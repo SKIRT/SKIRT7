@@ -1,0 +1,52 @@
+/*//////////////////////////////////////////////////////////////////
+////       SKIRT -- an advanced radiative transfer code         ////
+////       © Astronomical Observatory, Ghent University         ////
+//////////////////////////////////////////////////////////////////*/
+
+#include "FatalError.hpp"
+#include "OligoDustCell.hpp"
+
+using namespace std;
+
+////////////////////////////////////////////////////////////////////
+
+OligoDustCell::OligoDustCell(int Ncomp)
+    : DustCell(Ncomp)
+{
+}
+
+////////////////////////////////////////////////////////////////////
+
+double
+OligoDustCell::Labsstellar(int /*ell*/)
+const
+{
+    throw FATALERROR("This function should never be called");
+}
+
+////////////////////////////////////////////////////////////////////
+
+double
+OligoDustCell::Labsdust(int /*ell*/)
+const
+{
+    throw FATALERROR("This function should never be called");
+}
+
+////////////////////////////////////////////////////////////////////
+
+void
+OligoDustCell::rebootLabsdust()
+{
+    throw FATALERROR("This function should never be called");
+}
+
+////////////////////////////////////////////////////////////////////
+
+void
+OligoDustCell::absorb(int /*ell*/, double /*DeltaL*/, bool /*ynstellar*/)
+{
+    throw FATALERROR("This function should never be called");
+}
+
+////////////////////////////////////////////////////////////////////

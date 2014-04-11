@@ -1,0 +1,112 @@
+/*//////////////////////////////////////////////////////////////////
+////       SKIRT -- an advanced radiative transfer code         ////
+////       © Astronomical Observatory, Ghent University         ////
+//////////////////////////////////////////////////////////////////*/
+
+#include "FatalError.hpp"
+#include "Random.hpp"
+#include "UniformCuboidGeometry.hpp"
+
+using namespace std;
+
+//////////////////////////////////////////////////////////////////////
+
+UniformCuboidGeometry::UniformCuboidGeometry()
+    : _xmax(0), _ymax(0), _zmax(0), _rho(0)
+{
+}
+
+////////////////////////////////////////////////////////////////////
+
+void UniformCuboidGeometry::setupSelfBefore()
+{
+    GenGeometry::setupSelfBefore();
+
+    // verify property values
+    if (_xmax <= 0 || _ymax <= 0 || _zmax <= 0) throw FATALERROR("Cuboid size should be positive");
+
+    // construct the coboid box
+    _extent = Box(-_xmax, -_ymax, -_zmax, _xmax, _ymax, _zmax);
+
+    // compute the average density
+    _rho = 1. / _extent.volume();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void UniformCuboidGeometry::setExtentX(double value)
+{
+    _xmax = value;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+double UniformCuboidGeometry::extentX() const
+{
+    return _xmax;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void UniformCuboidGeometry::setExtentY(double value)
+{
+    _ymax = value;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+double UniformCuboidGeometry::extentY() const
+{
+    return _ymax;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void UniformCuboidGeometry::setExtentZ(double value)
+{
+    _zmax = value;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+double UniformCuboidGeometry::extentZ() const
+{
+    return _zmax;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+double UniformCuboidGeometry::density(Position bfr) const
+{
+    return _extent.contains(bfr) ? _rho : 0.;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+Position UniformCuboidGeometry::generatePosition() const
+{
+    return _random->position(_extent);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+double UniformCuboidGeometry::SigmaX() const
+{
+    return 1. / (4. * _ymax * _zmax);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+double UniformCuboidGeometry::SigmaY() const
+{
+    return 1. / (4. * _xmax * _zmax);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+double UniformCuboidGeometry::SigmaZ() const
+{
+    return 1. / (4. * _xmax * _ymax);
+}
+
+//////////////////////////////////////////////////////////////////////

@@ -1,0 +1,34 @@
+/*//////////////////////////////////////////////////////////////////
+////       DoxStyle -- streamlining documentation blocks        ////
+////       © Astronomical Observatory, Ghent University         ////
+//////////////////////////////////////////////////////////////////*/
+
+#include <QCoreApplication>
+#include <QTextCodec>
+#include "Chunk.hpp"
+
+//////////////////////////////////////////////////////////////////////
+
+/** This console application streamlines doxygen documentation blocks starting with slash-star-star
+    in a chunk of source code. The chunk of source code is read from stdin and the result is
+    written to stdout. */
+int main(int argc, char** argv)
+{
+    // construct application object for argument parsing and such,
+    // but don't run the event loop because we don't need it
+    QCoreApplication app(argc, argv);
+
+    // set the codec for strings in the source code to UTF-8, and also...
+    // set the locale encoding to UTF-8 since we expect source code as input and output
+    // !! this assumes that the source code editor is set to UTF-8 encoding
+    QTextCodec::setCodecForCStrings(QTextCodec::codecForName("UTF-8"));
+    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
+
+    // perform a streamline operation from stdin to stdout
+    Chunk styler;
+    styler.readFromConsole();
+    styler.streamline();
+    styler.writeToConsole();
+}
+
+//////////////////////////////////////////////////////////////////////

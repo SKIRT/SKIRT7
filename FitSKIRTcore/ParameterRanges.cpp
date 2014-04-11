@@ -1,0 +1,66 @@
+/*//////////////////////////////////////////////////////////////////
+////       SKIRT -- an advanced radiative transfer code         ////
+////       © Astronomical Observatory, Ghent University         ////
+//////////////////////////////////////////////////////////////////*/
+
+#include "ParameterRanges.hpp"
+#include "ParameterRange.hpp"
+#include "FatalError.hpp"
+
+using namespace std;
+
+//////////////////////////////////////////////////////////////////////
+
+ParameterRanges::ParameterRanges()
+{
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void ParameterRanges::addRange(ParameterRange* value)
+{
+    if (!value) throw FATALERROR("Parameter range pointer shouldn't be null");
+    value->setParent(this);
+    _prs << value;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+QList<ParameterRange*> ParameterRanges::ranges() const
+{
+    return _prs;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void ParameterRanges::setupSelfBefore()
+{
+    SimulationItem::setupSelfBefore();
+
+    // verify that there is at least one range
+    if (_prs.isEmpty()) throw FATALERROR("There are no parameter ranges");
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
+double ParameterRanges::minRange(int pri) const
+{
+   return _prs[pri]->minimumValue();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+double ParameterRanges::maxRange(int pri) const
+{
+   return _prs[pri]->maximumValue();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+QString ParameterRanges::label(int pri) const
+{
+    return _prs[pri]->label();
+}
+
+//////////////////////////////////////////////////////////////////////

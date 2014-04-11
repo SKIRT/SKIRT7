@@ -1,0 +1,24 @@
+#-------------------------------------------------
+#  DoxStyle -- streamlining documentation blocks
+#  © Astronomical Observatory, Ghent University
+#-------------------------------------------------
+
+# overall setup
+QT      += core
+QT      -= gui
+TARGET   = doxstyle
+CONFIG  += console
+CONFIG  -= app_bundle
+TEMPLATE = app
+
+#--------------------------------------------------
+# source and header files: maintained by Qt creator
+#--------------------------------------------------
+
+SOURCES += src/main.cpp \
+    src/Block.cpp \
+    src/Chunk.cpp
+
+HEADERS += \
+    src/Block.hpp \
+    src/Chunk.hpp

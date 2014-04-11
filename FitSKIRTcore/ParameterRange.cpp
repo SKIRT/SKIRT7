@@ -1,0 +1,96 @@
+/*//////////////////////////////////////////////////////////////////
+////       SKIRT -- an advanced radiative transfer code         ////
+////       © Astronomical Observatory, Ghent University         ////
+//////////////////////////////////////////////////////////////////*/
+
+#include "ParameterRange.hpp"
+#include "FatalError.hpp"
+
+////////////////////////////////////////////////////////////////////
+
+ParameterRange::ParameterRange()
+    : _minimumValue(0), _maximumValue(0)
+{
+}
+
+////////////////////////////////////////////////////////////////////
+
+void ParameterRange::setupSelfBefore()
+{
+    SimulationItem::setupSelfBefore();
+
+    if (_maximumValue < _minimumValue)
+        throw FATALERROR("Maximum value of parameter range must be larger or equal than minimum value");
+}
+
+////////////////////////////////////////////////////////////////////
+
+void ParameterRange::setLabel(QString value)
+{
+    _label = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+QString ParameterRange::label() const
+{
+    return _label;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void ParameterRange::setQuantityType(ParameterRange::PhysicalQuantity value)
+{
+    _quantityType = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+ParameterRange::PhysicalQuantity ParameterRange::quantityType() const
+{
+    return _quantityType;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void ParameterRange::setMinimumValue(double value)
+{
+    _minimumValue = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double ParameterRange::minimumValue() const
+{
+    return _minimumValue;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void ParameterRange::setMaximumValue(double value)
+{
+    _maximumValue = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double ParameterRange::maximumValue() const
+{
+    return _maximumValue;
+}
+
+////////////////////////////////////////////////////////////////////
+
+QString ParameterRange::quantityString() const
+{
+    switch (_quantityType)
+    {
+    case length: return "length";
+    case distance: return "distance";
+    case mass: return "mass";
+    case posangle: return "posangle";
+    default: return "";
+    }
+}
+
+////////////////////////////////////////////////////////////////////

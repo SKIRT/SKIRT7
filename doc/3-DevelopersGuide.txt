@@ -1,0 +1,853 @@
+/**
+
+\page DevelopersGuide Developer's Guide
+
+\section DevIntro Introduction
+
+This chapter offers guidelines on how to extend or adjust the SKIRT code.
+
+The SKIRT code is not meant to be ever finished. Contributions are expected to come in at least two flavors.
+Fundamental changes and additions will probably be developed by the core SKIRT team at the Ghent University.
+More modest changes, such as introducing a new spectral energy distribution for the sources or a new function
+describing the geometrical distribution of the dust, can easily be contributed by any heavy-duty SKIRT user.
+In fact, when you plan to use SKIRT for a particular radiative transfer problem, chances are that you will
+want to fine-tune it to your own needs.
+
+\section DevDirs Directory Structure
+
+The SKIRT source code is contained in an online repository and can be obtained as described in the sections
+\ref InstallSrcGet, \ref InstallMacGet, and \ref InstallUbuGet.
+
+\subsection DevDirsRep Structure of the code repository
+
+The directories in the SKIRT6 code repository are structured as follows (only a partial tree is shown):
+
+\verbatim
+SKIRT6 (repository)
+    SKIRT
+        trunk
+            doc
+            src
+                SKIRTcore
+                SKIRTmain
+                Discover
+            dat
+                DustMix
+                DustMixPopulation
+                ISRF
+                SED
+        branches
+            branch1
+                doc
+                src
+                dat
+            branch2
+    DoxStyle
+        trunk
+\endverbatim
+
+The top-level directory \c SKIRT contains the source code for SKIRT version 6.
+Other top-level directories such as \c DoxStyle contain the source code for projects related to
+but not actually part of SKIRT. This manual only covers the \c SKIRT directory.
+
+The \c trunk directory contains the mainstream version of the code, which should successfully run all
+regression tests at all times (at least, that is the intention). Changes or additions to the code deemed
+to be relatively safe (in the sense that they won't break existing code) can be applied directly to the trunk.
+
+Each subdirectory of the \c branches directory represents a <em>feature branch</em>. A feature branch
+contains a distinct version of the code and is used to develop and test more extensive changes before they
+are merged back into the trunk. Feature branches usually have a limited life-time.
+
+The \c .pro Qt project files and some shell scripts reside on the same level as the \c src directory. The C++ source
+code resides in the \c src directory (or rather in one of its subdirectories). The \c .hpp and \c .cpp files for a
+particular class always reside in the same directory. Additional documentation resides in the \c doc directory.
+The \c dat directory contains data files ("resources") required by SKIRT at run-time. The contents of this directory
+must be copied with the executables when the application is deployed.
+
+\subsection DevDirsLocal Structure of a local working copy
+
+A local working copy (i.e. a copy of the code used for building or developing SKIRT on someones computer)
+mimics either the trunk or one of the feature branches. It may look as follows:
+
+\verbatim
+~/SKIRT
+    svn
+        doc
+        src
+            ...
+        dat
+            ...
+    debug
+    release
+    run
+\endverbatim
+
+When working on the main development trunk, the local \c svn directory is mapped to the \c trunk directory in the
+repository. When working on a feature branch, the local \c svn directory would be mapped to
+(for example) the \c branches/branch1 directory.
+
+The extra directories on the same level as the \c svn directory contain the results of the build process
+or the input/output files involved in actually running SKIRT. This information obviously does not belong
+in the source code repository, thus these directories occur only in the local working copy, \em not in the repository.
+
+\section DevStyle Coding style
+
+To improve readability and maintainablity, it is important to use a consistent style across the code.
+Use the <em> chameleon rule </em> as a general guiding principle: adopt the style of the code already present.
+
+\subsection DevStyleFiles Files, classes and globals
+
+Each C++ class (or namespace) is contained in its own .hpp and .cpp files, both named for the class.
+Each of these files starts with the standard license template provided as part of the SKIRT documentation.
+
+Combining additional classes in the same header or source file is permissible only in extraordinary circumstances.
+For example, a small private utility class, used only from within a single class, may sometimes meaningfully be
+placed inside the implementation of the client class.
+
+SKIRT is extremely parallelized (multiple threads working on the same and/or different simulations at the same time).
+Do not use global (static) variables unless the information is clearly tied into some resource that is
+by definition unique to the application. Examples of such a resource include the console (in and out),
+the list of available C++ classes, and the path to the directory containing run-time resources for the application.
+Even then, protect the use of these variables against race conditions with an appropriate locking mechanism.
+
+Private variables, functions and classes that are not declared inside a class declaration in the header file,
+are placed inside an anonymous namespace in the .cpp file, rather than declaring them static outside a namespace.
+
+\subsection DevStyleLibs Containers and strings
+
+SKIRT is based on the Qt development framework. Any SKIRT code can freely use all the facilities of the QtCore
+module, in addition to the facilities of the standard C++ template library (STL). At this point, other Qt modules
+are not included in the build (but may be added if really needed).
+
+The SKIRT code that actually performs the simulations uses STL containers such as \c std::vector.
+This is mostly for historical reasons, but it also turns out that for the purely numerical work in this area,
+the Qt containers don't offer any performance improvements, while the ease of coding doesn't really matter.
+The SKIRT code dealing with the user interface and other non-core tasks
+uses Qt containers such as \c QList and \c QHash. In this area the ease of coding far outweighs the disadvantage
+of introducing a second set of containers to the application, as there is virtually no need for conversion between
+the two types of containers. When adding new code, select the appropriate containers according to the chameleon rule.
+
+The intention is to make SKIRT fully Unicode compatible for text input/output, filenames, etc. This is easily
+accomplished with the facilities of the Qt library. Thus always use the Qt class \c QString to represent strings,
+rather than the STL \c std::string class.
+In new code, use the Qt facilities for file I/O as well. In existing code the STL facilities for file I/O can stay
+around, although they are not fully Unicode compatible on all platforms.
+Use <tt>.toLocal8Bit().constData()</tt> to convert a \c QString to a filename that can be passed to an STL
+file I/O function.
+Use <tt>.toStdString()</tt> only if you know for sure that the string contains just 7-bit ASCII characters.
+
+\subsection DevStyleNames Naming conventions
+
+Recent code honors the following conventions:
+  - all names are in camel case, i.e. each new word starts with a capital, as in \c localVariable or \c MyDerivedClass
+  - class names start with an uppercase letter; function and variable names start with a lowercase letter
+  - the names of class data members (variables declared as part of a class) have an underscore prefix, as in \c _x
+  - getters and setters are named for the property: \c _property leads to \c property() and \c setProperty()
+  - function names (other than getters) usually start with a verb, as in \c createPackage() or \c run()
+  - constants and enumeration values have all-uppercase names, as in \c LEFT and \c RIGHT
+
+In older code, functions and variables sometimes have all-lowercase names, as in \c setproperty(). New code
+should honor the new conventions described above, unless when making small adjustments to existing code that
+uses the older conventions (the chameleon rule again).
+
+\subsection DevStyleFormat Formatting the code
+
+Before editing any SKIRT code, configure the Qt Creator development environment as described in \ref InstallMacConf
+or \ref InstallUbuConf. All SKIRT code must:
+- use indentation and alignment as configured by the file <tt>.../svn/doc/SKIRT Code Style.xml</tt>.
+- keep all lines within the 120 character limit (as indicated by the right margin in the Qt Creator editor).
+
+Examples of correct indentation and alignment can of course be found in the existing code. It may also be
+instructive to review the code examples in the "C++ -> Code Style" tab of the Qt Creator preferences panel (press the
+"Edit..." button and play with the settings but don't forget to cancel your changes).
+
+Most importantly, you can apply correct indentation and alignment to a piece of code as follows:
+ - select one or more lines of code (possibly the whole file) in the Qt Creator editor
+ - choose the "Edit->Advanced->Auto-indent Selection" menu item \em or press Command-I (on Mac) or Ctrl-I (on Ubuntu).
+
+In .cpp files regular //-style comments are used for annotating the implementation. In .hpp files /**-style
+Doxygen documentation blocks are used to document the code. These structured comments are used to
+generate HTML and PDF formatted documentation for SKIRT.
+
+Assuming you installed the DoxStyle tool as described in \ref InstallMacDoxStyle or \ref InstallUbuDoxStyle,
+you can automatically reformat documentation blocks in the Qt Creator editor as follows:
+ - select a section of code that contains one or more /**-style documentation blocks (you may select regular code
+   as well, possibly even the whole file)
+ - choose the "Tools->External->DoxStyle->Streamline Selection" menu item \em or
+   press Alt-Command-I (on Mac) or Alt-Ctrl-I (on Ubuntu).
+
+Finally, keep \#include statements and forward class declarations together in the beginning of the file,
+sorted within each group, with the groups in the following order: C/C++, Qt, SKIRT .hpp files, class declarations.
+
+\section DevCodeStruct Structure of the code
+
+\subsection DevBlocks Blocks of code
+
+The various classes in the SKIRT source code are distributed over several directories as follows:
+  - \c SKIRTcore: core SKIRT functionality for setting up and performing a simulation; this includes all simulation
+    items (see \ref DevSimItems) plus any primitives or utilities used from within these classes.
+  - \c Discover: functionality for automatically discovering relevant information on the simulation item classes
+    available in the code, and using this information for input/output purposes (such as the creation of a
+    simulation hierarchy from an interactive console Q&A session, or reading and writing a ski file);
+    see \ref DevSimDisco.
+  - SKIRTmain: the main() function and functionality to translate the command line arguments into action.
+
+\dot
+digraph dependencies {
+    rankdir=TB;
+    nodesep=0.5
+    node [shape=rect, fontname=Helvetica, fontsize=10];
+    edge [arrowhead=vee];
+
+    SKIRTmain [label="SKIRTmain"];
+    subgraph {
+        rank = same;
+        Discover [label="Discover"];
+        SKIRTcore [label="SKIRTcore"];
+    }
+    SKIRTmain -> Discover;
+    SKIRTmain -> SKIRTcore;
+    Discover -> SKIRTcore;
+}
+\enddot
+
+The diagram above shows the dependencies between these blocks of code. Specifically, the code in the
+\c SKIRTcore block does not depend on the code in any of the other two blocks. When further developing the code,
+it is important to honor these dependency limitations.
+
+\subsection DevSimItems Simulation items
+
+A complete simulation is represented in SKIRT as run-time hierarchy of objects (instances of various C++ classes)
+called <em>simulation items</em>. The following diagram presents a simple run-time simulation hierarchy
+(a connection starting with a diamond loosely means "A owns B"):
+
+\dot
+digraph runtime {
+    rankdir=LR;
+    node [shape=rect, fontname=Helvetica, fontsize=10];
+    edge [dir=back arrowtail=ediamond];
+
+    OligoMonteCarloSimulation [label="OligoMonteCarloSimulation" URL="\ref OligoMonteCarloSimulation"];
+      Parallel [label="Parallel" URL="\ref Parallel"];
+      FilePaths [label="FilePaths" URL="\ref FilePaths"];
+      Console [label="Console" URL="\ref Console"];
+      Random [label="Random" URL="\ref Random"];
+      ExtragalacticUnits [label="ExtragalacticUnits" URL="\ref ExtragalacticUnits"];
+      OligoWavelengthGrid [label="OligoWavelengthGrid" URL="\ref OligoWavelengthGrid"];
+      SPHStellarSystem [label="SPHStellarSystem" URL="\ref SPHStellarSystem"];
+      DustSystem [label="DustSystem" URL="\ref DustSystem"];
+        SPHDustDistribution [label="SPHDustDistribution" URL="\ref SPHDustDistribution"];
+          InterstellarDustMix [label="InterstellarDustMix" URL="\ref InterstellarDustMix"];
+        OctTreeDustGridStructure [label="OctTreeDustGridStructure" URL="\ref OctTreeDustGridStructure"];
+      InstrumentSystem [label="InstrumentSystem" URL="\ref InstrumentSystem"];
+        SimpleInstrument_1 [label="SimpleInstrument_1" URL="\ref SimpleInstrument"];
+        SimpleInstrument_2 [label="SimpleInstrument_2" URL="\ref SimpleInstrument"];
+        SimpleInstrument_3 [label="SimpleInstrument_3" URL="\ref SimpleInstrument"];
+
+      OligoMonteCarloSimulation -> Parallel;
+      OligoMonteCarloSimulation -> FilePaths;
+      OligoMonteCarloSimulation -> Console;
+      OligoMonteCarloSimulation -> Random;
+      OligoMonteCarloSimulation -> ExtragalacticUnits;
+      OligoMonteCarloSimulation -> OligoWavelengthGrid;
+      OligoMonteCarloSimulation -> SPHStellarSystem;
+      OligoMonteCarloSimulation -> DustSystem;
+        DustSystem -> SPHDustDistribution;
+          SPHDustDistribution -> InterstellarDustMix;
+        DustSystem -> OctTreeDustGridStructure;
+      OligoMonteCarloSimulation -> InstrumentSystem;
+        InstrumentSystem -> SimpleInstrument_1;
+        InstrumentSystem -> SimpleInstrument_2;
+        InstrumentSystem -> SimpleInstrument_3;
+}
+\enddot
+
+A run-time simulation hierarchy includes the following information:
+  - the configuration of the simulation, including all parameters, represented by a combination of:
+      - the structural makeup of the hierarchy
+      - the selection of the type of simulation items actually included (e.g. OctTreeDustGridStructure rather than
+        another type of dust grid)
+      - the properties of the various simulation items (not shown in the diagram)
+  - the functionality needed to perform the simulation and output the results, embodied in the code associated with
+    each specific simulation item class
+  - the run-time data needed and/or generated while performing the simulation, represented by data members in
+    each of the simulation items.
+
+Multiple run-time simulation hierarchies can co-exist and are independent of each other. There is no shared or
+global data, except when accessing truly global resources (such as the console) which are protected by
+appropriate locking mechanisms. Also see \ref DevStyleFiles.
+
+The contents of a ski file mimics the corresponding run-time simulation hierarchy (see \ref UserSKIStruct) with
+the exception of the Parallel, FilePaths and Log (Console) objects, which are configured in the \c SKIRTmain code
+as determined by the command line arguments.
+
+\subsection DevSimClasses Simulation item classes
+
+A simulation item is an instance of a C++ class that inherits the SimulationItem class. The following diagram
+presents a small part of the inheritance tree:
+
+\dot
+digraph inheritance {
+    rankdir=BT;
+    node [shape=rect, fontname=Helvetica, fontsize=10];
+    edge [arrowhead=empty];
+
+    SimulationItem [label="SimulationItem" URL="\ref SimulationItem"];
+      StellarSystem [label="StellarSystem" URL="\ref StellarSystem"];
+        SPHStellarSystem [label="SPHStellarSystem" URL="\ref SPHStellarSystem"];
+        OtherStellarSystem [label="..."];
+      Simulation [label="Simulation" URL="\ref Simulation"];
+        MonteCarloSimulation [label="MonteCarloSimulation" URL="\ref MonteCarloSimulation"];
+          OligoMonteCarloSimulation [label="OligoMonteCarloSimulation" URL="\ref OligoMonteCarloSimulation"];
+          OtherMonteCarloSimulation [label="..."];
+      Log [label="Log" URL="\ref Log"];
+        Console [label="Console" URL="\ref Console"];
+        FileLog [label="FileLog" URL="\ref FileLog"];
+
+      StellarSystem -> SimulationItem;
+        SPHStellarSystem -> StellarSystem;
+        OtherStellarSystem -> StellarSystem;
+      Simulation -> SimulationItem;
+        MonteCarloSimulation -> Simulation;
+          OligoMonteCarloSimulation -> MonteCarloSimulation;
+          OtherMonteCarloSimulation -> MonteCarloSimulation;
+      Log -> SimulationItem;
+        Console -> Log;
+        FileLog -> Log;
+}
+\enddot
+
+The leaf nodes represent concrete simulation item classes. Instances of these classes can be part of a run-time
+simulation hierarchy. The non-leaf nodes represent abstract simulation item classes that can't be instantiated.
+
+Thus simulation items form a compile-time class hierarchy through inheritance (with the SimulationItem class
+at the top), and a run-time object hierarchy through pointers (with an instance of a Simulation subclass at the top).
+
+The basic interface inherited from SimulationItem facilitates common functionality for working with simulation items.
+For example, the SimulationItem::find() function allows locating a simulation item in a run-time simulation hierarchy
+simply providing its class name. Also, the Simulation class cooperates with the SimulationItem interface to
+setup and run a complete simulation.
+
+\subsection DevSimDisco Discovery of simulation items
+
+The code residing in the \c Discover directory provides automatic discovery of compile-time information on the
+available simulation item classes and their properties. Based on this functionality, the code offers various
+interfaces to the outside world. These interfaces automatically adjust when new simulation item classes
+or properties are added to the code. Currently the code supports:
+ - creating a simulation hierarchy based on user responses during an interactive console Q&A session,
+ - saving or loading a simulation hierarchy to and from a ski file (in XML format),
+ - generating a human-readable report summarizing the simulation parameters for a simulation hierarchy.
+
+The discovery mechanism allows all information about a simulation item class to be defined in a single place,
+i.e. in the simulation item class declaration and implementation. The interfaces described above have no built-in
+knowledge about specific simulation item classes, which means that they self-adjust to changes in the code.
+
+Specifically this means that:
+ - When adding a new simulation item class, there is no need to add code in each of the interfaces separately;
+   the same basic information (included in the simulation item class declaration) is used by all interfaces.
+ - New interfaces (such as perhaps a graphical user interface) can be added later, without changing any of the
+   existing code, and without duplicating information about specific simulation item classes.
+
+The following diagram presents the relationships between some important classes implementing the Discovery
+mechanism and the interfaces using it. A dashed line ending in a V-shaped arrow means "A references B";
+A solid line ending in an empty triangular arrow means "A inherits B":
+
+\dot
+digraph relations {
+    rankdir=BT;
+    nodesep=0.5;
+    node [shape=rect, fontname=Helvetica, fontsize=10];
+    edge [arrowhead=empty];  // A inherits B
+
+    RegisterSimulationItems [label="RegisterSimulationItems" URL="\ref RegisterSimulationItems"];
+    SimulationItemRegistry [label="SimulationItemRegistry" URL="\ref SimulationItemRegistry"];
+    MetaObject [label="Qt MetaObject"];
+    SimulationItemDiscovery [label="SimulationItemDiscovery" URL="\ref SimulationItemDiscovery"];
+    main [label="SKIRTmain" style=bold];
+
+    subgraph {
+        PropertyHandlerVisitor [label="PropertyHandlerVisitor" URL="\ref PropertyHandlerVisitor"];
+        ConsoleHierarchyCreator [label="ConsoleHierarchyCreator" URL="\ref ConsoleHierarchyCreator"];
+        XmlHierarchyWriter [label="XmlHierarchyWriter" URL="\ref XmlHierarchyWriter"];
+        ConsoleHierarchyCreator -> PropertyHandlerVisitor;
+        XmlHierarchyWriter -> PropertyHandlerVisitor;
+    }
+    subgraph {
+        PropertyHandler [label="PropertyHandler" URL="\ref PropertyHandler"];
+        IntPropertyHandler [label="IntPropertyHandler" URL="\ref IntPropertyHandler"];
+        ItemPropertyHandler [label="ItemPropertyHandler" URL="\ref ItemPropertyHandler"];
+        IntPropertyHandler -> PropertyHandler;
+        ItemPropertyHandler -> PropertyHandler;
+    }
+    edge [arrowhead=vee style=dashed];  // A references B
+
+    RegisterSimulationItems -> SimulationItemRegistry;
+    SimulationItemRegistry -> MetaObject [constraint=false];
+    SimulationItemDiscovery -> SimulationItemRegistry;
+    SimulationItemDiscovery -> MetaObject;
+    main -> RegisterSimulationItems;
+    main -> PropertyHandlerVisitor [constraint=false];
+    PropertyHandlerVisitor -> SimulationItemDiscovery;
+    PropertyHandler -> PropertyHandlerVisitor [dir=both arrowtail=vee constraint=false];
+    PropertyHandler -> MetaObject;
+    PropertyHandler -> SimulationItemDiscovery;
+}
+\enddot
+
+The discovery mechanism heavily uses the Qt meta object mechanism, which is centered around the QObject and
+QMetaObject classes (refer to the Qt documentation). It includes the following components:
+ - SimulationItemRegistry keeps track of all available simulation items, including the abstract
+   classes in the inheritance tree.
+ - RegisterSimulationItems has a single function that adds the available classes to the registry. It is provided as
+   a seperate file so that it would be easy to locate and edit when a new simulation item class is added to the code.
+ - SimulationItemDiscovery does the ground work of extracting the relevant information from the compile-time
+   data structures provided by the Qt meta object mechanism.
+ - PropertyHandler subclasses handle simulation item properties, i.e. the values of the simulation parameters.
+   There is a subclass for each property type, including value types such as integer or string, and
+   pointer types that reference another simulation item or a list of items.
+ - PropertyHandlerVisitor subclasses implement the interfaces described above.
+
+The abstract classes PropertyHandler and PropertyHandlerVisitor, and their subclasses, cooperate according to the
+<em>visitor design pattern</em> (see the literature or the web for more information on this pattern). This enables
+each of the interfaces to visit (i.e. iterate over) the properties of all simulation items in a runtime simulation
+hierarchy in a type-safe way, based on the discovered compile-time information.
+
+The code in the \c SKIRTmain block first adds all known simulation items to the SimulationItemRegistry.
+It then uses one of the PropertyHandlerVisitor subclasses, for example ConsoleHierarchyCreator, to create a
+runtime simulation hierarchy which it then asks to actually perform the simulation. The \c SKIRTmain code can use
+XmlHierarchyWriter, another PropertyHandlerVisitor subclass, to store the simulation parameters in a ski file.
+
+\section DevDiscoUsage Making simulation items discoverable
+
+\subsection DevDiscoIntro Overall requirements
+
+Performing a simulation happens in three distinct phases:
+ - Construction: the simulation runtime hierarchy is created and all properties are set according to
+   the simulation parameters. At the end of this phase, all simulation item instances have been constructed.
+   No actual calculations happen in this phase and so it is very fast (on the order of milliseconds).
+ - Setup: all simulation items get a chance to perform some initialization and store the results in data members.
+   This may involve reading large files or creating large data structures, so setup may take a long time.
+   Several simulation items also write statistics or other results to output files during setup.
+ - Run: the simulation is actually performed by launching a (usually large) number of photon packages and
+   recording the effects. At the end of this phase, the final results are written to output files.
+
+Before touching the code, read the documentation for the SimulationItem and Simulation classes and their functions.
+Make sure you understand how the setup and run mechanism works, and which functions to override (or not to override)
+in a SimulationItem subclass. There are many examples in the code, so use the chameleon rule and your common sense.
+
+A discoverable simulation item class must comply with the following requirements:
+ - the class must directly or indirectly inherit the SimulationItem class
+ - the class declaration must start with the Q_OBJECT macro (see the Qt documentation)
+ - the class declaration must contain the appropriate Q_CLASSINFO() macros as described in \ref DevDiscoInfo
+ - all setters and getters for properties specified in a Q_CLASSINFO() macro must be declared Q_INVOKABLE
+ - there must be a constructor with zero arguments; for a concrete class the constructor must be declared
+   Q_INVOKABLE, for an abstract class it should be declared protected
+ - the constructor should initialize all data members to simple, default values, and do nothing else
+ - if setup is required, the appropriate setupSelfXXXX() function must be overridden
+
+Finally, a line of code must be added to the RegisterSimulationItems::registerAll() function to register the class.
+
+\subsection DevDiscoInfo Class info specifications
+
+The class declaration for a simulation item must contain appropriate Q_CLASSINFO() macros to specify information
+used by the discovery mechanism. These macros are placed immediately after the Q_OBJECT macro. For example:
+
+\verbatim
+class Simulation : public SimulationItem
+{
+    Q_OBJECT
+    Q_CLASSINFO("Title", "the simulation")
+
+    Q_CLASSINFO("Property", "random")
+    Q_CLASSINFO("Title", "the random number generator")
+    Q_CLASSINFO("Default", "Random")
+
+    Q_CLASSINFO("Property", "units")
+    Q_CLASSINFO("Title", "the units system")
+    Q_CLASSINFO("Default", "ExtragalacticUnits")
+
+public:
+    Q_INVOKABLE void setRandom(Random* value);
+    Q_INVOKABLE Random* random() const;
+
+    Q_INVOKABLE void setUnits(Units* value);
+    Q_INVOKABLE Units* units() const;
+
+    ...
+};
+\endverbatim
+
+The Q_CLASSINFO() macro expects two string arguments which are interpreted as a key/value pair. Note that the ordering
+of the macros is important since there can be multiple key/value pairs with the same key (as shown in the example).
+
+The value corresponding to a "Title" key specifies a human-readable description for a simulation item or one of
+its properties. The title should not be capitalized; the first letter will automatically be converted
+to uppercase if the title is used at the beginning of a sentence.
+
+The first Q_CLASSINFO() macro after Q_OBJECT must specify a title for the simulation item implemented by the class.
+Subsequently there is a block of Q_CLASSINFO() macros for each property of the simulation item.
+
+The first macro in each block uses the "Property" key to specify the property name. The property name must match
+the names of getter and setter functions declared for the class, as shown in the example. The data member corresponding
+to this property usually has the same name prefixed with an underscore, although this is not a requirement: the
+discovery mechanism accesses the property solely through its getter and setter functions.
+All setters and getters for properties specified in a Q_CLASSINFO() macro must be declared Q_INVOKABLE.
+
+The data type of a property is automatically derived from the return value of the corresponding getter.
+The discovery mechanism currently supports the following data types:
+
+<TABLE>
+<TR><TD><B>C++ type</B></TD>    <TD><B>Interpretation</B></TD>
+                                <TD><B>PropertyHandler subclass</B></TD></TR>
+<TR><TD>bool</TD>               <TD>Boolean "true" or "false"</TD>
+                                <TD>BoolPropertyHandler</TD></TR>
+<TR><TD>int</TD>                <TD>Integer value, possibly signed</TD>
+                                <TD>IntPropertyHandler</TD></TR>
+<TR><TD><I>EnumType</I><SUP>1</SUP></TD>
+                                <TD>One of the enumeration values</TD>
+                                <TD>EnumPropertyHandler</TD></TR>
+<TR><TD>double</TD>             <TD>Real value, possibly with unit (see \ref UserSKIUnits)</TD>
+                                <TD>DoublePropertyHandler</TD></TR>
+<TR><TD>QList\<double*\></TD>   <TD>Comma separated list of real values, each possibly with unit</TD>
+                                <TD>DoubleListPropertyHandler</TD></TR>
+<TR><TD>QString</TD>            <TD>Arbitrary string value, such as a filename</TD>
+                                <TD>StringPropertyHandler</TD></TR>
+<TR><TD>ItemType</TD>           <TD>A simulation item of the specified type</TD>
+                                <TD>ItemPropertyHandler</TD></TR>
+<TR><TD>QList\<<I>ItemType</I>*\><SUP>2</SUP></TD>
+                                <TD>A list of simulation items of the specified type</TD>
+                                <TD>ItemListPropertyHandler</TD></TR>
+</TABLE>
+
+\note 1: replace "EnumType" by any enumeration type
+\note 2: replace "ItemType" by any simulation item type (i.e. name of a SimulationItem subclass)
+
+Any Q_CLASSINFO() macros following the "Property" macro in each block describe attributes for the property.
+The ordering of these macros within the block does not matter, as long as the "Property" macro comes first.
+Some attributes (such as "Title") are supported by all property types. Other attributes are specific for certain
+property types. The table below summarizes the currently supported properties. For more information refer to
+the documentation or source code for the relevant property handler (as listed in the previous table).
+
+<TABLE>
+<TR><TD><B>Key</B></TD> <TD><B>Value</B></TD>
+                        <TD><B>Applicability</B></TD></TR>
+<TR><TD>Property</TD>   <TD>Name of the property</TD><TD>Required for each property</TD></TR>
+<TR><TD>Title</TD>      <TD>Human-readable description for the property, not capitalized</TD>
+                        <TD>Required for a concrete class and for each property</TD></TR>
+<TR><TD>Quantity</TD>   <TD>Physical type of the property, e.g. length or mass (see source code of Units class)</TD>
+                        <TD>Allowed for properties of type Double and DoubleList;
+                            if missing, values are dimensionless (i.e. no units)</TD></TR>
+<TR><TD>Default</TD>    <TD>Default value for the property, in the same format as in a ski file</TD>
+                        <TD>Allowed for all property types except DoubleList</TD></TR>
+<TR><TD>MinValue</TD>   <TD>Minimum value for the property, in the same format as in a ski file</TD>
+                        <TD>Allowed for properties of type Int, Double, DoubleList</TD></TR>
+<TR><TD>MaxValue</TD>   <TD>Maximum value for the property, in the same format as in a ski file</TD>
+                        <TD>Allowed for properties of type Int, Double, and DoubleList</TD></TR>
+<TR><TD>Optional</TD>   <TD>If "true" the property value is optional, i.e. it can be a zero pointer or an empty list;
+                            otherwise a value is required (the default)</TD>
+                        <TD>Allowed for properties of type Item and ItemList</TD></TR>
+<TR><TD><I>EnumItem</I><SUP>3</SUP></TD>
+                        <TD>Human-readable description for the enumeration item specified as the key</TD>
+                        <TD>Required for properties of type Enum; repeat for each enumeration item</TD></TR>
+<TR><TD>TrueIf</TD> <TD>The enum value for which this property is considered "true" in RelevantIf tests</TD>
+                        <TD>Allowed for properties of type Enum; if missing the property is never "true"</TD></TR>
+<TR><TD>RelevantIf</TD> <TD>The name of a property in the same class, the value of which must be true or nonzero
+                            for this property to be relevant</TD>
+                        <TD>Allowed for all property types</TD></TR>
+<TR><TD>AllowedIf</TD>  <TD>The name of a class that must be already present in the simulation for this class
+                            to be allowed, or an exclamation sign followed by the name of a class that must NOT
+                            be already present in the simulation for this class to be allowed, or a comma-separated
+                            list of such items</TD>
+                        <TD>May occur for any class and is inherited by subclasses; multiple items in a single
+                            attribute are OR-ed, multiple occurrences of this attribute are AND-ed</TD></TR>
+</TABLE>
+
+\note 3: replace "EnumItem" by one of the identifiers defined as part of the enumeration type
+
+
+\section DevTut Tutorial: Adding a new geometry
+
+\image html TutorialDevExpDisk.png
+\image latex TutorialDevExpDisk.png
+\image html TutorialDevIsoDisk.png
+\image latex TutorialDevIsoDisk.png
+
+\em Illustration: Top row: exponential disk; Bottom row: isothermal disk;
+Left column: cut through xz-plane; Right colummn: edge-on flux.
+
+In this tutorial, you will extend the SKIRT code with a new geometry that can be used for stellar and
+dust density distributions.
+Before starting this tutorial, you should have installed the development environment and built the SKIRT code
+as described in the \ref InstallationGuide. You should also know how to use SKIRT as described in the \ref UsersGuide.
+
+The new geometry is an isothermal disk with the axisymmetric density profile
+\f[ \rho({\bf{r}}) \equiv \rho(R,z)
+= \rho_0\,\exp\left(-\frac{R}{h_R}\right)\, {\text{sech}}^2\left(\frac{z}{h_z}\right) \f]
+with the scalelength \f$h_R\f$ and the scaleheight \f$h_z\f$ as two free parameters.
+
+\subsection DevTutSco Scoping out the work
+
+To add a new geometry, you need to create a new class and tie it into the simulation item class hierarchy.
+Rather than reinventing the wheel, browse the SKIRT documentation and look for an existing class with properties
+simular to your needs. It so happens that the ExpDiskGeometry class also defines an axisymmetric dust disk.
+To examine it more closely, open the \c ExpDiskGeometry.hpp header file in the code editor.
+
+It appears that ExpDiskGeometry inherits from SepAxGeometry, an abstract class representing axisymmetric
+dust geometries where the density is a separable function of \f$R\f$ and \f$z\f$.
+ExpDiskGeometry offers two properties \f$h_R\f$ and \f$h_z\f$ corresponding to the free parameters you need,
+plus two properties related to truncation of the disk which you don't need but can easily be removed.
+There is also a data member for the central density \f$\rho_0\f$.
+
+Looking in some more detail, ExpDiskGeometry offers the following functions:
+ - a default constructor
+ - the setupSelfBefore() function, which calculates the central density
+ - setters and getters for the model parameters
+ - the functions density(), randomR(), randomz(), SigmaR(), and SigmaZ() that define various aspects of
+   the geometry modeled by this class
+
+Clearly you should use the same structure for your new class. The main work will consist of adjusting
+the key functions for the new geometry.
+
+\subsection DevTutMat The mathematics
+
+\subsubsection DevTutMatDens Density
+
+The Geometry class documentation states that all geometries in SKIRT must be normalized so that the total mass
+is equal to one. Given this normalization, we can determine the central
+density for the new geometry as a function of \f$h_R\f$ and \f$h_z\f$. We find
+\f[ M = \iiint \rho({\bf{r}})\, {\text{d}}{\bf{r}}
+= 2\pi\,\rho_0 \int_0^\infty \exp\left(-\frac{R}{h_R}\right)\,R\,{\text{d}}R
+\int_{-\infty}^\infty {\text{sech}}^2\left(\frac{z}{h_z}\right)\,{\text{d}}z. \f]
+Using the equalities \f[ \int_0^\infty x\,{\text{e}}^{-x}\,{\text{d}}x
+= \int_0^\infty {\text{sech}}^2 x\,{\text{d}}x = 1 \f]
+we find that \f[ M = 4\pi\,h_R^2\,h_z \,\rho_0\f]
+and hence (using \f$M=1\f$) \f[ \rho_0 = \frac{1}{4\pi\,h_R^2\,h_z}. \f]
+The density \f$\rho(R,z)\f$ is then easily calculated using its original definition above.
+
+\subsubsection DevTutMatSurfDens Surface densities
+
+We also need to calculate the edge-on and face-on surface densities \f$\Sigma_R\f$ and \f$\Sigma_Z\f$.
+The documentation for the AxGeometry::SigmaR() function defines the edge-on or radial surface density
+as the integration of the density along a line in the equatorial plane starting at the centre of the coordinate
+system, \f[ \Sigma_R = \int_0^\infty \rho(R,0)\,{\text{d}}R. \f]
+The documentation for the Geometry::SigmaZ() function defines the face-on or Z-axis surface density
+as the integration of the density along the entire Z-axis,
+\f[ \Sigma_Z = \int_{-\infty}^\infty \rho(0,z)\,{\text{d}}z. \f]
+In our present case, we find
+\f[ \Sigma_R = \rho_0\int_0^\infty \exp\left(-\frac{R}{h_R}\right)\,{\text{d}}R = \rho_0\,h_R\f] and
+\f[ \Sigma_Z = \rho_0\int_{-\infty}^\infty {\text{sech}}^2\left(\frac{z}{h_z}\right)\,{\text{d}}z = 2\,\rho_0\,h_z.\f]
+
+\subsubsection DevTutMatRan Random position
+
+Finally a geometry must be able to draw a random position from its three-dimensional probability density
+distribution. For an axisymmetric geometry with separable density function, the problem is reduced to drawing
+two values, each from a one-dimensional probability distribution, in the radial and vertical directions.
+
+The documentation for the SepAxGeometry::randomR() function states that it returns
+a random \f$R\f$ from the one-dimensional probability
+distribution \f[ p(R)\, {\text{d}}R = 2\pi\, \rho_R(R)\, R\, {\text{d}}R. \f]
+In the present case we find
+\f[ p(R)\,{\text{d}}R = \frac{\rho(R,z)\,R\,{\text{d}}R}{\int_0^\infty \rho(R',z)\,R'\,{\text{d}}R'}
+= \frac{1}{h_R^2} \exp\left(-\frac{R}{h_R}\right) \,R\,{\text{d}}R \f]
+with cumulative distribution
+\f[ P(R) = \int_0^R p(R')\,{\text{d}}R' = 1 - \left( 1+\frac{R}{h_R}\right) \exp\left(-\frac{R}{h_R}\right). \f]
+Solving \f${\cal{X}}=P(R)\f$ for \f$R\f$, where \f$\cal{X}\f$ is a uniform random deviate, we obtain
+\f[ R = h_R \left[ -1-W_{-1} \left(\frac{ {\cal{X}}-1}{\text{e}}\right) \right] \f]
+where \f$W_{-1}\f$ is the Lambert function of order \f$-1\f$, which can be calculated in SKIRT using
+the function SpecialFunctions::LambertW1.
+
+The documentation for the SepAxGeometry::randomz() function states that it returns
+a random \f$z\f$ from the one-dimensional probability distribution
+\f[ p(z)\, {\text{d}}z = \rho_z(z)\, {\text{d}}z. \f]
+In the present case we find
+\f[ p(z)\,{\text{d}}z = \frac{\rho(R,z)\,{\text{d}}z}{\int_{-\infty}^\infty \rho(R,z')\,{\text{d}}z'}
+= \frac{1}{2\,h_z} {\text{sech}}^2\left(\frac{z}{h_z}\right) \,{\text{d}}z \f]
+with cumulative distribution
+\f[ P(z) = \int_{-\infty}^z p(z')\,{\text{d}}z' = \frac12\left[ 1+{\text{tanh}}\left(\frac{z}{h_z}\right) \right]. \f]
+Solving \f${\cal{X}}=P(z)\f$ for \f$z\f$, where \f$\cal{X}\f$ is a uniform random deviate, we obtain
+\f[ z = h_z\,{\text{artanh}}(2{\cal{X}}-1) = \frac12\,h_z\,\ln\frac{{\cal{X}}}{1-{\cal{X}}}, \f]
+where we used the identity
+\f[ {\text{artanh}}\,x=\frac12\ln\frac{1+x}{1-x}. \f]
+
+\subsection DevTutCre Creating the new source and header files
+
+It is quite possible to create a new class from within the Qt Creator development environment. However since your
+new class will so closely resemble an existing one, it is easier to copy the header and source files using
+a regular file browser (or if you prefer, command lines in a terminal window). Locate the files
+\c ExpDiskGeometry.hpp and \c ExpDiskGeometry.cpp in your local working copy of the SKIRT source code
+(in the src/SKIRTcore directory), and copy them to a set of new files named
+\c IsoThermalDiskGeometry.hpp and \c IsoThermalDiskGeometry.cpp (in the same directory).
+Do not remove the original files!
+
+Go back to Qt Creator (in "Edit" mode) and right-click on the SKIRT project icon in the "Projects" pane. In the
+popu-menu, choose "Add Existing Files..." (sometimes you need to right-click a second time to make this menu item
+appear). In the dialog, locate and select the two new source files and press the "Open" button.
+In the next (smaller) dialog, confirm that you want to add the new files to source control. Now locate the
+new files in Qt Creator's project browser and open them in the editor.
+
+In the new header file, replace the three occurrences of \c "EXPDISKGEOMETRY_HPP" by \c "ISOTHERMALDISKGEOMETRY_HPP".
+This is the standard header guard to avoid multiple includes of the same class definition.
+
+In both new files, replace all occurrences of \c "ExpDiskGeometry" by \c "IsoThermalDiskGeometry".
+
+Press the "Hammer" icon in the left margin to save your changes and perform a build. There should be no errors.
+
+\subsection DevTutDec The class declaration
+
+Since the class declaration for IsoThermalDiskGeometry is very similar to that of ExpDiskGeometry,
+the header file \c IsoThermalDiskGeometry.hpp for your new class does not need a lot of work.
+
+Most importantly, adjust the description of the class in the first occurrence of the Q_CLASSINFO() macro.
+For example, replace "an exponential disk geometry" by "an iso-thermal disk geometry".
+This text will be used for identifying your new geometry to a user, such as when constructing
+a new .ski file during an interactive Q&A session.
+
+You should also remove the getters and setters for the truncation parameters, the corresponding Q_CLASSINFO() macros,
+and the corresponding data members, since these parameters are not needed in the new class.
+
+While updating the documentation, take care to follow the rules for comments in /**-style documentation blocks.
+These comments are processed by the <a href="http://www.doxygen.org">Doxygen</a> utility to produce
+the SKIRT manual in HTML and PDF formats. It is \em really important to write decent comments for every function.
+When in doubt about the syntax for formatting comments, look for examples elsewhere in the SKIRT source code or
+check the <a href="http://www.doxygen.org/manual.html">Doxygen manual</a> on the web.
+
+\subsection DevTutDef The class definition
+
+The source file \c IsoThermalDiskGeometry.cpp needs more extensive edits beyond replacing the class name.
+
+The constructor should initialize all data members to some default value, without performing extensive calculations.
+Often the constructor simply sets all data members to zero.
+Since you removed the truncation-related data members declared for the class, you need to remove their
+initialization from the constructor as well:
+
+\code
+IsoThermalDiskGeometry::IsoThermalDiskGeometry()
+    : _hR(0), _hz(0), _rho0(0)
+{
+}
+\endcode
+
+Note that there is no destructor. This is fine since the class does not allocate any resources that need deallocation.
+
+The implementation of the function setupSelfBefore() must always start with a call to the same function in the
+base class (SepAxGeometry in this case). This call can remain unchanged. Remove the code that deals with the
+truncation-related properties; other than that everything can stay unchanged. The allowed range for the
+scale height and scale length is the same as for the exponential disk, and the central density happens to be
+the same as for the untruncated exponential disk:
+
+\code
+void IsoThermalDiskGeometry::setupSelfBefore()
+{
+    SepAxGeometry::setupSelfBefore();
+
+    // verify property values
+    if (_hR <= 0) throw FATALERROR("Radial scale length hR should be positive");
+    if (_hz <= 0) throw FATALERROR("Axial scale height hz should be positive");
+
+    // calculate central density
+    _rho0 = 1.0/(4.0*M_PI*_hz*_hR*_hR);
+}
+\endcode
+
+Update the implementation of the functions density(), sigmaR(), and sigmaZ()
+to reflect the (surface) density formulas derived before:
+
+\code
+double IsoThermalDiskGeometry::density(double R, double z) const
+{
+    double sechz = 1.0 / cosh(z/_hz);
+    return _rho0 * exp(-R/_hR) * sechz*sechz;
+}
+
+double IsoThermalDiskGeometry::sigmaR() const
+{
+    return _rho0*_hR;
+}
+
+double IsoThermalDiskGeometry::sigmaZ() const
+{
+    return 2.0*_rho0*_hz;
+}
+\endcode
+
+Update the implementation of the functions randomR() and randomz() to reflect the formulas derived before
+for generating the appropriate random values:
+
+\code
+double IsoThermalDiskGeometry::randomR() const
+{
+    double X = _random->uniform();
+    return _hR * (-1.0-SpecialFunctions::LambertW1((X-1.0)/M_E));
+}
+
+double IsoThermalDiskGeometry::randomz() const
+{
+    double X = _random->uniform();
+    return 0.5 * _hz * log(X/(1.0-X));
+}
+\endcode
+
+Press the "Hammer" icon again to save your changes and perform a build. There should be no errors.
+
+\subsection DevTutReg Registering the new class
+
+Having declared and defined the new class, you must make its existence known to the SKIRT discovery mechanism
+so that it will be properly listed when constructing a new .ski file during an interactive Q&A session.
+See \ref DevSimDisco and \ref DevDiscoUsage.
+Note that this registration requirement applies only simulation item classes, i.e. classes that inherit directly
+or indirectly from the SimulationItem class, as is the case for your new IsoThermalDiskGeometry class.
+
+Locate the file \c RegisterSimulationItems.cpp in Qt Creator's project browser and open it in the editor. You need
+to add two lines in this file: an \c include directive for the new class header, and an \c add<> statement to
+register the new class.
+
+Add the \c include directive to the already long list of \c include directives, in alpahabetical order. For
+example:
+
+\code
+#include "InterstellarDustMix.hpp"
+#include "IsoThermalDiskGeometry.hpp"
+...
+\endcode
+
+Insert a new \c add<> statement to the existing list in the location you want it to appear in the corresponding
+choice list while creating a new .ski file in the interactive Q&A session. In this case, locate the
+list of \c add<> statements for geometry classes and insert a new statement (for example) right after
+the one for the ExpDiskGeometry class:
+
+\code
+    add<ExpDiskGeometry>();
+    add<IsoThermalDiskGeometry>();
+    ...
+\endcode
+
+Press the "Hammer" icon again to save your changes and perform a build. Assuming there are no errors,
+SKIRT is now ready for use with the new geometry.
+
+\subsection DevTutUse Using the new class
+
+Launch the newly built SKIRT version without any command line arguments. Provide appropriate responses to the
+interactive questions for a simulation with a stellar system or a dust distribution composed of various components.
+The list of choices will include a new item for the iso-thermal disk geometry:
+
+\verbatim
+  1. A point source geometry
+  2. A Plummer geometry
+     ...
+  9. An exponential disk geometry
+ 10. An iso-thermal disk geometry
+     ...
+\endverbatim
+
+Enter the appropriate choice (10 in the example) to select your new geometry.
+Complete the Q&A session to save the ski file.
+Alternatively, you can edit a copy of a ski file you made earlier to use your new geometry.
+
+To verify the results for a stellar distribution, run a simulation without dust and with appropriate
+frame instruments to generate an image of the flux received in a few relevant directions.
+
+To verify the results for a dust density distribution, set the writeDensity property of the dust system to “true”,
+so that SKIRT generates cuts through the dust along the coordinate axes (in the output files
+prefix_ds_trhoxy.fits and prefix_ds_trhoxz.fits).
+
+*/

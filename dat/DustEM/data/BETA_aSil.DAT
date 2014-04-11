@@ -1,0 +1,25 @@
+# DUSTEM: parameters for BETA(T) behaviour of Qabs
+# first DBETA correction to standard index beta0
+# then lambda threshold to apply BETA(T)
+#
+#  beta0    abeta      gbeta    bmax
+# lthresh(microns)     lstiff (dlambda=lthresh/lstiff)
+# nbetav (nr of beta values if 0 uses formula)
+# tbeta betav (if nbetav >= 0)
+#
+ 2.11E+00  1.15E+01  -6.60E-01  5.00E+00
+ 3.00E+01  1.00E+00  
+ 13
+ 1.00E+00      1.55E+00
+ 2.00E+00      1.70E+00
+ 5.00E+00      2.20E+00
+ 7.00E+00      2.42E+00
+ 1.00E+01      2.60E+00
+ 1.50E+01      2.50E+00
+ 2.00E+01      2.20E+00
+ 3.00E+01      2.00E+00
+ 7.00E+01      1.76E+00
+ 1.00E+02      1.68E+00
+ 2.00E+02      1.50E+00
+ 3.00E+02      1.40E+00
+ 1.00E+03      1.10E+00

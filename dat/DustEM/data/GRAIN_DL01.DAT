@@ -1,0 +1,14 @@
+# DUSTEM: definition of grain populations
+# 
+# run keywords 
+# G0 scaling factor for radiation field
+# grain type, nsize, type keywords, Mdust/MH, rho, amin, amax, alpha/a0 [, at, ac, gamma (ED)] [, au, zeta, eta (CV)]
+# cgs units
+#
+sdist
+1.0000
+PAH0_DL01         10 mix-logn           5.4000E-04  2.2400E+00  3.1000E-08  4.9000E-07  3.5000E-08  4.0000E-01
+PAH1_DL01         10 mix-logn           5.4000E-04  2.2400E+00  3.1000E-08  4.9000E-07  3.5000E-08  4.0000E-01
+Gra		  30 logn         	1.8000E-04  2.2400E+00  3.1000E-08  4.0000E-06  3.0000E-07  4.0000E-01
+Gra     	  70 plaw-ed-cv		2.3300E-03  2.2400E+00  3.1000E-08  2.0000E-04 -2.5400E+00  1.0700E-06  4.2800E-05  3.0000E+00  1.0700E-06 -1.6500E-01  1.0000E+00
+aSil              70 plaw-ed-cv    	8.2700E-03  3.5000E+00  3.1000E-08  2.0000E-04 -3.2100E+00  1.6400E-05  1.0000E-05  3.0000E+00  1.6400E-05  3.0000E-01  1.0000E+00

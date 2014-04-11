@@ -1,0 +1,730 @@
+/**
+
+\page DustProp Handling Dust Properties
+
+\section DustIntro Introduction
+
+Absorption and scattering by dust plays an important role in most SKIRT simulations. This chapter describes
+how SKIRT produces and uses the optical dust properties that are appropriate for a particular astrophysical model.
+
+\section DustOver Overview
+
+At the core of the dust story is the DustMix class hierarchy, illustrated in the following (incomplete) diagram
+(connections starting with a triangle denote inheritance).
+
+\dot
+digraph dustmixhierarchy {
+    rankdir=BT;
+    node [shape=rect, fontname=Helvetica, fontsize=10];
+    edge [arrowhead=empty];
+
+    DustMix [label="DustMix" URL="\ref DustMix"];
+      InterstellarDustMix [label="InterstellarDustMix" URL="\ref InterstellarDustMix"];
+      MultiGrainDustMix [label="MultiGrainDustMix" URL="\ref MultiGrainDustMix"];
+        MRNDustMix [label="MRNDustMix" URL="\ref MRNDustMix"];
+        ZubkoDustMix [label="ZubkoDustMix" URL="\ref ZubkoDustMix"];
+        ConfigurableDustMix [label="ConfigurableDustMix" URL="\ref ConfigurableDustMix"];
+      DraineLiDustMix [label="DraineLiDustMix" URL="\ref DraineLiDustMix"];
+
+      InterstellarDustMix -> DustMix;
+      MultiGrainDustMix -> DustMix;
+        MRNDustMix -> MultiGrainDustMix;
+        ZubkoDustMix -> MultiGrainDustMix;
+        ConfigurableDustMix -> MultiGrainDustMix;
+      DraineLiDustMix -> DustMix;
+}
+\enddot
+
+A DustMix object (i.e. an instance of one of the DustMix subclasses) represents a dust mixture with its
+associated set of properties. A dust mixture consists of one or more dust populations; each
+dust population can represent dust grains with different chemical compositions
+and/or with different sizes. A continuous range of dust populations (e.g. a size distribution) must
+be discretized in a finite number of populations.
+
+The top-level DustMix class provides functions to the rest of the SKIRT code for retrieving relevant properties
+of the various dust populations in the mixture. Subclasses are simply expected to setup the properties for
+each dust population, and do not offer any additional retrieval functions.
+The DustMix class manages two categories of properties. Fundamental properties must be
+communicated by each concrete subclass to the DustMix class during setup; derived properties
+are calculated by the DustMix class without further assistance from the subclass. The DustMix
+class stores the fundamental properties and frequently accessed derived properties in
+private member variables. Some derived properties are calculated on the fly.
+The DustMix classes do not perform any normalization on the dust properties; they
+publish absolute values in the appropriate SI units.
+
+The classes that inherit directly from DustMix, such as InterstellarDustMix and DrainLiDustMix, usually represent
+pre-calculated, average dust properties for some "standard" dust mix, simply imported from a data file.
+
+The MultiGrainDustMix class is an important "intermediate" DustMix subclass. It offers facilities to its
+subclasses to calculate the properties for a dust population from the underlying grain composition and
+grain size distribution. The grain size distribution can be discretized in a number of bins (specified by the
+subclass as well), resulting in a range of dust populations with the same grain composition.
+A multi-grain dust mix can consist of multiple dust population ranges, each with a specific grain composition
+and with a particular grain size distribution split into one or more bins.
+
+The MultiGrainDustMix class extends the DustMix public interface with a function to calculate
+the enthalpy of a typical dust grain at a specified temperature, for each dust population. This
+capability is offered here rather than in the DustMix base class because it requires access to
+the specific enthalpy information depending on the grain composition.
+
+Some MultiGrainDustMix subclasses, such as MRNDustMix and ZubkoDustMix, implement a specific dust model with
+a builtin grain size distribution function (which can be quite complex, as in ZubkoDustMix). On the other hand,
+the ConfigurableDustMix class allows a dust mix to be fully configured from within the ski file using pre-conceived
+components, as illustrated in the following (incomplete) diagram (connections starting with a triangle denote
+inheritance; connections starting with a diamond denote aggregation).
+
+\dot
+digraph configurabledustmix {
+    rankdir=LR;
+    node [shape=rect, fontname=Helvetica, fontsize=10];
+
+    DustMix [label="DustMix" URL="\ref DustMix"];
+    MultiGrainDustMix [label="MultiGrainDustMix" URL="\ref MultiGrainDustMix"];
+    ConfigurableDustMix [label="ConfigurableDustMix" URL="\ref ConfigurableDustMix"];
+    DustMixPopulation [label="DustMixPopulation" URL="\ref DustMixPopulation"];
+    GrainComposition [label="GrainComposition" URL="\ref GrainComposition"];
+    DraineGraphiteGrainComposition [label="DraineGraphiteGrainComposition" URL="\ref DraineGraphiteGrainComposition"];
+    GrainSizeDistribution [label="GrainSizeDistribution" URL="\ref GrainSizeDistribution"];
+    PowerLawGrainSizeDistribution [label="PowerLawGrainSizeDistribution" URL="\ref PowerLawGrainSizeDistribution"];
+
+    { rank=same; DustMix; MultiGrainDustMix; ConfigurableDustMix }
+    { rank=same; DustMixPopulation }
+    { rank=same; GrainComposition; DraineGraphiteGrainComposition;
+                 GrainSizeDistribution; PowerLawGrainSizeDistribution }
+
+    DustMix -> MultiGrainDustMix [dir=back arrowtail=empty];
+    MultiGrainDustMix -> ConfigurableDustMix [dir=back arrowtail=empty];
+    GrainComposition -> DraineGraphiteGrainComposition [dir=back arrowtail=empty];
+    GrainSizeDistribution -> PowerLawGrainSizeDistribution [dir=back arrowtail=empty];
+
+    ConfigurableDustMix -> DustMixPopulation  [dir=back arrowtail=ediamond];
+    DustMixPopulation -> GrainComposition  [dir=back arrowtail=ediamond];
+    DustMixPopulation -> GrainSizeDistribution  [dir=back arrowtail=ediamond];
+}
+\enddot
+
+A GrainComposition object represents the optical and calorimetric properties of a particular grain material,
+according to a certain model. A GrainSizeDistribution object represents a particular grain size distribution
+function.
+For each dust population, a ConfigurableDustMix object holds a DustMixPopulation object, which in turn holds
+a GrainComposition object, a GrainSizeDistribution object, and the number of subpopulations used for
+discretizing the size distribution.
+For example one could mimic an MRNDustMix with the following ski file configuration:
+
+\verbatim
+<mix type="DustMix">
+  <ConfigurableDustMix writeMix="true" writeMeanMix="true" writeSize="true">
+      <populations type="DustMixPopulation">
+          <DustMixPopulation subPops="3">
+              <composition type="GrainComposition">
+                  <DraineGraphiteGrainComposition/>
+              </composition>
+              <sizeDistribution type="GrainSizeDistribution">
+                  <PowerLawGrainSizeDistribution minSize="50 A" maxSize="0.25 micron"
+                                                 factor="7.4131024130091926e-31" exponent="3.5"/>
+              </sizeDistribution>
+          </DustMixPopulation>
+          <DustMixPopulation subPops="4">
+              <composition type="GrainComposition">
+                  <DraineSilicateGrainComposition/>
+              </composition>
+              <sizeDistribution type="GrainSizeDistribution">
+                  <PowerLawGrainSizeDistribution minSize="50 A" maxSize="0.25 micron"
+                                                 factor="7.762471166286928e-31" exponent="3.5"/>
+              </sizeDistribution>
+          </DustMixPopulation>
+      </populations>
+  </ConfigurableDustMix>
+</mix>
+\endverbatim
+
+\note The SilicateMiePowerLawDustMix class has been removed. It can easily be replaced by a properly configured
+ConfigurableDustMix, as illustrated below.
+
+\verbatim
+<mix type="DustMix">
+  <ConfigurableDustMix writeMix="true" writeMeanMix="true" writeSize="true">
+      <populations type="DustMixPopulation">
+          <DustMixPopulation subPops="9">
+              <composition type="GrainComposition">
+                  <MieSilicateGrainComposition/>
+              </composition>
+              <sizeDistribution type="GrainSizeDistribution">
+                  <PowerLawGrainSizeDistribution minSize="0.01 micron" maxSize="10 micron"
+                                                 factor="1" exponent="1.5"/>
+              </sizeDistribution>
+          </DustMixPopulation>
+      </populations>
+  </ConfigurableDustMix>
+</mix>
+\endverbatim
+
+
+\section DustQuant Physical Quantities
+
+This section lists the physical quantities involved in the calculation and use of dust properties, including
+appropriate SI units, and introducing the notation used in the SKIRT documentation (and in the code, for that matter).
+
+\subsection DustQuantUnits Fundamental Units
+
+<TABLE>
+<TR><TD><B>Units</B></TD>  <TD><B>Description</B></TD></TR>
+<TR><TD>\f$\text{m}\f$</TD>  <TD>distance, length, size</TD></TR>
+<TR><TD>\f$\text{kg}\f$</TD> <TD>mass</TD></TR>
+<TR><TD>\f$\#\f$</TD>  <TD>discrete number of items</TD></TR>
+<TR><TD>\f$1\f$</TD>  <TD>dimensionless</TD></TR>
+</TABLE>
+
+\subsection DustQuantBasic Basic quantities
+
+<TABLE>
+<TR><TD><B>Symbol</B></TD>  <TD><B>Units</B></TD>  <TD><B>Description</B></TD></TR>
+<TR><TD>\f$\lambda\f$</TD>  <TD>\f$\text{m}\f$</TD>  <TD>Wavelength</TD></TR>
+<TR><TD>\f$\vec{r}\f$</TD>  <TD>\f$\text{m}\f$</TD>  <TD>%Position</TD></TR>
+<TR><TD>\f$s\f$</TD>  <TD>\f$m\f$</TD>  <TD>Distance (along a path)</TD></TR>
+<TR><TD>\f$V\f$</TD>  <TD>\f$\text{m}^3\f$</TD>  <TD>Volume</TD></TR>
+</TABLE>
+
+\subsection DustQuantPop Dust population properties
+
+<TABLE>
+<TR><TD><B>Symbol</B></TD>  <TD><B>Units</B></TD>  <TD><B>Description</B></TD></TR>
+<TR><TD>\f$M\f$</TD>  <TD>\f$\text{kg}\f$</TD>  <TD>Dust mass</TD></TR>
+<TR><TD>\f$\rho=M/V\f$</TD>  <TD>\f$\text{kg}\,\text{m}^{-3}\f$</TD>  <TD>Dust mass density</TD></TR>
+<TR><TD>\f$C\f$</TD>  <TD>\f$\text{m}^2\f$</TD>  <TD>Cross section (absorption, scattering or extinction)</TD></TR>
+
+<TR><TD>\f$N_\text{H}\f$</TD>  <TD>\f$\#_\text{H}\f$</TD>  <TD>Number of hydrogen atoms</TD></TR>
+<TR><TD>\f$n_\text{H}=N_\text{H}/V\f$</TD>  <TD>\f$\#_\text{H}\,\text{m}^{-3}\f$</TD>
+                                            <TD>Hydrogen atom number density</TD></TR>
+<TR><TD>\f$\mu=M/N_\text{H}\f$</TD>   <TD>\f$\text{kg}\,\#_\text{H}^{-1}\f$</TD>
+                                      <TD>Dust mass per hydrogen atom</TD></TR>
+<TR><TD>\f$\varsigma=C/N_\text{H}\f$</TD>  <TD>\f$\text{m}^2\,\#_\text{H}^{-1}\f$</TD>
+                                           <TD>Cross section per hydrogen atom</TD></TR>
+<TR><TD>\f$\kappa=C/M=\varsigma/\mu\f$</TD>  <TD>\f$\text{m}^2\,\text{kg}^{-1}\f$</TD>
+                                             <TD>Opacity (absorption, scattering or extinction)</TD></TR>
+
+<TR><TD>\f$\tau=\int\kappa\rho\,\text{d}s\f$</TD>  <TD>\f$1\f$</TD>  <TD>Optical depth</TD></TR>
+<TR><TD>\f$g\f$</TD>  <TD>\f$1\f$</TD>  <TD>Scattering phase function asymmetry parameter</TD></TR>
+
+</TABLE>
+
+\subsection DustQuantGrain Dust grain properties
+
+<TABLE>
+<TR><TD><B>Symbol</B></TD>  <TD><B>Units</B></TD>  <TD><B>Description</B></TD></TR>
+<TR><TD>\f$a\f$</TD>  <TD>\f$\text{m}\f$</TD>  <TD>Dust grain size</TD></TR>
+<TR><TD>\f$N_\text{D}\f$</TD>  <TD>\f$\#_\text{D}\f$</TD>  <TD>Number of dust grains</TD></TR>
+<TR><TD>\f$n_\text{D}=N_\text{D}/V\f$</TD>  <TD>\f$\#_\text{D}\,\text{m}^{-3}\f$</TD>
+                                            <TD>Dust grain number density</TD></TR>
+<TR><TD>\f$\Omega(a)=(\frac{\text{d}n_\text{D}}{\text{d}a})/n_\text{H}\f$</TD>
+        <TD>\f$\#_\text{D}\,\#_\text{H}^{-1}\,\text{m}^{-1}\f$</TD>
+        <TD>Dust grain size distribution per hydrogen atom</TD></TR>
+<TR><TD>\f$Q\f$</TD>  <TD>\f$1\f$</TD>  <TD>Efficiency (absorption, scattering or extinction)</TD></TR>
+<TR><TD>\f$g\f$</TD>  <TD>\f$1\f$</TD>  <TD>Scattering phase function asymmetry parameter</TD></TR>
+<TR><TD>\f$\rho_\text{bulk}\f$</TD>  <TD>\f$\text{kg}\,\text{m}^{-3}\f$</TD>  <TD>Bulk mass density</TD></TR>
+<TR><TD>\f$h\f$</TD>  <TD>\f$\text{J}\,\text{kg}^{-1}\f$</TD>
+                      <TD>Specific enthalpy (internal energy per unit mass)</TD></TR>
+</TABLE>
+
+\subsection DustQuantRad Radiation
+
+<TABLE>
+<TR><TD><B>Symbol</B></TD>    <TD><B>Units</B></TD>  <TD><B>Description</B></TD></TR>
+<TR><TD>\f$L_\lambda\f$</TD>  <TD>\f$\text{W}\,\text{m}^{-1}\f$</TD>
+                              <TD>Spectral luminosity in function of wavelength</TD></TR>
+<TR><TD>\f$J_\lambda\f$</TD>  <TD>\f$\text{W}\,\text{m}^{-3}\,\text{sr}^{-1}\f$</TD>
+                              <TD>Spectral radiance in function of wavelength</TD></TR>
+<TR><TD>\f$B_\lambda\f$</TD>  <TD>\f$\text{W}\,\text{m}^{-3}\,\text{sr}^{-1}\f$</TD>
+                              <TD>Black-body spectral radiance (Planck's law)</TD></TR>
+<TR><TD>\f$\varepsilon_\lambda\approx\kappa\,B_\lambda\f$</TD>
+                              <TD>\f$\text{W}\,\text{m}^{-1}\,\text{kg}^{-1}\,\text{sr}^{-1}\f$</TD>
+                              <TD>Spectral emissivity per unit mass</TD></TR>
+<TR><TD>\f$\text{j}_\lambda\approx\rho\,\varepsilon_\lambda\f$</TD>
+                              <TD>\f$\text{W}\,\text{m}^{-4}\,\text{sr}^{-1}\f$</TD>
+                              <TD>Spectral emission per unit volume</TD></TR>
+</TABLE>
+
+\section DustMix Dust Mix Properties
+
+\subsection DustMixFunda Fundamental properties
+
+The fundamental properties stored and published by a dust mix object in SKIRT are:
+ - the number of dust populations \f$N_{\text{pop}}\f$,
+ - for each dust population \f$c\f$, defined at the grid points \f$\lambda_\ell\f$ of the simulation's wavelength grid:
+   - the absorption cross section per hydrogen atom \f$\varsigma_{\ell,c}^{\text{abs}}\f$,
+   - the scattering cross section per hydrogen atom \f$\varsigma_{\ell,c}^{\text{sca}}\f$,
+   - the scattering phase function asymmetry parameter \f$g_{\ell,c}\f$,
+ - for each dust population \f$c\f$:
+   - the dust mass per hydrogen atom \f$\mu_{c}\f$.
+
+Each subclass must provide these properties to the DustMix base class, either directly (e.g. InterStellarDustMix)
+or calculated from the basic grain properties through the functionality of the MultiGrainDustMix class.
+The section \ref DustMixGrain describes the latter calculation in more detail.
+
+There is an excellent reason for using the cross sections \f$\varsigma\f$ and dust masses \f$\mu\f$
+as fundamental properties rather than the opacities \f$\kappa\f$:
+it allows properly handling multiple dust populations and multiple geometries.
+This is explained in the section \ref DustNormal.
+
+\subsection DustMixDeriv Derived properties
+
+The DustMix class allows to obtain quite a few additional properties which are calculated from the fundamental
+properties without further assistance from the subclass. Frequently used derived properties are cached, others
+are calculated on the fly.
+
+The derived properties foremost include properties that apply to the dust mixture as a
+whole, i.e. the total absorption, scattering and extinction cross sections per hydrogen atom \f[ \begin{split}
+\varsigma_\ell^{\text{abs}} &= \sum_{c=1}^{N_{\text{pop}}} \varsigma_{\ell,c}^{\text{abs}} \\
+\varsigma_\ell^{\text{sca}} &= \sum_{c=1}^{N_{\text{pop}}} \varsigma_{\ell,c}^{\text{sca}} \\
+\varsigma_\ell^{\text{ext}} &= \sum_{c=1}^{N_{\text{pop}}} \left(\varsigma_{\ell,c}^{\text{abs}} +
+\varsigma_{\ell,c}^{\text{sca}} \right), \end{split} \f] the global albedo \f[\varpi_\ell =
+\frac{\varsigma_\ell^{\text{sca}}}{\varsigma_\ell^{\text{ext}}}, \f] the average scattering phase
+function asymmetry parameter \f[ g_\ell = \frac{1}{\varsigma_\ell^{\text{sca}}}
+\sum_{c=1}^{N_{\text{pop}}} g_{\ell,c}\, \varsigma_{\ell,c}^{\text{sca}}, \f]
+and the total dust mass per hydrogen atom \f[\mu = \sum_{c=1}^{N_{\text{pop}}} \mu_{c}. \f]
+
+Furthermore the derived properties include the total absorption, scattering and extinction opacities for
+the dust mixture as a whole (note that the opacities are \em not provided for individual dust populations)
+\f[ \begin{split}
+\kappa_\ell^{\text{abs}} &= \frac{\varsigma_\ell^{\text{abs}}}{\mu} \\
+\kappa_\ell^{\text{sca}} &= \frac{\varsigma_\ell^{\text{sca}}}{\mu} \\
+\kappa_\ell^{\text{ext}} &= \frac{\varsigma_\ell^{\text{ext}}}{\mu}. \end{split} \f]
+
+If the simulation's wavelength grid represents a sampled wavelength range (as it would for
+panchromatic simulations), derived properties also include the Planck-integrated absorption
+cross sections per hydrogen atom \f$\varsigma_{\text{P},c}^{\text{abs}}(T)\f$, defined as \f[
+\varsigma_{\text{P},c}^{\text{abs}}(T) = \int_0^\infty \varsigma_{\lambda,c}^{\text{abs}}\,
+B_\lambda(T)\, {\text{d}}\lambda. \f]  These values are precalculated on a large grid of temperatures,
+so that the equation can also be solved for \f$T\f$ given a value for \f$\varsigma_{\text{P},c}^{\text{abs}}\f$.
+
+\subsection DustMixGrain Calculating dust mix properties from grain properties
+
+The MultiGrainDustMix class calculates the fundamental dust properties from the following dust grain properties,
+provided by its subclass:
+the absorption efficiencies \f$Q^{\text{abs}}(\lambda,a)\f$,
+the scattering efficiencies \f$Q^{\text{sca}}(\lambda,a)\f$,
+the scattering phase function asymmetry parameter \f$g(\lambda,a)\f$,
+the bulk density \f$\rho_{\text{bulk}}\f$ of the grain material,
+and the grain size distribution per hydrogen atom \f$\Omega(a)=(\frac{\text{d}n_\text{D}}{\text{d}a})/n_\text{H}\f$.
+
+The grain size distribution is split into \f$N_\text{bins}\f$ bins
+on a logarithmic scale, and a seperate dust population is added for each bin. If the total
+range of the size distribution is given by \f$[a_\text{min},a_\text{max}]\f$, we denote the
+ranges for the various bins as \f$[a_{\text{min},c},a_{\text{max},c}],
+\,c=1,...,N_\text{bins}\f$ where \f$a_{\text{min},1}=a_\text{min}\f$ and
+\f$a_{\text{max},N_\text{bins}}=a_\text{max}\f$.
+The properties are calculated for each of the dust populations \f$c\f$
+and for each wavelength \f$\lambda_\ell\f$ in the simulation's wavelength grid, using the formulas listed below.
+
+The absorption and scattering cross sections per hydrogen atom \f$\varsigma_{\ell,c}^{\text{abs}}\f$ and
+\f$\varsigma_{\ell,c}^{\text{abs}}\f$ for the \f$\ell\f$'th wavelength and of the \f$c\f$'th dust
+population are calculated by an integration over the size distribution, \f[
+\varsigma_{\ell,c}^{\text{abs}} = \int_{a_{\text{min},c}}^{a_{\text{max},c}}
+\Omega(a)\, Q^{\text{abs}}(\lambda_\ell,a)\, \pi a^2\, {\text{d}}a \f]
+and \f[ \varsigma_{\ell,c}^{\text{sca}} = \int_{a_{\text{min},c}}^{a_{\text{max},c}}
+\Omega(a)\, Q^{\text{sca}}(\lambda_\ell,a)\, \pi a^2\, {\text{d}}a. \f]
+The asymmetry parameter \f$g_{\ell,c}\f$ is similarly calculated using \f[ g_{\ell,c} =
+\frac{1}{\varsigma_{\ell,c}^{\text{sca}}} \int_{a_{\text{min},c}}^{a_{\text{max},c}}
+\Omega(a)\, g(\lambda_\ell,a)\, Q^{\text{sca}}(\lambda_\ell,a)\, \pi
+a^2\, {\text{d}}a. \f] The dust mass \f$\mu_c\f$ for each dust population is
+calculated by integrating the bulk density over the size distribution, \f[ \mu_c
+= \int_{a_{\text{min},c}}^{a_{\text{max},c}} \Omega(a)\,
+\rho_{\text{bulk}}\, \frac{4\pi}{3}\, a^3\, {\text{d}}a. \f]
+
+\subsection DustMixCalor Calorimetric properties
+
+The MultiGrainDustMix class extends the DustMix public interface with a function to calculate
+the enthalpy of a typical dust grain at a specified temperature, for each dust population. This
+capability is offered in the MultiGrainDustMix class rather than in the DustMix base class because it requires
+access to the specific enthalpy information offered by the GrainComposition class hierarchy.
+
+The function returns the enthalpy \f$H_c(T)\f$ at temperature \f$T\f$ of a "mean" dust grain
+representative of the \f$c\f$'th dust population. The enthalpy is equivalent to the
+internal energy of the dust grain, using an arbitrary zero point. It is obtained by
+multiplying the specific enthalpy of the appropriate grain composition (at the specified
+temperature) by the mass of a representative dust grain.
+
+The enthalpy information is used for calculating the temperature probability distribution of small dust grains
+that are not in thermal equilibrium with the environment. This is explained in more detail in section \ref DustEmis.
+
+\section DustNormal Normalizing dust components
+
+It is an important objective for the dust configuration in SKIRT to be understandable and transparent.
+Multiple dust populations should combine in a simple "linear" manner regardless of how
+they are included in the dust system. Based on a concrete example, this section demonstrates how this objective
+can be achieved.
+
+To simplify the notation, we consider the dust properties at a single fixed wavelength so that we
+can omit the wavelength index. We also focus the discussion on the total extinction to avoid the upper index,
+and we leave the scattering asymmetry parameter aside.
+
+\subsection DustNormalHeart The heart of the matter
+
+The core issue is this: when combining dust populations, the
+cross sections and masses per hydrogen atom can be simply added:
+\f[ \varsigma=\sum_c\varsigma_{c} \quad;\quad \mu=\sum_c\mu_{c}, \f]
+but this is not true for the opacities:
+\f[ \kappa=\frac{\varsigma}{\mu}=\frac{\sum_c\varsigma_{c}}{\sum_c\mu_{c}}
+    \neq \sum_c\frac{\varsigma_{c}}{\mu_c}=\sum_c\kappa_{c}. \f]
+The choice of the units in the denominator (i.e. "per hydrogen atom") is arbitrary; one could use any units as long as
+all cross sections and masses are provided in exactly the same way. Since dust properties in the literature are often
+provided per hydrogen atom, this is a natural choice.
+
+\subsection DustNormalAddit Normalization schemes
+
+A SKIRT dust system contains one or more dust components, each with a specific geometry and a particular dust mix.
+Each dust mix has one or more dust populations. Let us denote dust components (i.e. geometries) with
+the index \f$h\f$ and dust populations for each component with the index \f$c\f$.
+The dust system stores:
+ - the cross sections per hydrogen atom \f$\varsigma_{hc}\f$ for each dust component and dust population;
+ - the dust masses per hydrogen atom \f$\mu_{hc}\f$ for each dust component and dust population;
+ - the dust mass density distribution \f$\rho_{h}(\vec{r})\f$ for each dust component,
+   discretized over the dust grid.
+
+The density distribution for dust component \f$h\f$ can be normalized to a given total mass \f$M_h\f$ or
+to a given optical depth \f$\tau_h\f$ along a specific path S using
+\f[M_h = \int_\text{V}\rho_{h}(\vec{r})\,\text{d}V \f]
+\f[\tau_h = \int_\text{S}\kappa_{h}\,\rho_{h}(\vec{r})\,\text{d}s \f]
+where the derived dust mix property \f$\kappa_{h}\f$ is calculated according to
+\f[\kappa_{h}=\frac{\sum_c\varsigma_{hc}}{\sum_c\mu_{hc}}.\f]
+
+\subsection DustNormalModel A specific dust model
+
+Now consider a dust model consisting of two dust populations, named 1 and 2, with identical spatial distribution.
+There are two distinct ways to configure this model in SKIRT:
+ - configuration A: a single dust component using a dust mix with the two populations 1 and 2;
+ - configuration B: two dust components with identical spatial distribution,
+   the first using a dust mix with population 1 and the second using a dust mix with population 2.
+
+Given appropriate normalization of the respective dust components, we expect the results of configurations
+A and B to be identical.
+
+The dust system stores the cross sections \f$\varsigma_1, \varsigma_2\f$ and dust masses per hydrogen atom
+\f$\mu_1, \mu_2\f$ for each population.
+In configuration A there is a single dust component with dust mass density distribution \f$\rho_\text{A}\f$
+and with opacity \f$\kappa_\text{A}=(\varsigma_1+\varsigma_2)/(\mu_1+\mu_2)\f$.
+In configuration B there are two dust components with dust mass density distribution \f$\rho_\text{B1}\f$
+and \f$\rho_\text{B2}\f$ and with opacities \f$\kappa_\text{B1}=\varsigma_1/\mu_1\f$ and
+\f$\kappa_\text{B2}=\varsigma_2/\mu_2\f$.
+
+\subsection DustNormalMass Normalization on mass
+
+Assume that we are given the total normalization dust mass \f$M\f$ for configuration A. We'd like to find the
+normalization masses \f$M_1\f$ and \f$M_2\f$ for each of the dust components in configuration B so that the
+total optical depth along an arbitrary path is identical in both configurations.
+
+In configuration A the normalization equation reads
+\f[ M = \int_\text{V}\rho_\text{A}(\vec{r})\,\text{d}V \f]
+and the total optical depth along an arbitrary path P is given by
+\f[ \tau_\text{A} = \frac{\varsigma_1+\varsigma_2}{\mu_1+\mu_2} \int_\text{P}\rho_\text{A}(\vec{r})\,\text{d}s \f]
+
+In configuration B the normalization equations read
+\f[ M_1 = \int_\text{V}\rho_\text{B1}(\vec{r})\,\text{d}V \f]
+\f[ M_2 = \int_\text{V}\rho_\text{B2}(\vec{r})\,\text{d}V \f]
+and the total optical depth along an arbitrary path is given by
+\f[ \tau_\text{B} = \frac{\varsigma_1}{\mu_1} \int_\text{P}\rho_\text{B1}(\vec{r})\,\text{d}s +
+                    \frac{\varsigma_2}{\mu_2} \int_\text{P}\rho_\text{B2}(\vec{r})\,\text{d}s \f]
+
+Since all geometries are identical, we can write
+\f$\rho_\text{B1}(\vec{r})=b_1\rho_\text{A}(\vec{r})\f$ and
+\f$\rho_\text{B2}(\vec{r})=b_2\rho_\text{A}(\vec{r})\f$
+where \f$b_1,b_2\f$ are constants that don't dependent on \f$\vec{r}\f$.
+Requiring \f$\tau_\text{A}=\tau_\text{B}\f$ and \f$M=M_1+M_2\f$ then leads to the system of equations
+\f[ \frac{\varsigma_1+\varsigma_2}{\mu_1+\mu_2} = \frac{\varsigma_1}{\mu_1}b_1 + \frac{\varsigma_2}{\mu_2}b_2
+\quad;\quad 1=b_1+b_2 \f]
+in the unknowns \f$b_1\f$ and \f$b_2\f$. As can be easily verified by substitution, the solution of this system is
+\f$b_1 = \frac{\mu_1}{\mu_1+\mu_2}\f$ and \f$b_2 = \frac{\mu_2}{\mu_1+\mu_2}\f$.
+From the mass normalization equations above we see that \f$M_1/M=b_1\f$ and \f$M_2/M=b_2\f$ so that
+\f[ M_1 = \frac{\mu_1}{\mu_1+\mu_2}M \quad;\quad M_2 = \frac{\mu_2}{\mu_1+\mu_2}M. \f]
+
+In other words, the normalization mass must be distributed over the dust components proportional to the dust mass
+of each dust population. A rather intuitive result!
+
+\subsection DustNormalDepth Normalization on optical depth
+
+Assume that we are given the optical depth \f$\tau\f$ along a specific path S for normalizing configuration A.
+We'd like to find the optical depths \f$\tau_1\f$ and \f$\tau_2\f$ (along the same path) for normalizing each
+of the dust components in configuration B so that the total optical depth along an arbitrary path is identical
+in both configurations.
+
+In configuration A the normalization equation reads
+\f[ \tau = \frac{\varsigma_1+\varsigma_2}{\mu_1+\mu_2} \int_\text{S}\rho_\text{A}(\vec{r})\,\text{d}s \f]
+and the total optical depth along an arbitrary path is given by
+\f[ \tau_\text{A} = \frac{\varsigma_1+\varsigma_2}{\mu_1+\mu_2} \int_\text{P}\rho_\text{A}(\vec{r})\,\text{d}s \f]
+
+In configuration B the normalization equations read
+\f[ \tau_1 = \frac{\varsigma_1}{\mu_1} \int_\text{S}\rho_\text{B1}(\vec{r})\,\text{d}s \f]
+\f[ \tau_2 = \frac{\varsigma_2}{\mu_2} \int_\text{S}\rho_\text{B2}(\vec{r})\,\text{d}s \f]
+and the total optical depth along an arbitrary path is given by
+\f[ \tau_\text{B} = \frac{\varsigma_1}{\mu_1} \int_\text{P}\rho_\text{B1}(\vec{r})\,\text{d}s +
+                    \frac{\varsigma_2}{\mu_2} \int_\text{P}\rho_\text{B2}(\vec{r})\,\text{d}s \f]
+
+Since all geometries are identical, we can write
+\f$\rho_\text{B1}(\vec{r})=b_1\rho_\text{A}(\vec{r})\f$ and
+\f$\rho_\text{B2}(\vec{r})=b_2\rho_\text{A}(\vec{r})\f$
+where \f$b_1,b_2\f$ are constants that don't dependent on \f$\vec{r}\f$.
+Requiring \f$\tau_\text{A}=\tau_\text{B}\f$ and \f$\tau=\tau_1+\tau_2\f$ both lead to the equation
+\f[ \frac{\varsigma_1+\varsigma_2}{\mu_1+\mu_2} = \frac{\varsigma_1}{\mu_1}b_1 + \frac{\varsigma_2}{\mu_2}b_2 \f]
+in the unknowns \f$b_1\f$ and \f$b_2\f$. As can be easily verified by substitution, a solution of this equation is
+\f$b_1 = \frac{\mu_1}{\mu_1+\mu_2}\f$ and \f$b_2 = \frac{\mu_2}{\mu_1+\mu_2}\f$. If we also require that the total
+dust mass in the system remains the same, then this is the only solution (as shown in the previous subsection).
+Otherwise there is a family of solutions and we can arbitrarily select this one.
+
+From the optical depth normalization equations above we see that
+\f$\tau_1=b_1\frac{\varsigma_1}{\mu_1}\left(\frac{\varsigma_1+\varsigma_2}{\mu_1+\mu_2}\right)^{-1}\tau\f$ and
+\f$\tau_2=b_2\frac{\varsigma_2}{\mu_2}\left(\frac{\varsigma_1+\varsigma_2}{\mu_1+\mu_2}\right)^{-1}\tau\f$
+so that after some basic algebra we obtain
+\f[ \tau_1 = \frac{\varsigma_1}{\varsigma_1+\varsigma_2}\tau
+\quad;\quad \tau_2 = \frac{\varsigma_2}{\varsigma_1+\varsigma_2}\tau. \f]
+
+In other words, the optical depth must be distributed over the dust components proportional to the cross section
+of each dust population. A rather intuitive result!
+
+
+\section DustEmis Calculating dust emission
+
+As soon as a SKIRT simulation includes a dust system, dust absorption and scattering are automatically enabled.
+For a panchromatic simulation, thermal emission by the dust can be (and usually is) enabled as well. There are
+multiple configuration options related to this calculation.
+
+\subsection DustEmisLib Dust library mechanism
+
+In the most straightforward configuration, SKIRT calculates the dust emission spectrum for each cell in the dust grid,
+based on the absorption spectrum stored in the dust cells during the stellar emission phase. Since this calculation may
+be prohibitively resource-intensive, SKIRT also implements a \em library mechanism (the DustLib class). Multiple
+dust cells are mapped to the same library item based on the characteristics of the radiation field in the cells.
+The idea is to form clusters of cells with a similar radiation field. Once this mapping has been determined, SKIRT
+constructs a representative radiation field for each library item, averaging over all cells that map to the item,
+and then calculates the dust emission for each library item based on this average radiation field.
+Finally, the resulting spectrum for each library item (or dust cell) is normalized to unity; it will be weighed with
+the total absorbed energy per dust cell during the dust emission phase of the simulation.
+
+Consider the calculation for library item \f$n\f$, assuming a wavelength grid \f$\lambda_\ell\f$.
+If the dust system contains multiple dust components \f$h\f$, each with its own dust mix, the emissivity
+\f$\varepsilon_{n,h,\ell}\f$ is calculated for each dust component \f$h\f$ seperately, and
+the results are combined into the complete emission spectrum for a dust cell \f$m\f$ through
+\f[ j_{m,\ell} = \sum_{h=0}^{N_{\text{comp}}-1} \rho_{m,h} \, \varepsilon_{n,h,\ell}. \f]
+Since the densities \f$\rho_{m,h}\f$ differ for each dust cell, the result must
+be calculated and stored for each dust cell separately. If the dust system has only a
+single dust component, the above formula reduces to \f$j_{m,\ell} =\rho_m\, \varepsilon_{n,\ell}\f$,
+so that the normalized emission spectrum is identical for all dust cells that map to a
+certain library entry.
+
+There are versions of the dust library mechanism with a 1D grid (Dim1DustLib) and a 2D grid (Dim2DustLib).
+The default mechanism (AllCellsDustLib) simply calculates the thermal emission for every cell, so it is not really
+a library.
+
+\subsection DustEmisGrey Grey body dust emission
+
+With the "modified blackbody" dust emissivity option (the GreyBodyDustEmissivity class), SKIRT assumes
+that the dust grains are in local thermal equilibrium (LTE). Under this
+assumption (which is valid for large grains) the dust emits as a modified blackbody, with a
+different equilibrium temperature for every population in the mixture if it is a multi-grain
+mixture. The emissivity in an interstellar radiation field \f$J_\lambda\f$ can then immediately
+be calculated as \f[ \varepsilon_\lambda = \frac{1}{\mu} \sum_{c=0}^{N_{\text{pop}}-1}
+\varsigma_{\lambda,c}^{\text{abs}}\, B_\lambda(T_c) \f] with \f$\mu\f$ the total dust mass of
+the dust mix, \f$\varsigma_{\lambda,c}^{\text{abs}}\f$ the absorption cross section of the
+\f$c\f$'th dust population, and \f$T_c\f$ the equilibrium temperature of that population,
+defined by the balance equation \f[ \int_0^\infty \varsigma_{\lambda,c}^{\text{abs}}\,
+J_\lambda\, {\text{d}}\lambda = \int_0^\infty \varsigma_{\lambda,c}^{\text{abs}}\,
+B_\lambda(T_c)\, {\text{d}}\lambda. \f]
+
+The modified blackbody calculation is very fast, so it is best to use the "all cells" library with this option.
+
+\subsection DustEmisTrans Transient heating dust emission
+
+With the "transient heating" dust emissivity option (the TransientDustEmissivity class), SKIRT properly calculates
+non-LTE (NLTE) dust emission by transiently heated small grains and PAH molecules. Since this requires access to
+enthalpy data and to detailed optical properties for the various dust grain populations in a dust mix,
+all dust components in the dust system must have a dust mix that inherits from the MultiGrainDustMix class.
+
+The transient heating calculation is quite resource-intensive, so it is often advisable to
+use the Dim2DustLib dust library mechanism with this option.
+
+Using the discretization of the dust composition and size distribution into a range of dust
+populations held by a MultiGrainDustMix object, the simulation's wavelength grid, and a
+specialized temperature grid constructed in this class, the emissivity in an interstellar
+radiation field \f$J_\lambda\f$ can be calculated as \f[ \varepsilon_\lambda = \frac{1}{\mu}
+\sum_{c=0}^{N_{\text{pop}}-1} \varsigma_{\lambda,c}^{\text{abs}}\,
+\sum_{i=0}^{N_{\text{temp}}-1} P_{c,i}\, B_\lambda(T_i) \f] with \f$\mu\f$ the total dust mass
+of the dust mix, \f$\varsigma_{\lambda,c}^{\text{abs}}\f$ the absorption cross section of the
+\f$c\f$'th dust population, \f$T_i\f$ the \f$i\f$'th temperature grid point, and
+\f$P_{c,i}\f$ the probability of finding a grain of the \f$c\f$'th dust population in the
+\f$i\f$'th temperature bin.
+
+The probabilities \f$P_{c,i}\f$ are calculated following a scheme based on Guhathakurta &
+Draine (ApJ 1989), Draine & Li (ApJ 2001), Kruegel (book, 2003), and Misselt et al. (arXiv,
+2008). The scheme is also nicely described in Verstappen (PhD thesis, 2013, section 2.5). An
+overview is presented below. To simplify the notation we focus on a single dust population,
+dropping the index \f$c\f$.
+
+We define a transition matrix \f$A_{f,i}\f$ describing the probability per unit time for a
+grain to transfer from initial temperature bin \f$i\f$ to final temperature bin \f$f\f$.
+The transition matrix elements in the case of heating \f$(f>i)\f$ are given by \f[ A_{f,i} =
+4\pi\, \varsigma_{\lambda_{fi}}^{\text{abs}}\,J_{\lambda_{fi}}\, \frac{hc\,\Delta
+H_f}{(H_f-H_i)^3} \f] where \f$H_f\f$ and \f$H_i\f$ are the enthalpies of the final and initial
+temperature bins, \f$\Delta H_f\f$ is the width of the final temperature bin, and
+\f$\lambda_{fi}\f$ is the transition wavelength which can be obtained from \f[
+\lambda_{fi}=\frac{hc}{H_f-H_i}. \f] We assume that cooling transitions occur only to the next
+lower level, so that \f$A_{f,i}=0\f$ for \f$f<i-1\f$ and \f[ A_{i-1,i} =
+\frac{4\pi}{H_i-H_{i-1}}\, \int_0^\infty \varsigma_{\lambda}^{\text{abs}}\, B_{\lambda}(T_i)\,
+{\text{d}}\lambda. \f] The diagonal matrix elements are defined as \f[ A_{i,i} = -\sum_{f\ne i}
+A_{f,i}\f] however as we will see below there is no need to explicitly calculate these values.
+
+Assuming a steady state situation, the probabilities \f$P_{i}\f$ can be obtained from the
+transition matrix by solving the set of \f$N\f$ linear equations \f[ \sum_{i=0}^{N-1} A_{f,i}
+\,P_i=0 \qquad f=0,...,N-1 \f] along with the normalization condition \f[ \sum_{i=0}^{N-1} P_i
+= 1, \f] where \f$N\f$ is the number of temperature bins. Because the matrix values for
+\f$f<i-1\f$ are zero these equations can be solved by a recursive procedure of computational
+order \f${\mathcal{O}(N^2)}\f$. To avoid numerical instabilities caused by the negative
+diagonal elements, the procedure employs a well-chosen linear combination of the original
+equations. This leads to the following recursion relations for the adjusted matrix elements
+\f$B_{f,i}\f$, the unnormalized probabilities \f$X_i\f$, and finally the normalized
+probabilities \f$P_{i}\f$: \f{align*} B_{N-1,i} &= A_{N-1,i} & i=0,\ldots,N-2 \\ B_{f,i} &=
+B_{f+1,i}+A_{f,i} & f=N-2,\ldots,1;\,i=0,\ldots,f-1 \\ X_0 &= 1 \\ X_i &=
+\frac{\sum_{j=0}^{i-1}B_{i,j}X_j}{A_{i-1,i}} & i=1,\ldots,N-1 \\ P_i &=
+\frac{X_i}{\sum_{j=0}^{N-1}X_j} & i=0,\ldots,N-1 \f}
+
+\subsection DustEmisDustEM The DustEM code
+
+Historically, SKIRT used the DustEM code to calculate dust emissivity for transiently heated dust grains.
+DustEM is described in Compiègne et al. 2011 (AA, 525, A103) and can be downloaded
+from http://www.ias.u-psud.fr/DUSTEM/.
+The DustEM option is still present in SKIRT (the DustEmDustEmissivity class) but it may be removed once our own code
+(described in section \ref DustEmisTrans above) has been optimized and tested more extensively.
+
+In SKIRT, DustEM is always executed with dust properties equivalent to the Draine & Li 2007 model implemented by the
+DraineLiDustMix class. Consequently the DustEmDustEmissivity class requires that all dust
+components in the dust system have the DraineLiDustMix dust mix, which is quite restrictive.
+
+Specifically, DustEM is executed with the following parameter file:
+
+\verbatim
+# grain type, nsize, type keywords, Mdust/MH, rho, amin, amax, alpha/a0 [, at, ac, gamma (ED)] [, au, zeta, eta (CV)]
+# (cgs units)
+PAH0_DL07 10 mix-logn   5.40E-4 2.24E+0 3.10E-08 1.20E-7  3.50E-8 4.00E-1
+PAH1_DL07 10 mix-logn   5.40E-4 2.24E+0 3.10E-08 1.20E-7  3.50E-8 4.00E-1
+Gra       30 logn       1.80E-4 2.24E+0 3.10E-08 4.00E-6  3.00E-7 4.00E-1
+Gra       70 plaw-ed-cv 2.33E-3 2.24E+0 3.10E-08 2.00E-4 -2.54E+0 1.07E-6 4.28E-5 3.00E+0 1.07E-6 -1.65E-1 1.00E+0
+aSil      70 plaw-ed-cv 8.27E-3 3.50E+0 3.10E-08 2.00E-4 -3.21E+0 1.64E-5 1.00E-5 3.00E+0 1.64E-5  3.00E-1 1.00E+0
+\endverbatim
+
+\subsection DustEmisMigr Migrating from DustEM
+
+If you were using DustEM to calculate transient heating of dust grains in SKIRT (see \ref DustEmisDustEM),
+your ski file was configured with DustEmDustEmissivity dust emissivity (by definition) and with the DraineLiDustMix
+dust mix (since this is the only dust mix supported by SKIRT's interface with DustEM).
+
+Our own transient heating code (see \ref DustEmisTrans) works with any dust mix that derives from
+the MultiGrainDustMix class. However, it does not work with the DraineLiDustMix class. To reproduce the same results
+with our own transient heating code as when using DustEM, adjust your ski file as follows:
+ - replace DustEmDustEmissivity by TransientDustEmissivity as dust emissivity option;
+ - replace the DraineLiDustMix by the configurable dust mix listed below.
+
+\verbatim
+<ConfigurableDustMix writeMix="true" writeMeanMix="true" writeSize="true">
+    <populations type="DustMixPopulation">
+        <DustMixPopulation subPops="15">
+            <composition type="GrainComposition">
+                <DustEmGrainComposition grainType="PAH0_DL07" bulkMassDensity="2.24 g/cm3"/>
+            </composition>
+            <sizeDistribution type="GrainSizeDistribution">
+                <ModifiedLogNormalGrainSizeDistribution minSize="3.1e-8 cm" maxSize="1.2e-7 cm"
+                    factor="1.206243e-06" centroid="3.5e-8 cm" width="0.4"
+                    y0="0.6266685" y1="0.5692438"/>
+            </sizeDistribution>
+        </DustMixPopulation>
+        <DustMixPopulation subPops="15">
+            <composition type="GrainComposition">
+                <DustEmGrainComposition grainType="PAH1_DL07" bulkMassDensity="2.24 g/cm3"/>
+            </composition>
+            <sizeDistribution type="GrainSizeDistribution">
+                <ModifiedLogNormalGrainSizeDistribution minSize="3.1e-8 cm" maxSize="1.2e-7 cm"
+                    factor="1.206243e-06" centroid="3.5e-8 cm" width="0.4"
+                    y0="0.3733315" y1="0.4307562"/>
+            </sizeDistribution>
+        </DustMixPopulation>
+        <DustMixPopulation subPops="15">
+            <composition type="GrainComposition">
+                <DustEmGrainComposition grainType="Gra" bulkMassDensity="2.24 g/cm3"/>
+            </composition>
+            <sizeDistribution type="GrainSizeDistribution">
+                <LogNormalGrainSizeDistribution minSize="3.1e-8 cm" maxSize="4e-6 cm"
+                    factor="5.769364e-10" centroid="3e-7 cm" width="0.4"/>
+            </sizeDistribution>
+        </DustMixPopulation>
+        <DustMixPopulation subPops="15">
+            <composition type="GrainComposition">
+                <DustEmGrainComposition grainType="Gra" bulkMassDensity="2.24 g/cm3"/>
+            </composition>
+            <sizeDistribution type="GrainSizeDistribution">
+                <ModifiedPowerLawGrainSizeDistribution minSize="3.1e-8 cm" maxSize="2e-4 cm"
+                    factor="5.349947e-24" alpha="-2.54"
+                    at="1.07e-6 cm" ac="4.28e-5 cm" gamma="3"
+                    au="1.07e-6 cm" zeta="-1.65e-1" eta="1"/>
+            </sizeDistribution>
+        </DustMixPopulation>
+        <DustMixPopulation subPops="15">
+            <composition type="GrainComposition">
+                <DustEmGrainComposition grainType="aSil" bulkMassDensity="3.5 g/cm3"/>
+            </composition>
+            <sizeDistribution type="GrainSizeDistribution">
+                <ModifiedPowerLawGrainSizeDistribution minSize="3.1e-8 cm" maxSize="2e-4 cm"
+                    factor="1.009585e-28" alpha="-3.21"
+                    at="1.64e-5 cm" ac="1e-5 cm" gamma="3"
+                    au="1.64e-5 cm" zeta="3e-1" eta="1"/>
+            </sizeDistribution>
+        </DustMixPopulation>
+    </populations>
+</ConfigurableDustMix>
+\endverbatim
+
+Admittedly the ski file instructions are a lot more verbose than the DustEM parameter file shown in section
+\ref DustEmisDustEM. However it is also a lot more self-explanatory, with human-readable property names
+and physical units.
+
+The DustEmGrainComposition class loads optical and calorimetric data from the same resource files as DustEm does.
+The \em grainType attribute corresponds to the DustEM grain type, and is used to select the appropriate
+resource files (the filenames contain the grain type).
+
+The various GrainSizeDistribution subclasses mimic the size distribution functions built into DustEM.
+Refer to LogNormalGrainSizeDistribution, ModifiedLogNormalGrainSizeDistribution,
+or ModifiedPowerLawGrainSizeDistribution for more details.
+The size range and function parameters are provided as attributes; you will recognize the values listed in
+the DustEM parameter file. The \em factor attribute sets the proportionality factor \f$C\f$ for the size distribution.
+This factor determines the dust mass per hydrogen atom \f$\mu_c\f$  for each dust mix population \f$c\f$
+via integration of the size distribution \f$\Omega(a)=C\,f(a)\f$ over dust size \f$a\f$:
+\f[ \mu_c = \frac{4\pi}{3}\,C\, \rho_{\text{bulk},c} \int_{a_{\text{min},c}}^{a_{\text{max},c}} f(a)\,a^3\,
+{\text{d}}a, \f] where \f$\rho_{\text{bulk},c}\f$ is the bulk density of the appropriate grain composition.
+
+You can verify the dust mass per hydrogen atom \f$\mu_c\f$ for each dust mix population in the SKIRT output file(s)
+\c prefix_ds_mix_h_mass.dat (set the \em writeMix attribute of the ConfigurableDustMix to \em true),
+and adjust the proportionality factor in the ski file accordingly.
+To facilitate this process, set the number of sub-populations to 1 for all dust mix populations
+(but don't forget to set it back to 15 for running a proper simulation).
+
+\note There is an inconsistency in DustEM with regards to the calculation of the dust mass when using the "mix"
+option in the type keywords. The mix option adjusts the grain size distribution (and thus the resulting emission),
+but the change is not taken into account when calculating the dust mass for each "mixed" population. SKIRT takes
+the change into account for all calculations. The table below lists the proper numbers for the DustEM parameter
+file shown in section \ref DustEmisDustEM.
+
+<TABLE>
+<TR><TD><B>Composition</B></TD>  <TD><B>DustEM specified</B></TD>  <TD></TD>
+                                 <TD><B>DustEM effective & SKIRT</B></TD>  <TD></TD></TR>
+<TR><TD></TD>           <TD>\f$M_\text{dust}/M_\text{H}\f$</TD>  <TD>%</TD>
+                        <TD>\f$M_\text{dust}/M_\text{H}\f$</TD>  <TD>%</TD></TR>
+<TR><TD>PAH0_DL07</TD>  <TD>\f$5.40\times 10^{-4}\f$</TD>  <TD>4.553 %</TD>
+                        <TD>\f$3.24\times 10^{-4}\f$</TD>  <TD>2.862 %</TD></TR>
+<TR><TD>PAH1_DL07</TD>  <TD>\f$5.40\times 10^{-4}\f$</TD>  <TD>4.553 %</TD>
+                        <TD>\f$2.16\times 10^{-4}\f$</TD>  <TD>1.908 %</TD></TR>
+<TR><TD>Gra</TD>        <TD>\f$1.80\times 10^{-4}\f$</TD>  <TD>1.518 %</TD>
+                        <TD>\f$1.80\times 10^{-4}\f$</TD>  <TD>1.590 %</TD></TR>
+<TR><TD>Gra</TD>        <TD>\f$2.33\times 10^{-3}\f$</TD>  <TD>19.646 %</TD>
+                        <TD>\f$2.33\times 10^{-3}\f$</TD>  <TD>20.583 %</TD></TR>
+<TR><TD>aSil</TD>       <TD>\f$8.27\times 10^{-3}\f$</TD>  <TD>69.730 %</TD>
+                        <TD>\f$8.27\times 10^{-3}\f$</TD>  <TD>73.057 %</TD></TR>
+</TABLE>
+
+
+*/

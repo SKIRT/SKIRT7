@@ -1,0 +1,53 @@
+/*//////////////////////////////////////////////////////////////////
+////       SKIRT -- an advanced radiative transfer code         ////
+////       © Astronomical Observatory, Ghent University         ////
+//////////////////////////////////////////////////////////////////*/
+
+#include <cmath>
+#include "FatalError.hpp"
+#include "ModifiedLogNormalGrainSizeDistribution.hpp"
+
+////////////////////////////////////////////////////////////////////
+
+ModifiedLogNormalGrainSizeDistribution::ModifiedLogNormalGrainSizeDistribution()
+    : _y0(1.), _y1(1.)
+{
+}
+
+////////////////////////////////////////////////////////////////////
+
+void ModifiedLogNormalGrainSizeDistribution::setY0(double value)
+{
+    _y0 = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double ModifiedLogNormalGrainSizeDistribution::y0() const
+{
+    return _y0;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void ModifiedLogNormalGrainSizeDistribution::setY1(double value)
+{
+    _y1 = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double ModifiedLogNormalGrainSizeDistribution::y1() const
+{
+    return _y1;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double ModifiedLogNormalGrainSizeDistribution::dnda(double a) const
+{
+    double M = _y0 + (_y1-_y0) * log(a/_amin) / log(_amax/_amin);
+    return LogNormalGrainSizeDistribution::dnda(a) * M;
+}
+
+////////////////////////////////////////////////////////////////////
