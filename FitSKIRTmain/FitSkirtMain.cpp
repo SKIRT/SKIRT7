@@ -11,6 +11,8 @@
 #include "RegisterSimulationItems.hpp"
 #include "SignalHandler.hpp"
 
+#include "git_version.h"
+
 //////////////////////////////////////////////////////////////////////
 
 int main(int argc, char** argv)
@@ -22,7 +24,8 @@ int main(int argc, char** argv)
     // but don't run the event loop because we don't need it
     QCoreApplication app(argc, argv);
     app.setApplicationName("FitSKIRT");
-    app.setApplicationVersion("v6 (git 000 built on " + QString(__DATE__).simplified() + " at "  __TIME__ ")");
+    app.setApplicationVersion("v7 (git " + QString(git_version).simplified() +
+                              " built on " + QString(__DATE__).simplified() + " at "  __TIME__ ")");
 
     // install C signal handlers (which throw an exception if all goes well)
     SignalHandler::InstallSignalHandlers();

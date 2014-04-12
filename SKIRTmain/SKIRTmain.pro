@@ -24,8 +24,12 @@ unix: PRE_TARGETDEPS += $$OUT_PWD/../Fundamentals/libfundamentals.a \
                         $$OUT_PWD/../Discover/libdiscover.a \
                         $$OUT_PWD/../SKIRTcore/libskirtcore.a
 
+# create a header file containing a reasonably unique description of the git version and
 # touch SkirtMain.cpp so it always gets recompiled to update the version number and time stamp
-build_version.commands = touch ../../git/SKIRTmain/SkirtMain.cpp
+A_QUOTE = "\'\"\'"
+A_SEMICOLON = "\';\'"
+build_version.commands = echo const char* git_version = $$A_QUOTE `git -C ../../git rev-list HEAD | wc -l`.`git -C ../../git describe --dirty --always` $$A_QUOTE $$A_SEMICOLON > ../../git/SKIRTmain/git_version.h && \
+                         touch ../../git/SKIRTmain/SkirtMain.cpp
 QMAKE_EXTRA_TARGETS += build_version
 PRE_TARGETDEPS += build_version
 

@@ -1,3 +1,4 @@
 .DS_Store
 .qmake.stash
 *.pro.user
+git_version.h
