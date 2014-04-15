@@ -217,7 +217,7 @@ template <class _Tp>
 struct _my_abs_expr : std::unary_function<_Tp, _Tp>
 {
     _Tp operator()(const _Tp& _x) const
-    {return abs(_x);}
+    {return fabs(_x);}
 };
 
 template <class _Tp>

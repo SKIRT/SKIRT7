@@ -99,21 +99,15 @@ double ReferenceImage::chi2(Array *Dframe, Array *Bframe,
 
 void ReferenceImage::returnFrame(Array *Dframe, Array *Bframe) const
 {
-    double chi_value,dlum, b2d;
+    double chi_value, dlum, b2d;
 
     _convolution->convolve(Dframe, _xdim, _ydim);
     _convolution->convolve(Bframe, _xdim, _ydim);
 
     _lumsimplex->optimize(&_refim,Dframe,Bframe,dlum,b2d,chi_value);
 
-    Array final = dlum*((*Dframe) + b2d*((*Bframe)));
-    Array residual = abs(_refim-final)/abs(_refim);
-    for (int m=0;m<_xdim*_ydim;m++)
-    {
-        (*Dframe)[m] = final[m];
-        (*Bframe)[m] = residual[m];
-    }
-
+    *Dframe = dlum*((*Dframe) + b2d*((*Bframe)));
+    *Bframe = abs(_refim-(*Dframe))/abs(_refim);
 }
 
 ////////////////////////////////////////////////////////////////////
