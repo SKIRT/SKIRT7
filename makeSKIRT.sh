@@ -33,5 +33,5 @@ then
 fi
 
 # create the make file and perform the build
-$QMAKEPATH buildSKIRT.pro -o ../release/Makefile CONFIG+=release
+$QMAKEPATH BuildSKIRT.pro -o ../release/Makefile CONFIG+=release
 make -w -C ../release
