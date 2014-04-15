@@ -99,7 +99,7 @@ void MonteCarloSimulation::fillDustSystemPath(PhotonPackage* pp, DustSystemPath*
 {
     double tau = 0.0;
     if (_ds) tau = _ds->opticaldepth(pp->ell(),pp->position(),pp->direction(),dsp);
-    if (tau<0.0 || isnan(tau) || isinf(tau))
+    if (tau<0.0 || std::isnan(tau) || std::isinf(tau))
         throw FATALERROR("The optical depth along the path is not a positive number: tau = " + QString::number(tau));
 }
 

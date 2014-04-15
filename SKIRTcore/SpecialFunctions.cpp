@@ -555,7 +555,7 @@ SpecialFunctions::LambertW(const double z)
     const double eps=4.0e-16;
     const double em1=0.3678794411714423215955237701614608;
     double p,e,t,w;
-    if (z<-em1 || isinf(z) || isnan(z)) throw FATALERROR("Bad argument (z = " + QString::number(z) + ")");
+    if (z<-em1 || std::isinf(z) || std::isnan(z)) throw FATALERROR("Bad argument (z = " + QString::number(z) + ")");
     if (z==0.0) return 0.0;
     if (z<-em1+1e-4)     // series near -em1 in sqrt(q)
     {
@@ -613,7 +613,7 @@ SpecialFunctions::LambertW1(const double z)
                                  12.250753501314460424,
                                  -18.100697012472442755,
                                  27.029044799010561650 };
-    if (z<-em1 || z>0.0 || isinf(z) || isnan(z)) throw FATALERROR("Bad argument (z = " + QString::number(z) + ")");
+    if (z<-em1 || z>0.0 || std::isinf(z) || std::isnan(z)) throw FATALERROR("Bad argument (z = " + QString::number(z) + ")");
     if (z==0.0) return -DBL_MAX;
     double q = z+em1;
     double r = -sqrt(q);

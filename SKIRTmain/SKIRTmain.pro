@@ -28,7 +28,7 @@ unix: PRE_TARGETDEPS += $$OUT_PWD/../Fundamentals/libfundamentals.a \
 # touch SkirtMain.cpp so it always gets recompiled to update the version number and time stamp
 A_QUOTE = "\'\"\'"
 A_SEMICOLON = "\';\'"
-build_version.commands = echo const char* git_version = $$A_QUOTE `git -C ../../git rev-list HEAD | wc -l`-`git -C ../../git describe --dirty --always` $$A_QUOTE $$A_SEMICOLON > ../../git/SKIRTmain/git_version.h && \
+build_version.commands = echo const char* git_version = $$A_QUOTE `git --git-dir=../../git/.git rev-list HEAD | wc -l`-`git --git-dir=../../git/.git describe --dirty --always` $$A_QUOTE $$A_SEMICOLON > ../../git/SKIRTmain/git_version.h && \
                          touch ../../git/SKIRTmain/SkirtMain.cpp
 QMAKE_EXTRA_TARGETS += build_version
 PRE_TARGETDEPS += build_version

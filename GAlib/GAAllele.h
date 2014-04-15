@@ -86,9 +86,6 @@ public:
   T * a;
 };
 
-template <class T> int operator==(const T &, const T &);
-template <class T> int operator!=(const T &, const T &);
-
 template <class T>
 class GAAlleleSet {
 public:
@@ -137,15 +134,6 @@ public:
   int read(STD_ISTREAM &);
   int write(STD_OSTREAM & os) const;
 #endif
-
-  //friend int operator==<>(const GAAlleleSet<T> &, const GAAlleleSet<T> &);
-  //friend int operator!=<>(const GAAlleleSet<T> &, const GAAlleleSet<T> &);
-
-  //friend int operator==<T>(const GAAlleleSet<T> &, const GAAlleleSet<T> &);
-  //friend int operator!=<T>(const GAAlleleSet<T> &, const GAAlleleSet<T> &);
-
-  friend int operator==(const GAAlleleSet<T> &, const GAAlleleSet<T> &);
-  friend int operator!=(const GAAlleleSet<T> &, const GAAlleleSet<T> &);
 
 protected:
   GAAlleleSetCore<T> *core;

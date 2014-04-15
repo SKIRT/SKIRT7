@@ -171,7 +171,7 @@ const
             z = _zmax - 1e-8*(_zv[_Nz]-_zv[_Nz-1]);
         }
     }
-    if (isinf(R) || isnan(R) || isinf(z) || isnan(z) ||
+    if (std::isinf(R) || std::isnan(R) || std::isinf(z) || std::isnan(z) ||
         R>=_Rmax || z<=_zmin || z>=_zmax) return path.clear();
 
     // Determination of the initial grid cell
