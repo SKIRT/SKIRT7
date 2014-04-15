@@ -14,13 +14,13 @@ QMAKE_CXXFLAGS_RELEASE -= -O2
 QMAKE_CXXFLAGS_RELEASE += -O3
 
 # include libraries internal to the project
-INCLUDEPATH += $$PWD/../Fundamentals $$PWD/../cfitsio $$PWD/../Voro
-DEPENDPATH += $$PWD/../Fundamentals $$PWD/../cfitsio $$PWD/../Voro
+INCLUDEPATH += $$PWD/../Fundamentals $$PWD/../Cfitsio $$PWD/../Voro
+DEPENDPATH += $$PWD/../Fundamentals $$PWD/../Cfitsio $$PWD/../Voro
 unix: LIBS += -L$$OUT_PWD/../Fundamentals/ -lfundamentals \
-              -L$$OUT_PWD/../cfitsio/ -lcfitsio \
+              -L$$OUT_PWD/../Cfitsio/ -lcfitsio \
               -L$$OUT_PWD/../Voro/ -lvoro
 unix: PRE_TARGETDEPS += $$OUT_PWD/../Fundamentals/libfundamentals.a \
-                        $$OUT_PWD/../cfitsio/libcfitsio.a \
+                        $$OUT_PWD/../Cfitsio/libcfitsio.a \
                         $$OUT_PWD/../Voro/libvoro.a
 
 #--------------------------------------------------
