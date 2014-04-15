@@ -8,8 +8,8 @@
 # using your current local copy of the code
 #
 
-# if qmake is not in the system path, guess the install path
-QMAKEPATH=`which qmake`
+# determine the qmake install path
+#QMAKEPATH=`which qmake`
 if [ "$QMAKEPATH" == "" ]
 then
     # try the path targeted by the one-click Qt installer
