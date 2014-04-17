@@ -3,6 +3,11 @@
 #  © Astronomical Observatory, Ghent University
 #-------------------------------------------------
 
+#---------------------------------------------------------------------
+# This library offers the discovery functionality that handles
+# parameter files for SKIRT and FitSKIRT.
+#---------------------------------------------------------------------
+
 # overall setup
 TEMPLATE = lib
 TARGET = discover

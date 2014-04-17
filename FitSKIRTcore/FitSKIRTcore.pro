@@ -3,6 +3,11 @@
 #  © Astronomical Observatory, Ghent University
 #-------------------------------------------------
 
+#---------------------------------------------------------------------
+# This library provides the core FitSKIRT functionality, connecting
+# the genetic algorithm mechanism with the SKIRT capabilities.
+#---------------------------------------------------------------------
+
 # overall setup
 TEMPLATE = lib
 TARGET = fitskirtcore

@@ -3,6 +3,12 @@
 #  © Astronomical Observatory, Ghent University
 #-------------------------------------------------
 
+#---------------------------------------------------------------------
+# This library provides support for genetic algorithm mechanisms.
+# The source code is adapted from Matthew Wall's GAlib (c) 1995 MIT
+# which can be downloaded at http://lancet.mit.edu/ga/GAlib.html
+#---------------------------------------------------------------------
+
 # overall setup
 TEMPLATE = lib
 TARGET = galib

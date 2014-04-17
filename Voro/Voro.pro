@@ -3,6 +3,13 @@
 #  © Astronomical Observatory, Ghent University
 #-------------------------------------------------
 
+#---------------------------------------------------------------------
+# This library provides support for building Voronoi meshes.
+# The source code is adapted from the Voro++ library written by
+# Chris H. Rycroft (LBL / UC Berkeley)
+# which can be downloaded at http://math.lbl.gov/voro++/about.html
+#---------------------------------------------------------------------
+
 # overall setup
 TEMPLATE = lib
 TARGET = voro

@@ -3,6 +3,12 @@
 #  © Astronomical Observatory, Ghent University
 #-------------------------------------------------
 
+#---------------------------------------------------------------------
+# This library offers generic functionality that is essentially
+# unrelated to SKIRT and FitSKIRT. Most items are fully defined
+# in their respective header files to optimize performance.
+#---------------------------------------------------------------------
+
 # overall setup
 TEMPLATE = lib
 TARGET = fundamentals

@@ -3,6 +3,11 @@
 #  © Astronomical Observatory, Ghent University
 #-------------------------------------------------
 
+#---------------------------------------------------------------------
+# This "subdirs" project builds all library and application projects
+# needed for SKIRT, FitSKIRT and DoxStyle (documentation streamliner)
+#---------------------------------------------------------------------
+
 TEMPLATE = subdirs
 
 # add subdirectories in order of dependency,

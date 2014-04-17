@@ -3,6 +3,11 @@
 #  © Astronomical Observatory, Ghent University
 #-------------------------------------------------
 
+#---------------------------------------------------------------------
+# This library provides the core SKIRT functionality, including all
+# simulation item classes plus some SKIRT-specific support classes.
+#---------------------------------------------------------------------
+
 # overall setup
 TEMPLATE = lib
 TARGET = skirtcore

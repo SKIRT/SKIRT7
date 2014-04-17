@@ -3,6 +3,12 @@
 #  © Astronomical Observatory, Ghent University
 #-------------------------------------------------
 
+#---------------------------------------------------------------------
+# This library encapsulates any and all MPI-related functionality used
+# by SKIRT and FitSKIRT. Concentrating all MPI calls in this library
+# allows all other code to be compiled without the MPI extra's.
+#---------------------------------------------------------------------
+
 # overall setup
 TEMPLATE = lib
 TARGET = mpisupport

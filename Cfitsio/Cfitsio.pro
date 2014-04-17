@@ -3,6 +3,14 @@
 #  © Astronomical Observatory, Ghent University
 #-------------------------------------------------
 
+#---------------------------------------------------------------------
+# This library provides input/output capabilities for FITS files.
+# It contains a subset of the source files offered in tarball
+# cfitsio3360.tar.gz downloaded from NASA's HEASARC software site
+# at http://heasarc.gsfc.nasa.gov/fitsio/fitsio.html .
+# No changes were made to any of the source files.
+#---------------------------------------------------------------------
+
 # overall setup
 TEMPLATE = lib
 TARGET = cfitsio

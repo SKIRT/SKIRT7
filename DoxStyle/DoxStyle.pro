@@ -3,6 +3,12 @@
 #  © Astronomical Observatory, Ghent University
 #-------------------------------------------------
 
+#---------------------------------------------------------------------
+# This console application can be invoked from the Qt Creator code
+# editor to help streamline Doxygen documentation blocks.
+# It is independent from SKIRT and FitSKIRT.
+#---------------------------------------------------------------------
+
 # overall setup
 TEMPLATE = app
 TARGET   = doxstyle

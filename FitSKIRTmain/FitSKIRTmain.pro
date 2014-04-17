@@ -3,6 +3,11 @@
 #  © Astronomical Observatory, Ghent University
 #-------------------------------------------------
 
+#---------------------------------------------------------------------
+# This is the FitSKIRT console application. It handles the command
+# line arguments and links in everything else from other libraries.
+#---------------------------------------------------------------------
+
 # overall setup
 TEMPLATE = app
 TARGET   = fitskirt
