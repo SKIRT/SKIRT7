@@ -308,12 +308,12 @@ namespace NR
     //=============== Constructing cumulative distribution functions ==================
 
     /** Given a distribution discretized over \f$N\f$ points \f[p_i \qquad i=0,\dots,N-1\f] this
-        function builds a sequence representing the corresponding normalized cumulative distribution
-        \f[P_0=0;\quad P_{i+1}=\frac{\sum_{j=0}^i p_j}{\sum_{j=0}^{N-1} p_j} \qquad i=0,\dots,N-1.\f]
-        The target array is resized to \f$N+1\f$ elements. The source sequence can be any container
-        type with indexed random access (including Array, std::vector and QList), and can have any
-        item type that can be assigned to double. */
-    template<class V> inline void cdf(Array& Pv, const V& pv)
+        function builds the corresponding normalized cumulative distribution
+        \f[P_0=0;\quad P_{i+1}=\frac{\sum_{j=0}^i p_j}{\sum_{j=0}^{N-1} p_j} \qquad i=0,\dots,N-1\f]
+        with \f$N+1\f$ elements. In this version of the function, the source distribution is
+        specified as an array with at least one element; the target array is resized appropriately
+        and replaced by the cumulative distribution. */
+    inline void cdf(Array& Pv, const Array& pv)
     {
         int n = pv.size();
         Pv.resize(n+1);  // also sets Pv[0] to zero
@@ -322,49 +322,17 @@ namespace NR
     }
 
     /** Given a distribution discretized over \f$N\f$ points \f[p_i \qquad i=0,\dots,N-1\f] this
-        function builds a sequence representing the corresponding normalized cumulative distribution
-        \f[P_0=0;\quad P_{i+1}=\frac{\sum_{j=0}^i p_j}{\sum_{j=0}^{N-1} p_j} \qquad
-        i=0,\dots,N-1.\f] The target array is resized to \f$N+1\f$ elements. The source
-        distribution is obtained from the specified container \em pv by invoking the specified
-        member function \em pvalue on each container item. The container is assumed to hold
-        pointers to the target objects (the member function is called using the -> operator). */
-    template<class V, class T> inline void cdf(Array& Pv, const V& pv, double (T::*pvalue)() const)
+        function builds the corresponding normalized cumulative distribution
+        \f[P_0=0;\quad P_{i+1}=\frac{\sum_{j=0}^i p_j}{\sum_{j=0}^{N-1} p_j} \qquad i=0,\dots,N-1\f]
+        with \f$N+1\f$ elements. In this version of the function, the source distribution is
+        specified by a function object with signature double pv(int i); the number of source points
+        \f$N>0\f$ is specified as a separate argument. The source function is called once for each
+        index \f$i=0,\dots,N-1\f$. The target array is resized appropriately and replaced by
+        the cumulative distribution. */
+    template<typename Functor> inline void cdf(Array& Pv, int n, Functor pv)
     {
-        int n = pv.size();
         Pv.resize(n+1);  // also sets Pv[0] to zero
-        for (int i=0; i<n; i++) Pv[i+1] = Pv[i] + ((pv[i])->*pvalue)();
-        Pv /= Pv[n];
-    }
-
-    /** Given a distribution discretized over \f$N\f$ points \f[p_i \qquad i=0,\dots,N-1\f] this
-        function builds a sequence representing the corresponding normalized cumulative distribution
-        \f[P_0=0;\quad P_{i+1}=\frac{\sum_{j=0}^i p_j}{\sum_{j=0}^{N-1} p_j} \qquad
-        i=0,\dots,N-1.\f] The target array is resized to \f$N+1\f$ elements. The source
-        distribution is obtained from the specified container \em pv by invoking the specified
-        member function \em pvalue on each container item. This version of the template is selected
-        if an extra boolean argument is present. The container is assumed to contain the target
-        objects themselves (the member function is called using the . operator). */
-    template<class V, class T> inline void cdf(Array& Pv, const V& pv, double (T::*pvalue)() const, bool)
-    {
-        int n = pv.size();
-        Pv.resize(n+1);  // also sets Pv[0] to zero
-        for (int i=0; i<n; i++) Pv[i+1] = Pv[i] + ((pv[i]).*pvalue)();
-        Pv /= Pv[n];
-    }
-
-    /** Given a distribution discretized over \f$N\f$ points \f[p_i \qquad i=0,\dots,N-1\f] this
-        function builds a sequence representing the corresponding normalized cumulative distribution
-        \f[P_0=0;\quad P_{i+1}=\frac{\sum_{j=0}^i p_j}{\sum_{j=0}^{N-1} p_j} \qquad i=0,\dots,N-1.\f]
-        The target array is resized to \f$N+1\f$ elements. The source distribution is obtained
-        from the specified object (of arbitrary type) by invoking the specified member functions.
-        The \em psize member must return the number of elements \f$N\f$ in the distribution, and
-        the \em pvalue member must return the value \f$p_i\f$ when invoked with the index \f$i\f$. */
-    template<class T> inline void cdf(Array& Pv, const T* pobj,
-                                      int (T::*psize)() const, double (T::*pvalue)(int) const)
-    {
-        int n = (pobj->*psize)();
-        Pv.resize(n+1);  // also sets Pv[0] to zero
-        for (int i=0; i<n; i++) Pv[i+1] = Pv[i] + (pobj->*pvalue)(i);
+        for (int i=0; i<n; i++) Pv[i+1] = Pv[i] + pv(i);
         Pv /= Pv[n];
     }
 }

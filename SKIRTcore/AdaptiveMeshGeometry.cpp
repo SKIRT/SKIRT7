@@ -44,7 +44,7 @@ void AdaptiveMeshGeometry::setupSelfBefore()
     find<Log>()->info("Adaptive mesh data was successfully imported: " + QString::number(_mesh->Ncells()) + " cells.");
 
     // construct a vector with the normalized cumulative densities
-    NR::cdf(_cumrhov, _mesh, &AdaptiveMesh::Ncells, &AdaptiveMesh::density);
+    NR::cdf(_cumrhov, _mesh->Ncells(), [this](int i){return _mesh->density(i);} );
 }
 
 //////////////////////////////////////////////////////////////////////

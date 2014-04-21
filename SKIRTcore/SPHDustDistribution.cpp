@@ -95,7 +95,7 @@ void SPHDustDistribution::setupSelfBefore()
                       + QString::number(_grid->totalParticles() / double(GRIDSIZE*GRIDSIZE*GRIDSIZE),'f',1));
 
     // construct a vector with the normalized cumulative particle densities
-    NR::cdf(_cumrhov, _pv, &SPHGasParticle::metalMass, true);
+    NR::cdf(_cumrhov, _pv.size(), [this](int i){return _pv[i].metalMass();} );
 }
 
 //////////////////////////////////////////////////////////////////////

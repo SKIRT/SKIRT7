@@ -267,12 +267,10 @@ void MonteCarloSimulation::simulatescattering(PhotonPackage* pp)
         Position bfr = pp->position();
         int m = _ds->grid()->whichcell(bfr);
         if (m==-1) throw FATALERROR("The scattering event seems to take place outside the dust grid");
-        Array kapparhov(Ncomp);
-        for (int h=0; h<Ncomp; h++) kapparhov[h] = _ds->mix(h)->kappasca(ell) * _ds->density(m,h);
         Array Xv;
-        NR::cdf(Xv,kapparhov);
+        NR::cdf(Xv, Ncomp, [this,ell,m](int h){return _ds->mix(h)->kappasca(ell)*_ds->density(m,h);} );
         hmix = NR::locate_clip(Xv, _random->uniform());
-   }
+    }
     DustMix* mix = _ds->mix(hmix);
 
     // Now just perform the scattering

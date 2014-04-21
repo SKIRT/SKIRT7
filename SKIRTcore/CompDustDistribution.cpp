@@ -60,7 +60,7 @@ void CompDustDistribution::setupSelfAfter()
     DustDistribution::setupSelfAfter();
 
     // construct a vector with the normalized cumulative densities
-    NR::cdf(_cumrhov, _dcv, &DustComp::mass);
+    NR::cdf(_cumrhov, _dcv.size(), [this](int i){return _dcv[i]->mass();} );
 }
 
 //////////////////////////////////////////////////////////////////////

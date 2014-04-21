@@ -65,7 +65,7 @@ void AdaptiveMeshDustDistribution::setupSelfAfter()
     }
 
     // construct a vector with the normalized cumulative densities
-    NR::cdf(_cumrhov, _mesh, &AdaptiveMesh::Ncells, &AdaptiveMesh::density);
+    NR::cdf(_cumrhov, _mesh->Ncells(), [this](int i){return _mesh->density(i);} );
 }
 
 //////////////////////////////////////////////////////////////////////
