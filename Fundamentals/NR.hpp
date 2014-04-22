@@ -191,13 +191,13 @@ namespace NR
     /** This function builds a power-law grid over the specified range \f$[x_{\text{min}},
         x_{\text{max}}]\f$ and with the specified number of \f$N>0\f$ bins and specified ratio
         \f${\cal{R}}\f$ of last over first bin widths, and stores the resulting \f$N+1\f$ border
-        points \f$x_i\f$ in the provided array, which is resized appropriately. The grid's border
-        points are calculated according to \f[ x_i = x_{\text{min}} + (x_{\text{max}} -
+        points \f$x_i\f$ in the provided array, which is resized appropriately. If the specified
+        ratio is very close to one, the function simply builds a linear grid. Otherwise the grid's
+        border points are calculated according to \f[ x_i = x_{\text{min}} + (x_{\text{max}} -
         x_{\text{min}}) \left(\frac{1-q^i}{1-q^N}\right) \qquad i=0,\ldots,N, \f] with \f$ q =
         {\cal{R}}^{1/(N-1)} \f$. It is easy to check that the ratio between the widths of the last
         and first bins is indeed \f${\cal{R}}\f$: \f[ \frac{ x_N-x_{N-1} }{ x_1-x_0 } = \frac{
-        q^{N-1} - q^N }{ 1-q } = q^{N-1} = {\cal{R}}. \f] If the specified ratio is very close to
-        one, the function simply builds a linear grid. */
+        q^{N-1} - q^N }{ 1-q } = q^{N-1} = {\cal{R}}. \f] */
     inline void powgrid(Array& xv, double xmin, double xmax, int n, double ratio)
     {
         if (fabs(ratio-1.)<1e-3)
@@ -211,6 +211,56 @@ namespace NR
             double q = pow(ratio,1./(n-1));
             for (int i=0; i<=n; ++i)
                 xv[i] = xmin + (1.-pow(q,i))/(1.-pow(q,n)) * range;
+        }
+    }
+
+    /** This function builds a symmetrical power-law grid over the specified symmetrical range
+        \f$[-x_{\text{max}}, x_{\text{max}}]\f$ and with the specified number of \f$N>0\f$ bins and
+        specified ratio \f${\cal{R}}\f$ of outermost over innermost bin widths, and stores the
+        resulting \f$N+1\f$ border points \f$x_i\f$ in the provided array, which is resized
+        appropriately. If the specified ratio is very close to one, the function simply builds a
+        linear grid. Otherwise, because of the required symmetry, the expression for the grid's
+        border points depends on whether the number of bins is even or odd. If \f$N\f$ is even, we
+        define \f$M=N/2\f$ and set \f$x_M=0\f$ and \f[ x_{M\pm i} = \pm x_{\text{max}}
+        \left(\frac{1-q^i}{1-q^M}\right) \qquad i=1,\ldots,M \f] with \f$ q = {\cal{R}}^{1/(M-1)}
+        \f$. The ratio between the widths of the outermost and the innermost bins is now \f[
+        \frac{x_{2M}-x_{2M-1}}{x_{M+1}-x_M} = \frac{q^{M-1}-q^M}{1-q} = q^{M-1} = {\cal{R}}. \f] On
+        the other hand, if \f$N\f$ is odd, we define \f$M = (N+1)/2\f$ and \f[ x_{M-\frac12\pm
+        (i-\frac12)} = \pm x_{\text{max}} \left[ \frac{ \frac12\,(1+q) - q^i }{ \frac12\,(1+q) -
+        q^M } \right] \qquad i=1,\ldots,M, \f] with again \f$ q = {\cal{R}}^{1/(M-1)} \f$. The
+        ratio between the widths of the outermost and the innermost bins is for this case \f[
+        \frac{ x_{2M-1}-x_{2M-2} }{ x_M-x_{M-1} } = \frac{ q^{M-1} - q^M }{ 1-q } = q^{M-1} =
+        {\cal{R}}. \f] */
+    inline void sympowgrid(Array& xv, double xmax, int n, double ratio)
+    {
+        if (fabs(ratio-1.)<1e-3)
+        {
+            lingrid(xv, -xmax, xmax, n);
+        }
+        else
+        {
+            xv.resize(n+1);
+            if (n%2==0)
+            {
+                int M = n/2;
+                double q = pow(ratio,1.0/(M-1.0));
+                xv[M] = 0.0;
+                for (int i=1; i<=M; ++i)
+                {
+                    xv[M+i] = (1.0-pow(q,i)) / (1.0-pow(q,M)) * xmax;
+                    xv[M-i] = -xv[M+i];
+                }
+            }
+            else
+            {
+                int M = (n+1)/2;
+                double q = pow(ratio,1.0/(M-1.0));
+                for (int i=1; i<=M; ++i)
+                {
+                    xv[M-1+i] = (0.5+0.5*q-pow(q,i)) / (0.5+0.5*q-pow(q,M)) * xmax;
+                    xv[M-i] = -xv[M-1+i];
+                }
+            }
         }
     }
 

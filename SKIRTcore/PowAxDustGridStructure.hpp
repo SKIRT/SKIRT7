@@ -78,8 +78,7 @@ protected:
         \frac12\,(1+q) - q^k }{ \frac12\,(1+q) - q^M } \right] \qquad k=1,\ldots,M, \f] with again
         \f$ q = ({\cal{R}}_z)^{1/(M-1)} \f$. The ratio between the widths of the outermost and the
         innermost bins is for this case \f[ \frac{ z_{2M-1}-z_{2M-2} }{ z_M-z_{M-1} } = \frac{
-        q^{M-1} - q^M }{ 1-q } = q^{M-1} = {\cal{R}}_z. \f] Finally, this funtion writes out the
-        distribution of the grid cells when the corresponding flag is set to true. */
+        q^{M-1} - q^M }{ 1-q } = q^{M-1} = {\cal{R}}_z. \f] */
     void setupSelfBefore();
 
     //======== Setters & Getters for Discoverable Attributes =======
