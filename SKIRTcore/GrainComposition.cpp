@@ -416,7 +416,7 @@ void GrainComposition::loadLogHeatCapacityGrid(QString resourcename)
     // interpolate the heat capacity values on a larger grid, to enable accurate integration
     _NT = 5000; // arbitrary value
     Array logTv;
-    double dT = NR::lingrid(logTv, logTinv[0], logTinv[Nin-1], _NT);
+    double dT = NR::lingrid(logTv, logTinv[0], logTinv[Nin-1], _NT-1);
     Array logCv = NR::resample<NR::interpolate_linlin>(logTv, logTinv, logCinv);
 
     // perform the integration
@@ -441,7 +441,7 @@ void GrainComposition::loadLogHeatCapacityGrid(QString resourcename)
 void GrainComposition::calculateEnthalpyGrid(EnthalpyFunction efun)
 {
     _NT = 3000; // arbitrary value
-    NR::loggrid(_Tv, 1., 3000., _NT);
+    NR::loggrid(_Tv, 1., 3000., _NT-1);
     _hv.resize(_NT);
     for (int t=0; t<_NT; t++) _hv[t] = efun(_Tv[t]);
 }

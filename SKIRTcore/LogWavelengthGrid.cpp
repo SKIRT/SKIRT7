@@ -27,7 +27,7 @@ void LogWavelengthGrid::setupSelfBefore()
     if (_lambdamax <= _lambdamin) throw FATALERROR("the longest wavelength should be larger than the shortest");
     if (_Nlambda < 2) throw FATALERROR("the number of wavelength grid points should be at least 2");
 
-    NR::loggrid(_lambdav, _lambdamin, _lambdamax, _Nlambda);
+    NR::loggrid(_lambdav, _lambdamin, _lambdamax, _Nlambda-1);
 }
 
 ////////////////////////////////////////////////////////////////////

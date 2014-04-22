@@ -37,7 +37,7 @@ void RingGeometry::setupSelfBefore()
 
     // setup the cumulative distribution for the radial distribution
     int NR = 330;
-    NR::lingrid(_Rv, max(0.,_R0-8*_w), _R0+8*_w, NR);
+    NR::lingrid(_Rv, max(0.,_R0-8*_w), _R0+8*_w, NR-1);
     _Xv.resize(NR);
     double sqrtpi = sqrt(M_PI);
     for (int i=0; i<NR; i++)

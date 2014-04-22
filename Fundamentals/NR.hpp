@@ -173,27 +173,36 @@ namespace NR
 
     //======================== Constructing grids =======================
 
-    /** This function builds a linear grid (with equidistant grid points) for the specified range
-        and number of grid points, and stores the resulting values in the provided array. The
-        array is resized to the specified number of grid points. The function returns the delta
-        between two adjacent grid points. */
+    /** This function builds a linear grid over the specified range \f$[x_{\text{min}},
+        x_{\text{max}}]\f$ and with the specified number of \f$N>0\f$ bins, and stores the
+        resulting \f$N+1\f$ border points \f$x_i\f$ in the provided array, which is resized
+        appropriately. The grid's border points are calculated according to \f[ x_i =
+        x_{\text{min}} + (x_{\text{max}}-x_{\text{min}})\,\frac{i}{N} \qquad i=0,\ldots,N. \f] The
+        function returns the bin width, i.e. the distance between two adjacent border points, given
+        by \f$(x_{\text{max}}-x_{\text{min}})/N\f$. */
     inline double lingrid(Array& xv, double xmin, double xmax, int n)
     {
-        xv.resize(n);
-        double dx = (xmax-xmin)/(n-1);
-        for (int i=0; i<n; i++) xv[i] = xmin + i*dx;
+        xv.resize(n+1);
+        double dx = (xmax-xmin)/n;
+        for (int i=0; i<=n; i++) xv[i] = xmin + i*dx;
         return dx;
     }
 
-    /** This function builds a power-law grid with the specified range, number of bins, and
-        ratio of last over first bin widths, and stores the resulting values in the provided array.
-        If the specified ratio is very close to one, the function simply builds a linear grid. The
-        array is resized to the specified number of bins plus one. */
+    /** This function builds a power-law grid over the specified range \f$[x_{\text{min}},
+        x_{\text{max}}]\f$ and with the specified number of \f$N>0\f$ bins and specified ratio
+        \f${\cal{R}}\f$ of last over first bin widths, and stores the resulting \f$N+1\f$ border
+        points \f$x_i\f$ in the provided array, which is resized appropriately. The grid's border
+        points are calculated according to \f[ x_i = x_{\text{min}} + (x_{\text{max}} -
+        x_{\text{min}}) \left(\frac{1-q^i}{1-q^N}\right) \qquad i=0,\ldots,N, \f] with \f$ q =
+        {\cal{R}}^{1/(N-1)} \f$. It is easy to check that the ratio between the widths of the last
+        and first bins is indeed \f${\cal{R}}\f$: \f[ \frac{ x_N-x_{N-1} }{ x_1-x_0 } = \frac{
+        q^{N-1} - q^N }{ 1-q } = q^{N-1} = {\cal{R}}. \f] If the specified ratio is very close to
+        one, the function simply builds a linear grid. */
     inline void powgrid(Array& xv, double xmin, double xmax, int n, double ratio)
     {
         if (fabs(ratio-1.)<1e-3)
         {
-            lingrid(xv, xmin, xmax, n+1);
+            lingrid(xv, xmin, xmax, n);
         }
         else
         {
@@ -205,15 +214,18 @@ namespace NR
         }
     }
 
-    /** This function builds a logarithmic grid with the specified range and number of grid
-        points, and stores the resulting values in the provided array. The array is resized
-        to the specified number of grid points. */
+    /** This function builds a logarithmic grid over the specified range \f$[x_{\text{min}},
+        x_{\text{max}}]\f$ and with the specified number of \f$N>0\f$ bins, and stores the
+        resulting \f$N+1\f$ border points \f$x_i\f$ in the provided array, which is resized
+        appropriately. The grid's border points are calculated according to \f[ x_i =
+        x_{\text{min}} \left( \frac{x_{\text{max}}}{x_{\text{min}}} \right)^{i/N} \qquad
+        i=0,\ldots,N. \f] */
     inline void loggrid(Array& xv, double xmin, double xmax, int n)
     {
-        xv.resize(n);
-        double dlogx = log10(xmax/xmin)/(n-1);
+        xv.resize(n+1);
+        double dlogx = log10(xmax/xmin)/n;
         double logxmin = log10(xmin);
-        for (int i=0; i<n; i++) xv[i] = pow(10, logxmin + i*dlogx);
+        for (int i=0; i<=n; i++) xv[i] = pow(10, logxmin + i*dlogx);
     }
 
     //=================== Interpolating and resampling ===================

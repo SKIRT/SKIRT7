@@ -31,8 +31,8 @@ void NestedLogWavelengthGrid::setupSelfBefore()
 
     // build the high- and low-resolution grids, independently
     Array lambdalowv, lambdazoomv;
-    NR::loggrid(lambdalowv, _lambdamin, _lambdamax, _Nlambda);
-    NR::loggrid(lambdazoomv, _lambdazoommin, _lambdazoommax, _Nlambdazoom);
+    NR::loggrid(lambdalowv, _lambdamin, _lambdamax, _Nlambda-1);
+    NR::loggrid(lambdazoomv, _lambdazoommin, _lambdazoommax, _Nlambdazoom-1);
 
     // merge the two grids
     vector<double> lambdav;
