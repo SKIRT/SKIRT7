@@ -5,6 +5,7 @@
 
 #include "FatalError.hpp"
 #include "LinSpheDustGridStructure.hpp"
+#include "NR.hpp"
 
 using namespace std;
 
@@ -25,9 +26,7 @@ void LinSpheDustGridStructure::setupSelfBefore()
     if (_Nr <= 0) throw FATALERROR("the number of radial grid points should be positive");
 
     // grid distribution in r
-    _rv.resize(_Nr+1);
-    for (int i=0; i<=_Nr; i++)
-        _rv[i] = i*_rmax/_Nr;
+    NR::lingrid(_rv, 0., _rmax, _Nr);
 
     // the total number of cells
     _Ncells = _Nr;

@@ -43,8 +43,7 @@ public:
 protected:
     /** This function verifies the validity of the number of radial bins \f$N_r\f$, the minimum
         radius \f$r_{\text{min}}\f$ and the maximum radius \f$r_{\text{max}}\f$, and then
-        calculates the \f$N_r+1\f$ radial grid points \f[ r_i = r_{\text{min}} \left(
-        \frac{r_{\text{max}}}{r_{\text{min}}} \right)^{i/N_r} \qquad i=0,\ldots,N_r. \f] */
+        calculates the \f$N_r+1\f$ radial grid points. */
     void setupSelfBefore();
 
     //======== Setters & Getters for Discoverable Attributes =======

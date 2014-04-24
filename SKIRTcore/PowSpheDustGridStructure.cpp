@@ -6,6 +6,7 @@
 #include <cmath>
 #include "FatalError.hpp"
 #include "PowSpheDustGridStructure.hpp"
+#include "NR.hpp"
 
 using namespace std;
 
@@ -28,18 +29,7 @@ void PowSpheDustGridStructure::setupSelfBefore()
     if (_Nr <= 0) throw FATALERROR("the number of radial grid points Nr should be positive");
 
     // grid distribution in r
-    _rv.resize(_Nr+1);
-    if (fabs(_ratio-1.0)<1e-3)
-    {
-        for (int i=0; i<=_Nr; i++)
-            _rv[i] = i*_rmax/_Nr;
-    }
-    else
-    {
-        double q = pow(_ratio,1.0/(_Nr-1.0));
-        for (int i=0; i<=_Nr; ++i)
-            _rv[i] = (1.0-pow(q,i))/(1.0-pow(q,_Nr)) * _rmax;
-    }
+    NR::powgrid(_rv, -0., _rmax, _Nr, _ratio);
 
     // the total number of cells
     _Ncells = _Nr;

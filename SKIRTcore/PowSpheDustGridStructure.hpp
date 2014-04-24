@@ -44,11 +44,7 @@ public:
 protected:
     /** This function verifies the validity of the number of radial bins \f$N_r\f$, the maximum
         radius \f$r_{\text{max}}\f$ and the ratio \f${\cal{R}}\f$ of the widths of the outermost
-        and innermost dust cells. It then calculates the \f$N_r+1\f$ radial grid points \f[ r_i =
-        r_{\text{max}}\, \left(\frac{1-q^i}{1-q^{N_r}}\right) \qquad i=0,\ldots,N_r, \f] with \f[ q
-        = {\cal{R}}^{\frac{1}{N_r-1}}. \f] It is easy to check that the ratio between the widths of
-        the outermost and innermost cells is indeed \f${\cal{R}}\f$, \f[ \frac{ r_{N_r}-r_{N_r-1}
-        }{ r_1-r_0 } = \frac{ q^{N_r-1} - q^{N_r} }{ 1-q } = q^{N_r-1} = {\cal{R}}. \f] */
+        and innermost dust cells. It then calculates the \f$N_r+1\f$ radial grid points. */
     void setupSelfBefore();
 
     //======== Setters & Getters for Discoverable Attributes =======

@@ -14,8 +14,9 @@
 /** The SpheDustGridStructure class is an abstract subclass of the general DustGridStructure class,
     and represents one-dimensional, spherically symmetric dust grid structures. Each cell in such a
     grid is a spherical shell. Internally, a spherical dust grid structure is specified through a
-    set of \f$N_r+1\f$ radial grid points \f$r_i\f$ (with \f$i=0,\ldots,N_r\f$). In total there are
-    \f$N_{\text{cells}} = N_r\f$ cells in the dust grid structure. */
+    set of \f$N_r+1\f$ radial grid border points \f$r_i\f$ (with \f$i=0,\ldots,N_r\f$). There are
+    \f$N_{\text{cells}} = N_r\f$ cells in the dust grid structure, with cell indices \f$m\f$ that
+    map one-to-one to the lower border indices \f$i=0,\ldots,N_r-1\f$. */
 class SpheDustGridStructure : public DustGridStructure
 {
     Q_OBJECT
@@ -59,9 +60,9 @@ public:
     double zmax() const;
 
     /** This function returns the volume of the dust cell with cell number \f$m\f$. For a spherical
-        dust grid structure, the function determines the radial bin \f$i\f$ that corresponds to the
-        cell number \f$m\f$ and the volume is easily calculated as \f[V =
-        \frac{4\pi}{3}\,(r_{i+1}^3-r_i^3),\f] with \f$r_i\f$ and \f$r_{i+1}\f$ the inner and outer
+        dust grid structure, cell number \f$m\f$ corresponds to the radial bin with lower border
+        index \f$i=m\f$, and the volume is easily calculated as \f[V =
+        \frac{4\pi}{3}\, (r_{i+1}^3-r_i^3),\f] with \f$r_i\f$ and \f$r_{i+1}\f$ the inner and outer
         radius of the shell respectively. */
     double volume(int m) const;
 
@@ -70,15 +71,14 @@ public:
     int whichcell(Position bfr) const;
 
     /** This function returns the central location from the dust cell with cell number \f$m\f$. For
-        a spherical dust grid structure, the function first determines the radial bin \f$i\f$
-        corresponding to the cell number \f$m\f$. Then, the central radius is determined using \f[
-        r = \frac{r_i + r_{i+1}}{2} \f] This random radius is combined with the unit vector on the
-        X-axis to generate the central position from the cell. */
+        a spherical dust grid structure, cell number \f$m\f$ corresponds to the radial bin with
+        lower border index \f$i=m\f$, and the central radius is determined using \f[ r = \frac{r_i
+        + r_{i+1}}{2}. \f] The returned position is arbitrarily located on the x-axis. */
     Position centralPositionInCell(int m) const;
 
     /** This function returns a random location from the dust cell with cell number \f$m\f$. For a
-        spherical dust grid structure, the function first determines the radial bin \f$i\f$
-        corresponding to the cell number \f$m\f$. Then, a random radius is determined using \f[ r =
+        spherical dust grid structure, cell number \f$m\f$ corresponds to the radial bin with
+        lower border index \f$i=m\f$, and a random radius is determined using \f[ r =
         r_i + {\cal{X}}\,(r_{i+1}-r_i) \f] with \f${\cal{X}}\f$ a random deviate. This random
         radius is combined with a random position on the unit sphere to generate a random position
         from the cell. */
@@ -96,19 +96,6 @@ protected:
     /** This function writes the intersection of the dust grid structure with the xy plane to the
         specified DustGridPlotFile object. */
     void write_xy(DustGridPlotFile* outfile) const;
-
-private:
-    /** This private function determines the radial bin index \f$i\f$ such that \f$r_i \leq r <
-        r_{i+1}\f$. It uses a simple bisection method borrowed from the Numerical Recipes book. */
-    int whichrcell(double r) const;
-
-    /** This private function returns the cell number corresponding to the radial bin index
-        \f$i\f$. It trivially returns \f$m=i\f$. */
-    int index(int i) const;
-
-    /** This private function calculates the radial bin index \f$i\f$ from the cell number \f$m\f$.
-        For a spherical dust grid structure, we have \f$i=m\f$. */
-    void invertindex(int m, int& i) const;
 
     //======================== Data Members ========================
 

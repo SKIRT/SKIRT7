@@ -6,6 +6,7 @@
 #include <cmath>
 #include "FatalError.hpp"
 #include "LogSpheDustGridStructure.hpp"
+#include "NR.hpp"
 
 using namespace std;
 
@@ -28,15 +29,7 @@ void LogSpheDustGridStructure::setupSelfBefore()
     if (_Nr <= 0) throw FATALERROR("the number of radial grid points should be positive");
 
     // grid distribution in r
-    _rv.resize(_Nr+1);
-    double logrmin = log10(_rmin);
-    double logrmax = log10(_rmax);
-    _rv[0] = 0.0;
-    for (int i=0; i<_Nr; i++)
-    {
-        double logr = logrmin + i*(logrmax-logrmin)/(_Nr-1);
-        _rv[i+1] = pow(10.0,logr);
-    }
+    NR::zerologgrid(_rv, _rmin, _rmax, _Nr);
 
     // the total number of cells
     _Ncells = _Nr;

@@ -273,9 +273,23 @@ namespace NR
     inline void loggrid(Array& xv, double xmin, double xmax, int n)
     {
         xv.resize(n+1);
-        double dlogx = log10(xmax/xmin)/n;
         double logxmin = log10(xmin);
+        double dlogx = log10(xmax/xmin)/n;
         for (int i=0; i<=n; i++) xv[i] = pow(10, logxmin + i*dlogx);
+    }
+
+    /** This function builds a grid with its first bin starting at zero, and subsequent logarithmic
+        border points over the specified range \f$[x_{\text{min}}, x_{\text{max}}]\f$. The grid has
+        the specified number of \f$N>0\f$ bins and the resulting \f$N+1\f$ border points \f$x_i\f$
+        are stored in the provided array, which is resized appropriately. The grid's border points
+        are calculated according to \f$x_0=0\f$ and \f[ x_i = x_{\text{min}} \left(
+        \frac{x_{\text{max}}}{x_{\text{min}}} \right)^{(i-1)/(N-1)} \qquad i=1,\ldots,N. \f] */
+    inline void zerologgrid(Array& xv, double xmin, double xmax, int n)
+    {
+        xv.resize(n+1);  // this also initializes xv[0] to zero
+        double logxmin = log10(xmin);
+        double dlogx = log10(xmax/xmin)/(n-1);
+        for (int i=0; i<n; i++) xv[i+1] = pow(10, logxmin + i*dlogx);
     }
 
     //=================== Interpolating and resampling ===================

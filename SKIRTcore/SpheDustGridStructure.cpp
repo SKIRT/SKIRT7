@@ -7,7 +7,7 @@
 #include <cstdlib>
 #include "DustGridPath.hpp"
 #include "DustGridPlotFile.hpp"
-#include "FatalError.hpp"
+#include "NR.hpp"
 #include "Random.hpp"
 #include "SpheDustGridStructure.hpp"
 
@@ -29,39 +29,30 @@ int SpheDustGridStructure::dimension() const
 
 //////////////////////////////////////////////////////////////////////
 
-double
-SpheDustGridStructure::xmax()
-const
+double SpheDustGridStructure::xmax() const
 {
     return _rmax;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double
-SpheDustGridStructure::ymax()
-const
+double SpheDustGridStructure::ymax() const
 {
     return _rmax;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double
-SpheDustGridStructure::zmax()
-const
+double SpheDustGridStructure::zmax() const
 {
     return _rmax;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double
-SpheDustGridStructure::volume(int m)
-const
+double SpheDustGridStructure::volume(int m) const
 {
-    int i;
-    invertindex(m,i);
+    int i = m;
     if (i<0 || i>=_Nr)
         return 0.0;
     else
@@ -74,35 +65,25 @@ const
 
 //////////////////////////////////////////////////////////////////////
 
-int
-SpheDustGridStructure::whichcell(Position bfr)
-const
+int SpheDustGridStructure::whichcell(Position bfr) const
 {
-    int i = whichrcell(bfr.radius());
-    if (i<0 || i>=_Nr) return -1;
-    return index(i);
+    return NR::locate_fail(_rv, bfr.radius());
 }
 
 //////////////////////////////////////////////////////////////////////
 
-Position
-SpheDustGridStructure::centralPositionInCell(int m)
-const
+Position SpheDustGridStructure::centralPositionInCell(int m) const
 {
-    int i;
-    invertindex(m,i);
+    int i = m;
     double r = (_rv[i]+_rv[i+1])/2.0;
     return Position(r,0.0,0.0);
 }
 
 //////////////////////////////////////////////////////////////////////
 
-Position
-SpheDustGridStructure::randomPositionInCell(int m)
-const
+Position SpheDustGridStructure::randomPositionInCell(int m) const
 {
-    int i;
-    invertindex(m,i);
+    int i = m;
     Direction bfk = _random->direction();
     double r = _rv[i] + (_rv[i+1]-_rv[i])*_random->uniform();
     return Position(r,bfk);
@@ -110,9 +91,7 @@ const
 
 //////////////////////////////////////////////////////////////////////
 
-DustGridPath
-SpheDustGridStructure::path(Position bfr, Direction bfk)
-const
+DustGridPath SpheDustGridStructure::path(Position bfr, Direction bfk) const
 {
     // Determination of the initial position and direction of the path,
     // and calculation of some initial values
@@ -144,8 +123,7 @@ const
 
     // Determination of the initial grid cell
 
-    int i = whichrcell(r);
-    if (i==-1 || i==_Nr) throw FATALERROR("The photon package starts outside the dust grid");
+    int i = NR::locate_clip(_rv, r);
 
     // And here we go...
 
@@ -155,12 +133,12 @@ const
 
     if (q<0.0)
     {
-        int imin = whichrcell(p);
+        int imin = NR::locate_clip(_rv,p);
         rN = _rv[i];
         qN = -sqrt((rN-p)*(rN+p));
         while (i>imin)
         {
-            int m = index(i);
+            int m = i;
             double ds = qN-q;
             path.addsegment(m, ds);
             i--;
@@ -176,7 +154,7 @@ const
     qN = sqrt((rN-p)*(rN+p));
     while (true)
     {
-        int m = index(i);
+        int m = i;
         double ds = qN-q;
         path.addsegment(m, ds);
         i++;
@@ -195,44 +173,6 @@ const
 void SpheDustGridStructure::write_xy(DustGridPlotFile* outfile) const
 {
     for (int i=0; i<=_Nr; i++) outfile->writeCircle(_rv[i]);
-}
-
-//////////////////////////////////////////////////////////////////////
-
-int
-SpheDustGridStructure::whichrcell(double r)
-const
-{
-    if (r<0.0) return -1;
-    else if (r>_rmax) return _Nr;
-    int il=-1, iu=_Nr, im;
-    while (iu-il>1)
-    {
-        im = (iu+il)>>1;
-        if (r>=_rv[im])
-            il = im;
-        else
-            iu = im;
-    }
-    return il;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-int
-SpheDustGridStructure::index(int i)
-const
-{
-    return i;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void
-SpheDustGridStructure::invertindex(int m, int& i)
-const
-{
-    i = m;
 }
 
 //////////////////////////////////////////////////////////////////////
