@@ -11,6 +11,7 @@
 #include "DustGridPlotFile.hpp"
 #include "FatalError.hpp"
 #include "Log.hpp"
+#include "NR.hpp"
 #include "Random.hpp"
 
 using namespace std;
@@ -92,9 +93,9 @@ int AxSpheDustGridStructure::whichcell(Position bfr) const
 {
     double r, theta, phi;
     bfr.spherical(r, theta, phi);
-    int i = whichrcell(r);
-    if (i>=_Nr) return -1;
-    int k = whichthetacell(theta);
+    int i = NR::locate_fail(_rv, r);
+    if (i<0) return -1;
+    int k = NR::locate_clip(_thetav, theta);
     return index(i,k);
 }
 
@@ -214,17 +215,15 @@ DustGridPath AxSpheDustGridStructure::path(Position bfr, Direction bfk) const
     }
 
     // Determine the indices of the cell containing the starting point.
-    // In the rare cases that the point is still outside the grid, return an empty path.
     double r, theta, phi;
     bfr.spherical(r, theta, phi);
-    int i = whichrcell(r);
-    int k = whichthetacell(theta);
-    if (i >= _Nr) return path.clear();
+    int i = NR::locate_fail(_rv, r);
+    int k = NR::locate_clip(_thetav, theta);
 
     // Start the loop over cells/path segments until we leave the grid
     int inext = i;
     int knext = k;
-    while (i < _Nr)
+    while (i < _Nr && i >= 0)
     {
         // Calculate the distance travelled inside the cell by considering
         // the potential exit points for each of the four cell boundaries;
@@ -294,8 +293,8 @@ DustGridPath AxSpheDustGridStructure::path(Position bfr, Direction bfk) const
             bfr += bfk*eps;
             double r, theta, phi;
             bfr.spherical(r, theta, phi);
-            i = whichrcell(r);
-            k = whichthetacell(theta);
+            i = NR::locate_fail(_rv, r);
+            k = NR::locate_clip(_thetav, theta);
         }
     }
 
@@ -323,41 +322,6 @@ void AxSpheDustGridStructure::write_xz(DustGridPlotFile* outfile) const
         double z = _rmax * cos(_thetav[k]);
         outfile->writeLine(-x, -z, x, z);
     }
-}
-
-//////////////////////////////////////////////////////////////////////
-
-int AxSpheDustGridStructure::whichrcell(double r) const
-{
-    if (r<0.0) return -1;
-    else if (r>_rmax) return _Nr;
-    int il=-1, iu=_Nr, im;
-    while (iu-il>1)
-    {
-        im = (iu+il)>>1;
-        if (r>=_rv[im])
-            il = im;
-        else
-            iu = im;
-    }
-    return il;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-int AxSpheDustGridStructure::whichthetacell(double theta) const
-{
-    if (theta<=0) return 0;
-    int kl=-1, ku=_Ntheta, km;
-    while (ku-kl>1)
-    {
-        km = (ku+kl)>>1;
-        if (theta>=_thetav[km])
-            kl = km;
-        else
-            ku = km;
-    }
-    return kl;
 }
 
 //////////////////////////////////////////////////////////////////////

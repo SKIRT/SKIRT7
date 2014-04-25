@@ -5,6 +5,7 @@
 
 #include "LinAxDustGridStructure.hpp"
 #include "FatalError.hpp"
+#include "NR.hpp"
 
 using namespace std;
 
@@ -27,14 +28,10 @@ void LinAxDustGridStructure::setupSelfBefore()
     if (_Nz <= 0) throw FATALERROR("the number of axial grid points should be positive");
 
     // grid distribution in R
-    _Rv.resize(_NR+1);
-    for (int i=0; i<=_NR; i++)
-        _Rv[i] = i*_Rmax/_NR;
+    NR::lingrid(_Rv, 0., _Rmax, _NR);
 
     // grid distribution in z
-    _zv.resize(_Nz+1);
-    for (int k=0; k<=_Nz; k++)
-        _zv[k] = -_zmax + 2.0*k*_zmax/_Nz;
+    NR::lingrid(_zv, -_zmax, _zmax, _Nz);
 
     // the total number of cells
     _Ncells = _NR*_Nz;

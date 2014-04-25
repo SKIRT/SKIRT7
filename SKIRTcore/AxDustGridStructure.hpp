@@ -104,15 +104,6 @@ protected:
     void write_xz(DustGridPlotFile* outfile) const;
 
 private:
-
-    /** This private function determines the radial bin number \f$i\f$ such that \f$R_i \leq R <
-        R_{i+1}\f$. It uses a simple bisection method borrowed from the Numerical Recipes book. */
-    int whichRcell(double R) const;
-
-    /** This private function determines the vertical bin number \f$k\f$ such that \f$z_k \leq z <
-        z_{k+1}\f$. It uses a simple bisection method borrowed from the Numerical Recipes book. */
-    int whichzcell(double z) const;
-
     /** This private function returns the cell number corresponding to the radial index \f$i\f$ and
         the vertical index \f$k\f$. The correspondence is simply \f$m=k+N_z\,i\f$. */
     int index(int i, int k) const;

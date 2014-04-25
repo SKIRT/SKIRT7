@@ -59,26 +59,8 @@ public:
     Q_INVOKABLE PowAxDustGridStructure();
 
 protected:
-    /** This function calculates the distribution of radial grid points from the number of radial
-        bins \f$N_R\f$, the maximum radius \f$R_{\text{max}}\f$ and the ratio \f${\cal{R}}_R\f$ of
-        the widths of the outermost and innermost radial bin. These can be found as \f[ R_i =
-        R_{\text{max}}\, \left(\frac{1-q^i}{1-q^{N_R}}\right) \qquad i=0,\ldots,N_R, \f] with \f$ q
-        = ({\cal{R}}_R)^{1/(N_R-1)} \f$. It is easy to check that the ratio between the widths of
-        the outermost and innermost radial bins is indeed \f${\cal{R}}_R\f$, \f[ \frac{
-        R_{N_R}-R_{N_R-1} }{ R_1-R_0 } = \frac{ q^{N_R-1} - q^{N_R} }{ 1-q } = q^{N_R-1} =
-        {\cal{R}}_R. \f] The determination of the vertical grid points is similar, but is somewhat
-        more complicated as the innermost bin is now the central and not the first bin (the
-        vertical grid runs from \f$-z_{\text{max}}\f$ to \f$z_{\text{max}}\f$). If \f$N_z\f$ is
-        even, we define \f$M=N_z/2\f$ and set \f$z_M=0\f$ and \f[ z_{M\pm k} = \pm z_{\text{max}}
-        \left(\frac{1-q^k}{1-q^M}\right) \qquad k=1,\ldots,M \f] with \f$ q =
-        ({\cal{R}}_z)^{1/(M-1)} \f$. The ratio between the widths of the outermost and the
-        innermost bins is now \f[ \frac{ z_{2M}-z_{2M-1} }{ z_{M+1}-z_M } = \frac{ q^{M-1} - q^M }{
-        1-q } = q^{M-1} = {\cal{R}}_z. \f] On the other hand, if \f$N_z\f$ is odd, we set \f$M =
-        (N_z+1)/2\f$ and \f[ z_{M-\frac12\pm (k-\frac12)} = \pm z_{\text{max}} \left[ \frac{
-        \frac12\,(1+q) - q^k }{ \frac12\,(1+q) - q^M } \right] \qquad k=1,\ldots,M, \f] with again
-        \f$ q = ({\cal{R}}_z)^{1/(M-1)} \f$. The ratio between the widths of the outermost and the
-        innermost bins is for this case \f[ \frac{ z_{2M-1}-z_{2M-2} }{ z_M-z_{M-1} } = \frac{
-        q^{M-1} - q^M }{ 1-q } = q^{M-1} = {\cal{R}}_z. \f] */
+    /** This function verifies the validity of the input parameters, and then calculates the
+        \f$N_R+1\f$ radial grid points and the \f$N_z+1\f$ vertical grid points. */
     void setupSelfBefore();
 
     //======== Setters & Getters for Discoverable Attributes =======

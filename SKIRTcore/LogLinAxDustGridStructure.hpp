@@ -54,9 +54,7 @@ public:
 protected:
     /** This function verifies the validity of the number of bins and the maximum extent of the
         grid in the radial and vertical directions, and then calculates the \f$N_R+1\f$ radial grid
-        points \f[ R_i = R_{\text{min}} \left( \frac{R_{\text{max}}}{R_{\text{min}}}
-        \right)^{i/N_R} \qquad i=0,\ldots,N_R, \f] and the \f$N_z+1\f$ vertical grid points \f[ z_k
-        = -z_{\text{max}} + \frac{2k\,z_{\text{max}}}{N_z} \qquad k=0,\ldots,N_z. \f] */
+        points and the \f$N_z+1\f$ vertical grid points. */
     void setupSelfBefore();
 
     //======== Setters & Getters for Discoverable Attributes =======

@@ -8,7 +8,7 @@
 #include "AxDustGridStructure.hpp"
 #include "DustGridPath.hpp"
 #include "DustGridPlotFile.hpp"
-#include "FatalError.hpp"
+#include "NR.hpp"
 #include "Random.hpp"
 
 using namespace std;
@@ -74,9 +74,9 @@ int
 AxDustGridStructure::whichcell(Position bfr)
 const
 {
-    int i = whichRcell(bfr.cylradius());
-    int k = whichzcell(bfr.height());
-    if (i<0 || i>=_NR || k<0 || k>=_Nz) return -1;
+    int i = NR::locate_fail(_Rv, bfr.cylradius());
+    int k = NR::locate_fail(_zv, bfr.height());
+    if (i<0 || k<0) return -1;
     return index(i,k);
 }
 
@@ -176,10 +176,8 @@ const
 
     // Determination of the initial grid cell
 
-    int i = whichRcell(R);
-    int k = whichzcell(z);
-    if (i==-1 || k==-1 || i==_NR || k==_Nz)
-        throw FATALERROR("The photon package starts outside the dust grid");
+    int i = NR::locate_clip(_Rv, R);
+    int k = NR::locate_clip(_zv, z);
 
     // And here we go...
 
@@ -192,7 +190,7 @@ const
     {
         if (q<0.0)
         {
-            int imin = whichRcell(p);
+            int imin = NR::locate_clip(_Rv, p);
             RN = _Rv[i];
             qN = -sqrt((RN-p)*(RN+p));
             zN = _zv[k+1];
@@ -269,7 +267,7 @@ const
     {
         if (q<0.0)
         {
-            int imin = whichRcell(p);
+            int imin = NR::locate_clip(_Rv, p);
             RN = _Rv[i];
             qN = -sqrt((RN-p)*(RN+p));
             zN = _zv[k];
@@ -361,46 +359,6 @@ void AxDustGridStructure::write_xz(DustGridPlotFile* outfile) const
     {
         outfile->writeLine(-_Rmax, _zv[k], _Rmax, _zv[k]);
     }
-}
-
-//////////////////////////////////////////////////////////////////////
-
-int
-AxDustGridStructure::whichRcell(double R)
-const
-{
-    if (R<0.0) return -1;
-    else if (R>_Rmax) return _NR;
-    int il=-1, iu=_NR, im;
-    while (iu-il>1)
-    {
-        im = (iu+il)>>1;
-        if (R>=_Rv[im])
-            il = im;
-        else
-            iu = im;
-    }
-    return il;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-int
-AxDustGridStructure::whichzcell(double z)
-const
-{
-    if (z<_zmin) return -1;
-    else if (z>_zmax) return _Nz;
-    int kl=-1, ku=_Nz, km;
-    while (ku-kl>1)
-    {
-        km = (ku+kl)>>1;
-        if (z>=_zv[km])
-            kl = km;
-        else
-            ku = km;
-    }
-    return kl;
 }
 
 //////////////////////////////////////////////////////////////////////

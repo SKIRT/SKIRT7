@@ -50,9 +50,7 @@ public:
 protected:
     /** This function verifies the validity of the number of bins and the maximum extent of the
         grid in the radial and vertical directions, and then calculates the \f$N_r+1\f$ radial grid
-        points \f[ r_i = r_{\text{min}} \left( \frac{r_{\text{max}}}{r_{\text{min}}}
-        \right)^{i/N_r} \qquad i=0,\ldots,N_r, \f] and the \f$N_\theta+1\f$ angular grid points \f[ \theta_k
-        = \frac{k\,\pi}{N_\theta} \qquad k=0,\ldots,N_\theta. \f] */
+        points and the \f$N_\theta+1\f$ angular grid points. */
     void setupSelfBefore();
 
     //======== Setters & Getters for Discoverable Attributes =======

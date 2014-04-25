@@ -60,21 +60,7 @@ public:
 
 protected:
     /** This function verifies the validity of the input parameters, and then calculates the
-        distribution of radial grid points from the number of radial bins \f$N_R\f$, the minimum
-        radius \f$R_{\text{min}}\f$ and the maximum radius \f$R_{\text{max}}\f$, \f[ R_i =
-        R_{\text{min}} \left( \frac{R_{\text{max}}}{R_{\text{min}}} \right)^{i/N_R} \qquad
-        i=0,\ldots,N_R. \f] The calculation of the position of the vertical grid points depends on
-        whether \f$N_z\f$ is even or odd. If \f$N_z\f$ is even, we define \f$M=N_z/2\f$ and set
-        \f$z_M=0\f$ and \f[ z_{M\pm k} = \pm z_{\text{max}} \left(\frac{1-q^k}{1-q^M}\right) \qquad
-        k=1,\ldots,M \f] with \f$ q = ({\cal{R}}_z)^{1/(M-1)} \f$. The ratio between the widths of
-        the outermost and the innermost bins is now \f[ \frac{ z_{2M}-z_{2M-1} }{ z_{M+1}-z_M } =
-        \frac{ q^{M-1} - q^M }{ 1-q } = q^{M-1} = {\cal{R}}_z. \f] On the other hand, if \f$N_z\f$
-        is odd, we set \f$M = (N_z+1)/2\f$ and \f[ z_{M-\frac12\pm (k-\frac12)} = \pm
-        z_{\text{max}} \left[ \frac{ \frac12\,(1+q) - q^k }{ \frac12\,(1+q) - q^M } \right] \qquad
-        k=1,\ldots,M, \f] with again \f$ q = ({\cal{R}}_z)^{1/(M-1)} \f$. The ratio between the
-        widths of the outermost and the innermost bins is for this case \f[ \frac{
-        z_{2M-1}-z_{2M-2} }{ z_M-z_{M-1} } = \frac{ q^{M-1} - q^M }{ 1-q } = q^{M-1} = {\cal{R}}_z.
-        \f] */
+        \f$N_R+1\f$ radial grid points and the \f$N_z+1\f$ vertical grid points. */
     void setupSelfBefore();
 
     //======== Setters & Getters for Discoverable Attributes =======

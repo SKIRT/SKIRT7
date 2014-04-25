@@ -122,16 +122,6 @@ protected:
     void write_xz(DustGridPlotFile* outfile) const;
 
 private:
-    /** This private function returns the radial bin number \f$i\f$ such that \f$r_i \leq r <
-        r_{i+1}\f$, or -1 if \f$r< 0\f$, or \f$N_r\f$ if \f$r>r_{\text{max}}\f$. */
-    int whichrcell(double r) const;
-
-    /** This private function returns the angular bin number \f$k\f$ such that \f$\theta_k \leq
-        \theta < \theta_{k+1}\f$, or 0 if \f$\theta< 0\f$, or \f$N_\theta-1\f$ if \f$\theta>\pi\f$.
-        In other words the function assumes that \f$0 \leq \theta < \pi\f$, and returns the
-        respective outermost bin if not. */
-    int whichthetacell(double theta) const;
-
     /** This private function returns the cell number corresponding to the radial index \f$i\f$ and
         the angular index \f$k\f$. The correspondence is simply \f$m=k+N_\theta\,i\f$. */
     int index(int i, int k) const;

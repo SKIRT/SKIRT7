@@ -6,6 +6,7 @@
 #include <cmath>
 #include "FatalError.hpp"
 #include "LogLinAxDustGridStructure.hpp"
+#include "NR.hpp"
 
 using namespace std;
 
@@ -31,20 +32,10 @@ void LogLinAxDustGridStructure::setupSelfBefore()
     if (_Nz <= 0) throw FATALERROR("the number of axial grid points should be positive");
 
     // grid distribution in R
-    _Rv.resize(_NR+1);
-    double logRmin = log10(_Rmin);
-    double logRmax = log10(_Rmax);
-    _Rv[0] = 0.0;
-    for (int i=0; i<_NR; i++)
-    {
-        double logR = logRmin + i*(logRmax-logRmin)/(_NR-1);
-        _Rv[i+1] = pow(10.0,logR);
-    }
+    NR::zerologgrid(_Rv, _Rmin, _Rmax, _NR);
 
     // grid distribution in z
-    _zv.resize(_Nz+1);
-    for (int k=0; k<=_Nz; k++)
-        _zv[k] = -_zmax + 2.0*k*_zmax/_Nz;
+    NR::lingrid(_zv, -_zmax, _zmax, _Nz);
 
     // the total number of cells
     _Ncells = _NR*_Nz;
