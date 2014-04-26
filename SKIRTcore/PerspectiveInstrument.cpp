@@ -68,7 +68,7 @@ void PerspectiveInstrument::setupSelfBefore()
     {
         _transform.rotateX(c/v, -b/v);
         _transform.rotateY(v, -a);
-        double k = (a*a+b*b)*_Ux - a*b*_Uy - a*c*_Uz;
+        double k = (b*b+c*c)*_Ux - a*b*_Uy - a*c*_Uz;
         double l = c*_Uy - b*_Uz;
         double u = sqrt(k*k+l*l);
         _transform.rotateZ(l/u, -k/u);

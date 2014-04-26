@@ -253,7 +253,7 @@ has components \f$k\f$ along the \f$x\f$ axis and \f$l\f$ along the \f$y\f$ axis
 Using the previously derived value for \f$\mathcal{R}_{xy}\f$ simple
 matrix algebra leads to
 \f[
-k=(a^{2}+b^{2})U_{x}-abU_{y}-acU_{z}\qquad\mathrm{and}\qquad l=cU_{y}-bU_{z}
+k=(b^{2}+c^{2})U_{x}-abU_{y}-acU_{z}\qquad\mathrm{and}\qquad l=cU_{y}-bU_{z}
 \f]
 where we dropped a proportionality factor of \f$1/v\f$ in both values,
 since \f$k\f$ and \f$l\f$ are not normalized.
