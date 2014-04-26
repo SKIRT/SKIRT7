@@ -3,9 +3,9 @@
 ////       © Astronomical Observatory, Ghent University         ////
 //////////////////////////////////////////////////////////////////*/
 
-#include <cmath>
 #include "FatalError.hpp"
 #include "LinCubDustGridStructure.hpp"
+#include "NR.hpp"
 
 using namespace std;
 
@@ -29,20 +29,10 @@ void LinCubDustGridStructure::setupSelfBefore()
     if (_zmax <= 0) throw FATALERROR("the outer radius in the z direction should be positive");
     if (_Nz <= 0) throw FATALERROR("the number of grid points in the z direction should be positive");
 
-    // grid distribution in x
-    _xv.resize(_Nx+1);
-    for (int i=0; i<=_Nx; ++i)
-        _xv[i] = -_xmax + 2.0*i*_xmax/_Nx;
-
-    // grid distribution in y
-    _yv.resize(_Ny+1);
-    for (int j=0; j<=_Ny; ++j)
-        _yv[j] = -_ymax + 2.0*j*_ymax/_Ny;
-
-    // grid distribution in z
-    _zv.resize(_Nz+1);
-    for (int k=0; k<=_Nz; ++k)
-        _zv[k] = -_zmax + 2.0*k*_zmax/_Nz;
+    // grid distributions
+    NR::lingrid(_xv, _xmin, _xmax, _Nx);
+    NR::lingrid(_yv, _ymin, _ymax, _Ny);
+    NR::lingrid(_zv, _zmin, _zmax, _Nz);
 
     // the total number of cells
     _Ncells = _Nx*_Ny*_Nz;

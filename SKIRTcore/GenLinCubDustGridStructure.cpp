@@ -3,8 +3,8 @@
 ////       © Astronomical Observatory, Ghent University         ////
 //////////////////////////////////////////////////////////////////*/
 
-#include <cmath>
 #include "FatalError.hpp"
+#include "NR.hpp"
 #include "GenLinCubDustGridStructure.hpp"
 
 using namespace std;
@@ -29,20 +29,10 @@ void GenLinCubDustGridStructure::setupSelfBefore()
     if (_zmax <= _zmin) throw FATALERROR("the maximum radius in the z direction should be larger than the minimum radius");
     if (_Nz <= 0) throw FATALERROR("the number of grid points in the z direction should be positive");
 
-    // grid distribution in x
-    _xv.resize(_Nx+1);
-    for (int i=0; i<=_Nx; ++i)
-        _xv[i] = _xmin + i*(_xmax-_xmin)/_Nx;
-
-    // grid distribution in y
-    _yv.resize(_Ny+1);
-    for (int j=0; j<=_Ny; ++j)
-        _yv[j] = _ymin + j*(_ymax-_ymin)/_Ny;
-
-    // grid distribution in z
-    _zv.resize(_Nz+1);
-    for (int k=0; k<=_Nz; ++k)
-        _zv[k] = _zmin + k*(_zmax-_zmin)/_Nz;
+    // grid distributions
+    NR::lingrid(_xv, _xmin, _xmax, _Nx);
+    NR::lingrid(_yv, _ymin, _ymax, _Ny);
+    NR::lingrid(_zv, _zmin, _zmax, _Nz);
 
     // the total number of cells
     _Ncells = _Nx*_Ny*_Nz;
@@ -172,27 +162,6 @@ void GenLinCubDustGridStructure::setPointsZ(int value)
 int GenLinCubDustGridStructure::pointsZ() const
 {
     return _Nz;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double GenLinCubDustGridStructure::xmax() const
-{
-    return max(_xmax,-_xmin);
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double GenLinCubDustGridStructure::ymax() const
-{
-    return max(_ymax,-_ymin);
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double GenLinCubDustGridStructure::zmax() const
-{
-    return max(_zmax,-_zmin);
 }
 
 //////////////////////////////////////////////////////////////////////

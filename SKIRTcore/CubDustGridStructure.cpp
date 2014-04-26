@@ -11,6 +11,7 @@
 #include "DustGridPath.hpp"
 #include "DustGridPlotFile.hpp"
 #include "FatalError.hpp"
+#include "NR.hpp"
 #include "Random.hpp"
 
 using namespace std;
@@ -26,21 +27,21 @@ CubDustGridStructure::CubDustGridStructure()
 
 double CubDustGridStructure::xmax() const
 {
-    return _xmax;
+    return max(fabs(_xmin),fabs(_xmax));
 }
 
 //////////////////////////////////////////////////////////////////////
 
 double CubDustGridStructure::ymax() const
 {
-    return _ymax;
+    return max(fabs(_ymin),fabs(_ymax));
 }
 
 //////////////////////////////////////////////////////////////////////
 
 double CubDustGridStructure::zmax() const
 {
-    return _zmax;
+    return max(fabs(_zmin),fabs(_zmax));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -54,12 +55,10 @@ double CubDustGridStructure::volume(int m) const
 
 int CubDustGridStructure::whichcell(Position bfr) const
 {
-    double x,y,z;
-    bfr.cartesian(x,y,z);
-    int i = whichxcell(x);
-    int j = whichycell(y);
-    int k = whichzcell(z);
-    if (i==-1 || j==-1 || k==-1)
+    int i = NR::locate_fail(_xv, bfr.x());
+    int j = NR::locate_fail(_yv, bfr.y());
+    int k = NR::locate_fail(_zv, bfr.z());
+    if (i<0 || j<0 || k<0)
         return -1;
     else
         return index(i,j,k);
@@ -173,11 +172,9 @@ DustGridPath CubDustGridStructure::path(Position bfr, Direction bfk) const
 
     // Now determine which grid cell we are in...
 
-    int i = whichxcell(x);
-    int j = whichycell(y);
-    int k = whichzcell(z);
-    if (i>=_Nx || j>=_Ny || k>=_Nz || i<0 || j<0 || k<0)
-        throw FATALERROR("The photon package starts outside the dust grid");
+    int i = NR::locate_clip(_xv, x);
+    int j = NR::locate_clip(_yv, y);
+    int k = NR::locate_clip(_zv, z);
 
     // And there we go...
 
@@ -269,57 +266,6 @@ void CubDustGridStructure::write_xyz(DustGridPlotFile* outfile) const
     for (int j=0; j<=_Ny; j++)
         for (int k=0; k<=_Nz; k++)
             outfile->writeLine(_xmin, _yv[j], _zv[k], _xmax, _yv[j], _zv[k]);
-}
-
-//////////////////////////////////////////////////////////////////////
-
-int CubDustGridStructure::whichxcell(double x) const
-{
-    if (x<_xmin || x>_xmax) return -1;
-    int il=-1, iu=_Nx, im;
-    while (iu-il>1)
-    {
-        im = (iu+il)>>1;
-        if (x>=_xv[im])
-            il = im;
-        else
-            iu = im;
-    }
-    return il;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-int CubDustGridStructure::whichycell(double y) const
-{
-    if (y<_ymin || y>_ymax) return -1;
-    int jl=-1, ju=_Ny, jm;
-    while (ju-jl>1)
-    {
-        jm = (ju+jl)>>1;
-        if (y>=_yv[jm])
-            jl = jm;
-        else
-            ju = jm;
-    }
-    return jl;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-int CubDustGridStructure::whichzcell(double z) const
-{
-    if (z<_zmin || z>_zmax) return -1;
-    int kl=-1, ku=_Nz, km;
-    while (ku-kl>1)
-    {
-        km = (ku+kl)>>1;
-        if (z>=_zv[km])
-            kl = km;
-        else
-            ku = km;
-    }
-    return kl;
 }
 
 //////////////////////////////////////////////////////////////////////

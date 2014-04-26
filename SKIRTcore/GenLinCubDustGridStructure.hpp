@@ -69,11 +69,7 @@ public:
 
 protected:
     /** This function verifies the number of bins and the maximum extent of the grid in the X, Y
-        and Z directions, and then calculates the grid points along each of these axes as \f[
-        \begin{split} x_i &= x_{\text{min}} + \frac{i\,(x_{\text{max}}-x_{\text{min}})}{N_x} \qquad
-        i=0,\ldots,N_x, \\ y_j &= y_{\text{min}} + \frac{j\,(y_{\text{max}}-y_{\text{min}})}{N_y} \qquad
-        j=0,\ldots,N_y, \\ z_k &= z_{\text{min}} + \frac{k\,(z_{\text{max}}-z_{\text{min}})}{N_z} \qquad
-        k=0,\ldots,N_z. \end{split} \f] */
+        and Z directions, and then calculates the grid points along each of these axes. */
     void setupSelfBefore();
 
     //======== Setters & Getters for Discoverable Attributes =======
@@ -132,22 +128,6 @@ public:
 
     /** Returns the number of grid points in the z direction. */
     Q_INVOKABLE int pointsZ() const;
-
-    //======================== Other Functions =======================
-
-public:
-    /** This function returns the maximum extent \f$x_{\text{max}}\f$ of the grid structure in the
-        \f$x\f$ direction, in either the position or negative direction. */
-    double xmax() const;
-
-    /** This function returns the maximum extent \f$y_{\text{max}}\f$ of the grid structure in the
-        \f$y\f$ direction, in either the position or negative direction. */
-    double ymax() const;
-
-    /** This function returns the maximum extent \f$z_{\text{max}}\f$ of the grid structure in the
-        \f$z\f$ direction, in either the position or negative direction. */
-    double zmax() const;
-
 };
 
 ////////////////////////////////////////////////////////////////////

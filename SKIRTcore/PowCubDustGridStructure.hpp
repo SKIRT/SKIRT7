@@ -77,21 +77,7 @@ public:
 
 protected:
     /** This function verifies the validity of the input parameters, and then calculates the
-        distribution of grid points in the X direction from the number of bins \f$N_x\f$, the
-        maximum extent \f$x_{\text{max}}\f$ and the ratio \f${\cal{R}}_x\f$ between the widths of
-        the outermost and innermost bin. The calculation of the position of the grid points depends
-        on whether \f$N_x\f$ is even or odd. If \f$N_x\f$ is even, we define \f$M=N_x/2\f$ and set
-        \f$x_M=0\f$ and \f[ x_{M\pm i} = \pm x_{\text{max}} \left(\frac{1-q^i}{1-q^M}\right) \qquad
-        i=1,\ldots,M \f] with \f$ q = ({\cal{R}}_x)^{1/(M-1)} \f$. The ratio between the widths of
-        the outermost and the innermost bins is \f[ \frac{ x_{2M}-x_{2M-1} }{ x_{M+1}-x_M } =
-        \frac{ q^{M-1} - q^M }{ 1-q } = q^{M-1} = {\cal{R}}_x. \f] On the other hand, if \f$N_x\f$
-        is odd, we set \f$M = (N_x+1)/2\f$ and \f[ x_{M-\frac12\pm (i-\frac12)} = \pm
-        x_{\text{max}} \left[ \frac{ \frac12\,(1+q) - q^i }{ \frac12\,(1+q) - q^M } \right] \qquad
-        i=1,\ldots,M, \f] with again \f$ q = ({\cal{R}}_x)^{1/(M-1)} \f$. The ratio between the
-        widths of the outermost and the innermost bins is for this case \f[ \frac{
-        x_{2M-1}-x_{2M-2} }{ x_M-x_{M-1} } = \frac{ q^{M-1} - q^M }{ 1-q } = q^{M-1} = {\cal{R}}_x.
-        \f] The same exercise is repeated for the distribution of the grid points in the Y and Z
-        directions. */
+        distribution of grid points in each direction. */
     void setupSelfBefore();
 
     //======== Setters & Getters for Discoverable Attributes =======

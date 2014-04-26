@@ -59,11 +59,7 @@ public:
 
 protected:
     /** This function verifies the number of bins and the maximum extent of the grid in the X, Y
-        and Z directions, and then calculates the grid points along each of these axes as \f[
-        \begin{split} x_i &= -x_{\text{max}} + \frac{2i\,x_{\text{max}}}{N_x} \qquad
-        i=0,\ldots,N_x, \\ y_j &= -y_{\text{max}} + \frac{2j\,y_{\text{max}}}{N_y} \qquad
-        j=0,\ldots,N_y, \\ z_k &= -z_{\text{max}} + \frac{2k\,z_{\text{max}}}{N_z} \qquad
-        k=0,\ldots,N_z. \end{split} \f] */
+        and Z directions, and then calculates the grid points along each of these axes. */
     void setupSelfBefore();
 
     //======== Setters & Getters for Discoverable Attributes =======

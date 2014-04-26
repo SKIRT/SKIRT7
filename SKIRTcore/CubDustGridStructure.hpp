@@ -33,20 +33,17 @@ protected:
     //======================== Other Functions =======================
 
 public:
-    /** This function returns the maximum extent \f$x_{\text{max}}\f$ of the grid structure in the
-        \f$x\f$ direction. This information is stored internally. */
-    virtual double xmax() const;
-    //double xmax() const;
+    /** This function returns the maximum extent \f$\max(|x_{\text{min}}|,|x_{\text{max}}|)\f$ of
+        the grid structure in the \f$x\f$ direction. */
+    double xmax() const;
 
-    /** This function returns the maximum extent \f$y_{\text{max}}\f$ of the grid structure in the
-        \f$y\f$ direction. This information is stored internally. */
-    virtual double ymax() const;
-    //double ymax() const;
+    /** This function returns the maximum extent \f$\max(|y_{\text{min}}|,|y_{\text{max}}|)\f$ of
+        the grid structure in the \f$y\f$ direction. */
+    double ymax() const;
 
-    /** This function returns the maximum extent \f$z_{\text{max}}\f$ of the grid structure in the
-        \f$z\f$ direction. This information is stored internally. */
-    virtual double zmax() const;
-    //double zmax() const;
+    /** This function returns the maximum extent \f$\max(|z_{\text{min}}|,|z_{\text{max}}|)\f$ of
+        the grid structure in the \f$z\f$ direction. This information is stored internally. */
+    double zmax() const;
 
     /** This function returns the volume of the dust cell with cell number \f$m\f$. For a cartesian
         dust grid structure, the function determines the bin indices \f$i\f$, \f$j\f$ and \f$k\f$
@@ -104,19 +101,7 @@ protected:
     void write_xyz(DustGridPlotFile* outfile) const;
 
 private:
-    /** This private function determines the number \f$i\f$ such that \f$x_i \leq x < x_{i+1}\f$.
-        It uses a simple bisection method borrowed from the Numerical Recipes book. */
-    int whichxcell(double x) const;
-
-    /** This private function determines the number \f$j\f$ such that \f$y_j \leq y < y_{j+1}\f$.
-        It uses a simple bisection method borrowed from the Numerical Recipes book. */
-    int whichycell(double y) const;
-
-    /** This private function determines the number \f$k\f$ such that \f$z_k \leq z < z_{k+1}\f$.
-        It uses a simple bisection method borrowed from the Numerical Recipes book. */
-    int whichzcell(double z) const;
-
-    /** This function returns the cell number \f$m\f$ corresponding to the three bin indices
+   /** This function returns the cell number \f$m\f$ corresponding to the three bin indices
         \f$i\f$, \f$j\f$ and \f$k\f$. The correspondence is \f$m=k+j\,N_z+i\,N_y\,N_z\f$. */
     int index(int i, int j, int k) const;
 
