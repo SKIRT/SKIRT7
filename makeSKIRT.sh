@@ -9,20 +9,24 @@
 #
 
 # determine the qmake install path
-#QMAKEPATH=`which qmake`
-if [ "$QMAKEPATH" == "" ]
-then
-    # try the path targeted by the one-click Qt installer
-    if [ -e "$HOME/Qt5.2.1/5.2.1/clang_64/bin/qmake" ]
-    then
-        QMAKEPATH=$HOME/Qt5.2.1/5.2.1/clang_64/bin/qmake
-    fi
 
-    # try the path targeted by ./makeQt_everywhere.sh
-    if [ -e "$HOME/Qt/Desktop/5.2.1/bin/qmake" ]
-    then
-        QMAKEPATH=$HOME/Qt/Desktop/5.2.1/bin/qmake
-    fi
+
+# try the path targeted by the one-click Qt installer
+if [ -e "$HOME/Qt5.2.1/5.2.1/clang_64/bin/qmake" ]
+then
+    QMAKEPATH=$HOME/Qt5.2.1/5.2.1/clang_64/bin/qmake
+fi
+
+# try the path targeted by ./makeQt_everywhere.sh
+if [ -e "$HOME/Qt/Desktop/5.2.1/bin/qmake" ]
+then
+    QMAKEPATH=$HOME/Qt/Desktop/5.2.1/bin/qmake
+fi
+
+# try the path in /usr/local used on Ghent research team computers
+if [ -e "/usr/local/Qt/5.2.1/bin/qmake" ]
+then
+    QMAKEPATH=/usr/local/Qt/5.2.1/bin/qmake
 fi
 
 # exit with an error if we don't find qmake
