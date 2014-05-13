@@ -36,8 +36,7 @@ namespace
         // does not clear values; does not resize underlying memory
         void resize(size_t n) { _n = n; }
 
-        // access to values
-        const T& operator()(size_t i, size_t j) const { return _v[i*_n+j]; }
+        // access to values  (const version currently not needed)
         T& operator()(size_t i, size_t j) { return _v[i*_n+j]; }
     };
 
