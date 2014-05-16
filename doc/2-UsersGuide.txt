@@ -13,7 +13,7 @@ can be found in the documentation for the C++ class implementing the parameter. 
 the class name (and hence the corresponding documentation) is fairly easy to locate even for a non-developer.
 
 \note The instructions in this chapter assume that you have installed SKIRT on your computer as explained in
-the \ref InstallationGuide, and that you have added SKIRT to your \c PATH as explained in \ref InstallBinary.
+the \ref InstallationGuide, and that you have added SKIRT to your \c PATH.
 
 
 \section UserCmdLine SKIRT Command line user interface

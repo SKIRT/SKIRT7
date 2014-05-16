@@ -8,144 +8,33 @@ This chapter describes how to install SKIRT on your computer.
 
 \subsection InstallReq System requirements
 
-SKIRT has been developed and tested on Mac OS X 10.7 (Lion) and on the Linux distribution Ubuntu 12.04 (64-bit).
+SKIRT has been developed and tested on Mac OS X 10.9 (Mavericks) and on the Linux distribution Ubuntu 14.04 (64-bit).
 However SKIRT should be able to run on any Unix system. To perform all but the smallest simulations,
 it must be compiled as a 64-bit application and run on a 64-bit system.
-
 At this time SKIRT does not properly compile or run on Microsoft Windows systems, however should the need arise this
 could probably be supported with only a small effort.
 
+SKIRT is written in C++11 and is based on the Qt 5.2 development environment. There are no other external dependencies.
+The source code is hosted on our institution's GitHub. Thus you will need to install a \em git client, a recent
+C++ compiler and the appropriate Qt libraries. The documentation is generated from the source code through Doxygen.
+You don't need to install Doxygen and the related tools unless you are a substantial contributor to the code.
+
 \subsection InstallTypes Types of installation
 
-There are several types of installation, depending on what you wish to do:
- -# Use SKIRT unmodified on Mac OS X.
- -# Use SKIRT unmodified on any Unix system.
- -# Adjust or augment the SKIRT code as a software developer.
- -# Generate updated versions of the SKIRT documentation.
+Subsequent sections provide detailed installation instructions for three scenarios:
+ - use and/or develop on Mac OS X: see \ref InstallDevMac
+ - use and/or develop on Ubuntu Desktop: see \ref InstallDevUbu
+ - use (with no or minor modifications) on a Unix server: see \ref InstallSource
 
-Subsequent sections provide installation instructions for the following scenarios:
- - \ref InstallBinary (use case 1)
- - \ref InstallSource (use case 2)
- - \ref InstallDevMac (use case 3 and 4)
- - \ref InstallDevUbu (use case 3)
+The procedure for other scenarios, e.g. another desktop Unix flavor, can probably (hopefully) be inferred
+by picking and choosing from these instructions.
 
 
-\section InstallBinary Installing a pre-built SKIRT binary
 
-If you intend to use the standard version of SKIRT without modification on Mac OS X (10.6 or later),
-you can install the pre-built SKIRT binary.
-Since this binary does not rely on outside libraries or data, the installation process is really simple:
- -# download the \c SKIRT*.zip file containing the most recent SKIRT binary for Mac OS X
-    from <a href="http://www.skirt.ugent.be/downloads">www.skirt.ugent.be/downloads</a>
- -# unzip the file by double-clicking its icon;
- -# drag the extracted \c bin directory and its contents (the \c skirt binary and supporting library and data files)
-    to a place of your liking;
- -# optionally update your \c PATH to include the SKIRT \c bin directory.
-
-For example, if you placed the extracted \c bin directory in the ~/SKIRT directory, you can
-include SKIRT in your \c PATH by adding the following line to your ~/.profile or ~/.bash_profile file:
-
-\verbatim
-export PATH=~/SKIRT/bin:$PATH
-\endverbatim
-
-
-\section InstallSource Building SKIRT from source on any Unix system
-
-You can build SKIRT from the source code on any Unix system. To do so, you will need to install the relevant
-compile and build tools, and the additional libraries on which SKIRT depends.
-
-\note
-After you've followed the guidelines in this section, the SKIRT source code will reside on your computer and so you
-can obviously tweak it using your preferred text editor. However if you expect to modify or extend the SKIRT code
-in any but the most trivial ways, it is highly recommended to install the full-featured Qt development environment
-as described in section \ref InstallDevMac or \ref InstallDevUbu rather than using the guidelines in this section.
-
-\subsection InstallSrcPacks Installing tools and libraries other than Qt
-
-SKIRT is written in C++, except for a helper application called "DustEM" which is written in Fortran 2003.
-Hence both C++ and Fortran compilers must be installed on your computer.
-The SKIRT source code resides in an online repository managed by the \em Apache \em Subversion source control tool,
-so a recent subversion client \c svn must be installed on your computer.
-Finally, the <b>Cfitsio</b> library to access FITS files should be installed on your computer before
-attempting to compile or build SKIRT.
-
-Depending on the particular Unix flavor under consideration, you may accomplish this by any of the following
-means:
- - install the appropriate package(s) using some standard package manager,
-   similar to what's described in \ref InstallUbuPacks;
- - download an installer providing a prebuilt binary, similar to what's described in \ref InstallMacSvn;
- - build things from source, similar to what's described in \ref InstallMacFits.
-
-\subsection InstallSrcGet Getting the SKIRT source code
-
-Create a directory hierarchy that will hold the SKIRT source code, binaries and run-time information.
-The top-level directory can have any name (for example \c SKIRT) and can be located anywhere (for example in
-your home directory), but the subdirectories must be named as indicated:
-
-\verbatim
-cd
-mkdir SKIRT
-cd SKIRT
-mkdir release run svn
-\endverbatim
-
-Now obtain the SKIRT source code from the Subversion repository as follows
-(the svn command will prompt for your user name and password for the SKIRT source code repository):
-
-\verbatim
-cd ~/SKIRT
-svn co http://ronny.ugent.be/svn/SKIRT6/SKIRT/trunk svn
-\endverbatim
-
-To update the local copy of the source code after changes were made to the repository, use:
-
-\verbatim
-cd svn
-svn update
-\endverbatim
-
-\subsection InstallSrcQt Installing the Qt tools and libraries
-
-SKIRT uses the Qt application framework, so the Qt libraries and build tools should be installed on your computer
-before attempting to compile or build SKIRT (even if you don't use the full Qt development environment).
-Go to the <a href="http://qt-project.org/downloads">Qt download page</a> and download the Qt libraries source code
-version 4.8.4 intended for Linux/X11 (which can in fact be used on any platform). For example,
-SKIRT has been tested with \c qt-everywhere-opensource-src-4.8.4.tar.gz on Ubuntu.
-
-The SKIRT source code includes a shell script \c makeQt_everywhere.sh to assist in building Qt from source.
-To minimize dependencies on external libraries, the provided script builds only a limited Qt subset that is sufficient
-for the current version of SKIRT. You can use the script as is, or you can modify it to suit your needs (for example,
-you may want to change the directory where the Qt libraries are installed).
-
-Enter the following shell commands to build Qt from source (it takes a while!):
-
-\verbatim
-cd <directory-containing-qt-source-distribution>
-tar xvfz qt-everywhere-opensource-src-4.8.4.tar.gz
-cd qt-everywhere-opensource-src-4.8.4
-cp ~/SKIRT/svn/makeQt_everywhere.sh .
-chmod +rx makeQt_everywhere.sh
-./makeQt_everywhere.sh
-\endverbatim
-
-\subsection InstallSrcBuild Building SKIRT
-
-To build SKIRT from the source code in the svn directory, use:
-
-\verbatim
-cd ~/SKIRT/release
-~/Qt/Desktop/4.8.4/bin/qmake ../svn/SKIRT.pro
-make
-\endverbatim
-
-Where the path to \c qmake may need to be adjusted depending on where Qt was installed.
-
-
-\section InstallDevMac Preparing to develop SKIRT on Mac OS X
+\section InstallDevMac Installing SKIRT on Mac OS X
 
 This section explains how to install and configure the complete development environment for SKIRT on
-Mac OS X 10.7 (Lion) including the capability to generate HTML and PDF documentation for SKIRT.
+Mac OS X 10.9 (Mavericks) including the capability to generate HTML and PDF documentation for SKIRT.
 Mac OS X is written on top of a Unix system (\em not Linux) customized by Apple. This means that most of the standard
 Unix tools are available, but things are sufficiently different to warrant a separate treatment.
 
@@ -153,20 +42,23 @@ Some of the installation steps described below require you to enter Unix shell c
 In most cases, you will need to be or become super-user (for example using \c sudo \c bash) for the commands
 to run successfully.
 
-\subsection InstallMacComp Installing the compilers
+\subsection InstallMacComp Installing the compiler
 
-SKIRT is written in C++, except for a helper application called "DustEM" which is written in Fortran 2003.
-Hence both C++ and Fortran compilers must be installed on your computer.
+SKIRT is written in C++11, the C++ flavor that was standardized in 2011, extending the language with new features.
+Hence you need to install a recent C++ compiler.
+On Mac OS X this is accomplished by installing the Xcode development environment, which is
+freely available from the App Store. Download and install the latest version, and then launch the Xcode application
+at least once to complete installation. SKIRT was tested with Xcode 5.1 which installs the Apple C++ compiler Clang 3.4
+(Apple LLVM version 5.1 based on LLVM 3.4).
 
-On Mac OS X the GNU C++ compiler g++ is usually obtained by installing the \em XCode development environment,
-freely available from the Apple web site. Alternatively, on recent Mac OS X systems you can install the
-<em>Command Line Tools for Xcode</em> package, also freely available from the Apple web site, which is a smaller
-download. In both cases, use the default install location.
-SKIRT was tested with the apple-darwin g++ version 4.2 (the last g++ version officially supported by Apple).
+\note It is important that you launch the Xcode application at least once to complete installation
+of the command line tools that will be used by the Qt development environment.
 
-An installer for the GNU Fortran compiler can be obtained from the
-<a href="http://gcc.gnu.org/wiki/GFortranBinaries">gfortran download page</a>. SKIRT was tested with the installer
-called \em gfortran-4.6.2-x86_64-Lion.dmg .
+\note You need to install the full Xcode application; installing the <em>Command Line Tools for Xcode</em> package
+is not sufficient (and not needed).
+
+XXXXXXXXXXXX
+
 
 \subsection InstallMacSvn Installing the source control client
 
@@ -474,7 +366,8 @@ In addition, install the following packages:
 - <a href="http://www.graphviz.org/Download_macos.php">Graphviz Graph Visualization Software</a> (graphviz-2.28.0.pkg)
 
 
-\section InstallDevUbu Preparing to develop SKIRT on Ubuntu
+
+\section InstallDevUbu Installing SKIRT on Ubuntu Desktop
 
 This section explains how to install and configure the development environment for SKIRT on Ubuntu,
 one of the most popular Linux distributions for desktops and servers. At this time there are no
@@ -551,5 +444,99 @@ If you plan on writing or updating SKIRT code documentation, you may wish to ins
 a tool to assist with formatting /**-style documentation blocks in .hpp files.
 Proceed as described in \ref InstallMacDoxStyle, keeping in mind that on Ubuntu "Preferences" are called "Options",
 and that the corresponding dialog is accessed by selecting the "Tools->Options..." menu item.
+
+
+
+\section InstallSource Installing SKIRT on a Unix server
+
+You can build SKIRT from the source code on any Unix system. To do so, you will need to install the relevant
+compile and build tools, and the additional libraries on which SKIRT depends.
+
+\note
+After you've followed the guidelines in this section, the SKIRT source code will reside on your computer and so you
+can obviously tweak it using your preferred text editor. However if you expect to modify or extend the SKIRT code
+in any but the most trivial ways, it is highly recommended to install the full-featured Qt development environment
+as described in section \ref InstallDevMac or \ref InstallDevUbu rather than using the guidelines in this section.
+
+\subsection InstallSrcPacks Installing tools and libraries other than Qt
+
+SKIRT is written in C++, except for a helper application called "DustEM" which is written in Fortran 2003.
+Hence both C++ and Fortran compilers must be installed on your computer.
+The SKIRT source code resides in an online repository managed by the \em Apache \em Subversion source control tool,
+so a recent subversion client \c svn must be installed on your computer.
+Finally, the <b>Cfitsio</b> library to access FITS files should be installed on your computer before
+attempting to compile or build SKIRT.
+
+Depending on the particular Unix flavor under consideration, you may accomplish this by any of the following
+means:
+ - install the appropriate package(s) using some standard package manager,
+   similar to what's described in \ref InstallUbuPacks;
+ - download an installer providing a prebuilt binary, similar to what's described in \ref InstallMacSvn;
+ - build things from source, similar to what's described in \ref InstallMacFits.
+
+\subsection InstallSrcGet Getting the SKIRT source code
+
+Create a directory hierarchy that will hold the SKIRT source code, binaries and run-time information.
+The top-level directory can have any name (for example \c SKIRT) and can be located anywhere (for example in
+your home directory), but the subdirectories must be named as indicated:
+
+\verbatim
+cd
+mkdir SKIRT
+cd SKIRT
+mkdir release run svn
+\endverbatim
+
+Now obtain the SKIRT source code from the Subversion repository as follows
+(the svn command will prompt for your user name and password for the SKIRT source code repository):
+
+\verbatim
+cd ~/SKIRT
+svn co http://ronny.ugent.be/svn/SKIRT6/SKIRT/trunk svn
+\endverbatim
+
+To update the local copy of the source code after changes were made to the repository, use:
+
+\verbatim
+cd svn
+svn update
+\endverbatim
+
+\subsection InstallSrcQt Installing the Qt tools and libraries
+
+SKIRT uses the Qt application framework, so the Qt libraries and build tools should be installed on your computer
+before attempting to compile or build SKIRT (even if you don't use the full Qt development environment).
+Go to the <a href="http://qt-project.org/downloads">Qt download page</a> and download the Qt libraries source code
+version 4.8.4 intended for Linux/X11 (which can in fact be used on any platform). For example,
+SKIRT has been tested with \c qt-everywhere-opensource-src-4.8.4.tar.gz on Ubuntu.
+
+The SKIRT source code includes a shell script \c makeQt_everywhere.sh to assist in building Qt from source.
+To minimize dependencies on external libraries, the provided script builds only a limited Qt subset that is sufficient
+for the current version of SKIRT. You can use the script as is, or you can modify it to suit your needs (for example,
+you may want to change the directory where the Qt libraries are installed).
+
+Enter the following shell commands to build Qt from source (it takes a while!):
+
+\verbatim
+cd <directory-containing-qt-source-distribution>
+tar xvfz qt-everywhere-opensource-src-4.8.4.tar.gz
+cd qt-everywhere-opensource-src-4.8.4
+cp ~/SKIRT/svn/makeQt_everywhere.sh .
+chmod +rx makeQt_everywhere.sh
+./makeQt_everywhere.sh
+\endverbatim
+
+\subsection InstallSrcBuild Building SKIRT
+
+To build SKIRT from the source code in the svn directory, use:
+
+\verbatim
+cd ~/SKIRT/release
+~/Qt/Desktop/4.8.4/bin/qmake ../svn/SKIRT.pro
+make
+\endverbatim
+
+Where the path to \c qmake may need to be adjusted depending on where Qt was installed.
+
 
 */
