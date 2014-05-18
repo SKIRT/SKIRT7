@@ -57,129 +57,72 @@ of the command line tools that will be used by the Qt development environment.
 \note You need to install the full Xcode application; installing the <em>Command Line Tools for Xcode</em> package
 is not sufficient (and not needed).
 
-XXXXXXXXXXXX
 
+\subsection InstallMacGit Configuring the source control client
 
-\subsection InstallMacSvn Installing the source control client
+The SKIRT source code resides in an online GitHub repository. You can access this repository from your computer
+through the \c git client software, which is automatically installed by Xcode along with the C++ compiler
+(see \ref InstallMacComp).
 
-The SKIRT source code resides in an online repository managed by the \em Apache \em Subversion source control tool,
-so a recent subversion client \c svn must be installed on your computer to replace the svn client installed
-by default on Mac OS X.
-
-Go to the <a href="http://www.wandisco.com/subversion/download#osx">subversion download page</a>
-and download the most recent version of the "Vanilla Subversion" binary package suitable for your version of Mac OS X
-(for example, \c Subversion-1.7.5_10.7.x.pkg). Double-click the package file icon and follow the instructions to
-install subversion.
-
-To ensure that the Qt development environment uses the newly installed subversion tools (rather than those
-installed by default on Mac OS X), perform the following commands:
+Before using the \c git client, you should configure it with your user name and email address. This is
+especially important if you plan to contribute code to the SKIRT repository. Perform the following commands,
+replacing the placeholders with your own name and email address:
 
 \verbatim
-cd /usr/bin
-mv svn svn.default
-mv svnversion svnversion.default
-ln -s /opt/subversion/bin/svn svn
-ln -s /opt/subversion/bin/svnversion svnversion
-\endverbatim
-
-\note For advanced users: it is not sufficient to include /opt/subversion/bin in your \c PATH environment variable.
-The SKIRT build script (defined in SKIRT.pro) uses svnversion to determine the code's revision number. When this
-script is executed from the Qt Creator GUI application, it doesn't see the regular environment variables.
-
-\subsection InstallMacFits Installing the FITS library
-
-The <b>Cfitsio</b> library to access FITS files should be installed on your computer before attempting to compile
-or build SKIRT. On Mac OS X this library must be built from source through a "manual" procedure.
-The library should be placed in the directory /usr/local/lib and the header files in /usr/local/include/cfitsio.
-Choosing a different location is possible but not recommended, since you will have
-to manually adjust some of the SKIRT build configuration files.
-
-First go to the <a href="http://heasarc.gsfc.nasa.gov/docs/software/fitsio/fitsio.html">CFITSIO webpage</a> and
-download the most recent version of the CFITSIO source code for Unix
-(SKIRT has been tested with \c cfitsio3300.tar.gz).
-Move this file to your /usr/local/src directory and untar the file as follows:
-
-\verbatim
-mkdir -p /usr/local/src
-mv cfitsio3300.tar.gz /usr/local/src
-cd /usr/local/src
-tar xvfz cfitsio3300.tar.gz
-\endverbatim
-
-Now enter the cfitsio subdirectory and do the installation as follows:
-
-\verbatim
-cd cfitsio
-./configure
-make
-\endverbatim
-
-This compiles and builds the library, and puts the library file libcfitsio.a and the header files in the current
-directory. Copy them to the appropriate directory as follows:
-
-\verbatim
-mkdir -p /usr/local/lib
-cp libcfitsio.a /usr/local/lib
-mkdir -p /usr/local/include/cfitsio
-cp *.h /usr/local/include/cfitsio
+git config --global user.name "John Smith"
+git config --global user.email john.smith@smithsonian.org
 \endverbatim
 
 \subsection InstallMacQt Installing the Qt development environment
 
-You need two Mac-specific installers: one for the basic Qt tools and libraries (version 4.8.4), and one for the
-Qt Creator integrated development environment (version 2.6).
+SKIRT is based on the Qt 5.2 development environment. In addition to run-time libraries and build tools, Qt offers
+a convenient integrated code editor called Qt Creator. All of these components can be installed on Mac OS X with
+a single installer.
 
-Go to the <a href="http://qt-project.org/downloads">Qt download page</a> and download the disk image files called
-\c qt-mac-opensource-4.8.4.dmg and \c qt-creator-mac-opensource-2.6.0.dmg . First double-click
-the \c qt-mac-opensource-4.8.4.dmg file icon to open the disk image of the library installer, double-click
-the installer package icon in the window that appears, and follow the instructions in the installer wizard
-for a standard install.
-Then double-click the \c qt-creator-mac-opensource-2.6.0.dmg file icon to open the disk image of the Qt Creator
-application, and in the window that appears drag the Qt Creator application icon over the Applications folder
-so that it gets copied.
+Go to the <a href="http://qt-project.org/downloads">Qt download page</a> and download the disk image file called
+\c qt-opensource-mac-x64-clang-5.2.1.dmg . Double-click the downloaded file's icon to open the disk image of the
+installer, double-click the installer package icon in the window that appears, and follow the instructions in the
+installer wizard for a standard install.
 
-Use Finder to locate the \em Qt \em Creator application in the Applications folder, and drag the application
-icon to your dock (or add it to your preferred application launcher).
+Use Finder or Spotlight to locate the \em Qt \em Creator application in the newly installed directory,
+and drag the application icon to your dock (or add it to your preferred application launcher).
 
 Launch the Qt Creator application and choose the "Qt Creator->Preferences..." menu item to open the preferences dialog.
-Select the "Build&Run->Compilers" tab and verify that Qt automatically detected the C++ compilers installed on your
+Select the "Build&Run->Compilers" tab and verify that Qt automatically detected the Clang compiler installed on your
 computer. If not, manually add a suitable compiler and press the "Apply" button.
-Select the "Build&Run->Qt Versions" tab. You need to manually add the Qt library version you installed earlier:
-press the "Add" button, and in the new dialog locate "/Developer/Tools/Qt/qmake" and press "Open". Back in the
-preferences dialog, verify that the Qt version was added and press the "Apply" button.
+Select the "Build&Run->Qt Versions" tab and verify that Qt automatically detected the Qt version you just installed
+(Qt 5.2.1 if you used the installer mentioned above). If not, manually add an appropriate Qt version.
 Select the "Build&Run->Kits" tab. Remove any lines listed other than "Desktop (Default)" (select each of the
-lines in turn and press the "Remove" button). Select the line "Desktop (Default)" and configure its properties:
-set "Compiler" to "GCC x86 64-bit", and set "Qt version" to the version you installed earlier (i.e. 4.8.4).
+lines in turn and press the "Remove" button). Select the line "Desktop (Default)" and verify and/or configure
+its properties: "Compiler" should be "Clang x86 64-bit", and "Qt version" should be the version you installed
+(i.e. Qt 5.2.1 if you used the installer mentioned above).
 Finally press the "OK" buttun to accept the changes and close the preferences dialog.
-
-\note On Mac OS X 10.8 (Mountain Lion) you should select the compiler "Clang x86 64-bit" instead of "GCC x86 64-bit".
 
 \subsection InstallMacGet Getting the SKIRT source code
 
 Create a directory hierarchy that will hold the SKIRT source code, binaries and run-time information.
 The top-level directory can have any name (for example \c SKIRT) and can be located anywhere (for example in
-your home directory), but the subdirectories must be named as indicated:
+your home directory), but the subdirectories should be named as indicated:
 
 \verbatim
 cd
 mkdir SKIRT
 cd SKIRT
-mkdir debug release run svn
+mkdir debug release run git
 \endverbatim
 
-Now obtain the SKIRT source code from the Subversion repository as follows
-(the svn command will prompt for your user name and password for the SKIRT source code repository):
+Now obtain the SKIRT source code from the GitHub repository as follows:
 
 \verbatim
 cd ~/SKIRT
-svn co http://ronny.ugent.be/svn/SKIRT6/SKIRT/trunk svn
+git clone git@github.ugent.be:SKIRT/SKIRT.git git
 \endverbatim
 
 To update the local copy of the source code after changes were made to the repository, use:
 
 \verbatim
-cd svn
-svn update
+cd ~/SKIRT/git
+git pull
 \endverbatim
 
 \subsection InstallMacConf Configuring the development environment
@@ -206,33 +149,29 @@ settings untouched), and at the end press the OK button to confirm the changes.
       to your local hard disk and add it to the documentation available in Qt Creator
 
   - "C++ -> Code Style" tab
-    - press the "Import..." button, select the file <tt>.../svn/doc/SKIRT Code Style.xml</tt>
+    - press the "Import..." button, select the file <tt>~/SKIRT/git/doc/SkirtCodeStyle.xml</tt>
       and press the "Open" button
 
   - "C++ -> File Naming" tab
     - Header suffix: hpp
     - Lower case filenames: Off
-    - License template: press the "Choose..." button, select the file \c .../svn/doc/LicenseTemplate.txt
+    - License template: press the "Choose..." button, select the file <tt>~/SKIRT/git/doc/LicenseTemplate.txt</tt>
       and press the "Open" button
 
   - "Build & Run -> General" tab
     - Save all files before build: On
+    - Open Compile Output pane when building: On
     - Clear old application output on a new run: On
     - Merge stderr and stdout: On
-
-  - "Version Control->Subversion" tab
-    - Authentication: On
-    - Username and Password: your account information for the SKIRT source code repository
+    - Default build directory: "../%{CurrentBuild:Name}"
 
 \subsection InstallMacBuild Building SKIRT
 
-To build SKIRT from within Qt Creator, you need to open the SKIRT Qt project included with the source code.
+To build SKIRT from within Qt Creator, you need to open the main Qt project included with the source code.
 In Qt Creator, choose the menu item "File->Open File or Project...", locate the Qt project
-file \c SKIRT.pro inside your \c SKIRT/svn directory, and press the "Open" button from within the dialog.
+file \c BuildSKIRT.pro inside your \c SKIRT/git directory, and press the "Open" button from within the dialog.
 
-\note Make sure to open the \c SKIRT.pro file and \em not the \c FitSKIRT.pro file residing in the same directory.
-
-Qt Creator now opens a configuration pane for the SKIRT project in its main window. Simply press the
+Qt Creator now opens a configuration pane for the BuildSKIRT project in its main window. Simply press the
 "Configure Project..." button without changing any of the values, which causes Qt Creator to switch to
 regular "Edit" mode. However you still need to adjust the project configuration.
 
@@ -240,18 +179,17 @@ Select "Projects" mode in the left margin and select the "Build & Run" tab. Ther
 "Build" and "Run", placed under a "Desktop" header. First select the "Build" subtab. There are two build
 configurations called "Debug" and "Release", which can be selected through the "Edit build configuration" popup.
 For each configuration, change the "Build directory" to one of the directories you created earlier
-(SKIRT/debug for the debug configuration, SKIRT/release for the release configuration). \em IMPORTANT: leave the
-"Edit build configuration" popup on the release configuration.
+(\c SKIRT/debug for the debug configuration, \c SKIRT/release for the release configuration).
 
-Still in "Projects" mode, now select the "Run" subtab. Change the "Working directory" to SKIRT/run directory
-you created earlier. Enter the name of a .ski file in the "Arguments" field; if you don't yet have any ski files,
-just enter a dummy name like "test". Turn off the "Run in terminal" option;
+\note IMPORTANT: leave the "Edit build configuration" popup on the release configuration.
+
+Still in "Projects" mode, now select the "Run" subtab. In the "Run configuration" popup, select the
+"SKIRTmain" item. Now change the "Working directory" to the \c SKIRT/run directory
+you created earlier. Turn off the "Run in terminal" option;
 this causes SKIRT's log messages to appear inside Qt Creator rather than in a separate Terminal window.
 
 Finally go back to "Edit" mode (icon in left margin). Here you can browse, view and edit the source tree.
-To build SKIRT,
-click the hammer icon in the left margin. To run SKIRT, click the green triangular icon in the left margin.
-For more information, click the question mark icon in the left margin and refer to the Qt Creator documentation.
+To compile and build the complete SKIRT code (including FitSKIRT), click the hammer icon in the left margin.
 
 \subsection InstallMacRun Running SKIRT
 
@@ -260,7 +198,7 @@ include SKIRT in your \c PATH by adding a line to your ~/.profile or ~/.bash_pro
 the SKIRT project in the default location as described above, you should add the following line:
 
 \verbatim
-export PATH=~/SKIRT/release:$PATH
+export PATH=~/SKIRT/release/SKIRTmain:~/SKIRT/release/FitSKIRTmain:$PATH
 \endverbatim
 
 To validate your installation and build, enter the following commands in a Terminal window:
@@ -273,7 +211,7 @@ skirt -h
 Since SKIRT doesn't recognize the -h option, it will write an error message, followed by a brief help text:
 
 \verbatim
-Welcome to SKIRT v6 (svn __ built on __)
+Welcome to SKIRT v___
 * *** Error: Invalid command line arguments
 !
 ! To create a new ski file interactively:    skirt
@@ -282,50 +220,21 @@ Welcome to SKIRT v6 (svn __ built on __)
 !   skirt [-b] [-s <simulations>] [-t <threads>]
 !         [-k] [-i <dirpath>] [-o <dirpath>]
 !         [-r] {<filepath>}*
-_ _ _
+...
 \endverbatim
 
-\note On some older Mac OS X systems SKIRT immediately fails with a system error message, complaining that it
-can't load the Qt libraries, even if the the Qt libraries have been properly installed as described before.
+It can be useful (e.g. when testing a new feature) to run SKIRT from within Qt creator. This is meaningful only if
+you already have a .ski file. To specify the command line arguments for SKIRT (including the name of the .ski file),
+select "Projects" mode in the left margin and go to the "SKIRTmain" run configuration.
+Enter the command line arguments in the "Arguments" field. Go back to "Edit mode".
 
-To resolve this problem, add the following lines to your ~/.profile or ~/.bash_profile file:
-
-\verbatim
-for directory in `ls /Library/Frameworks | grep Qt`; do
-    DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/Library/Frameworks/$directory
-done
-export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:/Library/Frameworks/
-\endverbatim
-
-\subsection InstallMacDeploy Building SKIRT for deployment
-
-To build a SKIRT binary that can be deployed on other Mac OS X systems, use the shell script in the \c svn directory:
-
-\verbatim
-cd SKIRT/svn
-bash makeSKIRT_macosx.sh
-\endverbatim
-
-The \c skirt binary and supporting \c dat and \c lib directories are placed in the \c bin directory next to the
-\c svn directory.
+To run SKIRT, click the green triangular icon in the left margin.
 
 \subsection InstallMacDoxStyle Installing the documentation streamliner
 
-If you plan on writing or updating SKIRT code documentation, you may wish to install and configure DoxStyle,
+If you plan on writing or updating SKIRT code documentation, you may wish to configure DoxStyle,
 a tool to assist with formatting /**-style documentation blocks in .hpp files.
-
-DoxStyle is available from the SKIRT repository as a separate Qt Creator project, in a separate directory.
-To obtain and build DoxStyle, follow a procedure similar to what's described in this chapter for SKIRT:
- - Create a \c DoxStyle directory (for instance next to your \c SKIRT directory) with subdirectories
-   \c debug, \c release and \c svn.
- - In Qt Creator choose the "File->New File or Project..." menu item and in the dialog select
-   "Project from Version Control->Subversion Checkout"; enter "http://ronny.ugent.be/svn/SKIRT6/DoxStyle/trunk"
-   in the "Repository" field and proceed to setup the project as described in \ref InstallMacGet.
- - Build a release version of the project by clicking the hammer icon in the left margin.
-
-There now is an executable file \c DoxStyle in your ~/DoxStyle/release directory. You can leave it there, or you can
-move it to another location on your system and remove the remainder of the DoxStyle directory and its contents.
-The DoxStyle executable will continue to work as long as you have Qt installed.
+DoxStyle is automatically included and built as part of the buildSKIRT project.
 
 To configure Qt Creator so that you can easily use DoxStyle, choose the "Qt Creator->Preferences..." menu item to open
 the preferences panel, and make the adjustments on the various tabs as listed below, pressing the OK button at the end.
@@ -335,7 +244,7 @@ the preferences panel, and make the adjustments on the various tabs as listed be
    - Add a new item called "Streamline Selection" to this category
    - Configure the attributes for this item as follows:
      - Description: "Streamlines the doxygen blocks in the selection"
-     - Executable: path to the DoxStyle executable
+     - Executable: path to the DoxStyle executable: ~/SKIRT/release/DoxStyle/doxstyle
      - Arguments: empty
      - Working directory: empty
      - Output: Replace Selection
@@ -351,10 +260,8 @@ For information on how to use DoxStyle, see \ref DevStyleFormat.
 
 \subsection InstallMacDoxygen Installing the documentation generator
 
-This section is only relevant if you wish to (re-)generate the SKIRT documentation. Most developers will be content
-to submit new code to the repository and leave the creation of fresh documentation to other souls. But if you insist...
-
-The SKIRT documentation is generated from the source files by Doxygen. This open source application requires
+This section is only relevant if you wish to (re-)generate the SKIRT documentation.
+The SKIRT documentation is generated from the source files by Doxygen. This free open source application requires
 a TeX distribution to handle mathematical formulas, and it uses the Dots tool in the Graphviz graph visualization
 software to generate class diagrams.
 
@@ -362,86 +269,94 @@ If you do not already have a recent TeX install, install the following package:
 - <a href="http://www.tug.org/mactex/2012/">The MacTeX-2012 Distribution</a> (MacTeX.pkg)
 
 In addition, install the following packages:
-- <a href="http://www.stack.nl/~dimitri/doxygen/">Doxygen application and tools</a> (Doxygen-1.7.6.1.dmg)
-- <a href="http://www.graphviz.org/Download_macos.php">Graphviz Graph Visualization Software</a> (graphviz-2.28.0.pkg)
+- <a href="http://www.stack.nl/~dimitri/doxygen/">Doxygen application and tools</a> (Doxygen-1.8.5.dmg)
+- <a href="http://www.graphviz.org/Download_macos.php">Graphviz Graph Visualization Software</a> (graphviz-2.36.0.pkg)
 
+For information on how to actually generate the documentation, see \ref DevBuildDocs.
 
 
 \section InstallDevUbu Installing SKIRT on Ubuntu Desktop
 
-This section explains how to install and configure the development environment for SKIRT on Ubuntu,
-one of the most popular Linux distributions for desktops and servers. At this time there are no
+This section explains how to install and configure the development environment for SKIRT on Ubuntu Desktop 14.04,
+one of the most popular Linux distributions. At this time there are no
 instructions for generating SKIRT documentation on Ubuntu, although this should be possible if the need arises.
 
 Some of the installation steps described below require you to enter Unix shell commands in a Terminal window.
 In most cases, you will need to be or become super-user (for example using \c sudo \c bash) for the commands
 to run successfully.
 
-\subsection InstallUbuPacks Installing tools and libraries
+\subsection InstallUbuPacks Installing development tools
 
-SKIRT is written in C++, except for a helper application called "DustEM" which is written in Fortran 2003.
-Hence both C++ and Fortran compilers must be installed on your computer.
-The SKIRT source code resides in an online repository managed by the \em Apache \em Subversion source control tool,
-so a recent subversion client \c svn must be installed on your computer.
-Finally, the <b>Cfitsio</b> library to access FITS files should be installed on your computer before attempting
-to compile or build SKIRT.
+SKIRT is written in C++11, the C++ flavor that was standardized in 2011, extending the language with new features.
+The SKIRT source code resides in an online GitHub repository, which you can access from your computer
+through the \c git client. Hence you need to install a recent C++ compiler and the \c git client.
 
 On Ubuntu you can accomplish this easily by installing the appropriate packages using the standard package manager.
 From a Terminal window, simply enter:
 
 \verbatim
 apt-get install g++
-apt-get install gfortran
-apt-get install subversion
-apt-get install libccfits-dev
+apt-get install git
+\endverbatim
+
+\subsection InstallUbuGit Configuring the source control client
+
+Before using the \c git client, you should configure it with your user name and email address. This is
+especially important if you plan to contribute code to the SKIRT repository. Perform the following commands,
+replacing the placeholders with your own name and email address:
+
+\verbatim
+git config --global user.name "John Smith"
+git config --global user.email john.smith@smithsonian.org
 \endverbatim
 
 \subsection InstallUbuQt Installing the Qt development environment
 
-As the first step, install the basic Qt tools and libraries as explained in \ref InstallSrcQt. Then
-goto to the <a href="http://qt-project.org/downloads">Qt download page</a> and download the installer
-for the Qt Creator integrated development environment version 2.6 for 64-bit Linux/X11 called
-\c qt-creator-linux-x86_64-opensource-2.6.0.bin.
+SKIRT is based on the Qt 5.2 development environment. In addition to run-time libraries and build tools, Qt offers
+a convenient integrated code editor called Qt Creator. All of these components can be installed on Ubuntu with
+a single installer.
 
-You need to make the downloaded file executable, and then you can run it as follows:
+Go to the <a href="http://qt-project.org/downloads">Qt download page</a> and download the file called
+\c qt-opensource-linux-x64-5.2.1.run . Make the downloaded file executable and run it as follows:
 
 \verbatim
-chmod u+x qt-creator-linux-x86_64-opensource-2.6.0.bin
-./qt-creator-linux-x86_64-opensource-2.6.0.bin
+chmod +rx qt-opensource-linux-x64-5.2.1.run
+./qt-opensource-linux-x64-5.2.1.run
 \endverbatim
 
-Once you see the installer wizard, follow the instructions for a standard install.
+Follow the instructions in the installer wizard for a standard install.
+Once the installation completed, locate and launch the Qt Creator application.
+Choose the "Tools->Options..." menu item to open the options dialog.
 
-Launch the Qt Creator application and choose the "Tools->Options..." menu item to open the options dialog.
-Select the "Build&Run->Compilers" tab and check whether Qt automatically detected one or more suitable C++ compilers.
-If not, manually add a suitable compiler and press the "Apply" button.
-Select the "Build&Run->Qt Versions" tab. You need to manually add the Qt library version you installed earlier:
-press the "Add" button, and in the new dialog locate "~/Qt/Desktop/4.8.4/bin/qmake" and press "Open". Back in the
-options dialog, verify that the Qt version was added and press the "Apply" button.
+Select the "Build&Run->Compilers" tab and verify that Qt automatically detected the gcc compiler installed on your
+computer. If not, manually add a suitable compiler and press the "Apply" button.
+Select the "Build&Run->Qt Versions" tab and verify that Qt automatically detected the Qt version you just installed
+(Qt 5.2.1 if you used the installer mentioned above). If not, manually add an appropriate Qt version.
 Select the "Build&Run->Kits" tab. Remove any lines listed other than "Desktop (Default)" (select each of the
-lines in turn and press the "Remove" button). Select the line "Desktop (Default)" and configure its properties:
-set "Compiler" to your preferred compiler (always use a x86 64-bit version), and set "Qt version" to the version
-you installed earlier (i.e. 4.8.4).
-Finally press the "OK" buttun to accept the changes and close the options dialog.
+lines in turn and press the "Remove" button). Select the line "Desktop (Default)" and verify and/or configure
+its properties: "Compiler" should be "gcc x86 64-bit", and "Qt version" should be the version you installed
+(i.e. Qt 5.2.1 if you used the installer mentioned above).
+Finally press the "OK" buttun to accept the changes and close the preferences dialog.
 
 \subsection InstallUbuGet Getting the SKIRT source code
 
-Proceed as described in \ref InstallSrcGet or \ref InstallMacGet.
+Proceed as described in \ref InstallMacGet.
 
 \subsection InstallUbuConf Configuring the development environment
 
-Before proceeding, you should configure Qt Creator according to the instructions
-provided in \ref InstallMacConf, keeping in mind that on Ubuntu "Preferences" are called "Options",
+Proceed as described in \ref InstallMacConf, keeping in mind that on Ubuntu "Preferences" are called "Options",
 and that the corresponding dialog is accessed by selecting the "Tools->Options..." menu item.
 
 \subsection InstallUbuBuild Building SKIRT
 
-To build SKIRT from within Qt Creator, proceed as described in \ref InstallMacBuild.
+Proceed as described in \ref InstallMacBuild.
+
+\subsection InstallUbuRun Running SKIRT
+
+Proceed as described in \ref InstallMacRun.
 
 \subsection InstallUbuDoxStyle Installing the documentation streamliner
 
-If you plan on writing or updating SKIRT code documentation, you may wish to install and configure DoxStyle,
-a tool to assist with formatting /**-style documentation blocks in .hpp files.
 Proceed as described in \ref InstallMacDoxStyle, keeping in mind that on Ubuntu "Preferences" are called "Options",
 and that the corresponding dialog is accessed by selecting the "Tools->Options..." menu item.
 
@@ -449,94 +364,93 @@ and that the corresponding dialog is accessed by selecting the "Tools->Options..
 
 \section InstallSource Installing SKIRT on a Unix server
 
-You can build SKIRT from the source code on any Unix system. To do so, you will need to install the relevant
-compile and build tools, and the additional libraries on which SKIRT depends.
-
-\note
+This section explains how to install SKIRT on any Unix system.
 After you've followed the guidelines in this section, the SKIRT source code will reside on your computer and so you
 can obviously tweak it using your preferred text editor. However if you expect to modify or extend the SKIRT code
 in any but the most trivial ways, it is highly recommended to install the full-featured Qt development environment
 as described in section \ref InstallDevMac or \ref InstallDevUbu rather than using the guidelines in this section.
 
-\subsection InstallSrcPacks Installing tools and libraries other than Qt
+\subsection InstallSrcPacks Installing development tools
 
-SKIRT is written in C++, except for a helper application called "DustEM" which is written in Fortran 2003.
-Hence both C++ and Fortran compilers must be installed on your computer.
-The SKIRT source code resides in an online repository managed by the \em Apache \em Subversion source control tool,
-so a recent subversion client \c svn must be installed on your computer.
-Finally, the <b>Cfitsio</b> library to access FITS files should be installed on your computer before
-attempting to compile or build SKIRT.
+SKIRT is written in C++11, the C++ flavor that was standardized in 2011, extending the language with new features.
+The SKIRT source code resides in an online GitHub repository, which you can access from your computer
+through the \c git client. Hence you need to install a recent C++ compiler and the \c git client.
 
 Depending on the particular Unix flavor under consideration, you may accomplish this by any of the following
 means:
- - install the appropriate package(s) using some standard package manager,
-   similar to what's described in \ref InstallUbuPacks;
- - download an installer providing a prebuilt binary, similar to what's described in \ref InstallMacSvn;
- - build things from source, similar to what's described in \ref InstallMacFits.
+ - use a standard package manager for your system;
+ - download and run an installer that was downloaded manually;
+ - ask your system manager to install the required tools.
+
+\subsection InstallSrcGit Configuring the source control client
+
+Before using the \c git client, you should configure it with your user name and email address. This is
+especially important if you plan to contribute code to the SKIRT repository. Perform the following commands,
+replacing the placeholders with your own name and email address:
+
+\verbatim
+git config --global user.name "John Smith"
+git config --global user.email john.smith@smithsonian.org
+\endverbatim
 
 \subsection InstallSrcGet Getting the SKIRT source code
 
-Create a directory hierarchy that will hold the SKIRT source code, binaries and run-time information.
-The top-level directory can have any name (for example \c SKIRT) and can be located anywhere (for example in
-your home directory), but the subdirectories must be named as indicated:
-
-\verbatim
-cd
-mkdir SKIRT
-cd SKIRT
-mkdir release run svn
-\endverbatim
-
-Now obtain the SKIRT source code from the Subversion repository as follows
-(the svn command will prompt for your user name and password for the SKIRT source code repository):
-
-\verbatim
-cd ~/SKIRT
-svn co http://ronny.ugent.be/svn/SKIRT6/SKIRT/trunk svn
-\endverbatim
-
-To update the local copy of the source code after changes were made to the repository, use:
-
-\verbatim
-cd svn
-svn update
-\endverbatim
+Proceed as described in \ref InstallMacGet.
 
 \subsection InstallSrcQt Installing the Qt tools and libraries
 
 SKIRT uses the Qt application framework, so the Qt libraries and build tools should be installed on your computer
 before attempting to compile or build SKIRT (even if you don't use the full Qt development environment).
 Go to the <a href="http://qt-project.org/downloads">Qt download page</a> and download the Qt libraries source code
-version 4.8.4 intended for Linux/X11 (which can in fact be used on any platform). For example,
-SKIRT has been tested with \c qt-everywhere-opensource-src-4.8.4.tar.gz on Ubuntu.
+version 5.2.1 intended for your system.
+SKIRT has been tested with \c qt-everywhere-opensource-src-5.2.1.tar.gz on Ubuntu.
 
-The SKIRT source code includes a shell script \c makeQt_everywhere.sh to assist in building Qt from source.
+The SKIRT source code includes a shell script \c makeQt_everywhere.sh to assist with building Qt from source.
 To minimize dependencies on external libraries, the provided script builds only a limited Qt subset that is sufficient
-for the current version of SKIRT. You can use the script as is, or you can modify it to suit your needs (for example,
-you may want to change the directory where the Qt libraries are installed).
+for the current version of SKIRT. You can use the script as is, but more likely you will need to modify it
+to suit your needs in the following ways:
+ - adjust the value of the \c -prefix option to specify the directory where the Qt libraries will be installed;
+ - add a \c -platform option with a value that specifies the appropriate compiler and operating system,
+   unless you know that the default will work for your environment; the value of the platform option must be
+   the name of one of the subdirectories in the \c mkspecs directory inside the Qt source distribution.
 
-Enter the following shell commands to build Qt from source (it takes a while!):
+\note On the servers used by the Ghent University SKIRT team, the default platform works fine so you can omit the
+\c -platform option.
+
+\note On the Ghent University High Performance Computing (HPC) system, it is highly recommended that you use
+the Intel C++ compiler. To accomplish this, add the option "-platform linux-icc-64" in the \c makeQt_everywhere.sh
+script, and \em before you execute the script, load the \c ictce module in addition to the \c jobs module.
+You will need to (re)load this modules before (re)building SKIRT as well.
+
+After editing the script as needed, enter the following shell commands to build Qt from source (it takes a while!):
 
 \verbatim
 cd <directory-containing-qt-source-distribution>
-tar xvfz qt-everywhere-opensource-src-4.8.4.tar.gz
-cd qt-everywhere-opensource-src-4.8.4
-cp ~/SKIRT/svn/makeQt_everywhere.sh .
+tar xvfz qt-everywhere-opensource-src-5.2.1.tar.gz
+cd qt-everywhere-opensource-src-5.2.1
+cp ~/SKIRT/git/makeQt_everywhere.sh .
 chmod +rx makeQt_everywhere.sh
 ./makeQt_everywhere.sh
 \endverbatim
 
 \subsection InstallSrcBuild Building SKIRT
 
-To build SKIRT from the source code in the svn directory, use:
+The SKIRT source code includes a shell script \c makeSKIRT.sh to assist in building SKIRT
+from the source code in the git directory.
+If the Qt tools and libraries were not installed in one of the default places, you will need to adjust
+the path to \c qmake in the script. Also, before you use the script for the first time, you may need
+to make it executable.
+
+To build SKIRT use:
 
 \verbatim
-cd ~/SKIRT/release
-~/Qt/Desktop/4.8.4/bin/qmake ../svn/SKIRT.pro
-make
+cd ~/SKIRT/git
+chmod +rx makeSKIRT.sh
+./makeSKIRT.sh
 \endverbatim
 
-Where the path to \c qmake may need to be adjusted depending on where Qt was installed.
+\subsection InstallSrcRun Running SKIRT
 
+Proceed as described in \ref InstallMacRun.
 
 */

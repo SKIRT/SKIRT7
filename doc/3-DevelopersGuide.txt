@@ -6,104 +6,66 @@
 
 This chapter offers guidelines on how to extend or adjust the SKIRT code.
 
-The SKIRT code is not meant to be ever finished. Contributions are expected to come in at least two flavors.
+The SKIRT code will never be finished.
 Fundamental changes and additions will probably be developed by the core SKIRT team at the Ghent University.
-More modest changes, such as introducing a new spectral energy distribution for the sources or a new function
+Other changes, such as introducing a new spectral energy distribution for the sources or a new function
 describing the geometrical distribution of the dust, can easily be contributed by any heavy-duty SKIRT user.
 In fact, when you plan to use SKIRT for a particular radiative transfer problem, chances are that you will
-want to fine-tune it to your own needs.
+want to adapt or extend it to suit your needs.
+
 
 \section DevDirs Directory Structure
 
-The SKIRT source code is contained in an online repository and can be obtained as described in the sections
-\ref InstallSrcGet, \ref InstallMacGet, and \ref InstallUbuGet.
-
-\subsection DevDirsRep Structure of the code repository
-
-The directories in the SKIRT6 code repository are structured as follows (only a partial tree is shown):
-
-\verbatim
-SKIRT6 (repository)
-    SKIRT
-        trunk
-            doc
-            src
-                SKIRTcore
-                SKIRTmain
-                Discover
-            dat
-                DustMix
-                DustMixPopulation
-                ISRF
-                SED
-        branches
-            branch1
-                doc
-                src
-                dat
-            branch2
-    DoxStyle
-        trunk
-\endverbatim
-
-The top-level directory \c SKIRT contains the source code for SKIRT version 6.
-Other top-level directories such as \c DoxStyle contain the source code for projects related to
-but not actually part of SKIRT. This manual only covers the \c SKIRT directory.
-
-The \c trunk directory contains the mainstream version of the code, which should successfully run all
-regression tests at all times (at least, that is the intention). Changes or additions to the code deemed
-to be relatively safe (in the sense that they won't break existing code) can be applied directly to the trunk.
-
-Each subdirectory of the \c branches directory represents a <em>feature branch</em>. A feature branch
-contains a distinct version of the code and is used to develop and test more extensive changes before they
-are merged back into the trunk. Feature branches usually have a limited life-time.
-
-The \c .pro Qt project files and some shell scripts reside on the same level as the \c src directory. The C++ source
-code resides in the \c src directory (or rather in one of its subdirectories). The \c .hpp and \c .cpp files for a
-particular class always reside in the same directory. Additional documentation resides in the \c doc directory.
-The \c dat directory contains data files ("resources") required by SKIRT at run-time. The contents of this directory
-must be copied with the executables when the application is deployed.
-
-\subsection DevDirsLocal Structure of a local working copy
-
-A local working copy (i.e. a copy of the code used for building or developing SKIRT on someones computer)
-mimics either the trunk or one of the feature branches. It may look as follows:
+The SKIRT source code is contained in an online repository and can be obtained as described in \ref InstallMacGet.
+The files are organized in a directory structure; your local copy may look as follows:
 
 \verbatim
 ~/SKIRT
-    svn
-        doc
-        src
-            ...
-        dat
-            ...
     debug
+    git
+        Cfitsio
+        dat
+        Discover
+        doc
+        ...
     release
+        Cfitsio
+        Discover
+        ...
     run
 \endverbatim
 
-When working on the main development trunk, the local \c svn directory is mapped to the \c trunk directory in the
-repository. When working on a feature branch, the local \c svn directory would be mapped to
-(for example) the \c branches/branch1 directory.
+The \c git directory contains an identical copy of the online SKIRT repository; it is usually placed inside a local
+directory called \c SKIRT in your home directory. The \c debug and \c release directories contain the result of
+building the SKIRT project, including the final binary executables. Always use the \c release build for
+"production" simulations; the code in the \c debug build is not optimized and runs several times slower.
+The \c run directory may contain input/output files involved in actually running SKIRT.
+The information in these last three directories obviously does not belong
+in the source code repository, which is why these directories are \em not inside the \c git directory.
 
-The extra directories on the same level as the \c svn directory contain the results of the build process
-or the input/output files involved in actually running SKIRT. This information obviously does not belong
-in the source code repository, thus these directories occur only in the local working copy, \em not in the repository.
-
+The \c git directory contains three types of information:
+  - Immediately inside the \c git directory reside the main project file \c BuildSKIRT.pro and some
+    shell scripts used for installing and building SKIRT or its documentation. For more information,
+    see \ref InstallMacBuild, \ref InstallSrcBuild, \ref InstallSrcQt, and \ref DevBuildDocs.
+  - Directories with short all-lower-case names contain support files, such as resource files read by the code
+    at run time (\c dat), extra documentation that doesn't fit inside the source files (\c doc), and Mathematica
+    notebooks for some of the geometry calculations (\c math).
+  - Directories with mixed-case names contain the source code; each directory contains the sources for
+    a particular subproject, including the \c .pro project file, the \c .hpp header files and the
+    \c .cpp source files themselves. For more information, see \ref DevCodeStruct.
 
 
 \section DevBuildDocs Building the documentation
 
-The PTS documentation is generated from the Python source files (and from the extra files in the \c doc directory)
-by Doxygen. For information on how to install this free application, refer to the section
-"Installing the documentation generator" in the SKIRT documentation.
+The SKIRT documentation is generated from the C++ header files (and from the extra files in the \c doc directory)
+by Doxygen. For information on how to install this free application, refer to \ref InstallMacDoxygen.
 
 The \c git directory contains shell scripts for building and publishing the documentation. These scripts have been
 tested on Mac OS X only and will need to be adjusted for use on other systems. Before invoking
 the scripts for the first time, you may need to make them executable as follows:
 
 \verbatim
-cd ~/PTS/git
+cd ~/SKIRT/git
 chmod +rx makeHTML.sh
 chmod +rx makePDF.sh
 chmod +rx publishToWebHost.sh
@@ -112,7 +74,7 @@ chmod +rx publishToWebHost.sh
 To build the HTML documentation, enter:
 
 \verbatim
-cd ~/PTS/git
+cd ~/SKIRT/git
 ./makeHTML.sh
 \endverbatim
 
@@ -122,6 +84,7 @@ archive with the same contents in the \c doc directory next to the \c git direct
 \c doc directory \em inside the \c git directory).
 
 When you run the script for the first time, Doxygen creates the \c html directory and it contents from scratch.
+This takes a long time.
 If you run the script again after you modified the source code (or the extra documentation files),
 Doxygen only processes the changes so it completes a lot faster.
 
@@ -138,12 +101,11 @@ The output PDF file is placed in the \c doc directory next to the \c git directo
 Finally, to publish the documentation to the SKIRT web site, enter:
 
 \verbatim
-cd ~/PTS/git
+cd ~/SKIRT/git
 ./publishToWebHost.sh
 \endverbatim
 
 The script will request the password that provides write access to the SKIRT web area.
-
 
 
 \section DevStyle Coding style
@@ -173,7 +135,7 @@ are placed inside an anonymous namespace in the .cpp file, rather than declaring
 
 SKIRT is based on the Qt development framework. Any SKIRT code can freely use all the facilities of the QtCore
 module, in addition to the facilities of the standard C++ template library (STL). At this point, other Qt modules
-are not included in the build (but may be added if really needed).
+are not included in the build.
 
 The SKIRT code that actually performs the simulations uses STL containers such as \c std::vector.
 This is mostly for historical reasons, but it also turns out that for the purely numerical work in this area,
@@ -210,7 +172,7 @@ uses the older conventions (the chameleon rule again).
 
 Before editing any SKIRT code, configure the Qt Creator development environment as described in \ref InstallMacConf
 or \ref InstallUbuConf. All SKIRT code must:
-- use indentation and alignment as configured by the file <tt>.../svn/doc/SKIRT Code Style.xml</tt>.
+- use indentation and alignment as configured by the file <tt>~/SKIRT/git/doc/SkirtCodeStyle.xml</tt>.
 - keep all lines within the 120 character limit (as indicated by the right margin in the Qt Creator editor).
 
 Examples of correct indentation and alignment can of course be found in the existing code. It may also be
@@ -235,18 +197,52 @@ you can automatically reformat documentation blocks in the Qt Creator editor as 
 Finally, keep \#include statements and forward class declarations together in the beginning of the file,
 sorted within each group, with the groups in the following order: C/C++, Qt, SKIRT .hpp files, class declarations.
 
+
 \section DevCodeStruct Structure of the code
 
 \subsection DevBlocks Blocks of code
 
-The various classes in the SKIRT source code are distributed over several directories as follows:
-  - \c SKIRTcore: core SKIRT functionality for setting up and performing a simulation; this includes all simulation
-    items (see \ref DevSimItems) plus any primitives or utilities used from within these classes.
-  - \c Discover: functionality for automatically discovering relevant information on the simulation item classes
-    available in the code, and using this information for input/output purposes (such as the creation of a
-    simulation hierarchy from an interactive console Q&A session, or reading and writing a ski file);
-    see \ref DevSimDisco.
-  - SKIRTmain: the main() function and functionality to translate the command line arguments into action.
+The various classes in the SKIRT source code are distributed over several subprojects, each residing
+in its own directory (see \ref DevDirs), as follows (in alphabetical order):
+  - \c Cfitsio -- This library provides input/output capabilities for FITS files.
+    It contains a subset of the source files offered in tarball
+    cfitsio3360.tar.gz downloaded from NASA's HEASARC software site
+    at http://heasarc.gsfc.nasa.gov/fitsio/fitsio.html .
+    No changes were made to any of the source files.
+  - \c Discover -- This library handles parameter files for SKIRT and FitSKIRT. More specifically, it
+    offers the functionality for automatically discovering relevant information on the simulation item classes
+    available in the code, and using this information for input/output purposes, such as the creation of a
+    simulation hierarchy from an interactive console Q&A session, or reading and writing a ski file.
+    For more information see \ref DevSimDisco.
+  - \c DoxStyle -- This console application can be invoked from the Qt Creator code
+    editor to help streamline Doxygen documentation blocks, as explained in \ref DevStyleFormat.
+    The DoxStyle code is completely independent from SKIRT and FitSKIRT; it is included here so that it
+    would be easily available to any SKIRT developer.
+  - \c FitSKIRTcore -- This library provides the core FitSKIRT functionality, connecting
+    the genetic algorithm mechanism with the SKIRT capabilities.
+  - \c FitSKIRTmain -- This is the FitSKIRT console application. It handles the command
+    line arguments and links in everything else from other libraries.
+  - \c Fundamentals -- This library offers generic functionality that is essentially
+    unrelated to SKIRT and FitSKIRT. Most items are fully defined
+    in their respective header files to optimize performance.
+  - \c GAlib -- This library provides support for genetic algorithm mechanisms.
+    The source code is adapted from Matthew Wall's GAlib (c) 1995 MIT
+    which can be downloaded at http://lancet.mit.edu/ga/GAlib.html .
+  - \c MPIsupport -- This library encapsulates any and all MPI-related functionality used
+    by SKIRT and FitSKIRT. Concentrating all MPI calls in this library
+    allows all other code to be compiled without the MPI extra's.
+  - \c SKIRTcore -- This library provides the core SKIRT functionality
+    for setting up and performing a simulation; this includes all simulation
+    item classes plus some SKIRT-specific support classes.
+    For more information see \ref DevSimItems.
+  - \c SKIRTmain -- This is the SKIRT console application. It handles the command
+    line arguments and links in everything else from other libraries.
+  - \c Voro -- This library provides support for building Voronoi meshes.
+    The source code is adapted from the Voro++ library written by Chris H. Rycroft (LBL / UC Berkeley)
+    which can be downloaded at http://math.lbl.gov/voro++/about.html .
+    For more information see \ref Voro.
+
+The following diagram shows the dependencies between the various subprojects.
 
 \dot
 digraph dependencies {
@@ -266,10 +262,6 @@ digraph dependencies {
     Discover -> SKIRTcore;
 }
 \enddot
-
-The diagram above shows the dependencies between these blocks of code. Specifically, the code in the
-\c SKIRTcore block does not depend on the code in any of the other two blocks. When further developing the code,
-it is important to honor these dependency limitations.
 
 \subsection DevSimItems Simulation items
 

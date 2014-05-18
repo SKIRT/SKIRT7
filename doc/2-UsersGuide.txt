@@ -41,7 +41,7 @@ The SKIRT command line application can be invoked in one of two modes (depending
 When invoked without any command line arguments, SKIRT enters interactive mode. For example:
 \verbatim
 $ skirt
-   Welcome to SKIRT v6 (svn __ built on __)
+   Welcome to SKIRT v___
    Interactively constructing a simulation...
  ? Enter the name of the ski file to be created: example
 
@@ -97,7 +97,7 @@ configured in the ski file, reading any required input files (specified in the s
 and placing any output files in the current directory as well. For example:
 \verbatim
 $ skirt example
-   Welcome to SKIRT v6 (svn __ built on __)
+   Welcome to SKIRT v___
    Constructing a simulation from ski file 'example.ski'...
    Starting simulation example...
 
@@ -179,9 +179,6 @@ Three "standard" files are always generated for every simulation (assuming a ski
 Many of the other output files are described in the tutorials later in this chapter.
 
 \section UserParamFile SKIRT parameter file format (ski file)
-
-\note The ski file format has changed in a fundamental and incompatible way between SKIRT5 and SKIRT6.
-All legacy ski files must be recreated from scratch to work with SKIRT6.
 
 \subsection UserSKIStruct Structure of a ski file
 
@@ -326,7 +323,7 @@ SKIRT responds with a welcome message and starts an interactive session in the t
 will prompt you for all the information describing a particular simulation:
 
 \verbatim
-   Welcome to SKIRT v6 (svn __ built on __)
+   Welcome to SKIRT v___
    Interactively constructing a simulation...
  ? Enter the name of the ski file to be created: MonoDisk
 \endverbatim
@@ -756,7 +753,7 @@ SKIRT responds with a welcome message and immediately starts performing the simu
 asks a question so it can be left to run unattended:
 
 \verbatim
-   Welcome to SKIRT v6 (svn __ built on __)
+   Welcome to SKIRT v___
    Constructing a simulation from ski file 'MonoDisk.ski'...
    Starting simulation MonoDisk...
    Starting setup...
@@ -903,7 +900,7 @@ SKIRT responds with a welcome message and starts an interactive session in the t
 will prompt you for all the information describing a particular simulation:
 
 \verbatim
-   Welcome to SKIRT v6 (svn __ built on __)
+   Welcome to SKIRT v___
    Interactively constructing a simulation...
  ? Enter the name of the ski file to be created: PanSPH
 \endverbatim
@@ -1233,7 +1230,7 @@ during which it will prompt you for all the information describing
 a particular simulation:
 
 \verbatim
-   Welcome to SKIRT v6 (svn __ built on __)
+   Welcome to SKIRT v___
    Interactively constructing a simulation...
  ? Enter the name of the ski file to be created: ScatAMR
 \endverbatim
