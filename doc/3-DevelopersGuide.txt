@@ -242,26 +242,39 @@ in its own directory (see \ref DevDirs), as follows (in alphabetical order):
     which can be downloaded at http://math.lbl.gov/voro++/about.html .
     For more information see \ref Voro.
 
-The following diagram shows the dependencies between the various subprojects.
-
 \dot
 digraph dependencies {
     rankdir=TB;
-    nodesep=0.5
+    nodesep=0.5;
     node [shape=rect, fontname=Helvetica, fontsize=10];
     edge [arrowhead=vee];
-
-    SKIRTmain [label="SKIRTmain"];
-    subgraph {
-        rank = same;
-        Discover [label="Discover"];
-        SKIRTcore [label="SKIRTcore"];
+    compound=true;
+    subgraph cluster1 {
+        SKIRTmain -> SKIRTcore;
+        SKIRTmain -> Discover;
+        Discover -> SKIRTcore;
+        SKIRTcore -> Voro;
+        SKIRTcore -> Cfitsio;
+        FitSKIRTmain -> FitSKIRTcore;
+        FitSKIRTmain -> SKIRTcore;
+        FitSKIRTmain -> Discover;
+        FitSKIRTcore -> SKIRTcore;
+        FitSKIRTcore -> Discover;
+        FitSKIRTcore -> GAlib;
+        DoxyStyle;
     }
-    SKIRTmain -> Discover;
-    SKIRTmain -> SKIRTcore;
-    Discover -> SKIRTcore;
+    subgraph cluster2 {
+        MPIsupport -> Fundamentals;
+    }
+    Voro -> MPIsupport [lhead=cluster2, ltail=cluster1];
 }
 \enddot
+
+The above diagram shows the dependencies between the subprojects. A subproject in the upper box may directly
+depend on any of the subprojects in the lower box; these dependencies are represented by a single arrow to
+keep the diagram readable. Note that all arrows point down, which means that there are no circular dependencies.
+When adjusting or extending the code, be careful not to inadvertently create any new dependencies. In any case,
+circular dependencies between subprojects are not allowed.
 
 \subsection DevSimItems Simulation items
 
