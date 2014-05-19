@@ -5,7 +5,8 @@
 \section DustIntro Introduction
 
 Absorption and scattering by dust plays an important role in most SKIRT simulations. This chapter describes
-how SKIRT produces and uses the optical dust properties that are appropriate for a particular astrophysical model.
+how SKIRT produces and uses the optical and calorimetric dust properties that are appropriate for a particular
+astrophysical model.
 
 \section DustOver Overview
 

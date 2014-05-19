@@ -1,6 +1,6 @@
 /**
 
-\page UsersGuide User's Guide
+\page UsersGuide SKIRT User's Guide
 
 \section UserIntro Introduction
 

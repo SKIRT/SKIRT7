@@ -2,9 +2,16 @@
  *
  * \page voro The Voro++ library
  *
- * \note Author: Chris H. Rycroft (LBL / UC Berkeley); email: chr@alum.mit.edu
- *
  * \section vorointro Introduction
+ *
+ * \note The Voro++ library was written by Chris H. Rycroft (LBL / UC Berkeley), email: chr@alum.mit.edu,
+ *       and can be downloaded at http://math.lbl.gov/voro++/about.html
+ *
+ * The Voro++ code included with SKIRT was slightly adjusted to avoid compiler warnings, and some unused classes were
+ * omitted. Other than that, the code is Chris Rycroft's and all the credit goes to him.
+ *
+ * \note The remaining text in this chapter is copied from the Voro++ documentation, with minor modifications.
+ *
  * Voro++ is a software library for carrying out three-dimensional computations
  * of the Voronoi tessellation. A distinguishing feature of the Voro++ library
  * is that it carries out cell-based calculations, computing the Voronoi cell

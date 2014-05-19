@@ -1,0 +1,11 @@
+/**
+
+\page FSUsersGuide FitSKIRT User's Guide
+
+\section FSUserIntro Introduction
+
+This chapter explains how to prepare for and run a FitSKIRT simulation and what output to expect.
+
+\note TODO: TO BE COMPLETED.
+
+*/

@@ -1,0 +1,67 @@
+/**
+
+\page Cfitsio The CFITSIO library
+
+\section CfitsioIntro Introduction
+
+\note The CFITSIO library is written and maintained by NASA's HEASARC
+      and can be downloaded at http://heasarc.gsfc.nasa.gov/fitsio/fitsio.html
+
+CFITSIO is a pure C library that provides input/output capabilities for FITS files.
+The version included with SKIRT contains a subset of the source files in tarball
+\c cfitsio3360.tar.gz (downloaded from the NASA's HEASARC web site).
+No changes were made to any of the source files. Compiler warnings are explicitly disabled to
+avoid generating a myriad of warnings for code that has presumably been well tested by its authors.
+
+\note The remaining text in this chapter is copied from the CFITSIO documentation, with minor modifications.
+
+\section CfitsioOver Library overview
+
+CFITSIO is a machine-independent library of routines for reading and writing data files in the FITS (Flexible Image
+Transport System) data format. It can also read IRAF format image files and raw binary data arrays by converting them
+on the fly into a virtual FITS format file. This library is written in ANSI C and provides a powerful yet simple
+interface for accessing FITS files which will run on most commonly used computers and workstations. CFITSIO supports
+all the features described in the official definition of the FITS format and can read and write all the currently
+defined types of extensions, including ASCII tables (TABLE), Binary tables (BINTABLE) and IMAGE extensions. The CFITSIO
+routines insulate the programmer from having to deal with the complicated formatting details in the FITS file, however,
+it is assumed that users have a general knowledge about the structure and usage of FITS files.
+
+\section CfitsioFormat The FITS file format
+
+For more information about the FITS format, refer to the following web page:
+http://heasarc.gsfc.nasa.gov/docs/heasarc/fits.html
+
+FITS stands for Flexible Image Transport System and is the standard file format used to store most astronomical data
+files. There are 2 basic types of FITS files: images and tables. FITS images often contain a 2-dimensional array of
+pixels representing an image of a piece of the sky, but FITS images can also contain 1-D arrays (i.e, a spectrum or
+light curve), or 3-D arrays (a data cube), or even higher dimensional arrays of data. An image may also have zero
+dimensions, in which case it is referred to as a null or empty array. The supported datatypes for the image arrays are
+8, 16, and 32-bit integers, and 32 and 64-bit floating point real numbers. Both signed and unsigned integers are
+supported.
+
+FITS tables contain rows and columns of data, similar to a spreadsheet. All the values in a particular column must have
+the same datatype. A cell of a column is not restricted to a single number, and instead can contain an array or vector
+of numbers. There are actually 2 subtypes of FITS tables: ASCII and binary. As the names imply, ASCII tables store the
+data values in an ASCII representation whereas binary tables store the data values in a more efficient machine-readable
+binary format. Binary tables are generally more compact and support more features (e.g., a wider range of datatypes,
+and vector columns) than ASCII tables.
+
+A single FITS file many contain multiple images or tables. Each table or image is called a Header-Data Unit, or HDU.
+The first HDU in a FITS file must be an image (but it may have zero axes) and is called the Primary %Array. Any
+additional HDUs in the file (which are also referred to as 'extensions') may contain either an image or a table.
+
+Every HDU contains a header containing keyword records. Each keyword record is 80 ASCII characters long and has the
+following format:
+
+\verbatim
+KEYWORD = value / comment string
+\endverbatim
+
+The keyword name can be up to 8 characters long (all uppercase). The value can be either an integer or floating point
+number, a logical value (T or F), or a character string enclosed in single quotes. Each header begins with a series of
+required keywords to describe the datatype and format of the following data unit, if any. Any number of other optional
+keywords can be included in the header to provide other descriptive information about the data. For the most part, the
+CFITSIO routines automatically write the required FITS keywords for each HDU, so you, the programmer, usually do not
+need to worry about them.
+
+*/
