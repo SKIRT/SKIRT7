@@ -30,7 +30,7 @@ namespace
 BruzualCharlotSEDFamily::BruzualCharlotSEDFamily(SimulationItem* item)
 {
     // local constants for units
-    const double Lsun = Units::bolluminositysun();
+    const double Lsun = Units::Lsun();
     const double Angstrom = 1e-10;
 
     // Prepare the vectors for the Bruzual & Charlot library SEDs

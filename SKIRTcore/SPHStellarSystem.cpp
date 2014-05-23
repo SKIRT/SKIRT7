@@ -89,7 +89,7 @@ void SPHStellarSystem::setupSelfBefore()
             Ltot += Lv[ell];
         }
     }
-    find<Log>()->info("  Total luminosity: " + QString::number(Ltot/Units::bolluminositysun()) + " Lsun");
+    find<Log>()->info("  Total luminosity: " + QString::number(Ltot/Units::Lsun()) + " Lsun");
 
     // construct the permanent vectors _Xvv with the normalized cumulative luminosities (per wavelength bin)
     _Xvv.resize(Nlambda,0);

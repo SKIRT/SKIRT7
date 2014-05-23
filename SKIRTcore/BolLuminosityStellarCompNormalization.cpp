@@ -23,7 +23,7 @@ void BolLuminosityStellarCompNormalization::setupSelfBefore()
     if (_Ltot_Lsun <= 0) throw FATALERROR("The bolometric luminosity should be positive");
 
     // convert to program units
-    _Ltot_W = _Ltot_Lsun * Units::bolluminositysun();
+    _Ltot_W = _Ltot_Lsun * Units::Lsun();
 }
 
 ////////////////////////////////////////////////////////////////////

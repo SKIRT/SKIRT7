@@ -16,19 +16,17 @@ using namespace std;
 namespace
 {
     // fundamental physical and astronomical constants
-    const double _G = 6.673e-11;
-    const double _h = 6.6260693e-34;
     const double _c = 2.99792458e8;
-    const double _k = 1.3806505e-23;
+    const double _h = 6.62606957e-34;
+    const double _k = 1.3806488e-23;
     const double _NA = 6.02214129e23;
-    const double _AU = 1.49597870691e11;
-    const double _pc = 3.08568025e16;
-    const double _Mproton = 1.67262158e-27;
-    const double _Msun = 1.98892e30;
-    const double _Lsun = 3.845e26;             // Allen & Cox (2000)
-    const double _TCMB = 2.725;                // Mather et al. (1999)
-    const double _lambdaV = 550e-9;            // V-band wavelength
-    const double _kappaV = 2600.;              // "standard" extinction coefficient in V-band
+    const double _AU = 1.49597871e11;
+    const double _pc = 3.08567758e16;
+    const double _Mproton = 1.67262178e-27;
+    const double _Msun = 1.9891e30;
+    const double _Lsun = 3.839e26;          // value without solar neutrino radiation
+    const double _lambdaV = 550e-9;         // V-band wavelength
+    const double _kappaV = 2600.;           // "standard" extinction coefficient in V-band
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -317,9 +315,9 @@ double Units::out(QString qty, double value) const
 ////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////
 
-double Units::G()
+double Units::c()
 {
-    return _G;
+    return _c;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -327,13 +325,6 @@ double Units::G()
 double Units::h()
 {
     return _h;
-}
-
-////////////////////////////////////////////////////////////////////
-
-double Units::c()
-{
-    return _c;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -380,16 +371,9 @@ double Units::Msun()
 
 ////////////////////////////////////////////////////////////////////
 
-double Units::bolluminositysun()
+double Units::Lsun()
 {
     return _Lsun;
-}
-
-////////////////////////////////////////////////////////////////////
-
-double Units::TCMB()
-{
-    return _TCMB;
 }
 
 ////////////////////////////////////////////////////////////////////

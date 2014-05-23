@@ -31,7 +31,7 @@ void LuminosityStellarCompNormalization::setupSelfBefore()
     if (_ell < 0) throw FATALERROR("The given band is outside of the simulation's wavelength grid");
 
     // convert to program units
-    _LX_Wm = _LX_Lsun * Units::bolluminositysun() * SunSED::solarluminosity(this, _ell);
+    _LX_Wm = _LX_Lsun * Units::Lsun() * SunSED::solarluminosity(this, _ell);
 }
 
 ////////////////////////////////////////////////////////////////////

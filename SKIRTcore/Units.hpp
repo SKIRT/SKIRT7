@@ -54,14 +54,11 @@ protected:
 public:
     // - - - - - physical constants - - - - -
 
-    /** This function returns the gravitational constant \f$G\f$. */
-    static double G();
+    /** This function returns the speed of light \f$c\f$. */
+    static double c();
 
     /** This function returns Planck's constant \f$h\f$. */
     static double h();
-
-    /** This function returns the speed of light \f$c\f$. */
-    static double c();
 
     /** This function returns the Boltzmann constant \f$k\f$. */
     static double k();
@@ -83,15 +80,10 @@ public:
     static double Msun();
 
     /** This function returns the bolometric luminosity of the Sun. */
-    static double bolluminositysun();
-
-    /** This function returns the temperature of the cosmic microwave background. */
-    static double TCMB();
+    static double Lsun();
 
     /** This function returns the wavelength of the center of the optical V band. */
     static double lambdaV();
-
-    /** This function returns the wavelength of the center of the optical V band. */
 
     /** This function returns the total (i.e. absorption and scattering) dust opacity
         \f$\kappa_{\text{V}}\f$ in the V-band for a Draine & Li (2007) dust mix with
