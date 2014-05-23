@@ -5,7 +5,6 @@
 
 #include <cmath>
 #include "Trust1Geometry.hpp"
-#include "FatalError.hpp"
 #include "Random.hpp"
 #include "Units.hpp"
 
@@ -24,66 +23,44 @@ void Trust1Geometry::setupSelfBefore()
     GenGeometry::setupSelfBefore();
 
     // set property values
-    _xmin = -5.0 * Units::pc();
-    _xmax = 5.0 * Units::pc();
-    _ymin = -5.0 * Units::pc();
-    _ymax = 5.0 * Units::pc();
-    _zmin = -5.0 * Units::pc();
-    _zmax = -2.0 * Units::pc();
-
-    // calculate central density (along the centre of the helix)
-    _rho = 1.0 / (_xmax-_xmin) / (_ymax-_ymin) / (_zmax-_zmin);
+    double pc = Units::pc();
+    _slab = Box(-5*pc, -5*pc, -5*pc, 5*pc, 5*pc, -2*pc);
+    _rho = 1.0 / _slab.volume();
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double
-Trust1Geometry::density(Position bfr)
-const
+double Trust1Geometry::density(Position bfr) const
 {
-    double x, y, z;
-    bfr.cartesian(x,y,z);
-    if (x<_xmin || x>_xmax || y<_ymin || y>_ymax || z<_zmin ||z>_zmax) return 0.0;
-    return _rho;
+    return _slab.contains(bfr) ? _rho : 0;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-Position
-Trust1Geometry::generatePosition()
-const
+Position Trust1Geometry::generatePosition() const
 {
-    double x = _xmin + (_xmax-_xmin)*_random->uniform();
-    double y = _ymin + (_ymax-_ymin)*_random->uniform();
-    double z = _zmin + (_zmax-_zmin)*_random->uniform();
-    return Position(x,y,z);
+    return _random->position(_slab);
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double
-Trust1Geometry::SigmaX()
-const
+double Trust1Geometry::SigmaX() const
 {
-    return 0.0;
+    return 0;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double
-Trust1Geometry::SigmaY()
-const
+double Trust1Geometry::SigmaY() const
 {
-    return 0.0;
+    return 0;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double
-Trust1Geometry::SigmaZ()
-const
+double Trust1Geometry::SigmaZ() const
 {
-    return _rho * (_zmax-_zmin);
+    return _rho * _slab.zwidth();
 }
 
 //////////////////////////////////////////////////////////////////////
