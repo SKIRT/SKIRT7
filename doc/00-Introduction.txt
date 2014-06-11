@@ -37,16 +37,12 @@ constructed by the genetic procedure, FitSKIRT performs a SKIRT simulation using
 individual's genes. The resulting simulated images are compared with the observed target images, and the result
 is fed back into the genetic algorithm as the quality measure for the individual.
 
-The name SKIRT, acronym for Stellar Kinematics Including Radiative Transfer, reflects the code's original use in
-studying the effects of dust absorption and scattering on the observed kinematics of elliptical galaxies.
-Ironically, the capability to account for the effects of a system's internal kinematics is no longer present
-in the current version.
-
 SKIRT is completely written in C++ and has been designed with well-defined programming interfaces between components.
 Adding a new feature is usually as simple as adding another class; the user interface automatically adjusts to allow
 configuring the new options.
 
-This manual contains three major parts:
+This manual is structured as follows:
+  - Part 0: Introduction (this page) and \ref LegalInfo.
   - Part I: Guides -- provides overall guidance and tutorials.
     - The \ref InstallationGuide describes how to install SKIRT on your computer.
     - The \ref UsersGuide explains how to run a SKIRT simulation and what output to expect.
