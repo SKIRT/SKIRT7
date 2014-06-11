@@ -7,6 +7,10 @@
 # generate the latex documentation in a temporary folder next to the git folder
 /Applications/Doxygen.app/Contents/Resources/doxygen doc/pdf.doxygen
 
+# adjust the make file to allow more iterations for fixing cross-references
+mv ../latex/Makefile ../latex/Makefile_original
+sed s/count=5/count=15/ < ../latex/Makefile_original > ../latex/Makefile
+
 # generate the pdf file
 make -C ../latex
 
