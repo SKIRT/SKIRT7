@@ -10,15 +10,14 @@
 
 ////////////////////////////////////////////////////////////////////
 
-/** The ExpDiskGeometry class is a subclass of the SepAxGeometry class, and describes
-    axisymmetric geometries characterized by a double-exponential profile, in which the
-    density decreases exponentially in the radial and the vertical directions. A truncation
-    can be applied in both the radial and vertical direction.  In formula form \f[ \rho(R,z) =
-    \rho_0\, {\text{e}}^{-\frac{R}{h_R}-\frac{|z|}{h_z}}, \f] for
-    \f$R\leq R_{\text{max}}\f$ and \f$|z|\leq z_{\text{max}}\f$. The model contains four free
-    parameters: the radial scale length \f$h_R\f$, the vertical scale height \f$h_z\f$, the radial
-    truncation radius \f$R_{\text{max}}\f$, and the vertical truncation radius
-    \f$z_{\text{max}}\f$. */
+/** The ExpDiskGeometry class is a subclass of the SepAxGeometry class, and describes axisymmetric
+    geometries characterized by a double-exponential profile, in which the density decreases
+    exponentially in the radial and the vertical directions; see van der Kruit (1986, A&A, 157,
+    230–244). A truncation can be applied in both the radial and vertical direction. In formula
+    form \f[ \rho(R,z) = \rho_0\, {\text{e}}^{-\frac{R}{h_R}-\frac{|z|}{h_z}}, \f] for \f$R\leq
+    R_{\text{max}}\f$ and \f$|z|\leq z_{\text{max}}\f$. The model contains four free parameters:
+    the radial scale length \f$h_R\f$, the vertical scale height \f$h_z\f$, the radial truncation
+    radius \f$R_{\text{max}}\f$, and the vertical truncation radius \f$z_{\text{max}}\f$. */
 class ExpDiskGeometry : public SepAxGeometry
 {
     Q_OBJECT

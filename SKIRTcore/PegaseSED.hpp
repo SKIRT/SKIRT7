@@ -11,7 +11,8 @@
 ////////////////////////////////////////////////////////////////////
 
 /** PegaseSED is a class that represents template galaxy %SEDs from the Pegase library. The library
-    offers templates for elliptical, lenticular and spiral galaxies. */
+    offers templates for elliptical, lenticular and spiral galaxies. See Fioc & Rocca-Volmerange
+    (1997, A&A, 326, 950–962). */
 class PegaseSED : public StellarSED
 {
     Q_OBJECT

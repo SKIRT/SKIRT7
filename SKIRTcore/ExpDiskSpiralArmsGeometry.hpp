@@ -11,19 +11,19 @@
 
 ////////////////////////////////////////////////////////////////////
 
-/** The ExpDiskSpiralArmsGeometry class is a subclass of the GenGeometry class, and
-    describes geometries characterized by a double-exponential profile with a spiral arm
-    perturbation. The undisturbed density decreases exponentially in the radial and the vertical
-    directions, whereas the spiral arm perturbation (with an arbitrary weight factor) is a
-    logarithmic spiral arm pattern. A truncation can be applied in both the radial and vertical
-    direction. In formula form, the density behaves as \f[ \rho(R,\phi,z) =
-    \rho_0\, {\text{e}}^{-\frac{R}{h_R}-\frac{|z|}{h_z}} \left\{
-    1+w\sin\left[m\left( \frac{\ln(R/h_R)}{\tan p}-(\phi-\phi_0)\right)\right]\right\} \f] for
-    \f$R\leq R_{\text{max}}\f$ and \f$|z|\leq z_{\text{max}}\f$. The model
-    contains eight parameters: the radial scale length \f$h_R\f$, the vertical scale height
-    \f$h_z\f$, the radial truncation radius \f$R_{\text{max}}\f$, the vertical truncation radius
-    \f$z_{\text{max}}\f$, the number of spiral arms \f$m\f$, the pitch angle \f$p\f$, the spiral
-    arm phase zero-point \f$\phi_0\f$, and the spiral perturbation weight \f$w\f$. */
+/** The ExpDiskSpiralArmsGeometry class is a subclass of the GenGeometry class, and describes
+    geometries characterized by a double-exponential profile with a spiral arm perturbation. The
+    undisturbed density decreases exponentially in the radial and the vertical directions, whereas
+    the spiral arm perturbation (with an arbitrary weight factor) is a logarithmic spiral arm
+    pattern; see Misiriotis et al. (2000, A&A, 353, 117–123). A truncation can be applied in both
+    the radial and vertical direction. In formula form, the density behaves as \f[ \rho(R,\phi,z) =
+    \rho_0\, {\text{e}}^{-\frac{R}{h_R}-\frac{|z|}{h_z}} \left\{ 1+w\sin\left[m\left(
+    \frac{\ln(R/h_R)}{\tan p}-(\phi-\phi_0)\right)\right]\right\} \f] for \f$R\leq
+    R_{\text{max}}\f$ and \f$|z|\leq z_{\text{max}}\f$. The model contains eight parameters: the
+    radial scale length \f$h_R\f$, the vertical scale height \f$h_z\f$, the radial truncation
+    radius \f$R_{\text{max}}\f$, the vertical truncation radius \f$z_{\text{max}}\f$, the number of
+    spiral arms \f$m\f$, the pitch angle \f$p\f$, the spiral arm phase zero-point \f$\phi_0\f$, and
+    the spiral perturbation weight \f$w\f$. */
 class ExpDiskSpiralArmsGeometry : public GenGeometry
 {
     Q_OBJECT

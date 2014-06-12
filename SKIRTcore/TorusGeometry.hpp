@@ -10,16 +10,16 @@
 
 ////////////////////////////////////////////////////////////////////
 
-/** The TorusGeometry class is a subclass of the AxGeometry class and describes the
-    geometry of an axisymmetric torus as assumed to be present in the centre of active
-    galactic nuclei. This geometry is described by a radial power-law density with a
-    finite opening angle. In formula, it is most easily expressed in spherical coordinates
-    as \f[ \rho(r,\theta) = A\, r^{-p}\,{\text{e}}^{-q|\cos\theta|} \quad\text{for }
-    r_{\text{min}}<r<r_{\text{max}} \text{ and } \frac{\pi}{2}-\Delta<\theta<\frac{\pi}{2}
-    +\Delta. \f] There are five free parameters describing this dust geometry: the inner and
-    outer radii \f$r_{\text{min}}\f$ and \f$r_{\text{max}}\f$ of the torus, the radial power
-    law index \f$p\f$, the polar index \f$q\f$ and the angle \f$\Delta\f$ describing the opening
-    angle of the torus. */
+/** The TorusGeometry class is a subclass of the AxGeometry class and describes the geometry of an
+    axisymmetric torus as assumed to be present in the centre of active galactic nuclei. This
+    geometry is described by a radial power-law density with a finite opening angle; see Stalevski
+    et al. (2012, MNRAS, 420, 2756–2772) and Granato & Danese (1994, MNRAS, 268, 235). In formula,
+    it is most easily expressed in spherical coordinates as \f[ \rho(r,\theta) = A\,
+    r^{-p}\,{\text{e}}^{-q|\cos\theta|} \quad\text{for } r_{\text{min}}<r<r_{\text{max}} \text{ and
+    } \frac{\pi}{2}-\Delta<\theta<\frac{\pi}{2} +\Delta. \f] There are five free parameters
+    describing this dust geometry: the inner and outer radii \f$r_{\text{min}}\f$ and
+    \f$r_{\text{max}}\f$ of the torus, the radial power law index \f$p\f$, the polar index \f$q\f$
+    and the angle \f$\Delta\f$ describing the opening angle of the torus. */
 class TorusGeometry : public AxGeometry
 {
     Q_OBJECT

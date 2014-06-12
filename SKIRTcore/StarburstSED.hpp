@@ -11,12 +11,12 @@
 ////////////////////////////////////////////////////////////////////
 
 /** StarburstSED is a class that represents spectral energy distributions of starbursting stellar
-    populations. The SEDs are generated from data of the Starburst99 library. More specific, they
-    represent stellar populations with a constant, continuous star formation rate that have evolved
-    for 100 Myr. The initial mass function has is a simple Salpeter IMF (a power law with
-    \f$\alpha=2.35\f$) with \f$1~M_\odot\f$ and \f$100~M_\odot\f$ as lower and upper masses.
-    Populations with different metallicities can be chosen (with \f$Z\f$ ranging between 0.001 and
-    0.040). */
+    populations. The SEDs are generated from data of the Starburst99 library; see Leitherer et al.
+    (1999, ApJS, 123, 3–40). More specifically, they represent stellar populations with a constant,
+    continuous star formation rate that have evolved for 100 Myr. The initial mass function has is
+    a simple Salpeter IMF (a power law with \f$\alpha=2.35\f$) with \f$1~M_\odot\f$ and
+    \f$100~M_\odot\f$ as lower and upper masses. Populations with different metallicities can be
+    chosen (with \f$Z\f$ ranging between 0.001 and 0.040). */
 class StarburstSED : public StellarSED
 {
     Q_OBJECT

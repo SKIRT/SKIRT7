@@ -11,22 +11,23 @@
 //////////////////////////////////////////////////////////////////////
 
 /** The SersicFunction class represents the Sersic function \f${\cal{S}}_n(s)\f$ of Sersic index
-    \f$n\f$. This function represents the dimensionless three-dimensional density of a normalized
-    Sersic surface brightness distribution, \f[ I_n(s_{\text{p}}) =
+    \f$n\f$; see Sersic (1963). This function represents the dimensionless three-dimensional
+    density of a normalized Sersic surface brightness distribution, \f[ I_n(s_{\text{p}}) =
     \frac{b_n^{2n}}{\pi\,\Gamma(2n+1)}\, {\text{e}}^{-b_ns_{\text{p}}^{1/n}}, \f] where \f$b_n\f$
     is a dimensionless constant that is defined by the condition that \f[ \pi \int_0^1
     I_n(s_{\text{p}})\, s_{\text{p}}\, {\text{d}}s_{\text{p}} = \frac12.\f] Its value can
     conveniently be approximated as \f[ b_n = 2n -\frac{1}{3} + \frac{4}{405n} +
-    \frac{46}{25515n^2} + \frac{131}{1148175n^3}, \f] as derived by Ciotti & Bertin (1999). Given
-    \f$I_n(s_{\text{p}})\f$, the Sersic function \f${\cal{S}}_n(s)\f$ can be determined by solving
-    the Abel integral equation \f[ 2 \int_{s_{\text{p}}}^\infty \frac{ {\cal{S}}_n(s)\, s\,
-    {\text{d}}s }{ \sqrt{s^2-s_{\text{p}}^2} } = I_n(s_{\text{p}}). \f] The solution of this
-    integral equation can be written as \f[ {\cal{S}}_n(s) = -\frac{1}{\pi} \int_s^\infty \frac{
-    \text{d}I_n }{ {\text{d}} s_{\text{p}}} (s_{\text{p}})\, \frac{ {\text{d} s_{\text{p}}}}
-    {\sqrt{s_{\text{p}}^2-s^2}}. \f] As a C++ class, the SersicFunction class contains a vector
-    with the values of \f${\cal{S}}_n(s)\f$ on a grid, distributed logarithmically between
-    \f$s=10^{-6}\f$ and \f$s=10^4\f$. Also the cumulative mass function, \f[ {\cal{M}}_n(s) = 4\pi
-    \int_0^s {\cal{S}}_n(s)\,s^2\, {\text{d}}s \f] is stored on the same grid. */
+    \frac{46}{25515n^2} + \frac{131}{1148175n^3}, \f] as derived by Ciotti & Bertin (1999, A&A 352,
+    447–451). Given \f$I_n(s_{\text{p}})\f$, the Sersic function \f${\cal{S}}_n(s)\f$ can be
+    determined by solving the Abel integral equation \f[ 2 \int_{s_{\text{p}}}^\infty \frac{
+    {\cal{S}}_n(s)\, s\, {\text{d}}s }{ \sqrt{s^2-s_{\text{p}}^2} } = I_n(s_{\text{p}}). \f] The
+    solution of this integral equation can be written as \f[ {\cal{S}}_n(s) = -\frac{1}{\pi}
+    \int_s^\infty \frac{ \text{d}I_n }{ {\text{d}} s_{\text{p}}} (s_{\text{p}})\, \frac{ {\text{d}
+    s_{\text{p}}}} {\sqrt{s_{\text{p}}^2-s^2}}. \f] As a C++ class, the SersicFunction class
+    contains a vector with the values of \f${\cal{S}}_n(s)\f$ on a grid, distributed
+    logarithmically between \f$s=10^{-6}\f$ and \f$s=10^4\f$. Also the cumulative mass function,
+    \f[ {\cal{M}}_n(s) = 4\pi \int_0^s {\cal{S}}_n(s)\,s^2\, {\text{d}}s \f] is stored on the same
+    grid. */
 class SersicFunction
 {
 public:

@@ -10,10 +10,10 @@
 
 ////////////////////////////////////////////////////////////////////
 
-/** The PlummerGeometry class is a subclass of the SpheGeometry class, and describes
-    spherically symmetric geometries characterized by a Plummer density profile, \f[
-    \rho(r) = \rho_0\, \left(1+\frac{r^2}{c^2}\right)^{-5/2}. \f] The only free parameter
-    is the scale length \f$c\f$. */
+/** The PlummerGeometry class is a subclass of the SpheGeometry class, and describes spherically
+    symmetric geometries characterized by a Plummer density profile, \f[ \rho(r) = \rho_0\,
+    \left(1+\frac{r^2}{c^2}\right)^{-5/2}. \f] The only free parameter is the scale length \f$c\f$.
+    See Plummer (1911, MNRAS, 71, 460–470) and Dejonghe (1987, MNRAS, 224, 13–39). */
 class PlummerGeometry : public SpheGeometry
 {
     Q_OBJECT

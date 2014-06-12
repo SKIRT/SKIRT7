@@ -11,15 +11,15 @@ class SersicFunction;
 
 ////////////////////////////////////////////////////////////////////
 
-/** The SersicGeometry class is a subclass of the SpheGeometry class, and describes
-    spherically symmetric stellar geometries characterized by the density distribution \f[ \rho(r)
-    = \rho_0\, {\cal{S}}_n \left(\frac{r}{r_{\text{eff}}}\right), \f] with \f${\cal{S}}_n(s)\f$ the
-    Sersic function of order \f$n\f$ (see SersicFunction). It is defined in such a way that the
-    projected surface brightness profile has the form \f[ I(r_p) = I_0 \exp \left[ -b_n\left(
+/** The SersicGeometry class is a subclass of the SpheGeometry class, and describes spherically
+    symmetric stellar geometries characterized by the density distribution \f[ \rho(r) = \rho_0\,
+    {\cal{S}}_n \left(\frac{r}{r_{\text{eff}}}\right), \f] with \f${\cal{S}}_n(s)\f$ the Sersic
+    function of order \f$n\f$ (see SersicFunction). It is defined in such a way that the projected
+    surface brightness profile has the form \f[ I(r_p) = I_0 \exp \left[ -b_n\left(
     \frac{r_p}{r_{\text{eff}}} \right)^{1/n} \right]. \f] Two parameters characterize a
     SersicGeometry class object: the Sersic index \f$n\f$ and the effective radius
-    \f$r_{\text{eff}}\f$. Internally, the SersicGeometry class has a SersicFunction object
-    as one of its data members. */
+    \f$r_{\text{eff}}\f$. Internally, the SersicGeometry class has a SersicFunction object as one
+    of its data members. See Sersic (1963) and Ciotti & Bertin (1999, A&A 352, 447–451). */
 class SersicGeometry : public SpheGeometry
 {
     Q_OBJECT

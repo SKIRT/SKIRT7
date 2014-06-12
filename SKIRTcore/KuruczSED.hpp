@@ -11,7 +11,7 @@
 ////////////////////////////////////////////////////////////////////
 
 /** KuruczSED is a class that represents spectral energy distributions of stars according to the
-    model of Kurucz. SSPs with different metallicities, effective temperatures and surface
+    model of Kurucz (1993). SSPs with different metallicities, effective temperatures and surface
     gravities can be chosen. */
 class KuruczSED : public StellarSED
 {

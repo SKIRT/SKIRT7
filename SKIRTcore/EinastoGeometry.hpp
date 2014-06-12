@@ -11,16 +11,15 @@
 
 ////////////////////////////////////////////////////////////////////
 
-/** The EinastoGeometry class is a subclass of the SpheGeometry class, and
-    describes spherical geometries characterized by an Einasto density profile, \f[ \rho(r)
-    = \rho_{\text{s}}\, \exp\left\{-d_n \left[ \left(
-    \frac{r}{r_{\text{s}}}\right)^{1/n}-1\right] \right\}.\f] This geometry has
-    two free parameters: the half mass radius \f$r_{\text{s}}\f$, and the Einasto index
-    \f$n\f$. The quantity \f$d_n\f$ is not a free parameter, but a numerical
-    constant that guarantees that \f$r_{\text{s}}\f$ is the radius of the sphere that contains
-    half of the total mass. A numerical approximation for \f$d_n\f$ is provided by
-    Retana-Montenegro et al. (2012): \f[ d_n = 3n + -\frac13 + \frac{8}{1215\,n} +
-    \frac{184}{229635\,n^2} + \frac{1048}{31000725\,n^3}. \f] */
+/** The EinastoGeometry class is a subclass of the SpheGeometry class, and describes spherical
+    geometries characterized by an Einasto density profile (Einasto 1965), \f[ \rho(r) =
+    \rho_{\text{s}}\, \exp\left\{-d_n \left[ \left( \frac{r}{r_{\text{s}}}\right)^{1/n}-1\right]
+    \right\}.\f] This geometry has two free parameters: the half mass radius \f$r_{\text{s}}\f$,
+    and the Einasto index \f$n\f$. The quantity \f$d_n\f$ is not a free parameter, but a numerical
+    constant that guarantees that \f$r_{\text{s}}\f$ is the radius of the sphere that contains half
+    of the total mass. A numerical approximation for \f$d_n\f$ is provided by Retana-Montenegro et
+    al. (2012): \f[ d_n = 3n + -\frac13 + \frac{8}{1215\,n} + \frac{184}{229635\,n^2} +
+    \frac{1048}{31000725\,n^3}. \f] */
 class EinastoGeometry : public SpheGeometry
 {
     Q_OBJECT

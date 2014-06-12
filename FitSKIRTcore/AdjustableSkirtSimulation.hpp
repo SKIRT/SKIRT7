@@ -69,26 +69,28 @@ public:
     /** This function returns the y increment of frame at positon \em ind. */
     double ypress(int ind) const;
 
-    /** This function runs the SKIRT simulation specified by the previously loaded ski file after
-        adjusting its contents as specified through the \em conditions and \em replacements
-        dictionary arguments (see detailed description below). The prefix string, if present,
-        is appended to the filename prefix for all output files of this simulation run.
+/**
+This function runs the SKIRT simulation specified by the previously loaded ski file after
+adjusting its contents as specified through the \em conditions and \em replacements
+dictionary arguments (see detailed description below). The prefix string, if present,
+is appended to the filename prefix for all output files of this simulation run.
 
-        The \em conditions dictionary contains a set of key/value pairs controlling inclusion or
-        exclusion of certain marked sections in the ski file. The key for each dictionary item
-        is a string matching a section label in the ski file, as explained below. The value for
-        each dictionary item is boolean \c true (to indicate inclusion of the section) or \c
-        false (to indicate exclusion of the section).
+The \em conditions dictionary contains a set of key/value pairs controlling inclusion or
+exclusion of certain marked sections in the ski file. The key for each dictionary item
+is a string matching a section label in the ski file, as explained below. The value for
+each dictionary item is boolean \c true (to indicate inclusion of the section) or \c
+false (to indicate exclusion of the section).
 
-        The \em replacements dictionary contains a set of key/value pairs controlling
-        replacement of labeled attribute values in the ski file. The key for each dictionary item
-        is a string matching an attribute label in the ski file, as explained below. The value for
-        each dictionary item is in fact a pair of values: the numeric replacement value in SI units,
-        and a physical quantity specifier such as "length" (or the empty string if the value is
-        dimensionless).
+The \em replacements dictionary contains a set of key/value pairs controlling
+replacement of labeled attribute values in the ski file. The key for each dictionary item
+is a string matching an attribute label in the ski file, as explained below. The value for
+each dictionary item is in fact a pair of values: the numeric replacement value in SI units,
+and a physical quantity specifier such as "length" (or the empty string if the value is
+dimensionless).
 
-        To mark a section of the ski file for conditional inclusion, enclose the section in XML
-        comments including curly brackets as in the following example:
+To mark a section of the ski file for conditional inclusion, enclose the section in XML
+comments including curly brackets as in the following example:
+
 \verbatim
   <!--{bulge:-->
     <OligoStellarComp luminosities="1e15, 1e15, 1e15">
@@ -97,33 +99,34 @@ public:
   <!--}-->
 \endverbatim
 
-        The section start and end markers must be written exactly as shown, embedded in XML comments,
-        with the section label immediately following the left curly bracket and immediately preceding
-        a colon. The section label must start with a letter and can contain only letters, digits and
-        underscore characters. Nested sections are not allowed.
+The section start and end markers must be written exactly as shown, embedded in XML comments,
+with the section label immediately following the left curly bracket and immediately preceding
+a colon. The section label must start with a letter and can contain only letters, digits and
+underscore characters. Nested sections are not allowed.
 
-        If the section label matches one of the keys in the condition dictionary handed to this function,
-        and the corresponding value is \c false, this function removes the section from the XML file.
-        If the corresponding value is \c true, or if the label does not match a key in the dictionary,
-        then the section is preserved (i.e. the default is to leave the section in).
+If the section label matches one of the keys in the condition dictionary handed to this function,
+and the corresponding value is \c false, this function removes the section from the XML file.
+If the corresponding value is \c true, or if the label does not match a key in the dictionary,
+then the section is preserved (i.e. the default is to leave the section in).
 
-        To mark a numeric attribute value for replacement in the ski file, enclose the
-        value in square brackets and provide a label, as in the following example:
+To mark a numeric attribute value for replacement in the ski file, enclose the
+value in square brackets and provide a label, as in the following example:
+
 \verbatim
   <SersicGeometry index="3" radius="[stellar_scale:1500 pc]"/>
 \endverbatim
 
-        The brackets must be just within the quotes delimiting the attribute value. The label must
-        start with a letter and contain only letters, digits and underscores. It must be
-        immediately followed by a colon and then the regular attribute value, possibly including a
-        unit specifier. Spaces are not allowed except between the value and the unit specifier,
-        where a single space is required.
+The brackets must be just within the quotes delimiting the attribute value. The label must
+start with a letter and contain only letters, digits and underscores. It must be
+immediately followed by a colon and then the regular attribute value, possibly including a
+unit specifier. Spaces are not allowed except between the value and the unit specifier,
+where a single space is required.
 
-        This function replaces each labeled attribute value by a regular value (i.e. without the
-        brackets and the label). If the label matches one of the keys in the replacement dictionary
-        handed to this function, the corresponding value is substituted in the ski file. If there
-        is no match, the value provided in the ski file (after the colon) serves as a default.
-    */
+This function replaces each labeled attribute value by a regular value (i.e. without the
+brackets and the label). If the label matches one of the keys in the replacement dictionary
+handed to this function, the corresponding value is substituted in the ski file. If there
+is no match, the value provided in the ski file (after the colon) serves as a default.
+*/
     void performWith(ConditionDict conditions, ReplacementDict replacements, QString prefix=QString());
 
 private:

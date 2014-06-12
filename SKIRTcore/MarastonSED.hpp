@@ -11,8 +11,8 @@
 ////////////////////////////////////////////////////////////////////
 
 /** MarastonSED is a class that represents spectral energy distributions of simple stellar
-    populations (SSPs) according to the model of Maraston. SSPs with different ages and
-    metallicities can be chosen. */
+    populations (SSPs) according to the model of Maraston (1998, MNRAS, 300, 872–892). SSPs with
+    different ages and metallicities can be chosen. */
 class MarastonSED : public StellarSED
 {
     Q_OBJECT
