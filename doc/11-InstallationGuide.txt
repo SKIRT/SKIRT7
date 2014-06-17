@@ -111,11 +111,11 @@ cd SKIRT
 mkdir debug release run git
 \endverbatim
 
-Now obtain the SKIRT source code from the GitHub repository as follows:
+To obtain the SKIRT source code from the GitHub repository as anonymous user, enter:
 
 \verbatim
 cd ~/SKIRT
-git clone git@github.ugent.be:SKIRT/SKIRT.git git
+git clone https://github.ugent.be/SKIRT/SKIRT.git git
 \endverbatim
 
 To update the local copy of the source code after changes were made to the repository, use:
@@ -124,6 +124,22 @@ To update the local copy of the source code after changes were made to the repos
 cd ~/SKIRT/git
 git pull
 \endverbatim
+
+\subsubsection InstallMacGetUGent Using a UGent account
+
+If you have direct "push" access rights to the SKIRT repository as part of the core developer team, you need
+to follow a slightly different procedure. Before cloning the source code to your computer, sign in to
+<a href="https://github.ugent.be">the UGent GitHub</a> using your regular universal UGent password.
+Navigate to "Edit your profile" and then "SSH keys", and follow the instructions to generate (if necessary)
+and add your public SSH key to the list.
+
+To clone the SKIRT source code from the GitHub repository to your computer using your SSH key, enter:
+
+\verbatim
+cd ~/SKIRT
+git clone git@github.ugent.be:SKIRT/SKIRT.git git
+\endverbatim
+
 
 \subsection InstallMacConf Configuring the development environment
 
