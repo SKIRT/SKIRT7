@@ -259,7 +259,10 @@ HEADERS += \
     XDustCompNormalization.hpp \
     YDustCompNormalization.hpp \
     ZDustCompNormalization.hpp \
-    ZubkoDustMix.hpp
+    ZubkoDustMix.hpp \
+    ZubkoSilicateGrainSizeDistribution.hpp \
+    ZubkoGraphiteGrainSizeDistribution.hpp \
+    ZubkoPAHGrainSizeDistribution.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -479,4 +482,7 @@ SOURCES += \
     XDustCompNormalization.cpp \
     YDustCompNormalization.cpp \
     ZDustCompNormalization.cpp \
-    ZubkoDustMix.cpp
+    ZubkoDustMix.cpp \
+    ZubkoSilicateGrainSizeDistribution.cpp \
+    ZubkoGraphiteGrainSizeDistribution.cpp \
+    ZubkoPAHGrainSizeDistribution.cpp

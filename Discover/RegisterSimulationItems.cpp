@@ -146,6 +146,9 @@
 #include "YDustCompNormalization.hpp"
 #include "ZDustCompNormalization.hpp"
 #include "ZubkoDustMix.hpp"
+#include "ZubkoGraphiteGrainSizeDistribution.hpp"
+#include "ZubkoPAHGrainSizeDistribution.hpp"
+#include "ZubkoSilicateGrainSizeDistribution.hpp"
 
 using namespace SimulationItemRegistry;
 
@@ -310,6 +313,9 @@ void RegisterSimulationItems::registerAll()
     add<ModifiedPowerLawGrainSizeDistribution>();
     add<LogNormalGrainSizeDistribution>();
     add<ModifiedLogNormalGrainSizeDistribution>();
+    add<ZubkoGraphiteGrainSizeDistribution>();
+    add<ZubkoSilicateGrainSizeDistribution>();
+    add<ZubkoPAHGrainSizeDistribution>();
 
     add<DustMixPopulation>();
 
