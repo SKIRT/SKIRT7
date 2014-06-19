@@ -20,36 +20,29 @@ using namespace std;
 Array ISRF::mathis(SimulationItem* simitem)
 {
     WavelengthGrid* lambdagrid = simitem->find<WavelengthGrid>();
+    const Array& lambdav = lambdagrid->lambdav();
     int Nlambda = lambdagrid->Nlambda();
+    int ellA = NR::locate_clip(lambdav, 0.0912e-6);
+    int ellB = NR::locate_clip(lambdav, 0.110e-6);
+    int ellC = NR::locate_clip(lambdav, 0.134e-6);
+    int ellD = NR::locate_clip(lambdav, 0.250e-6);
 
     const double Wv[] = {1e-14,1e-13,4e-13};
-    const double Tv[] = {7500.0,4000.0,3000.0};
-    const double lambda912 = 912e-10;
-    const double lambda110 = 110e-9;
-    const double lambda134 = 134e-9;
-    const double lambda246 = 246e-9;
-    const Array& lambdav = lambdagrid->lambdav();
-    int ell912 = NR::locate_clip(lambdav,lambda912);
-    int ell110 = NR::locate_clip(lambdav,lambda110);
-    int ell134 = NR::locate_clip(lambdav,lambda134);
-    int ell246 = NR::locate_clip(lambdav,lambda246);
+    const double Tv[] = {7500,4000,3000};
 
     Array Jv(Nlambda);
-    for (int ell=ell912+1; ell<=ell110; ell++)
-        Jv[ell] = 38.57 * pow(lambdav[ell]*1e6,3.4172);
-    for (int ell=ell110+1; ell<=ell134; ell++)
-        Jv[ell] = 2.045e-2;
-    for (int ell=ell134+1; ell<=ell246; ell++)
-        Jv[ell] = 7.115e-4 * pow(lambdav[ell]*1e6,-1.6678);
-    for (int ell=0; ell<=ell246; ell++)
-        Jv[ell] *= 1e3;     // conversion from erg/cm2/s/micron to W/m3
+    for (int ell=ellA+1; ell<=ellB; ell++)
+        Jv[ell] = 3069. * pow(lambdav[ell]*1e6,3.4172);
+    for (int ell=ellB+1; ell<=ellC; ell++)
+        Jv[ell] = 1.627;
+    for (int ell=ellC+1; ell<=ellD; ell++)
+        Jv[ell] = 0.0566 * pow(lambdav[ell]*1e6,-1.6678);
     for (int i=0; i<3; i++)
     {
         PlanckFunction B(Tv[i]);
-        for (int ell=ell246+1; ell<Nlambda; ell++)
-            Jv[ell] += 4*M_PI* Wv[i] * B(lambdav[ell]);
+        for (int ell=ellD+1; ell<Nlambda; ell++)
+            Jv[ell] += Wv[i] * B(lambdav[ell]);
     }
-    Jv /= (4*M_PI);
     return Jv;
 }
 
