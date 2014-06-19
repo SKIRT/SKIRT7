@@ -34,6 +34,12 @@ namespace ISRF
         Dexter) and then resampled. The argument specifies a simulation item that should be linked
         into the simulation hierarchy; it is used to retrieve the simulation's wavelength grid. */
     Array kruegel(SimulationItem* simitem);
+
+    /** This function returns the radiation intensity \f$B_\lambda(T)\f$ of a black body at the
+        temperature \f$T\f$, sampled at the simulation's wavelength grid points \f$\lambda_\ell\f$.
+        The first argument specifies a simulation item that should be linked into the simulation
+        hierarchy; it is used to retrieve the simulation's wavelength grid. */
+    Array blackbody(SimulationItem* simitem, double T);
 }
 
 ////////////////////////////////////////////////////////////////////

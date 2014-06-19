@@ -71,3 +71,16 @@ Array ISRF::kruegel(SimulationItem* simitem)
 }
 
 ////////////////////////////////////////////////////////////////////
+
+Array ISRF::blackbody(SimulationItem* simitem, double T)
+{
+    WavelengthGrid* lambdagrid = simitem->find<WavelengthGrid>();
+    PlanckFunction B(T);
+    int Nlambda = lambdagrid->Nlambda();
+    Array Jv(Nlambda);
+    for (int ell=0; ell<Nlambda; ell++)
+        Jv[ell] = B(lambdagrid->lambda(ell));
+    return Jv;
+}
+
+////////////////////////////////////////////////////////////////////

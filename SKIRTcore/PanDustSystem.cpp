@@ -3,6 +3,7 @@
 ////       © Astronomical Observatory, Ghent University         ////
 //////////////////////////////////////////////////////////////////*/
 
+#include <cmath>
 #include <fstream>
 #include "ArrayTable.hpp"
 #include "DustEmissivity.hpp"
@@ -64,62 +65,72 @@ void PanDustSystem::setupSelfBefore()
 
 ////////////////////////////////////////////////////////////////////
 
+namespace
+{
+    void writeEmissivitiesForField(PanDustSystem* ds, const Array& Jv, QString filebody, QString title)
+    {
+        WavelengthGrid* lambdagrid = ds->find<WavelengthGrid>();
+        Units* units = ds->find<Units>();
+        Log* log = ds->find<Log>();
+
+        // inform user
+        QString filename = ds->find<FilePaths>()->output(filebody+".dat");
+        log->info("Writing emissivities for " + title + " to " + filename + "...");
+
+        // get emissivity for each dust mix
+        int Ncomp = ds->Ncomp();
+        ArrayTable<2> evv(Ncomp,0);
+        for (int h=0; h<Ncomp; h++) evv(h) = ds->dustEmissivity()->emissivity(ds->mix(h), Jv);
+
+        // write the input field and the emissivity for each dust mix to file
+        ofstream file(filename.toLocal8Bit().constData());
+        file << "# Dust emissivities for " << title.toStdString() << "\n";
+        file << "# column 1: lambda (" << units->uwavelength().toStdString() << ")\n";
+        file << "# column 2: embedding field mean intensity -- J_lambda (W/m3/sr)\n";
+        for (int h=0; h<Ncomp; h++)
+            file << "# column " << h+3 << ": dust mix " << h << " -- lambda*j_lambda (W/sr/H)\n";
+        int Nlambda = lambdagrid->Nlambda();
+        for (int ell=0; ell<Nlambda; ell++)
+        {
+            double lambda = lambdagrid->lambda(ell);
+            file << units->owavelength(lambda) << ' ' << Jv[ell];
+            for (int h=0; h<Ncomp; h++)
+                file << ' ' << ds->mix(h)->mu()*lambda*evv(h,ell);
+            file << '\n';
+        }
+        file.close();
+    }
+}
+
+////////////////////////////////////////////////////////////////////
+
 void PanDustSystem::setupSelfAfter()
 {
     DustSystem::setupSelfAfter();
 
     if (writeEmissivity())
     {
-        WavelengthGrid* lambdagrid = find<WavelengthGrid>();
-        Units* units = find<Units>();
-        Log* log = find<Log>();
-
-        // get the local interstellar radiation field, to be used as "input"
+        // write emissivities for a range of scaled Mathis ISRF input fields
         Array Jv = ISRF::mathis(this);
-
-        // get emissivity for each dust mix and for several input field strengths
-        // (emissivity is rescaled for ease of plotting)
-        const double factors[] = { 1e-4, 1., 1e4, 1e8 };
-        int Nfields = sizeof(factors)/sizeof(factors[0]);
-        ArrayTable<3> evv(_Ncomp,Nfields,0);
-        for (int h=0; h<_Ncomp; h++)
+        for (int i=-4; i<7; i++)
         {
-            log->info("Calculating emissivities for dust component " + QString::number(h) + "...");
-            double input = ( mix(h)->kappaabsv() * Jv * lambdagrid->dlambdav() ).sum();
-            for (int f=0; f<Nfields; f++)
-            {
-                double factor = factors[f];
-                evv(h,f) = _dustemissivity->emissivity(mix(h), Jv*factor) / factor;
-                double output = ( evv(h,f) * lambdagrid->dlambdav() ).sum();
-                log->info("  with factor " + QString::number(factor) +
-                          "  ; energy difference: " + QString::number(100.*(output-input)/input,'f',3) + " %");
-            }
+            double U = pow(10.,i);
+            writeEmissivitiesForField(this, U*Jv, "Mathis_U_" + QString::number(U,'e',0),
+                                      QString::number(U) + " * Mathis ISRF");
         }
 
-        QString filename = find<FilePaths>()->output("ds_emissivity.dat");
-        log->info("Writing emissivities to " + filename + "...");
-
-        // write the input and the emissivity for each dust component to file
-        ofstream file(filename.toLocal8Bit().constData());
-        file << "# column 1: lambda (" << units->uwavelength().toLocal8Bit().constData() << ")\n";
-        file << "# column 2: ISRF mean intensity J_lambda (W/m3/sr)\n";
-        file << "# subsequent columns: lambda*emissivity[ISRF*factor]/factor (W/hydrogen atom/sr)\n";
-        file << "#                     for each dust component and for several input field strengths\n";
-        int column = 2;
-        for (int h=0; h<_Ncomp; h++)
-            for (int f=0; f<Nfields; f++)
-                file << "# column " << ++column << ": dust component " << h << ", factor " << factors[f] << "\n";
-        for (int ell=0; ell<_Nlambda; ell++)
+        // write emissivities for a range of diluted Black Body input fields
+        const int Tv[] = { 3000, 6000, 9000, 12000, 15000, 18000 };
+        const double Dv[] = { 8.28e-12, 2.23e-13, 2.99e-14, 7.23e-15, 2.36e-15, 9.42e-16 };
+        for (int i=0; i<6; i++)
         {
-            double lambda = lambdagrid->lambda(ell);
-            file << units->owavelength(lambda) << ' ' << Jv[ell];
-            for (int h=0; h<_Ncomp; h++)
-                for (int f=0; f<Nfields; f++)
-                    file << ' ' << mix(h)->mu()*lambda*evv(h,f,ell);
-            file << '\n';
+            Jv = Dv[i] * ISRF::blackbody(this, Tv[i]);
+            writeEmissivitiesForField(this, Jv,
+                                      QString("BlackBody_T_%1").arg(Tv[i], 5, 10, QChar('0')),
+                                      QString("%1 * B(%2K)").arg(Dv[i],0,'e',2).arg(Tv[i]) );
         }
-        file.close();
-        log->info("File " + filename + " created.");
+
+        find<Log>()->info("Done writing emissivities.");
     }
 }
 
