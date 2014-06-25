@@ -44,6 +44,7 @@
 #include "DustMixPopulation.hpp"
 #include "EdgeOnDustCompNormalization.hpp"
 #include "EinastoGeometry.hpp"
+#include "EnstatiteGrainComposition.hpp"
 #include "ExpDiskGeometry.hpp"
 #include "ExpDiskSpiralArmsGeometry.hpp"
 #include "ExtragalacticUnits.hpp"
@@ -51,6 +52,7 @@
 #include "FilePaths.hpp"
 #include "FileSED.hpp"
 #include "FileWavelengthGrid.hpp"
+#include "ForsteriteGrainComposition.hpp"
 #include "FrameInstrument.hpp"
 #include "FullInstrument.hpp"
 #include "GammaGeometry.hpp"
@@ -79,6 +81,7 @@
 #include "MeanZubkoDustMix.hpp"
 #include "MeshDustComponent.hpp"
 #include "MieSilicateGrainComposition.hpp"
+#include "MinSilicateGrainComposition.hpp"
 #include "ModifiedLogNormalGrainSizeDistribution.hpp"
 #include "ModifiedPowerLawGrainSizeDistribution.hpp"
 #include "MultiFrameInstrument.hpp"
@@ -303,6 +306,9 @@ void RegisterSimulationItems::registerAll()
     add<DraineNeutralPAHGrainComposition>();
     add<DraineIonizedPAHGrainComposition>();
     add<MieSilicateGrainComposition>();
+    add<MinSilicateGrainComposition>();
+    add<EnstatiteGrainComposition>();
+    add<ForsteriteGrainComposition>();
     add<TrustGraphiteGrainComposition>();
     add<TrustSilicateGrainComposition>();
     add<TrustNeutralPAHGrainComposition>();

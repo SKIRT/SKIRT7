@@ -262,7 +262,10 @@ HEADERS += \
     ZubkoDustMix.hpp \
     ZubkoSilicateGrainSizeDistribution.hpp \
     ZubkoGraphiteGrainSizeDistribution.hpp \
-    ZubkoPAHGrainSizeDistribution.hpp
+    ZubkoPAHGrainSizeDistribution.hpp \
+    MinSilicateGrainComposition.hpp \
+    ForsteriteGrainComposition.hpp \
+    EnstatiteGrainComposition.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -485,4 +488,7 @@ SOURCES += \
     ZubkoDustMix.cpp \
     ZubkoSilicateGrainSizeDistribution.cpp \
     ZubkoGraphiteGrainSizeDistribution.cpp \
-    ZubkoPAHGrainSizeDistribution.cpp
+    ZubkoPAHGrainSizeDistribution.cpp \
+    MinSilicateGrainComposition.cpp \
+    ForsteriteGrainComposition.cpp \
+    EnstatiteGrainComposition.cpp
