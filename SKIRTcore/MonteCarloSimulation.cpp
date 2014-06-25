@@ -138,7 +138,7 @@ void MonteCarloSimulation::peeloffscattering(PhotonPackage* pp)
         wv[0] = 1.0;
     else
     {
-        int m = _ds->grid()->whichcell(bfr);
+        int m = _ds->whichcell(bfr);
         if (m==-1) throw FATALERROR("The scattering event seems to take place outside the dust grid");
         for (int h=0; h<Ncomp; h++) wv[h] = _ds->mix(h)->kappasca(ell) * _ds->density(m,h);
         wv /= wv.sum();
@@ -265,7 +265,7 @@ void MonteCarloSimulation::simulatescattering(PhotonPackage* pp)
     if (Ncomp>1)
     {
         Position bfr = pp->position();
-        int m = _ds->grid()->whichcell(bfr);
+        int m = _ds->whichcell(bfr);
         if (m==-1) throw FATALERROR("The scattering event seems to take place outside the dust grid");
         Array Xv;
         NR::cdf(Xv, Ncomp, [this,ell,m](int h){return _ds->mix(h)->kappasca(ell)*_ds->density(m,h);} );

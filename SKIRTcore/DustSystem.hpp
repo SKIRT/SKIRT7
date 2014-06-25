@@ -237,10 +237,6 @@ public:
     /** This function returns the number of dust components. */
     int Ncomp() const;
 
-    /** This function returns the dust grid structure. It is a shorthand for dustGridStructure().
-        */
-    DustGridStructure* grid() const;
-
     /** This function returns a pointer to the dust mixture corresponding to the \f$h\f$'th dust
         component. */
     DustMix* mix(int h) const;
