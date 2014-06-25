@@ -27,10 +27,10 @@ DustEmGrainComposition::DustEmGrainComposition(SimulationItem *parent, QString g
 void DustEmGrainComposition::setupSelfBefore()
 {
     setBulkDensity(_bulkmassdensity);
-    loadLogHeatCapacityGrid("DustEM/hcap/C_" + _graintype + ".DAT");
-    loadOpticalGrid("DustEM/oprop/LAMBDA.DAT",
-                    "DustEM/oprop/Q_" + _graintype + ".DAT",
-                    "DustEM/oprop/G_" + _graintype + ".DAT");
+    loadLogHeatCapacityGrid("GrainComposition/DustEM/hcap/C_" + _graintype + ".DAT");
+    loadOpticalGrid("GrainComposition/DustEM/oprop/LAMBDA.DAT",
+                    "GrainComposition/DustEM/oprop/Q_" + _graintype + ".DAT",
+                    "GrainComposition/DustEM/oprop/G_" + _graintype + ".DAT");
 }
 
 //////////////////////////////////////////////////////////////////////

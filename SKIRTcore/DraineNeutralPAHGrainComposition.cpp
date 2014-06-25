@@ -24,7 +24,7 @@ DraineNeutralPAHGrainComposition::DraineNeutralPAHGrainComposition(SimulationIte
 
 void DraineNeutralPAHGrainComposition::setupSelfBefore()
 {
-    loadOpticalGrid("GrainComposition/PAHneu_30.dat", true, false, true, false);
+    loadOpticalGrid("GrainComposition/Draine/PAHneu_30.dat", true, false, true, false);
     calculateEnthalpyGrid(DraineGraphiteGrainComposition::enthalpyfunction);
     setBulkDensity(2.24e3);
 }

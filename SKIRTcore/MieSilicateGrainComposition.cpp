@@ -24,7 +24,7 @@ MieSilicateGrainComposition::MieSilicateGrainComposition(SimulationItem *parent)
 
 void MieSilicateGrainComposition::setupSelfBefore()
 {
-    loadOpticalGrid("GrainComposition/MieAmorphousSilicate.dat", false, false, false, false);
+    loadOpticalGrid("GrainComposition/Other/MieAmorphousSilicate.dat", false, false, false, false);
     calculateEnthalpyGrid(DraineSilicateGrainComposition::enthalpyfunction);
     setBulkDensity(3.0e3);
 }

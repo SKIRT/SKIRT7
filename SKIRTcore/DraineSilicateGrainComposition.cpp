@@ -53,7 +53,7 @@ double DraineSilicateGrainComposition::enthalpyfunction(double T)
 
 void DraineSilicateGrainComposition::setupSelfBefore()
 {
-    loadOpticalGrid("GrainComposition/suvSil_81.dat", true, false, false, false);
+    loadOpticalGrid("GrainComposition/Draine/suvSil_81.dat", true, false, false, false);
     calculateEnthalpyGrid(enthalpyfunction);
     setBulkDensity(3.0e3);
 }
