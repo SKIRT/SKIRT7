@@ -27,7 +27,7 @@ class OligoMonteCarloSimulation : public MonteCarloSimulation
 
     Q_CLASSINFO("Property", "stellarSystem")
     Q_CLASSINFO("Title", "the stellar system")
-    Q_CLASSINFO("Default", "CompStellarSystem")
+    Q_CLASSINFO("Default", "StellarSystem")
 
     Q_CLASSINFO("Property", "dustSystem")
     Q_CLASSINFO("Title", "the dust system")

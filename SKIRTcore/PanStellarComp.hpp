@@ -6,20 +6,20 @@
 #ifndef PANSTELLARCOMP_HPP
 #define PANSTELLARCOMP_HPP
 
-#include "StellarComp.hpp"
+#include "GeometricStellarComp.hpp"
 class StellarCompNormalization;
 class StellarSED;
 
 //////////////////////////////////////////////////////////////////////
 
-/** The PanStellarComp class represents a stellar component in a panchromatic simulation. It uses a
-    spectral energy distribution (an instance of SED class) and a normalization method (an instance
-    of the StellarCompNormalization class) to calculate the luminosity vector maintained by the
-    StellarComp base class. */
-class PanStellarComp : public StellarComp
+/** The PanStellarComp class represents a stellar component that uses a built-in geometry in a
+    panchromatic simulation. It uses a spectral energy distribution (an instance of the StellarSED
+    class) and a normalization method (an instance of the StellarCompNormalization class) to
+    calculate the luminosity vector maintained by the GeometricStellarComp base class. */
+class PanStellarComp : public GeometricStellarComp
 {
     Q_OBJECT
-    Q_CLASSINFO("Title", "a stellar component in a panchromatic simulation")
+    Q_CLASSINFO("Title", "a stellar component with a built-in geometry (in an panchromatic simulation)")
     Q_CLASSINFO("AllowedIf", "PanMonteCarloSimulation")
 
     Q_CLASSINFO("Property", "sed")
@@ -38,8 +38,9 @@ protected:
     /** This function verifies the attribute values. */
     void setupSelfBefore();
 
-    /** This function calculates the luminosity vector maintained by the StellarComp base class
-        using the spectral energy distribution and normalization method provided as attributes. */
+    /** This function calculates the luminosity vector maintained by the GeometricStellarComp base
+        class using the spectral energy distribution and normalization method provided as
+        attributes. */
     void setupSelfAfter();
 
     //======== Setters & Getters for Discoverable Attributes =======

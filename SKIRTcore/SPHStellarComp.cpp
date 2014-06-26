@@ -13,7 +13,7 @@
 #include "NR.hpp"
 #include "PhotonPackage.hpp"
 #include "Random.hpp"
-#include "SPHStellarSystem.hpp"
+#include "SPHStellarComp.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
 
@@ -21,16 +21,16 @@ using namespace std;
 
 //////////////////////////////////////////////////////////////////////
 
-SPHStellarSystem::SPHStellarSystem()
+SPHStellarComp::SPHStellarComp()
     : _writeLuminosities(false)
 {
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void SPHStellarSystem::setupSelfBefore()
+void SPHStellarComp::setupSelfBefore()
 {
-    StellarSystem::setupSelfBefore();
+    StellarComp::setupSelfBefore();
 
     // cache the random generator
     _random = find<Random>();
@@ -120,49 +120,49 @@ void SPHStellarSystem::setupSelfBefore()
 
 //////////////////////////////////////////////////////////////////////
 
-void SPHStellarSystem::setFilename(QString value)
+void SPHStellarComp::setFilename(QString value)
 {
     _filename = value;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-QString SPHStellarSystem::filename() const
+QString SPHStellarComp::filename() const
 {
     return _filename;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void SPHStellarSystem::setWriteLuminosities(bool value)
+void SPHStellarComp::setWriteLuminosities(bool value)
 {
     _writeLuminosities = value;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-bool SPHStellarSystem::writeLuminosities() const
+bool SPHStellarComp::writeLuminosities() const
 {
     return _writeLuminosities;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double SPHStellarSystem::luminosity(int ell) const
-{
-    return _Ltotv[ell];
-}
-
-//////////////////////////////////////////////////////////////////////
-
-int SPHStellarSystem::dimension() const
+int SPHStellarComp::dimension() const
 {
     return 3;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void SPHStellarSystem::launch(PhotonPackage* pp, int ell, double L) const
+double SPHStellarComp::luminosity(int ell) const
+{
+    return _Ltotv[ell];
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void SPHStellarComp::launch(PhotonPackage* pp, int ell, double L) const
 {
     int i = NR::locate_clip(_Xvv[ell], _random->uniform());
     double h = _random->gauss()*_hv[i];

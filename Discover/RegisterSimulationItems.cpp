@@ -13,7 +13,7 @@
 #include "AdaptiveMeshDustDistribution.hpp"
 #include "AdaptiveMeshDustGridStructure.hpp"
 #include "AdaptiveMeshGeometry.hpp"
-#include "AdaptiveMeshStellarSystem.hpp"
+#include "AdaptiveMeshStellarComp.hpp"
 #include "AllCellsDustLib.hpp"
 #include "AxGeometry.hpp"
 #include "AxSpheDustGridStructure.hpp"
@@ -25,7 +25,6 @@
 #include "BruzualCharlotSED.hpp"
 #include "ClumpyGeometry.hpp"
 #include "CompDustDistribution.hpp"
-#include "CompStellarSystem.hpp"
 #include "ConfigurableDustMix.hpp"
 #include "CubicSplineSmoothingKernel.hpp"
 #include "Dim1DustLib.hpp"
@@ -113,7 +112,7 @@
 #include "SEDInstrument.hpp"
 #include "SIUnits.hpp"
 #include "SPHDustDistribution.hpp"
-#include "SPHStellarSystem.hpp"
+#include "SPHStellarComp.hpp"
 #include "SersicGeometry.hpp"
 #include "ShellGeometry.hpp"
 #include "SimpleInstrument.hpp"
@@ -121,6 +120,7 @@
 #include "SpheGeometry.hpp"
 #include "SpheroidalGeometry.hpp"
 #include "StarburstSED.hpp"
+#include "StellarSystem.hpp"
 #include "StellarUnits.hpp"
 #include "SunSED.hpp"
 #include "TTauriDiskGeometry.hpp"
@@ -143,7 +143,7 @@
 #include "VoronoiDustGridStructure.hpp"
 #include "VoronoiGeometry.hpp"
 #include "VoronoiMeshAsciiFile.hpp"
-#include "VoronoiStellarSystem.hpp"
+#include "VoronoiStellarComp.hpp"
 #include "WeingartnerDraineDustMix.hpp"
 #include "XDustCompNormalization.hpp"
 #include "YDustCompNormalization.hpp"
@@ -190,18 +190,17 @@ void RegisterSimulationItems::registerAll()
     add<NestedLogWavelengthGrid>();
     add<FileWavelengthGrid>();
 
-    add<StellarSystem>(false);
-    add<CompStellarSystem>();
-    add<SPHStellarSystem>();
-    add<AdaptiveMeshStellarSystem>();
-    add<VoronoiStellarSystem>();
-
+    add<StellarSystem>();
     add<StellarComp>(false);
+    add<GeometricStellarComp>(false);
     add<OligoStellarComp>();
     add<PanStellarComp>();
     add<StellarCompNormalization>(false);
     add<BolLuminosityStellarCompNormalization>();
     add<LuminosityStellarCompNormalization>();
+    add<SPHStellarComp>();
+    add<AdaptiveMeshStellarComp>();
+    add<VoronoiStellarComp>();
 
     add<Geometry>(false);
     add<PointGeometry>();

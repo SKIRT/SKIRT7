@@ -22,7 +22,7 @@ PanStellarComp::PanStellarComp()
 
 void PanStellarComp::setupSelfBefore()
 {
-    StellarComp::setupSelfBefore();
+    GeometricStellarComp::setupSelfBefore();
 
     // verify that we have all properties
     if (!_sed) throw FATALERROR("SED was not set");
@@ -39,7 +39,7 @@ void PanStellarComp::setupSelfBefore()
 
 void PanStellarComp::setupSelfAfter()
 {
-    StellarComp::setupSelfAfter();
+    GeometricStellarComp::setupSelfAfter();
 
     // actually calculate the luminosities (we need our SED child to be setup for this)
     int Nlambda = find<WavelengthGrid>()->Nlambda();

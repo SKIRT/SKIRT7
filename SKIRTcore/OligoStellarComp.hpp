@@ -6,17 +6,17 @@
 #ifndef OLIGOSTELLARCOMP_HPP
 #define OLIGOSTELLARCOMP_HPP
 
-#include "StellarComp.hpp"
+#include "GeometricStellarComp.hpp"
 
 //////////////////////////////////////////////////////////////////////
 
-/** The OligoStellarComp class represents a stellar component in an oligochromatic simulation.
-    Specifically this means that the spectral energy distribution over the small number of
-    wavelengths is managed internally rather than through the SED class. */
-class OligoStellarComp : public StellarComp
+/** The OligoStellarComp class represents a stellar component that uses a built-in geometry in an
+    oligochromatic simulation. The spectral energy distribution over the small number of
+    wavelengths is managed internally rather than through an instance of the StellarSED class. */
+class OligoStellarComp : public GeometricStellarComp
 {
     Q_OBJECT
-    Q_CLASSINFO("Title", "a stellar component in an oligochromatic simulation")
+    Q_CLASSINFO("Title", "a stellar component with a built-in geometry (in an oligochromatic simulation)")
     Q_CLASSINFO("AllowedIf", "OligoMonteCarloSimulation")
 
     Q_CLASSINFO("Property", "luminosities")
@@ -31,7 +31,7 @@ public:
 
 protected:
     /** This function converts the luminosity input values to program units using the Sun's SED,
-        and copies the result into the vector maintained by the StellarComp base class. */
+        and copies the result into the vector maintained by the GeometricStellarComp base class. */
     void setupSelfBefore();
 
     //======== Setters & Getters for Discoverable Attributes =======

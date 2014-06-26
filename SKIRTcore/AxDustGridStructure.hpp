@@ -23,9 +23,9 @@ class AxDustGridStructure : public DustGridStructure
     Q_OBJECT
     Q_CLASSINFO("Title", "an axisymmetric dust grid structure")
     Q_CLASSINFO("AllowedIf", "!GenGeometry")
-    Q_CLASSINFO("AllowedIf", "!AdaptiveMeshStellarSystem")
-    Q_CLASSINFO("AllowedIf", "!SPHStellarSystem")
-    Q_CLASSINFO("AllowedIf", "!VoronoiStellarSystem")
+    Q_CLASSINFO("AllowedIf", "!AdaptiveMeshStellarComp")
+    Q_CLASSINFO("AllowedIf", "!SPHStellarComp")
+    Q_CLASSINFO("AllowedIf", "!VoronoiStellarComp")
     Q_CLASSINFO("AllowedIf", "!AdaptiveMeshDustDistribution")
     Q_CLASSINFO("AllowedIf", "!SPHDustDistribution")
     Q_CLASSINFO("AllowedIf", "!VoronoiDustDistribution")

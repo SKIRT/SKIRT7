@@ -25,7 +25,7 @@ OligoStellarComp::OligoStellarComp()
 
 void OligoStellarComp::setupSelfBefore()
 {
-    StellarComp::setupSelfBefore();
+    GeometricStellarComp::setupSelfBefore();
 
     // Verify that the wavelength grid (and thus the simulation) is of the Oligo type
     OligoWavelengthGrid* lambdagrid = find<OligoWavelengthGrid>();

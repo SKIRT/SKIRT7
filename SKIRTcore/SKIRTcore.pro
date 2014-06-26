@@ -42,7 +42,6 @@ HEADERS += \
     AdaptiveMeshGeometry.hpp \
     AdaptiveMeshInterface.hpp \
     AdaptiveMeshNode.hpp \
-    AdaptiveMeshStellarSystem.hpp \
     AllCellsDustLib.hpp \
     AngularDistribution.hpp \
     AxDustGridStructure.hpp \
@@ -60,7 +59,6 @@ HEADERS += \
     BruzualCharlotSEDFamily.hpp \
     ClumpyGeometry.hpp \
     CompDustDistribution.hpp \
-    CompStellarSystem.hpp \
     ConfigurableDustMix.hpp \
     Console.hpp \
     CubDustGridStructure.hpp \
@@ -200,7 +198,6 @@ HEADERS += \
     SPHDustDistribution.hpp \
     SPHGasParticle.hpp \
     SPHGasParticleGrid.hpp \
-    SPHStellarSystem.hpp \
     SepAxGeometry.hpp \
     SersicFunction.hpp \
     SersicGeometry.hpp \
@@ -253,7 +250,6 @@ HEADERS += \
     VoronoiMeshAsciiFile.hpp \
     VoronoiMeshFile.hpp \
     VoronoiMeshInterface.hpp \
-    VoronoiStellarSystem.hpp \
     WavelengthGrid.hpp \
     WeingartnerDraineDustMix.hpp \
     XDustCompNormalization.hpp \
@@ -265,7 +261,11 @@ HEADERS += \
     ZubkoPAHGrainSizeDistribution.hpp \
     MinSilicateGrainComposition.hpp \
     ForsteriteGrainComposition.hpp \
-    EnstatiteGrainComposition.hpp
+    EnstatiteGrainComposition.hpp \
+    GeometricStellarComp.hpp \
+    SPHStellarComp.hpp \
+    VoronoiStellarComp.hpp \
+    AdaptiveMeshStellarComp.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -276,7 +276,6 @@ SOURCES += \
     AdaptiveMeshFile.cpp \
     AdaptiveMeshGeometry.cpp \
     AdaptiveMeshNode.cpp \
-    AdaptiveMeshStellarSystem.cpp \
     AllCellsDustLib.cpp \
     AxDustGridStructure.cpp \
     AxGeometry.cpp \
@@ -293,7 +292,6 @@ SOURCES += \
     BruzualCharlotSEDFamily.cpp \
     ClumpyGeometry.cpp \
     CompDustDistribution.cpp \
-    CompStellarSystem.cpp \
     ConfigurableDustMix.cpp \
     Console.cpp \
     CubDustGridStructure.cpp \
@@ -428,7 +426,6 @@ SOURCES += \
     SPHDustDistribution.cpp \
     SPHGasParticle.cpp \
     SPHGasParticleGrid.cpp \
-    SPHStellarSystem.cpp \
     SepAxGeometry.cpp \
     SersicFunction.cpp \
     SersicGeometry.cpp \
@@ -479,7 +476,6 @@ SOURCES += \
     VoronoiMesh.cpp \
     VoronoiMeshAsciiFile.cpp \
     VoronoiMeshFile.cpp \
-    VoronoiStellarSystem.cpp \
     WavelengthGrid.cpp \
     WeingartnerDraineDustMix.cpp \
     XDustCompNormalization.cpp \
@@ -491,4 +487,8 @@ SOURCES += \
     ZubkoPAHGrainSizeDistribution.cpp \
     MinSilicateGrainComposition.cpp \
     ForsteriteGrainComposition.cpp \
-    EnstatiteGrainComposition.cpp
+    EnstatiteGrainComposition.cpp \
+    GeometricStellarComp.cpp \
+    SPHStellarComp.cpp \
+    VoronoiStellarComp.cpp \
+    AdaptiveMeshStellarComp.cpp

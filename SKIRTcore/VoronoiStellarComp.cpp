@@ -3,9 +3,9 @@
 ////       © Astronomical Observatory, Ghent University         ////
 //////////////////////////////////////////////////////////////////*/
 
-#include "AdaptiveMesh.hpp"
-#include "AdaptiveMeshFile.hpp"
-#include "AdaptiveMeshStellarSystem.hpp"
+#include "VoronoiMesh.hpp"
+#include "VoronoiMeshFile.hpp"
+#include "VoronoiStellarComp.hpp"
 #include "BruzualCharlotSEDFamily.hpp"
 #include "FatalError.hpp"
 #include "FilePaths.hpp"
@@ -20,7 +20,7 @@ using namespace std;
 
 //////////////////////////////////////////////////////////////////////
 
-AdaptiveMeshStellarSystem::AdaptiveMeshStellarSystem()
+VoronoiStellarComp::VoronoiStellarComp()
     : _meshfile(0), _densityIndex(0), _metallicityIndex(1), _ageIndex(2),
       _xmax(0), _ymax(0), _zmax(0),
       _random(0), _mesh(0)
@@ -29,16 +29,16 @@ AdaptiveMeshStellarSystem::AdaptiveMeshStellarSystem()
 
 ////////////////////////////////////////////////////////////////////
 
-AdaptiveMeshStellarSystem::~AdaptiveMeshStellarSystem()
+VoronoiStellarComp::~VoronoiStellarComp()
 {
     delete _mesh;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void AdaptiveMeshStellarSystem::setupSelfBefore()
+void VoronoiStellarComp::setupSelfBefore()
 {
-    StellarSystem::setupSelfBefore();
+    StellarComp::setupSelfBefore();
 
     // verify property values
     if (_xmax <= 0 || _ymax <= 0 || _zmax <= 0) throw FATALERROR("Domain size should be positive");
@@ -46,10 +46,10 @@ void AdaptiveMeshStellarSystem::setupSelfBefore()
     // cache the random generator
     _random = find<Random>();
 
-    // import the adaptive mesh
-    _mesh = new AdaptiveMesh(_meshfile, QList<int>() << _densityIndex << _metallicityIndex << _ageIndex,
+    // import the Voronoi mesh
+    _mesh = new VoronoiMesh(_meshfile, QList<int>() << _densityIndex << _metallicityIndex << _ageIndex,
                              Box(-_xmax,-_ymax,-_zmax, _xmax,_ymax,_zmax));
-    find<Log>()->info("Adaptive mesh data was successfully imported: " + QString::number(_mesh->Ncells()) + " cells.");
+    find<Log>()->info("Voronoi mesh data was successfully imported: " + QString::number(_mesh->Ncells()) + " cells.");
 
     // construct the library of SED models
     BruzualCharlotSEDFamily bc(this);
@@ -94,7 +94,7 @@ void AdaptiveMeshStellarSystem::setupSelfBefore()
 
 //////////////////////////////////////////////////////////////////////
 
-void AdaptiveMeshStellarSystem::setAdaptiveMeshFile(AdaptiveMeshFile* value)
+void VoronoiStellarComp::setVoronoiMeshFile(VoronoiMeshFile* value)
 {
     if (_meshfile) delete _meshfile;
     _meshfile = value;
@@ -103,112 +103,112 @@ void AdaptiveMeshStellarSystem::setAdaptiveMeshFile(AdaptiveMeshFile* value)
 
 //////////////////////////////////////////////////////////////////////
 
-AdaptiveMeshFile* AdaptiveMeshStellarSystem::adaptiveMeshFile() const
+VoronoiMeshFile* VoronoiStellarComp::voronoiMeshFile() const
 {
     return _meshfile;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void AdaptiveMeshStellarSystem::setDensityIndex(int value)
+void VoronoiStellarComp::setDensityIndex(int value)
 {
     _densityIndex = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-int AdaptiveMeshStellarSystem::densityIndex() const
+int VoronoiStellarComp::densityIndex() const
 {
     return _densityIndex;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void AdaptiveMeshStellarSystem::setMetallicityIndex(int value)
+void VoronoiStellarComp::setMetallicityIndex(int value)
 {
     _metallicityIndex = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-int AdaptiveMeshStellarSystem::metallicityIndex() const
+int VoronoiStellarComp::metallicityIndex() const
 {
     return _metallicityIndex;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void AdaptiveMeshStellarSystem::setAgeIndex(int value)
+void VoronoiStellarComp::setAgeIndex(int value)
 {
     _ageIndex = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-int AdaptiveMeshStellarSystem::ageIndex() const
+int VoronoiStellarComp::ageIndex() const
 {
     return _ageIndex;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void AdaptiveMeshStellarSystem::setExtentX(double value)
+void VoronoiStellarComp::setExtentX(double value)
 {
     _xmax = value;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double AdaptiveMeshStellarSystem::extentX() const
+double VoronoiStellarComp::extentX() const
 {
     return _xmax;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void AdaptiveMeshStellarSystem::setExtentY(double value)
+void VoronoiStellarComp::setExtentY(double value)
 {
     _ymax = value;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double AdaptiveMeshStellarSystem::extentY() const
+double VoronoiStellarComp::extentY() const
 {
     return _ymax;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void AdaptiveMeshStellarSystem::setExtentZ(double value)
+void VoronoiStellarComp::setExtentZ(double value)
 {
     _zmax = value;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double AdaptiveMeshStellarSystem::extentZ() const
+double VoronoiStellarComp::extentZ() const
 {
     return _zmax;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double AdaptiveMeshStellarSystem::luminosity(int ell) const
-{
-    return _Ltotv[ell];
-}
-
-//////////////////////////////////////////////////////////////////////
-
-int AdaptiveMeshStellarSystem::dimension() const
+int VoronoiStellarComp::dimension() const
 {
     return 3;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void AdaptiveMeshStellarSystem::launch(PhotonPackage* pp, int ell, double L) const
+double VoronoiStellarComp::luminosity(int ell) const
+{
+    return _Ltotv[ell];
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void VoronoiStellarComp::launch(PhotonPackage* pp, int ell, double L) const
 {
     int m = NR::locate_clip(_Xvv[ell], _random->uniform());
     Position bfr = _mesh->randomPosition(_random, m);
