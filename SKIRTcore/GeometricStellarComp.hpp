@@ -24,7 +24,7 @@ class GeometricStellarComp : public StellarComp
     Q_CLASSINFO("Title", "a stellar component with a built-in geometry")
 
     Q_CLASSINFO("Property", "geometry")
-    Q_CLASSINFO("Title", "the spatial geometry of the stellar distribution")
+    Q_CLASSINFO("Title", "the geometry of the spatial stellar distribution")
     Q_CLASSINFO("Default", "PointGeometry")
 
     //============= Construction - Setup - Destruction =============

@@ -485,25 +485,30 @@ To obtain a V-band image, enter a wavelength "list" containing the single value 
 
 Each simulation must contain some luminous sources which emit radiation. In SKIRT terminology, these sources
 form a stellar system. A stellar system can be composed of a number of stellar components, each with
-specific geometry and emission properties, or it can be imported from
+specific geometric and emission properties which can be configured using built-in features or may be imported from
 the output of a hydrodynamical simulation in various formats.
 
 \verbatim
    Possible choices for the stellar system:
-      1. A stellar system composed of various stellar components
-      2. A stellar system derived from an SPH output file
-      3. A stellar system imported from an adaptive mesh data file
-      4. A stellar system imported from a Voronoi mesh data file
- ? Enter one of these numbers [1,4] (1): 1
+      1. A stellar system
+   Automatically selected the only choice: 1
 \endverbatim
 
-The stellar system in this tutorial simulation is composed of two components, a disk and a bulge. So you need
-to select the "component" stellar system type.
+Since there is only one type of stellar system, it is automatically selected.
 
 \verbatim
    Possible choices for item #1 in the stellar components list:
-      1. A stellar component in an oligochromatic simulation
-   Automatically selected the only choice: 1
+      1. A stellar component with a built-in geometry (in an oligochromatic simulation)
+      2. A stellar component derived from an SPH output file
+      3. A stellar component imported from an adaptive mesh data file
+      4. A stellar component imported from a Voronoi mesh data file
+ ? Enter one of these numbers [1,4] (1): 1
+\endverbatim
+
+The stellar system in this tutorial simulation is composed of two components, a disk and a bulge, which are
+configured using built-in features. So you need to select the "built-in geometry" stellar component type.
+
+\verbatim
    Possible choices for the geometry of the stellar distribution:
       1. A point source geometry
       2. A Plummer geometry
@@ -521,17 +526,18 @@ to select the "component" stellar system type.
  ? Enter the luminosities, one per wavelength, in solar units [0,..]: 5e9
 \endverbatim
 
-For an oligochromatic simulation, each stellar component is characterized by a particular geometry and by the
-total component luminosity at each wavelength in the simulation's wavelength grid.
-
-For the first stellar component, the oligochromatic stellar component type is automatically selected. For the geometry,
+In an oligochromatic simulation, each stellar component is characterized by a particular geometry and by the
+total component luminosity at each wavelength in the simulation's wavelength grid. For the geometry,
 select an exponential disk with a scale length of 4 kpc and a scale height of 350 pc, without truncation.
 Further specify a V-band luminosity of \f$L_{\text{V}} = 5\times10^9~L_{\odot,{\text{V}}}\f$.
 
 \verbatim
    Possible choices for item #2 in the stellar components list:
-      1. A stellar component in an oligochromatic simulation
- ? Enter one of these numbers or zero to terminate the list [0,1] (1): 1
+      1. A stellar component with a built-in geometry (in an oligochromatic simulation)
+      2. A stellar component derived from an SPH output file
+      3. A stellar component imported from an adaptive mesh data file
+      4. A stellar component imported from a Voronoi mesh data file
+ ? Enter one of these numbers [0,4] (0): 1
    Possible choices for the geometry of the stellar distribution:
       1. A point source geometry
       2. A Plummer geometry
@@ -556,8 +562,8 @@ Further specify a V-band luminosity of \f$L_{\text{V}} = 5\times10^9~L_{\odot,{\
  ? Enter the luminosities, one per wavelength, in solar units [0,..]: 3e9
 \endverbatim
 
-For the second stellar component, you need to explicitly select the oligochromatic stellar component type
-(to avoid terminating the list of stellar components). For the geometry, select a spheroidal variant of
+For the second stellar component, again
+select the "built-in geometry" stellar component type. For the geometry, select a spheroidal variant of
 the Sersic model with Sersic index \f$n=2\f$, effective radius \f$R_{\text{e}} = 1.6\f$ kpc, and
 flattening parameter \f$q=0.7\f$. Further specify a V-band luminosity of \f$L_{\text{V}}
 = 3\times10^9~L_{\odot,{\text{V}}}\f$.
@@ -569,7 +575,8 @@ for example to form a clumpy triaxial Einasto geometry.
 
 \verbatim
    Possible choices for item #3 in the stellar components list:
-      1. A stellar component in an oligochromatic simulation
+      1. A stellar component with a built-in geometry (in an oligochromatic simulation)
+         ...
  ? Enter one of these numbers or zero to terminate the list [0,1] (1): 0
 \endverbatim
 
@@ -887,7 +894,7 @@ A lot of information provided in the previous tutorial is not repeated here!
 
 To complete this tutorial, you need SPH output data that is converted to a format appropriate for importing in SKIRT.
 You need a file with stellar particle data and one with gas particle data. The required file formats are described
-in the documentation for the functions SPHStellarSystem::setFilename() and SPHDustDistribution::setFilename().
+in the documentation for the functions SPHStellarComp::setFilename() and SPHDustDistribution::setFilename().
 
 Download the files \c eagle_stars.dat and \c eagle_gas.dat from the SKIRT downloads page
 <a href="http://www.skirt.ugent.be/downloads">www.skirt.ugent.be/downloads</a>
@@ -997,19 +1004,22 @@ For this tutorial, select a wavelength grid with 30 grid points distributed loga
 
 \verbatim
    Possible choices for the stellar system:
-      1. A stellar system composed of various stellar components
-      2. A stellar system derived from an SPH output file
-      3. A stellar system imported from an adaptive mesh data file
-      4. A stellar system imported from a Voronoi mesh data file
+      1. A stellar system
+   Automatically selected the only choice: 1
+   Possible choices for item #1 in the stellar components list:
+      1. A stellar component with a built-in geometry (in an panchromatic simulation)
+      2. A stellar component derived from an SPH output file
+      3. A stellar component imported from an adaptive mesh data file
+      4. A stellar component imported from a Voronoi mesh data file
  ? Enter one of these numbers [1,4] (1): 2
  ? Enter the name of the file with the SPH star particles: eagle_stars.dat
  ? Output the luminosities per wavelength bin? [yes/no] (no):
 \endverbatim
 
-In this tutorial, the stellar system is imported from the output of an SPH simulation. You need SPH stellar particle
-data in a format appropriate for importing in SKIRT, as described in the documentation for the function
-SPHStellarSystem::setFilename().
-Select the appropriate stellar system type and enter the name of your stellar particle data file.
+In this tutorial, the stellar information is imported from the output of an SPH simulation. You need SPH stellar
+particle data in a format appropriate for importing in SKIRT, as described in the documentation for the function
+SPHStellarComp::setFilename(). Select the appropriate stellar component type and enter the name of your stellar
+particle data file.
 
 \subsection UserTut2Dust Dust system
 
@@ -1342,14 +1352,14 @@ containing the single value \f$\lambda=0.55\,\mu\textrm{m}\f$ (V-band).
 
 \verbatim
    Possible choices for the stellar system:
-      1. A stellar system composed of various stellar components
-      2. A stellar system derived from an SPH output file
-      3. A stellar system imported from an adaptive mesh data file
-      4. A stellar system imported from a Voronoi mesh data file
- ? Enter one of these numbers [1,4] (1): 1
-   Possible choices for item #1 in the stellar components list:
-      1. A stellar component in an oligochromatic simulation
+      1. A stellar system
    Automatically selected the only choice: 1
+   Possible choices for item #1 in the stellar components list:
+      1. A stellar component with a built-in geometry (in an panchromatic simulation)
+      2. A stellar component derived from an SPH output file
+      3. A stellar component imported from an adaptive mesh data file
+      4. A stellar component imported from a Voronoi mesh data file
+ ? Enter one of these numbers [1,4] (1): 1
    Possible choices for the geometry of the stellar distribution:
       1. A point source geometry
       2. A Plummer geometry
@@ -1359,7 +1369,8 @@ containing the single value \f$\lambda=0.55\,\mu\textrm{m}\f$ (V-band).
  ? Enter the scale length [0 AU,.. AU]: 0.03e18 cm
  ? Enter the luminosities, one for each wavelength, in solar units [0,..]: 1e-6
    Possible choices for item #2 in the stellar components list:
-      1. A stellar component in an oligochromatic simulation
+      1. A stellar component with a built-in geometry (in an panchromatic simulation)
+         ...
  ? Enter one of these numbers or zero to terminate the list [0,1] (1): 0
 \endverbatim
 

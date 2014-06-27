@@ -343,8 +343,9 @@ digraph runtime {
       Random [label="Random" URL="\ref Random"];
       ExtragalacticUnits [label="ExtragalacticUnits" URL="\ref ExtragalacticUnits"];
       OligoWavelengthGrid [label="OligoWavelengthGrid" URL="\ref OligoWavelengthGrid"];
-      SPHStellarSystem [label="SPHStellarSystem" URL="\ref SPHStellarSystem"];
-      DustSystem [label="DustSystem" URL="\ref DustSystem"];
+      StellarSystem [label="StellarSystem" URL="\ref StellarSystem"];
+        SPHStellarComp [label="SPHStellarComp" URL="\ref SPHStellarComp"];
+      OligoDustSystem [label="OligoDustSystem" URL="\ref OligoDustSystem"];
         SPHDustDistribution [label="SPHDustDistribution" URL="\ref SPHDustDistribution"];
           InterstellarDustMix [label="InterstellarDustMix" URL="\ref InterstellarDustMix"];
         OctTreeDustGridStructure [label="OctTreeDustGridStructure" URL="\ref OctTreeDustGridStructure"];
@@ -359,11 +360,12 @@ digraph runtime {
       OligoMonteCarloSimulation -> Random;
       OligoMonteCarloSimulation -> ExtragalacticUnits;
       OligoMonteCarloSimulation -> OligoWavelengthGrid;
-      OligoMonteCarloSimulation -> SPHStellarSystem;
-      OligoMonteCarloSimulation -> DustSystem;
-        DustSystem -> SPHDustDistribution;
+      OligoMonteCarloSimulation -> StellarSystem;
+        StellarSystem -> SPHStellarComp;
+      OligoMonteCarloSimulation -> OligoDustSystem;
+        OligoDustSystem -> SPHDustDistribution;
           SPHDustDistribution -> InterstellarDustMix;
-        DustSystem -> OctTreeDustGridStructure;
+        OligoDustSystem -> OctTreeDustGridStructure;
       OligoMonteCarloSimulation -> InstrumentSystem;
         InstrumentSystem -> SimpleInstrument_1;
         InstrumentSystem -> SimpleInstrument_2;
@@ -402,9 +404,9 @@ digraph inheritance {
     edge [arrowhead=empty];
 
     SimulationItem [label="SimulationItem" URL="\ref SimulationItem"];
-      StellarSystem [label="StellarSystem" URL="\ref StellarSystem"];
-        SPHStellarSystem [label="SPHStellarSystem" URL="\ref SPHStellarSystem"];
-        OtherStellarSystem [label="..."];
+      StellarComp [label="StellarComp" URL="\ref StellarComp"];
+        SPHStellarComp [label="SPHStellarComp" URL="\ref SPHStellarComp"];
+        OtherStellarComp [label="..."];
       Simulation [label="Simulation" URL="\ref Simulation"];
         MonteCarloSimulation [label="MonteCarloSimulation" URL="\ref MonteCarloSimulation"];
           OligoMonteCarloSimulation [label="OligoMonteCarloSimulation" URL="\ref OligoMonteCarloSimulation"];
@@ -413,9 +415,9 @@ digraph inheritance {
         Console [label="Console" URL="\ref Console"];
         FileLog [label="FileLog" URL="\ref FileLog"];
 
-      StellarSystem -> SimulationItem;
-        SPHStellarSystem -> StellarSystem;
-        OtherStellarSystem -> StellarSystem;
+      StellarComp -> SimulationItem;
+        SPHStellarComp -> StellarComp;
+        OtherStellarComp -> StellarComp;
       Simulation -> SimulationItem;
         MonteCarloSimulation -> Simulation;
           OligoMonteCarloSimulation -> MonteCarloSimulation;
