@@ -15,7 +15,7 @@ At this time SKIRT does not properly compile or run on Microsoft Windows systems
 could probably be supported with only a small effort.
 
 SKIRT is written in C++11 and is based on the Qt 5.2 development environment. There are no other external dependencies.
-The source code is hosted on our institution's GitHub. Thus you will need to install a \em git client, a recent
+The source code is hosted on GitHub. Thus you will need to install a \em git client, a recent
 C++ compiler and the appropriate Qt libraries. The documentation is generated from the source code through Doxygen.
 You don't need to install Doxygen and the related tools unless you are a substantial contributor to the code.
 
@@ -100,9 +100,10 @@ Finally press the "OK" buttun to accept the changes and close the preferences di
 
 \subsection InstallMacGet Getting the SKIRT source code
 
-Create a directory hierarchy that will hold the SKIRT source code, binaries and run-time information.
-The top-level directory can have any name (for example \c SKIRT) and can be located anywhere (for example in
-your home directory), but the subdirectories should be named as indicated:
+To work with SKIRT, you need to copy the source code to your local file system. First create a directory hierarchy that
+will hold the SKIRT source code, binaries and run-time information. The top-level directory can have any name (for
+example \c SKIRT) and can be located anywhere (for example in your home directory), but the subdirectories should be
+named as indicated:
 
 \verbatim
 cd
@@ -111,33 +112,56 @@ cd SKIRT
 mkdir debug release run git
 \endverbatim
 
-To obtain the SKIRT source code from the GitHub repository as anonymous user, enter:
+\subsubsection InstallMacGetRepos Source code repositories
+
+The most recent stable version of the SKIRT source code is available from the
+<a href="https://github.com/SKIRT/SKIRT">public SKIRT GitHub repository</a> at
+<a href="https://github.com">GitHub.com</a>.
+While any user can freely retrieve the code from this repository (even anonymously), only the core SKIRT team
+has write access to it.
+
+The current development version of the SKIRT source code is stored in a \em private GitHub repository hosted
+on the Ghent University's web servers. You can access this repository only if you have a UGent account \em and
+the core SKIRT team has specifically granted you read-only or read/write access rights to the repository.
+
+\subsubsection InstallMacGetPublic Using the public repository
+
+If you just want to use the stable version of SKIRT without making any code contributions, you can simply clone
+the public repository as an anonymous user:
 
 \verbatim
 cd ~/SKIRT
-git clone https://github.ugent.be/SKIRT/SKIRT.git git
+git clone https://github.com/SKIRT/SKIRT.git git
 \endverbatim
 
-To update the local copy of the source code after changes were made to the repository, use:
+If you plan to make code contributions, you should instead create an account at
+<a href="https://github.com">GitHub.com</a>,
+fork the <a href="https://github.com/SKIRT/SKIRT">SKIRT repository</a> and then clone your own fork to your computer.
+This allows you to push your modifications to your own fork and initiate a pull request when you want to contribute
+the changes to the project. Refer to the online GitHub documentation for more information about this process.
 
-\verbatim
-cd ~/SKIRT/git
-git pull
-\endverbatim
+\subsubsection InstallMacGetUGent Using the private repository
 
-\subsubsection InstallMacGetUGent Using a UGent account
-
-If you have direct "push" access rights to the SKIRT repository as part of the core developer team, you need
-to follow a slightly different procedure. Before cloning the source code to your computer, sign in to
+If you have a UGent account and the core SKIRT team has granted you access rights to the SKIRT repository, you need to
+follow a slightly different procedure. Before cloning the source code to your computer, sign in to
 <a href="https://github.ugent.be">the UGent GitHub</a> using your regular universal UGent password.
-Navigate to "Edit your profile" and then "SSH keys", and follow the instructions to generate (if necessary)
-and add your public SSH key to the list.
+Navigate to "Edit your profile" and then "SSH keys", and follow the instructions to generate (if necessary) and add
+your public SSH key to the list.
 
-To clone the SKIRT source code from the GitHub repository to your computer using your SSH key, enter:
+Once your SSH key has been added, you can clone the SKIRT source code from the private repository to your computer:
 
 \verbatim
 cd ~/SKIRT
 git clone git@github.ugent.be:SKIRT/SKIRT.git git
+\endverbatim
+
+\subsubsection InstallMacGetUpdate Updating your local copy
+
+To update your local copy of the source code after changes were made to the repository from which you cloned it, use:
+
+\verbatim
+cd ~/SKIRT/git
+git pull
 \endverbatim
 
 
