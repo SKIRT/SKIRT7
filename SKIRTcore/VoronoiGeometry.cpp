@@ -43,8 +43,8 @@ void VoronoiGeometry::setupSelfBefore()
     _mesh->addDensityDistribution(_densityIndex, _multiplierIndex);
     find<Log>()->info("Voronoi mesh data was successfully imported: " + QString::number(_mesh->Ncells()) + " cells.");
 
-    // construct a vector with the normalized cumulative densities
-    NR::cdf(_cumrhov, _mesh->Ncells(), [this](int i){return _mesh->density(i);} );
+    // construct a vector with the normalized cumulative masses
+    NR::cdf(_cumrhov, _mesh->Ncells(), [this](int i){return _mesh->density(i)*_mesh->volume(i);} );
 }
 
 //////////////////////////////////////////////////////////////////////
