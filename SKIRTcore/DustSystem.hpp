@@ -57,6 +57,10 @@ class DustSystem : public SimulationItem
     Q_CLASSINFO("Title", "output FITS files displaying the dust density distribution")
     Q_CLASSINFO("Default", "yes")
 
+    Q_CLASSINFO("Property", "writeDepthMap")
+    Q_CLASSINFO("Title", "output FITS file with a V-band optical depth map seen from the center")
+    Q_CLASSINFO("Default", "no")
+
     Q_CLASSINFO("Property", "writeQuality")
     Q_CLASSINFO("Title", "calculate and output quality metrics for the dust grid")
     Q_CLASSINFO("Default", "no")
@@ -141,6 +145,21 @@ private:
         suitable (in the ideal case, there would be no difference between both sets of maps). */
     void writedensity() const;
 
+    /** This function writes out a FITS file named <tt>prefix_ds_tau.fits</tt> with an all-sky
+        V-band optical depth map as seen from the coordinate origin. The map has 1600 x 800 pixels
+        and uses the Mollweide projection to project the complete sky onto a proportional 2:1 ellipse.
+        The values outside of the ellipse are set to zero. The direction \f$\bf{k}=(\theta,\phi)\f$
+        corresponding to the pixel in the map with horizontal and vertical indices \f$(i,j)\f$ can
+        be found through the inverse Mollweide projection, which in this case can be written as
+        follows:
+        \f[ x=(i+\frac{1}{2})/N_\mathrm{pixels,x} \f]
+        \f[ y=(j+\frac{1}{2})/N_\mathrm{pixels,y} \f]
+        \f[ \alpha=\arcsin(2y-1) \f]
+        \f[ \theta=\arccos(\frac{2\alpha+\sin 2\alpha}{\pi}) \f]
+        \f[ \phi=\frac{\pi(2x-1)}{\cos\alpha}) \f]
+    */
+    void writedepthmap() const;
+
     /** This function writes out a simple text file, named <tt>prefix_ds_quality.dat</tt>,
         providing some basic quality metrics for the dust grid. The first metric consists of the
         mean value and the standard deviation for the absolute difference \f$|\rho_g-\rho_t|\f$
@@ -196,6 +215,14 @@ public:
     /** Returns the flag that indicates whether or not to output FITS files displaying the dust
         density distribution for further analysis. */
     Q_INVOKABLE bool writeDensity() const;
+
+    /** Sets the flag that indicates whether or not to output a FITS file with an all-sky V-band
+        optical depth map as seen from the center. The default value is false. */
+    Q_INVOKABLE void setWriteDepthMap(bool value);
+
+    /** Returns the flag that indicates whether or not to output a FITS file with an all-sky V-band
+        optical depth map as seen from the center. */
+    Q_INVOKABLE bool writeDepthMap() const;
 
     /** Sets the flag that indicates whether or not to calculate and output quality metrics for the
         dust grid. The default value is false. */
@@ -383,6 +410,7 @@ protected:
     int _Nrandom;
     bool _writeConvergence;
     bool _writeDensity;
+    bool _writeDepthMap;
     bool _writeQuality;
     bool _writeCellProperties;
     bool _writeCellsCrossed;

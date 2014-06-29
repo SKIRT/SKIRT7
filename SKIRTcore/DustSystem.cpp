@@ -3,6 +3,7 @@
 ////       © Astronomical Observatory, Ghent University         ////
 //////////////////////////////////////////////////////////////////*/
 
+#include <cmath>
 #include <fstream>
 #include "DustCell.hpp"
 #include "DustDistribution.hpp"
@@ -27,7 +28,9 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////
 
 DustSystem::DustSystem()
-    : _dd(0), _grid(0), _Nrandom(100), _writeConvergence(true), _writeDensity(true)
+    : _dd(0), _grid(0), _gdi(0), _Nrandom(100),
+      _writeConvergence(true), _writeDensity(true), _writeDepthMap(false),
+      _writeQuality(false), _writeCellProperties(false), _writeCellsCrossed(false)
 {
 }
 
@@ -94,6 +97,9 @@ void DustSystem::setupSelfAfter()
 
     // Write the density in the xy plane and the xz plane to a file.
     if (_writeDensity) writedensity();
+
+    // Output optical depth map as seen from the center
+    if (_writeDepthMap) writedepthmap();
 
     // Calculate and output some quality metrics for the dust grid
     if (_writeQuality) writequality();
@@ -442,6 +448,107 @@ void DustSystem::writedensity() const
 
 ////////////////////////////////////////////////////////////////////
 
+// Private class to output a FITS file with an optical depth map viewed from the center using Mollweide projection
+namespace
+{
+    // The image size in each direction, in pixels
+    const int Npx = 1600;
+    const int Npy = 800;
+
+    class WriteDepthMap : public ParallelTarget
+    {
+    private:
+        // results -- sized to fit in constructor
+        Array tauv;
+
+        // data members initialized in constructor
+        const DustSystem* _ds;
+        DustGridStructure* _grid;
+        FilePaths* _paths;
+        Log* _log;
+        int _ell;
+
+    public:
+        // constructor
+        WriteDepthMap(const DustSystem* ds)
+            : tauv(Npx*Npy)
+        {
+            _ds = ds;
+            _grid = ds->dustGridStructure();
+            _log = ds->find<Log>();
+            _paths = ds->find<FilePaths>();
+            _log->info("Calculating optical depth map viewed from the center...");
+            _ell = max(0, ds->find<WavelengthGrid>()->nearest(Units::lambdaV()));
+        }
+
+         // the parallized loop body; calculates the results for a single line in the image
+        void body(int j)
+        {
+            double y = (j+0.5) / Npy;
+            for (int i=0; i<Npx; i++)
+            {
+                double x = (i+0.5) / Npx;
+
+                // perform the inverse Mollweide projection
+                double alpha = asin(2*y-1);
+                double theta = acos((2*alpha+sin(2*alpha))/M_PI);
+                double phi = M_PI*(2*x-1)/cos(alpha);
+
+                // if the deprojected direction is within range, compute the optical depth
+                if (phi > -M_PI && phi < M_PI)
+                    tauv[i+Npx*j] = opticaldepth(_ell, Position(), Direction(theta, phi));
+            }
+        }
+
+        // write the results to a FITS file with an appropriate name
+        void write()
+        {
+            QString filename = _paths->output("ds_tau.fits");
+            FITSInOut::write(filename, tauv, Npx, Npy, 1,  360./Npx, 180./Npy, "deg", "deg");
+            WavelengthGrid* lambdagrid = _ds->find<WavelengthGrid>();
+            Units* units = _ds->find<Units>();
+            _log->info("Written optical depth map at λ = " +
+                       QString::number(units->owavelength(lambdagrid->lambda(_ell))) + " " +
+                       units->uwavelength() + " to file " + filename);
+        }
+
+    private:
+        double opticaldepth(int ell, Position bfr, Direction bfk)
+        {
+            DustGridPath dgp = _grid->path(bfr,bfk);
+            int N = dgp.size();
+            const vector<int>& mv = dgp.mv();
+            const vector<double>& dsv = dgp.dsv();
+
+            int Ncomp = _ds->Ncomp();
+            vector<double> kappaextv(Ncomp);
+            for (int h=0; h<Ncomp; h++)
+                kappaextv[h] = _ds->mix(h)->kappaext(ell);
+
+            double tau = 0.0;
+            for (int n=0; n<N; n++)
+            {
+                for (int h=0; h<Ncomp; h++)
+                    tau += kappaextv[h] * _ds->density(mv[n],h) * dsv[n];
+            }
+            return tau;
+        }
+    };
+}
+
+////////////////////////////////////////////////////////////////////
+
+void DustSystem::writedepthmap() const
+{
+    // construct a private class instance to do the work (parallelized)
+    WriteDepthMap wdm(this);
+    Parallel* parallel = find<ParallelFactory>()->parallel();
+    parallel->call(&wdm, Npy);
+    wdm.write();
+}
+
+////////////////////////////////////////////////////////////////////
+
 void DustSystem::writequality() const
 {
     Log* log = find<Log>();
@@ -628,6 +735,20 @@ void DustSystem::setWriteDensity(bool value)
 bool DustSystem::writeDensity() const
 {
     return _writeDensity;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void DustSystem::setWriteDepthMap(bool value)
+{
+    _writeDepthMap = value;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+bool DustSystem::writeDepthMap() const
+{
+    return _writeDepthMap;
 }
 
 //////////////////////////////////////////////////////////////////////
