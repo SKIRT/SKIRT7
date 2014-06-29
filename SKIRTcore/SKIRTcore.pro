@@ -265,7 +265,8 @@ HEADERS += \
     GeometricStellarComp.hpp \
     SPHStellarComp.hpp \
     VoronoiStellarComp.hpp \
-    AdaptiveMeshStellarComp.hpp
+    AdaptiveMeshStellarComp.hpp \
+    FileGrainComposition.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -491,4 +492,5 @@ SOURCES += \
     GeometricStellarComp.cpp \
     SPHStellarComp.cpp \
     VoronoiStellarComp.cpp \
-    AdaptiveMeshStellarComp.cpp
+    AdaptiveMeshStellarComp.cpp \
+    FileGrainComposition.cpp

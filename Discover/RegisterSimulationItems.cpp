@@ -48,6 +48,7 @@
 #include "ExpDiskSpiralArmsGeometry.hpp"
 #include "ExtragalacticUnits.hpp"
 #include "FaceOnDustCompNormalization.hpp"
+#include "FileGrainComposition.hpp"
 #include "FilePaths.hpp"
 #include "FileSED.hpp"
 #include "FileWavelengthGrid.hpp"
@@ -312,6 +313,7 @@ void RegisterSimulationItems::registerAll()
     add<TrustSilicateGrainComposition>();
     add<TrustNeutralPAHGrainComposition>();
     add<DustEmGrainComposition>();
+    add<FileGrainComposition>();
 
     add<GrainSizeDistribution>(false);
     add<PowerLawGrainSizeDistribution>();

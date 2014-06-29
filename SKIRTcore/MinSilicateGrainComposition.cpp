@@ -17,7 +17,7 @@ void MinSilicateGrainComposition::setupSelfBefore()
 {
     setBulkDensity(3.09e3);
     loadLogHeatCapacityGrid("GrainComposition/DustEM/hcap/C_aSil.DAT");
-    loadOpticalGrid("GrainComposition/Min/aSil_Min2007.dat", false, false, false, false);
+    loadOpticalGrid(true, "GrainComposition/Min/aSil_Min2007.dat", false, false, false, false);
 }
 
 //////////////////////////////////////////////////////////////////////

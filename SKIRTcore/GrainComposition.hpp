@@ -93,7 +93,7 @@ public:
 
 protected:
     /** This function should be used by a subclass to read the complete grid with optical
-        properties from a resource data file with the specified name. The file should have a simple
+        properties from a resource or input data file with the specified name. The file should have a simple
         text format as described here. Any initial lines that start with a # character are
         considered to be part of a header and are thus ignored. The first number on the first
         non-header line specifies the number of grain size grid points \f$N_a\f$; the first number
@@ -110,7 +110,7 @@ protected:
         is present, false means it is absent). The wavelength must be given in micron; the other
         three values are dimensionless. For all lines discussed above, any additional information
         at the end of the line is ignored. */
-    void loadOpticalGrid(QString resourcename, bool reverse, bool skip1, bool skip2, bool skip3);
+    void loadOpticalGrid(bool resource, QString name, bool reverse, bool skip1, bool skip2, bool skip3);
 
     /** This function should be used by a subclass to read the complete grid with optical
         properties from three resource data files with the specified name, respectively containing:
@@ -148,14 +148,14 @@ protected:
     void loadOpticalGrid(QString resourceLambda, QString resourceQ, QString resourceG);
 
     /** This function can be used by a subclass to read enthalpy values in function of temperature
-        from a table specified in the resource data file with the specified name. The file should
+        from a table specified in the resource or input data file with the specified name. The file should
         have a simple text format as described here. Any initial lines that start with a #
         character are considered to be part of a header and are thus ignored. The first number on
         the first non-header line specifies the number of temperature grid points \f$N_T\f$. The
         remaining lines tabulate the enthalpy for increasing temperature. Each line must have two
         columns specifying the temperature \f$T_t\f$ (in K) and the corresponding enthalpy
         \f$h_t\f$ (in erg/g). Any additional information at the end of a line is ignored. */
-    void loadEnthalpyGrid(QString resourcename);
+    void loadEnthalpyGrid(bool resource, QString name);
 
     /** This function can be used by a subclass to read a table, containing the logarithm of the
         heat capacity in function of the logarithm of temperature, from the resource data file with

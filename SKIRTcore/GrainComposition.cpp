@@ -159,10 +159,10 @@ double GrainComposition::bulkdensity() const
 
 ////////////////////////////////////////////////////////////////////
 
-void GrainComposition::loadOpticalGrid(QString resourcename, bool reverse, bool skip1, bool skip2, bool skip3)
+void GrainComposition::loadOpticalGrid(bool resource, QString name, bool reverse, bool skip1, bool skip2, bool skip3)
 {
     // open the file
-    QString filename = FilePaths::resource(resourcename);
+    QString filename = resource ? FilePaths::resource(name) : find<FilePaths>()->input(name);
     ifstream file(filename.toLocal8Bit().constData());
     if (!file.is_open()) throw FATALERROR("Could not open the data file " + filename);
     find<Log>()->info("Reading grain composition from file " + filename + "...");
@@ -345,10 +345,10 @@ void GrainComposition::loadOpticalGrid(QString resourceLambda, QString resourceQ
 
 ////////////////////////////////////////////////////////////////////
 
-void GrainComposition::loadEnthalpyGrid(QString resourcename)
+void GrainComposition::loadEnthalpyGrid(bool resource, QString name)
 {
     // open the file
-    QString filename = FilePaths::resource(resourcename);
+    QString filename = resource ? FilePaths::resource(name) : find<FilePaths>()->input(name);
     ifstream file(filename.toLocal8Bit().constData());
     if (!file.is_open()) throw FATALERROR("Could not open the data file " + filename);
     find<Log>()->info("Reading enthalpy data from file " + filename + "...");
