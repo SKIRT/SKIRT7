@@ -14,7 +14,7 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////
 
 TorusGeometry::TorusGeometry()
-    : _p(0), _q(0), _Delta(0), _rmin(0), _rmax(0), _sinDelta(0), _A(0)
+    : _p(0), _q(0), _Delta(0), _rmin(0), _rmax(0), _sinDelta(0), _smin(0), _sdiff(0), _A(0)
 {
 }
 
@@ -31,16 +31,16 @@ void TorusGeometry::setupSelfBefore()
     if (_rmin <= 0) throw FATALERROR("The minimum radius of the torus should be positive");
     if (_rmax <= _rmin) throw FATALERROR("The maximum radius of the torus should be larger than the minimum radius");
 
-    // cache frequently used value
+    // cache frequently used values
     _sinDelta = sin(_Delta);
+    _smin = SpecialFunctions::gln(_p-2.0,_rmin);
+    _sdiff = SpecialFunctions::gln2(_p-2.0,_rmax,_rmin);
 
     // determine the normalization factor
-    double smin = SpecialFunctions::gln(_p-2.0,_rmin);
-    double smax = SpecialFunctions::gln(_p-2.0,_rmax);
     if (_q>1e-3)
-        _A = _q * 0.25/M_PI / (smax-smin) / (1.0-exp(-_q*_sinDelta));
+        _A = _q * 0.25/M_PI / _sdiff / (1.0-exp(-_q*_sinDelta));
     else
-        _A = 0.25/M_PI / (smax-smin) / _sinDelta;
+        _A = 0.25/M_PI / _sdiff / _sinDelta;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -115,9 +115,7 @@ double TorusGeometry::maxRadius() const
 
 //////////////////////////////////////////////////////////////////////
 
-double
-TorusGeometry::density(double R, double z)
-const
+double TorusGeometry::density(double R, double z) const
 {
     double r = sqrt(R*R+z*z);
     if (r<= _rmin || r>= _rmax) return 0.0;
@@ -128,14 +126,10 @@ const
 
 //////////////////////////////////////////////////////////////////////
 
-Position
-TorusGeometry::generatePosition()
-const
+Position TorusGeometry::generatePosition() const
 {
-    double smin = SpecialFunctions::gln(_p-2.0,_rmin);
-    double smax = SpecialFunctions::gln(_p-2.0,_rmax);
     double X = _random->uniform();
-    double s = smin+X*(smax-smin);
+    double s = _smin + X*_sdiff;
     double r = SpecialFunctions::gexp(_p-2.0,s);
     X = _random->uniform();
     double costheta = 0.0;
@@ -155,19 +149,14 @@ const
 
 //////////////////////////////////////////////////////////////////////
 
-double
-TorusGeometry::SigmaR()
-const
+double TorusGeometry::SigmaR() const
 {
-    return _A * (SpecialFunctions::gln(_p,_rmax)-
-                 SpecialFunctions::gln(_p,_rmin));
+    return _A * SpecialFunctions::gln2(_p,_rmax,_rmin);
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double
-TorusGeometry::SigmaZ()
-const
+double TorusGeometry::SigmaZ() const
 {
     return 0.0;
 }

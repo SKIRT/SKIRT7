@@ -172,6 +172,8 @@ private:
 
     // data members initialized during setup
     double _sinDelta;
+    double _smin;
+    double _sdiff;
     double _A;
 };
 

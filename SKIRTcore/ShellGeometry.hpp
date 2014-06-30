@@ -113,9 +113,9 @@ private:
     double _p;
 
     // data members initialized during setup
+    double _smin;
+    double _sdiff;
     double _A;
-    double _glnpm2rmin;
-    double _glnpm2rmax;
 };
 
 ////////////////////////////////////////////////////////////////////

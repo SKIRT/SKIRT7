@@ -792,6 +792,13 @@ SpecialFunctions::gln(const double p, const double x)
 
 ////////////////////////////////////////////////////////////////////
 
+double SpecialFunctions::gln2(const double p, const double x1, const double x2)
+{
+    return pow(x2, 1.0-p) * gln(p, x1/x2);
+}
+
+////////////////////////////////////////////////////////////////////
+
 double
 SpecialFunctions::gexp(const double p, const double x)
 {
@@ -809,3 +816,4 @@ SpecialFunctions::gexp(const double p, const double x)
 }
 
 ////////////////////////////////////////////////////////////////////
+

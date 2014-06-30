@@ -209,6 +209,14 @@ namespace SpecialFunctions
         \frac16\,(1-p)^2 \ln^3x + \frac{1}{24}\,(1-p)^3\ln^4x + \ldots \f] */
     double gln(const double p, const double x);
 
+    /** This function returns the difference between two values of the generalized logarithmic
+        function \f${\text{gln}}(p,x)\f$ with the same exponent \f$p\f$. Compared to simply
+        subtracting the two generalized logarithms, this function achieves much better accuracy for
+        large arguments \f$x_1\f$ and \f$x_2\f$ by using the identity \f[ {\text{gln2}}(p,x_1,x_2)
+        = {\text{gln}}(p,x_1) - {\text{gln}}(p,x_2) = (x_2)^{1-p} \, {\text{gln}}(p,\frac{x_1}{x_2}).
+        \f] */
+    double gln2(const double p, const double x1, const double x2);
+
     /** This function returns a generalized exponential function \f${\text{gexp}}(p,x)\f$, defined
         as the inverse of the function gln. In formula it is defined as \f[ {\text{gexp}}(p,x) =
         \begin{cases} \; ((1-p)\,x+1)^{\frac{1}{1-p}} & p\ne1 \\ \; {\text{e}}^p & p=1. \end{cases}

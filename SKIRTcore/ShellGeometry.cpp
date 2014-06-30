@@ -14,7 +14,7 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////
 
 ShellGeometry::ShellGeometry()
-    : _rmin(0), _rmax(0), _p(0), _A(0)
+    : _rmin(0), _rmax(0), _p(0), _smin(0), _sdiff(0), _A(0)
 {
 }
 
@@ -30,9 +30,9 @@ void ShellGeometry::setupSelfBefore()
     if (_p < 0) throw FATALERROR("the power law exponent p should be positive");
 
     // calculate cached values
-    _glnpm2rmin = SpecialFunctions::gln(_p-2.0,_rmin);
-    _glnpm2rmax = SpecialFunctions::gln(_p-2.0,_rmax);
-    _A = 0.25/M_PI / (_glnpm2rmax-_glnpm2rmin);
+    _smin = SpecialFunctions::gln(_p-2.0,_rmin);
+    _sdiff = SpecialFunctions::gln2(_p-2.0,_rmax,_rmin);
+    _A = 0.25/M_PI / _sdiff;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -79,9 +79,7 @@ double ShellGeometry::expon() const
 
 //////////////////////////////////////////////////////////////////////
 
-double
-ShellGeometry::density(double r)
-const
+double ShellGeometry::density(double r) const
 {
     if (r<_rmin || r>_rmax)
         return 0.0;
@@ -91,23 +89,18 @@ const
 
 //////////////////////////////////////////////////////////////////////
 
-double
-ShellGeometry::randomradius()
-const
+double ShellGeometry::randomradius() const
 {
     double X = _random->uniform();
-    double glnpm2r = _glnpm2rmin + X*(_glnpm2rmax-_glnpm2rmin);
-    return SpecialFunctions::gexp(_p-2.0,glnpm2r);
+    double s = _smin + X*_sdiff;
+    return SpecialFunctions::gexp(_p-2.0,s);
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double
-ShellGeometry::Sigmar()
-const
+double ShellGeometry::Sigmar() const
 {
-    return _A * (SpecialFunctions::gln(_p,_rmax)-
-                 SpecialFunctions::gln(_p,_rmin));
+    return _A * SpecialFunctions::gln2(_p,_rmax,_rmin);
 }
 
 //////////////////////////////////////////////////////////////////////
