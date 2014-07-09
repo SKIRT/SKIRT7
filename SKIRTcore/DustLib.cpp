@@ -70,7 +70,7 @@ namespace
         }
 
         // the parallized loop body; calculates the emission for a single library entry
-        void body(int n)
+        void body(size_t n)
         {
             // get the list of dust cells that map to this library entry
             QList<int> mv = _mh.values(n);

@@ -6,6 +6,8 @@
 #ifndef PARALLELTARGET_HPP
 #define PARALLELTARGET_HPP
 
+#include <cstddef>
+
 ////////////////////////////////////////////////////////////////////
 
 /** ParallelTarget is an abstract base class for objects that serve as a target for the call()
@@ -22,7 +24,7 @@ public:
     /** The function that will be invoked by the Parallel class as the body of a parallelized for
         loop. The argument is the index of the loop. This function must be implemented in the
         derived class. */
-    virtual void body(int index) = 0;
+    virtual void body(size_t index) = 0;
 };
 
 ////////////////////////////////////////////////////////////////////

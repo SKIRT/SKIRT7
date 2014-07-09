@@ -23,7 +23,7 @@ TreeNodeSampleDensityCalculator::TreeNodeSampleDensityCalculator(
 
 //////////////////////////////////////////////////////////////////////
 
-void TreeNodeSampleDensityCalculator::body(int n)
+void TreeNodeSampleDensityCalculator::body(size_t n)
 {
     _rv[n] = _random->position(_extent);
     _rhov[n] = _dd->density(_rv[n]);

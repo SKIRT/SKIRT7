@@ -41,7 +41,7 @@ public:
         thru \em numBodies-1. The function is designed for use as the body in a parallel loop; see
         the Parallel class. You must invoke this function for all indices in the range 0 thru \em
         numBodies-1 before calling the other functions in this class. */
-    void body(int n);
+    void body(size_t index);
 
     /** This function returns an estimate for the mean value of the difference
         \f$|\tau_g-\tau_t|\f$. */

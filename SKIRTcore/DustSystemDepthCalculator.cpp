@@ -30,7 +30,7 @@ DustSystemDepthCalculator::DustSystemDepthCalculator(const DustSystem *ds,
 
 //////////////////////////////////////////////////////////////////////
 
-void DustSystemDepthCalculator::body(int index)
+void DustSystemDepthCalculator::body(size_t index)
 {
     int k = _numSamplesPerBody;
     while (k--)

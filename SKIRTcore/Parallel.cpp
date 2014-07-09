@@ -60,7 +60,7 @@ int Parallel::threadCount() const
 
 ////////////////////////////////////////////////////////////////////
 
-void Parallel::call(ParallelTarget* target, int limit)
+void Parallel::call(ParallelTarget* target, size_t limit)
 {
     // verify that we're being called from our parent thread
     if (QThread::currentThread() != _parentThread)
@@ -126,9 +126,9 @@ void Parallel::doWork()
         // do work as long as some is available
         forever
         {
-            int index = _next.fetchAndAddOrdered(1);  // get the next index atomically
-            if (index >= _limit) break;               // break if no more are available
-            _target->body(index);                     // execute the body
+            size_t index = _next++;         // get the next index atomically
+            if (index >= _limit) break;     // break if no more are available
+            _target->body(index);           // execute the body
         }
     }
     catch (FatalError& error)

@@ -225,7 +225,7 @@ QStringList SkirtCommandLineHandler::skifilesFor(const QDir& dir, QString name)
 
 ////////////////////////////////////////////////////////////////////
 
-void SkirtCommandLineHandler::doSimulation(int index)
+void SkirtCommandLineHandler::doSimulation(size_t index)
 {
     QString filename = _skifiles[index];
     if (_skifiles.size() > 1) _console.warning("Performing simulation #" + QString::number(index+1) +

@@ -126,7 +126,7 @@ void PanMonteCarloSimulation::runstellaremission()
 
 ////////////////////////////////////////////////////////////////////
 
-void PanMonteCarloSimulation::do_stellaremission_wavelength(int ell)
+void PanMonteCarloSimulation::do_stellaremission_wavelength(size_t ell)
 {
     double Ltot = _ss->luminosity(ell);
     if (Ltot>0.0)
@@ -218,7 +218,7 @@ void PanMonteCarloSimulation::rundustselfabsorption()
 
 ////////////////////////////////////////////////////////////////////
 
-void PanMonteCarloSimulation::do_dustselfabsorption_wavelength(int ell)
+void PanMonteCarloSimulation::do_dustselfabsorption_wavelength(size_t ell)
 {
     const int Ncells = _pds->Ncells();
 
@@ -281,7 +281,7 @@ void PanMonteCarloSimulation::rundustemission()
 
 ////////////////////////////////////////////////////////////////////
 
-void PanMonteCarloSimulation::do_dustemission_wavelength(int ell)
+void PanMonteCarloSimulation::do_dustemission_wavelength(size_t ell)
 {
     const int Ncells = _pds->Ncells();
 

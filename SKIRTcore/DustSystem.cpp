@@ -95,7 +95,7 @@ void DustSystem::setupSelfAfter()
 ////////////////////////////////////////////////////////////////////
 
 // parallelized body used above
-void DustSystem::setVolumeBody(int m)
+void DustSystem::setVolumeBody(size_t m)
 {
     _volumev[m] = _grid->weight(m) > 0 ? _grid->volume(m) : 0;
 }
@@ -103,7 +103,7 @@ void DustSystem::setVolumeBody(int m)
 ////////////////////////////////////////////////////////////////////
 
 // parallelized body used above
-void DustSystem::setGridDensityBody(int m)
+void DustSystem::setGridDensityBody(size_t m)
 {
     for (int h=0; h<_Ncomp; h++)
         _rhovv(m,h) = _gdi->density(h,m);
@@ -112,7 +112,7 @@ void DustSystem::setGridDensityBody(int m)
 ////////////////////////////////////////////////////////////////////
 
 // parallelized body used above
-void DustSystem::setSampleDensityBody(int m)
+void DustSystem::setSampleDensityBody(size_t m)
 {
     if (m%100000==0)
     {
@@ -349,7 +349,7 @@ namespace
         }
 
         // the parallized loop body; calculates the results for a single line in the images
-        void body(int j)
+        void body(size_t j)
         {
             double z = zd ? (zbase + j*zres) : 0.;
             for (int i=0; i<Np; i++)
@@ -457,7 +457,7 @@ namespace
         }
 
          // the parallized loop body; calculates the results for a single line in the image
-        void body(int j)
+        void body(size_t j)
         {
             double y = (j+0.5) / Npy;
             for (int i=0; i<Npx; i++)

@@ -95,7 +95,7 @@ private:
 
     /** This function actually performs a single simulation constructed from the ski file at the
         specified index. */
-    void doSimulation(int index);
+    void doSimulation(size_t index);
 
     /** This function prints a brief help message to the console. */
     void printHelp();

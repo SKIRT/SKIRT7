@@ -6,7 +6,7 @@
 #ifndef PARALLEL_HPP
 #define PARALLEL_HPP
 
-#include <QAtomicInt>
+#include <atomic>
 #include <QHash>
 #include <QList>
 #include <QMutex>
@@ -25,7 +25,7 @@ class ParallelFactory;
 
     For example, to invoke a member function 1000 times one would write something like:
         \code
-        void Test::body(int index) { ... }
+        void Test::body(size_t index) { ... }
         ...
         ParallelFactory factory;
         factory.parallel()->call(this, &Test::body, 1000);
@@ -83,12 +83,12 @@ public:
     /** Calls the body() function of the specified specified target object \em limit times, with the
         value of the \em index argument ranging from 0 to \em limit-1. The work is distributed over
         the parallel threads in an unpredicable manner. */
-    void call(ParallelTarget* target, int limit);
+    void call(ParallelTarget* target, size_t limit);
 
     /** Calls the specified member function for the specified target object \em limit times, with
         the value of the \em index argument ranging from 0 to \em limit-1. The work is distributed
         over the parallel threads in an unpredicable manner. */
-    template<class T> void call(T* targetObject, void (T::*targetMember)(int index), int limit);
+    template<class T> void call(T* targetObject, void (T::*targetMember)(size_t index), size_t limit);
 
 private:
     /** The function that gets executed inside each of the parallel threads. */
@@ -117,15 +117,15 @@ private:
     public:
         /** Constructs a ParallelTarget instance with a body() function that calls the specified
             target member function on the specified target object. */
-        Target(T* targetObject, void (T::*targetMember)(int index))
+        Target(T* targetObject, void (T::*targetMember)(size_t index))
             : _targetObject(targetObject), _targetMember(targetMember) { }
 
         /** Calls the target member function on the target object specified in the constructor. */
-        void body(int index) { (_targetObject->*(_targetMember))(index); }
+        void body(size_t index) { (_targetObject->*(_targetMember))(index); }
 
     private:
         T* _targetObject;
-        void (T::*_targetMember)(int index);
+        void (T::*_targetMember)(size_t index);
     };
 
     /** The declaration for this class is nested in the Parallel class declaration. An instance of
@@ -155,7 +155,7 @@ private:
 
     // data members shared by all threads; changed only when no parallel threads are active
     ParallelTarget* _target;    // the target to be called
-    int _limit;                 // the limit of the for loop being implemented
+    size_t _limit;              // the limit of the for loop being implemented
     bool _terminate;            // becomes true when the parallel threads must exit
 
     // data members shared by all threads; changes are protected by a mutex
@@ -167,13 +167,13 @@ private:
                                 // or zero if no exception was thrown
 
     // data member shared by all threads; changes are atomic (no need for protection)
-    QAtomicInt _next;           // the current index of the for loop being implemented
+    std::atomic<size_t> _next;  // the current index of the for loop being implemented
 };
 
 ////////////////////////////////////////////////////////////////////
 
 // outermost portion of the call() template function implementation
-template<class T> void Parallel::call(T* targetObject, void (T::*targetMember)(int index), int limit)
+template<class T> void Parallel::call(T* targetObject, void (T::*targetMember)(size_t index), size_t limit)
 {
     Target<T> target(targetObject, targetMember);
     call(&target, limit);

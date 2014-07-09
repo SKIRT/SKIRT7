@@ -443,7 +443,7 @@ namespace
         }
 
         // the parallized loop body; calculates the results for a single line in the images
-        void body(int j)
+        void body(size_t j)
         {
             double z = zd ? (zbase + j*zres) : 0.;
             for (int i=0; i<Np; i++)

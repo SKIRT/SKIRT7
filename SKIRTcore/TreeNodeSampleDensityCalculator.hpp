@@ -39,7 +39,7 @@ public:
         function is designed for use as the body in a parallel loop; see the Parallel class. You
         must invoke this function for all indices in the sample range 0 before calling most of
         the other functions in this class. */
-    void body(int n);
+    void body(size_t n);
 
     /** This function calculates and returns the volume of the cell. */
     double volume() const;

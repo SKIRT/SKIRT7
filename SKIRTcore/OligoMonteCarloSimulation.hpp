@@ -90,7 +90,7 @@ private:
     void runstellaremission();
 
     /** This function implements the loop body for runstellaremission(). */
-    void dostellaremissionchunk(int index);
+    void dostellaremissionchunk(size_t index);
 
     //======================== Data Members ========================
 

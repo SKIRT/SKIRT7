@@ -98,7 +98,7 @@ private:
 
     /** This function is used by runstellaremission() as the body of a parallel loop to perform
         stellar emission for a single wavelength. */
-    void do_stellaremission_wavelength(int ell);
+    void do_stellaremission_wavelength(size_t ell);
 
     /** This function drives the dust self-absorption phase in a panchromatic Monte Carlo
         simulation. This function consists of a big loop, which represents the different cycles of
@@ -139,7 +139,7 @@ private:
 
     /** This function is used by rundustselfabsorption() as the body of a parallel loop to perform
         dust self absorption for a single wavelength. */
-    void do_dustselfabsorption_wavelength(int ell);
+    void do_dustselfabsorption_wavelength(size_t ell);
 
     /** This function drives the dust emission phase in a panchromatic Monte Carlo simulation. The
         first task is to construct the dust emission library (an object of the DustEmissionLibrary
@@ -172,7 +172,7 @@ private:
 
     /** This function is used by rundustemission() as the body of a parallel loop to perform
         dust emission for a single wavelength. */
-    void do_dustemission_wavelength(int ell);
+    void do_dustemission_wavelength(size_t ell);
 
     /** This function initializes the progress counters used in logprogress(). */
     void initprogress();

@@ -96,15 +96,15 @@ protected:
 
 private:
     /** This function serves as the parallelization body for calculating the volume of each cell. */
-    void setVolumeBody(int m);
+    void setVolumeBody(size_t m);
 
     /** This function serves as the parallelization body for setting the density value of each cell
         through the DustGridDensityInterface interface, if available. */
-    void setGridDensityBody(int m);
+    void setGridDensityBody(size_t m);
 
     /** This function serves as the parallelization body for setting the density value of each cell
         by taking random density sample. */
-    void setSampleDensityBody(int m);
+    void setSampleDensityBody(size_t m);
 
     /** This function writes out a simple text file, named <tt>prefix_ds_convergence.dat</tt>,
         providing a convergence check on the dust system. The function calculates the total dust

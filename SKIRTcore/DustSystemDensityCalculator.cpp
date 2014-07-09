@@ -26,7 +26,7 @@ DustSystemDensityCalculator::DustSystemDensityCalculator(const DustSystem *ds, i
 
 //////////////////////////////////////////////////////////////////////
 
-void DustSystemDensityCalculator::body(int n)
+void DustSystemDensityCalculator::body(size_t n)
 {
     int k = _numSamplesPerBody;
     while (k--)

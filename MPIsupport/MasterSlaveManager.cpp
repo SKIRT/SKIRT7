@@ -190,7 +190,7 @@ namespace
     public:
         LocalTarget(MasterSlaveManager::Task* task, QVector<QVariant> inputVector)
             : _task(task), _inputVector(inputVector), _outputVector(inputVector.size()) { }
-        void body(int index) { _outputVector[index] = _task->perform(_inputVector[index]); }
+        void body(size_t index) { _outputVector[index] = _task->perform(_inputVector[index]); }
         QVector<QVariant> outputVector() { return _outputVector; }
     private:
         MasterSlaveManager::Task* _task;

@@ -114,7 +114,7 @@ OligoMonteCarloSimulation::runstellaremission()
 ////////////////////////////////////////////////////////////////////
 
 void
-OligoMonteCarloSimulation::dostellaremissionchunk(int index)
+OligoMonteCarloSimulation::dostellaremissionchunk(size_t index)
 {
     if (index%_Nlog == 0)
         _log->info("Launching photon package " + QString::number(static_cast<double>(index)*CHUNKSIZE, 'f', 0)
