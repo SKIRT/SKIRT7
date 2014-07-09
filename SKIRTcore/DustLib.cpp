@@ -6,9 +6,9 @@
 #include <QMultiHash>
 #include "DustLib.hpp"
 #include "DustEmissivity.hpp"
-#include "DustSystem.hpp"
 #include "Log.hpp"
 #include "NR.hpp"
+#include "PanDustSystem.hpp"
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
 #include "WavelengthGrid.hpp"
@@ -32,7 +32,7 @@ namespace
         ArrayTable<2>& _Lvv;        // output luminosities indexed on m or n and ell (writable reference)
         QMultiHash<int,int> _mh;    // hash map <n,m> of cells for each library entry
         Log* _log;
-        DustSystem* _ds;
+        PanDustSystem* _ds;
         DustEmissivity* _de;
         WavelengthGrid* _lambdagrid;
         int _Nlambda;
@@ -45,7 +45,7 @@ namespace
         {
             // get basic information about the wavelength grid and the dust system
             _log = item->find<Log>();
-            _ds = item->find<DustSystem>();
+            _ds = item->find<PanDustSystem>();
             _de = item->find<DustEmissivity>();
             _lambdagrid = item->find<WavelengthGrid>();
             _Nlambda = _lambdagrid->Nlambda();

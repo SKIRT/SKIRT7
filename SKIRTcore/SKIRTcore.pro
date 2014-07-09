@@ -72,7 +72,6 @@ HEADERS += \
     DraineLiDustMix.hpp \
     DraineNeutralPAHGrainComposition.hpp \
     DraineSilicateGrainComposition.hpp \
-    DustCell.hpp \
     DustComp.hpp \
     DustCompNormalization.hpp \
     DustDistribution.hpp \
@@ -161,12 +160,10 @@ HEADERS += \
     OctTreeDustGridStructure.hpp \
     OctTreeNode.hpp \
     OffsetGeometry.hpp \
-    OligoDustCell.hpp \
     OligoDustSystem.hpp \
     OligoMonteCarloSimulation.hpp \
     OligoStellarComp.hpp \
     OligoWavelengthGrid.hpp \
-    PanDustCell.hpp \
     PanDustSystem.hpp \
     PanMonteCarloSimulation.hpp \
     PanStellarComp.hpp \
@@ -306,7 +303,6 @@ SOURCES += \
     DraineLiDustMix.cpp \
     DraineNeutralPAHGrainComposition.cpp \
     DraineSilicateGrainComposition.cpp \
-    DustCell.cpp \
     DustComp.cpp \
     DustCompNormalization.cpp \
     DustDistribution.cpp \
@@ -390,12 +386,10 @@ SOURCES += \
     OctTreeDustGridStructure.cpp \
     OctTreeNode.cpp \
     OffsetGeometry.cpp \
-    OligoDustCell.cpp \
     OligoDustSystem.cpp \
     OligoMonteCarloSimulation.cpp \
     OligoStellarComp.cpp \
     OligoWavelengthGrid.cpp \
-    PanDustCell.cpp \
     PanDustSystem.cpp \
     PanMonteCarloSimulation.cpp \
     PanStellarComp.cpp \

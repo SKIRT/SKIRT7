@@ -5,7 +5,6 @@
 
 #include <cmath>
 #include <fstream>
-#include "DustCell.hpp"
 #include "DustDistribution.hpp"
 #include "DustGridDensityInterface.hpp"
 #include "DustGridStructure.hpp"
@@ -36,14 +35,6 @@ DustSystem::DustSystem()
 
 ////////////////////////////////////////////////////////////////////
 
-DustSystem::~DustSystem()
-{
-    int n = _dustcellv.size();
-    for (int m=0; m<n; m++) delete _dustcellv[m];
-}
-
-//////////////////////////////////////////////////////////////////////
-
 void DustSystem::setupSelfBefore()
 {
     SimulationItem::setupSelfBefore();
@@ -59,25 +50,18 @@ void DustSystem::setupSelfAfter()
     SimulationItem::setupSelfAfter();
 
     // Copy some basic properties
-
     _Ncomp = _dd->Ncomp();
     _Ncells = _grid->Ncells();
 
-    // Create the dust cells
-
-    _dustcellv.resize(_Ncells);
-    for (int m=0; m<_Ncells; m++)
-    {
-        _dustcellv[m] = createDustCell();
-    }
+    // Resize the tables that hold essential dust cell properties
+    _volumev.resize(_Ncells);
+    _rhovv.resize(_Ncells,_Ncomp);
 
     // Set the volume of the cells
-
     find<Log>()->info("Calculating the volume of the cells...");
     find<ParallelFactory>()->parallel()->call(this, &DustSystem::setVolumeBody, _Ncells);
 
     // Set the density of the cells
-
     _gdi = _grid->interface<DustGridDensityInterface>();
     if (_gdi)
     {
@@ -113,11 +97,7 @@ void DustSystem::setupSelfAfter()
 // parallelized body used above
 void DustSystem::setVolumeBody(int m)
 {
-    double weight = _grid->weight(m);
-    if (weight > 0.0)
-        _dustcellv[m]->setvolume(_grid->volume(m));
-    else
-        _dustcellv[m]->setvolume(0.0);
+    _volumev[m] = _grid->weight(m) > 0 ? _grid->volume(m) : 0;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -126,7 +106,7 @@ void DustSystem::setVolumeBody(int m)
 void DustSystem::setGridDensityBody(int m)
 {
     for (int h=0; h<_Ncomp; h++)
-        _dustcellv[m]->setdensity(h, _gdi->density(h,m));
+        _rhovv(m,h) = _gdi->density(h,m);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -139,10 +119,9 @@ void DustSystem::setSampleDensityBody(int m)
         find<Log>()->info("  Computing density for cell " + QString::number(m)
                           + " (" + QString::number(floor(100.*m/_Ncells)) + "%)");
     }
-    double weight = _grid->weight(m);
-    if (weight > 0.0)
+    if (_grid->weight(m) > 0)
     {
-        vector<double> sumv(_Ncomp);
+        Array sumv(_Ncomp);
         for (int n=0; n<_Nrandom; n++)
         {
             Position bfr = _grid->randomPositionInCell(m);
@@ -150,14 +129,12 @@ void DustSystem::setSampleDensityBody(int m)
         }
         for (int h=0; h<_Ncomp; h++)
         {
-            double rho = sumv[h]/_Nrandom;
-            _dustcellv[m]->setdensity(h,rho);
+            _rhovv(m,h) = sumv[h]/_Nrandom;
         }
     }
     else
     {
-        for (int h=0; h<_Ncomp; h++)
-            _dustcellv[m]->setdensity(h,0.0);
+        for (int h=0; h<_Ncomp; h++) _rhovv(m,h) = 0;
     }
 }
 
@@ -176,9 +153,7 @@ void DustSystem::writeconvergence() const
     double M = 0.0;
     for (int m=0; m<_Ncells; m++)
     {
-        double rho = _dustcellv[m]->density();
-        double volume = _dustcellv[m]->volume();
-        M += rho*volume;
+        M += density(m)*volume(m);
     }
 
     // calculation of the X-axis surface density
@@ -617,8 +592,8 @@ void DustSystem::writecellproperties() const
     double totalmass = _dd->mass();
     for (int m=0; m<_Ncells; m++)
     {
-        double rho = _dustcellv[m]->density();
-        double V = _dustcellv[m]->volume();
+        double rho = density(m);
+        double V = volume(m);
         double delta = (rho*V)/totalmass;
         double tau = Units::kappaV()*rho*pow(V,1./3.);
         file << units->ovolume(V) << '\t' << units->omassvolumedensity(rho) << '\t' << delta << '\t' << tau << '\n';
@@ -802,234 +777,66 @@ int DustSystem::dimension() const
 
 //////////////////////////////////////////////////////////////////////
 
-int
-DustSystem::Ncells()
-const
+int DustSystem::Ncells() const
 {
     return _Ncells;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-int
-DustSystem::Ncomp()
-const
+int DustSystem::Ncomp() const
 {
     return _Ncomp;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-DustMix*
-DustSystem::mix(int h)
-const
+DustMix* DustSystem::mix(int h) const
 {
     return _dd->mix(h);
 }
 
 //////////////////////////////////////////////////////////////////////
 
-int
-DustSystem::whichcell(Position bfr)
-const
+int DustSystem::whichcell(Position bfr) const
 {
     return _grid->whichcell(bfr);
 }
 
 //////////////////////////////////////////////////////////////////////
 
-Position
-DustSystem::randomPositionInCell(int m)
-const
+Position DustSystem::randomPositionInCell(int m) const
 {
     return _grid->randomPositionInCell(m);
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double
-DustSystem::volume(int m)
-const
+double DustSystem::volume(int m) const
 {
-    return _dustcellv[m]->volume();
+    return _volumev[m];
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double
-DustSystem::density(int m, int h)
-const
+double DustSystem::density(int m, int h) const
 {
-    if (m==-1)
-        return 0.0;
-    else
-        return _dustcellv[m]->density(h);
+    return m >= 0 ? _rhovv(m,h) : 0;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double
-DustSystem::density(int m)
-const
+double DustSystem::density(int m) const
 {
-    if (m==-1)
-        return 0.0;
-    else
-        return _dustcellv[m]->density();
+    double rho = 0;
+    if (m >= 0)
+        for (int h=0; h<_Ncomp; h++) rho += _rhovv(m,h);
+    return rho;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double
-DustSystem::Labs(int m, int ell)
-const
-{
-    return _dustcellv[m]->Labs(ell);
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double
-DustSystem::Labsstellar(int m, int ell)
-const
-{
-    return _dustcellv[m]->Labsstellar(ell);
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double
-DustSystem::Labsdust(int m, int ell)
-const
-{
-    return _dustcellv[m]->Labsdust(ell);
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double
-DustSystem::Labstot(int m)
-const
-{
-    int Nlambda = find<WavelengthGrid>()->Nlambda();
-    double sum = 0.0;
-    for (int ell=0; ell<Nlambda; ell++)
-        sum += _dustcellv[m]->Labs(ell);
-    return sum;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double
-DustSystem::Labsstellartot(int m)
-const
-{
-    int Nlambda = find<WavelengthGrid>()->Nlambda();
-    double sum = 0.0;
-    for (int ell=0; ell<Nlambda; ell++)
-        sum += _dustcellv[m]->Labsstellar(ell);
-    return sum;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double
-DustSystem::Labsdusttot(int m)
-const
-{
-    int Nlambda = find<WavelengthGrid>()->Nlambda();
-    double sum = 0.0;
-    for (int ell=0; ell<Nlambda; ell++)
-        sum += _dustcellv[m]->Labsdust(ell);
-    return sum;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double
-DustSystem::Labstot()
-const
-{
-    double sum = 0.0;
-    for (int m=0; m<_Ncells; m++)
-        sum += Labstot(m);
-    return sum;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double
-DustSystem::Labsstellartot()
-const
-{
-    double sum = 0.0;
-    for (int m=0; m<_Ncells; m++)
-        sum += Labsstellartot(m);
-    return sum;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double
-DustSystem::Labsdusttot()
-const
-{
-    double sum = 0.0;
-    for (int m=0; m<_Ncells; m++)
-        sum += Labsdusttot(m);
-    return sum;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void
-DustSystem::rebootLabsdust()
-const
-{
-    for (int m=0; m<_Ncells; m++)
-        _dustcellv[m]->rebootLabsdust();
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void
-DustSystem::absorb(int m, int ell, double DeltaL, bool ynstellar)
-{
-    _dustcellv[m]->absorb(ell,DeltaL,ynstellar);
-}
-
-//////////////////////////////////////////////////////////////////////
-
-Array
-DustSystem::meanintensityv(int m)
-const
-{
-    WavelengthGrid* lambdagrid = find<WavelengthGrid>();
-    Array Jv(lambdagrid->Nlambda());
-    double fac = 4.0*M_PI*volume(m);
-    for (int ell=0; ell<lambdagrid->Nlambda(); ell++)
-    {
-        double kappaabsrho = 0.0;
-        for (int h=0; h<_Ncomp; h++)
-        {
-            double kappaabs = mix(h)->kappaabs(ell);
-            double rho = density(m,h);
-            kappaabsrho += kappaabs*rho;
-        }
-        double J = Labs(m,ell) / (kappaabsrho*fac) / lambdagrid->dlambda(ell);
-        // guard against (rare) situations where both Labs and kappa*fac are zero
-        Jv[ell] = isfinite(J) ? J : 0.0;
-    }
-    return Jv;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double
-DustSystem::opticaldepth(int ell,
-                         Position bfr,
-                         Direction bfk,
-                         DustSystemPath* dsp)
+double DustSystem::opticaldepth(int ell, Position bfr, Direction bfk, DustSystemPath* dsp)
 {
     DustGridPath dgp = _grid->path(bfr,bfk);
 
@@ -1100,9 +907,7 @@ double DustSystem::opticaldepth(int ell, Position bfr, Direction bfk, double dis
 
 ////////////////////////////////////////////////////////////////////
 
-void
-DustSystem::write()
-const
+void DustSystem::write() const
 {
     // If requested, output statistics on the number of cells crossed
     if (_writeCellsCrossed)

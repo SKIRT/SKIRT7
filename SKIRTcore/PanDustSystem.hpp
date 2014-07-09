@@ -14,10 +14,10 @@ class DustLib;
 
 /** A PanDustSystem class object represents a complete dust system for use with panchromatic
     simulations. This class relies on the functionality implemented in the DustSystem base class,
-    providing a factory method for creating a dust cell of the appropriate PanDustCell type. In
-    addition to the DustSystem functionality, this class supports dust emission. Most importantly,
-    it holds a DustEmissivity object and a DustLib object used to calculate the dust emission
-    spectrum for dust cells. */
+    and additionaly supports dust emission. It maintains information on the absorbed energy for
+    each cell at each wavelength in a (potentially very large) table. It also holds a
+    DustEmissivity object and a DustLib object used to calculate the dust emission spectrum for
+    dust cells. */
 class PanDustSystem : public DustSystem
 {
     Q_OBJECT
@@ -68,10 +68,6 @@ protected:
         local (i.e. solar neighborhood) interstellar radiation field as defined by Mathis et al.
         (1983, A&A, 128, 212). */
     void setupSelfAfter();
-
-    /** This factory function creates and returns a pointer to a new dust cell of the appropriate
-        PanDustCell type. */
-    virtual DustCell* createDustCell();
 
     //======== Setters & Getters for Discoverable Attributes =======
 
@@ -128,6 +124,64 @@ public:
     //======================== Other Functions =======================
 
 public:
+    /** The function simulates the absorption of a monochromatic luminosity package in the dust
+        cell with cell number \f$m\f$, i.e. it adds a fraction \f$\Delta L\f$ to the already
+        absorbed luminosity at wavelength index \f$\ell\f$. The function adds the absorbed energy
+        to the appropriate item in the table for stellar or dust emission as indicated by the flag.
+        The addition is performed in a thread-safe manner so this function may be concurrently
+        called from multiple threads. */
+    void absorb(int m, int ell, double DeltaL, bool ynstellar);
+
+    /** This function resets the absorbed dust luminosity to zero in all cells of the dust system. */
+    void rebootLabsdust();
+
+    /** This function returns the absorbed luminosity \f$L_{\ell,m}\f$ at wavelength index
+        \f$\ell\f$ in the dust cell with cell number \f$m\f$. */
+    double Labs(int m, int ell) const;
+
+    /** This function returns the absorbed stellar luminosity \f$L^*_{\ell,m}\f$ at wavelength index
+        \f$\ell\f$ in the dust cell with cell number \f$m\f$. */
+    double Labsstellar(int m, int ell) const;
+
+    /** This function returns the absorbed dust luminosity \f$L^{\text{d}}_{\ell,m}\f$ at wavelength index
+        \f$\ell\f$ in the dust cell with cell number \f$m\f$. */
+    double Labsdust(int m, int ell) const;
+
+    /** This function returns the total (bolometric) absorbed luminosity in the dust cell with cell
+        number \f$m\f$. It is calculated by summing the absorbed luminosity at all the wavelength indices. */
+    double Labstot(int m) const;
+
+    /** This function returns the total (bolometric) absorbed stellar luminosity in the dust cell with cell
+        number \f$m\f$. It is calculated by summing the absorbed stellar luminosity at all the wavelength
+        indices.  */
+    double Labsstellartot(int m) const;
+
+    /** This function returns the total (bolometric) absorbed dust luminosity in the dust cell with cell
+        number \f$m\f$. It is calculated by summing the absorbed dust luminosity at all the wavelength
+        indices. */
+    double Labsdusttot(int m) const;
+
+    /** This function returns the total (bolometric) absorbed stellar luminosity in the entire dust system.
+        It is calculated by summing the absorbed luminosity of all the cells. */
+    double Labstot() const;
+
+    /** This function returns the total (bolometric) absorbed dust luminosity in the entire dust system.
+        It is calculated by summing the absorbed stellar luminosity of all the cells. */
+    double Labsstellartot() const;
+
+    /** This function returns the total (bolometric) absorbed luminosity in the entire dust system.
+        It is calculated by summing the absorbed dust luminosity of all the cells. */
+    double Labsdusttot() const;
+
+    /** This function returns a vector with the mean radiation field \f$J_{\ell,m}\f$ at all
+        wavelength indices in the dust cell with cell number \f$m\f$. It is calculated as \f[
+        J_{\ell,m} = \frac{ L_{\ell,m}^{\text{abs}} }{ 4\pi\, V_m\, \sum_h
+        \kappa_{\ell,h}^{\text{abs}}\, \rho_{m,h} } \f] with \f$L_{\ell,m}^{\text{abs}}\f$ the
+        absorbed luminosity, \f$\kappa_{\ell,h}^{\text{abs}}\f$ the absorption coefficient
+        corresponding to the \f$h\f$'th dust component, \f$\rho_{m,h}\f$ the dust density
+        corresponding to the \f$h\f$'th dust component, and \f$V_m\f$ the volume of the cell. */
+    Array meanintensityv(int m) const;
+
     /** This function returns true if dust emission is turned on for this dust system, and false
         otherwise. */
     bool dustemission() const;
@@ -182,6 +236,8 @@ private:
 
     // data members initialized during setup
     int _Nlambda;
+    Table<2> _Labsstelvv;  // absorbed stellar emission for each cell and each wavelength (indexed on m,ell)
+    Table<2> _Labsdustvv;  // absorbed dust emission for each cell and each wavelength (indexed on m,ell)
 };
 
 //////////////////////////////////////////////////////////////////////

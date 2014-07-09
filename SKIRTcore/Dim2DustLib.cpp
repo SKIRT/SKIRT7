@@ -6,9 +6,9 @@
 #include <cfloat>
 #include "Dim2DustLib.hpp"
 #include "DustMix.hpp"
-#include "DustSystem.hpp"
 #include "FatalError.hpp"
 #include "Log.hpp"
+#include "PanDustSystem.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
 
@@ -71,7 +71,7 @@ std::vector<int> Dim2DustLib::mapping() const
 {
     // get basic information about the wavelength grid and the dust system
     WavelengthGrid* lambdagrid = find<WavelengthGrid>();
-    DustSystem* ds = find<DustSystem>();
+    PanDustSystem* ds = find<PanDustSystem>();
     int Nlambda = lambdagrid->Nlambda();
     int Ncells = ds->Ncells();
     int Ncomp = ds->Ncomp();

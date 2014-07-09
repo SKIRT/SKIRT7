@@ -5,10 +5,10 @@
 
 #include <cfloat>
 #include "Dim1DustLib.hpp"
-#include "DustSystem.hpp"
 #include "FatalError.hpp"
 #include "ISRF.hpp"
 #include "Log.hpp"
+#include "PanDustSystem.hpp"
 #include "WavelengthGrid.hpp"
 
 using namespace std;
@@ -49,7 +49,7 @@ std::vector<int> Dim1DustLib::mapping() const
 {
     // get basic information about the wavelength grid and the dust system
     WavelengthGrid* lambdagrid = find<WavelengthGrid>();
-    DustSystem* ds = find<DustSystem>();
+    PanDustSystem* ds = find<PanDustSystem>();
     int Ncells = ds->Ncells();
 
     // calculate the properties of the ISRF in all cells of the dust system;

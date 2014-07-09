@@ -11,8 +11,8 @@
 #include "Array.hpp"
 #include "Position.hpp"
 #include "SimulationItem.hpp"
+#include "Table.hpp"
 
-class DustCell;
 class DustDistribution;
 class DustGridDensityInterface;
 class DustGridStructure;
@@ -26,8 +26,7 @@ class DustSystemPath;
     the dust) and a grid structure on which this distribution is discretized. There are specialized
     subclasses for use with oligochromatic and panchromatic simulations respectively. A DustSystem
     object contains a vector of dust cells, each of which contain all useful information on the
-    dust within that particular piece of the configuration space. The type of dust cell is selected
-    by the subclass through the factory method createDustCell(). Furthermore, a DustSystem object
+    dust within that particular piece of the configuration space. Furthermore, a DustSystem object
     contains pointers a DustDistribution object and to a DustGridStructure object). A subclass
     may of course maintain additional information depending on its needs. */
 class DustSystem : public SimulationItem
@@ -79,34 +78,21 @@ protected:
     /** The default constructor; it is protected since this is an abstract class. */
     DustSystem();
 
-public:
-    /** The destructor deletes the dust cells that were created during the setup phase. */
-    ~DustSystem();
-
-protected:
     /** This function verifies that all attribute values have been appropriately set. */
     void setupSelfBefore();
 
     /** This function performs setup for the dust system, which takes several phases. The first
-        phase consists of the creation of the dust cells. The type of dust cell (OligoDustCell or
-        PanDustCell) is selected by the subclass through the factory method createDustCell(). The
-        second phase consists of calculating and storing the volume and the dust density (for every
-        dust component) of all the cells. To calculate the volume of a given dust cell, we just
-        call the corresponding function of the dust grid structure. To calculate and set the
-        density corresponding to given dust component in a given cell, a number of random positions
-        are generated within the cell (see sampleCount()). The density in the cell is calculated as
-        the mean of the density values (found using a call to the corresponding function of the
-        dust distribution) in these points. The calculation of both volume and density is
-        parallellized. In the third phase, if the corresponding write flag is turned on, the
-        function invokes writeconvergence() to calculate and output a convergence check on the dust
-        system. In the fourth and final phase, if the corresponding write flag is turned on, the
-        function invokes writedensity() to calculate and output theoretical and grid-discretized
-        density maps in the coordinate planes. */
+        phase consists of the creation of the vectors that hold the volumes and densities of the
+        dust cells. The second phase consists of calculating and storing the volume and the dust
+        density (for every dust component) of all the cells. To calculate the volume of a given
+        dust cell, we just call the corresponding function of the dust grid structure. To calculate
+        and set the density corresponding to given dust component in a given cell, a number of
+        random positions are generated within the cell (see sampleCount()). The density in the cell
+        is calculated as the mean of the density values (found using a call to the corresponding
+        function of the dust distribution) in these points. The calculation of both volume and
+        density is parallellized. In the last phase, the function optionally invokes various
+        writeXXX() functions depending on the state of the corresponding write flags. */
     void setupSelfAfter();
-
-    /** This pure virtual factory function must be overridden in each subclass to create and return
-        a pointer to a new dust cell of the appropriate type, i.e. OligoDustCell or PanDustCell. */
-    virtual DustCell* createDustCell() = 0;
 
 private:
     /** This function serves as the parallelization body for calculating the volume of each cell. */
@@ -277,81 +263,18 @@ public:
         function just passes the call to corresponding function of the dust grid structure. */
     Position randomPositionInCell(int m) const;
 
-    /** This function returns the volume of the dust cell with cell number \f$m\f$. The function
-        just passes the call to the \f$m\f$'th dust cell in the internal dust cells array. */
+    /** This function returns the volume of the dust cell with cell number \f$m\f$. */
     double volume(int m) const;
 
     /** This function returns the dust density corresponding to dust component \f$h\f$ of the dust
         cell with cell number \f$m\f$. If \f$m=-1\f$, i.e. if the cell number corresponds to a
-        non-existing cell outside the grid, the value zero is returned. Otherwise, the function
-        just passes the call to the \f$m\f$'th dust cell in the internal dust cells array. */
+        non-existing cell outside the grid, the value zero is returned. */
     double density(int m, int h) const;
 
     /** This function returns the total dust density of the dust cell with cell number \f$m\f$. If
         \f$m=-1\f$, i.e. if the cell number corresponds to a non-existing cell outside the grid,
-        the value zero is returned. Otherwise, the function just passes the call to the \f$m\f$'th
-        dust cell in the internal dust cells array. */
+        the value zero is returned. */
     double density(int m) const;
-
-    /** This function returns the absorbed luminosity \f$L_{\ell,m}\f$ at wavelength index
-        \f$\ell\f$ in the dust cell with cell number \f$m\f$. The function just passes the call to
-        the \f$m\f$'th dust cell in the internal dust cells array. */
-    double Labs(int m, int ell) const;
-
-    /** This function returns the absorbed stellar luminosity \f$L^*_{\ell,m}\f$ at wavelength index
-        \f$\ell\f$ in the dust cell with cell number \f$m\f$. The function just passes the call to
-        the \f$m\f$'th dust cell in the internal dust cells array. */
-    double Labsstellar(int m, int ell) const;
-
-    /** This function returns the absorbed dust luminosity \f$L^{\text{d}}_{\ell,m}\f$ at wavelength index
-        \f$\ell\f$ in the dust cell with cell number \f$m\f$. The function just passes the call to
-        the \f$m\f$'th dust cell in the internal dust cells array. */
-    double Labsdust(int m, int ell) const;
-
-    /** This function returns the total (bolometric) absorbed luminosity in the dust cell with cell
-        number \f$m\f$. It is calculated by summing the absorbed luminosity at all the wavelength indices. */
-    double Labstot(int m) const;
-
-    /** This function returns the total (bolometric) absorbed stellar luminosity in the dust cell with cell
-        number \f$m\f$. It is calculated by summing the absorbed stellar luminosity at all the wavelength
-        indices.  */
-    double Labsstellartot(int m) const;
-
-    /** This function returns the total (bolometric) absorbed dust luminosity in the dust cell with cell
-        number \f$m\f$. It is calculated by summing the absorbed dust luminosity at all the wavelength
-        indices. */
-    double Labsdusttot(int m) const;
-
-    /** This function returns the total (bolometric) absorbed stellar luminosity in the entire dust system.
-        It is calculated by summing the absorbed luminosity of all the cells. */
-    double Labstot() const;
-
-    /** This function returns the total (bolometric) absorbed dust luminosity in the entire dust system.
-        It is calculated by summing the absorbed stellar luminosity of all the cells. */
-    double Labsstellartot() const;
-
-    /** This function returns the total (bolometric) absorbed luminosity in the entire dust system.
-        It is calculated by summing the absorbed dust luminosity of all the cells. */
-    double Labsdusttot() const;
-
-    /** This function resets the absorbed dust luminosity to zero in all cells of the dust system.
-        It just passes the call to all the cells. */
-    void rebootLabsdust() const;
-
-    /** The function simulates the absorption of a monochromatic luminosity package in the dust cell
-        with cell number \f$m\f$, i.e. it adds a fraction \f$\Delta L\f$ to the already absorbed
-        luminosity at wavelength index \f$\ell\f$. The function just passes the call to the
-        \f$m\f$'th dust cell in the internal dust cells array. */
-    void absorb(int m, int ell, double DeltaL, bool ynstellar);
-
-    /** This function returns a vector with the mean radiation field \f$J_{\ell,m}\f$ at all
-        wavelength indices in the dust cell with cell number \f$m\f$. It is calculated as \f[
-        J_{\ell,m} = \frac{ L_{\ell,m}^{\text{abs}} }{ 4\pi\, V_m\, \sum_h
-        \kappa_{\ell,h}^{\text{abs}}\, \rho_{m,h} } \f] with \f$L_{\ell,m}^{\text{abs}}\f$ the
-        absorbed luminosity, \f$\kappa_{\ell,h}^{\text{abs}}\f$ the absorption coefficient
-        corresponding to the \f$h\f$'th dust component, \f$\rho_{m,h}\f$ the dust density
-        corresponding to the \f$h\f$'th dust component, and \f$V_m\f$ the volume of the cell. */
-    Array meanintensityv(int m) const;
 
     /** This function returns the optical depth
         \f$\tau_{\ell,{\text{path}}}({\boldsymbol{r}},{\boldsymbol{k}})\f$ at wavelength index
@@ -400,6 +323,13 @@ public:
         call the implementation in this base class. */
     virtual void write() const;
 
+    /** This pure virtual function must be implemented in each subclass to simulate absorption of
+        of a monochromatic luminosity package in the specified dust cell. Although this is only
+        meaningful for panchromatic simulations, it is provided in this base class because the
+        function is referenced from the general MonteCarloSimulation class (although it is actually
+        invoked only for panchromatic simulations). */
+    virtual void absorb(int m, int ell, double DeltaL, bool ynstellar) = 0;
+
     //======================== Data Members ========================
 
 protected:
@@ -416,9 +346,10 @@ protected:
     bool _writeCellsCrossed;
 
     // data members initialized during setup
-    std::vector<DustCell*> _dustcellv;
     int _Ncomp;
     int _Ncells;
+    Array _volumev;     // volume for each cell (indexed on m)
+    Table<2> _rhovv;    // density for each cell and each dust component (indexed on m,h)
     std::vector<qint64> _crossed;
     QMutex _crossedMutex;
 };

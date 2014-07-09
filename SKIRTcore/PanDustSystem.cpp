@@ -14,9 +14,9 @@
 #include "FITSInOut.hpp"
 #include "FilePaths.hpp"
 #include "ISRF.hpp"
+#include "LockFree.hpp"
 #include "Log.hpp"
 #include "NR.hpp"
-#include "PanDustCell.hpp"
 #include "PanDustSystem.hpp"
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
@@ -59,7 +59,7 @@ void PanDustSystem::setupSelfBefore()
     if (lambdagrid->nearest(0.55e-6) < 0)
         throw FATALERROR("Wavelength range should include 0.55 micron for a panchromatic simulation with dust");
 
-    // provide size of wavelength grid to createDustCell() function
+    // cache size of wavelength grid
     _Nlambda = lambdagrid->Nlambda();
 }
 
@@ -108,6 +108,11 @@ void PanDustSystem::setupSelfAfter()
 {
     DustSystem::setupSelfAfter();
 
+    // resize the tables that hold the absorbed energies for each dust cell and wavelength
+    _Labsstelvv.resize(_Ncells,_Nlambda);
+    _Labsdustvv.resize(_Ncells,_Nlambda);
+
+    // write emissivities if so requested
     if (writeEmissivity())
     {
         // write emissivities for a range of scaled Mathis ISRF input fields
@@ -132,13 +137,6 @@ void PanDustSystem::setupSelfAfter()
 
         find<Log>()->info("Done writing emissivities.");
     }
-}
-
-////////////////////////////////////////////////////////////////////
-
-DustCell* PanDustSystem::createDustCell()
-{
-    return new PanDustCell(_Ncomp, _Nlambda);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -231,6 +229,130 @@ bool PanDustSystem::writeISRF() const
     return _dustemissivity && _writeISRF;
 }
 
+//////////////////////////////////////////////////////////////////////
+
+void PanDustSystem::absorb(int m, int ell, double DeltaL, bool ynstellar)
+{
+    if (ynstellar)
+        LockFree::add(_Labsstelvv(m,ell), DeltaL);
+    else
+        LockFree::add(_Labsdustvv(m,ell), DeltaL);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void PanDustSystem::rebootLabsdust()
+{
+    _Labsdustvv.clear();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+double PanDustSystem::Labs(int m, int ell) const
+{
+    return _Labsstelvv(m,ell) + _Labsdustvv(m,ell);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+double PanDustSystem::Labsstellar(int m, int ell) const
+{
+    return _Labsstelvv(m,ell);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+double PanDustSystem::Labsdust(int m, int ell) const
+{
+    return _Labsdustvv(m,ell);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+double PanDustSystem::Labstot(int m) const
+{
+    double sum = 0.0;
+    for (int ell=0; ell<_Nlambda; ell++)
+        sum += _Labsstelvv(m,ell) + _Labsdustvv(m,ell);
+    return sum;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+double PanDustSystem::Labsstellartot(int m) const
+{
+    double sum = 0.0;
+    for (int ell=0; ell<_Nlambda; ell++)
+        sum += _Labsstelvv(m,ell);
+    return sum;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+double PanDustSystem::Labsdusttot(int m) const
+{
+    double sum = 0.0;
+    for (int ell=0; ell<_Nlambda; ell++)
+        sum += _Labsdustvv(m,ell);
+    return sum;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+double PanDustSystem::Labstot() const
+{
+    double sum = 0.0;
+    for (int m=0; m<_Ncells; m++)
+        for (int ell=0; ell<_Nlambda; ell++)
+            sum += _Labsstelvv(m,ell) + _Labsdustvv(m,ell);
+    return sum;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+double PanDustSystem::Labsstellartot() const
+{
+    double sum = 0.0;
+    for (int m=0; m<_Ncells; m++)
+        for (int ell=0; ell<_Nlambda; ell++)
+            sum += _Labsstelvv(m,ell);
+    return sum;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+double PanDustSystem::Labsdusttot() const
+{
+    double sum = 0.0;
+    for (int m=0; m<_Ncells; m++)
+        for (int ell=0; ell<_Nlambda; ell++)
+            sum += _Labsdustvv(m,ell);
+    return sum;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+Array PanDustSystem::meanintensityv(int m) const
+{
+    WavelengthGrid* lambdagrid = find<WavelengthGrid>();
+    Array Jv(lambdagrid->Nlambda());
+    double fac = 4.0*M_PI*volume(m);
+    for (int ell=0; ell<lambdagrid->Nlambda(); ell++)
+    {
+        double kappaabsrho = 0.0;
+        for (int h=0; h<_Ncomp; h++)
+        {
+            double kappaabs = mix(h)->kappaabs(ell);
+            double rho = density(m,h);
+            kappaabsrho += kappaabs*rho;
+        }
+        double J = Labs(m,ell) / (kappaabsrho*fac) / lambdagrid->dlambda(ell);
+        // guard against (rare) situations where both Labs and kappa*fac are zero
+        Jv[ell] = isfinite(J) ? J : 0.0;
+    }
+    return Jv;
+}
+
 ////////////////////////////////////////////////////////////////////
 
 bool PanDustSystem::dustemission() const
@@ -265,7 +387,7 @@ namespace
     {
     private:
         // cached values initialized in constructor
-        const DustSystem* _ds;
+        const PanDustSystem* _ds;
         DustGridStructure* _grid;
         Units* _units;
         FilePaths* _paths;
@@ -282,7 +404,7 @@ namespace
 
     public:
         // constructor
-        WriteTemp(const DustSystem* ds)
+        WriteTemp(const PanDustSystem* ds)
         {
             _ds = ds;
             _grid = ds->dustGridStructure();

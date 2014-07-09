@@ -35,6 +35,9 @@ template <N> class Table
     // All values are set to zero.
     void resize(size_t n_0, ..., size_t n_Nm1);
 
+    // Sets all values in the table to zero.
+    void clear();
+
     // Returns the number of items in the indicated dimension.
     size_t size(size_t dim) const;
 
@@ -70,6 +73,9 @@ protected:
 public:
     // Returns the number of items in the indicated dimension.
     size_t size(size_t dim) const { return _n[dim]; }
+
+    // Sets all values in the table to zero.
+    void clear() { _v = 0; }
 };
 
 ////////////////////////////////////////////////////////////////////

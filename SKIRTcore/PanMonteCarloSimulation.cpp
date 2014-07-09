@@ -140,7 +140,7 @@ void PanMonteCarloSimulation::do_stellaremission_wavelength(int ell)
             if (index%_Nlog == 0) logprogress("stellar emission", ell, index);
             _ss->launch(&pp,ell,L);
             peeloffemission(&pp);
-            if (_ds) while (true)
+            if (_pds) while (true)
             {
                 fillDustSystemPath(&pp,&dsp);
                 simulateescapeandabsorption(&pp,&dsp,_pds->dustemission());
@@ -163,7 +163,7 @@ void PanMonteCarloSimulation::rundustselfabsorption()
     const int Ncyclesmax = 100;
     const double epsmax = 0.005;
     const int Nlambda = _lambdagrid->Nlambda();
-    const int Ncells = _ds->Ncells();
+    const int Ncells = _pds->Ncells();
     vector<double> Labsdusttotv(Ncyclesmax+1);
     Labsdusttotv[0] = 0.0;
 
@@ -179,10 +179,10 @@ void PanMonteCarloSimulation::rundustselfabsorption()
         // Determine the bolometric luminosity that is absorbed in every cell (and that will hence be re-emitted).
         _Labsbolv.resize(Ncells);
         for (int m=0; m<Ncells; m++)
-            _Labsbolv[m] = _ds->Labstot(m);
+            _Labsbolv[m] = _pds->Labstot(m);
 
         // Set the absorbed dust luminosity to zero in all cells
-        _ds->rebootLabsdust();
+        _pds->rebootLabsdust();
 
         // Run a simulation at every wavelength
         initprogress();
@@ -190,12 +190,12 @@ void PanMonteCarloSimulation::rundustselfabsorption()
         parallel->call(this, &PanMonteCarloSimulation::do_dustselfabsorption_wavelength, Nlambda);
 
         // Update the absorbed luminosity in each cell. Save the total absorbed luminosity in the vector Labstotv.
-        Labsdusttotv[_cycle] = _ds->Labsdusttot();
+        Labsdusttotv[_cycle] = _pds->Labsdusttot();
         _log->info("The total absorbed stellar luminosity is "
-                   + QString::number(_units->obolluminosity(_ds->Labsstellartot())) + " "
+                   + QString::number(_units->obolluminosity(_pds->Labsstellartot())) + " "
                    + _units->ubolluminosity() );
         _log->info("The total absorbed dust luminosity is "
-                   + QString::number(_units->obolluminosity(_ds->Labsdusttot())) + " "
+                   + QString::number(_units->obolluminosity(_pds->Labsdusttot())) + " "
                    + _units->ubolluminosity() );
 
         // Check the criterion to terminate the self-absorption cycle. We use the criterion that the total
@@ -220,7 +220,7 @@ void PanMonteCarloSimulation::rundustselfabsorption()
 
 void PanMonteCarloSimulation::do_dustselfabsorption_wavelength(int ell)
 {
-    const int Ncells = _ds->Ncells();
+    const int Ncells = _pds->Ncells();
 
     // Determine the luminosity to be emitted at this wavelength index
     Array Lv(Ncells);
@@ -246,7 +246,7 @@ void PanMonteCarloSimulation::do_dustselfabsorption_wavelength(int ell)
             if (index%_Nlog == 0) logprogress("self-absorption cycle " + QString::number(_cycle), ell, index);
             double X = _random->uniform();
             int m = NR::locate_clip(Xv,X);
-            Position bfr = _ds->randomPositionInCell(m);
+            Position bfr = _pds->randomPositionInCell(m);
             Direction bfk = _random->direction();
             pp.set(false,ell,bfr,bfk,L,0);
             while (true)
@@ -283,13 +283,13 @@ void PanMonteCarloSimulation::rundustemission()
 
 void PanMonteCarloSimulation::do_dustemission_wavelength(int ell)
 {
-    const int Ncells = _ds->Ncells();
+    const int Ncells = _pds->Ncells();
 
     // Determine the luminosity to be emitted at this wavelength index
     Array Lv(Ncells);
     for (int m=0; m<Ncells; m++)
     {
-        double Labsbol = _ds->Labstot(m);
+        double Labsbol = _pds->Labstot(m);
         if (Labsbol>0.0) Lv[m] = Labsbol * _pds->dustluminosity(m,ell);
     }
     double Ltot = Lv.sum();
@@ -309,7 +309,7 @@ void PanMonteCarloSimulation::do_dustemission_wavelength(int ell)
             if (index%_Nlog == 0) logprogress("dust emission", ell, index);
             double X = _random->uniform();
             int m = NR::locate_clip(Xv,X);
-            Position bfr = _ds->randomPositionInCell(m);
+            Position bfr = _pds->randomPositionInCell(m);
             Direction bfk = _random->direction();
             pp.set(false,ell,bfr,bfk,L,0);
             peeloffemission(&pp);

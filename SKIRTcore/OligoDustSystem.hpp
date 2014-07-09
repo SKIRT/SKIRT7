@@ -11,8 +11,7 @@
 //////////////////////////////////////////////////////////////////////
 
 /** An OligoDustSystem class object represents a complete dust system for use with oligochromatic
-    simulations. All functionality is implemented in the DustSystem base class, except for the
-    factory method creating a dust cell of the appropriate OligoDustCell type. */
+    simulations. All functionality is implemented in the DustSystem base class. */
 class OligoDustSystem : public DustSystem
 {
     Q_OBJECT
@@ -24,10 +23,12 @@ public:
     /** The default constructor. */
     Q_INVOKABLE OligoDustSystem();
 
-protected:
-    /** This factory function creates and returns a pointer to a new dust cell of the appropriate
-        OligoDustCell type. */
-    virtual DustCell* createDustCell();
+    //======================== Other Functions =======================
+
+public:
+    /** The function simulates the absorption of a monochromatic luminosity package in the
+        specified dust cell. It should never be invoked for oligochromatic simulations. */
+    void absorb(int m, int ell, double DeltaL, bool ynstellar);
 };
 
 //////////////////////////////////////////////////////////////////////
