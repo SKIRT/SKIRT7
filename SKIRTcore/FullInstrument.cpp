@@ -5,6 +5,7 @@
 
 #include "FatalError.hpp"
 #include "FullInstrument.hpp"
+#include "LockFree.hpp"
 #include "PeelOffPhotonPackage.hpp"
 #include "WavelengthGrid.hpp"
 
@@ -72,18 +73,18 @@ FullInstrument::detect(const PeelOffPhotonPackage* pp)
         int nscatt = pp->nscatt();
         if (nscatt==0)
         {
-            record(&_Ftrav[ell], L);
-            record(&_Fdirv[ell], Lextf);
+            LockFree::add(_Ftrav[ell], L);
+            LockFree::add(_Fdirv[ell], Lextf);
         }
         else
         {
-            record(&_Fscav[ell], Lextf);
-            if (nscatt<=_Nscatt) record(&_Fscavv[nscatt][ell], Lextf);
+            LockFree::add(_Fscav[ell], Lextf);
+            if (nscatt<=_Nscatt) LockFree::add(_Fscavv[nscatt][ell], Lextf);
         }
     }
     else
     {
-        record(&_Fdusv[ell], Lextf);
+        LockFree::add(_Fdusv[ell], Lextf);
     }
 
     if (l>=0)
@@ -93,18 +94,18 @@ FullInstrument::detect(const PeelOffPhotonPackage* pp)
             int nscatt = pp->nscatt();
             if (nscatt==0)
             {
-                record(&_ftrav[m], L);
-                record(&_fdirv[m], Lextf);
+                LockFree::add(_ftrav[m], L);
+                LockFree::add(_fdirv[m], Lextf);
             }
             else
             {
-                record(&_fscav[m], Lextf);
-                if (nscatt<=_Nscatt) record(&_fscavv[nscatt][m], Lextf);
+                LockFree::add(_fscav[m], Lextf);
+                if (nscatt<=_Nscatt) LockFree::add(_fscavv[nscatt][m], Lextf);
             }
         }
         else
         {
-            record(&_fdusv[m], Lextf);
+            LockFree::add(_fdusv[m], Lextf);
         }
     }
 }

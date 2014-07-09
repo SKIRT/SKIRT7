@@ -87,12 +87,6 @@ public:
         */
     int dimension() const;
 
-    /** This function returns true if this simulation type may launch photon packages of the same
-        wavelength in parallel, and false if not (for example because parallelization is on
-        wavelenghts). Any derived class must implement this function (usually by trivially returning
-        true or false). */
-    virtual bool parallelPhotonsOfSameWaveLength() const = 0;
-
 protected:
     /** This function is provided for use in subclasses to perform the final step in a Monte Carlo
         simulation. It writes out the useful information in the instrument system and in the dust

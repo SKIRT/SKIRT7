@@ -8,6 +8,7 @@
 #include "FITSInOut.hpp"
 #include "InstrumentFrame.hpp"
 #include "Log.hpp"
+#include "LockFree.hpp"
 #include "PeelOffPhotonPackage.hpp"
 #include "MultiFrameInstrument.hpp"
 #include "Units.hpp"
@@ -144,7 +145,7 @@ void InstrumentFrame::detect(const PeelOffPhotonPackage *pp)
         double extf = exp(-taupath);
         double Lextf = L*extf;
 
-        _instrument->record(&_ftotv[l], Lextf);
+        LockFree::add(_ftotv[l], Lextf);
     }
 }
 

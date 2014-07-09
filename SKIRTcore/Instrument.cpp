@@ -11,11 +11,6 @@ using namespace std;
 
 ////////////////////////////////////////////////////////////////////
 
-// the length of the photon package queues
-#define QUEUE_LEN 50   // guestimate; can perhaps be lowered without harming performance too much
-
-////////////////////////////////////////////////////////////////////
-
 Instrument::Instrument()
     : _is(0)
 {
@@ -42,13 +37,6 @@ void Instrument::setInstrumentName(QString value)
 QString Instrument::instrumentName() const
 {
     return _instrumentname;
-}
-
-////////////////////////////////////////////////////////////////////
-
-void Instrument::record(double *address, double value)
-{
-    _is->record(address, value);
 }
 
 ////////////////////////////////////////////////////////////////////

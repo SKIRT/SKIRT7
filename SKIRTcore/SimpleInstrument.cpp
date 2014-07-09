@@ -4,6 +4,7 @@
 //////////////////////////////////////////////////////////////////*/
 
 #include "FatalError.hpp"
+#include "LockFree.hpp"
 #include "PeelOffPhotonPackage.hpp"
 #include "SimpleInstrument.hpp"
 #include "WavelengthGrid.hpp"
@@ -40,8 +41,8 @@ SimpleInstrument::detect(const PeelOffPhotonPackage* pp)
     double extf = exp(-taupath);
     double Lextf = L*extf;
 
-    record(&_Ftotv[ell], Lextf);
-    if (l>=0) record(&_ftotv[m], Lextf);
+    LockFree::add(_Ftotv[ell], Lextf);
+    if (l>=0) LockFree::add(_ftotv[m], Lextf);
 }
 
 ////////////////////////////////////////////////////////////////////

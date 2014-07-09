@@ -8,6 +8,7 @@
 #include "FatalError.hpp"
 #include "FilePaths.hpp"
 #include "FITSInOut.hpp"
+#include "LockFree.hpp"
 #include "Log.hpp"
 #include "PeelOffPhotonPackage.hpp"
 #include "Units.hpp"
@@ -328,7 +329,7 @@ void PerspectiveInstrument::detect(const PeelOffPhotonPackage *pp)
         // add the adjusted luminosity to the appropriate pixel in the data cube
         int ell = pp->ell();
         int m = i + _Nx*j + _Nx*_Ny*ell;
-        record(&_ftotv[m], L);
+        LockFree::add(_ftotv[m], L);
     }
 }
 

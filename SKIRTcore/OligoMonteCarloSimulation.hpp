@@ -66,11 +66,6 @@ public:
 
     //======================== Other Functions =======================
 
-public:
-    /** This function returns true since the oligochromatic simulation class launches photon packages
-        of the same wavelength in parallel. */
-    bool parallelPhotonsOfSameWaveLength() const;
-
 protected:
     /** This function actually runs the simulation. For an oligochromatic simulation, this just
         includes the stellar emission phase (plus writing the results). */

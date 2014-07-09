@@ -4,6 +4,7 @@
 //////////////////////////////////////////////////////////////////*/
 
 #include "FatalError.hpp"
+#include "LockFree.hpp"
 #include "PeelOffPhotonPackage.hpp"
 #include "SEDInstrument.hpp"
 #include "WavelengthGrid.hpp"
@@ -37,7 +38,7 @@ SEDInstrument::detect(const PeelOffPhotonPackage* pp)
     double extf = exp(-taupath);
     double Lextf = L*extf;
 
-    record(&_Ftotv[ell], Lextf);
+    LockFree::add(_Ftotv[ell], Lextf);
 }
 
 ////////////////////////////////////////////////////////////////////

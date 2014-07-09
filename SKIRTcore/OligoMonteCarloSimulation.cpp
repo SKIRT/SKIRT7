@@ -84,13 +84,6 @@ OligoDustSystem* OligoMonteCarloSimulation::dustSystem() const
 
 ////////////////////////////////////////////////////////////////////
 
-bool OligoMonteCarloSimulation::parallelPhotonsOfSameWaveLength() const
-{
-    return true;
-}
-
-////////////////////////////////////////////////////////////////////
-
 void OligoMonteCarloSimulation::runSelf()
 {
     runstellaremission();

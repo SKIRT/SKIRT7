@@ -102,13 +102,6 @@ PanDustSystem* PanMonteCarloSimulation::dustSystem() const
 
 ////////////////////////////////////////////////////////////////////
 
-bool PanMonteCarloSimulation::parallelPhotonsOfSameWaveLength() const
-{
-    return false;
-}
-
-////////////////////////////////////////////////////////////////////
-
 void PanMonteCarloSimulation::runSelf()
 {
     runstellaremission();

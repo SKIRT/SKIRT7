@@ -70,11 +70,6 @@ public:
 
     //======================== Other Functions =======================
 
-public:
-    /** This function returns false since the panchromatic simulation class does not launch photon
-        packages of the same wavelength in parallel. */
-    bool parallelPhotonsOfSameWaveLength() const;
-
 protected:
     /** This function actually runs the simulation. For a panchromatic simulation, this includes
         the stellar emission phase, the dust self-absorption phase, and the dust emission phase

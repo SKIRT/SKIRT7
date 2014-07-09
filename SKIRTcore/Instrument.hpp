@@ -66,11 +66,6 @@ public:
         files. Its implementation must be provided in a subclass. */
     virtual void write() = 0;
 
-    /** This function adds the specified value to the variable at the specified address in the
-        instrument's data structure. It calls the InstrumentSystem::record() function, which
-        provides the appropriate locking for the instrument's data structure. */
-    void record(double* address, double value);
-
     //======================== Data Members ========================
 
 protected:

@@ -30,7 +30,8 @@ HEADERS += \
     CommandLineArguments.hpp \
     NR.hpp \
     Table.hpp \
-    Vec.hpp
+    Vec.hpp \
+    LockFree.hpp
 
 SOURCES += \
     CommandLineArguments.cpp

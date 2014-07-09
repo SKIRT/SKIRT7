@@ -5,6 +5,7 @@
 
 #include "FatalError.hpp"
 #include "FrameInstrument.hpp"
+#include "LockFree.hpp"
 #include "PeelOffPhotonPackage.hpp"
 #include "WavelengthGrid.hpp"
 
@@ -41,7 +42,7 @@ FrameInstrument::detect(const PeelOffPhotonPackage* pp)
         double extf = exp(-taupath);
         double Lextf = L*extf;
 
-        record(&_ftotv[m], Lextf);
+        LockFree::add(_ftotv[m], Lextf);
     }
 }
 
