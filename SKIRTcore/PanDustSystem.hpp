@@ -139,31 +139,9 @@ public:
         \f$\ell\f$ in the dust cell with cell number \f$m\f$. */
     double Labs(int m, int ell) const;
 
-    /** This function returns the absorbed stellar luminosity \f$L^*_{\ell,m}\f$ at wavelength index
-        \f$\ell\f$ in the dust cell with cell number \f$m\f$. */
-    double Labsstellar(int m, int ell) const;
-
-    /** This function returns the absorbed dust luminosity \f$L^{\text{d}}_{\ell,m}\f$ at wavelength index
-        \f$\ell\f$ in the dust cell with cell number \f$m\f$. */
-    double Labsdust(int m, int ell) const;
-
     /** This function returns the total (bolometric) absorbed luminosity in the dust cell with cell
         number \f$m\f$. It is calculated by summing the absorbed luminosity at all the wavelength indices. */
-    double Labstot(int m) const;
-
-    /** This function returns the total (bolometric) absorbed stellar luminosity in the dust cell with cell
-        number \f$m\f$. It is calculated by summing the absorbed stellar luminosity at all the wavelength
-        indices.  */
-    double Labsstellartot(int m) const;
-
-    /** This function returns the total (bolometric) absorbed dust luminosity in the dust cell with cell
-        number \f$m\f$. It is calculated by summing the absorbed dust luminosity at all the wavelength
-        indices. */
-    double Labsdusttot(int m) const;
-
-    /** This function returns the total (bolometric) absorbed stellar luminosity in the entire dust system.
-        It is calculated by summing the absorbed luminosity of all the cells. */
-    double Labstot() const;
+    double Labs(int m) const;
 
     /** This function returns the total (bolometric) absorbed dust luminosity in the entire dust system.
         It is calculated by summing the absorbed stellar luminosity of all the cells. */
@@ -236,8 +214,10 @@ private:
 
     // data members initialized during setup
     int _Nlambda;
-    Table<2> _Labsstelvv;  // absorbed stellar emission for each cell and each wavelength (indexed on m,ell)
-    Table<2> _Labsdustvv;  // absorbed dust emission for each cell and each wavelength (indexed on m,ell)
+    Table<2> _Labsstelvv;   // absorbed stellar emission for each cell and each wavelength (indexed on m,ell)
+    Table<2> _Labsdustvv;   // absorbed dust emission for each cell and each wavelength (indexed on m,ell)
+    bool _haveLabsstel;     // true if absorbed stellar emission is relevant for this simulation
+    bool _haveLabsdust;     // true if absorbed dust emission is relevant for this simulation
 };
 
 //////////////////////////////////////////////////////////////////////

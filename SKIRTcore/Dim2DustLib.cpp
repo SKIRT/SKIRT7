@@ -88,7 +88,7 @@ std::vector<int> Dim2DustLib::mapping() const
     Array lambdameanv(Ncells);
     for (int m=0; m<Ncells; m++)
     {
-        if (ds->Labstot(m) > 0.0)
+        if (ds->Labs(m) > 0.0)
         {
             const Array& Jv = ds->meanintensityv(m);
             double sumrho = 0.;

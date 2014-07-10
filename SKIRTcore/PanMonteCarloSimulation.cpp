@@ -179,7 +179,7 @@ void PanMonteCarloSimulation::rundustselfabsorption()
         // Determine the bolometric luminosity that is absorbed in every cell (and that will hence be re-emitted).
         _Labsbolv.resize(Ncells);
         for (int m=0; m<Ncells; m++)
-            _Labsbolv[m] = _pds->Labstot(m);
+            _Labsbolv[m] = _pds->Labs(m);
 
         // Set the absorbed dust luminosity to zero in all cells
         _pds->rebootLabsdust();
@@ -289,7 +289,7 @@ void PanMonteCarloSimulation::do_dustemission_wavelength(size_t ell)
     Array Lv(Ncells);
     for (int m=0; m<Ncells; m++)
     {
-        double Labsbol = _pds->Labstot(m);
+        double Labsbol = _pds->Labs(m);
         if (Labsbol>0.0) Lv[m] = Labsbol * _pds->dustluminosity(m,ell);
     }
     double Ltot = Lv.sum();

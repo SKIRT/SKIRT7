@@ -109,8 +109,20 @@ void PanDustSystem::setupSelfAfter()
     DustSystem::setupSelfAfter();
 
     // resize the tables that hold the absorbed energies for each dust cell and wavelength
-    _Labsstelvv.resize(_Ncells,_Nlambda);
-    _Labsdustvv.resize(_Ncells,_Nlambda);
+    // - absorbed stellar emission is relevant for calculating dust emission
+    // - absorbed dust emission is relevant for calculating dust self-absorption
+    _haveLabsstel = false;
+    _haveLabsdust = false;
+    if (dustemission())
+    {
+        _Labsstelvv.resize(_Ncells,_Nlambda);
+        _haveLabsstel = true;
+        if (selfAbsorption())
+        {
+            _Labsdustvv.resize(_Ncells,_Nlambda);
+            _haveLabsdust = true;
+        }
+    }
 
     // write emissivities if so requested
     if (writeEmissivity())
@@ -234,9 +246,15 @@ bool PanDustSystem::writeISRF() const
 void PanDustSystem::absorb(int m, int ell, double DeltaL, bool ynstellar)
 {
     if (ynstellar)
+    {
+        if (!_haveLabsstel) throw FATALERROR("This dust system does not support absorption of stellar emission");
         LockFree::add(_Labsstelvv(m,ell), DeltaL);
+    }
     else
+    {
+        if (!_haveLabsdust) throw FATALERROR("This dust system does not support absorption of dust emission");
         LockFree::add(_Labsdustvv(m,ell), DeltaL);
+    }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -250,61 +268,23 @@ void PanDustSystem::rebootLabsdust()
 
 double PanDustSystem::Labs(int m, int ell) const
 {
-    return _Labsstelvv(m,ell) + _Labsdustvv(m,ell);
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double PanDustSystem::Labsstellar(int m, int ell) const
-{
-    return _Labsstelvv(m,ell);
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double PanDustSystem::Labsdust(int m, int ell) const
-{
-    return _Labsdustvv(m,ell);
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double PanDustSystem::Labstot(int m) const
-{
-    double sum = 0.0;
-    for (int ell=0; ell<_Nlambda; ell++)
-        sum += _Labsstelvv(m,ell) + _Labsdustvv(m,ell);
+    double sum = 0;
+    if (_haveLabsstel) sum += _Labsstelvv(m,ell);
+    if (_haveLabsdust) sum += _Labsdustvv(m,ell);
     return sum;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double PanDustSystem::Labsstellartot(int m) const
+double PanDustSystem::Labs(int m) const
 {
-    double sum = 0.0;
-    for (int ell=0; ell<_Nlambda; ell++)
-        sum += _Labsstelvv(m,ell);
-    return sum;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double PanDustSystem::Labsdusttot(int m) const
-{
-    double sum = 0.0;
-    for (int ell=0; ell<_Nlambda; ell++)
-        sum += _Labsdustvv(m,ell);
-    return sum;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double PanDustSystem::Labstot() const
-{
-    double sum = 0.0;
-    for (int m=0; m<_Ncells; m++)
+    double sum = 0;
+    if (_haveLabsstel)
         for (int ell=0; ell<_Nlambda; ell++)
-            sum += _Labsstelvv(m,ell) + _Labsdustvv(m,ell);
+            sum += _Labsstelvv(m,ell);
+    if (_haveLabsdust)
+        for (int ell=0; ell<_Nlambda; ell++)
+            sum += _Labsdustvv(m,ell);
     return sum;
 }
 
@@ -312,10 +292,11 @@ double PanDustSystem::Labstot() const
 
 double PanDustSystem::Labsstellartot() const
 {
-    double sum = 0.0;
-    for (int m=0; m<_Ncells; m++)
-        for (int ell=0; ell<_Nlambda; ell++)
-            sum += _Labsstelvv(m,ell);
+    double sum = 0;
+    if (_haveLabsstel)
+        for (int m=0; m<_Ncells; m++)
+            for (int ell=0; ell<_Nlambda; ell++)
+                sum += _Labsstelvv(m,ell);
     return sum;
 }
 
@@ -323,10 +304,11 @@ double PanDustSystem::Labsstellartot() const
 
 double PanDustSystem::Labsdusttot() const
 {
-    double sum = 0.0;
-    for (int m=0; m<_Ncells; m++)
-        for (int ell=0; ell<_Nlambda; ell++)
-            sum += _Labsdustvv(m,ell);
+    double sum = 0;
+    if (_haveLabsdust)
+        for (int m=0; m<_Ncells; m++)
+            for (int ell=0; ell<_Nlambda; ell++)
+                sum += _Labsdustvv(m,ell);
     return sum;
 }
 
@@ -452,7 +434,7 @@ namespace
                 double y = yd ? (ybase + (zd ? i : j)*yres) : 0.;
                 Position bfr(x,y,z);
                 int m = _grid->whichcell(bfr);
-                if (m!=-1 && _ds->Labstot(m)>0.0)
+                if (m!=-1 && _ds->Labs(m)>0.0)
                 {
                     const Array& Jv = _ds->meanintensityv(m);
                     int p = 0;
@@ -509,7 +491,7 @@ void PanDustSystem::write() const
         file << '\n' << '\n';
         for (int m=0; m<_Ncells; m++)
         {
-            double Ltotm = Labstot(m);
+            double Ltotm = Labs(m);
             if (Ltotm>0.0)
             {
                 Position bfr = _grid->centralPositionInCell(m);
