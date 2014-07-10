@@ -189,9 +189,9 @@ private:
     qint64 _Nlog;          // a message is logged when this number of photon packages was processed for a wavelength
     Array _Ndone;          // the number of photon packages already launched for each wavelength
 
-    // data member used to communicate between rundustselfabsorption() and its parallel loop
-    int _cycle;            // number of dust self-absorption cycles
+    // data members used to communicate between rundustXXX() and the corresponding parallel loop
     Array _Labsbolv;       // vector that contains the bolometric absorbed luminosity in all cells
+    int _cycle;            // number of dust self-absorption cycles
 };
 
 ////////////////////////////////////////////////////////////////////

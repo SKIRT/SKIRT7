@@ -49,6 +49,9 @@ void PanMonteCarloSimulation::setupSelfAfter()
 
     // correctly size completion counters for progress log
     _Ndone.resize(_lambdagrid->Nlambda());
+
+    // properly size the array used to communicate between rundustXXX() and the corresponding parallel loop
+    if (_pds && _pds->dustemission()) _Labsbolv.resize(_pds->Ncells());
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -177,7 +180,6 @@ void PanMonteCarloSimulation::rundustselfabsorption()
         _log->info("Dust emission spectra calculated.");
 
         // Determine the bolometric luminosity that is absorbed in every cell (and that will hence be re-emitted).
-        _Labsbolv.resize(Ncells);
         for (int m=0; m<Ncells; m++)
             _Labsbolv[m] = _pds->Labs(m);
 
@@ -273,6 +275,11 @@ void PanMonteCarloSimulation::rundustemission()
     _pds->calculatedustemission();
     _log->info("Dust emission spectra calculated.");
 
+    // Determine the bolometric luminosity that is absorbed in every cell (and that will hence be re-emitted).
+    const int Ncells = _pds->Ncells();
+    for (int m=0; m<Ncells; m++)
+        _Labsbolv[m] = _pds->Labs(m);
+
     // perform the actual dust emission
     initprogress();
     Parallel* parallel = find<ParallelFactory>()->parallel();
@@ -289,7 +296,7 @@ void PanMonteCarloSimulation::do_dustemission_wavelength(size_t ell)
     Array Lv(Ncells);
     for (int m=0; m<Ncells; m++)
     {
-        double Labsbol = _pds->Labs(m);
+        double Labsbol = _Labsbolv[m];
         if (Labsbol>0.0) Lv[m] = Labsbol * _pds->dustluminosity(m,ell);
     }
     double Ltot = Lv.sum();
