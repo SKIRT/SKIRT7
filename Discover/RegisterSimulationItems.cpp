@@ -121,6 +121,7 @@
 #include "SpheGeometry.hpp"
 #include "SpheroidalGeometry.hpp"
 #include "StarburstSED.hpp"
+#include "StellarSurfaceGeometry.hpp"
 #include "StellarSystem.hpp"
 #include "StellarUnits.hpp"
 #include "SunSED.hpp"
@@ -222,6 +223,7 @@ void RegisterSimulationItems::registerAll()
     add<GenGeometry>(false);
     add<ExpDiskSpiralArmsGeometry>();
     add<NetzerAccretionDiskGeometry>();
+    add<StellarSurfaceGeometry>();
     add<UniformCuboidGeometry>();
     add<Trust1Geometry>();
     add<Trust6Geometry>();
