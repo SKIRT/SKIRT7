@@ -31,7 +31,9 @@ HEADERS += \
     NR.hpp \
     Table.hpp \
     Vec.hpp \
-    LockFree.hpp
+    LockFree.hpp \
+    MemoryStatistics.hpp
 
 SOURCES += \
-    CommandLineArguments.cpp
+    CommandLineArguments.cpp \
+    MemoryStatistics.cpp

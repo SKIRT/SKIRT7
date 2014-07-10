@@ -15,6 +15,7 @@
 #include "FileLog.hpp"
 #include "FilePaths.hpp"
 #include "LatexHierarchyWriter.hpp"
+#include "MemoryStatistics.hpp"
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
 #include "Simulation.hpp"
@@ -125,7 +126,7 @@ int SkirtCommandLineHandler::doBatch()
     // if there is only one ski file, simply perform the single simulation
     if (_skifiles.size() == 1)
     {
-        doSimulation(0);
+        doSimulation(0); // memory statistics are reported in doSimulation()
     }
     else
     {
@@ -139,6 +140,9 @@ int SkirtCommandLineHandler::doBatch()
         factory.setMaxThreadCount(_parallelSims);
         factory.parallel()->call(this, &SkirtCommandLineHandler::doSimulation, _skifiles.size());
     }
+
+    // report memory statistics for the complete run
+    _console.info(MemoryStatistics::reportPeak());
 
     // report stopwatch results, if any
     foreach (QString line, StopWatch::report()) _console.warning(line);
@@ -264,6 +268,10 @@ void SkirtCommandLineHandler::doSimulation(size_t index)
         log->setup();
         log->info(QCoreApplication::applicationName() + " " + QCoreApplication::applicationVersion());
         simulation->setupAndRun();
+
+        // if this is the only or first simulation in the run, report memory statistics in the simulation's log file
+        if (_skifiles.size() == 1 || (_parallelSims==1 && index==0))
+            log->info(MemoryStatistics::reportPeak());
     }
     catch (FatalError& error)
     {
