@@ -7,6 +7,7 @@
 #define MONTECARLOSIMULATION_HPP
 
 #include "Simulation.hpp"
+#include <QTime>
 #include <atomic>
 class DustSystem;
 class DustSystemPath;
@@ -110,12 +111,18 @@ public:
 
 protected:
     /** This function initializes the progress counter used in logprogress() for the specified
-        phase and logs the number of photon packages, wavelengths and chunks to be processed. */
+        phase and logs the number of photon packages and wavelengths to be processed. */
     void initprogress(QString phase);
 
     /** This function logs a progress message for the phase specified in the initprogress()
-        function. It must be called once just before processing each chunk. */
-    void logprogress();
+        function, assuming the previous message was issued at least 3 seconds ago. The function
+        must be called regularly while processing photon packages. The argument specifies the
+        number of photon packages processed since the most recent invocation in the same thread. */
+    void logprogress(quint64 extraDone);
+
+    /** This constant specifies the suggested number of photon packages to be processed between
+        invocations of the logprogress() function. */
+    const quint64 LOG_CHUNK_SIZE = 50000;
 
     /** This function drives the stellar emission phase in a Monte Carlo simulation. It consists of
         a parallelized loop that iterates over \f$N_{\text{pp}}\times N_\lambda\f$ monochromatic
@@ -290,7 +297,8 @@ protected:
 private:
     // *** data members used by the XXXprogress() functions in this class ***
     QString _phase;         // a string identifying the photon shooting phase for use in the log message
-    std::atomic<quint64> _Ndone;  // the number of chuncks processed so far (out of _Nlambda*_Nchunks)
+    std::atomic<quint64> _Ndone;  // the number of photon packages processed so far (for all wavelengths)
+    QTime _timer;           // measures the time elapsed since the most recent log message
 };
 
 ////////////////////////////////////////////////////////////////////

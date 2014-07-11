@@ -162,8 +162,6 @@ void PanMonteCarloSimulation::rundustselfabsorption()
 
 void PanMonteCarloSimulation::dodustselfabsorptionchunk(size_t index)
 {
-    logprogress();
-
     // Determine the wavelength index for this chunk
     int ell = index % _Nlambda;
 
@@ -186,23 +184,32 @@ void PanMonteCarloSimulation::dodustselfabsorptionchunk(size_t index)
         DustSystemPath dsp;
         double L = Ltot / _Npp;
         double Lmin = 1e-4*L;
-        for (quint64 index=0; index<_chunksize; index++)
+
+        quint64 remaining = _chunksize;
+        while (remaining > 0)
         {
-            double X = _random->uniform();
-            int m = NR::locate_clip(Xv,X);
-            Position bfr = _pds->randomPositionInCell(m);
-            Direction bfk = _random->direction();
-            pp.set(false,ell,bfr,bfk,L,0);
-            while (true)
+            quint64 count = qMin(remaining, LOG_CHUNK_SIZE);
+            for (quint64 i=0; i<count; i++)
             {
-                fillDustSystemPath(&pp,&dsp);
-                simulateescapeandabsorption(&pp,&dsp,true);
-                if (pp.luminosity() <= Lmin) break;
-                simulatepropagation(&pp,&dsp);
-                simulatescattering(&pp);
+                double X = _random->uniform();
+                int m = NR::locate_clip(Xv,X);
+                Position bfr = _pds->randomPositionInCell(m);
+                Direction bfk = _random->direction();
+                pp.set(false,ell,bfr,bfk,L,0);
+                while (true)
+                {
+                    fillDustSystemPath(&pp,&dsp);
+                    simulateescapeandabsorption(&pp,&dsp,true);
+                    if (pp.luminosity() <= Lmin) break;
+                    simulatepropagation(&pp,&dsp);
+                    simulatescattering(&pp);
+                }
             }
+            logprogress(count);
+            remaining -= count;
         }
     }
+    else logprogress(_chunksize);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -230,8 +237,6 @@ void PanMonteCarloSimulation::rundustemission()
 
 void PanMonteCarloSimulation::dodustemissionchunk(size_t index)
 {
-    logprogress();
-
     // Determine the wavelength index for this chunk
     int ell = index % _Nlambda;
 
@@ -254,25 +259,34 @@ void PanMonteCarloSimulation::dodustemissionchunk(size_t index)
         DustSystemPath dsp;
         double L = Ltot / _Npp;
         double Lmin = 1e-4 * L;
-        for (quint64 index=0; index<_chunksize; index++)
+
+        quint64 remaining = _chunksize;
+        while (remaining > 0)
         {
-            double X = _random->uniform();
-            int m = NR::locate_clip(Xv,X);
-            Position bfr = _pds->randomPositionInCell(m);
-            Direction bfk = _random->direction();
-            pp.set(false,ell,bfr,bfk,L,0);
-            peeloffemission(&pp);
-            while (true)
+            quint64 count = qMin(remaining, LOG_CHUNK_SIZE);
+            for (quint64 i=0; i<count; i++)
             {
-                fillDustSystemPath(&pp,&dsp);
-                simulateescapeandabsorption(&pp,&dsp,false);
-                if (pp.luminosity() <= Lmin) break;
-                simulatepropagation(&pp,&dsp);
-                peeloffscattering(&pp);
-                simulatescattering(&pp);
+                double X = _random->uniform();
+                int m = NR::locate_clip(Xv,X);
+                Position bfr = _pds->randomPositionInCell(m);
+                Direction bfk = _random->direction();
+                pp.set(false,ell,bfr,bfk,L,0);
+                peeloffemission(&pp);
+                while (true)
+                {
+                    fillDustSystemPath(&pp,&dsp);
+                    simulateescapeandabsorption(&pp,&dsp,false);
+                    if (pp.luminosity() <= Lmin) break;
+                    simulatepropagation(&pp,&dsp);
+                    peeloffscattering(&pp);
+                    simulatescattering(&pp);
+                }
             }
+            logprogress(count);
+            remaining -= count;
         }
     }
+    else logprogress(_chunksize);
 }
 
 ////////////////////////////////////////////////////////////////////

@@ -119,17 +119,27 @@ void MonteCarloSimulation::initprogress(QString phase)
     _phase = phase;
     _Ndone = 0;
 
-    _log->info("Will launch " + QString::number(_packages,'g') + " photon packages for "
+    _log->info("(" + QString::number(_packages,'g') + " photon packages for "
                + (_Nlambda==1 ? QString("a single wavelength") : QString("each of %1 wavelengths").arg(_Nlambda))
-               + ", in " + QString::number(_Nlambda*_Nchunks) + " chunks...");
+               + ")");
+    _timer.start();
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void MonteCarloSimulation::logprogress()
+void MonteCarloSimulation::logprogress(quint64 extraDone)
 {
-    double completed = _Ndone++ * 100. / (_Nchunks*_Nlambda);
-    _log->info("Launching " + _phase + " photon packages: " + QString::number(completed,'f',1) + "%");
+    // accumulate the work already done
+    _Ndone.fetch_add(extraDone);
+
+    // space the messages at least 3 seconds apart; in the interest of speed,
+    // we do this without locking, so once in a while two consecutive messages may slip through
+    if (_timer.elapsed() > 3000)
+    {
+        _timer.restart();
+        double completed = _Ndone * 100. / (_Npp*_Nlambda);
+        _log->info("Launched " + _phase + " photon packages: " + QString::number(completed,'f',1) + "%");
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -146,8 +156,6 @@ void MonteCarloSimulation::runstellaremission()
 
 void MonteCarloSimulation::dostellaremissionchunk(size_t index)
 {
-    logprogress();
-
     int ell = index % _Nlambda;
     double L = _ss->luminosity(ell)/_Npp;
     if (L > 0)
@@ -155,22 +163,30 @@ void MonteCarloSimulation::dostellaremissionchunk(size_t index)
         double Lmin = 1e-4 * L;
         PhotonPackage pp;
         DustSystemPath dsp;
-        for (quint64 i=0; i<_chunksize; i++)
-        {
-            _ss->launch(&pp,ell,L);
-            peeloffemission(&pp);
 
-            if (_ds) while (true)
+        quint64 remaining = _chunksize;
+        while (remaining > 0)
+        {
+            quint64 count = qMin(remaining, LOG_CHUNK_SIZE);
+            for (quint64 i=0; i<count; i++)
             {
-                fillDustSystemPath(&pp,&dsp);
-                simulateescapeandabsorption(&pp,&dsp,_ds->dustemission());
-                if (pp.luminosity() <= Lmin) break;
-                simulatepropagation(&pp,&dsp);
-                peeloffscattering(&pp);
-                simulatescattering(&pp);
+                _ss->launch(&pp,ell,L);
+                peeloffemission(&pp);
+                if (_ds) while (true)
+                {
+                    fillDustSystemPath(&pp,&dsp);
+                    simulateescapeandabsorption(&pp,&dsp,_ds->dustemission());
+                    if (pp.luminosity() <= Lmin) break;
+                    simulatepropagation(&pp,&dsp);
+                    peeloffscattering(&pp);
+                    simulatescattering(&pp);
+                }
             }
+            logprogress(count);
+            remaining -= count;
         }
     }
+    else logprogress(_chunksize);
 }
 
 ////////////////////////////////////////////////////////////////////
