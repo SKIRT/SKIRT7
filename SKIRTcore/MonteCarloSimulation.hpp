@@ -7,6 +7,7 @@
 #define MONTECARLOSIMULATION_HPP
 
 #include "Simulation.hpp"
+#include <atomic>
 class DustSystem;
 class DustSystemPath;
 class InstrumentSystem;
@@ -35,7 +36,7 @@ class MonteCarloSimulation : public Simulation
     Q_CLASSINFO("Property", "packages")
     Q_CLASSINFO("Title", "the number of photon (γ) packages per wavelength")
     Q_CLASSINFO("MinValue", "0")
-    Q_CLASSINFO("MaxValue", "2e13")
+    Q_CLASSINFO("MaxValue", "1e15")
     Q_CLASSINFO("Default", "1e6")
 
     //============= Construction - Setup - Destruction =============
@@ -44,9 +45,32 @@ protected:
     /** The default constructor; it is protected since this is an abstract class. */
     MonteCarloSimulation();
 
-    /** This function verifies that all attribute values have been appropriately set. The dust system
-        is optional and thus it may have a null value. */
+    /** This function verifies that all attribute values have been appropriately set. The dust
+        system is optional and thus it may have a null value. */
     void setupSelfBefore();
+
+    /** This function determines how the photon packages should be split over chunks. A chunk is
+        the unit of parallelization in the simulation, i.e. multiple chunks may be performed
+        simultaneously in different execution threads. The number of photons launched in a chunk,
+        called the chunk size, is the same for all chunks in the simulation. All photon packages in
+        a chunk have the same wavelength. If no photon packages must be launched for the
+        simulation, the number of chunks is trivially zero. If there is only a single execution
+        thread, there is no reason to split the photon packages into chunks, so the number of
+        chunks per wavelength is set to one, and the chunk size is equal to the number of photon
+        packages per wavelength. Otherwise the number of chunks is determined using a heuristic
+        that balances the following objectives: (1) the total number of chunks for all wavelengths
+        should be substantially larger than the number of parallel threads, to minimize the load
+        imbalance at the end of each phase; (2) for the same reason, the chunk size should not be
+        overly large; (3) the chunk size should not be too small, since each chunk incurs a
+        nontrivial overhead. This leads to the following formula for the number of chunks per
+        wavelength \f$N_\text{chunks}\f$ in function of the specified number of photon packages per
+        wavelength \f$N_\text{pp}\f$, the number of wavelengths in the simulation's wavelength grid
+        \f$N_\lambda\f$ and the number of parallel execution threads \f$N_\text{threads}\f$
+        \f[N_\text{chunks} = {\text{ceil}}\left[ \min(\frac{N_\text{pp}}{2\,S_\text{min}},
+        \max(\frac{N_\text{pp}}{S_\text{max}}, \frac{b\,N_\text{threads}}{N_\lambda})) \right]\f]
+        where \f$S_\text{min}=10^4\f$ is the minimum chunk size, \f$S_\text{max}=10^7\f$ is the
+        maximum chunk size, and \f$b=10\f$ is the load balancing safety factor. */
+    void setupSelfAfter();
 
     //======== Setters & Getters for Discoverable Attributes =======
 
@@ -57,24 +81,21 @@ public:
     /** Returns the instrument system for this simulation. */
     Q_INVOKABLE InstrumentSystem* instrumentSystem() const;
 
-    /** Sets the number of photon packages to be launched for this simulation per wavelength. The
-        current implementation launches photon packages in chunks of 10000, thus the specified
-        number is automatically rounded to an integer multiple of 10000. A simulation always
-        launches at least one chunk (i.e. 10000 photon packages) per wavelength, unless the
-        specified number of photon packages is exactly equal to zero. Also, the current
-        implementation represents the number of chunks in a signed 32-bit integer (because the
-        iteration count of a loop in the Parallel class is a 32-bit signed integer). This means
-        that the number of photon packages per wavelength is limited to a maximum of 2e9 x 10000 =
-        2e13. This function throws an error if a larger number is specified. The argument is of type
-        double (which can exactly represent integers up to 9e15) to avoid 64-bit integers: they are
-        difficult to declare consistently across 32 & 64 bit platforms, and we would need to
-        implement yet another discoverable property type. As a side benefit, one can use
+    /** Sets the number of photon packages to be launched per wavelength for this simulation.
+        Photon packages are launched in chunks of the same size. Unless the specified number of
+        photon packages is exactly equal to zero, a simulation always launches at least one chunk.
+        The chunk size is determined automatically during setup as described for the function
+        setupSelfAfter(). The number of photon packages per wavelength actually launched is always
+        an integer multiple of the chunk size, and thus may be slightly more than the specified
+        number. The maximum number of photon packages per wavelength is somewhat arbitrarily set to
+        1e15. This function throws an error if a larger number is specified. The argument is of
+        type double (which can exactly represent integers up to 9e15) rather than 64-bit integer to
+        avoid implementing yet another discoverable property type. As a side benefit, one can use
         exponential notation to specify a large number of photon packages. */
     Q_INVOKABLE void setPackages(double value);
 
-    /** Returns the number of photon packages to be launched for this simulation per wavelength.
-        The returned value is always a multiple of the chunk size, as discussed for setPackages().
-        */
+    /** Returns the number of photon packages to be launched per wavelength for this simulation
+        exactly as specified by the setPackages() function (i.e. the value is not yet adjusted). */
     Q_INVOKABLE double packages() const;
 
     //======================== Other Functions =======================
@@ -88,33 +109,54 @@ public:
     int dimension() const;
 
 protected:
-    /** This function is provided for use in subclasses to perform the final step in a Monte Carlo
-        simulation. It writes out the useful information in the instrument system and in the dust
-        system so that the results of the simulation can be analyzed. */
-    void write();
+    /** This function initializes the progress counter used in logprogress() for the specified
+        phase and logs the number of photon packages, wavelengths and chunks to be processed. */
+    void initprogress(QString phase);
 
-    /** This function is provided for use in subclasses. It calculates the information on the path of
-        a photon package through the dust system and stores it in a DustSystemPath object. In
-        essence, the function calls the DustSystem::opticaldepth() function. */
+    /** This function logs a progress message for the phase specified in the initprogress()
+        function. It must be called once just before processing each chunk. */
+    void logprogress();
+
+    /** This function drives the stellar emission phase in a Monte Carlo simulation. It consists of
+        a parallelized loop that iterates over \f$N_{\text{pp}}\times N_\lambda\f$ monochromatic
+        photons packages. Within this loop, the function simulates the life cycle of a single
+        stellar photon package. Each photon package is born when it is emitted by the stellar
+        system. Immediately after birth, peel-off photon packages are created and launched towards
+        the instruments (one for each instrument). If there is dust in the system (there usually
+        is...), the photon package now enters a cycle which consists of different steps. First, all
+        details of the path of photon package through the dust system are calculated and stored.
+        Based on this information, the escape and absorption of a fraction of the luminosity of the
+        photon package is simulated. When the photon package is still luminous enough, it is
+        propagated to a new scattering position, peel-off photon packages are created and launched
+        towards each instrument, and the actual scattering is simulated. Then again, the details of
+        the path of photon package through the dust system are calculated and stored, and the loop
+        repeats itself. It is terminated only when the photon package has lost a very substantial
+        part of its original luminosity (and hence becomes irrelevant). */
+    void runstellaremission();
+
+    /** This function implements the loop body for runstellaremission(). */
+    void dostellaremissionchunk(size_t index);
+
+    /** This function calculates the information on the path of a photon package through the dust
+        system and stores it in a DustSystemPath object. In essence, the function calls the
+        DustSystem::opticaldepth() function. */
     void fillDustSystemPath(PhotonPackage* pp, DustSystemPath* dsp) const;
 
-    /** This function is provided for use in subclasses.
-        It simulates the peel-off of a photon package after an emission event. This
+    /** This function simulates the peel-off of a photon package after an emission event. This
         means that we create peel-off or shadow photon packages, one for every instrument in the
         instrument system, that we force to propagate in the direction of the observer(s) instead
         of in the propagation direction \f${\bf{k}}\f$ determined randomly by the emission process.
-        Each peel-off photon package has the same
-        characteristics as the original peel-off photon package, except that the propagation
-        direction is altered to the direction \f${\bf{k}}_{\text{obs}}\f$ of the observer (there is
-        no extra weight factor or compensation because the emission is considered to be isotropic,
-        and so the probability that a photon package would have been emitted towards the observer
-        is the same as the probability that it is emitted in any other direction). For each
-        instrument in the instrument system, the function creates such a peel-off photon package
-        and feeds it to the instrument. */
+        Each peel-off photon package has the same characteristics as the original peel-off photon
+        package, except that the propagation direction is altered to the direction
+        \f${\bf{k}}_{\text{obs}}\f$ of the observer (there is no extra weight factor or
+        compensation because the emission is considered to be isotropic, and so the probability
+        that a photon package would have been emitted towards the observer is the same as the
+        probability that it is emitted in any other direction). For each instrument in the
+        instrument system, the function creates such a peel-off photon package and feeds it to the
+        instrument. */
     void peeloffemission(PhotonPackage* pp);
 
-    /** This function is provided for use in subclasses.
-        It simulates the peel-off of a photon package before a scattering event. This
+    /** This function simulates the peel-off of a photon package before a scattering event. This
         means that, just before a scattering event, we create peel-off or shadow photon packages,
         one for every instrument in the instrument system, that we force to propagate in the
         direction of the observer(s) instead of in the propagation direction \f${\bf{k}}\f$
@@ -143,8 +185,7 @@ protected:
         such a peel-off photon package and feeds it to the instrument. */
     void peeloffscattering(PhotonPackage* pp);
 
-    /** This function is provided for use in subclasses.
-        It simulates the escape from the system and the absorption by dust of a fraction
+    /** This function simulates the escape from the system and the absorption by dust of a fraction
         of the luminosity of a photon package. It actually splits the luminosity \f$L_\ell\f$ of
         the photon package in \f$N+2\f$ different parts, with \f$N\f$ the number of dust cells
         along its path through the dust system: a part \f$L_\ell^{\text{esc}}\f$ that escapes from
@@ -194,8 +235,7 @@ protected:
         L_{\ell,n}^{\text{abs}} = L_\ell. \f] */
     void simulateescapeandabsorption(PhotonPackage* pp, DustSystemPath* dsp, bool dustemission);
 
-    /** This function is provided for use in subclasses.
-        It determines the next scattering location of a photon package and the simulates
+    /** This function determines the next scattering location of a photon package and the simulates
         the propagation to this position. Given the total optical depth along the path of the
         photon package \f$\tau_{\ell,\text{path}}\f$ (this quantity is stored in the DustSystemPath
         object that is provided as an input parameter of this function), a random optical depth
@@ -208,8 +248,7 @@ protected:
         propagated over this distance. */
     void simulatepropagation(PhotonPackage* pp, DustSystemPath* dsp);
 
-    /** This function is provided for use in subclasses.
-        It simulates a scattering event of a photon package. Most of the properties of
+    /** This function simulates a scattering event of a photon package. Most of the properties of
         the photon package remain unaltered, including the position and the luminosity. The
         properties that change are the number of scattering events experienced by the photon
         package (this is obviously increased by one) and the propagation direction, which is
@@ -225,28 +264,35 @@ protected:
         corresponding scattering phase function. */
     void simulatescattering(PhotonPackage* pp);
 
+    /** This function performs the final step in a Monte Carlo simulation. It writes out the useful
+        information in the instrument system and in the dust system so that the results of the
+        simulation can be analyzed. */
+    void write();
+
     //======================== Data Members ========================
 
 protected:
     // *** discoverable attributes to be setup by a subclass ***
-
     WavelengthGrid* _lambdagrid;
     StellarSystem* _ss;
     DustSystem* _ds;
 
     // *** discoverable attributes managed by this class ***
-
-    // the instrument system
     InstrumentSystem* _is;
+    double _packages;       // the specified number of photon packages to be launched per wavelength
 
-    // the number of photon packages in one chunk
-    enum ChunkSize { CHUNKSIZE = 10000 };
+    // *** data members initialized by this class during setup ***
+    quint64 _Nlambda;       // the number of wavelengths in the simulation's wavelength grid
+    quint64 _Nchunks;       // the number of chunks to be launched per wavelength
+    quint64 _chunksize;     // the number of photon packages in one chunk
+    quint64 _Npp;           // the precise number of photon packages to be launched per wavelength
 
-    // the number of photon package chunks to be launched per wavelength
-    // this value is managed by setPackages()
-    int _Nchunks;
+private:
+    // *** data members used by the XXXprogress() functions in this class ***
+    QString _phase;         // a string identifying the photon shooting phase for use in the log message
+    std::atomic<quint64> _Ndone;  // the number of chuncks processed so far (out of _Nlambda*_Nchunks)
 };
 
 ////////////////////////////////////////////////////////////////////
-#endif // MONTECARLOSIMULATION_HPP
 
+#endif // MONTECARLOSIMULATION_HPP

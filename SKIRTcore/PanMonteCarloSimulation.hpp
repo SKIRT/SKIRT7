@@ -41,9 +41,6 @@ public:
     Q_INVOKABLE PanMonteCarloSimulation();
 
 protected:
-    /** This function verifies the validity of the property values. */
-    void setupSelfBefore();
-
     /** This function performs some basic initialization. */
     void setupSelfAfter();
 
@@ -77,79 +74,42 @@ protected:
     void runSelf();
 
 private:
-    /** This function drives the stellar emission phase in a panchromatic Monte Carlo simulation.
-        It consists of two nested loops: an outer loop that loops over all wavelengths, and an
-        inner loop that iterates over different monochromatic photons packages corresponding to a
-        single wavelength. The outer loop (over wavelengths) is parallellized. Within the nested
-        loops, the function simulates the life cycle of a single stellar photon package. Each
-        photon package is born when it is emitted by the stellar system. Immediately after birth,
-        peel-off photon packages are created and launched towards the instruments (one for each
-        instrument). If there is dust in the system (there usually is...), the photon package now
-        enters a cycle which consists of different steps. First, all details of the path of photon
-        package through the dust system are calculated and stored. Based on this information, the
-        escape and absorption of a fraction of the luminosity of the photon package is simulated.
-        When the photon package is still luminous enough, it is propagated to a new scattering
-        position, peel-off photon packages are created and launched towards each instrument, and
-        the actual scattering is simulated. Then again, the details of the path of photon package
-        through the dust system are calculated and stored, and the loop repeats itself. It is
-        terminated only when the photon package has lost a very substantial part of its original
-        luminosity (and hence becomes irrelevant). */
-    void runstellaremission();
-
-    /** This function is used by runstellaremission() as the body of a parallel loop to perform
-        stellar emission for a single wavelength. */
-    void do_stellaremission_wavelength(size_t ell);
-
     /** This function drives the dust self-absorption phase in a panchromatic Monte Carlo
         simulation. This function consists of a big loop, which represents the different cycles of
         the dust self-absorption phase. This outer loop, and the function, terminates when either
         the maximum number of dust self-absorption iterations has been reached (the hardcoded value
         is 100), or when the total luminosity absorbed by the dust is stable and does not change by
-        more than 1% compared to the previous cycle. Within every cycle, the first task is to
-        construct the dust emission library (an object of the DustEmissionLibrary class) that
-        describes the spectral properties of the dust emission. In principle, we should construct a
-        separate dust emission library for every dust population in the dust system, but this still
-        needs to be implemented. Once the dust emission library is constructed, the dust
-        self-absorption phase consists of two nested loops: an outer loop that loops over all
-        wavelengths, and an inner loop that iterates over different monochromatic photons packages
-        corresponding to a single wavelength. The outer loop (over wavelengths) is parallellized.
-        Within the nested loops, the function simulates the life cycle of a single dust photon
-        package. Before we can start the life cycle of the photon packages at a given wavelength
-        index \f$\ell\f$, we first have to determine the total luminosity that is emitted from
-        every dust cell at that wavelength index. This is just the product of the total luminosity
-        absorbed in the \f$m\f$'th dust cell, \f$L^{\text{abs}}_m\f$, and the normalized SED at
-        wavelength index \f$\ell\f$ corresponding to that cell, as obtained from the dust emission
-        library. Once we know the luminosity \f$L_{\ell,m}\f$ emitted by each dust cell, we
-        calculate the total dust luminosity, \f[ L_\ell = \sum_{m=0}^{N_{\text{cells}}-1}
-        L_{\ell,m}, \f] and create a vector \f$X_m\f$ that describes the normalized cumulative
-        luminosity distribution as a function of the cell number \f$m\f$, \f[ X_m = \frac{
-        \sum_{m'=0}^m L_{\ell,m'} }{ L_\ell }. \f] This vector is used to generate random dust
-        cells from which photon packages can be launched. Now the actual dust self-absorption can
-        start, i.e. we launch \f$N_{\text{pp}}\f$ different photon packages at wavelength index
-        \f$\ell\f$, with the original position chosen as a random position in the cell \f$m\f$
-        chosen randomly from the cumulative luminosity distribution \f$X_m\f$. As we assume that
-        there is no scattering for the dust photon packages (an option that could be changed if
-        desired) and we don't need to consider peel-off (the dust self-absorption phase is just to
-        calculate the internal equilibrium, not to calculate the emergent radiation field), the
-        life cycle of a photon in the dust emission phase is extremely simple. First, all details
-        of the path of photon package through the dust system are calculated and stored. Based on
-        this information, the escape and absorption of a fraction of the luminosity of the photon
-        package (i.e. the self-absorption) is simulated. */
+        more than 0.5% compared to the previous cycle. Within every cycle, the first task is to
+        construct the dust emission library that describes the spectral properties of the dust
+        emission. Subsequently the dust self-absorption phase implements a parallelized loop that
+        iterates over \f$N_{\text{pp}}\times N_\lambda\f$ monochromatic photon packages. Within
+        this loop, the function simulates the life cycle of a single dust photon package. Before we
+        can start the life cycle of the photon packages at a given wavelength index \f$\ell\f$, we
+        first have to determine the total luminosity that is emitted from every dust cell at that
+        wavelength index. This is just the product of the total luminosity absorbed in the
+        \f$m\f$'th dust cell, \f$L^{\text{abs}}_m\f$, and the normalized SED at wavelength index
+        \f$\ell\f$ corresponding to that cell, as obtained from the dust emission library. Once we
+        know the luminosity \f$L_{\ell,m}\f$ emitted by each dust cell, we calculate the total dust
+        luminosity, \f[ L_\ell = \sum_{m=0}^{N_{\text{cells}}-1} L_{\ell,m}, \f] and create a
+        vector \f$X_m\f$ that describes the normalized cumulative luminosity distribution as a
+        function of the cell number \f$m\f$, \f[ X_m = \frac{ \sum_{m'=0}^m L_{\ell,m'} }{ L_\ell
+        }. \f] This vector is used to generate random dust cells from which photon packages can be
+        launched. Now the actual dust self-absorption can start, i.e. we launch \f$N_{\text{pp}}\f$
+        different photon packages at wavelength index \f$\ell\f$, with the original position chosen
+        as a random position in the cell \f$m\f$ chosen randomly from the cumulative luminosity
+        distribution \f$X_m\f$. The remaining life cycle of a photon package in the dust emission
+        phase is very similar to the life cycle described in
+        MonteCarloSimulation::runstellaremission(). */
     void rundustselfabsorption();
 
-    /** This function is used by rundustselfabsorption() as the body of a parallel loop to perform
-        dust self absorption for a single wavelength. */
-    void do_dustselfabsorption_wavelength(size_t ell);
+    /** This function implements the loop body for rundustselfabsorption(). */
+    void dodustselfabsorptionchunk(size_t index);
 
     /** This function drives the dust emission phase in a panchromatic Monte Carlo simulation. The
-        first task is to construct the dust emission library (an object of the DustEmissionLibrary
-        class) that describes the spectral properties of the dust emission. In principle, we should
-        construct a separate dust emission library for every dust population in the dust system,
-        but this still needs to be implemented. Once the dust emission library is constructed, the
-        dust emission phase consists of two nested loops: an outer loop that loops over all
-        wavelengths, and an inner loop that iterates over different monochromatic photons packages
-        corresponding to a single wavelength. The outer loop (over wavelengths) is parallellized.
-        Within the nested loops, the function simulates the life cycle of a single dust photon
+        first task is to construct the dust emission library that describes the spectral properties
+        of the dust emission. Subsequently the dust emission phase implements a parallelized loop
+        that iterates over \f$N_{\text{pp}}\times N_\lambda\f$ monochromatic photon packages.
+        Within this loop, the function simulates the life cycle of a single dust photon
         package. Before we can start the life cycle of the photon packages at a given wavelength
         index \f$\ell\f$, we first have to determine the total luminosity that is emitted from
         every dust cell at that wavelength index. This is just the product of the total luminosity
@@ -163,35 +123,22 @@ private:
         cells from which photon packages can be launched. Now the actual dust emission can start,
         i.e. we launch \f$N_{\text{pp}}\f$ different photon packages at wavelength index
         \f$\ell\f$, with the original position chosen as a random position in the cell \f$m\f$
-        chosen randomly from the cumulative luminosity distribution \f$X_m\f$. As we assume that
-        there is no scattering for the dust photon packages (an option that could be changed if
-        desired), the life cycle of a photon in the dust emission phase is extremely simple: it
-        just consists of creating peel-off photon packages and launching them towards the
-        instruments (one for each instrument). */
+        chosen randomly from the cumulative luminosity distribution \f$X_m\f$. The remaining life
+        cycle of a photon package in the dust emission phase is very similar to the life cycle
+        described in MonteCarloSimulation::runstellaremission(). */
     void rundustemission();
 
-    /** This function is used by rundustemission() as the body of a parallel loop to perform
-        dust emission for a single wavelength. */
-    void do_dustemission_wavelength(size_t ell);
-
-    /** This function initializes the progress counters used in logprogress(). */
-    void initprogress();
-
-    /** This function logs a progress message for the specified phase, wavelength and photon
-        package index. */
-    void logprogress(QString phase, int ell, qint64 index);
+    /** This function implements the loop body for rundustemission(). */
+    void dodustemissionchunk(size_t index);
 
     //======================== Data Members ========================
 
 private:
     PanDustSystem* _pds;   // copy of _ds (pointer to the dust system) with the "pan" subtype
-    qint64 _Npp;           // the number of photon packages per wavelength
-    qint64 _Nlog;          // a message is logged when this number of photon packages was processed for a wavelength
-    Array _Ndone;          // the number of photon packages already launched for each wavelength
 
     // data members used to communicate between rundustXXX() and the corresponding parallel loop
-    Array _Labsbolv;       // vector that contains the bolometric absorbed luminosity in all cells
-    int _cycle;            // number of dust self-absorption cycles
+    int _Ncells;           // number of dust cells
+    Array _Labsbolv;       // vector that contains the bolometric absorbed luminosity in each cell
 };
 
 ////////////////////////////////////////////////////////////////////

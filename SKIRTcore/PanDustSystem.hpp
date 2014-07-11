@@ -124,6 +124,10 @@ public:
     //======================== Other Functions =======================
 
 public:
+    /** This function returns true if dust emission is turned on for this dust system, and false
+        otherwise. */
+    bool dustemission() const;
+
     /** The function simulates the absorption of a monochromatic luminosity package in the dust
         cell with cell number \f$m\f$, i.e. it adds a fraction \f$\Delta L\f$ to the already
         absorbed luminosity at wavelength index \f$\ell\f$. The function adds the absorbed energy
@@ -159,10 +163,6 @@ public:
         corresponding to the \f$h\f$'th dust component, \f$\rho_{m,h}\f$ the dust density
         corresponding to the \f$h\f$'th dust component, and \f$V_m\f$ the volume of the cell. */
     Array meanintensityv(int m) const;
-
-    /** This function returns true if dust emission is turned on for this dust system, and false
-        otherwise. */
-    bool dustemission() const;
 
     /** This function (re-)calculates the relevant dust emission spectra for the dust system, based
         on the absorption data currently stored in the dust cells, and internally caches the

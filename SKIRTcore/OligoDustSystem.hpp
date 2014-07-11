@@ -26,6 +26,10 @@ public:
     //======================== Other Functions =======================
 
 public:
+    /** This function always returns false since oligochromatic simulations do no support dust
+        emission. */
+    bool dustemission() const;
+
     /** The function simulates the absorption of a monochromatic luminosity package in the
         specified dust cell. It should never be invoked for oligochromatic simulations. */
     void absorb(int m, int ell, double DeltaL, bool ynstellar);

@@ -11,19 +11,23 @@
 #include "FatalError.hpp"
 #include "Instrument.hpp"
 #include "InstrumentSystem.hpp"
+#include "Log.hpp"
 #include "MonteCarloSimulation.hpp"
 #include "NR.hpp"
+#include "Parallel.hpp"
+#include "ParallelFactory.hpp"
 #include "PeelOffPhotonPackage.hpp"
 #include "Random.hpp"
 #include "StellarSystem.hpp"
 #include "TimeLogger.hpp"
+#include "WavelengthGrid.hpp"
 
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////
 
 MonteCarloSimulation::MonteCarloSimulation()
-    : _lambdagrid(0), _ss(0), _ds(0), _is(0), _Nchunks(1)
+    : _lambdagrid(0), _ss(0), _ds(0), _is(0), _packages(0)
 {
 }
 
@@ -37,6 +41,32 @@ void MonteCarloSimulation::setupSelfBefore()
     if (!_ss) throw FATALERROR("Stellar system was not set");
     if (!_is) throw FATALERROR("Instrument system was not set");
     // dust system is optional; nr of packages has a valid default
+}
+
+////////////////////////////////////////////////////////////////////
+
+void MonteCarloSimulation::setupSelfAfter()
+{
+    Simulation::setupSelfAfter();
+
+    // cache frequently used parameters
+    _Nlambda = _lambdagrid->Nlambda();
+
+    // determine the number of chunks and the corresponding chunk size
+    if (_packages <= 0)
+    {
+        _Nchunks = 0;
+        _chunksize = 0;
+        _Npp = 0;
+    }
+    else
+    {
+        int Nthreads = _parfac->maxThreadCount();
+        if (Nthreads == 1) _Nchunks = 1;
+        else _Nchunks = ceil( qMin(_packages/2e4, qMax(_packages/1e7, 10.*Nthreads/_Nlambda)) );
+        _chunksize = ceil(_packages/_Nchunks);
+        _Npp = _Nchunks*_chunksize;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -60,21 +90,19 @@ InstrumentSystem* MonteCarloSimulation::instrumentSystem() const
 void MonteCarloSimulation::setPackages(double value)
 {
     // protect implementation limit
-    if (value > 2e9*CHUNKSIZE+1)  // add 1 to allow for rounding errors
-        throw FATALERROR("Number of photon packages is larger than implementation limit of 2e13");
+    if (value > 1e15)
+        throw FATALERROR("Number of photon packages is larger than implementation limit of 1e15");
     if (value < 0)
         throw FATALERROR("Number of photon packages is negative");
 
-    // convert to (rounded) number of chunks, with minimum of 1 chunk unless # packages is identical to zero
-    _Nchunks = static_cast<int>((value/CHUNKSIZE)+0.5);
-    if (_Nchunks < 1 && value > 0) _Nchunks = 1;
+    _packages = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
 double MonteCarloSimulation::packages() const
 {
-    return static_cast<double>(_Nchunks)*CHUNKSIZE;
+    return _packages;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -86,11 +114,63 @@ int MonteCarloSimulation::dimension() const
 
 ////////////////////////////////////////////////////////////////////
 
-void MonteCarloSimulation::write()
+void MonteCarloSimulation::initprogress(QString phase)
 {
-    TimeLogger logger(_log, "writing results");
-    if (_is) _is->write();
-    if (_ds) _ds->write();
+    _phase = phase;
+    _Ndone = 0;
+
+    _log->info("Will launch " + QString::number(_packages,'g') + " photon packages for "
+               + (_Nlambda==1 ? QString("a single wavelength") : QString("each of %1 wavelengths").arg(_Nlambda))
+               + ", in " + QString::number(_Nlambda*_Nchunks) + " chunks...");
+}
+
+////////////////////////////////////////////////////////////////////
+
+void MonteCarloSimulation::logprogress()
+{
+    double completed = _Ndone++ * 100. / (_Nchunks*_Nlambda);
+    _log->info("Launching " + _phase + " photon packages: " + QString::number(completed,'f',1) + "%");
+}
+
+////////////////////////////////////////////////////////////////////
+
+void MonteCarloSimulation::runstellaremission()
+{
+    TimeLogger logger(_log, "the stellar emission phase");
+    initprogress("stellar emission");
+    Parallel* parallel = find<ParallelFactory>()->parallel();
+    parallel->call(this, &MonteCarloSimulation::dostellaremissionchunk, _Nchunks*_Nlambda);
+}
+
+////////////////////////////////////////////////////////////////////
+
+void MonteCarloSimulation::dostellaremissionchunk(size_t index)
+{
+    logprogress();
+
+    int ell = index % _Nlambda;
+    double L = _ss->luminosity(ell)/_Npp;
+    if (L > 0)
+    {
+        double Lmin = 1e-4 * L;
+        PhotonPackage pp;
+        DustSystemPath dsp;
+        for (quint64 i=0; i<_chunksize; i++)
+        {
+            _ss->launch(&pp,ell,L);
+            peeloffemission(&pp);
+
+            if (_ds) while (true)
+            {
+                fillDustSystemPath(&pp,&dsp);
+                simulateescapeandabsorption(&pp,&dsp,_ds->dustemission());
+                if (pp.luminosity() <= Lmin) break;
+                simulatepropagation(&pp,&dsp);
+                peeloffscattering(&pp);
+                simulatescattering(&pp);
+            }
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -278,6 +358,15 @@ void MonteCarloSimulation::simulatescattering(PhotonPackage* pp)
     Direction bfknew = mix->generatenewdirection(ell,bfkold);
     pp->setnscatt(pp->nscatt()+1);
     pp->setdirection(bfknew);
+}
+
+////////////////////////////////////////////////////////////////////
+
+void MonteCarloSimulation::write()
+{
+    TimeLogger logger(_log, "writing results");
+    if (_is) _is->write();
+    if (_ds) _ds->write();
 }
 
 ////////////////////////////////////////////////////////////////////

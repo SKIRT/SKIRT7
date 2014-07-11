@@ -29,29 +29,13 @@ PanMonteCarloSimulation::PanMonteCarloSimulation()
 
 ////////////////////////////////////////////////////////////////////
 
-void PanMonteCarloSimulation::setupSelfBefore()
-{
-    MonteCarloSimulation::setupSelfBefore();
-
-    // the number of photon packages per wavelength as a 64-bit integer
-    _Npp = static_cast<qint64>(_Nchunks)*CHUNKSIZE;
-
-    // generate 100 messages for each wavelength cycle, but never more than one per chunk
-    _Nlog = _lambdagrid->Nlambda() * _Npp / 100;
-    if (_Nlog < CHUNKSIZE) _Nlog = CHUNKSIZE;
-}
-
-////////////////////////////////////////////////////////////////////
-
 void PanMonteCarloSimulation::setupSelfAfter()
 {
     MonteCarloSimulation::setupSelfAfter();
 
-    // correctly size completion counters for progress log
-    _Ndone.resize(_lambdagrid->Nlambda());
-
     // properly size the array used to communicate between rundustXXX() and the corresponding parallel loop
-    if (_pds && _pds->dustemission()) _Labsbolv.resize(_pds->Ncells());
+    _Ncells = _pds ? _pds->Ncells() : 0;
+    if (_pds && _pds->dustemission()) _Labsbolv.resize(_Ncells);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -118,61 +102,17 @@ void PanMonteCarloSimulation::runSelf()
 
 ////////////////////////////////////////////////////////////////////
 
-void PanMonteCarloSimulation::runstellaremission()
-{
-    TimeLogger logger(_log, "the stellar emission phase");
-
-    initprogress();
-    Parallel* parallel = find<ParallelFactory>()->parallel();
-    parallel->call(this, &PanMonteCarloSimulation::do_stellaremission_wavelength, _lambdagrid->Nlambda());
-}
-
-////////////////////////////////////////////////////////////////////
-
-void PanMonteCarloSimulation::do_stellaremission_wavelength(size_t ell)
-{
-    double Ltot = _ss->luminosity(ell);
-    if (Ltot>0.0)
-    {
-        PhotonPackage pp;
-        DustSystemPath dsp;
-        double L = Ltot / _Npp;
-        double Lmin = 1e-4*L;
-        for (qint64 index=0; index<_Npp; index++)
-        {
-            if (index%_Nlog == 0) logprogress("stellar emission", ell, index);
-            _ss->launch(&pp,ell,L);
-            peeloffemission(&pp);
-            if (_pds) while (true)
-            {
-                fillDustSystemPath(&pp,&dsp);
-                simulateescapeandabsorption(&pp,&dsp,_pds->dustemission());
-                if (pp.luminosity() <= Lmin) break;
-                simulatepropagation(&pp,&dsp);
-                peeloffscattering(&pp);
-                simulatescattering(&pp);
-            }
-        }
-        logprogress("stellar emission", ell, _Npp);
-    }
-}
-
-////////////////////////////////////////////////////////////////////
-
 void PanMonteCarloSimulation::rundustselfabsorption()
 {
     TimeLogger logger(_log, "the dust self-absorption phase");
 
     const int Ncyclesmax = 100;
     const double epsmax = 0.005;
-    const int Nlambda = _lambdagrid->Nlambda();
-    const int Ncells = _pds->Ncells();
-    vector<double> Labsdusttotv(Ncyclesmax+1);
-    Labsdusttotv[0] = 0.0;
+    Array Labsdusttotv(Ncyclesmax+1);
 
-    for (_cycle=1; _cycle<=Ncyclesmax; _cycle++)
+    for (int cycle=1; cycle<=Ncyclesmax; cycle++)
     {
-        TimeLogger logger(_log, "the dust self-absorption cycle " + QString::number(_cycle));
+        TimeLogger logger(_log, "the dust self-absorption cycle " + QString::number(cycle));
 
         // Construct the dust emission spectra
         _log->info("Calculating dust emission spectra...");
@@ -180,29 +120,29 @@ void PanMonteCarloSimulation::rundustselfabsorption()
         _log->info("Dust emission spectra calculated.");
 
         // Determine the bolometric luminosity that is absorbed in every cell (and that will hence be re-emitted).
-        for (int m=0; m<Ncells; m++)
+        for (int m=0; m<_Ncells; m++)
             _Labsbolv[m] = _pds->Labs(m);
 
         // Set the absorbed dust luminosity to zero in all cells
         _pds->rebootLabsdust();
 
-        // Run a simulation at every wavelength
-        initprogress();
+        // Run a simulation
+        initprogress("dust self-absorption cycle " + QString::number(cycle));
         Parallel* parallel = find<ParallelFactory>()->parallel();
-        parallel->call(this, &PanMonteCarloSimulation::do_dustselfabsorption_wavelength, Nlambda);
+        parallel->call(this, &PanMonteCarloSimulation::dodustselfabsorptionchunk, _Nchunks*_Nlambda);
 
         // Update the absorbed luminosity in each cell. Save the total absorbed luminosity in the vector Labstotv.
-        Labsdusttotv[_cycle] = _pds->Labsdusttot();
+        Labsdusttotv[cycle] = _pds->Labsdusttot();
         _log->info("The total absorbed stellar luminosity is "
                    + QString::number(_units->obolluminosity(_pds->Labsstellartot())) + " "
                    + _units->ubolluminosity() );
         _log->info("The total absorbed dust luminosity is "
-                   + QString::number(_units->obolluminosity(_pds->Labsdusttot())) + " "
+                   + QString::number(_units->obolluminosity(Labsdusttotv[cycle])) + " "
                    + _units->ubolluminosity() );
 
         // Check the criterion to terminate the self-absorption cycle. We use the criterion that the total
         // absorbed dust luminosity should be changed by less than epsmax compared to the previous cycle.
-        double eps = fabs((Labsdusttotv[_cycle]-Labsdusttotv[_cycle-1])/Labsdusttotv[_cycle]);
+        double eps = fabs((Labsdusttotv[cycle]-Labsdusttotv[cycle-1])/Labsdusttotv[cycle]);
         if (eps<epsmax)
         {
             _log->info("Convergence reached; the last increase in the absorbed dust luminosity was "
@@ -220,13 +160,16 @@ void PanMonteCarloSimulation::rundustselfabsorption()
 
 ////////////////////////////////////////////////////////////////////
 
-void PanMonteCarloSimulation::do_dustselfabsorption_wavelength(size_t ell)
+void PanMonteCarloSimulation::dodustselfabsorptionchunk(size_t index)
 {
-    const int Ncells = _pds->Ncells();
+    logprogress();
+
+    // Determine the wavelength index for this chunk
+    int ell = index % _Nlambda;
 
     // Determine the luminosity to be emitted at this wavelength index
-    Array Lv(Ncells);
-    for (int m=0; m<Ncells; m++)
+    Array Lv(_Ncells);
+    for (int m=0; m<_Ncells; m++)
     {
         double Labsbol = _Labsbolv[m];
         if (Labsbol>0.0) Lv[m] = Labsbol * _pds->dustluminosity(m,ell);
@@ -234,7 +177,7 @@ void PanMonteCarloSimulation::do_dustselfabsorption_wavelength(size_t ell)
     double Ltot = Lv.sum();
 
     // Emit photon packages
-    if (Ltot>0.0)
+    if (Ltot > 0)
     {
         Array Xv;
         NR::cdf(Xv, Lv);
@@ -243,9 +186,8 @@ void PanMonteCarloSimulation::do_dustselfabsorption_wavelength(size_t ell)
         DustSystemPath dsp;
         double L = Ltot / _Npp;
         double Lmin = 1e-4*L;
-        for (qint64 index=0; index<_Npp; index++)
+        for (quint64 index=0; index<_chunksize; index++)
         {
-            if (index%_Nlog == 0) logprogress("self-absorption cycle " + QString::number(_cycle), ell, index);
             double X = _random->uniform();
             int m = NR::locate_clip(Xv,X);
             Position bfr = _pds->randomPositionInCell(m);
@@ -260,7 +202,6 @@ void PanMonteCarloSimulation::do_dustselfabsorption_wavelength(size_t ell)
                 simulatescattering(&pp);
             }
         }
-        logprogress("self-absorption cycle " + QString::number(_cycle), ell, _Npp);
     }
 }
 
@@ -276,25 +217,27 @@ void PanMonteCarloSimulation::rundustemission()
     _log->info("Dust emission spectra calculated.");
 
     // Determine the bolometric luminosity that is absorbed in every cell (and that will hence be re-emitted).
-    const int Ncells = _pds->Ncells();
-    for (int m=0; m<Ncells; m++)
+    for (int m=0; m<_Ncells; m++)
         _Labsbolv[m] = _pds->Labs(m);
 
     // perform the actual dust emission
-    initprogress();
+    initprogress("dust emission");
     Parallel* parallel = find<ParallelFactory>()->parallel();
-    parallel->call(this, &PanMonteCarloSimulation::do_dustemission_wavelength, _lambdagrid->Nlambda());
+    parallel->call(this, &PanMonteCarloSimulation::dodustemissionchunk, _Nchunks*_Nlambda);
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void PanMonteCarloSimulation::do_dustemission_wavelength(size_t ell)
+void PanMonteCarloSimulation::dodustemissionchunk(size_t index)
 {
-    const int Ncells = _pds->Ncells();
+    logprogress();
+
+    // Determine the wavelength index for this chunk
+    int ell = index % _Nlambda;
 
     // Determine the luminosity to be emitted at this wavelength index
-    Array Lv(Ncells);
-    for (int m=0; m<Ncells; m++)
+    Array Lv(_Ncells);
+    for (int m=0; m<_Ncells; m++)
     {
         double Labsbol = _Labsbolv[m];
         if (Labsbol>0.0) Lv[m] = Labsbol * _pds->dustluminosity(m,ell);
@@ -302,7 +245,7 @@ void PanMonteCarloSimulation::do_dustemission_wavelength(size_t ell)
     double Ltot = Lv.sum();
 
     // Emit photon packages
-    if (Ltot>0.0)
+    if (Ltot > 0)
     {
         Array Xv;
         NR::cdf(Xv, Lv);
@@ -310,10 +253,9 @@ void PanMonteCarloSimulation::do_dustemission_wavelength(size_t ell)
         PhotonPackage pp;
         DustSystemPath dsp;
         double L = Ltot / _Npp;
-        double Lmin = 1e-4*L;
-        for (qint64 index=0; index<_Npp; index++)
+        double Lmin = 1e-4 * L;
+        for (quint64 index=0; index<_chunksize; index++)
         {
-            if (index%_Nlog == 0) logprogress("dust emission", ell, index);
             double X = _random->uniform();
             int m = NR::locate_clip(Xv,X);
             Position bfr = _pds->randomPositionInCell(m);
@@ -330,37 +272,6 @@ void PanMonteCarloSimulation::do_dustemission_wavelength(size_t ell)
                 simulatescattering(&pp);
             }
         }
-        logprogress("dust emission", ell, _Npp);
-    }
-}
-
-////////////////////////////////////////////////////////////////////
-
-void PanMonteCarloSimulation::initprogress()
-{
-    _Ndone = 0;
-}
-
-////////////////////////////////////////////////////////////////////
-
-void PanMonteCarloSimulation::logprogress(QString phase, int ell, qint64 index)
-{
-    // update progress counter (conversion to double may loose some precision)
-    _Ndone[ell] = index;
-
-    // only log when the total number of photon packages is nonzero (to avoid messages with NaN's)
-    if (_Npp > 0)
-    {
-        // calculate completion percentage
-        // note: since we don't do this in a critical section, the result may be slightly incorrect
-        double completed = _Ndone.sum() * 100. / _Npp / _Ndone.size();
-
-        // log message
-        QString prefix = (index == _Npp)
-                         ? "Completed " + QString::number(_Npp) + " " + phase + " photon packages"
-                         : "Launching " + phase + " photon package " + QString::number(index);
-        _log->info(prefix + " for λ = " + QString::number(_units->owavelength(_lambdagrid->lambda(ell)), 'g', 4) + " "
-                   + _units->uwavelength() + " (" + QString::number(completed,'f',0) + "%)...");
     }
 }
 

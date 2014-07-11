@@ -323,11 +323,17 @@ public:
         call the implementation in this base class. */
     virtual void write() const;
 
+    /** This pure virtual function must be implemented in each subclass to indicate whether dust
+        emission is turned on for this dust system. The function returns true if dust emission is
+        turned on, and false otherwise. It is provided in this base class because it is invoked
+        from the general MonteCarloSimulation class. */
+    virtual bool dustemission() const = 0;
+
     /** This pure virtual function must be implemented in each subclass to simulate absorption of
-        of a monochromatic luminosity package in the specified dust cell. Although this is only
-        meaningful for panchromatic simulations, it is provided in this base class because the
-        function is referenced from the general MonteCarloSimulation class (although it is actually
-        invoked only for panchromatic simulations). */
+        of a monochromatic luminosity package in the specified dust cell. The function should be
+        called only if dustemission() returns true. It is provided in this base class because it is
+        referenced from the general MonteCarloSimulation class (although it is actually invoked
+        only for panchromatic simulations). */
     virtual void absorb(int m, int ell, double DeltaL, bool ynstellar) = 0;
 
     //======================== Data Members ========================

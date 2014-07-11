@@ -14,6 +14,13 @@ OligoDustSystem::OligoDustSystem()
 
 //////////////////////////////////////////////////////////////////////
 
+bool OligoDustSystem::dustemission() const
+{
+    return false;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void OligoDustSystem::absorb(int /*m*/, int /*ell*/, double /*DeltaL*/, bool /*ynstellar*/)
 {
     throw FATALERROR("This function should never be called");

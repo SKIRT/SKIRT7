@@ -241,6 +241,13 @@ bool PanDustSystem::writeISRF() const
     return _dustemissivity && _writeISRF;
 }
 
+////////////////////////////////////////////////////////////////////
+
+bool PanDustSystem::dustemission() const
+{
+    return _dustemissivity!=0;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void PanDustSystem::absorb(int m, int ell, double DeltaL, bool ynstellar)
@@ -333,13 +340,6 @@ Array PanDustSystem::meanintensityv(int m) const
         Jv[ell] = isfinite(J) ? J : 0.0;
     }
     return Jv;
-}
-
-////////////////////////////////////////////////////////////////////
-
-bool PanDustSystem::dustemission() const
-{
-    return _dustemissivity!=0;
 }
 
 ////////////////////////////////////////////////////////////////////
