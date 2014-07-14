@@ -139,7 +139,6 @@ public:
         \begin{pmatrix} k'_x \\ k'_y \\ k'_z \end{pmatrix}
         \f]
     */
-
     Direction generateDirection(Position bfr) const;
 
     //======================== Data Members ========================

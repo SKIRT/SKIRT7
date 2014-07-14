@@ -87,16 +87,9 @@ double StellarSurfaceGeometry::SigmaZ() const
 
 double StellarSurfaceGeometry::probabilityForDirection(Position bfr, Direction bfk) const
 {
-    double kx, ky, kz;
-    bfk.cartesian(kx,ky,kz);
-    double x, y, z;
-    bfr.cartesian(x,y,z);
-    // double r = bfr.radius();
-    // if (fabs(1.0-r/_rstar)<1e-5)
-    //     throw FATALERROR("not launching a photon from the stellar surface");
-    double cosphip = (x*kx+y*ky+z*kz)/_rstar;
-    if (cosphip >= 0.0)
-        return 2.0*cosphip;
+    double costhetap = Vec::dot(bfr,bfk)/_rstar;
+    if (costhetap > 0.0)
+        return 2.0*costhetap;
     else
         return 0.0;
 }
@@ -106,25 +99,21 @@ double StellarSurfaceGeometry::probabilityForDirection(Position bfr, Direction b
 Direction StellarSurfaceGeometry::generateDirection(Position bfr) const
 {
     // picking a random (theta',phi')
-
     double thetap = asin(sqrt(_random->uniform()));
     double phip = 2.0*M_PI*_random->uniform();
 
     // conversion to the regular coordinate system
-
     Direction bfkp(thetap,phip);
     double kpx, kpy, kpz;
     bfkp.cartesian(kpx,kpy,kpz);
     double r, theta, phi;
     bfr.spherical(r,theta,phi);
-    // if (fabs(1.0-r/_rstar)<1e-5)
-    //     throw FATALERROR("not launching a photon from the stellar surface");
     double costheta = cos(theta);
     double sintheta = sin(theta);
     double cosphi = cos(phi);
     double sinphi = sin(phi);
     double kx = costheta*cosphi*kpx - sinphi*kpy + sintheta*cosphi*kpz;
-    double ky = costheta*sinphi*kpx - cosphi*kpy + sintheta*sinphi*kpz;
+    double ky = costheta*sinphi*kpx + cosphi*kpy + sintheta*sinphi*kpz;
     double kz = -sintheta*kpx + costheta*kpz;
     return Direction(kx,ky,kz);
 }
