@@ -142,12 +142,10 @@ Random::exponcutoff(double xmax)
         return 0.0;
     else if (xmax<1e-10)
         return uniform()*xmax;
-    double R = uniform();
-    double x = -log(1.0-R*(1.0-exp(-xmax)));
+    double x = -log(1.0-uniform()*(1.0-exp(-xmax)));
     while (x>xmax)
     {
-        R = uniform();
-        x = -log(1.0-R*(1.0-exp(-xmax)));
+        x = -log(1.0-uniform()*(1.0-exp(-xmax)));
     }
     return x;
 }

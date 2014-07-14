@@ -88,11 +88,11 @@ public:
         \f$(\theta,\phi)\f$ from the two-dimensional probability density \f[
         p(\theta,\phi)\,d\theta\,d\phi = \left(\frac{\sin\theta}{2}\,d\theta\right)
         \left(\frac{1}{2\pi}\,d\varphi\right).\f] A random direction on the unit sphere can thus be
-        constructed by taking two uniform deviates \f${\cal R}_1\f$ and \f${\cal R}_2\f$, and
-        solving the two equations \f[ \begin{split} {\cal R}_1 &= \int_0^\theta
-        \frac{\sin\theta'\,d\theta'}{2} \\ {\cal R}_2 &= \int_0^\varphi \frac{d\varphi'}{2\pi}
+        constructed by taking two uniform deviates \f${\cal{X}}_1\f$ and \f${\cal{X}}_2\f$, and
+        solving the two equations \f[ \begin{split} {\cal{X}}_1 &= \int_0^\theta
+        \frac{\sin\theta'\,d\theta'}{2} \\ {\cal{X}}_2 &= \int_0^\varphi \frac{d\varphi'}{2\pi}
         \end{split} \f] for \f$\theta\f$ and \f$\varphi\f$. The solution is readily found, \f[
-        \begin{split} \theta &= \arccos\left(2{\cal R}_1-1\right) \\ \varphi &= 2\pi\,{\cal R}_2.
+        \begin{split} \theta &= \arccos\left(2{\cal{X}}_1-1\right) \\ \varphi &= 2\pi\,{\cal {X}}_2.
         \end{split} \f] Once these spherical coordinates are calculated, a Direction object can be
         constructed by calling the constructor Direction::Direction(double theta, double phi). */
     Direction direction();
@@ -100,13 +100,13 @@ public:
     /** This function generates a random direction on the unit sphere, sampled from a distribution
         with a \f$|\cos\theta|\f$ probability distribution, i.e. \f[ p(\theta,\phi)\,d\theta\,d\phi
         = \left(\sin\theta\,|\cos\theta|\,d\theta\right) \left(\frac{1}{2\pi}\,d\varphi\right).\f]
-        A random direction can be constructed by taking two uniform deviates \f${\cal R}_1\f$ and
-        \f${\cal R}_2\f$, and solving the two equations \f[ \begin{split} {\cal R}_1 &=
-        \int_0^\theta \sin\theta'\,|\cos\theta|\,d\theta' \\ {\cal R}_2 &= \int_0^\varphi
+        A random direction can be constructed by taking two uniform deviates \f${\cal{X}}_1\f$ and
+        \f${\cal{X}}_2\f$, and solving the two equations \f[ \begin{split} {\cal{X}}_1 &=
+        \int_0^\theta \sin\theta'\,|\cos\theta|\,d\theta' \\ {\cal{X}}_2 &= \int_0^\varphi
         \frac{d\varphi'}{2\pi} \end{split} \f] for \f$\theta\f$ and \f$\varphi\f$. The solution is
-        \f[ \begin{split} \theta &= \begin{cases}\,\arccos \sqrt{2{\cal R}_1-1} & \quad 0<{\cal
-        R}_1<\tfrac12 \\ \,\arccos -\sqrt{1-2{\cal R}_1} & \quad\frac12<{\cal R}_1<1 \end{cases} \\
-        \varphi &= 2\pi\,{\cal R}_2. \end{split} \f] Once these spherical coordinates are
+        \f[ \begin{split} \theta &= \begin{cases}\,\arccos \sqrt{2{\cal{X}}_1-1} & \quad 0<{\cal
+        R}_1<\tfrac12 \\ \,\arccos -\sqrt{1-2{\cal{X}}_1} & \quad\frac12<{\cal{X}}_1<1 \end{cases} \\
+        \varphi &= 2\pi\,{\cal{X}}_2. \end{split} \f] Once these spherical coordinates are
         calculated, a Direction object can be constructed by calling the constructor
         Direction::Direction(double theta, double phi). */
     Direction cosdirection();

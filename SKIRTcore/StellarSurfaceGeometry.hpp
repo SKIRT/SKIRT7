@@ -116,27 +116,27 @@ public:
         over an angle \f$\theta\f$ over the Y'-axis, where \f$\theta\f$ and \f$\varphi\f$ are the
         polar angle and azimuth of the position vector \f${\bf{r}}\f$. The connection is hence
         \f[
-        \begin{pmatrix} k'_x \\ k'_y \\ k'_z \end{pmatrix}
+        \begin{bmatrix} k'_x \\ k'_y \\ k'_z \end{bmatrix}
         =
-        \begin{pmatrix}
+        \begin{bmatrix}
         \cos\theta & 0 & -\sin\theta \\ 0 & 1 & 0 \\ \sin\theta & 0 & \cos\theta
-        \end{pmatrix}
-        \begin{pmatrix}
+        \end{bmatrix}
+        \begin{bmatrix}
         \cos\phi & \sin\phi & 0 \\ -\sin\phi & \cos\phi & 0 \\ 0 & 0 & 1
-        \end{pmatrix}
-        \begin{pmatrix} k_x \\ k_y \\ k_z \end{pmatrix}
+        \end{bmatrix}
+        \begin{bmatrix} k_x \\ k_y \\ k_z \end{bmatrix}
         \f]
         or in the other direction
         \f[
-        \begin{pmatrix} k_x \\ k_y \\ k_z \end{pmatrix}
+        \begin{bmatrix} k_x \\ k_y \\ k_z \end{bmatrix}
         =
-        \begin{pmatrix}
+        \begin{bmatrix}
         \cos\phi & -\sin\phi & 0 \\ \sin\phi & \cos\phi & 0 \\ 0 & 0 & 1
-        \end{pmatrix}
-        \begin{pmatrix}
+        \end{bmatrix}
+        \begin{bmatrix}
         \cos\theta & 0 & \sin\theta \\ 0 & 1 & 0 \\ -\sin\theta & 0 & \cos\theta
-        \end{pmatrix}
-        \begin{pmatrix} k'_x \\ k'_y \\ k'_z \end{pmatrix}
+        \end{bmatrix}
+        \begin{bmatrix} k'_x \\ k'_y \\ k'_z \end{bmatrix}
         \f]
     */
     Direction generateDirection(Position bfr) const;
