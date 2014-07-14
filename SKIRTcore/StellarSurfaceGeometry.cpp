@@ -89,7 +89,7 @@ double StellarSurfaceGeometry::probabilityForDirection(Position bfr, Direction b
 {
     double costhetap = Vec::dot(bfr,bfk)/_rstar;
     if (costhetap > 0.0)
-        return 2.0*costhetap;
+        return 4.0*costhetap;
     else
         return 0.0;
 }

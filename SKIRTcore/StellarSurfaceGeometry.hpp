@@ -85,15 +85,15 @@ public:
 
     // - - - - - - AngularDistribution interface - - - - - -
 
-    /** This function returns the normalized probability for a direction \f${\bf{k}}\f$,
-        given that the point of emission is \f${\bf{r}}\f$. The appropriate probability
-        distribution is given by \f[ p({\bf{k}})\, {\text{d}}\Omega = 2\cos\theta'\,
-        {\text{d}}\Omega \qquad 0 \leq \theta' < \frac{\pi}{2}. \f] Here \f$\theta'\f$ is the
-        angle between the direction \f${\bf{k}}\f$
-        and the normal on the surface of the stellar surface from which the photon package is sent, which
-        is just defined by the vector \f${\bf{r}}\f$. So \f[ \cos\theta' = \frac{{\bf{k}}\cdot{\bf{r}}}{r_*}. \f]
-        This distribution is correctly normalized in the sense that \f[ \frac{1}{4\pi} \iint p({\bf{k}})\,
-        {\text{d}}\Omega = 1. \f] */
+    /** This function returns the normalized probability for a direction \f${\bf{k}}\f$, given that
+        the point of emission is \f${\bf{r}}\f$. The appropriate probability distribution is given
+        by \f[ p({\bf{k}})\, {\text{d}}\Omega = \begin{cases} 4\cos\theta'\, {\text{d}}\Omega & 0
+        \leq \theta' < \frac{\pi}{2} \\ 0 & \frac{\pi}{2} \leq \theta' < \pi \end{cases} \f] Here
+        \f$\theta'\f$ is the angle between the direction \f${\bf{k}}\f$ and the normal on the
+        surface of the stellar surface from which the photon package is sent, which is just defined
+        by the vector \f${\bf{r}}\f$. So \f[ \cos\theta' = \frac{{\bf{k}}\cdot{\bf{r}}}{r_*}. \f]
+        This distribution is correctly normalized in the sense that \f[ \frac{1}{4\pi} \iint
+        p({\bf{k}})\, {\text{d}}\Omega = 1. \f] */
     double probabilityForDirection(Position bfr, Direction bfk) const;
 
     /** This function generates a random direction appropriate for the anisotropic outward radiation
