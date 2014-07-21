@@ -155,13 +155,14 @@ protected:
         of in the propagation direction \f${\bf{k}}\f$ determined randomly by the emission process.
         Each peel-off photon package has the same characteristics as the original peel-off photon
         package, except that the propagation direction is altered to the direction
-        \f${\bf{k}}_{\text{obs}}\f$ of the observer (there is no extra weight factor or
-        compensation because the emission is considered to be isotropic, and so the probability
-        that a photon package would have been emitted towards the observer is the same as the
-        probability that it is emitted in any other direction). For each instrument in the
-        instrument system, the function creates such a peel-off photon package and feeds it to the
-        instrument. */
-    void peeloffemission(PhotonPackage* pp);
+        \f${\bf{k}}_{\text{obs}}\f$ of the observer. For anistropic emission, a weight factor is
+        applied to the luminosity to compensate for the fact that the probability that a photon
+        package would have been emitted towards the observer is not the same as the probability
+        that it is emitted in any other direction. For each instrument in the instrument system,
+        the function creates such a peel-off photon package and feeds it to the instrument. The
+        first argument specifies the photon package that was just emitted; the second argument
+        provides a placeholder peel off photon package for use by the function. */
+    void peeloffemission(PhotonPackage* pp, PhotonPackage* ppp);
 
     /** This function simulates the peel-off of a photon package before a scattering event. This
         means that, just before a scattering event, we create peel-off or shadow photon packages,
@@ -189,8 +190,10 @@ protected:
         \f$\Phi_{\ell,h}\f$ are the scattering coefficient and phase function corresponding to the
         \f$h\f$'th dust component respectively (both evaluated at the wavelength index \f$\ell\f$
         of the photon package). For each instrument in the instrument system, the function creates
-        such a peel-off photon package and feeds it to the instrument. */
-    void peeloffscattering(PhotonPackage* pp);
+        such a peel-off photon package and feeds it to the instrument. The first argument specifies
+        the photon package that was just emitted; the second argument provides a placeholder peel
+        off photon package for use by the function. */
+    void peeloffscattering(PhotonPackage* pp, PhotonPackage* ppp);
 
     /** This function simulates the escape from the system and the absorption by dust of a fraction
         of the luminosity of a photon package. It actually splits the luminosity \f$L_\ell\f$ of

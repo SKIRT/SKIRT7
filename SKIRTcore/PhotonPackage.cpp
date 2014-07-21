@@ -3,153 +3,58 @@
 ////       © Astronomical Observatory, Ghent University         ////
 //////////////////////////////////////////////////////////////////*/
 
-#include <cmath>
 #include "PhotonPackage.hpp"
+#include "AngularDistribution.hpp"
 
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////
 
 PhotonPackage::PhotonPackage()
-    : _ynstellar(true),
-      _ell(0),
-      _L(0.0),
-      _nscatt(0),
-      _ad(0)
+    : _stellar(true), _L(0), _ell(0), _nscatt(0), _ad(0)
 {
 }
 
 ////////////////////////////////////////////////////////////////////
 
-PhotonPackage::PhotonPackage(bool ynstellar,
-                             int ell,
-                             Position bfr,
-                             Direction bfk,
-                             double L,
-                             int nscatt)
-    : _ynstellar(ynstellar),
-      _ell(ell),
-      _bfr(bfr),
-      _bfk(bfk),
-      _L(L),
-      _nscatt(nscatt),
-      _ad(0)
+void PhotonPackage::launch(bool stellar, double L, int ell, Position bfr, Direction bfk)
 {
-}
-
-////////////////////////////////////////////////////////////////////
-
-void
-PhotonPackage::set(bool ynstellar, int ell,
-                   Position bfr, Direction bfk, double L, int nscatt)
-{
-    _ynstellar = ynstellar;
+    _stellar = stellar;
+    _L = L;
     _ell = ell;
     _bfr = bfr;
     _bfk = bfk;
-    _L = L;
-    _nscatt = nscatt;
+    _nscatt = 0;
     _ad = 0;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-bool
-PhotonPackage::ynstellar()
-const
+void PhotonPackage::launchEmissionPeelOff(const PhotonPackage* pp, Direction bfk)
 {
-    return _ynstellar;
-}
-
-////////////////////////////////////////////////////////////////////
-
-void
-PhotonPackage::setynstellar(bool ynstellar)
-{
-    _ynstellar = ynstellar;
-}
-
-////////////////////////////////////////////////////////////////////
-
-int
-PhotonPackage::ell()
-const
-{
-    return _ell;
-}
-
-////////////////////////////////////////////////////////////////////
-
-void PhotonPackage::setell(int ell)
-{
-    _ell = ell;
-}
-
-////////////////////////////////////////////////////////////////////
-
-Position
-PhotonPackage::position()
-const
-{
-    return _bfr;
-}
-
-////////////////////////////////////////////////////////////////////
-
-Direction
-PhotonPackage::direction()
-const
-{
-    return _bfk;
-}
-
-////////////////////////////////////////////////////////////////////
-
-void
-PhotonPackage::setdirection(Direction bfk)
-{
+    _stellar = pp->_stellar;
+    _L = pp->_L;
+    _ell = pp->_ell;
+    _bfr = pp->_bfr;
     _bfk = bfk;
+    _nscatt = 0;
+    _ad = 0;
+
+    // apply emission direction bias if not isotropic
+    if (pp->_ad) _L *= pp->_ad->probabilityForDirection(_bfr, _bfk);
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double
-PhotonPackage::luminosity()
-const
+void PhotonPackage::launchScatteringPeelOff(const PhotonPackage* pp, Direction bfk, double w)
 {
-    return _L;
-}
-
-////////////////////////////////////////////////////////////////////
-
-void
-PhotonPackage::setluminosity(double L)
-{
-    _L = L;
-}
-
-////////////////////////////////////////////////////////////////////
-
-int
-PhotonPackage::nscatt()
-const
-{
-    return _nscatt;
-}
-
-////////////////////////////////////////////////////////////////////
-
-void
-PhotonPackage::setnscatt(int nscatt)
-{
-    _nscatt = nscatt;
-}
-
-////////////////////////////////////////////////////////////////////
-
-const AngularDistribution* PhotonPackage::angularDistribution() const
-{
-    return _ad;
+    _stellar = pp->_stellar;
+    _L = pp->_L * w;
+    _ell = pp->_ell;
+    _bfr = pp->_bfr;
+    _bfk = bfk;
+    _nscatt = pp->_nscatt + 1;
+    _ad = 0;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -161,10 +66,25 @@ void PhotonPackage::setAngularDistribution(const AngularDistribution* ad)
 
 ////////////////////////////////////////////////////////////////////
 
-void
-PhotonPackage::propagate(double s)
+void PhotonPackage::propagate(double s)
 {
-    _bfr = Position(_bfr + s*_bfk);
+    _bfr += s*_bfk;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void PhotonPackage::scatter(Direction bfk)
+{
+    _nscatt++;
+    _bfk = bfk;
+    _ad = 0;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void PhotonPackage::setLuminosity(double L)
+{
+    _L = L;
 }
 
 ////////////////////////////////////////////////////////////////////

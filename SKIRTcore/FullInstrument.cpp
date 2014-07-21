@@ -6,7 +6,7 @@
 #include "FatalError.hpp"
 #include "FullInstrument.hpp"
 #include "LockFree.hpp"
-#include "PeelOffPhotonPackage.hpp"
+#include "PhotonPackage.hpp"
 #include "WavelengthGrid.hpp"
 
 using namespace std;
@@ -58,19 +58,19 @@ int FullInstrument::scatteringLevels() const
 ////////////////////////////////////////////////////////////////////
 
 void
-FullInstrument::detect(const PeelOffPhotonPackage* pp)
+FullInstrument::detect(const PhotonPackage* pp)
 {
     int l = pixelondetector(pp);
     int ell = pp->ell();
     int m = l + ell*_Nxp*_Nyp;
     double L = pp->luminosity();
-    double taupath = pp->opticaldepth();
+    double taupath = opticalDepth(pp);
     double extf = exp(-taupath);
     double Lextf = L*extf;
 
-    if (pp->ynstellar())
+    if (pp->isStellar())
     {
-        int nscatt = pp->nscatt();
+        int nscatt = pp->nScatt();
         if (nscatt==0)
         {
             LockFree::add(_Ftrav[ell], L);
@@ -89,9 +89,9 @@ FullInstrument::detect(const PeelOffPhotonPackage* pp)
 
     if (l>=0)
     {
-        if (pp->ynstellar())
+        if (pp->isStellar())
         {
-            int nscatt = pp->nscatt();
+            int nscatt = pp->nScatt();
             if (nscatt==0)
             {
                 LockFree::add(_ftrav[m], L);

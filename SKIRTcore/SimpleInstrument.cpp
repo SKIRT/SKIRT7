@@ -5,7 +5,7 @@
 
 #include "FatalError.hpp"
 #include "LockFree.hpp"
-#include "PeelOffPhotonPackage.hpp"
+#include "PhotonPackage.hpp"
 #include "SimpleInstrument.hpp"
 #include "WavelengthGrid.hpp"
 
@@ -31,13 +31,13 @@ void SimpleInstrument::setupSelfBefore()
 ////////////////////////////////////////////////////////////////////
 
 void
-SimpleInstrument::detect(const PeelOffPhotonPackage* pp)
+SimpleInstrument::detect(const PhotonPackage* pp)
 {
     int l = pixelondetector(pp);
     int ell = pp->ell();
     int m = l + ell*_Nxp*_Nyp;
     double L = pp->luminosity();
-    double taupath = pp->opticaldepth();
+    double taupath = opticalDepth(pp);
     double extf = exp(-taupath);
     double Lextf = L*extf;
 

@@ -213,7 +213,7 @@ void AdaptiveMeshStellarComp::launch(PhotonPackage* pp, int ell, double L) const
     int m = NR::locate_clip(_Xvv[ell], _random->uniform());
     Position bfr = _mesh->randomPosition(_random, m);
     Direction bfk = _random->direction();
-    pp->set(true,ell,bfr,bfk,L,0);
+    pp->launch(true,L,ell,bfr,bfk);
 }
 
 //////////////////////////////////////////////////////////////////////

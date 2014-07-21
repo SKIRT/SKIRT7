@@ -9,7 +9,7 @@
 #include "FatalError.hpp"
 #include "FilePaths.hpp"
 #include "Log.hpp"
-#include "PeelOffPhotonPackage.hpp"
+#include "PhotonPackage.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
 

@@ -8,7 +8,7 @@
 
 #include "Array.hpp"
 #include "SimulationItem.hpp"
-class PeelOffPhotonPackage;
+class PhotonPackage;
 class MultiFrameInstrument;
 
 ////////////////////////////////////////////////////////////////////
@@ -97,12 +97,12 @@ private:
     /** This function returns the index of the spatial pixel on the detector that will be hit by a
         photon package, or -1 if the photon package does not hit the detector. It operates
         similarly to SingleFrameInstrument::pixelondetector(). */
-    int pixelondetector(const PeelOffPhotonPackage* pp) const;
+    int pixelondetector(const PhotonPackage* pp) const;
 
 public:
     /** This function simulates the detection of a photon package by the instrument frame. It
         operates similarly to SimpleInstrument::detect(), but for a single wavelength. */
-    void detect(const PeelOffPhotonPackage* pp);
+    void detect(const PhotonPackage* pp);
 
     /** This function properly calibrates and outputs the instrument data. It operates similarly to
         SimpleInstrument::write(), but for the single wavelength specified through its wavelength

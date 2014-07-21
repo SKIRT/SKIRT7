@@ -5,7 +5,7 @@
 
 #include "FatalError.hpp"
 #include "InstrumentFrame.hpp"
-#include "PeelOffPhotonPackage.hpp"
+#include "PhotonPackage.hpp"
 #include "MultiFrameInstrument.hpp"
 #include "WavelengthGrid.hpp"
 
@@ -46,7 +46,7 @@ QList<InstrumentFrame*> MultiFrameInstrument::frames() const
 
 ////////////////////////////////////////////////////////////////////
 
-void MultiFrameInstrument::detect(const PeelOffPhotonPackage *pp)
+void MultiFrameInstrument::detect(const PhotonPackage *pp)
 {
     _frames[pp->ell()]->detect(pp);
 }

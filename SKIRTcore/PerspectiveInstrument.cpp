@@ -10,7 +10,7 @@
 #include "FITSInOut.hpp"
 #include "LockFree.hpp"
 #include "Log.hpp"
-#include "PeelOffPhotonPackage.hpp"
+#include "PhotonPackage.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
 
@@ -299,7 +299,7 @@ Direction PerspectiveInstrument::bfkobs(const Position& bfr) const
 
 ////////////////////////////////////////////////////////////////////
 
-void PerspectiveInstrument::detect(const PeelOffPhotonPackage *pp)
+void PerspectiveInstrument::detect(const PhotonPackage *pp)
 {
     // get the position
     double x, y, z;
@@ -318,7 +318,7 @@ void PerspectiveInstrument::detect(const PeelOffPhotonPackage *pp)
         double d = zp;
 
         // determine the photon package's luminosity, attenuated for the absorption along its path to the instrument
-        double taupath = pp->opticaldepth(d);
+        double taupath = opticalDepth(pp,d);
         double L = pp->luminosity() * exp(-taupath);
 
         // adjust the luminosity for the distance from the launch position to the instrument

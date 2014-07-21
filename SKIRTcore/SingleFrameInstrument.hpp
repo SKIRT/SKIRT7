@@ -130,7 +130,7 @@ protected:
         \f$\Delta y\f$ are the resolution of the detector array and \f$[z]\f$ is an operator
         rounding to the nearest integer. The spatial pixel number \f$l\f$ is then determined as
         \f$l=i+j\,N_x\f$, asuming \f$i\f$ and \f$j\f$ are indeed within the detector range. */
-    int pixelondetector(const PeelOffPhotonPackage* pp) const;
+    int pixelondetector(const PhotonPackage* pp) const;
 
     /** This convenience function calibrates one or more luminosity data cubes gathered by a
         DistantInstrument subclass and outputs each data cube as a FITS file. The incoming data is

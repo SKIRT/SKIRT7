@@ -172,7 +172,6 @@ HEADERS += \
     ParallelFactory.hpp \
     ParallelTarget.hpp \
     ParticleTreeDustGridStructure.hpp \
-    PeelOffPhotonPackage.hpp \
     PegaseSED.hpp \
     PerspectiveInstrument.hpp \
     PhotonPackage.hpp \
@@ -399,7 +398,6 @@ SOURCES += \
     ParallelFactory.cpp \
     ParallelTarget.cpp \
     ParticleTreeDustGridStructure.cpp \
-    PeelOffPhotonPackage.cpp \
     PegaseSED.cpp \
     PerspectiveInstrument.cpp \
     PhotonPackage.cpp \

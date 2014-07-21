@@ -3,7 +3,6 @@
 ////       © Astronomical Observatory, Ghent University         ////
 //////////////////////////////////////////////////////////////////*/
 
-#include "AngularDistribution.hpp"
 #include "DustGridStructure.hpp"
 #include "DustMix.hpp"
 #include "DustSystem.hpp"
@@ -16,7 +15,7 @@
 #include "NR.hpp"
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
-#include "PeelOffPhotonPackage.hpp"
+#include "PhotonPackage.hpp"
 #include "Random.hpp"
 #include "StellarSystem.hpp"
 #include "TimeLogger.hpp"
@@ -161,7 +160,7 @@ void MonteCarloSimulation::dostellaremissionchunk(size_t index)
     if (L > 0)
     {
         double Lmin = 1e-4 * L;
-        PhotonPackage pp;
+        PhotonPackage pp,ppp;
         DustSystemPath dsp;
 
         quint64 remaining = _chunksize;
@@ -171,14 +170,14 @@ void MonteCarloSimulation::dostellaremissionchunk(size_t index)
             for (quint64 i=0; i<count; i++)
             {
                 _ss->launch(&pp,ell,L);
-                peeloffemission(&pp);
+                peeloffemission(&pp,&ppp);
                 if (_ds) while (true)
                 {
                     fillDustSystemPath(&pp,&dsp);
                     simulateescapeandabsorption(&pp,&dsp,_ds->dustemission());
                     if (pp.luminosity() <= Lmin) break;
                     simulatepropagation(&pp,&dsp);
-                    peeloffscattering(&pp);
+                    peeloffscattering(&pp,&ppp);
                     simulatescattering(&pp);
                 }
             }
@@ -201,30 +200,24 @@ void MonteCarloSimulation::fillDustSystemPath(PhotonPackage* pp, DustSystemPath*
 
 ////////////////////////////////////////////////////////////////////
 
-void MonteCarloSimulation::peeloffemission(PhotonPackage* pp)
+void MonteCarloSimulation::peeloffemission(PhotonPackage* pp, PhotonPackage* ppp)
 {
-    int ell = pp->ell();
-    bool ynstellar = pp->ynstellar();
     Position bfr = pp->position();
-    double L = pp->luminosity();
-    const AngularDistribution* ad = pp->angularDistribution();
 
     foreach (Instrument* instr, _is->instruments())
     {
         Direction bfknew = instr->bfkobs(bfr);
-        double directionbias = ad ? ad->probabilityForDirection(bfr, bfknew) : 1.;
-        PeelOffPhotonPackage ppp(ynstellar,ell,bfr,bfknew,L*directionbias,0,_ds);
-        instr->detect(&ppp);
+        ppp->launchEmissionPeelOff(pp, bfknew);
+        instr->detect(ppp);
     }
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void MonteCarloSimulation::peeloffscattering(PhotonPackage* pp)
+void MonteCarloSimulation::peeloffscattering(PhotonPackage* pp, PhotonPackage* ppp)
 {
     int Ncomp = _ds->Ncomp();
     int ell = pp->ell();
-    bool ynstellar = pp->ynstellar();
     Position bfr = pp->position();
 
     // Determination of the weighting factors of the phase functions corresponding to
@@ -242,16 +235,14 @@ void MonteCarloSimulation::peeloffscattering(PhotonPackage* pp)
 
     // Now do the actual peel-off
     Direction bfkold = pp->direction();
-    int nscatt = pp->nscatt()+1;
     foreach (Instrument* instr, _is->instruments())
     {
         Direction bfknew = instr->bfkobs(bfr);
         double w = 0.0;
         for (int h=0; h<Ncomp; h++)
             w += wv[h] * _ds->mix(h)->phasefunction(ell,bfkold,bfknew);
-        double L = pp->luminosity() * w;
-        PeelOffPhotonPackage ppp(ynstellar,ell,bfr,bfknew,L,nscatt,_ds);
-        instr->detect(&ppp);
+        ppp->launchScatteringPeelOff(pp, bfknew, w);
+        instr->detect(ppp);
     }
 }
 
@@ -263,7 +254,7 @@ void MonteCarloSimulation::simulateescapeandabsorption(PhotonPackage* pp, DustSy
     double taupath = dsp->opticaldepth();
     int ell = pp->ell();
     double L = pp->luminosity();
-    bool ynstellar = pp->ynstellar();
+    bool ynstellar = pp->isStellar();
     int Ncomp = _ds->Ncomp();
 
     // Easy case: there is only one dust component
@@ -289,7 +280,7 @@ void MonteCarloSimulation::simulateescapeandabsorption(PhotonPackage* pp, DustSy
             }
         }
         double Lsca = L * albedo * expfactor;
-        pp->setluminosity(Lsca);
+        pp->setLuminosity(Lsca);
     }
 
     // Difficult case: there are different dust components.
@@ -333,7 +324,7 @@ void MonteCarloSimulation::simulateescapeandabsorption(PhotonPackage* pp, DustSy
                 }
             }
         }
-        pp->setluminosity(Lsca);
+        pp->setLuminosity(Lsca);
     }
 }
 
@@ -372,8 +363,7 @@ void MonteCarloSimulation::simulatescattering(PhotonPackage* pp)
     // Now just perform the scattering
     Direction bfkold = pp->direction();
     Direction bfknew = mix->generatenewdirection(ell,bfkold);
-    pp->setnscatt(pp->nscatt()+1);
-    pp->setdirection(bfknew);
+    pp->scatter(bfknew);
 }
 
 ////////////////////////////////////////////////////////////////////

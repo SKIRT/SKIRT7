@@ -9,7 +9,7 @@
 #include "InstrumentFrame.hpp"
 #include "Log.hpp"
 #include "LockFree.hpp"
-#include "PeelOffPhotonPackage.hpp"
+#include "PhotonPackage.hpp"
 #include "MultiFrameInstrument.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
@@ -114,7 +114,7 @@ double InstrumentFrame::extentY() const
 
 ////////////////////////////////////////////////////////////////////
 
-int InstrumentFrame::pixelondetector(const PeelOffPhotonPackage* pp) const
+int InstrumentFrame::pixelondetector(const PhotonPackage* pp) const
 {
     // get the position
     double x, y, z;
@@ -135,13 +135,13 @@ int InstrumentFrame::pixelondetector(const PeelOffPhotonPackage* pp) const
 
 ////////////////////////////////////////////////////////////////////
 
-void InstrumentFrame::detect(const PeelOffPhotonPackage *pp)
+void InstrumentFrame::detect(const PhotonPackage *pp)
 {
     int l = pixelondetector(pp);
     if (l >= 0)
     {
         double L = pp->luminosity();
-        double taupath = pp->opticaldepth();
+        double taupath = _instrument->opticalDepth(pp);
         double extf = exp(-taupath);
         double Lextf = L*extf;
 

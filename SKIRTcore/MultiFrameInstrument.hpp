@@ -56,7 +56,7 @@ public:
     /** This function simulates the detection of a photon package by the instrument. It operates
         similarly to SimpleInstrument::detect(), except that the photon packages for different
         wavelengths are handed to different instrument frames. */
-    void detect(const PeelOffPhotonPackage* pp);
+    void detect(const PhotonPackage* pp);
 
     /** This function calibrates and outputs the instrument data. It operates similarly to
         SimpleInstrument::write(), except that a separate output file is written for each

@@ -195,7 +195,7 @@ void PanMonteCarloSimulation::dodustselfabsorptionchunk(size_t index)
                 int m = NR::locate_clip(Xv,X);
                 Position bfr = _pds->randomPositionInCell(m);
                 Direction bfk = _random->direction();
-                pp.set(false,ell,bfr,bfk,L,0);
+                pp.launch(false,L,ell,bfr,bfk);
                 while (true)
                 {
                     fillDustSystemPath(&pp,&dsp);
@@ -255,7 +255,7 @@ void PanMonteCarloSimulation::dodustemissionchunk(size_t index)
         Array Xv;
         NR::cdf(Xv, Lv);
 
-        PhotonPackage pp;
+        PhotonPackage pp,ppp;
         DustSystemPath dsp;
         double L = Ltot / _Npp;
         double Lmin = 1e-4 * L;
@@ -270,15 +270,15 @@ void PanMonteCarloSimulation::dodustemissionchunk(size_t index)
                 int m = NR::locate_clip(Xv,X);
                 Position bfr = _pds->randomPositionInCell(m);
                 Direction bfk = _random->direction();
-                pp.set(false,ell,bfr,bfk,L,0);
-                peeloffemission(&pp);
+                pp.launch(false,L,ell,bfr,bfk);
+                peeloffemission(&pp,&ppp);
                 while (true)
                 {
                     fillDustSystemPath(&pp,&dsp);
                     simulateescapeandabsorption(&pp,&dsp,false);
                     if (pp.luminosity() <= Lmin) break;
                     simulatepropagation(&pp,&dsp);
-                    peeloffscattering(&pp);
+                    peeloffscattering(&pp,&ppp);
                     simulatescattering(&pp);
                 }
             }

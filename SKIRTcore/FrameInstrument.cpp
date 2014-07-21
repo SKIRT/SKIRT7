@@ -6,7 +6,7 @@
 #include "FatalError.hpp"
 #include "FrameInstrument.hpp"
 #include "LockFree.hpp"
-#include "PeelOffPhotonPackage.hpp"
+#include "PhotonPackage.hpp"
 #include "WavelengthGrid.hpp"
 
 using namespace std;
@@ -30,7 +30,7 @@ void FrameInstrument::setupSelfBefore()
 ////////////////////////////////////////////////////////////////////
 
 void
-FrameInstrument::detect(const PeelOffPhotonPackage* pp)
+FrameInstrument::detect(const PhotonPackage* pp)
 {
     int l = pixelondetector(pp);
     if (l >= 0)
@@ -38,7 +38,7 @@ FrameInstrument::detect(const PeelOffPhotonPackage* pp)
         int ell = pp->ell();
         int m = l + ell*_Nxp*_Nyp;
         double L = pp->luminosity();
-        double taupath = pp->opticaldepth();
+        double taupath = opticalDepth(pp);
         double extf = exp(-taupath);
         double Lextf = L*extf;
 

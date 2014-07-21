@@ -5,7 +5,7 @@
 
 #include "FatalError.hpp"
 #include "LockFree.hpp"
-#include "PeelOffPhotonPackage.hpp"
+#include "PhotonPackage.hpp"
 #include "SEDInstrument.hpp"
 #include "WavelengthGrid.hpp"
 
@@ -30,11 +30,11 @@ void SEDInstrument::setupSelfBefore()
 ////////////////////////////////////////////////////////////////////
 
 void
-SEDInstrument::detect(const PeelOffPhotonPackage* pp)
+SEDInstrument::detect(const PhotonPackage* pp)
 {
     int ell = pp->ell();
     double L = pp->luminosity();
-    double taupath = pp->opticaldepth();
+    double taupath = opticalDepth(pp);
     double extf = exp(-taupath);
     double Lextf = L*extf;
 

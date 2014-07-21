@@ -7,7 +7,7 @@
 #include "FilePaths.hpp"
 #include "FITSInOut.hpp"
 #include "Log.hpp"
-#include "PeelOffPhotonPackage.hpp"
+#include "PhotonPackage.hpp"
 #include "SingleFrameInstrument.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
@@ -96,7 +96,7 @@ double SingleFrameInstrument::extentY() const
 
 ////////////////////////////////////////////////////////////////////
 
-int SingleFrameInstrument::pixelondetector(const PeelOffPhotonPackage* pp) const
+int SingleFrameInstrument::pixelondetector(const PhotonPackage* pp) const
 {
     // get the position
     double x, y, z;

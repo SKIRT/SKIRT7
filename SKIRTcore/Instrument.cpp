@@ -3,16 +3,17 @@
 ////       © Astronomical Observatory, Ghent University         ////
 //////////////////////////////////////////////////////////////////*/
 
-#include "FatalError.hpp"
 #include "Instrument.hpp"
-#include "InstrumentSystem.hpp"
+#include "DustSystem.hpp"
+#include "FatalError.hpp"
+#include "PhotonPackage.hpp"
 
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////
 
 Instrument::Instrument()
-    : _is(0)
+    : _ds(0)
 {
 }
 
@@ -22,7 +23,14 @@ void Instrument::setupSelfBefore()
 {
     SimulationItem::setupSelfBefore();
 
-    _is = find<InstrumentSystem>();
+    try
+    {
+        _ds = find<DustSystem>();
+    }
+    catch (FatalError)
+    {
+        _ds = 0;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -37,6 +45,13 @@ void Instrument::setInstrumentName(QString value)
 QString Instrument::instrumentName() const
 {
     return _instrumentname;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double Instrument::opticalDepth(const PhotonPackage* pp, double distance) const
+{
+    return _ds ? _ds->opticaldepth(pp->ell(),pp->position(),pp->direction(),distance) : 0;
 }
 
 ////////////////////////////////////////////////////////////////////

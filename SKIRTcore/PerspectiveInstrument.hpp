@@ -191,7 +191,7 @@ public:
 protected:
     /** This function simulates the detection of a photon package by the instrument.
         For more information see \ref PerInstr. */
-    void detect(const PeelOffPhotonPackage* pp);
+    void detect(const PhotonPackage* pp);
 
     /** This function calibrates and outputs the instrument data.
         For more information see \ref PerInstr. */
