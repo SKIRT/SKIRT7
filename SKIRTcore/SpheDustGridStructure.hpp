@@ -85,13 +85,10 @@ public:
         from the cell. */
     Position randomPositionInCell(int m) const;
 
-    /** This function returns a DustGridPath object, corresponding to path through the grid
-        starting at the position \f${\bf{r}}\f$ into the direction \f${\bf{k}}\f$. This
-        DustGridPath consists of three vectors: the first one lists the cell numbers \f$m\f$ of all
-        the cells crossed by the path, the second lists the path length \f$\Delta s\f$ covered in
-        each of these dust cells, and the third lists the total covered path length \f$s\f$ until
-        the end of each cell is encountered. */
-    DustGridPath path(Position bfr, Direction bfk) const;
+    /** This function calculates a path through the grid. The DustGridPath object passed as an
+        argument specifies the starting position \f${\bf{r}}\f$ and the direction \f${\bf{k}}\f$
+        for the path. The data on the calculated path are added back into the same object. */
+    void path(DustGridPath* path) const;
 
 protected:
     /** This function writes the intersection of the dust grid structure with the xy plane to the

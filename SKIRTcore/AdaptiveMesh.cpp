@@ -9,6 +9,7 @@
 #include "AdaptiveMesh.hpp"
 #include "AdaptiveMeshFile.hpp"
 #include "AdaptiveMeshNode.hpp"
+#include "DustGridPath.hpp"
 #include "FatalError.hpp"
 #include "Random.hpp"
 
@@ -280,22 +281,22 @@ double AdaptiveMesh::SigmaZ() const
 
 ////////////////////////////////////////////////////////////////////
 
-DustGridPath AdaptiveMesh::path(Position bfr, Direction bfk) const
+void AdaptiveMesh::path(DustGridPath* path) const
 {
     // Initialize the path
-    DustGridPath path(bfr, bfk, 3000);
+    path->clear();
 
     // If the photon package starts outside the dust grid, move it into the first grid cell that it will pass
-    Position r = path.moveinside(_root->extent(), _eps);
+    Position r = path->moveInside(_root->extent(), _eps);
 
     // Get the node containing the current location;
     // if the position is not inside the grid, return an empty path
     const AdaptiveMeshNode* node = _root->whichnode(r);
-    if (!node) return path.clear();
+    if (!node) return path->clear();
 
     // Start the loop over nodes/path segments until we leave the grid.
     double kx,ky,kz;
-    bfk.cartesian(kx,ky,kz);
+    path->direction().cartesian(kx,ky,kz);
     while (node)
     {
         double xnext = (kx<0.0) ? node->xmin() : node->xmax();
@@ -322,15 +323,13 @@ DustGridPath AdaptiveMesh::path(Position bfr, Direction bfk) const
             ds = dsz;
             wall = (kz<0.0) ? AdaptiveMeshNode::BOTTOM : AdaptiveMeshNode::TOP;
         }
-        path.addsegment(node->cellIndex(), ds);
-        r += (ds+_eps)*bfk;
+        path->addSegment(node->cellIndex(), ds);
+        r += (ds+_eps)*(path->direction());
 
         // try the most likely neighbor of the current node, and use top-down search as a fall-back
         node = node->whichnode(wall,r);
         if (!node) node = _root->whichnode(r);
     }
-
-    return path;
 }
 
 ////////////////////////////////////////////////////////////////////

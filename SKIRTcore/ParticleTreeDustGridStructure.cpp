@@ -6,6 +6,7 @@
 #include <cfloat>
 #include "BinTreeNode.hpp"
 #include "DustDistribution.hpp"
+#include "DustGridPath.hpp"
 #include "DustGridPlotFile.hpp"
 #include "DustMassInBoxInterface.hpp"
 #include "DustParticleInterface.hpp"
@@ -315,25 +316,25 @@ Position ParticleTreeDustGridStructure::randomPositionInCell(int m) const
 
 //////////////////////////////////////////////////////////////////////
 
-DustGridPath ParticleTreeDustGridStructure::path(Position bfr, Direction bfk) const
+void ParticleTreeDustGridStructure::path(DustGridPath* path) const
 {
     // Initialize the path
-    DustGridPath path(bfr, bfk, 3000);
+    path->clear();
 
     // If the photon package starts outside the dust grid, move it into the first grid cell that it will pass
-    Position r = path.moveinside(extent(), _eps);
+    Position r = path->moveInside(extent(), _eps);
 
     // Get the node containing the current location;
     // if the position is not inside the grid, return an empty path
     const TreeNode* node = root()->whichnode(r);
-    if (!node) return path.clear();
+    if (!node) return path->clear();
 
     // Start the loop over nodes/path segments until we leave the grid.
     // Use a different code segment depending on the search method.
     double x,y,z;
     r.cartesian(x,y,z);
     double kx,ky,kz;
-    bfk.cartesian(kx,ky,kz);
+    path->direction().cartesian(kx,ky,kz);
 
     while (node)
     {
@@ -352,7 +353,7 @@ DustGridPath ParticleTreeDustGridStructure::path(Position bfr, Direction bfk) co
         if (dsy>0 && dsy<ds) ds = dsy;
         if (dsz>0 && dsz<ds) ds = dsz;
         if (ds<DBL_MAX)
-            path.addsegment(cellnumber(node), ds);
+            path->addSegment(cellnumber(node), ds);
         else
             ds = 0;
 
@@ -364,8 +365,6 @@ DustGridPath ParticleTreeDustGridStructure::path(Position bfr, Direction bfk) co
         // always search from the root node down
         node = root()->whichnode(Vec(x,y,z));
     }
-
-    return path;
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -7,6 +7,7 @@
 #include <fstream>
 #include "DustDistribution.hpp"
 #include "DustGridDensityInterface.hpp"
+#include "DustGridPath.hpp"
 #include "DustGridStructure.hpp"
 #include "DustMix.hpp"
 #include "DustSystem.hpp"
@@ -159,57 +160,45 @@ void DustSystem::writeconvergence() const
     // calculation of the X-axis surface density
 
     double SigmaX = 0.0;
-    Position center(0.,0.,0.);
-    Direction bfkxpos(1.,0.,0.);
-    DustGridPath dgp = _grid->path(center,bfkxpos);
+    DustGridPath dgp(Position(0.,0.,0.), Direction(1.,0.,0.));
+    _grid->path(&dgp);
     int N = dgp.size();
-    vector<int> mv = dgp.mv();
-    vector<double> dsv = dgp.dsv();
     for (int n=0; n<N; n++)
-        SigmaX += dsv[n] * density(mv[n]);
-    Direction bfkxneg(-1.,0.,0.);
-    dgp = _grid->path(center,bfkxneg);
+        SigmaX += dgp.dsv(n) * density(dgp.mv(n));
+    dgp.setDirection(Direction(-1.,0.,0.));
+    _grid->path(&dgp);
     N = dgp.size();
-    mv = dgp.mv();
-    dsv = dgp.dsv();
     for (int n=0; n<N; n++)
-        SigmaX += dsv[n] * density(mv[n]);
+        SigmaX += dgp.dsv(n) * density(dgp.mv(n));
 
     // calculation of the Y-axis surface density
 
     double SigmaY = 0.0;
-    Direction bfkypos(0.,1.,0.);
-    dgp = _grid->path(center,bfkypos);
+    dgp.setDirection(Direction(0.,1.,0.));
+    _grid->path(&dgp);
     N = dgp.size();
-    mv = dgp.mv();
-    dsv = dgp.dsv();
     for (int n=0; n<N; n++)
-        SigmaY += dsv[n] * density(mv[n]);
-    Direction bfkyneg(0.,-1.,0.);
-    dgp = _grid->path(center,bfkyneg);
+        SigmaY += dgp.dsv(n) * density(dgp.mv(n));
+    dgp.setDirection(Direction(0.,-1.,0.));
+    _grid->path(&dgp);
     N = dgp.size();
-    mv = dgp.mv();
-    dsv = dgp.dsv();
     for (int n=0; n<N; n++)
-        SigmaY += dsv[n] * density(mv[n]);
+        SigmaY += dgp.dsv(n) * density(dgp.mv(n));
 
     // calculation of the Z-axis surface density
 
     double SigmaZ = 0.0;
-    Direction bfkzpos(0.,0.,1.);
-    dgp = _grid->path(center,bfkzpos);
+    dgp.setDirection(Direction(0.,0.,1.));
+    _grid->path(&dgp);
     N = dgp.size();
-    mv = dgp.mv();
-    dsv = dgp.dsv();
     for (int n=0; n<N; n++)
-        SigmaZ += dsv[n] * density(mv[n]);
+        SigmaZ += dgp.dsv(n) * density(dgp.mv(n));
     Direction bfkzneg(0.,0.,-1.);
-    dgp = _grid->path(center,bfkzneg);
+    dgp.setDirection(Direction(0.,0.,-1.));
+    _grid->path(&dgp);
     N = dgp.size();
-    mv = dgp.mv();
-    dsv = dgp.dsv();
     for (int n=0; n<N; n++)
-        SigmaZ += dsv[n] * density(mv[n]);
+        SigmaZ += dgp.dsv(n) * density(dgp.mv(n));
 
     // Compare these values to the expected values and write the result to file
 
@@ -443,6 +432,9 @@ namespace
         Log* _log;
         int _ell;
 
+        // dust grid path: allocated once so it can be reused
+        DustGridPath _dgp;
+
     public:
         // constructor
         WriteDepthMap(const DustSystem* ds)
@@ -490,21 +482,21 @@ namespace
     private:
         double opticaldepth(int ell, Position bfr, Direction bfk)
         {
-            DustGridPath dgp = _grid->path(bfr,bfk);
-            int N = dgp.size();
-            const vector<int>& mv = dgp.mv();
-            const vector<double>& dsv = dgp.dsv();
-
             int Ncomp = _ds->Ncomp();
             vector<double> kappaextv(Ncomp);
             for (int h=0; h<Ncomp; h++)
                 kappaextv[h] = _ds->mix(h)->kappaext(ell);
 
+            _dgp.setPosition(bfr);
+            _dgp.setDirection(bfk);
+            _grid->path(&_dgp);
+
             double tau = 0.0;
+            int N = _dgp.size();
             for (int n=0; n<N; n++)
             {
                 for (int h=0; h<Ncomp; h++)
-                    tau += kappaextv[h] * _ds->density(mv[n],h) * dsv[n];
+                    tau += kappaextv[h] * _ds->density(_dgp.mv(n),h) * _dgp.dsv(n);
             }
             return tau;
         }
@@ -838,7 +830,8 @@ double DustSystem::density(int m) const
 
 double DustSystem::opticaldepth(int ell, Position bfr, Direction bfk, DustSystemPath* dsp)
 {
-    DustGridPath dgp = _grid->path(bfr,bfk);
+    DustGridPath dgp(bfr,bfk);
+    _grid->path(&dgp);
 
     // If such statistics are requested, keep track of the number of cells crossed
     if (_writeCellsCrossed)
@@ -876,11 +869,8 @@ double DustSystem::opticaldepth(int ell, Position bfr, Direction bfk, DustSystem
 
 double DustSystem::opticaldepth(int ell, Position bfr, Direction bfk, double distance)
 {
-    DustGridPath dgp = _grid->path(bfr,bfk);
-    unsigned int N = dgp.size();
-    const vector<int>& mv = dgp.mv();
-    const vector<double>& sv = dgp.sv();
-    const vector<double>& dsv = dgp.dsv();
+    DustGridPath dgp(bfr,bfk);
+    _grid->path(&dgp);
 
     vector<double> kappaextv(_Ncomp);
     for (int h=0; h<_Ncomp; h++)
@@ -888,11 +878,12 @@ double DustSystem::opticaldepth(int ell, Position bfr, Direction bfk, double dis
 
     double tau = 0.0;
     unsigned int n = 0;
+    unsigned int N = dgp.size();
     for (; n<N; n++)
     {
         for (int h=0; h<_Ncomp; h++)
-            tau += kappaextv[h] * density(mv[n],h) * dsv[n];
-        if (sv[n] > distance) break;
+            tau += kappaextv[h] * density(dgp.mv(n),h) * dgp.dsv(n);
+        if (dgp.sv(n) > distance) break;
     }
 
     // If such statistics are requested, keep track of the number of cells crossed

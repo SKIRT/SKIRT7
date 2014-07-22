@@ -169,10 +169,11 @@ public:
     /** This function returns a random location from the dust cell with cell number \f$m\f$. */
     Position randomPositionInCell(int m) const;
 
-    /** This function returns a DustGridPath object, corresponding to a path through the grid
-        starting at the position \f${\bf{r}}\f$ into the direction \f${\bf{k}}\f$.
-        See the VoronoiMesh class for more information. */
-    DustGridPath path(Position bfr, Direction bfk) const;
+    /** This function calculates a path through the grid. The DustGridPath object passed as an
+        argument specifies the starting position \f${\bf{r}}\f$ and the direction \f${\bf{k}}\f$
+        for the path. The data on the calculated path are added back into the same object. See the
+        VoronoiMesh class for more information. */
+    void path(DustGridPath* path) const;
 
     //======================== Data Members ========================
 

@@ -110,22 +110,19 @@ const
 
 //////////////////////////////////////////////////////////////////////
 
-DustGridPath
-AxDustGridStructure::path(Position bfr, Direction bfk)
-const
+void AxDustGridStructure::path(DustGridPath* path) const
 {
     // Determination of the initial position and direction of the path,
     // and calculation of some initial values
-
-    DustGridPath path(bfr, bfk, 2*_NR + _Nz + 2);
+    path->clear();
     double kx,ky,kz;
-    bfk.cartesian(kx,ky,kz);
+    path->direction().cartesian(kx,ky,kz);
     double kq = sqrt(kx*kx+ky*ky);
     if (kz==0.0) kz = 1e-20;   // avoid moving exactly parallel to the equatorial plane
     if (kq==0.0) kq = 1e-20;   // avoid moving exactly parallel to the z-axis
     double x,y,z;
-    bfr.cartesian(x,y,z);
-    double R = bfr.cylradius();
+    path->position().cartesian(x,y,z);
+    double R = path->position().cylradius();
     double q = (x*kx+y*ky)/kq;
     double p2 = (R-q)*(R+q);
     double p = sqrt(max(0.0,p2));  // make sure that p>=0 here; necessary sometimes due to rounding errors
@@ -136,24 +133,24 @@ const
 
     if (R>=_Rmax)
     {
-        if (q>0.0 || p>_Rmax) return path.clear();
+        if (q>0.0 || p>_Rmax) return path->clear();
         else
         {
             R = _Rmax - 1e-8*(_Rv[_NR]-_Rv[_NR-1]);
             double qmax = sqrt((_Rmax-p)*(_Rmax+p));
             double ds = (qmax-q)/kq;
-            path.addsegment(-1,ds);
+            path->addSegment(-1,ds);
             q = qmax;
             z += kz*ds;
         }
     }
     if (z<_zmin)
     {
-        if (kz<=0.0) return path.clear();
+        if (kz<=0.0) return path->clear();
         else
         {
             double ds = (_zmin-z)/kz;
-            path.addsegment(-1,ds);
+            path->addSegment(-1,ds);
             q += kq*ds;
             R = sqrt(p*p+q*q);
             z = _zmin + 1e-8*(_zv[1]-_zv[0]);
@@ -161,18 +158,18 @@ const
     }
     else if (z>_zmax)
     {
-        if (kz>=0.0) return path.clear();
+        if (kz>=0.0) return path->clear();
         else
         {
             double ds = (_zmax-z)/kz;
-            path.addsegment(-1,ds);
+            path->addSegment(-1,ds);
             q += kq*ds;
             R = sqrt(p*p+q*q);
             z = _zmax - 1e-8*(_zv[_Nz]-_zv[_Nz-1]);
         }
     }
     if (std::isinf(R) || std::isnan(R) || std::isinf(z) || std::isnan(z) ||
-        R>=_Rmax || z<=_zmin || z>=_zmax) return path.clear();
+        R>=_Rmax || z<=_zmin || z>=_zmax) return path->clear();
 
     // Determination of the initial grid cell
 
@@ -202,7 +199,7 @@ const
                 if (dsq<dsz)
                 {
                     ds = dsq;
-                    path.addsegment(m, ds);
+                    path->addSegment(m, ds);
                     i--;
                     q = qN;
                     z += kz*ds;
@@ -212,9 +209,9 @@ const
                 else
                 {
                     ds = dsz;
-                    path.addsegment(m, ds);
+                    path->addSegment(m, ds);
                     k++;
-                    if (k>=_Nz) return path;
+                    if (k>=_Nz) return;
                     else
                     {
                         q += kq*ds;
@@ -234,9 +231,9 @@ const
             if (dsq<dsz)
             {
                 ds = dsq;
-                path.addsegment(m, ds);
+                path->addSegment(m, ds);
                 i++;
-                if (i>=_NR) return path;
+                if (i>=_NR) return;
                 else
                 {
                     q = qN;
@@ -248,9 +245,9 @@ const
             else
             {
                 ds = dsz;
-                path.addsegment(m, ds);
+                path->addSegment(m, ds);
                 k++;
-                if (k>=_Nz) return path;
+                if (k>=_Nz) return;
                 else
                 {
                     q += kq*ds;
@@ -279,7 +276,7 @@ const
                 if (dsq<dsz)
                 {
                     ds = dsq;
-                    path.addsegment(m, ds);
+                    path->addSegment(m, ds);
                     i--;
                     q = qN;
                     z += kz*ds;
@@ -289,9 +286,9 @@ const
                 else
                 {
                     ds = dsz;
-                    path.addsegment(m, ds);
+                    path->addSegment(m, ds);
                     k--;
-                    if (k<0) return path;
+                    if (k<0) return;
                     else
                     {
                         q += kq*ds;
@@ -311,9 +308,9 @@ const
             if (dsq<dsz)
             {
                 ds = dsq;
-                path.addsegment(m, ds);
+                path->addSegment(m, ds);
                 i++;
-                if (i>=_NR-1) return path;
+                if (i>=_NR-1) return;
                 else
                 {
                     q = qN;
@@ -325,9 +322,9 @@ const
             else
             {
                 ds = dsz;
-                path.addsegment(m, ds);
+                path->addSegment(m, ds);
                 k--;
-                if (k<0) return path;
+                if (k<0) return;
                 else
                 {
                     q += kq*ds;

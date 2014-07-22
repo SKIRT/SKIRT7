@@ -362,9 +362,9 @@ Position VoronoiDustGridStructure::randomPositionInCell(int m) const
 
 //////////////////////////////////////////////////////////////////////
 
-DustGridPath VoronoiDustGridStructure::path(Position bfr, Direction bfk) const
+void VoronoiDustGridStructure::path(DustGridPath* path) const
 {
-    return _mesh->path(bfr, bfk);
+    _mesh->path(path);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -3,28 +3,52 @@
 ////       © Astronomical Observatory, Ghent University         ////
 //////////////////////////////////////////////////////////////////*/
 
-#include <limits>
-#include "Box.hpp"
 #include "DustGridPath.hpp"
+#include "Box.hpp"
+#include <limits>
 
 using namespace std;
 
 //////////////////////////////////////////////////////////////////////
 
-DustGridPath::DustGridPath(const Position& bfr, const Direction& bfk, int sizehint)
-    : _bfr(bfr), _bfk(bfk), _s(0)
+namespace
 {
-    if (sizehint > 0)
-    {
-        _mv.reserve(sizehint);
-        _sv.reserve(sizehint);
-        _dsv.reserve(sizehint);
-    }
+    const int INITIAL_CAPACITY = 1000;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void DustGridPath::addsegment(int m, double ds)
+DustGridPath::DustGridPath(const Position& bfr, const Direction& bfk)
+    : _bfr(bfr), _bfk(bfk), _s(0)
+{
+    _mv.reserve(INITIAL_CAPACITY);
+    _sv.reserve(INITIAL_CAPACITY);
+    _dsv.reserve(INITIAL_CAPACITY);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+DustGridPath::DustGridPath()
+    : _s(0)
+{
+    _mv.reserve(INITIAL_CAPACITY);
+    _sv.reserve(INITIAL_CAPACITY);
+    _dsv.reserve(INITIAL_CAPACITY);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void DustGridPath::clear()
+{
+    _s = 0;
+    _mv.clear();
+    _sv.clear();
+    _dsv.clear();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void DustGridPath::addSegment(int m, double ds)
 {
     if (ds>0)
     {
@@ -37,7 +61,7 @@ void DustGridPath::addsegment(int m, double ds)
 
 //////////////////////////////////////////////////////////////////////
 
-Position DustGridPath::moveinside(const Box& box, double eps)
+Position DustGridPath::moveInside(const Box& box, double eps)
 {
     // a position that is certainly not inside any box
     static const Position OUTSIDE(numeric_limits<double>::infinity(),
@@ -57,7 +81,7 @@ Position DustGridPath::moveinside(const Box& box, double eps)
         else
         {
             double ds = (box.xmin()-rx)/kx;
-            addsegment(-1,ds);
+            addSegment(-1,ds);
             rx = box.xmin() + eps;
             ry += ky*ds;
             rz += kz*ds;
@@ -69,7 +93,7 @@ Position DustGridPath::moveinside(const Box& box, double eps)
         else
         {
             double ds = (box.xmax()-rx)/kx;
-            addsegment(-1,ds);
+            addSegment(-1,ds);
             rx = box.xmax() - eps;
             ry += ky*ds;
             rz += kz*ds;
@@ -83,7 +107,7 @@ Position DustGridPath::moveinside(const Box& box, double eps)
         else
         {
             double ds = (box.ymin()-ry)/ky;
-            addsegment(-1,ds);
+            addSegment(-1,ds);
             rx += kx*ds;
             ry = box.ymin() + eps;
             rz += kz*ds;
@@ -95,7 +119,7 @@ Position DustGridPath::moveinside(const Box& box, double eps)
         else
         {
             double ds = (box.ymax()-ry)/ky;
-            addsegment(-1,ds);
+            addSegment(-1,ds);
             rx += kx*ds;
             ry = box.ymax() - eps;
             rz += kz*ds;
@@ -109,7 +133,7 @@ Position DustGridPath::moveinside(const Box& box, double eps)
         else
         {
             double ds = (box.zmin()-rz)/kz;
-            addsegment(-1,ds);
+            addSegment(-1,ds);
             rx += kx*ds;
             ry += ky*ds;
             rz = box.zmin() + eps;
@@ -121,7 +145,7 @@ Position DustGridPath::moveinside(const Box& box, double eps)
         else
         {
             double ds = (box.zmax()-rz)/kz;
-            addsegment(-1,ds);
+            addSegment(-1,ds);
             rx += kx*ds;
             ry += ky*ds;
             rz = box.zmax() - eps;
@@ -130,71 +154,6 @@ Position DustGridPath::moveinside(const Box& box, double eps)
 
     // the position should now be just inside the box; although in rare cases, it may be still be outside!
     return Position(rx,ry,rz);
-}
-
-//////////////////////////////////////////////////////////////////////
-
-DustGridPath& DustGridPath::clear()
-{
-    _s = 0;
-    _mv.clear();
-    _sv.clear();
-    _dsv.clear();
-    return *this;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-int
-DustGridPath::size()
-const
-{
-    return _mv.size();
-}
-
-//////////////////////////////////////////////////////////////////////
-
-const Position&
-DustGridPath::position()
-const
-{
-    return _bfr;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-const Direction&
-DustGridPath::direction()
-const
-{
-    return _bfk;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-const vector<int>&
-DustGridPath::mv()
-const
-{
-    return _mv;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-const vector<double>&
-DustGridPath::sv()
-const
-{
-    return _sv;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-const vector<double>&
-DustGridPath::dsv()
-const
-{
-    return _dsv;
 }
 
 //////////////////////////////////////////////////////////////////////

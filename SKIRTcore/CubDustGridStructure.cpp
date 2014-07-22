@@ -80,16 +80,16 @@ Position CubDustGridStructure::randomPositionInCell(int m) const
 
 //////////////////////////////////////////////////////////////////////
 
-DustGridPath CubDustGridStructure::path(Position bfr, Direction bfk) const
+void CubDustGridStructure::path(DustGridPath* path) const
 {
     // Determination of the initial position and direction of the path,
     // and calculation of some initial values
 
-    DustGridPath path(bfr, bfk, _Nx + _Ny + _Nz);
+    path->clear();
     double kx,ky,kz;
-    bfk.cartesian(kx,ky,kz);
+    path->direction().cartesian(kx,ky,kz);
     double x,y,z;
-    bfr.cartesian(x,y,z);
+    path->position().cartesian(x,y,z);
     double ds, dsx, dsy, dsz;
 
     // move the photon package to the first grid cell that it will
@@ -97,11 +97,11 @@ DustGridPath CubDustGridStructure::path(Position bfr, Direction bfk) const
 
     if (x<_xmin)
     {
-        if (kx<=0.0) return path.clear();
+        if (kx<=0.0) return path->clear();
         else
         {
             ds = (_xmin-x)/kx;
-            path.addsegment(-1,ds);
+            path->addSegment(-1,ds);
             x = _xmin + 1e-8*(_xv[1]-_xv[0]);
             y += ky*ds;
             z += kz*ds;
@@ -109,11 +109,11 @@ DustGridPath CubDustGridStructure::path(Position bfr, Direction bfk) const
     }
     else if (x>_xmax)
     {
-        if (kx>=0.0) return path.clear();
+        if (kx>=0.0) return path->clear();
         else
         {
             ds = (_xmax-x)/kx;
-            path.addsegment(-1,ds);
+            path->addSegment(-1,ds);
             x = _xmax - 1e-8*(_xv[_Nx]-_xv[_Nx-1]);
             y += ky*ds;
             z += kz*ds;
@@ -121,11 +121,11 @@ DustGridPath CubDustGridStructure::path(Position bfr, Direction bfk) const
     }
     if (y<_ymin)
     {
-        if (ky<=0.0) return path.clear();
+        if (ky<=0.0) return path->clear();
         else
         {
             ds = (_ymin-y)/ky;
-            path.addsegment(-1,ds);
+            path->addSegment(-1,ds);
             x += kx*ds;
             y = _ymin + 1e-8*(_yv[1]-_yv[0]);
             z += kz*ds;
@@ -133,11 +133,11 @@ DustGridPath CubDustGridStructure::path(Position bfr, Direction bfk) const
     }
     else if (y>_ymax)
     {
-        if (ky>=0.0) return path.clear();
+        if (ky>=0.0) return path->clear();
         else
         {
             ds = (_ymax-y)/ky;
-            path.addsegment(-1,ds);
+            path->addSegment(-1,ds);
             x += kx*ds;
             y = _ymax - 1e-8*(_yv[_Ny]-_yv[_Ny-1]);
             z += kz*ds;
@@ -145,11 +145,11 @@ DustGridPath CubDustGridStructure::path(Position bfr, Direction bfk) const
     }
     if (z<_zmin)
     {
-        if (kz<=0.0) return path.clear();
+        if (kz<=0.0) return path->clear();
         else
         {
             ds = (_zmin-z)/kz;
-            path.addsegment(-1,ds);
+            path->addSegment(-1,ds);
             x += kx*ds;
             y += ky*ds;
             z = _zmin + 1e-8*(_zv[1]-_zv[0]);
@@ -157,18 +157,18 @@ DustGridPath CubDustGridStructure::path(Position bfr, Direction bfk) const
     }
     else if (z>_zmax)
     {
-        if (kz>=0.0) return path.clear();
+        if (kz>=0.0) return path->clear();
         else
         {
             ds = (_zmax-z)/kz;
-            path.addsegment(-1,ds);
+            path->addSegment(-1,ds);
             x += kx*ds;
             y += ky*ds;
             z = _zmax - 1e-8*(_zv[_Nz]-_zv[_Nz-1]);
         }
     }
 
-    if (x<_xmin || x>_xmax || y<_ymin || y>_ymax || z<_zmin || z>_zmax) return path.clear();
+    if (x<_xmin || x>_xmax || y<_ymin || y>_ymax || z<_zmin || z>_zmax) return path->clear();
 
     // Now determine which grid cell we are in...
 
@@ -190,9 +190,9 @@ DustGridPath CubDustGridStructure::path(Position bfr, Direction bfk) const
         if (dsx<=dsy && dsx<=dsz)
         {
             ds = dsx;
-            path.addsegment(m, ds);
+            path->addSegment(m, ds);
             i += (kx<0.0) ? -1 : 1;
-            if (i>=_Nx || i<0) return path;
+            if (i>=_Nx || i<0) return;
             else
             {
                 x = xE;
@@ -203,9 +203,9 @@ DustGridPath CubDustGridStructure::path(Position bfr, Direction bfk) const
         else if (dsy< dsx && dsy<=dsz)
         {
             ds = dsy;
-            path.addsegment(m, ds);
+            path->addSegment(m, ds);
             j += (ky<0.0) ? -1 : 1;
-            if (j>=_Ny || j<0) return path;
+            if (j>=_Ny || j<0) return;
             else
             {
                 x += kx*ds;
@@ -216,9 +216,9 @@ DustGridPath CubDustGridStructure::path(Position bfr, Direction bfk) const
         else if (dsz< dsx && dsz< dsy)
         {
             ds = dsz;
-            path.addsegment(m, ds);
+            path->addSegment(m, ds);
             k += (kz<0.0) ? -1 : 1;
-            if (k>=_Nz || k<0) return path;
+            if (k>=_Nz || k<0) return;
             else
             {
                 x += kx*ds;

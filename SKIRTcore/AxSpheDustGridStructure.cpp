@@ -189,13 +189,15 @@ namespace
 
 //////////////////////////////////////////////////////////////////////
 
-DustGridPath AxSpheDustGridStructure::path(Position bfr, Direction bfk) const
+void AxSpheDustGridStructure::path(DustGridPath* path) const
 {
     // Small value relative to domain size
     const double eps = 1e-11 * _rmax;
 
-    // Construct the path with its initial position and direction
-    DustGridPath path(bfr, bfk, 2*_Nr + _Ntheta + 2);
+    // Initialize the path
+    path->clear();
+    Position bfr = path->position();
+    Direction bfk = path->direction();
 
     // Move the photon package to the first grid cell that it will pass.
     // If it does not pass any grid cell, return an empty path.
@@ -204,8 +206,8 @@ DustGridPath AxSpheDustGridStructure::path(Position bfr, Direction bfk) const
     if (r2 > _rmax*_rmax)
     {
         double ds = firstIntersectionSphere(bfr, bfk, _rmax);
-        if (!ds) return path.clear();
-        path.addsegment(-1, ds);
+        if (!ds) return path->clear();
+        path->addSegment(-1, ds);
         bfr += bfk*(ds+eps);
     }
     // Move the position a bit away from the origin so that it has a meaningful cell number
@@ -281,7 +283,7 @@ DustGridPath AxSpheDustGridStructure::path(Position bfr, Direction bfk) const
         // move to the next current point, and update the cell indices
         if (inext!=i || knext!=k)
         {
-            path.addsegment(index(i,k), ds);
+            path->addSegment(index(i,k), ds);
             bfr += bfk*(ds+eps);
             i = inext;
             k = knext;
@@ -297,8 +299,6 @@ DustGridPath AxSpheDustGridStructure::path(Position bfr, Direction bfk) const
             k = NR::locate_clip(_thetav, theta);
         }
     }
-
-    return path;
 }
 
 //////////////////////////////////////////////////////////////////////

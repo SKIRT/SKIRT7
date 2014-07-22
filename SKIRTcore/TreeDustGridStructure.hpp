@@ -264,25 +264,23 @@ public:
         \f${\cal{X}}_2\f$ and \f${\cal{X}}_3\f$ three uniform deviates. */
     Position randomPositionInCell(int m) const;
 
-    /** This function returns a DustGridPath object, corresponding to a path through the grid
-        starting at the position \f${\bf{r}}\f$ into the direction \f${\bf{k}}\f$. This
-        DustGridPath consists of three vectors: the first one lists the cell numbers \f$m\f$ of all
-        the cells crossed by the path, the second lists the path length \f$\Delta s\f$ covered in
-        each of these dust cells, and the third lists the total covered path length \f$s\f$ until
-        the end of each cell is encountered. For a tree dust grid structure, the function uses a
-        rather straighforward algorithm. It determines the dust
-        cell that contains the starting position, and calculates the first wall of the cell that
-        will be crossed. The pathlength \f$\Delta s\f$ is determined and the current position is
-        moved to a new position along this path, a tiny fraction further than \f$\Delta s\f$, \f[
-        \begin{split} x_{\text{new}} &= x_{\text{current}} + (\Delta s + \epsilon)\,k_x \\
-        y_{\text{new}} &= y_{\text{current}} + (\Delta s + \epsilon)\,k_y \\ z_{\text{new}} &=
-        z_{\text{current}} + (\Delta s + \epsilon)\,k_z \end{split} \f] where \f[ \epsilon =
-        10^{-12} \sqrt{x_{\text{max}}^2 + y_{\text{max}}^2 + z_{\text{max}}^2} \f] By adding this
-        small extra bit, we ensure that the new position is now within the next cell, and we can
-        repeat this exercise. This loop is terminated when the next position is outside the dust
-        grid; at this point the DustGridPath structure is returned. To determine the cell numbers
-        in this algorithm, the function uses the method configured with setSearchMethod(). */
-    DustGridPath path(Position bfr, Direction bfk) const;
+    /** This function calculates a path through the grid. The DustGridPath object passed as an
+        argument specifies the starting position \f${\bf{r}}\f$ and the direction \f${\bf{k}}\f$
+        for the path. The data on the calculated path are added back into the same object.
+
+        For a tree dust grid structure, the function uses a rather straighforward algorithm. It
+        determines the dust cell that contains the starting position, and calculates the first wall
+        of the cell that will be crossed. The pathlength \f$\Delta s\f$ is determined and the
+        current position is moved to a new position along this path, a tiny fraction further than
+        \f$\Delta s\f$, \f[ \begin{split} x_{\text{new}} &= x_{\text{current}} + (\Delta s +
+        \epsilon)\,k_x \\ y_{\text{new}} &= y_{\text{current}} + (\Delta s + \epsilon)\,k_y \\
+        z_{\text{new}} &= z_{\text{current}} + (\Delta s + \epsilon)\,k_z \end{split} \f] where \f[
+        \epsilon = 10^{-12} \sqrt{x_{\text{max}}^2 + y_{\text{max}}^2 + z_{\text{max}}^2} \f] By
+        adding this small extra bit, we ensure that the new position is now within the next cell,
+        and we can repeat this exercise. This loop is terminated when the next position is outside
+        the dust grid. To determine the cell numbers in this algorithm, the function uses the
+        method configured with setSearchMethod(). */
+    void path(DustGridPath* path) const;
 
     /** This function is used by the interface() template function in the SimulationItem class. It
         returns a list of simulation items that should be considered in the search for an item that

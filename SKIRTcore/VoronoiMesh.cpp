@@ -5,6 +5,7 @@
 
 #include <cfloat>
 #include <cmath>
+#include "DustGridPath.hpp"
 #include "DustParticleInterface.hpp"
 #include "VoronoiMesh.hpp"
 #include "VoronoiMeshFile.hpp"
@@ -733,18 +734,19 @@ double VoronoiMesh::SigmaZ() const
 
 ////////////////////////////////////////////////////////////////////
 
-DustGridPath VoronoiMesh::path(Position bfr, Direction bfk) const
+void VoronoiMesh::path(DustGridPath* path) const
 {
     // Initialize the path
-    DustGridPath path(bfr, bfk, 3000);
+    path->clear();
+    Direction bfk = path->direction();
 
     // If the photon package starts outside the dust grid, move it into the first grid cell that it will pass
-    Position r = path.moveinside(_extent, _eps);
+    Position r = path->moveInside(_extent, _eps);
 
     // Get the index of the cell containing the current position;
     // if the position is not inside the grid, return an empty path
     int mr = cellIndex(r);
-    if (mr<0) return path.clear();
+    if (mr<0) return path->clear();
 
     // Start the loop over cells/path segments until we leave the grid
     while (mr>=0)
@@ -822,13 +824,11 @@ DustGridPath VoronoiMesh::path(Position bfr, Direction bfk) const
         // otherwise add a path segment and set the current point to the exit point
         else
         {
-            path.addsegment(mr, sq);
+            path->addSegment(mr, sq);
             r += (sq+_eps)*bfk;
             mr = mq;
         }
     }
-
-    return path;
 }
 
 ////////////////////////////////////////////////////////////////////

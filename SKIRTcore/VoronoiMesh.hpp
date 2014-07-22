@@ -10,7 +10,8 @@
 #include <QList>
 #include <QHash>
 #include "Box.hpp"
-#include "DustGridPath.hpp"
+#include "Position.hpp"
+class DustGridPath;
 class DustParticleInterface;
 class Random;
 class VoronoiMeshFile;
@@ -273,12 +274,10 @@ public:
     //====================== Path construction =====================
 
 public:
-    /** This function returns a DustGridPath object, corresponding to the path through the mesh
-        starting at the position \f${\bf{r}}\f$ into the direction \f${\bf{k}}\f$. This
-        DustGridPath consists of three vectors: the first one lists the cell numbers \f$m\f$ of all
-        the cells crossed by the path, the second lists the path length \f$\Delta s\f$ covered in
-        each of these dust cells, and the third lists the total covered path length \f$s\f$ until
-        the end of each cell is encountered.
+    /** This function calculates a path through the grid. The DustGridPath object passed as an
+        argument specifies the starting position \f${\bf{r}}\f$ and the direction \f${\bf{k}}\f$
+        for the path. The data on the calculated path are added back into the same object. See the
+        VoronoiMesh class for more information.
 
         In the first stage, the function checks whether the start point is inside the domain. If
         so, the current point is simply initialized to the start point. If not, the function
@@ -352,7 +351,7 @@ public:
         with \f$m_i=-1\f$ one has \f$\mathbf{n}=(-1,0,0)\f$ and \f$\mathbf{p}=(x_\text{min},0,0)\f$
         so that \f[s_i=\frac{x_\text{min}-r_x}{k_x}.\f]
     */
-    DustGridPath path(Position bfr, Direction bfk) const;
+    void path(DustGridPath* path) const;
 
     //========================= Data members =======================
 

@@ -7,7 +7,6 @@
 #include "AdaptiveMeshDustGridStructure.hpp"
 #include "AdaptiveMeshInterface.hpp"
 #include "DustDistribution.hpp"
-#include "DustGridPath.hpp"
 #include "DustGridPlotFile.hpp"
 #include "FatalError.hpp"
 #include "Log.hpp"
@@ -99,9 +98,9 @@ double AdaptiveMeshDustGridStructure::density(int h, int m) const
 
 //////////////////////////////////////////////////////////////////////
 
-DustGridPath AdaptiveMeshDustGridStructure::path(Position bfr, Direction bfk) const
+void AdaptiveMeshDustGridStructure::path(DustGridPath* path) const
 {
-    return _mesh->path(bfr, bfk);
+    _mesh->path(path);
 }
 
 //////////////////////////////////////////////////////////////////////

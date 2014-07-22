@@ -91,32 +91,32 @@ Position SpheDustGridStructure::randomPositionInCell(int m) const
 
 //////////////////////////////////////////////////////////////////////
 
-DustGridPath SpheDustGridStructure::path(Position bfr, Direction bfk) const
+void SpheDustGridStructure::path(DustGridPath* path) const
 {
     // Determination of the initial position and direction of the path,
     // and calculation of some initial values
 
-    DustGridPath path(bfr, bfk, 2*_Nr + 2);
+    path->clear();
     double x,y,z;
-    bfr.cartesian(x,y,z);
+    path->position().cartesian(x,y,z);
     double kx,ky,kz;
-    bfk.cartesian(kx,ky,kz);
+    path->direction().cartesian(kx,ky,kz);
 
     // Move the photon package to the first grid cell that it will pass.
     // If it does not pass any grid cell, return an empty path.
 
-    double r = bfr.radius();
+    double r = path->position().radius();
     double q = x*kx + y*ky + z*kz;
     double p = sqrt((r-q)*(r+q));
     if (r>_rmax)
     {
-        if (q>0.0 || p>_rmax) return path.clear();
+        if (q>0.0 || p>_rmax) return path->clear();
         else
         {
             r = _rmax - 1e-8*(_rv[_Nr]-_rv[_Nr-1]);
             double qmax = sqrt((_rmax-p)*(_rmax+p));
             double ds = (qmax-q);
-            path.addsegment(-1,ds);
+            path->addSegment(-1,ds);
             q = qmax;
         }
     }
@@ -140,7 +140,7 @@ DustGridPath SpheDustGridStructure::path(Position bfr, Direction bfk) const
         {
             int m = i;
             double ds = qN-q;
-            path.addsegment(m, ds);
+            path->addSegment(m, ds);
             i--;
             q = qN;
             rN = _rv[i];
@@ -156,9 +156,9 @@ DustGridPath SpheDustGridStructure::path(Position bfr, Direction bfk) const
     {
         int m = i;
         double ds = qN-q;
-        path.addsegment(m, ds);
+        path->addSegment(m, ds);
         i++;
-        if (i>=_Nr-1) return path;
+        if (i>=_Nr-1) return;
         else
         {
             q = qN;

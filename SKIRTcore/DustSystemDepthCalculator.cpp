@@ -6,7 +6,6 @@
 #include <cmath>
 #include "DustSystemDepthCalculator.hpp"
 #include "DustDistribution.hpp"
-#include "DustGridPath.hpp"
 #include "DustGridStructure.hpp"
 #include "DustSystem.hpp"
 #include "Random.hpp"
@@ -58,16 +57,15 @@ void DustSystemDepthCalculator::body(size_t index)
         double taut = Units::kappaV() * sumrho * ds;
 
         // determine the gridded optical depth by asking the grid for a path
-        DustGridPath dgp = _grid->path(Position(r1), Direction(k));
-        int N = dgp.size();
-        const vector<int>& mv = dgp.mv();
-        const vector<double>& sv = dgp.sv();
-        const vector<double>& dsv = dgp.dsv();
+        _dgp.setPosition(Position(r1));
+        _dgp.setDirection(Direction(k));
+        _grid->path(&_dgp);
         double sumrhods = 0;
+        int N = _dgp.size();
         for (int n=0; n<N; n++)
         {
-            if (sv[n] > s) break;
-            sumrhods += _ds->density(mv[n]) * dsv[n];
+            if (_dgp.sv(n) > s) break;
+            sumrhods += _ds->density(_dgp.mv(n)) * _dgp.dsv(n);
         }
         double taug = Units::kappaV() * sumrhods;
 

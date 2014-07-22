@@ -98,19 +98,21 @@ public:
         */
     Position randomPositionInCell(int m) const;
 
-    /** This function returns a DustGridPath object, corresponding to the path through the grid
-        starting at the position \f${\bf{r}}\f$ into the direction \f${\bf{k}}\f$. We represent the
-        path by its parameter equation \f${\bf{x}}={\bf{r}}+s\,{\bf{k}}\f$, and we assume that
-        \f${\bf{k}}\f$ is a unit vector. The two intersection points with a radial boundary sphere
-        \f${\bf{x}}^2=R^2\f$ are obtained by solving the quadratic equation \f$s^2 +
-        2\,({\bf{r}}\cdot{\bf{k}})\,s + ({\bf{r}}^2-R^2)=0\f$ for \f$s\f$. The two intersection
+    /** This function calculates a path through the grid. The DustGridPath object passed as an
+        argument specifies the starting position \f${\bf{r}}\f$ and the direction \f${\bf{k}}\f$
+        for the path. The data on the calculated path are added back into the same object.
+
+        We represent the path by its parameter equation \f${\bf{x}}={\bf{r}}+s\,{\bf{k}}\f$, and we
+        assume that \f${\bf{k}}\f$ is a unit vector. The two intersection points with a radial
+        boundary sphere \f${\bf{x}}^2=R^2\f$ are obtained by solving the quadratic equation \f$s^2
+        + 2\,({\bf{r}}\cdot{\bf{k}})\,s + ({\bf{r}}^2-R^2)=0\f$ for \f$s\f$. The two intersection
         points with an angular boundary cone \f$x_z^2=c^2\,{\bf{x}}^2\f$ (with \f$c=\cos\theta\f$)
         are obtained by solving the quadratic equation \f$(c^2-k_z^2)\,s^2 +
         2\,(c^2\,{\bf{r}}\cdot{\bf{k}}-r_z k_z)\,s + (c^2\,{\bf{r}}^2-r_z^2)=0\f$ for \f$s\f$. The
         intersection points with the reflected cone are always more distant than the other cell
         boundaries (the requirement to include the xy-plane \f$\theta=\pi/2\f$ in the grid ensures
         that this is true) and thus these phantom points are automatically ignored. */
-    DustGridPath path(Position bfr, Direction bfk) const;
+    void path(DustGridPath* path) const;
 
 protected:
     /** This function writes the intersection of the dust grid structure with the xy plane to the

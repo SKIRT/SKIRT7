@@ -13,30 +13,40 @@ class Box;
 
 //////////////////////////////////////////////////////////////////////
 
-/** The DustGridPath class is a technical class that contains the details of a path through a dust
-    grid structure. Given a dust grid structure, i.e. an object of a subclass of the
-    DustGridStucture class, a starting position \f${\bf{r}}\f$ and a propagation direction
-    \f${\bf{k}}\f$, one can calculate the path through the dust grid structure. A DustGridPath
-    object keeps record of all the cells that are crossed by this path, together with the physical
-    path length \f$\Delta s\f$ covered within each cell and the path length \f$s\f$ covered along
-    the entire path up to the end of the cell. The difference between this class and the
-    DustSystemPath class is that the DustGridPath class represents only the geometrical properties
-    of a path (i.e. it is only linked to a DustGridStructure class object), whereas the
-    DustSystemPath class also records the details on the optical depth (it is linked to a
-    DustSystem class object). */
+/** A DustGridPath object contains the details of a path through a dust grid structure. Given a
+    dust grid structure, i.e. an object of a DustGridStucture subclass, a starting position
+    \f${\bf{r}}\f$ and a propagation direction \f${\bf{k}}\f$, one can calculate the path through
+    the dust grid structure. A DustGridPath object keeps record of all the cells that are crossed
+    by this path, together with the physical path length \f$\Delta s\f$ covered within each cell
+    and the path length \f$s\f$ covered along the entire path up to the end of the cell. */
 class DustGridPath
 {
 public:
-    /** This constructor creates an empty path with the specified initial position and propagation
-        direction. If the optional \em sizehint is larger than zero, memory space is
-        reserved for a path with that size, avoiding the need for reallocating the internal vectors
-        as the path grows. The path is still allowed to grow beyond the specified size hint. In any
-        case the constructed path is empty (representing a path that lies outside the dust grid
-        structure). */
-    DustGridPath(const Position& bfr, const Direction& bfk, int sizehint = 0);
 
-    /** This function adds a segment in cell \f$m\f$ with length \f$s\f$ to the path. */
-    void addsegment(int m, double ds);
+    // ------- Constructors and setters -------
+
+    /** This constructor creates an empty path with the specified initial position and propagation
+        direction. */
+    DustGridPath(const Position& bfr, const Direction& bfk);
+
+    /** This constructor creates an empty path the with initial position and propagation direction
+        initialized to null values. After using this constructor, invoke the setPosition() and
+        setDirection() functions to set these properties to appropriate values. */
+    DustGridPath();
+
+    /** This function sets the initial position of the path to a new value. */
+    void setPosition(const Position& bfr) { _bfr = bfr; }
+
+    /** This function sets the propagation direction along the path to a new value. */
+    void setDirection(const Direction& bfk) { _bfk = bfk; }
+
+    /** This function removes all path segments, resulting in an empty path with the original
+        initial position and propagation direction. */
+    void clear();
+
+    /** This function adds a segment in cell \f$m\f$ with length \f$\Delta s\f$ to the path,
+        assuming \f$\Delta s>0\f$. Otherwise the function does nothing. */
+    void addSegment(int m, double ds);
 
     /** This function adds the segments to the path that are needed to move the initial position
         along the propagation direction (both specified in the constructor) inside a given box, and
@@ -46,33 +56,41 @@ public:
         The small value specified by \em eps is added to the path length beyond the intersection
         point so that the final position is well inside the box, guarding against rounding errors.
         */
-    Position moveinside(const Box &box, double eps);
+    Position moveInside(const Box &box, double eps);
 
-    /** This function removes all path segments, resulting in an empty path with the original
-        initial position and propagation direction. The function returns a reference to the
-        DustGridPath object itself (for convenient use in a return statement). */
-    DustGridPath& clear();
+    // ------- Getters -------
 
     /** This function returns the number of cells crossed along the path. */
-    int size() const;
+    int size() const { return _mv.size(); }
 
     /** This function returns the initial position of the path. */
-    const Position& position() const;
+    const Position& position() const { return _bfr; }
 
     /** This function returns the propagation direction along the path. */
-    const Direction& direction() const;
+    const Direction& direction() const { return _bfk; }
 
     /** This function returns the vector with the cell numbers \f$m\f$ of all the cells encountered
         along the path. */
-    const std::vector<int>& mv() const;
+    const std::vector<int>& mv() const { return _mv; }
 
     /** This function returns the vector with the path lengths covered from the initial position of
         the path until the end point of each cell encountered along the path. */
-    const std::vector<double>& sv() const;
+    const std::vector<double>& sv() const { return _sv; }
 
     /** This function returns the vector with the path lengths covered within each of the cells
         encountered along the path. */
-    const std::vector<double>& dsv() const;
+    const std::vector<double>& dsv() const { return _dsv; }
+
+    /** This function returns the cell number \f$m\f$ for segment $i$ in the path. */
+    int mv(int i) const { return _mv[i]; }
+
+    /** This function returns the path length covered from the initial position of the path until
+        the end point of the cell in segment $i$ in the path. */
+    double sv(int i) const { return _sv[i]; }
+
+    /** This function returns the path length covered within the cell in segment $i$ in the path.
+        */
+    double dsv(int i) const { return _dsv[i]; }
 
 private:
     Position _bfr;

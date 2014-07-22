@@ -11,11 +11,11 @@
 #include <QHash>
 #include <QString>
 #include "Box.hpp"
-#include "DustGridPath.hpp"
 #include "Position.hpp"
-class Random;
 class AdaptiveMeshFile;
 class AdaptiveMeshNode;
+class DustGridPath;
+class Random;
 
 ////////////////////////////////////////////////////////////////////
 
@@ -186,13 +186,10 @@ public:
 
     //====================== Path construction =====================
 
-    /** This function returns a DustGridPath object, corresponding to the path through the mesh
-        starting at the position \f${\bf{r}}\f$ into the direction \f${\bf{k}}\f$. This
-        DustGridPath consists of three vectors: the first one lists the cell numbers \f$m\f$ of all
-        the cells crossed by the path, the second lists the path length \f$\Delta s\f$ covered in
-        each of these dust cells, and the third lists the total covered path length \f$s\f$ until
-        the end of each cell is encountered. */
-    DustGridPath path(Position bfr, Direction bfk) const;
+    /** This function calculates a path through the grid. The DustGridPath object passed as an
+        argument specifies the starting position \f${\bf{r}}\f$ and the direction \f${\bf{k}}\f$
+        for the path. The data on the calculated path are added back into the same object. */
+    void path(DustGridPath* path) const;
 
     //========================= Data members =======================
 

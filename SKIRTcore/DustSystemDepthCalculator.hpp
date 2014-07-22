@@ -8,6 +8,7 @@
 
 #include "Array.hpp"
 #include "Box.hpp"
+#include "DustGridPath.hpp"
 #include "ParallelTarget.hpp"
 class DustDistribution;
 class DustGridStructure;
@@ -64,6 +65,9 @@ private:
     int _numBodies, _numSamplesPerBody, _numSamplesPerPath;
     Box _extent;
     double _eps;
+
+    // dust grid path: allocated once so it can be reused
+    DustGridPath _dgp;
 
     // optical depth sample arrays; sized to fit in constructor
     // (d=delta; tau=optical depth; 2=squared; v=vector)

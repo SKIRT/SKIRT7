@@ -6,6 +6,7 @@
 #include <cfloat>
 #include <cmath>
 #include "DustDistribution.hpp"
+#include "DustGridPath.hpp"
 #include "DustGridPlotFile.hpp"
 #include "FatalError.hpp"
 #include "Log.hpp"
@@ -428,25 +429,25 @@ Position TreeDustGridStructure::randomPositionInCell(int m) const
 
 //////////////////////////////////////////////////////////////////////
 
-DustGridPath TreeDustGridStructure::path(Position bfr, Direction bfk) const
+void TreeDustGridStructure::path(DustGridPath* path) const
 {
     // Initialize the path
-    DustGridPath path(bfr, bfk, 3000);
+    path->clear();
 
     // If the photon package starts outside the dust grid, move it into the first grid cell that it will pass
-    Position r = path.moveinside(extent(), _eps);
+    Position r = path->moveInside(extent(), _eps);
 
     // Get the node containing the current location;
     // if the position is not inside the grid, return an empty path
     const TreeNode* node = root()->whichnode(r);
-    if (!node) return path.clear();
+    if (!node) return path->clear();
 
     // Start the loop over nodes/path segments until we leave the grid.
     // Use a different code segment depending on the search method.
     double x,y,z;
     r.cartesian(x,y,z);
     double kx,ky,kz;
-    bfk.cartesian(kx,ky,kz);
+    path->direction().cartesian(kx,ky,kz);
 
     // ----------- Top-down -----------
 
@@ -465,7 +466,7 @@ DustGridPath TreeDustGridStructure::path(Position bfr, Direction bfk) const
             if (dsx<=dsy && dsx<=dsz) ds = dsx;
             else if (dsy<=dsx && dsy<=dsz) ds = dsy;
             else ds = dsz;
-            path.addsegment(cellnumber(node), ds);
+            path->addSegment(cellnumber(node), ds);
             x += (ds+_eps)*kx;
             y += (ds+_eps)*ky;
             z += (ds+_eps)*kz;
@@ -505,7 +506,7 @@ DustGridPath TreeDustGridStructure::path(Position bfr, Direction bfk) const
                 ds = dsz;
                 wall = (kz<0.0) ? TreeNode::BOTTOM : TreeNode::TOP;
             }
-            path.addsegment(cellnumber(node), ds);
+            path->addSegment(cellnumber(node), ds);
             x += (ds+_eps)*kx;
             y += (ds+_eps)*ky;
             z += (ds+_eps)*kz;
@@ -546,7 +547,7 @@ DustGridPath TreeDustGridStructure::path(Position bfr, Direction bfk) const
 
             if (dsx<=dsy && dsx<=dsz)
             {
-                path.addsegment(_cellnumberv[l], dsx);
+                path->addSegment(_cellnumberv[l], dsx);
                 x = xnext;
                 y += ky*dsx;
                 z += kz*dsx;
@@ -556,7 +557,7 @@ DustGridPath TreeDustGridStructure::path(Position bfr, Direction bfk) const
                     bool place = (kx<0.0) ? (oct % 2 == 1) : (oct % 2 == 0);
                     if (!place) break;
                     l = _tree[l]->father()->id();
-                    if (l == 0) return path;
+                    if (l == 0) return;
                 }
                 l += (kx<0.0) ? -1 : 1;
                 while (_cellnumberv[l] == -1)
@@ -584,7 +585,7 @@ DustGridPath TreeDustGridStructure::path(Position bfr, Direction bfk) const
 
             else if (dsy<dsx && dsy<=dsz)
             {
-                path.addsegment(_cellnumberv[l], dsy);
+                path->addSegment(_cellnumberv[l], dsy);
                 x += kx*dsy;
                 y  = ynext;
                 z += kz*dsy;
@@ -593,7 +594,7 @@ DustGridPath TreeDustGridStructure::path(Position bfr, Direction bfk) const
                     bool place = (ky<0.0) ? ((l-1) % 4 < 2) : ((l-1) % 4 > 1);
                     if (!place) break;
                     l = _tree[l]->father()->id();
-                    if (l == 0) return path;
+                    if (l == 0) return;
                 }
                 l += (ky<0.0) ? -2 : 2;
                 while (_cellnumberv[l] == -1)
@@ -621,7 +622,7 @@ DustGridPath TreeDustGridStructure::path(Position bfr, Direction bfk) const
 
             else if (dsz< dsx && dsz< dsy)
             {
-                path.addsegment(_cellnumberv[l], dsz);
+                path->addSegment(_cellnumberv[l], dsz);
                 x += kx*dsz;
                 y += ky*dsz;
                 z  = znext;
@@ -631,7 +632,7 @@ DustGridPath TreeDustGridStructure::path(Position bfr, Direction bfk) const
                     bool place = (kz<0.0) ? (oct < 5) : (oct > 4);
                     if (!place) break;
                     l = _tree[l]->father()->id();
-                    if (l == 0) return path;
+                    if (l == 0) return;
                 }
                 l += (kz<0.0) ? -4 : 4;
                 while (_cellnumberv[l] == -1)
@@ -658,8 +659,6 @@ DustGridPath TreeDustGridStructure::path(Position bfr, Direction bfk) const
     }
 
     // ------------------------------
-
-    return path;
 }
 
 //////////////////////////////////////////////////////////////////////
