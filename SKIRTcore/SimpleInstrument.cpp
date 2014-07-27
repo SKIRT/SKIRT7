@@ -31,7 +31,7 @@ void SimpleInstrument::setupSelfBefore()
 ////////////////////////////////////////////////////////////////////
 
 void
-SimpleInstrument::detect(const PhotonPackage* pp)
+SimpleInstrument::detect(PhotonPackage* pp)
 {
     int l = pixelondetector(pp);
     int ell = pp->ell();

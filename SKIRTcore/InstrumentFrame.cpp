@@ -135,7 +135,7 @@ int InstrumentFrame::pixelondetector(const PhotonPackage* pp) const
 
 ////////////////////////////////////////////////////////////////////
 
-void InstrumentFrame::detect(const PhotonPackage *pp)
+void InstrumentFrame::detect(PhotonPackage* pp)
 {
     int l = pixelondetector(pp);
     if (l >= 0)

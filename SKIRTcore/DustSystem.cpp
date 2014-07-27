@@ -20,6 +20,7 @@
 #include "Log.hpp"
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
+#include "PhotonPackage.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
 
@@ -828,30 +829,29 @@ double DustSystem::density(int m) const
 
 //////////////////////////////////////////////////////////////////////
 
-double DustSystem::opticaldepth(int ell, Position bfr, Direction bfk, DustSystemPath* dsp)
+double DustSystem::opticaldepth(PhotonPackage* pp, DustSystemPath* dsp)
 {
-    DustGridPath dgp(bfr,bfk);
-    _grid->path(&dgp);
+    _grid->path(pp);
 
     // If such statistics are requested, keep track of the number of cells crossed
     if (_writeCellsCrossed)
     {
         QMutexLocker lock(&_crossedMutex);
-        unsigned int index = dgp.size();
+        unsigned int index = pp->size();
         if (index >= _crossed.size()) _crossed.resize(index+1);
         _crossed[index] += 1;
     }
 
-    int N = dgp.size();
-    const vector<int>& mv = dgp.mv();
-    const vector<double>& sv = dgp.sv();
-    const vector<double>& dsv = dgp.dsv();
+    int N = pp->size();
+    const vector<int>& mv = pp->mv();
+    const vector<double>& sv = pp->sv();
+    const vector<double>& dsv = pp->dsv();
     vector<double> tauv(N);
     vector<double> dtauv(N);
     double tau = 0.0;
     vector<double> kappaextv(_Ncomp);
     for (int h=0; h<_Ncomp; h++)
-        kappaextv[h] = mix(h)->kappaext(ell);
+        kappaextv[h] = mix(h)->kappaext(pp->ell());
     for (int n=0; n<N; n++)
     {
         double dtau = 0.0;
@@ -861,29 +861,28 @@ double DustSystem::opticaldepth(int ell, Position bfr, Direction bfk, DustSystem
         dtauv[n] = dtau;
         tauv[n] = tau;
     }
-    dsp->initialize(bfr,bfk,mv,dsv,sv,ell,dtauv,tauv);
+    dsp->initialize(pp->position(), pp->direction(),mv,dsv,sv,pp->ell(),dtauv,tauv);
     return tau;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double DustSystem::opticaldepth(int ell, Position bfr, Direction bfk, double distance)
+double DustSystem::opticaldepth(PhotonPackage* pp, double distance)
 {
-    DustGridPath dgp(bfr,bfk);
-    _grid->path(&dgp);
+    _grid->path(pp);
 
     vector<double> kappaextv(_Ncomp);
     for (int h=0; h<_Ncomp; h++)
-        kappaextv[h] = mix(h)->kappaext(ell);
+        kappaextv[h] = mix(h)->kappaext(pp->ell());
 
     double tau = 0.0;
     unsigned int n = 0;
-    unsigned int N = dgp.size();
+    unsigned int N = pp->size();
     for (; n<N; n++)
     {
         for (int h=0; h<_Ncomp; h++)
-            tau += kappaextv[h] * density(dgp.mv(n),h) * dgp.dsv(n);
-        if (dgp.sv(n) > distance) break;
+            tau += kappaextv[h] * density(pp->mv(n),h) * pp->dsv(n);
+        if (pp->sv(n) > distance) break;
     }
 
     // If such statistics are requested, keep track of the number of cells crossed

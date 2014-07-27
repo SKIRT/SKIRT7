@@ -30,7 +30,7 @@ void FrameInstrument::setupSelfBefore()
 ////////////////////////////////////////////////////////////////////
 
 void
-FrameInstrument::detect(const PhotonPackage* pp)
+FrameInstrument::detect(PhotonPackage* pp)
 {
     int l = pixelondetector(pp);
     if (l >= 0)

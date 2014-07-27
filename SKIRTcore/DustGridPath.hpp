@@ -29,7 +29,7 @@ public:
         direction. */
     DustGridPath(const Position& bfr, const Direction& bfk);
 
-    /** This constructor creates an empty path the with initial position and propagation direction
+    /** This constructor creates an empty path with the initial position and propagation direction
         initialized to null values. After using this constructor, invoke the setPosition() and
         setDirection() functions to set these properties to appropriate values. */
     DustGridPath();
@@ -92,9 +92,10 @@ public:
         */
     double dsv(int i) const { return _dsv[i]; }
 
-private:
+protected:
     Position _bfr;
     Direction _bfk;
+private:
     double _s;
     std::vector<int> _mv;
     std::vector<double> _sv;

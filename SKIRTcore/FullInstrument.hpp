@@ -73,7 +73,7 @@ protected:
         correct subdetector. The corresponding flux for the transparent case is simply
         \f$L_\ell^{\text{tra}}\f$. We now only have to add the luminosities to the stored
         luminosity in the correct bin of both the 1D F-vectors and the 3D f-vectors. */
-    void detect(const PhotonPackage* pp);
+    void detect(PhotonPackage* pp);
 
     /** This function calibrates and outputs the instrument data.
         The calibration takes care of the conversion from bolometric luminosity units to

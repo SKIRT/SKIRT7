@@ -49,9 +49,9 @@ QString Instrument::instrumentName() const
 
 ////////////////////////////////////////////////////////////////////
 
-double Instrument::opticalDepth(const PhotonPackage* pp, double distance) const
+double Instrument::opticalDepth(PhotonPackage* pp, double distance) const
 {
-    return _ds ? _ds->opticaldepth(pp->ell(),pp->position(),pp->direction(),distance) : 0;
+    return _ds ? _ds->opticaldepth(pp,distance) : 0;
 }
 
 ////////////////////////////////////////////////////////////////////

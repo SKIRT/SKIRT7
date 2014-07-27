@@ -34,7 +34,7 @@ protected:
 protected:
     /** This function simulates the detection of a photon package by the instrument.
         See SimpleInstrument::detect() for more information. */
-    void detect(const PhotonPackage* pp);
+    void detect(PhotonPackage* pp);
 
     /** This function calibrates and outputs the instrument data.
         See SimpleInstrument::write() for more information. */

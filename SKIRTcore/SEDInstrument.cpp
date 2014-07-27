@@ -30,7 +30,7 @@ void SEDInstrument::setupSelfBefore()
 ////////////////////////////////////////////////////////////////////
 
 void
-SEDInstrument::detect(const PhotonPackage* pp)
+SEDInstrument::detect(PhotonPackage* pp)
 {
     int ell = pp->ell();
     double L = pp->luminosity();

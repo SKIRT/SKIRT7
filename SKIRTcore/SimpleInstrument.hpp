@@ -44,7 +44,7 @@ protected:
         optical depth through the dust system towards the observer. We now only have to add the
         luminosity to the stored luminosity in the correct bin of both the 1D F-vector and the 3D
         f-vector. */
-    void detect(const PhotonPackage* pp);
+    void detect(PhotonPackage* pp);
 
     /** This function calibrates and outputs the instrument data.
         The calibration takes care of the conversion from bolometric luminosity units to flux

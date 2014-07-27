@@ -7,8 +7,7 @@
 #define PHOTONPACKAGE_HPP
 
 #include <cfloat>
-#include "Direction.hpp"
-#include "Position.hpp"
+#include "DustGridPath.hpp"
 class AngularDistribution;
 
 ////////////////////////////////////////////////////////////////////
@@ -24,7 +23,7 @@ class AngularDistribution;
     start of a loop and then reused in the loop body for many consecutive launches; this allows the
     vectors with path information to remain allocated. Also, some trivial functions are implemented
     inline in the header. */
-class PhotonPackage
+class PhotonPackage : public DustGridPath
 {
 public:
 
@@ -107,8 +106,6 @@ private:
     bool _stellar;
     double _L;
     int _ell;
-    Position _bfr;
-    Direction _bfk;
     int _nscatt;
     const AngularDistribution* _ad;
 };

@@ -61,7 +61,7 @@ public:
         implementation must be provided in a subclass. The implementation must call the record()
         function to actually update the instrument's data structure, so that appropriate locking
         can be provided. */
-    virtual void detect(const PhotonPackage* pp) = 0;
+    virtual void detect(PhotonPackage* pp) = 0;
 
     /** This function calibrates the instrument and writes down the entire contents to a set of
         files. Its implementation must be provided in a subclass. */
@@ -71,7 +71,7 @@ public:
         depth over the specified distance along the current path of the specified photon package,
         at the photon package's wavelength. If the distance is not specified, the complete path is
         taken into account. */
-    double opticalDepth(const PhotonPackage* pp, double distance=DBL_MAX) const;
+    double opticalDepth(PhotonPackage* pp, double distance=DBL_MAX) const;
 
     //======================== Data Members ========================
 

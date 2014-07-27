@@ -58,7 +58,7 @@ int FullInstrument::scatteringLevels() const
 ////////////////////////////////////////////////////////////////////
 
 void
-FullInstrument::detect(const PhotonPackage* pp)
+FullInstrument::detect(PhotonPackage* pp)
 {
     int l = pixelondetector(pp);
     int ell = pp->ell();

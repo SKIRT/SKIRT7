@@ -46,7 +46,7 @@ QList<InstrumentFrame*> MultiFrameInstrument::frames() const
 
 ////////////////////////////////////////////////////////////////////
 
-void MultiFrameInstrument::detect(const PhotonPackage *pp)
+void MultiFrameInstrument::detect(PhotonPackage* pp)
 {
     _frames[pp->ell()]->detect(pp);
 }

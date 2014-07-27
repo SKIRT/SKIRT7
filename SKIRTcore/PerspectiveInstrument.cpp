@@ -299,7 +299,7 @@ Direction PerspectiveInstrument::bfkobs(const Position& bfr) const
 
 ////////////////////////////////////////////////////////////////////
 
-void PerspectiveInstrument::detect(const PhotonPackage *pp)
+void PerspectiveInstrument::detect(PhotonPackage* pp)
 {
     // get the position
     double x, y, z;

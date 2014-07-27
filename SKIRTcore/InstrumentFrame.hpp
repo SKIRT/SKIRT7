@@ -102,7 +102,7 @@ private:
 public:
     /** This function simulates the detection of a photon package by the instrument frame. It
         operates similarly to SimpleInstrument::detect(), but for a single wavelength. */
-    void detect(const PhotonPackage* pp);
+    void detect(PhotonPackage* pp);
 
     /** This function properly calibrates and outputs the instrument data. It operates similarly to
         SimpleInstrument::write(), but for the single wavelength specified through its wavelength

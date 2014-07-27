@@ -18,6 +18,7 @@ class DustGridDensityInterface;
 class DustGridStructure;
 class DustMix;
 class DustSystemPath;
+class PhotonPackage;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -300,7 +301,7 @@ public:
         \kappa_{\ell,h}^{\text{ext}}\, \rho_m, \f] and the total optical depth \f$\tau_{\ell,m}\f$
         covered between the starting point \f${\boldsymbol{r}}\f$ and the boundary of the cell, are
         stored in the DustSystemPath object. */
-    double opticaldepth(int ell, Position bfr, Direction bfk, DustSystemPath* ppd);
+    double opticaldepth(PhotonPackage* pp, DustSystemPath* dsp);
 
     /** This function returns the optical depth
         \f$\tau_{\ell,{\text{path}}}({\boldsymbol{r}},{\boldsymbol{k}})\f$ at wavelength index
@@ -309,7 +310,7 @@ public:
         The calculation proceeds as described for the other function with the same name; the
         differences being that the path length is limited to the specified distance, and that this
         function does not fill a DustSystemPath object. */
-    double opticaldepth(int ell, Position bfr, Direction bfk, double distance);
+    double opticaldepth(PhotonPackage* pp, double distance);
 
     /** If the writeCellsCrossed attribute is true, this function writes out a data file (named
         <tt>prefix_ds_crossed.dat</tt>) with statistics on the number of dust grid cells crossed
