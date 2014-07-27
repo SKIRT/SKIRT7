@@ -64,8 +64,8 @@ void DustSystemDepthCalculator::body(size_t index)
         int N = _dgp.size();
         for (int n=0; n<N; n++)
         {
-            if (_dgp.sv(n) > s) break;
-            sumrhods += _ds->density(_dgp.mv(n)) * _dgp.dsv(n);
+            if (_dgp.s(n) > s) break;
+            sumrhods += _ds->density(_dgp.m(n)) * _dgp.ds(n);
         }
         double taug = Units::kappaV() * sumrhods;
 

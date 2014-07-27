@@ -38,27 +38,28 @@ public:
     /** This function initializes the photon package for a new life cycle. The arguments specify
         the origin (emission by a star or by a dust grain), the luminosity, the wavelength index,
         the starting position and the propagation direction. The function copies the values
-        provided in the arguments to the corresponding data members, clears the current path, and
-        initializes all other data members to default values. All information about the previous
-        life cycle is lost. */
+        provided in the arguments to the corresponding data members and initializes the other data
+        members to default values, invalidating the current path. All information about the
+        previous life cycle is lost. */
     void launch(bool stellar, double L, int ell, Position bfr, Direction bfk);
 
     /** This function initializes a peel off photon package being sent to an instrument for an
         emission event. The arguments specify the base photon package from which the peel off
         derives and the direction towards the instrument. The function copies the relevant values
-        from the base photon package to the peel off photon package, updates the peel off
-        direction, applies the anistropic emission direction bias if needed, and clears the current
-        path. The base photon package remains unchanged. All information about the previous life
-        cycle in the peel off photon package is lost. */
+        from the base photon package to the peel off photon package and updates the peel off
+        direction, invalidating the current path, and applies the anistropic emission direction
+        bias if needed. The base photon package remains unchanged. All information about the
+        previous life cycle in the peel off photon package is lost. */
     void launchEmissionPeelOff(const PhotonPackage* pp, Direction bfk);
 
     /** This function initializes a peel off photon package being sent to an instrument for a
         scattering event. The arguments specify the base photon package from which the peel off
         derives, the direction towards the instrument, and the luminosity bias (as a multiplication
         factor). The function copies the relevant values from the base photon package to the peel
-        off photon package, updates the peel off direction and luminosity, increments the
-        scattering counter, and clears the current path. The base photon package remains unchanged.
-        All information about the previous life cycle in the peel off photon package is lost. */
+        off photon package, updates the peel off direction and luminosity, and increments the
+        scattering counter, invalidating the current path. The base photon package remains
+        unchanged. All information about the previous life cycle in the peel off photon package is
+        lost. */
     void launchScatteringPeelOff(const PhotonPackage* pp, Direction bfk, double w);
 
     /** This function sets the angular distribution of the emission at the photon package's origin.
@@ -67,13 +68,13 @@ public:
 
     /** This function causes the propagation of the photon package over a physical distance
         \f$s\f$. It updates the position from \f${\bf{r}}\f$ to \f${\bf{r}}+s\,{\bf{k}}\f$, where
-        \f${\bf{k}}\f$ is the propagation direction of the photon package, and it clears the
-        current path. */
+        \f${\bf{k}}\f$ is the propagation direction of the photon package, invalidating the current
+        path. */
     void propagate(double s);
 
     /** This function scatters the photon package into the new direction \f${\bf{k}}\f$. It
-        increments the counter that keeps track of scattering events, updates the direction, and
-        clears the current path. */
+        increments the counter that keeps track of scattering events and updates the direction,
+        invalidating the current path. */
     void scatter(Direction bfk);
 
     /** This function sets the luminosity of the photon package to a new value. */
@@ -90,14 +91,16 @@ public:
     /** This function returns the wavelength index of the photon package. */
     int ell() const { return _ell; }
 
-    /** This function returns the starting position of the photon package's current path, i.e. either the original position
-        of emission or the position of the last interaction with a dust grain. */
+    /** This function returns the starting position of the photon package's current path, i.e.
+        either the original position of emission or the position of the last interaction with a
+        dust grain. */
     Position position() const { return _bfr; }
 
     /** This function returns the propagation direction the photon package's current path. */
     Direction direction() const { return _bfk; }
 
-    /** This function returns the number of scattering events the photon package has experienced. */
+    /** This function returns the number of scattering events the photon package has experienced.
+        */
     int nScatt() const { return _nscatt; }
 
     // ------- Data members -------

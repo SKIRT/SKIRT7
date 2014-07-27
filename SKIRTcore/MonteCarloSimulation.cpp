@@ -6,7 +6,6 @@
 #include "DustGridStructure.hpp"
 #include "DustMix.hpp"
 #include "DustSystem.hpp"
-#include "DustSystemPath.hpp"
 #include "FatalError.hpp"
 #include "Instrument.hpp"
 #include "InstrumentSystem.hpp"
@@ -161,7 +160,6 @@ void MonteCarloSimulation::dostellaremissionchunk(size_t index)
     {
         double Lmin = 1e-4 * L;
         PhotonPackage pp,ppp;
-        DustSystemPath dsp;
 
         quint64 remaining = _chunksize;
         while (remaining > 0)
@@ -173,10 +171,10 @@ void MonteCarloSimulation::dostellaremissionchunk(size_t index)
                 peeloffemission(&pp,&ppp);
                 if (_ds) while (true)
                 {
-                    fillDustSystemPath(&pp,&dsp);
-                    simulateescapeandabsorption(&pp,&dsp,_ds->dustemission());
+                    _ds->fillOpticalDepth(&pp);
+                    simulateescapeandabsorption(&pp,_ds->dustemission());
                     if (pp.luminosity() <= Lmin) break;
-                    simulatepropagation(&pp,&dsp);
+                    simulatepropagation(&pp);
                     peeloffscattering(&pp,&ppp);
                     simulatescattering(&pp);
                 }
@@ -186,16 +184,6 @@ void MonteCarloSimulation::dostellaremissionchunk(size_t index)
         }
     }
     else logprogress(_chunksize);
-}
-
-////////////////////////////////////////////////////////////////////
-
-void MonteCarloSimulation::fillDustSystemPath(PhotonPackage* pp, DustSystemPath* dsp) const
-{
-    double tau = 0.0;
-    if (_ds) tau = _ds->opticaldepth(pp,dsp);
-    if (tau<0.0 || std::isnan(tau) || std::isinf(tau))
-        throw FATALERROR("The optical depth along the path is not a positive number: tau = " + QString::number(tau));
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -248,10 +236,10 @@ void MonteCarloSimulation::peeloffscattering(PhotonPackage* pp, PhotonPackage* p
 
 ////////////////////////////////////////////////////////////////////
 
-void MonteCarloSimulation::simulateescapeandabsorption(PhotonPackage* pp, DustSystemPath* dsp, bool dustemission)
+void MonteCarloSimulation::simulateescapeandabsorption(PhotonPackage* pp, bool dustemission)
 {
     const double taumin = 1e-3;
-    double taupath = dsp->opticaldepth();
+    double taupath = pp->tau();
     int ell = pp->ell();
     double L = pp->luminosity();
     bool ynstellar = pp->isStellar();
@@ -264,14 +252,14 @@ void MonteCarloSimulation::simulateescapeandabsorption(PhotonPackage* pp, DustSy
         double expfactor = (taupath>taumin) ? 1.0-exp(-taupath) : taupath*(1.0-0.5*taupath);
         if (dustemission)
         {
-            int Ncells = dsp->size();
+            int Ncells = pp->size();
             for (int n=0; n<Ncells; n++)
             {
-                int m = dsp->cellnumber(n);
+                int m = pp->m(n);
                 if (m!=-1)
                 {
-                    double taustart = (n==0) ? 0.0 : dsp->tau(n-1);
-                    double dtau = dsp->dtau(n);
+                    double taustart = (n==0) ? 0.0 : pp->tau(n-1);
+                    double dtau = pp->dtau(n);
                     double expfactorm = (dtau>taumin) ? 1.0-exp(-dtau) : dtau*(1.0-0.5*dtau);
                     double Lintm = L * exp(-taustart) * expfactorm;
                     double Labsm = (1.0-albedo) * Lintm;
@@ -295,11 +283,11 @@ void MonteCarloSimulation::simulateescapeandabsorption(PhotonPackage* pp, DustSy
             kappascav[h] = mix->kappasca(ell);
             kappaextv[h] = mix->kappaext(ell);
         }
-        int Ncells = dsp->size();
+        int Ncells = pp->size();
         double Lsca = 0.0;
         for (int n=0; n<Ncells; n++)
         {
-            int m = dsp->cellnumber(n);
+            int m = pp->m(n);
             if (m!=-1)
             {
                 double ksca = 0.0;
@@ -311,8 +299,8 @@ void MonteCarloSimulation::simulateescapeandabsorption(PhotonPackage* pp, DustSy
                     kext += rho*kappaextv[h];
                 }
                 double albedo = (kext>0.0) ? ksca/kext : 0.0;
-                double taustart = (n==0) ? 0.0 : dsp->tau(n-1);
-                double dtau = dsp->dtau(n);
+                double taustart = (n==0) ? 0.0 : pp->tau(n-1);
+                double dtau = pp->dtau(n);
                 double expfactorm = (dtau>taumin) ? 1.0-exp(-dtau) : dtau*(1.0-0.5*dtau);
                 double Lintm = L * exp(-taustart) * expfactorm;
                 double Lscam = albedo * Lintm;
@@ -330,11 +318,11 @@ void MonteCarloSimulation::simulateescapeandabsorption(PhotonPackage* pp, DustSy
 
 ////////////////////////////////////////////////////////////////////
 
-void MonteCarloSimulation::simulatepropagation(PhotonPackage* pp, DustSystemPath* dsp)
+void MonteCarloSimulation::simulatepropagation(PhotonPackage* pp)
 {
-    double taupath = dsp->opticaldepth();
+    double taupath = pp->tau();
     double tau = _random->exponcutoff(taupath);
-    double s = dsp->pathlength(tau);
+    double s = pp->pathlength(tau);
     pp->propagate(s);
 }
 

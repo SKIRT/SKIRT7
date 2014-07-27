@@ -10,7 +10,6 @@
 #include <QTime>
 #include <atomic>
 class DustSystem;
-class DustSystemPath;
 class InstrumentSystem;
 class PhotonPackage;
 class StellarSystem;
@@ -144,11 +143,6 @@ protected:
     /** This function implements the loop body for runstellaremission(). */
     void dostellaremissionchunk(size_t index);
 
-    /** This function calculates the information on the path of a photon package through the dust
-        system and stores it in a DustSystemPath object. In essence, the function calls the
-        DustSystem::opticaldepth() function. */
-    void fillDustSystemPath(PhotonPackage* pp, DustSystemPath* dsp) const;
-
     /** This function simulates the peel-off of a photon package after an emission event. This
         means that we create peel-off or shadow photon packages, one for every instrument in the
         instrument system, that we force to propagate in the direction of the observer(s) instead
@@ -211,7 +205,7 @@ protected:
         \f$L_\ell^{\text{sca}}\f$ and \f$L_{\ell,n}^{\text{abs}}\f$ (and \f$L_\ell^{\text{esc}}\f$,
         but this does not really matter...). If we denote the total optical depth along the path of
         the photon package as \f$\tau_{\ell,\text{path}}\f$ (this quantity is stored in the
-        DustSystemPath object that provided as an input parameter of this function), the fraction
+        PhotonPackage object provided as an input parameter of this function), the fraction
         of the luminosity that escapes from the system without any interaction is \f[
         L_\ell^{\text{esc}} = L_\ell\, {\text{e}}^{-\tau_{\ell,\text{path}}}. \f] Remains to
         subdivide the remainder of the initial luminosity, \f[ L_\ell \left( 1 -
@@ -224,8 +218,8 @@ protected:
         the dust, and \f[ L_{\ell,n}^{\text{abs}} = (1-\varpi_\ell)\, L_\ell \left(
         {\text{e}}^{-\tau_{\ell,n-1}} - {\text{e}}^{-\tau_{\ell,n}} \right), \f] with
         \f$\tau_{\ell,n}\f$ the optical depth measured from the initial position of the path until
-        the exit point of the \f$n\f$'th dust cell along the path (this quantity is stored in the
-        DustSystemPath object). It is straightforward to check that the sum of escaped, scattered
+        the exit point of the \f$n\f$'th dust cell along the path (this quantity is also stored in
+        the PhotonPackage object). It is straightforward to check that the sum of escaped, scattered
         and absorbed luminosities is \f[ L_\ell^{\text{esc}} + L_\ell^{\text{sca}} +
         \sum_{n=0}^{N-1} L_{\ell,n}^{\text{abs}} = L_\ell, \f] as desired. When there is more than
         one dust component, the dust properties are no longer uniform in every cell and things
@@ -243,12 +237,12 @@ protected:
         {\text{e}}^{-\tau_{\ell,n-1}} - {\text{e}}^{-\tau_{\ell,n}} \right). \f] Also in this case,
         it is easy to see that \f[ L_\ell^{\text{esc}} + L_\ell^{\text{sca}} + \sum_{n=0}^{N-1}
         L_{\ell,n}^{\text{abs}} = L_\ell. \f] */
-    void simulateescapeandabsorption(PhotonPackage* pp, DustSystemPath* dsp, bool dustemission);
+    void simulateescapeandabsorption(PhotonPackage* pp, bool dustemission);
 
     /** This function determines the next scattering location of a photon package and the simulates
         the propagation to this position. Given the total optical depth along the path of the
-        photon package \f$\tau_{\ell,\text{path}}\f$ (this quantity is stored in the DustSystemPath
-        object that is provided as an input parameter of this function), a random optical depth
+        photon package \f$\tau_{\ell,\text{path}}\f$ (this quantity is stored in the PhotonPackage
+        object provided as an input parameter of this function), a random optical depth
         \f$\tau_\ell\f$ is generated from an exponential probability distribution cut off at
         \f$\tau_{\ell,\text{path}}\f$, distribution \f[ p(\tau_\ell)\,{\text{d}}\tau_\ell \propto
         \begin{cases} \;{\text{e}}^{-\tau_\ell}\,{\text{d}}\tau_\ell &\qquad \text{for
@@ -256,7 +250,7 @@ protected:
         }\tau_\ell>\tau_{\ell,\text{path}}. \end{cases} \f] Once this random optical depth is
         determined, it is converted to a physical path length \f$s\f$ and the photon package is
         propagated over this distance. */
-    void simulatepropagation(PhotonPackage* pp, DustSystemPath* dsp);
+    void simulatepropagation(PhotonPackage* pp);
 
     /** This function simulates a scattering event of a photon package. Most of the properties of
         the photon package remain unaltered, including the position and the luminosity. The

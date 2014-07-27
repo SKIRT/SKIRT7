@@ -13,7 +13,6 @@
 #include "DustSystem.hpp"
 #include "DustSystemDensityCalculator.hpp"
 #include "DustSystemDepthCalculator.hpp"
-#include "DustSystemPath.hpp"
 #include "FatalError.hpp"
 #include "FilePaths.hpp"
 #include "FITSInOut.hpp"
@@ -165,12 +164,12 @@ void DustSystem::writeconvergence() const
     _grid->path(&dgp);
     int N = dgp.size();
     for (int n=0; n<N; n++)
-        SigmaX += dgp.dsv(n) * density(dgp.mv(n));
+        SigmaX += dgp.ds(n) * density(dgp.m(n));
     dgp.setDirection(Direction(-1.,0.,0.));
     _grid->path(&dgp);
     N = dgp.size();
     for (int n=0; n<N; n++)
-        SigmaX += dgp.dsv(n) * density(dgp.mv(n));
+        SigmaX += dgp.ds(n) * density(dgp.m(n));
 
     // calculation of the Y-axis surface density
 
@@ -179,12 +178,12 @@ void DustSystem::writeconvergence() const
     _grid->path(&dgp);
     N = dgp.size();
     for (int n=0; n<N; n++)
-        SigmaY += dgp.dsv(n) * density(dgp.mv(n));
+        SigmaY += dgp.ds(n) * density(dgp.m(n));
     dgp.setDirection(Direction(0.,-1.,0.));
     _grid->path(&dgp);
     N = dgp.size();
     for (int n=0; n<N; n++)
-        SigmaY += dgp.dsv(n) * density(dgp.mv(n));
+        SigmaY += dgp.ds(n) * density(dgp.m(n));
 
     // calculation of the Z-axis surface density
 
@@ -193,13 +192,13 @@ void DustSystem::writeconvergence() const
     _grid->path(&dgp);
     N = dgp.size();
     for (int n=0; n<N; n++)
-        SigmaZ += dgp.dsv(n) * density(dgp.mv(n));
+        SigmaZ += dgp.ds(n) * density(dgp.m(n));
     Direction bfkzneg(0.,0.,-1.);
     dgp.setDirection(Direction(0.,0.,-1.));
     _grid->path(&dgp);
     N = dgp.size();
     for (int n=0; n<N; n++)
-        SigmaZ += dgp.dsv(n) * density(dgp.mv(n));
+        SigmaZ += dgp.ds(n) * density(dgp.m(n));
 
     // Compare these values to the expected values and write the result to file
 
@@ -497,7 +496,7 @@ namespace
             for (int n=0; n<N; n++)
             {
                 for (int h=0; h<Ncomp; h++)
-                    tau += kappaextv[h] * _ds->density(_dgp.mv(n),h) * _dgp.dsv(n);
+                    tau += kappaextv[h] * _ds->density(_dgp.m(n),h) * _dgp.ds(n);
             }
             return tau;
         }
@@ -829,11 +828,12 @@ double DustSystem::density(int m) const
 
 //////////////////////////////////////////////////////////////////////
 
-double DustSystem::opticaldepth(PhotonPackage* pp, DustSystemPath* dsp)
+void DustSystem::fillOpticalDepth(PhotonPackage* pp)
 {
+    // determine the path and store the geometric details in the photon package
     _grid->path(pp);
 
-    // If such statistics are requested, keep track of the number of cells crossed
+    // if such statistics are requested, keep track of the number of cells crossed
     if (_writeCellsCrossed)
     {
         QMutexLocker lock(&_crossedMutex);
@@ -842,56 +842,57 @@ double DustSystem::opticaldepth(PhotonPackage* pp, DustSystemPath* dsp)
         _crossed[index] += 1;
     }
 
-    int N = pp->size();
-    const vector<int>& mv = pp->mv();
-    const vector<double>& sv = pp->sv();
-    const vector<double>& dsv = pp->dsv();
-    vector<double> tauv(N);
-    vector<double> dtauv(N);
-    double tau = 0.0;
+    // get the extinction coefficients at the relevant wavelength for all dust mixes
     vector<double> kappaextv(_Ncomp);
     for (int h=0; h<_Ncomp; h++)
         kappaextv[h] = mix(h)->kappaext(pp->ell());
-    for (int n=0; n<N; n++)
+
+    // calculate and store the optical depth details in the photon package
+    pp->fillOpticalDepth([this,kappaextv](int m)
     {
-        double dtau = 0.0;
+        double result = 0;
         for (int h=0; h<_Ncomp; h++)
-            dtau += kappaextv[h] * density(mv[n],h) * dsv[n];
-        tau += dtau;
-        dtauv[n] = dtau;
-        tauv[n] = tau;
-    }
-    dsp->initialize(pp->position(), pp->direction(),mv,dsv,sv,pp->ell(),dtauv,tauv);
-    return tau;
+            result += kappaextv[h] * density(m,h);
+        return result;
+    });
+
+    double tau = pp->tau();
+    if (tau<0.0 || std::isnan(tau) || std::isinf(tau))
+        throw FATALERROR("The optical depth along the path is not a positive number: tau = " + QString::number(tau));
 }
 
 //////////////////////////////////////////////////////////////////////
 
 double DustSystem::opticaldepth(PhotonPackage* pp, double distance)
 {
+    // determine the path and store the geometric details in the photon package
     _grid->path(pp);
 
+    // get the extinction coefficients at the relevant wavelength for all dust mixes
     vector<double> kappaextv(_Ncomp);
     for (int h=0; h<_Ncomp; h++)
         kappaextv[h] = mix(h)->kappaext(pp->ell());
 
+    // calculate the optical depth at the specified distance
     double tau = 0.0;
     unsigned int n = 0;
     unsigned int N = pp->size();
     for (; n<N; n++)
     {
         for (int h=0; h<_Ncomp; h++)
-            tau += kappaextv[h] * density(pp->mv(n),h) * pp->dsv(n);
-        if (pp->sv(n) > distance) break;
+            tau += kappaextv[h] * density(pp->m(n),h) * pp->ds(n);
+        if (pp->s(n) > distance) break;
     }
 
-    // If such statistics are requested, keep track of the number of cells crossed
+    // if such statistics are requested, keep track of the number of cells crossed
     if (_writeCellsCrossed)
     {
         QMutexLocker lock(&_crossedMutex);
         if (n >= _crossed.size()) _crossed.resize(n+1);
         _crossed[n] += 1;
     }
+
+    // return the optical depth at the specified distance
     return tau;
 }
 

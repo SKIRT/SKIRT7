@@ -17,7 +17,6 @@ class DustDistribution;
 class DustGridDensityInterface;
 class DustGridStructure;
 class DustMix;
-class DustSystemPath;
 class PhotonPackage;
 
 //////////////////////////////////////////////////////////////////////
@@ -277,39 +276,45 @@ public:
         the value zero is returned. */
     double density(int m) const;
 
-    /** This function returns the optical depth
+    /** This function calculates the optical depth
         \f$\tau_{\ell,{\text{path}}}({\boldsymbol{r}},{\boldsymbol{k}})\f$ at wavelength index
         \f$\ell\f$ along a path through the dust system starting at the position
-        \f${\boldsymbol{r}}\f$ into the direction \f${\boldsymbol{k}}\f$. The hard work is done
-        through a call to the construction of a DustGridPath class object, which contains all the
-        geometrical information on the path through the dust grid: it contains vectors which
-        contain the cell numbers \f$m\f$ of the cells that are crossed by the path, the pathlength
-        \f$(\Delta s)_m\f$ covered in that particular cell and a total path length counter
-        \f$s_m\f$ that gives the total path length covered between the starting point
-        \f${\boldsymbol{r}}\f$ and the boundary of the cell. With this information given, the
-        calculation of the optical depth is rather straightforward: it is calculated as \f[
+        \f${\boldsymbol{r}}\f$ into the direction \f${\boldsymbol{k}}\f$, where \f$\ell\f$,
+        \f${\boldsymbol{r}}\f$ and \f${\boldsymbol{k}}\f$ are obtained from the specified
+        PhotonPackage object, and it stores the resulting details back into the photon package
+        object.
+
+        The hard work is done by calling the DustGridStructure::path() function which stores the
+        geometrical information on the path through the dust grid into the photon package: the cell
+        numbers \f$m\f$ of the cells that are crossed by the path, the pathlength \f$(\Delta
+        s)_m\f$ covered in that particular cell and a total path length counter \f$s_m\f$ that
+        gives the total path length covered between the starting point \f${\boldsymbol{r}}\f$ and
+        the boundary of the cell. With this information given, the calculation of the optical depth
+        is rather straightforward: it is calculated as \f[
         \tau_{\ell,{\text{path}}}({\boldsymbol{r}},{\boldsymbol{k}}) = \sum_m (\Delta s)_m \sum_h
         \kappa_{\ell,h}^{\text{ext}}\, \rho_m, \f] where \f$\kappa_{\ell,h}^{\text{abs}}\f$ is the
         extinction coefficient corresponding to the \f$h\f$'th dust component at wavelength index
         \f$\ell\f$ and \f$\rho_{m,h}\f$ the dust density in the cell with cell number \f$m\f$
-        corresponding to the \f$h\f$'th dust component.
-
-        The function also also stores the details on the calculation of the optical depth in the
-        DustSystemPath object given in the function call. Apart from the quantities \f$m\f$,
-        \f$(\Delta s)_m\f$ and \f$s_m\f$ provided by the DustGridPath, also the optical depth
-        covered within the \f$m\f$'th dust cell, \f[ (\Delta\tau_\ell)_m = (\Delta s)_m \sum_h
-        \kappa_{\ell,h}^{\text{ext}}\, \rho_m, \f] and the total optical depth \f$\tau_{\ell,m}\f$
-        covered between the starting point \f${\boldsymbol{r}}\f$ and the boundary of the cell, are
-        stored in the DustSystemPath object. */
-    double opticaldepth(PhotonPackage* pp, DustSystemPath* dsp);
+        corresponding to the \f$h\f$'th dust component. The function also stores the details on the
+        calculation of the optical depth in the photon package, specifically it stores the optical
+        depth covered within the \f$m\f$'th dust cell, \f[ (\Delta\tau_\ell)_m = (\Delta s)_m
+        \sum_h \kappa_{\ell,h}^{\text{ext}}\, \rho_m, \f] and the total optical depth
+        \f$\tau_{\ell,m}\f$ covered between the starting point \f${\boldsymbol{r}}\f$ and the
+        boundary of the cell. */
+    void fillOpticalDepth(PhotonPackage* pp);
 
     /** This function returns the optical depth
-        \f$\tau_{\ell,{\text{path}}}({\boldsymbol{r}},{\boldsymbol{k}})\f$ at wavelength index
+        \f$\tau_{\ell,{\text{d}}}({\boldsymbol{r}},{\boldsymbol{k}})\f$ at wavelength index
         \f$\ell\f$ along a path through the dust system starting at the position
-        \f${\boldsymbol{r}}\f$ into the direction \f${\boldsymbol{k}}\f$ for a distance \f$d\f$.
-        The calculation proceeds as described for the other function with the same name; the
+        \f${\boldsymbol{r}}\f$ into the direction \f${\boldsymbol{k}}\f$ for a distance \f$d\f$,
+        where \f$\ell\f$, \f${\boldsymbol{r}}\f$ and \f${\boldsymbol{k}}\f$ are obtained from the
+        specified PhotonPackage object. The function first determines the photon package's path
+        through the dust grid, storing the geometric information about the path segments through
+        each cell into the photon package, and then calculates the optical depth at the specified
+        distance. The calculation proceeds as described for the fillOpticalDepth() function; the
         differences being that the path length is limited to the specified distance, and that this
-        function does not fill a DustSystemPath object. */
+        function does not store the optical depth information back into the PhotonPackage object.
+        */
     double opticaldepth(PhotonPackage* pp, double distance);
 
     /** If the writeCellsCrossed attribute is true, this function writes out a data file (named

@@ -90,7 +90,6 @@ HEADERS += \
     DustSystem.hpp \
     DustSystemDensityCalculator.hpp \
     DustSystemDepthCalculator.hpp \
-    DustSystemPath.hpp \
     EdgeOnDustCompNormalization.hpp \
     EinastoGeometry.hpp \
     ExpDiskGeometry.hpp \
@@ -318,7 +317,6 @@ SOURCES += \
     DustSystem.cpp \
     DustSystemDensityCalculator.cpp \
     DustSystemDepthCalculator.cpp \
-    DustSystemPath.cpp \
     EdgeOnDustCompNormalization.cpp \
     EinastoGeometry.cpp \
     ExpDiskGeometry.cpp \

@@ -3,7 +3,6 @@
 ////       © Astronomical Observatory, Ghent University         ////
 //////////////////////////////////////////////////////////////////*/
 
-#include "DustSystemPath.hpp"
 #include "Log.hpp"
 #include "NR.hpp"
 #include "PanDustSystem.hpp"
@@ -181,7 +180,6 @@ void PanMonteCarloSimulation::dodustselfabsorptionchunk(size_t index)
         NR::cdf(Xv, Lv);
 
         PhotonPackage pp;
-        DustSystemPath dsp;
         double L = Ltot / _Npp;
         double Lmin = 1e-4*L;
 
@@ -198,10 +196,10 @@ void PanMonteCarloSimulation::dodustselfabsorptionchunk(size_t index)
                 pp.launch(false,L,ell,bfr,bfk);
                 while (true)
                 {
-                    fillDustSystemPath(&pp,&dsp);
-                    simulateescapeandabsorption(&pp,&dsp,true);
+                    _pds->fillOpticalDepth(&pp);
+                    simulateescapeandabsorption(&pp,true);
                     if (pp.luminosity() <= Lmin) break;
-                    simulatepropagation(&pp,&dsp);
+                    simulatepropagation(&pp);
                     simulatescattering(&pp);
                 }
             }
@@ -256,7 +254,6 @@ void PanMonteCarloSimulation::dodustemissionchunk(size_t index)
         NR::cdf(Xv, Lv);
 
         PhotonPackage pp,ppp;
-        DustSystemPath dsp;
         double L = Ltot / _Npp;
         double Lmin = 1e-4 * L;
 
@@ -274,10 +271,10 @@ void PanMonteCarloSimulation::dodustemissionchunk(size_t index)
                 peeloffemission(&pp,&ppp);
                 while (true)
                 {
-                    fillDustSystemPath(&pp,&dsp);
-                    simulateescapeandabsorption(&pp,&dsp,false);
+                    _pds->fillOpticalDepth(&pp);
+                    simulateescapeandabsorption(&pp,false);
                     if (pp.luminosity() <= Lmin) break;
-                    simulatepropagation(&pp,&dsp);
+                    simulatepropagation(&pp);
                     peeloffscattering(&pp,&ppp);
                     simulatescattering(&pp);
                 }

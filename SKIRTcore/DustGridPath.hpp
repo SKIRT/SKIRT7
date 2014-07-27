@@ -7,6 +7,7 @@
 #define DUSTGRIDPATH_HPP
 
 #include <vector>
+#include <functional>
 #include "Direction.hpp"
 #include "Position.hpp"
 class Box;
@@ -17,8 +18,12 @@ class Box;
     dust grid structure, i.e. an object of a DustGridStucture subclass, a starting position
     \f${\bf{r}}\f$ and a propagation direction \f${\bf{k}}\f$, one can calculate the path through
     the dust grid structure. A DustGridPath object keeps record of all the cells that are crossed
-    by this path, together with the physical path length \f$\Delta s\f$ covered within each cell
-    and the path length \f$s\f$ covered along the entire path up to the end of the cell. */
+    by this path, together with the physical path length \f$\Delta s\f$ covered within each cell,
+    and the path length \f$s\f$ covered along the entire path up to the end of the cell. Given
+    additional information about the dust properties in each cell (at a particular wavelength), one
+    can also calculate optical depth information for the path. A DustGridPath object keeps record
+    of the optical depth \f$\Delta\tau\f$ along the path segment within each cell, and the optical
+    depth \f$\tau\f$ along the entire path up to the end of the cell. */
 class DustGridPath
 {
 public:
@@ -58,7 +63,15 @@ public:
         */
     Position moveInside(const Box &box, double eps);
 
-    // ------- Getters -------
+    /** This function calucates and stores the optical depth details for the path \f[
+        (\Delta\tau)_i = (\Delta s)_i \times (\kappa\rho)_{m_i}, \f] \f[ \tau_i = \sum_{j=0}^i
+        (\Delta\tau)_j,\f] using the path segment lengths \f$\Delta s_i\f$ already stored within
+        the path object, and the multiplication factors \f$(\kappa\rho)_{m_i}\f$ provided by the
+        caller through a call-back function, where \f$m_i\f$ is the number of the dust cell being
+        crossed in path segment \f$i\f$. */
+    void fillOpticalDepth(std::function<double(int m)> kapparho);
+
+    // ------- Trivial getters -------
 
     /** This function returns the number of cells crossed along the path. */
     int size() const { return _mv.size(); }
@@ -69,28 +82,42 @@ public:
     /** This function returns the propagation direction along the path. */
     const Direction& direction() const { return _bfk; }
 
-    /** This function returns the vector with the cell numbers \f$m\f$ of all the cells encountered
-        along the path. */
-    const std::vector<int>& mv() const { return _mv; }
-
-    /** This function returns the vector with the path lengths covered from the initial position of
-        the path until the end point of each cell encountered along the path. */
-    const std::vector<double>& sv() const { return _sv; }
-
-    /** This function returns the vector with the path lengths covered within each of the cells
-        encountered along the path. */
-    const std::vector<double>& dsv() const { return _dsv; }
-
     /** This function returns the cell number \f$m\f$ for segment $i$ in the path. */
-    int mv(int i) const { return _mv[i]; }
+    int m(int i) const { return _mv[i]; }
 
     /** This function returns the path length covered from the initial position of the path until
         the end point of the cell in segment $i$ in the path. */
-    double sv(int i) const { return _sv[i]; }
+    double s(int i) const { return _sv[i]; }
 
     /** This function returns the path length covered within the cell in segment $i$ in the path.
         */
-    double dsv(int i) const { return _dsv[i]; }
+    double ds(int i) const { return _dsv[i]; }
+
+    /** This function returns the optical depth covered from the initial position of the path until
+        the end point of the cell in segment $i$ in the path. */
+    double tau(int i) const { return _tauv[i]; }
+
+    /** This function returns the optical depth covered within the cell in segment $i$ in the path.
+        */
+    double dtau(int i) const { return _dtauv[i]; }
+
+    // ------- Nontrivial getters -------
+
+    /** This function returns the total optical depth along the entire path. It assumes that the
+        fillOpticalDepth() function was previously invoked for the path. */
+    double tau() const;
+
+    /** This function calculates the path length a photon package can travel along the path until
+        it has covered an optical depth \f$\tau\f$. In other words, it converts an optical depth
+        \f$\tau\f$ to a physical path length \f$s\f$. The function assumes that the
+        fillOpticalDepth() function was previously invoked for the path. We have to determine the
+        first cell along the path for which the cumulative optical depth \f$\tau_{m}\f$ becomes
+        larger than \f$\tau\f$. This means that the position we are looking for lies within the
+        \f$m\f$'th dust cell. The exact path length corresponding to \f$\tau\f$ is then found by
+        linear interpolation within this cell. */
+    double pathlength(double tau) const;
+
+    // ------- Data members -------
 
 protected:
     Position _bfr;
@@ -100,6 +127,8 @@ private:
     std::vector<int> _mv;
     std::vector<double> _sv;
     std::vector<double> _dsv;
+    std::vector<double> _tauv;
+    std::vector<double> _dtauv;
 };
 
 //////////////////////////////////////////////////////////////////////
