@@ -22,11 +22,7 @@ namespace
 DustGridPath::DustGridPath(const Position& bfr, const Direction& bfk)
     : _bfr(bfr), _bfk(bfk), _s(0)
 {
-    _mv.reserve(INITIAL_CAPACITY);
-    _sv.reserve(INITIAL_CAPACITY);
-    _dsv.reserve(INITIAL_CAPACITY);
-    _tauv.reserve(INITIAL_CAPACITY);
-    _dtauv.reserve(INITIAL_CAPACITY);
+    _v.reserve(INITIAL_CAPACITY);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -34,11 +30,7 @@ DustGridPath::DustGridPath(const Position& bfr, const Direction& bfk)
 DustGridPath::DustGridPath()
     : _s(0)
 {
-    _mv.reserve(INITIAL_CAPACITY);
-    _sv.reserve(INITIAL_CAPACITY);
-    _dsv.reserve(INITIAL_CAPACITY);
-    _tauv.reserve(INITIAL_CAPACITY);
-    _dtauv.reserve(INITIAL_CAPACITY);
+    _v.reserve(INITIAL_CAPACITY);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -46,9 +38,7 @@ DustGridPath::DustGridPath()
 void DustGridPath::clear()
 {
     _s = 0;
-    _mv.clear();
-    _sv.clear();
-    _dsv.clear();
+    _v.clear();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -58,9 +48,7 @@ void DustGridPath::addSegment(int m, double ds)
     if (ds>0)
     {
         _s += ds;
-        _mv.push_back(m);
-        _sv.push_back(_s);
-        _dsv.push_back(ds);
+        _v.push_back(Segment{m,ds,_s,0,0});
     }
 }
 
@@ -165,17 +153,15 @@ Position DustGridPath::moveInside(const Box& box, double eps)
 
 void DustGridPath::fillOpticalDepth(std::function<double(int m)> kapparho)
 {
-    int N = _mv.size();
-    _tauv.resize(N);
-    _dtauv.resize(N);
-
+    int N = _v.size();
     double tau = 0;
     for (int i=0; i<N; i++)
     {
-        double dtau = kapparho(_mv[i]) * _dsv[i];
+        Segment& segment = _v[i];
+        double dtau = kapparho(segment.m) * segment.ds;
         tau += dtau;
-        _dtauv[i] = dtau;
-        _tauv[i] = tau;
+        segment.dtau = dtau;
+        segment.tau = tau;
     }
 }
 
@@ -183,23 +169,21 @@ void DustGridPath::fillOpticalDepth(std::function<double(int m)> kapparho)
 
 double DustGridPath::tau() const
 {
-    int N = _tauv.size();
-    return N ? _tauv[N-1] : 0;
+    int N = _v.size();
+    return N ? _v[N-1].tau : 0;
 }
 
 //////////////////////////////////////////////////////////////////////
 
 double DustGridPath::pathlength(double tau) const
 {
-    int N = _tauv.size();
+    int N = _v.size();
     if (N>0 && tau>0)
     {
-        if (_tauv[0]>tau) return NR::interpolate_linlin(tau, 0, _tauv[0], 0, _sv[0]);
-
-        for (int i=1; i<N; i++)
-        {
-            if (_tauv[i]>tau) return NR::interpolate_linlin(tau, _tauv[i-1], _tauv[i], _sv[i-1], _sv[i]);
-        }
+        int i = NR::locate(_v,Segment{0,0,0,0,tau});
+        if (i<0) return NR::interpolate_linlin(tau, 0, _v[0].tau, 0, _v[0].s);
+        if (i<N-1) return NR::interpolate_linlin(tau, _v[i].tau, _v[i+1].tau, _v[i].s, _v[i+1].s);
+        return _v[N-1].s;
     }
     return 0;
 }

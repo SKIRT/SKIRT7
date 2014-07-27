@@ -74,7 +74,7 @@ public:
     // ------- Trivial getters -------
 
     /** This function returns the number of cells crossed along the path. */
-    int size() const { return _mv.size(); }
+    int size() const { return _v.size(); }
 
     /** This function returns the initial position of the path. */
     const Position& position() const { return _bfr; }
@@ -83,23 +83,23 @@ public:
     const Direction& direction() const { return _bfk; }
 
     /** This function returns the cell number \f$m\f$ for segment $i$ in the path. */
-    int m(int i) const { return _mv[i]; }
-
-    /** This function returns the path length covered from the initial position of the path until
-        the end point of the cell in segment $i$ in the path. */
-    double s(int i) const { return _sv[i]; }
+    int m(int i) const { return _v[i].m; }
 
     /** This function returns the path length covered within the cell in segment $i$ in the path.
         */
-    double ds(int i) const { return _dsv[i]; }
+    double ds(int i) const { return _v[i].ds; }
 
-    /** This function returns the optical depth covered from the initial position of the path until
+    /** This function returns the path length covered from the initial position of the path until
         the end point of the cell in segment $i$ in the path. */
-    double tau(int i) const { return _tauv[i]; }
+    double s(int i) const { return _v[i].s; }
 
     /** This function returns the optical depth covered within the cell in segment $i$ in the path.
         */
-    double dtau(int i) const { return _dtauv[i]; }
+    double dtau(int i) const { return _v[i].dtau; }
+
+    /** This function returns the optical depth covered from the initial position of the path until
+        the end point of the cell in segment $i$ in the path. */
+    double tau(int i) const { return _v[i].tau; }
 
     // ------- Nontrivial getters -------
 
@@ -124,11 +124,13 @@ protected:
     Direction _bfk;
 private:
     double _s;
-    std::vector<int> _mv;
-    std::vector<double> _sv;
-    std::vector<double> _dsv;
-    std::vector<double> _tauv;
-    std::vector<double> _dtauv;
+    struct Segment
+    {
+        int m;
+        double ds, s, dtau, tau;
+        bool operator<(Segment other) const { return tau < other.tau; }
+    };
+    std::vector<Segment> _v;
 };
 
 //////////////////////////////////////////////////////////////////////
