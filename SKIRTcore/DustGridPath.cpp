@@ -151,22 +151,6 @@ Position DustGridPath::moveInside(const Box& box, double eps)
 
 //////////////////////////////////////////////////////////////////////
 
-void DustGridPath::fillOpticalDepth(std::function<double(int m)> kapparho)
-{
-    int N = _v.size();
-    double tau = 0;
-    for (int i=0; i<N; i++)
-    {
-        Segment& segment = _v[i];
-        double dtau = kapparho(segment.m) * segment.ds;
-        tau += dtau;
-        segment.dtau = dtau;
-        segment.tau = tau;
-    }
-}
-
-//////////////////////////////////////////////////////////////////////
-
 double DustGridPath::tau() const
 {
     int N = _v.size();

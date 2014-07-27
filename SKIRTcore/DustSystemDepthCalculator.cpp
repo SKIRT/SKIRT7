@@ -60,14 +60,7 @@ void DustSystemDepthCalculator::body(size_t index)
         _dgp.setPosition(Position(r1));
         _dgp.setDirection(Direction(k));
         _grid->path(&_dgp);
-        double sumrhods = 0;
-        int N = _dgp.size();
-        for (int n=0; n<N; n++)
-        {
-            if (_dgp.s(n) > s) break;
-            sumrhods += _ds->density(_dgp.m(n)) * _dgp.ds(n);
-        }
-        double taug = Units::kappaV() * sumrhods;
+        double taug = Units::kappaV() * _dgp.opticalDepth([this](int m){ return _ds->density(m); }, s);
 
         // store the results
         double dtau = fabs(taug-taut);

@@ -6,8 +6,8 @@
 #ifndef DUSTGRIDPATH_HPP
 #define DUSTGRIDPATH_HPP
 
+#include <cfloat>
 #include <vector>
-#include <functional>
 #include "Direction.hpp"
 #include "Position.hpp"
 class Box;
@@ -28,7 +28,7 @@ class DustGridPath
 {
 public:
 
-    // ------- Constructors and setters -------
+    // ------- Constructors; handling position and directions -------
 
     /** This constructor creates an empty path with the specified initial position and propagation
         direction. */
@@ -44,6 +44,14 @@ public:
 
     /** This function sets the propagation direction along the path to a new value. */
     void setDirection(const Direction& bfk) { _bfk = bfk; }
+
+    /** This function returns the initial position of the path. */
+    const Position& position() const { return _bfr; }
+
+    /** This function returns the propagation direction along the path. */
+    const Direction& direction() const { return _bfk; }
+
+    // ------- Handling geometric data on path segments -------
 
     /** This function removes all path segments, resulting in an empty path with the original
         initial position and propagation direction. */
@@ -63,24 +71,8 @@ public:
         */
     Position moveInside(const Box &box, double eps);
 
-    /** This function calucates and stores the optical depth details for the path \f[
-        (\Delta\tau)_i = (\Delta s)_i \times (\kappa\rho)_{m_i}, \f] \f[ \tau_i = \sum_{j=0}^i
-        (\Delta\tau)_j,\f] using the path segment lengths \f$\Delta s_i\f$ already stored within
-        the path object, and the multiplication factors \f$(\kappa\rho)_{m_i}\f$ provided by the
-        caller through a call-back function, where \f$m_i\f$ is the number of the dust cell being
-        crossed in path segment \f$i\f$. */
-    void fillOpticalDepth(std::function<double(int m)> kapparho);
-
-    // ------- Trivial getters -------
-
     /** This function returns the number of cells crossed along the path. */
     int size() const { return _v.size(); }
-
-    /** This function returns the initial position of the path. */
-    const Position& position() const { return _bfr; }
-
-    /** This function returns the propagation direction along the path. */
-    const Direction& direction() const { return _bfk; }
 
     /** This function returns the cell number \f$m\f$ for segment $i$ in the path. */
     int m(int i) const { return _v[i].m; }
@@ -93,15 +85,57 @@ public:
         the end point of the cell in segment $i$ in the path. */
     double s(int i) const { return _v[i].s; }
 
+    // ------- Handling data on optical depth -------
+
+    /** This function calculates the optical depth for the specified distance along the path (or,
+        if the second argument is missing, for the complete path), using the path segment lengths
+        \f$\Delta s_i\f$ already stored within the path object, and the multiplication factors
+        \f$(\kappa\rho)_{m_i}\f$ provided by the caller through a call-back function, where
+        \f$m_i\f$ is the number of the dust cell being crossed in path segment \f$i\f$. The
+        call-back function must have the signature "double kapparho(int m)". The optical depth
+        information in the path is neither used nor stored. */
+    template<typename Functor> double opticalDepth(Functor kapparho, double distance=DBL_MAX) const
+    {
+        int N = _v.size();
+        double tau = 0;
+        for (int i=0; i<N; i++)
+        {
+            const Segment& segment = _v[i];
+            tau += kapparho(segment.m) * segment.ds;
+            if (segment.s > distance) break;
+        }
+        return tau;
+    }
+
+    /** This function calculates and stores the optical depth details for the path \f[
+        (\Delta\tau)_i = (\Delta s)_i \times (\kappa\rho)_{m_i}, \f] \f[ \tau_i = \sum_{j=0}^i
+        (\Delta\tau)_j,\f] using the path segment lengths \f$\Delta s_i\f$ already stored within
+        the path object, and the multiplication factors \f$(\kappa\rho)_{m_i}\f$ provided by the
+        caller through a call-back function, where \f$m_i\f$ is the number of the dust cell being
+        crossed in path segment \f$i\f$. The call-back function must have the signature
+        "double kapparho(int m)". */
+    template<typename Functor> inline void fillOpticalDepth(Functor kapparho)
+    {
+        int N = _v.size();
+        double tau = 0;
+        for (int i=0; i<N; i++)
+        {
+            Segment& segment = _v[i];
+            double dtau = kapparho(segment.m) * segment.ds;
+            tau += dtau;
+            segment.dtau = dtau;
+            segment.tau = tau;
+        }
+    }
+
     /** This function returns the optical depth covered within the cell in segment $i$ in the path.
-        */
+        It assumes that the fillOpticalDepth() function was previously invoked for the path. */
     double dtau(int i) const { return _v[i].dtau; }
 
     /** This function returns the optical depth covered from the initial position of the path until
-        the end point of the cell in segment $i$ in the path. */
+        the end point of the cell in segment $i$ in the path. It assumes that the
+        fillOpticalDepth() function was previously invoked for the path. */
     double tau(int i) const { return _v[i].tau; }
-
-    // ------- Nontrivial getters -------
 
     /** This function returns the total optical depth along the entire path. It assumes that the
         fillOpticalDepth() function was previously invoked for the path. */

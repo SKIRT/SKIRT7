@@ -22,6 +22,7 @@
 #include "PhotonPackage.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
+#include <QVarLengthArray>
 
 using namespace std;
 
@@ -159,46 +160,33 @@ void DustSystem::writeconvergence() const
 
     // calculation of the X-axis surface density
 
-    double SigmaX = 0.0;
+    double SigmaX = 0;
     DustGridPath dgp(Position(0.,0.,0.), Direction(1.,0.,0.));
     _grid->path(&dgp);
-    int N = dgp.size();
-    for (int n=0; n<N; n++)
-        SigmaX += dgp.ds(n) * density(dgp.m(n));
+    SigmaX += dgp.opticalDepth([this](int m){ return density(m); });
     dgp.setDirection(Direction(-1.,0.,0.));
     _grid->path(&dgp);
-    N = dgp.size();
-    for (int n=0; n<N; n++)
-        SigmaX += dgp.ds(n) * density(dgp.m(n));
+    SigmaX += dgp.opticalDepth([this](int m){ return density(m); });
 
     // calculation of the Y-axis surface density
 
     double SigmaY = 0.0;
     dgp.setDirection(Direction(0.,1.,0.));
     _grid->path(&dgp);
-    N = dgp.size();
-    for (int n=0; n<N; n++)
-        SigmaY += dgp.ds(n) * density(dgp.m(n));
+    SigmaY += dgp.opticalDepth([this](int m){ return density(m); });
     dgp.setDirection(Direction(0.,-1.,0.));
     _grid->path(&dgp);
-    N = dgp.size();
-    for (int n=0; n<N; n++)
-        SigmaY += dgp.ds(n) * density(dgp.m(n));
+    SigmaY += dgp.opticalDepth([this](int m){ return density(m); });
 
     // calculation of the Z-axis surface density
 
     double SigmaZ = 0.0;
     dgp.setDirection(Direction(0.,0.,1.));
     _grid->path(&dgp);
-    N = dgp.size();
-    for (int n=0; n<N; n++)
-        SigmaZ += dgp.ds(n) * density(dgp.m(n));
-    Direction bfkzneg(0.,0.,-1.);
+    SigmaZ += dgp.opticalDepth([this](int m){ return density(m); });
     dgp.setDirection(Direction(0.,0.,-1.));
     _grid->path(&dgp);
-    N = dgp.size();
-    for (int n=0; n<N; n++)
-        SigmaZ += dgp.ds(n) * density(dgp.m(n));
+    SigmaZ += dgp.opticalDepth([this](int m){ return density(m); });
 
     // Compare these values to the expected values and write the result to file
 
@@ -412,6 +400,40 @@ void DustSystem::writedensity() const
 
 ////////////////////////////////////////////////////////////////////
 
+// Private class to encapsulate the call-back function for calculating optical depths
+namespace
+{
+    class KappaRho
+    {
+    private:
+        // data members initialized in constructor
+        const DustSystem* _ds;
+        int _Ncomp;
+        QVarLengthArray<double,8> _kappaextv;
+
+    public:
+        // constructor
+        // stores the extinction coefficients at the specified wavelength for all dust mixes
+        KappaRho(const DustSystem* ds, int ell) : _ds(ds), _Ncomp(ds->Ncomp()), _kappaextv(_Ncomp)
+        {
+            for (int h=0; h<_Ncomp; h++)
+                _kappaextv[h] = _ds->mix(h)->kappaext(ell);
+        }
+
+        // call-back function
+        // returns kappa*rho for the specified cell number (and for the wavelength-index bound in the constructor)
+        double operator() (int m)
+        {
+            double result = 0;
+            for (int h=0; h<_Ncomp; h++)
+                result += _kappaextv[h] * _ds->density(m,h);
+            return result;
+        }
+    };
+}
+
+////////////////////////////////////////////////////////////////////
+
 // Private class to output a FITS file with an optical depth map viewed from the center using Mollweide projection
 namespace
 {
@@ -482,23 +504,10 @@ namespace
     private:
         double opticaldepth(int ell, Position bfr, Direction bfk)
         {
-            int Ncomp = _ds->Ncomp();
-            vector<double> kappaextv(Ncomp);
-            for (int h=0; h<Ncomp; h++)
-                kappaextv[h] = _ds->mix(h)->kappaext(ell);
-
             _dgp.setPosition(bfr);
             _dgp.setDirection(bfk);
             _grid->path(&_dgp);
-
-            double tau = 0.0;
-            int N = _dgp.size();
-            for (int n=0; n<N; n++)
-            {
-                for (int h=0; h<Ncomp; h++)
-                    tau += kappaextv[h] * _ds->density(_dgp.m(n),h) * _dgp.ds(n);
-            }
-            return tau;
+            return _dgp.opticalDepth(KappaRho(_ds, ell));
         }
     };
 }
@@ -842,20 +851,10 @@ void DustSystem::fillOpticalDepth(PhotonPackage* pp)
         _crossed[index] += 1;
     }
 
-    // get the extinction coefficients at the relevant wavelength for all dust mixes
-    vector<double> kappaextv(_Ncomp);
-    for (int h=0; h<_Ncomp; h++)
-        kappaextv[h] = mix(h)->kappaext(pp->ell());
-
     // calculate and store the optical depth details in the photon package
-    pp->fillOpticalDepth([this,kappaextv](int m)
-    {
-        double result = 0;
-        for (int h=0; h<_Ncomp; h++)
-            result += kappaextv[h] * density(m,h);
-        return result;
-    });
+    pp->fillOpticalDepth(KappaRho(this, pp->ell()));
 
+    // verify that the result makes sense
     double tau = pp->tau();
     if (tau<0.0 || std::isnan(tau) || std::isinf(tau))
         throw FATALERROR("The optical depth along the path is not a positive number: tau = " + QString::number(tau));
@@ -868,32 +867,17 @@ double DustSystem::opticaldepth(PhotonPackage* pp, double distance)
     // determine the path and store the geometric details in the photon package
     _grid->path(pp);
 
-    // get the extinction coefficients at the relevant wavelength for all dust mixes
-    vector<double> kappaextv(_Ncomp);
-    for (int h=0; h<_Ncomp; h++)
-        kappaextv[h] = mix(h)->kappaext(pp->ell());
-
-    // calculate the optical depth at the specified distance
-    double tau = 0.0;
-    unsigned int n = 0;
-    unsigned int N = pp->size();
-    for (; n<N; n++)
-    {
-        for (int h=0; h<_Ncomp; h++)
-            tau += kappaextv[h] * density(pp->m(n),h) * pp->ds(n);
-        if (pp->s(n) > distance) break;
-    }
-
     // if such statistics are requested, keep track of the number of cells crossed
     if (_writeCellsCrossed)
     {
         QMutexLocker lock(&_crossedMutex);
-        if (n >= _crossed.size()) _crossed.resize(n+1);
-        _crossed[n] += 1;
+        unsigned int index = pp->size();
+        if (index >= _crossed.size()) _crossed.resize(index+1);
+        _crossed[index] += 1;
     }
 
-    // return the optical depth at the specified distance
-    return tau;
+    // calculate and return the optical depth at the specified distance
+    return pp->opticalDepth(KappaRho(this, pp->ell()), distance);
 }
 
 ////////////////////////////////////////////////////////////////////
