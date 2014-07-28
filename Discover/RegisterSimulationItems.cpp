@@ -117,6 +117,7 @@
 #include "SersicGeometry.hpp"
 #include "ShellGeometry.hpp"
 #include "SimpleInstrument.hpp"
+#include "SingleGrainSizeDistribution.hpp"
 #include "SmoothingKernel.hpp"
 #include "SpheGeometry.hpp"
 #include "SpheroidalGeometry.hpp"
@@ -322,6 +323,7 @@ void RegisterSimulationItems::registerAll()
     add<ModifiedPowerLawGrainSizeDistribution>();
     add<LogNormalGrainSizeDistribution>();
     add<ModifiedLogNormalGrainSizeDistribution>();
+    add<SingleGrainSizeDistribution>();
     add<ZubkoGraphiteGrainSizeDistribution>();
     add<ZubkoSilicateGrainSizeDistribution>();
     add<ZubkoPAHGrainSizeDistribution>();
