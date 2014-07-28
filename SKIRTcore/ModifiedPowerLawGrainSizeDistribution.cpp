@@ -18,7 +18,7 @@ ModifiedPowerLawGrainSizeDistribution::ModifiedPowerLawGrainSizeDistribution()
 
 void ModifiedPowerLawGrainSizeDistribution::setupSelfBefore()
 {
-    GrainSizeDistribution::setupSelfBefore();
+    RangeGrainSizeDistribution::setupSelfBefore();
 
     // verify the attributes
     if (_alpha >= 0) throw FATALERROR("The index of the power-law must be negative");

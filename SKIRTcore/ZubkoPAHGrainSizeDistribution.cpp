@@ -67,14 +67,18 @@ ZubkoPAHGrainSizeDistribution::ZubkoPAHGrainSizeDistribution(SimulationItem* par
 
 ////////////////////////////////////////////////////////////////////
 
-void ZubkoPAHGrainSizeDistribution::setupSelfBefore()
+double ZubkoPAHGrainSizeDistribution::amin() const
 {
-    // override the size range configured in the base class
-    setMinSize(amin_pah);
-    setMaxSize(amax_pah);
-
-    GrainSizeDistribution::setupSelfBefore();
+    return amin_pah;
 }
+
+////////////////////////////////////////////////////////////////////
+
+double ZubkoPAHGrainSizeDistribution::amax() const
+{
+    return amax_pah;
+}
+
 
 ////////////////////////////////////////////////////////////////////
 

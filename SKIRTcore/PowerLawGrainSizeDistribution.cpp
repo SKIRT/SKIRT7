@@ -18,7 +18,7 @@ PowerLawGrainSizeDistribution::PowerLawGrainSizeDistribution()
 
 void PowerLawGrainSizeDistribution::setupSelfBefore()
 {
-    GrainSizeDistribution::setupSelfBefore();
+    RangeGrainSizeDistribution::setupSelfBefore();
 
     // verify the attributes
     if (_gamma <= 0) throw FATALERROR("The exponent must be positive");

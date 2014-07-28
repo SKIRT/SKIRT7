@@ -69,14 +69,18 @@ ZubkoSilicateGrainSizeDistribution::ZubkoSilicateGrainSizeDistribution(Simulatio
 
 ////////////////////////////////////////////////////////////////////
 
-void ZubkoSilicateGrainSizeDistribution::setupSelfBefore()
+double ZubkoSilicateGrainSizeDistribution::amin() const
 {
-    // override the size range configured in the base class
-    setMinSize(amin_sil);
-    setMaxSize(amax_sil);
-
-    GrainSizeDistribution::setupSelfBefore();
+    return amin_sil;
 }
+
+////////////////////////////////////////////////////////////////////
+
+double ZubkoSilicateGrainSizeDistribution::amax() const
+{
+    return amax_sil;
+}
+
 
 ////////////////////////////////////////////////////////////////////
 

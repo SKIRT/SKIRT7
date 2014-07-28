@@ -6,7 +6,7 @@
 #ifndef POWERLAWGRAINSIZEDISTRIBUTION_HPP
 #define POWERLAWGRAINSIZEDISTRIBUTION_HPP
 
-#include "GrainSizeDistribution.hpp"
+#include "RangeGrainSizeDistribution.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
@@ -15,7 +15,7 @@
     = C \, a^{-\gamma} \qquad \text{for}\quad a_\text{min} \leq a \leq a_\text{max}, \f] where the
     the exponent \f$\gamma>0\f$ can be configured as an attribute. The size range and the
     proportionality factor \f$C\f$ can be configured in the GrainSizeDistribution base class. */
-class PowerLawGrainSizeDistribution: public GrainSizeDistribution
+class PowerLawGrainSizeDistribution: public RangeGrainSizeDistribution
 {
     Q_OBJECT
     Q_CLASSINFO("Title", "a power-law dust grain size distribution")

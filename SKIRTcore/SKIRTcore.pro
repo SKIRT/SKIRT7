@@ -262,7 +262,8 @@ HEADERS += \
     VoronoiStellarComp.hpp \
     AdaptiveMeshStellarComp.hpp \
     FileGrainComposition.hpp \
-    StellarSurfaceGeometry.hpp
+    StellarSurfaceGeometry.hpp \
+    RangeGrainSizeDistribution.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -485,4 +486,5 @@ SOURCES += \
     VoronoiStellarComp.cpp \
     AdaptiveMeshStellarComp.cpp \
     FileGrainComposition.cpp \
-    StellarSurfaceGeometry.cpp
+    StellarSurfaceGeometry.cpp \
+    RangeGrainSizeDistribution.cpp

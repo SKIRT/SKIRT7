@@ -10,12 +10,11 @@
 
 ////////////////////////////////////////////////////////////////////
 
-/** ZubkoSilicateGrainSizeDistribution represents the dust grain size distribution for the silicate
-    population in model BARE_GR_S of Zubko, Dwek & Arendt (2004, ApJS, 152, 211). The size range
-    configured in the GrainSizeDistribution base class is ignored and replaced by the appropriate
-    built-in values. The proportionality factor \f$C\f$ configured in the GrainSizeDistribution
-    base class is combined with the built-in front-factor. It should usually be set to the default
-    value of \f$C=1\f$. */
+/** ZubkoSilicateGrainSizeDistribution represents the dust grain size distribution and grain size
+    range for the silicate population in model BARE_GR_S of Zubko, Dwek & Arendt (2004, ApJS, 152,
+    211). The proportionality factor \f$C\f$ configured in the GrainSizeDistribution base class is
+    combined with the built-in front-factor. It should usually be set to the default value of
+    \f$C=1\f$. */
 class ZubkoSilicateGrainSizeDistribution: public GrainSizeDistribution
 {
     Q_OBJECT
@@ -36,15 +35,21 @@ public:
         value of 1. */
     explicit ZubkoSilicateGrainSizeDistribution(SimulationItem* parent, double C = 1.);
 
-protected:
-    /** This function verifies the property values. */
-    void setupSelfBefore();
-
     //======================== Other Functions =======================
 
 public:
+    /** This function implements part of the GrainSizeDistributionInterface. It returns the
+        built-in minimum grain size \f$a_\text{min}\f$ as described in the header for this class.
+        */
+    double amin() const;
+
+    /** This function implements part of the GrainSizeDistributionInterface. It returns the
+        built-in maximum grain size \f$a_\text{max}\f$ as described in the header for this class.
+        */
+    double amax() const;
+
     /** This function implements the missing part of the GrainSizeDistributionInterface. It returns
-        the value of \f$\Omega(a)\f$ as described in the header for this class. */
+        the built-in value of \f$\Omega(a)\f$ as described in the header for this class. */
     double dnda(double a) const;
 };
 

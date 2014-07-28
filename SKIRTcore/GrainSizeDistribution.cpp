@@ -9,7 +9,7 @@
 ////////////////////////////////////////////////////////////////////
 
 GrainSizeDistribution::GrainSizeDistribution()
-    : _amin(0), _amax(0), _C(0)
+    : _C(0)
 {
 }
 
@@ -19,40 +19,8 @@ void GrainSizeDistribution::setupSelfBefore()
 {
     SimulationItem::setupSelfBefore();
 
-    // verify the distribution range
-    if (_amin <= 0) throw FATALERROR("Minimum grain size must be positive");
-    if (_amax <= _amin) throw FATALERROR("Maximum grain size must be larger than minimum grain size");
-
     // verify the front factor
     if (_C <= 0) throw FATALERROR("The front factor must be positive");
-}
-
-////////////////////////////////////////////////////////////////////
-
-void GrainSizeDistribution::setMinSize(double value)
-{
-    _amin = value;
-}
-
-////////////////////////////////////////////////////////////////////
-
-double GrainSizeDistribution::minSize() const
-{
-    return _amin;
-}
-
-////////////////////////////////////////////////////////////////////
-
-void GrainSizeDistribution::setMaxSize(double value)
-{
-    _amax = value;
-}
-
-////////////////////////////////////////////////////////////////////
-
-double GrainSizeDistribution::maxSize() const
-{
-    return _amax;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -67,20 +35,6 @@ void GrainSizeDistribution::setFactor(double value)
 double GrainSizeDistribution::factor() const
 {
     return _C;
-}
-
-////////////////////////////////////////////////////////////////////
-
-double GrainSizeDistribution::amin() const
-{
-    return _amin;
-}
-
-////////////////////////////////////////////////////////////////////
-
-double GrainSizeDistribution::amax() const
-{
-    return _amax;
 }
 
 ////////////////////////////////////////////////////////////////////

@@ -18,7 +18,7 @@ LogNormalGrainSizeDistribution::LogNormalGrainSizeDistribution()
 
 void LogNormalGrainSizeDistribution::setupSelfBefore()
 {
-    GrainSizeDistribution::setupSelfBefore();
+    RangeGrainSizeDistribution::setupSelfBefore();
 
     // verify the attributes
     if (_a0 <= 0) throw FATALERROR("The centroid of the log-normal law must be positive");

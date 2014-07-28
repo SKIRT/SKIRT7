@@ -6,7 +6,7 @@
 #ifndef MODIFIEDPOWERLAWGRAINSIZEDISTRIBUTION_HPP
 #define MODIFIEDPOWERLAWGRAINSIZEDISTRIBUTION_HPP
 
-#include "GrainSizeDistribution.hpp"
+#include "RangeGrainSizeDistribution.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
@@ -26,7 +26,7 @@
     The functional form for the grain size distribution implemented by this class is inspired by the
     DustEM code, which is described in Compiègne et al. 2011 (AA, 525, A103) and can be downloaded
     from http://www.ias.u-psud.fr/DUSTEM/. */
-class ModifiedPowerLawGrainSizeDistribution: public GrainSizeDistribution
+class ModifiedPowerLawGrainSizeDistribution: public RangeGrainSizeDistribution
 {
     Q_OBJECT
     Q_CLASSINFO("Title", "a modified power-law dust grain size distribution")

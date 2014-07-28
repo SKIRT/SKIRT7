@@ -67,13 +67,16 @@ ZubkoGraphiteGrainSizeDistribution::ZubkoGraphiteGrainSizeDistribution(Simulatio
 
 ////////////////////////////////////////////////////////////////////
 
-void ZubkoGraphiteGrainSizeDistribution::setupSelfBefore()
+double ZubkoGraphiteGrainSizeDistribution::amin() const
 {
-    // override the size range configured in the base class
-    setMinSize(amin_gra);
-    setMaxSize(amax_gra);
+    return amin_gra;
+}
 
-    GrainSizeDistribution::setupSelfBefore();
+////////////////////////////////////////////////////////////////////
+
+double ZubkoGraphiteGrainSizeDistribution::amax() const
+{
+    return amax_gra;
 }
 
 ////////////////////////////////////////////////////////////////////
