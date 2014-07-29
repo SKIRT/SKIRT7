@@ -23,4 +23,5 @@ SUBDIRS += \
     Discover \
     SKIRTmain \
     FitSKIRTcore \
-    FitSKIRTmain
+    FitSKIRTmain \
+    SkirtMakeUp
