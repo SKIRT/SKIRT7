@@ -7,6 +7,8 @@
 #define MAINWINDOW_HPP
 
 #include <QMainWindow>
+class WizardEngine;
+class QLayout;
 
 ////////////////////////////////////////////////////////////////////
 
@@ -37,6 +39,11 @@ private:
 
     // ==================== Event Handling ====================
 
+public slots:
+    /** This function replaced the wizard pane displayed in the central area by a pane newly
+        retrieved from the wizard engine. */
+    void replaceWizardPane();
+
 protected:
     /** This function is invoked when the user attempts to close the main window or to quit the
         application. If there are any unsaved changes, the function offers the user a chance to
@@ -44,6 +51,13 @@ protected:
         function stores the main window's position and size for future reference and allows the
         application to exit. */
     void closeEvent(QCloseEvent* event);
+
+    // ==================== Data Members ====================
+
+private:
+    WizardEngine* _wizard;
+    QWidget* _wizardPane;
+    QLayout* _wizardLayout;
 };
 
 ////////////////////////////////////////////////////////////////////

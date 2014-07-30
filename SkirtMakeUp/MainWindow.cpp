@@ -5,9 +5,14 @@
 
 #include "MainWindow.hpp"
 
+#include "WizardEngine.hpp"
 #include <QApplication>
 #include <QFileOpenEvent>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
 #include <QLabel>
+#include <QMessageBox>
+#include <QPushButton>
 #include <QSettings>
 #include <QStatusBar>
 
@@ -15,21 +20,46 @@
 
 MainWindow::MainWindow()
 {
-    // set a minimum window size
-    setMinimumSize(680, 510);
-
-    // set the window title
+    // setup the window, restoring previous position and size
     setWindowTitle(QCoreApplication::applicationName());
+    setMinimumSize(680, 510);
+    readSettings();
 
     // create the status bar
     statusBar()->addPermanentWidget(new QLabel(QCoreApplication::applicationVersion()));
     statusBar()->showMessage("Ready to roll", 3000);
 
-    // restore previous window position and size
-    readSettings();
+    // create the pane that holds the buttons to drive the wizard
+    auto advanceButton = new QPushButton("Continue");
+    auto retreatButton = new QPushButton("Back");
+    auto buttonLayout = new QHBoxLayout;
+    buttonLayout->addWidget(retreatButton);
+    buttonLayout->addWidget(advanceButton);
+
+    // create the pane that will hold the wizard UI
+    _wizardPane = new QLabel("Start");
+    _wizardLayout = new QHBoxLayout;
+    _wizardLayout->addWidget(_wizardPane);
+
+    // create the central area
+    auto centralLayout = new QVBoxLayout;
+    auto centralArea = new QWidget;
+    centralLayout->addLayout(_wizardLayout);
+    centralLayout->addLayout(buttonLayout);
+    centralArea->setLayout(centralLayout);
+    setCentralWidget(centralArea);
+
+    // create the wizard engine and connect it into our UI
+    _wizard = new WizardEngine(this);
+    connect(advanceButton, SIGNAL(clicked()), _wizard, SLOT(advance()));
+    connect(retreatButton, SIGNAL(clicked()), _wizard, SLOT(retreat()));
+    connect(_wizard, SIGNAL(canAdvanceChangedTo(bool)), advanceButton, SLOT(setEnabled(bool)));
+    connect(_wizard, SIGNAL(canRetreatChangedTo(bool)), retreatButton, SLOT(setEnabled(bool)));
+    connect(_wizard, SIGNAL(stateChanged()), this, SLOT(replaceWizardPane()));
+    _wizard->emitStateChanged();
 }
 
-/////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
 
 void MainWindow::readSettings()
 {
@@ -40,7 +70,7 @@ void MainWindow::readSettings()
     move(pos);
 }
 
-/////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
 
 void MainWindow::writeSettings()
 {
@@ -49,19 +79,34 @@ void MainWindow::writeSettings()
     settings.setValue("mainsize", size());
 }
 
-/////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+
+void MainWindow::replaceWizardPane()
+{
+    _wizardLayout->removeWidget(_wizardPane);
+    delete _wizardPane;
+    _wizardPane = _wizard->createPane();
+    _wizardLayout->addWidget(_wizardPane);
+}
+
+////////////////////////////////////////////////////////////////////
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    if (false)
+    if (_wizard->isDirty())
     {
-        event->ignore();
+        auto ret = QMessageBox::warning(this, QCoreApplication::applicationName(),
+                                        "Do you want to discard your unsaved changes?",
+                                        QMessageBox::Discard | QMessageBox::Cancel);
+        if (ret == QMessageBox::Cancel)
+        {
+            event->ignore();
+            return;
+        }
     }
-    else
-    {
-        writeSettings();
-        event->accept();
-    }
+
+    writeSettings();
+    event->accept();
 }
 
 ////////////////////////////////////////////////////////////////////
