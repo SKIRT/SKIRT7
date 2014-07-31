@@ -51,9 +51,11 @@ PRE_TARGETDEPS += build_version
 HEADERS += \
     SkirtMakeUp.hpp \
     MainWindow.hpp \
-    WizardEngine.hpp
+    WizardEngine.hpp \
+    BasicChoiceWizardPane.hpp
 
 SOURCES += \
     SkirtMakeUp.cpp \
     MainWindow.cpp \
-    WizardEngine.cpp
+    WizardEngine.cpp \
+    BasicChoiceWizardPane.cpp

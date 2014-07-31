@@ -32,19 +32,25 @@ MainWindow::MainWindow()
     // create the pane that holds the buttons to drive the wizard
     auto advanceButton = new QPushButton("Continue");
     auto retreatButton = new QPushButton("Back");
+    auto buttonGroupLayout = new QHBoxLayout;
+    buttonGroupLayout->addWidget(retreatButton);
+    buttonGroupLayout->addWidget(advanceButton);
     auto buttonLayout = new QHBoxLayout;
-    buttonLayout->addWidget(retreatButton);
-    buttonLayout->addWidget(advanceButton);
+    buttonLayout->addStretch(2);
+    buttonLayout->addLayout(buttonGroupLayout, 1);
 
     // create the pane that will hold the wizard UI
-    _wizardPane = new QLabel("Start");
+    _wizardPane = new QWidget;
     _wizardLayout = new QHBoxLayout;
     _wizardLayout->addWidget(_wizardPane);
+    auto wizardArea = new QFrame;
+    wizardArea->setFrameStyle(QFrame::StyledPanel);
+    wizardArea->setLayout(_wizardLayout);
 
     // create the central area
     auto centralLayout = new QVBoxLayout;
     auto centralArea = new QWidget;
-    centralLayout->addLayout(_wizardLayout);
+    centralLayout->addWidget(wizardArea);
     centralLayout->addLayout(buttonLayout);
     centralArea->setLayout(centralLayout);
     setCentralWidget(centralArea);

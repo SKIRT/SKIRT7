@@ -70,6 +70,12 @@ public:
         signals. */
     void emitStateChanged();
 
+    // ================== State Updating ====================
+
+public slots:
+    /** This function updates the basic choice to the specified value. */
+    void setBasicChoice(int newChoice);
+
     // ================== GUI Generation ====================
 
 public:
@@ -83,9 +89,21 @@ public:
     // ================== Data Members ====================
 
 private:
+    // the top-level state; always valid
     enum State { BasicChoice, CreateRoot, ConstructHierarchy, SaveHierarchy };
     State _state;
+
+    // the basic choice; always valid but remains Unknown until BasicChoice has been completed at least once
+    enum Choice { Unknown, NewSki };
+    Choice _choice;
+
+    // the simulation item hiearchy under construction; pointer has ownership;
+    // always valid but remains null until CreateRoot has been completed at least once
     SimulationItem* _root;
+
+    // the simulation item currently being handled; pointer is a reference without ownership;
+    // valid only during ConstructHierarchy
+    SimulationItem* _current;
 };
 
 ////////////////////////////////////////////////////////////////////

@@ -6,12 +6,13 @@
 #include "WizardEngine.hpp"
 
 #include "SimulationItem.hpp"
+#include "BasicChoiceWizardPane.hpp"
 #include <QLabel>
 
 ////////////////////////////////////////////////////////////////////
 
 WizardEngine::WizardEngine(QObject* parent)
-    : QObject(parent), _state(BasicChoice), _root(0)
+    : QObject(parent), _state(BasicChoice), _choice(Unknown), _root(0), _current(0)
 {
 }
 
@@ -26,7 +27,17 @@ WizardEngine::~WizardEngine()
 
 bool WizardEngine::canAdvance()
 {
-    return _state != SaveHierarchy;
+    switch (_state)
+    {
+    case BasicChoice:
+        return _choice != Unknown;
+    case CreateRoot:
+        return true;
+    case ConstructHierarchy:
+        return true;
+    case SaveHierarchy:
+        return false;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -47,22 +58,25 @@ bool WizardEngine::isDirty()
 
 void WizardEngine::advance()
 {
-    switch (_state)
+    if (canAdvance())
     {
-    case BasicChoice:
-        _state = CreateRoot;
-        emitStateChanged();
-        break;
-    case CreateRoot:
-        _state = ConstructHierarchy;
-        emitStateChanged();
-        break;
-    case ConstructHierarchy:
-        _state = SaveHierarchy;
-        emitStateChanged();
-        break;
-    case SaveHierarchy:
-        break;
+        switch (_state)
+        {
+        case BasicChoice:
+            _state = CreateRoot;
+            emitStateChanged();
+            break;
+        case CreateRoot:
+            _state = ConstructHierarchy;
+            emitStateChanged();
+            break;
+        case ConstructHierarchy:
+            _state = SaveHierarchy;
+            emitStateChanged();
+            break;
+        case SaveHierarchy:
+            break;
+        }
     }
 }
 
@@ -100,9 +114,27 @@ void WizardEngine::emitStateChanged()
 
 ////////////////////////////////////////////////////////////////////
 
+void WizardEngine::setBasicChoice(int newChoice)
+{
+    _choice = static_cast<Choice>(newChoice);
+    emit canAdvanceChangedTo(canAdvance());
+}
+
+////////////////////////////////////////////////////////////////////
+
 QWidget* WizardEngine::createPane()
 {
-    return new QLabel(QString::number(_state));
+    switch (_state)
+    {
+    case BasicChoice:
+        return new BasicChoiceWizardPane(_choice, this);
+    case CreateRoot:
+        return new QLabel("Dummy wizard pane for state CreateRoot");
+    case ConstructHierarchy:
+        return new QLabel("Dummy wizard pane for state ConstructHierarchy");
+    case SaveHierarchy:
+        return new QLabel("Dummy wizard pane for state SaveHierarchy");
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
