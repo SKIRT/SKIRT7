@@ -154,33 +154,27 @@ void InstrumentFrame::detect(PhotonPackage* pp)
 void InstrumentFrame::calibrateAndWriteData(int ell)
 {
     Units* units = find<Units>();
+    double c = units->c();
     WavelengthGrid* lambdagrid = find<WavelengthGrid>();
 
-    // conversion from bolometric luminosities (units W) to monochromatic luminosities (units W/m)
-    // --> divide by delta-lambda
+    // conversion from bolometric luminosities (units W) to monochromatic luminosities (units W/Hz)
+    // --> multiply by lambda^2/c/delta-lambda
+    double lambda = lambdagrid->lambda(ell);
     double dlambda = lambdagrid->dlambda(ell);
 
-    // correction for the area of the pixels of the images; the units are now W/m/sr
-    // --> divide by area
+    // correction for the area of the pixels of the images and the distance; the units are now W/m2/Hz/sr
+    // --> divide by fourpid2 * area
     double xpresang = 2.0*atan(_xpres/(2.0*_distance));
     double ypresang = 2.0*atan(_ypres/(2.0*_distance));
     double area = xpresang*ypresang;
-
-    // calibration step 3: conversion of the flux per pixel from monochromatic luminosity units (W/m/sr)
-    // to flux density units (W/m3/sr) by taking into account the distance
-    // --> divide by fourpid2
     double fourpid2 = 4.0*M_PI*_distance*_distance;
 
-    // we use lambda*flambda for the surface brightness (in units like W/m2/arcsec2)
-    // --> multiply by lambda
-    double lambda = lambdagrid->lambda(ell);
-
-    // conversion from program SI units (at this moment W/m3/sr) to the correct output units
-    // --> multiply by unit conversion factor
-    double unitfactor = units->obolsurfacebrightness(1);
+    // conversion from program SI units (at this moment W/m2/Hz/sr) to the correct output units
+    // --> multiply by the unit conversion factor
+    double unitfactor = units->osurfacebrightness(1.0);
 
     // perform the conversion, in place
-    _ftotv *= ((unitfactor * lambda) / (dlambda * area * fourpid2));
+    _ftotv *= ((unitfactor * lambda*lambda/c/dlambda) / (area * fourpid2));
 
     // write a FITS file
     QString filename = find<FilePaths>()->output(_instrument->instrumentName()
@@ -188,7 +182,7 @@ void InstrumentFrame::calibrateAndWriteData(int ell)
     find<Log>()->info("Writing total flux " + QString::number(ell) + " to FITS file " + filename + "...");
     FITSInOut::write(filename, _ftotv, _Nxp, _Nyp, 1,
                    units->olength(_xpres), units->olength(_ypres),
-                   units->ubolsurfacebrightness(), units->ulength());
+                   units->usurfacebrightness(), units->ulength());
 }
 
 ////////////////////////////////////////////////////////////////////

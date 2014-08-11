@@ -131,6 +131,7 @@
 #include "TransientDustEmissivity.hpp"
 #include "TriaxialGeometry.hpp"
 #include "Trust1Geometry.hpp"
+#include "Trust2Geometry.hpp"
 #include "Trust6Geometry.hpp"
 #include "Trust7aGeometry.hpp"
 #include "Trust7bGeometry.hpp"
@@ -227,6 +228,7 @@ void RegisterSimulationItems::registerAll()
     add<StellarSurfaceGeometry>();
     add<UniformCuboidGeometry>();
     add<Trust1Geometry>();
+    add<Trust2Geometry>();
     add<Trust6Geometry>();
     add<Trust7aGeometry>();
     add<Trust7bGeometry>();

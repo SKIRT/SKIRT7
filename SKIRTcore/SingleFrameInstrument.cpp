@@ -121,11 +121,15 @@ void SingleFrameInstrument::calibrateAndWriteDataCubes(QList< Array*> farrays, Q
 {
     WavelengthGrid* lambdagrid = find<WavelengthGrid>();
     int Nlambda = lambdagrid->Nlambda();
+    Units* units = find<Units>();
+    double c = units->c();
 
-    // calibration step 1: conversion from bolometric luminosities (units W) to monochromatic luminosities (units W/m)
+    // calibration step 1: conversion from bolometric luminosities (units W)
+    // to monochromatic luminosities (units W/Hz)
 
     for (int ell=0; ell<Nlambda; ell++)
     {
+        double lambda = lambdagrid->lambda(ell);
         double dlambda = lambdagrid->dlambda(ell);
         for (int i=0; i<_Nxp; i++)
         {
@@ -134,38 +138,29 @@ void SingleFrameInstrument::calibrateAndWriteDataCubes(QList< Array*> farrays, Q
                 int m = i + _Nxp*j + _Nxp*_Nyp*ell;
                 foreach (Array* farr, farrays)
                 {
-                    (*farr)[m] /= dlambda;
+                    (*farr)[m] *= lambda*lambda/c/dlambda;
                 }
             }
         }
     }
 
-    // calibration step 2: correction for the area of the pixels of the images; the units are now W/m/sr
+    // calibration step 2: correction for the area of the pixels of the
+    // images and the distance; the units are now W/m2/Hz/sr
 
     double xpresang = 2.0*atan(_xpres/(2.0*_distance));
     double ypresang = 2.0*atan(_ypres/(2.0*_distance));
     double area = xpresang*ypresang;
-    foreach (Array* farr, farrays)
-    {
-        (*farr) /= area;
-    }
-
-    // calibration step 3: conversion of the flux per pixel from monochromatic luminosity units (W/m/sr)
-    // to flux density units (W/m3/sr) by taking into account the distance
-
     double fourpid2 = 4.0*M_PI*_distance*_distance;
     foreach (Array* farr, farrays)
     {
-        (*farr) /= fourpid2;
+        (*farr) /= fourpid2*area;
     }
 
-    // conversion from program SI units (at this moment W/m3/sr) to the correct output units;
-    // we use lambda*flambda for the surface brightness (in units like W/m2/arcsec2)
+    // calibration step 3: conversion from program SI units (W/m2/Hz/sr) to the
+    // correct output units (typically MJy/sr)
 
-    Units* units = find<Units>();
     for (int ell=0; ell<Nlambda; ell++)
     {
-        double lambda = lambdagrid->lambda(ell);
         for (int i=0; i<_Nxp; i++)
         {
             for (int j=0; j<_Nyp; j++)
@@ -173,7 +168,7 @@ void SingleFrameInstrument::calibrateAndWriteDataCubes(QList< Array*> farrays, Q
                 int m = i + _Nxp*j + _Nxp*_Nyp*ell;
                 foreach (Array* farr, farrays)
                 {
-                    (*farr)[m] = units->obolsurfacebrightness(lambda*(*farr)[m]);
+                    (*farr)[m] = units->osurfacebrightness((*farr)[m]);
                 }
             }
         }
@@ -188,7 +183,7 @@ void SingleFrameInstrument::calibrateAndWriteDataCubes(QList< Array*> farrays, Q
         find<Log>()->info("Writing " + fnames[q] + " flux to FITS file " + fitsfilename + "...");
         FITSInOut::write(fitsfilename, *(farrays[q]), _Nxp, _Nyp, Nlambda,
                        units->olength(_xpres), units->olength(_ypres),
-                       units->ubolsurfacebrightness(), units->ulength());
+                       units->usurfacebrightness(), units->ulength());
     }
 }
 
