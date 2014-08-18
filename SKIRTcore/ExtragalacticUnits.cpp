@@ -27,12 +27,10 @@ ExtragalacticUnits::ExtragalacticUnits()
     _unitForQty["energy"] = "J";
     _unitForQty["bolluminosity"] = "Lsun";
     _unitForQty["monluminosity"] = "Lsun/micron";
-    _unitForQty["fluxdensity"] = "Jy";
-//    _unitForQty["bolflux"] = "W/m2";
-//    _unitForQty["monflux"] = "W/m2/micron";
-    _unitForQty["surfacebrightness"] = "MJy/sr";
-//    _unitForQty["bolsurfacebrightness"] = "W/m2/arcsec2";
-//    _unitForQty["monsurfacebrightness"] = "W/m2/micron/arcsec2";
+    _unitForQty["bolflux"] = "W/m2";
+    _unitForQty["monflux"] = "W/m2/micron";
+    _unitForQty["bolsurfacebrightness"] = "W/m2/arcsec2";
+    _unitForQty["monsurfacebrightness"] = "W/m2/micron/arcsec2";
     _unitForQty["temperature"] = "K";
     _unitForQty["angle"] = "arcsec";
     _unitForQty["posangle"] = "deg";

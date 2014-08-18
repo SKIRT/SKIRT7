@@ -120,7 +120,7 @@ protected:
         subsequent columns provide the corresponding data point from one of the specified arrays.
         The calibration performed by this function takes care of the
         conversion from bolometric luminosity units to flux density units. Typical units for the
-        quantities in the SED file are Jy. The calibration is
+        quantities in the SED file are are \f$\text{W}\,\text{m}^{-2}\f$. The calibration is
         performed in-place in the arrays, so the incoming data is overwritten. */
     void calibrateAndWriteSEDs(QList< Array* > Farrays, QStringList Fnames);
 

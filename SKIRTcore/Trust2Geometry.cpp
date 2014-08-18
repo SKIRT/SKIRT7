@@ -13,9 +13,6 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////
 
 Trust2Geometry::Trust2Geometry()
-    : _M0(0), _L0(0), _R0(0), _rho0(0),
-      _M1(0), _R1(0), _rho1(0), _bfr1(),
-      _M2(0), _R2(0), _rho2(0), _bfr2()
 {
 }
 
@@ -26,42 +23,41 @@ void Trust2Geometry::setupSelfBefore()
     GenGeometry::setupSelfBefore();
 
     // set property values
-    const double AU = Units::AU();
-
-    _M0 = 0.00261592496620725;
-    _L0 = 30.0 * AU;
-    _R0 = 15.0 * AU;
-    _rho0 = _M0 / (8.0*_L0*_L0*_L0-M_PI/6.0*_R0*_R0*_R0);
-
-    _M1 = 0.383609259628382;
-    _bfr1 = Position(-20.0*AU,-15.0*AU,-10.0*AU);
-    _R1 = 5.0*AU;
-    _rho1 = _M1 / (4.0*M_PI/3.0*_R1*_R1*_R1);
-
-    _M2 = 0.613774815405411;
-    _bfr2 = Position(-10.0/3.0*AU,5.0/3.0*AU,-5.0/3.0*AU);
-    _R2 = 20.0 * AU;
-    _rho2 = _M2 / (4.0*M_PI/3.0*_R2*_R2*_R2);
+    double AU = Units::AU();
+    _slab = Box(-5*pc, -5*pc, -5*pc, 5*pc, 5*pc, -2*pc);
+    _rho = 1.0 / _slab.volume();
 }
 
 //////////////////////////////////////////////////////////////////////
 
 double Trust2Geometry::density(Position bfr) const
 {
+    const double AU = Units::AU();
+    const double xmax = 60.0*AU;
+    const double ymax = 60.0*AU;
+    const double zmax = 60.0*AU;
+    const double rmin = 15.0*AU;
+    const double Mld = 0.00261592;
+    const double xs1 = 10.0*AU;
+    const double ys1 = 15.0*AU;
+    const double zs1 = 20.0*AU;
+    const double rs1 = 5.0*AU;
+    const double Ms1 = 0.383609;
+    const double xs1 = 26.666667*AU;
+    const double ys1 = 31.666667*AU;
+    const double zs1 = 28.333333*AU;
+    const double rs1 = 20.0*AU;
+    const double Ms2 = 0.613775;
     double x, y, z;
     bfr.cartesian(x,y,z);
-    if (x<-_L0 || x>_L0 || y<-_L0 || y>_L0 || z<-_L0 || z>_L0) return 0.0;
-    double dd0 = (x+_L0)*(x+_L0) + (y+_L0)*(y+_L0) + (z+_L0)*(z+_L0);
-    if (dd0<_R0*_R0) return 0.0;
-    double rho = _rho0;
-    double x1, y1, z1;
-    _bfr1.cartesian(x1,y1,z1);
-    double dd1 = (x-x1)*(x-x1) + (y-y1)*(y-y1) + (z-z1)*(z-z1);
-    if (dd1<_R1*_R1) rho += _rho1;
-    double x2, y2, z2;
-    _bfr2.cartesian(x2,y2,z2);
-    double dd2 = (x-x2)*(x-x2) + (y-y2)*(y-y2) + (z-z2)*(z-z2);
-    if (dd2<_R2*_R2) rho += _rho2;
+    double r = bfr.radius();
+    if (x<0.0 || x>xmax || y<0.0 || y>ymax || z<0.0 || z>zmax || r<rmin)
+        return 0.0;
+    double rho = rhold;
+    double d2s1 = (x-xs1)*(x-xs1) + (y-ys1)*(y-ys1) + (z-zs1)*(z-zs1);
+    if (d2s1 < rs1*rs1) rho += rhos1;
+    double d2s2 = (x-xs2)*(x-xs2) + (y-ys2)*(y-ys2) + (z-zs2)*(z-zs2);
+    if (d2s2 < rs2*rs2) rho += rhos2;
     return rho;
 }
 
@@ -69,82 +65,31 @@ double Trust2Geometry::density(Position bfr) const
 
 Position Trust2Geometry::generatePosition() const
 {
-    double X = _random->uniform();
-    if (X<_M0)
-    {
-        double dd0 = 0.0;
-        double x, y, z;
-        while (dd0<_R0*_R0)
-        {
-            x = (2.0*_random->uniform()-1.0) * _L0;
-            y = (2.0*_random->uniform()-1.0) * _L0;
-            z = (2.0*_random->uniform()-1.0) * _L0;
-            dd0 = (x+_L0)*(x+_L0) + (y+_L0)*(y+_L0) + (z+_L0)*(z+_L0);
-        }
-        return Position(x,y,z);
-    }
-    else if (X<_M0+_M1)
-    {
-        Direction bfk = _random->direction();
-        double kx, ky, kz;
-        bfk.cartesian(kx,ky,kz);
-        double r = _R1*pow(_random->uniform(),1.0/3.0);
-        double x1, y1, z1;
-        _bfr1.cartesian(x1,y1,z1);
-        double x = x1 + r*kx;
-        double y = y1 + r*ky;
-        double z = z1 + r*kz;
-        return Position(x,y,z);
-    }
-    else
-    {
-        Direction bfk = _random->direction();
-        double kx, ky, kz;
-        bfk.cartesian(kx,ky,kz);
-        double r = _R2*pow(_random->uniform(),1.0/3.0);
-        double x2, y2, z2;
-        _bfr2.cartesian(x2,y2,z2);
-        double x = x2 + r*kx;
-        double y = y2 + r*ky;
-        double z = z2 + r*kz;
-        return Position(x,y,z);
-    }
+
+
+
+    return _random->position(_slab);
 }
 
 //////////////////////////////////////////////////////////////////////
 
 double Trust2Geometry::SigmaX() const
 {
-    double x2, y2, z2;
-    _bfr2.cartesian(x2,y2,z2);
-    double Sigma0 = 2.0*_L0*_rho0;
-    double Sigma1 = 0.0;
-    double Sigma2 = 2.0*sqrt(_R2*_R2-y2*y2-z2*z2)*_rho2;
-    return Sigma0 + Sigma1 + Sigma2;
+    return 0;
 }
 
 //////////////////////////////////////////////////////////////////////
 
 double Trust2Geometry::SigmaY() const
 {
-    double x2, y2, z2;
-    _bfr2.cartesian(x2,y2,z2);
-    double Sigma0 = 2.0*_L0*_rho0;
-    double Sigma1 = 0.0;
-    double Sigma2 = 2.0*sqrt(_R2*_R2-x2*x2-z2*z2)*_rho2;
-    return Sigma0 + Sigma1 + Sigma2;
+    return 0;
 }
 
 //////////////////////////////////////////////////////////////////////
 
 double Trust2Geometry::SigmaZ() const
 {
-    double x2, y2, z2;
-    _bfr2.cartesian(x2,y2,z2);
-    double Sigma0 = 2.0*_L0*_rho0;
-    double Sigma1 = 0.0;
-    double Sigma2 = 2.0*sqrt(_R2*_R2-x2*x2-y2*y2)*_rho2;
-    return Sigma0 + Sigma1 + Sigma2;
+    return _rho * _slab.zwidth();
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -338,12 +338,11 @@ void PerspectiveInstrument::detect(PhotonPackage* pp)
 void PerspectiveInstrument::write()
 {
     Units* units = find<Units>();
-    double c = units->c();
     WavelengthGrid* lambdagrid = find<WavelengthGrid>();
     int Nlambda = find<WavelengthGrid>()->Nlambda();
 
-    // multiply each sample by lambda^2/c/dlamdba and by the constant factor 1/(4 pi s^2)
-    // to obtain the surface brightness and convert to output units (such as MJy/sr)
+    // multiply each sample by lambda/dlamdba and by the constant factor 1/(4 pi s^2)
+    // to obtain the surface brightness and convert to output units (such as W/m2/arcsec2)
 
     double front = 1. / (4.*M_PI*_s*_s);
     for (int ell=0; ell<Nlambda; ell++)
@@ -355,7 +354,7 @@ void PerspectiveInstrument::write()
             for (int j=0; j<_Ny; j++)
             {
                 int m = i + _Nx*j + _Nx*_Ny*ell;
-                _ftotv[m] = units->osurfacebrightness(_ftotv[m]*front*lambda*lambda/c/dlambda);
+                _ftotv[m] = units->obolsurfacebrightness(_ftotv[m]*front*lambda/dlambda);
             }
         }
     }
@@ -366,7 +365,7 @@ void PerspectiveInstrument::write()
     find<Log>()->info("Writing total flux to FITS file " + filename + "...");
     FITSInOut::write(filename, _ftotv, _Nx, _Ny, Nlambda,
                    units->olength(_s), units->olength(_s),
-                   units->usurfacebrightness(), units->ulength());
+                   units->ubolsurfacebrightness(), units->ulength());
 }
 
 ////////////////////////////////////////////////////////////////////

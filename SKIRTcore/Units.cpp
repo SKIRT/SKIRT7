@@ -138,32 +138,20 @@ namespace
             _factor["monluminosity W/micron"] = 1e6;
             _factor["monluminosity Lsun/micron"] = _Lsun * 1e6;
 
-            // flux density
-            _factor["fluxdensity W/m2/Hz"] = 1.;
-            _factor["fluxdensity Jy"] = 1e-26;
-            _factor["fluxdensity mJy"] = 1e-29;
-            _factor["fluxdensity MJy"] = 1e-20;
+            // bolometric flux
+            _factor["bolflux W/m2"] = 1.;
 
-//            // bolometric flux
-//            _factor["bolflux W/m2"] = 1.;
+            // monochromatic flux
+            _factor["monflux W/m3"] = 1.;
+            _factor["monflux W/m2/micron"] = 1e6;
 
-//            // monochromatic flux
-//            _factor["monflux W/m3"] = 1.;
-//            _factor["monflux W/m2/micron"] = 1e6;
+            // bolometric surface brightness
+            _factor["bolsurfacebrightness W/m2/sr"] = 1.;
+            _factor["bolsurfacebrightness W/m2/arcsec2"] = 1. / pow(M_PI/(180.*3600.),2);
 
-            // surface brightness
-            _factor["surfacebrightness W/m2/Hz/sr"] = 1.;
-            _factor["surfacebrightness Jy/sr"] = 1e-26;
-            _factor["surfacebrightness MJy/sr"] = 1e-20;
-            _factor["surfacebrightness W/m2/Hz/arcsec2"] = 1. / pow(M_PI/(180.*3600.),2);
-
-//            // bolometric surface brightness
-//            _factor["bolsurfacebrightness W/m2/sr"] = 1.;
-//            _factor["bolsurfacebrightness W/m2/arcsec2"] = 1. / pow(M_PI/(180.*3600.),2);
-
-//            // monochromatic surface brightness
-//            _factor["monsurfacebrightness W/m3/sr"] = 1.;
-//            _factor["monsurfacebrightness W/m2/micron/arcsec2"] = 1e6 / pow(M_PI/(180.*3600.),2);
+            // monochromatic surface brightness
+            _factor["monsurfacebrightness W/m3/sr"] = 1.;
+            _factor["monsurfacebrightness W/m2/micron/arcsec2"] = 1e6 / pow(M_PI/(180.*3600.),2);
 
             // temperature
             _factor["temperature K"] = 1.;
@@ -217,8 +205,10 @@ void Units::initCache()
     _uenergy = _unitForQty["energy"];
     _ubolluminosity = _unitForQty["bolluminosity"];
     _umonluminosity = _unitForQty["monluminosity"];
-    _ufluxdensity = _unitForQty["fluxdensity"];
-    _usurfacebrightness = _unitForQty["surfacebrightness"];
+    _ubolflux = _unitForQty["bolflux"];
+    _umonflux = _unitForQty["monflux"];
+    _ubolsurfacebrightness = _unitForQty["bolsurfacebrightness"];
+    _umonsurfacebrightness = _unitForQty["monsurfacebrightness"];
     _utemperature = _unitForQty["temperature"];
     _uangle = _unitForQty["angle"];
     _uposangle = _unitForQty["posangle"];
@@ -240,8 +230,10 @@ void Units::initCache()
     _cenergy = in("energy", _uenergy);
     _cbolluminosity = in("bolluminosity", _ubolluminosity);
     _cmonluminosity = in("monluminosity", _umonluminosity);
-    _cfluxdensity = in("fluxdensity", _ufluxdensity);
-    _csurfacebrightness = in("surfacebrightness", _usurfacebrightness);
+    _cbolflux = in("bolflux", _ubolflux);
+    _cmonflux = in("monflux", _umonflux);
+    _cbolsurfacebrightness = in("bolsurfacebrightness", _ubolsurfacebrightness);
+    _cmonsurfacebrightness = in("monsurfacebrightness", _umonsurfacebrightness);
     _ctemperature = in("temperature", _utemperature);
     _cangle = in("angle", _uangle);
     _cposangle = in("posangle", _uposangle);
@@ -716,44 +708,86 @@ double Units::omonluminosity(double Llambda) const
 
 ////////////////////////////////////////////////////////////////////
 
-QString Units::ufluxdensity() const
+QString Units::ubolflux() const
 {
-    return _ufluxdensity;
+    return _ubolflux;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double Units::ifluxdensity(double Fnu) const
+double Units::ibolflux(double F) const
 {
-    return Fnu*_cfluxdensity;
+    return F*_cbolflux;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double Units::ofluxdensity(double Fnu) const
+double Units::obolflux(double F) const
 {
-    return Fnu/_cfluxdensity;
+    return F/_cbolflux;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-QString Units::usurfacebrightness() const
+QString Units::umonflux() const
 {
-    return _usurfacebrightness;
+    return _umonflux;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double Units::isurfacebrightness(double fnu) const
+double Units::imonflux(double Flambda) const
 {
-    return fnu*_csurfacebrightness;
+    return Flambda*_cmonflux;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double Units::osurfacebrightness(double fnu) const
+double Units::omonflux(double Flambda) const
 {
-    return fnu/_csurfacebrightness;
+    return Flambda/_cmonflux;
+}
+
+////////////////////////////////////////////////////////////////////
+
+QString Units::ubolsurfacebrightness() const
+{
+    return _ubolsurfacebrightness;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double Units::ibolsurfacebrightness(double f) const
+{
+    return f*_cbolsurfacebrightness;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double Units::obolsurfacebrightness(double f) const
+{
+    return f/_cbolsurfacebrightness;
+}
+
+////////////////////////////////////////////////////////////////////
+
+QString Units::umonsurfacebrightness() const
+{
+    return _umonsurfacebrightness;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double Units::imonsurfacebrightness(double flambda) const
+{
+    return flambda*_cmonsurfacebrightness;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double Units::omonsurfacebrightness(double flambda) const
+{
+    return flambda/_cmonsurfacebrightness;
 }
 
 ////////////////////////////////////////////////////////////////////

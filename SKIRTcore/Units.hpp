@@ -331,31 +331,57 @@ public:
         used SI units (\f${\text{W}}\, {\text{m}}^{-1}\f$) to the program's input/output units. */
     double omonluminosity(double Llambda) const;
 
-    /** This function returns a string containing the name of the unit of flux density \f$F_\nu\f$
-        adopted by the program for input/output (internally, only SI units are used). */
-    QString ufluxdensity() const;
+    /** This function returns a string containing the name of the unit of total flux adopted by the
+        program for input/output (internally, only SI units are used). */
+    QString ubolflux() const;
 
-    /** This function converts the flux density \f$F_\nu\f$ from the program's input/output units
-        to the internally used SI units (\f${\text{W}}\, {\text{m}}^{-2}\, {\text{Hz}}^{-1}\f$). */
-    double ifluxdensity(double Fnu) const;
+    /** This function converts the (bolometric) flux \f$F\f$ from the program's input/output units
+        to the internally used SI units (\f${\text{W\,m}}^{-2}\f$). */
+    double ibolflux(double F) const;
 
-    /** This function converts the flux density \f$F_nu\f$ from the internally used SI units
-        (\f${\text{W}}\, {\text{m}}^{-2}\, {\text{Hz}}^{-1}\f$) to the program's input/output units. */
-    double ofluxdensity(double Fnu) const;
+    /** This function converts the (bolometric) flux \f$F\f$ from the internally used SI units
+        (\f${\text{W}}\, {\text{m}}^{-2}\f$) to the program's input/output units. */
+    double obolflux(double F) const;
 
-    /** This function returns a string containing the name of the unit of surface brightness adopted
-        by the program for input/output (internally, only SI units are used). */
-    QString usurfacebrightness() const;
+    /** This function returns a string containing the name of the unit of flux density adopted by
+        the program for input/output (internally, only SI units are used). */
+    QString umonflux() const;
 
-    /** This function converts the surface brightness \f$f_\nu\f$ from the program's input/output units
-        to the internally used SI units (\f${\text{W}}\, {\text{m}}^{-2}\, {\text{Hz}}^{-1}\,
-        {\text{sr}}^{-1}\f$). */
-    double isurfacebrightness(double fnu) const;
+    /** This function converts the flux density \f$F_\lambda\f$ from the program's input/output
+        units to the internally used SI units (\f${\text{W}\, \text{m}}^{-3}\f$). */
+    double imonflux(double Flambda) const;
 
-    /** This function converts the surface brightness \f$f_\nu\f$ from the internally used SI units
-        (\f${\text{W}}\, {\text{m}}^{-2}\, {\text{Hz}}^{-1}\, {\text{sr}}^{-1}\f$) to the program's
+    /** This function converts the flux density \f$F_\lambda\f$ from the internally used SI units
+        (\f${\text{W}}\, {\text{m}}^{-3}\f$) to the program's input/output units. */
+    double omonflux(double Flambda) const;
+
+    /** This function returns a string containing the name of the unit of bolometric surface
+        brightness adopted by the program for input/output (internally, only SI units are used). */
+    QString ubolsurfacebrightness() const;
+
+    /** This function converts the bolometric surface brightness \f$f\f$ from the program's
+        input/output units to the internally used SI units
+        (\f${\text{W}}\,{\text{m}}^{-2}\,{\text{sr}}^{-1}\f$). */
+    double ibolsurfacebrightness(double f) const;
+
+    /** This function converts the bolometric surface brightness \f$f\f$ from the internally used
+        SI units (\f${\text{W}}\, {\text{m}}^{-2}\, {\text{sr}}^{-1}\f$) to the program's
         input/output units. */
-    double osurfacebrightness(double fnu) const;
+    double obolsurfacebrightness(double f) const;
+
+    /** This function returns a string containing the name of the unit of surface brightness
+        adopted by the program for input/output (internally, only SI units are used). */
+    QString umonsurfacebrightness() const;
+
+    /** This function converts the surface brightness \f$f_\lambda\f$ from the program's
+        input/output units to the internally used SI units (\f${\text{W}}\, {\text{m}}^{-3}\,
+        {\text{sr}}^{-1}\f$). */
+    double imonsurfacebrightness(double flambda) const;
+
+    /** This function converts the surface brightness \f$f_\lambda\f$ from the internally used SI
+        units (\f${\text{W}}\, {\text{m}}^{-3}\, {\text{sr}}^{-1}\f$) to the program's input/output
+        units. */
+    double omonsurfacebrightness(double flambda) const;
 
     /** This function returns a string containing the name of the unit of temperature adopted by
         the program for input/output (internally, only SI units are used). */
@@ -441,8 +467,10 @@ private:
     QString _uenergy;
     QString _ubolluminosity;
     QString _umonluminosity;
-    QString _ufluxdensity;
-    QString _usurfacebrightness;
+    QString _ubolflux;
+    QString _umonflux;
+    QString _ubolsurfacebrightness;
+    QString _umonsurfacebrightness;
     QString _utemperature;
     QString _uangle;
     QString _uposangle;
@@ -464,8 +492,10 @@ private:
     double _cenergy;
     double _cbolluminosity;
     double _cmonluminosity;
-    double _cfluxdensity;
-    double _csurfacebrightness;
+    double _cbolflux;
+    double _cmonflux;
+    double _cbolsurfacebrightness;
+    double _cmonsurfacebrightness;
     double _ctemperature;
     double _cangle;
     double _cposangle;
