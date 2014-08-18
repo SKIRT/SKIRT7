@@ -264,7 +264,8 @@ HEADERS += \
     FileGrainComposition.hpp \
     StellarSurfaceGeometry.hpp \
     RangeGrainSizeDistribution.hpp \
-    SingleGrainSizeDistribution.hpp
+    SingleGrainSizeDistribution.hpp \
+    Trust2Geometry.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -489,4 +490,5 @@ SOURCES += \
     FileGrainComposition.cpp \
     StellarSurfaceGeometry.cpp \
     RangeGrainSizeDistribution.cpp \
-    SingleGrainSizeDistribution.cpp
+    SingleGrainSizeDistribution.cpp \
+    Trust2Geometry.cpp
