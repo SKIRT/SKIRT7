@@ -137,10 +137,13 @@ void DistantInstrument::calibrateAndWriteSEDs(QList< Array* > Farrays, QStringLi
     QString sedfilename = find<FilePaths>()->output(_instrumentname + "_sed.dat");
     find<Log>()->info("Writing SED to " + sedfilename + "...");
     ofstream sedfile(sedfilename.toLocal8Bit().constData());
-    sedfile << "# column 1: lambda" << endl;
+    sedfile << "# column 1: lambda (" << units->uwavelength().toStdString() << ")\n";
     for (int q = 0; q < Farrays.size(); q++)
     {
-        sedfile << "# column " << (q+2) << ": lambda*Flambda (" << Fnames[q].toStdString() << ")" << endl;
+        sedfile << "# column " << (q+2) << ": "
+                << Fnames[q].toStdString() << "; "
+                << units->sfluxdensity().toStdString() << " "
+                << "(" << units->ufluxdensity().toStdString() << ")\n";
     }
     sedfile << scientific << setprecision(8);
     for (int ell=0; ell<Nlambda; ell++)
@@ -149,7 +152,7 @@ void DistantInstrument::calibrateAndWriteSEDs(QList< Array* > Farrays, QStringLi
         sedfile << units->owavelength(lambda);
         for (int q = 0; q < Farrays.size(); q++)
         {
-            sedfile << '\t' << units->obolflux(lambdagrid->lambda(ell)*(*(Farrays[q]))[ell]);
+            sedfile << '\t' << units->ofluxdensity(lambda, (*(Farrays[q]))[ell]);
         }
         sedfile << endl;
     }

@@ -115,11 +115,11 @@ void ReferenceImages::writeOutBest(int index, int consec) const
         filepath = path->output("Best_"+QString::number(consec)+"_"+QString::number(counter)+".fits");
         FITSInOut::write(filepath, diskTotal, nx, ny, nz,
                        units->olength(adjSS->xpress(counter)), units->olength(adjSS->ypress(counter)),
-                       units->ubolsurfacebrightness(), units->ulength());
+                       units->usurfacebrightness(), units->ulength());
         filepath =  path->output("Residual_"+QString::number(consec)+"_"+QString::number(counter)+".fits");
         FITSInOut::write(filepath, bulgeTotal, nx, ny, nz,
                        units->olength(adjSS->xpress(counter)), units->olength(adjSS->ypress(counter)),
-                       units->ubolsurfacebrightness(), units->ulength());
+                       units->usurfacebrightness(), units->ulength());
 
         counter++;
     }

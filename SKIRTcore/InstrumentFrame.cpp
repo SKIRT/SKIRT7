@@ -171,16 +171,12 @@ void InstrumentFrame::calibrateAndWriteData(int ell)
     // --> divide by fourpid2
     double fourpid2 = 4.0*M_PI*_distance*_distance;
 
-    // we use lambda*flambda for the surface brightness (in units like W/m2/arcsec2)
-    // --> multiply by lambda
-    double lambda = lambdagrid->lambda(ell);
-
     // conversion from program SI units (at this moment W/m3/sr) to the correct output units
     // --> multiply by unit conversion factor
-    double unitfactor = units->obolsurfacebrightness(1);
+    double unitfactor = units->osurfacebrightness(lambdagrid->lambda(ell), 1.);
 
     // perform the conversion, in place
-    _ftotv *= ((unitfactor * lambda) / (dlambda * area * fourpid2));
+    _ftotv *= (unitfactor / (dlambda * area * fourpid2));
 
     // write a FITS file
     QString filename = find<FilePaths>()->output(_instrument->instrumentName()
@@ -188,7 +184,7 @@ void InstrumentFrame::calibrateAndWriteData(int ell)
     find<Log>()->info("Writing total flux " + QString::number(ell) + " to FITS file " + filename + "...");
     FITSInOut::write(filename, _ftotv, _Nxp, _Nyp, 1,
                    units->olength(_xpres), units->olength(_ypres),
-                   units->ubolsurfacebrightness(), units->ulength());
+                   units->usurfacebrightness(), units->ulength());
 }
 
 ////////////////////////////////////////////////////////////////////

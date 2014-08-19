@@ -354,7 +354,7 @@ void PerspectiveInstrument::write()
             for (int j=0; j<_Ny; j++)
             {
                 int m = i + _Nx*j + _Nx*_Ny*ell;
-                _ftotv[m] = units->obolsurfacebrightness(_ftotv[m]*front*lambda/dlambda);
+                _ftotv[m] = units->osurfacebrightness(lambda, _ftotv[m]*front/dlambda);
             }
         }
     }
@@ -365,7 +365,7 @@ void PerspectiveInstrument::write()
     find<Log>()->info("Writing total flux to FITS file " + filename + "...");
     FITSInOut::write(filename, _ftotv, _Nx, _Ny, Nlambda,
                    units->olength(_s), units->olength(_s),
-                   units->ubolsurfacebrightness(), units->ulength());
+                   units->usurfacebrightness(), units->ulength());
 }
 
 ////////////////////////////////////////////////////////////////////
