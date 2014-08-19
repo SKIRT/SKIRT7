@@ -37,6 +37,13 @@ class Units : public SimulationItem
     Q_OBJECT
     Q_CLASSINFO("Title", "a units system")
 
+    Q_CLASSINFO("Property", "fluxOutputStyle")
+    Q_CLASSINFO("Title", "the output style for flux density and surface brightness")
+    Q_CLASSINFO("Neutral", "neutral: λ F_λ = ν F_ν")
+    Q_CLASSINFO("Wavelength", "wavelength: F_λ")
+    Q_CLASSINFO("Frequency", "frequency: F_ν")
+    Q_CLASSINFO("Default", "Neutral")
+
     //============= Construction - Setup - Destruction =============
 
 protected:
@@ -48,6 +55,23 @@ protected:
         of any subclass AFTER the protected member values have been initialized with the
         appropriate unit identification strings. */
     void initCache();
+
+    //========= Setters & Getters for Discoverable Attributes ========
+
+public:
+    /** The enumeration type indicating the output style for flux density and surface brightness.
+        Neutral indicates \f$\lambda F_\lambda = \nu F_\nu\f$; Wavelength indicates
+        \f$F_\lambda\f$; and Frequency indicates \f$F_\nu\f$. */
+    Q_ENUMS(FluxOutputStyle)
+    enum FluxOutputStyle { Neutral, Wavelength, Frequency };
+
+    /** Sets the enumeration value indicating the output style for flux density and surface
+        brightness. The default value is Neutral. */
+    Q_INVOKABLE void setFluxOutputStyle(FluxOutputStyle value);
+
+    /** Returns the enumeration value indicating the output style for flux density and surface
+        brightness. */
+    Q_INVOKABLE FluxOutputStyle fluxOutputStyle() const;
 
     //======================== Other Functions =======================
 
@@ -331,57 +355,87 @@ public:
         used SI units (\f${\text{W}}\, {\text{m}}^{-1}\f$) to the program's input/output units. */
     double omonluminosity(double Llambda) const;
 
-    /** This function returns a string containing the name of the unit of total flux adopted by the
-        program for input/output (internally, only SI units are used). */
-    QString ubolflux() const;
-
-    /** This function converts the (bolometric) flux \f$F\f$ from the program's input/output units
-        to the internally used SI units (\f${\text{W\,m}}^{-2}\f$). */
-    double ibolflux(double F) const;
-
-    /** This function converts the (bolometric) flux \f$F\f$ from the internally used SI units
-        (\f${\text{W}}\, {\text{m}}^{-2}\f$) to the program's input/output units. */
-    double obolflux(double F) const;
-
-    /** This function returns a string containing the name of the unit of flux density adopted by
-        the program for input/output (internally, only SI units are used). */
-    QString umonflux() const;
-
-    /** This function converts the flux density \f$F_\lambda\f$ from the program's input/output
-        units to the internally used SI units (\f${\text{W}\, \text{m}}^{-3}\f$). */
-    double imonflux(double Flambda) const;
-
-    /** This function converts the flux density \f$F_\lambda\f$ from the internally used SI units
-        (\f${\text{W}}\, {\text{m}}^{-3}\f$) to the program's input/output units. */
-    double omonflux(double Flambda) const;
-
-    /** This function returns a string containing the name of the unit of bolometric surface
-        brightness adopted by the program for input/output (internally, only SI units are used). */
-    QString ubolsurfacebrightness() const;
-
-    /** This function converts the bolometric surface brightness \f$f\f$ from the program's
-        input/output units to the internally used SI units
-        (\f${\text{W}}\,{\text{m}}^{-2}\,{\text{sr}}^{-1}\f$). */
-    double ibolsurfacebrightness(double f) const;
-
-    /** This function converts the bolometric surface brightness \f$f\f$ from the internally used
-        SI units (\f${\text{W}}\, {\text{m}}^{-2}\, {\text{sr}}^{-1}\f$) to the program's
-        input/output units. */
-    double obolsurfacebrightness(double f) const;
-
-    /** This function returns a string containing the name of the unit of surface brightness
+    /** This function returns a string containing the name of the unit of neutral flux density
         adopted by the program for input/output (internally, only SI units are used). */
-    QString umonsurfacebrightness() const;
+    QString uneutralfluxdensity() const;
 
-    /** This function converts the surface brightness \f$f_\lambda\f$ from the program's
-        input/output units to the internally used SI units (\f${\text{W}}\, {\text{m}}^{-3}\,
-        {\text{sr}}^{-1}\f$). */
-    double imonsurfacebrightness(double flambda) const;
+    /** This function converts the neutral flux density \f$\lambda F_\lambda = \nu F_\nu\f$ from
+        the program's input/output units to the internally used SI units
+        (\f${\text{W\,m}}^{-2}\f$). */
+    double ineutralfluxdensity(double lambdaFlambda) const;
 
-    /** This function converts the surface brightness \f$f_\lambda\f$ from the internally used SI
-        units (\f${\text{W}}\, {\text{m}}^{-3}\, {\text{sr}}^{-1}\f$) to the program's input/output
+    /** This function converts the neutral flux density \f$\lambda F_\lambda = \nu F_\nu\f$ from
+        the internally used SI units (\f${\text{W}}\, {\text{m}}^{-2}\f$) to the program's
+        input/output units. */
+    double oneutralfluxdensity(double lambdaFlambda) const;
+
+    /** This function returns a string containing the name of the unit of neutral surface
+        brightness adopted by the program for input/output (internally, only SI units are used). */
+    QString uneutralsurfacebrightness() const;
+
+    /** This function converts the neutral surface brightness \f$\lambda f_\lambda = \nu f_\nu\f$
+        from the program's input/output units to the internally used SI units
+        (\f${\text{W}}\,{\text{m}}^{-2}\,{\text{sr}}^{-1}\f$). */
+    double ineutralsurfacebrightness(double lambdaflambda) const;
+
+    /** This function converts the neutral surface brightness \f$\lambda f_\lambda = \nu f_\nu\f$
+        from the internally used SI units (\f${\text{W}}\,{\text{m}}^{-2}\,{\text{sr}}^{-1}\f$) to
+        the program's input/output units. */
+    double oneutralsurfacebrightness(double lambdaflambda) const;
+
+    /** This function returns a string containing the name of the unit of wavelength flux density
+        adopted by the program for input/output (internally, only SI units are used). */
+    QString uwavelengthfluxdensity() const;
+
+    /** This function converts the wavelength flux density \f$F_\lambda\f$ from the program's
+        input/output units to the internally used SI units (\f${\text{W\,m}}^{-3}\f$). */
+    double iwavelengthfluxdensity(double Flambda) const;
+
+    /** This function converts the wavelength flux density \f$F_\lambda\f$ from the internally used
+        SI units (\f${\text{W}}\, {\text{m}}^{-3}\f$) to the program's input/output units. */
+    double owavelengthfluxdensity(double Flambda) const;
+
+    /** This function returns a string containing the name of the unit of wavelength surface
+        brightness adopted by the program for input/output (internally, only SI units are used). */
+    QString uwavelengthsurfacebrightness() const;
+
+    /** This function converts the wavelength surface brightness \f$f_\lambda\f$ from the program's
+        input/output units to the internally used SI units
+        (\f${\text{W}}\,{\text{m}}^{-3}\,{\text{sr}}^{-1}\f$). */
+    double iwavelengthsurfacebrightness(double flambda) const;
+
+    /** This function converts the wavelength surface brightness \f$f_\lambda\f$ from the
+        internally used SI units (\f${\text{W}}\,{\text{m}}^{-3}\,{\text{sr}}^{-1}\f$) to the
+        program's input/output units. */
+    double owavelengthsurfacebrightness(double flambda) const;
+
+    /** This function returns a string containing the name of the unit of frequency flux density
+        adopted by the program for input/output (internally, only SI units are used). */
+    QString ufrequencyfluxdensity() const;
+
+    /** This function converts the frequency flux density \f$F_\nu\f$ from the program's
+        input/output units to the internally used SI units
+        (\f${\text{W}}\,{\text{m}}^{-2}\,{\text{Hz}}^{-1}\f$). */
+    double ifrequencyfluxdensity(double Fnu) const;
+
+    /** This function converts the frequency flux density \f$F_\nu\f$ from the internally used SI
+        units (\f${\text{W}}\,{\text{m}}^{-2}\,{\text{Hz}}^{-1}\f$) to the program's input/output
         units. */
-    double omonsurfacebrightness(double flambda) const;
+    double ofrequencyfluxdensity(double Fnu) const;
+
+    /** This function returns a string containing the name of the unit of frequency surface
+        brightness adopted by the program for input/output (internally, only SI units are used). */
+    QString ufrequencysurfacebrightness() const;
+
+    /** This function converts the frequency surface brightness \f$f_\nu\f$ from the program's
+        input/output units to the internally used SI units
+        (\f${\text{W}}\,{\text{m}}^{-2}\,{\text{Hz}}^{-1}\,{\text{sr}}^{-1}\f$). */
+    double ifrequencysurfacebrightness(double fnu) const;
+
+    /** This function converts the frequency surface brightness \f$f_\nu\f$ from the internally
+        used SI units (\f${\text{W}}\,{\text{m}}^{-2}\,{\text{Hz}}^{-1}\,{\text{sr}}^{-1}\f$) to
+        the program's input/output units. */
+    double ofrequencysurfacebrightness(double fnu) const;
 
     /** This function returns a string containing the name of the unit of temperature adopted by
         the program for input/output (internally, only SI units are used). */
@@ -443,6 +497,34 @@ public:
         to the program's input/output units. */
     double opressure(double p) const;
 
+    // - - - - - output style conversions for flux density and surface brightness - - - - -
+
+    /** This function returns a string describing the flux density output style adopted by the
+        program. */
+    QString sfluxdensity() const;
+
+    /** This function returns a string containing the name of the unit of flux density adopted by
+        the program for output, depending on the selected flux output style. */
+    QString ufluxdensity() const;
+
+    /** This function converts the wavelength flux density \f$F_\lambda\f$ for wavelength
+        \f$\lambda\f$ from the internally used SI units to the program's flux output style
+        (neutral, wavelength or frequency) and units. */
+    double ofluxdensity(double lambda, double Flambda) const;
+
+    /** This function returns a string describing the surface brightness output style adopted by
+        the program. */
+    QString ssurfacebrightness() const;
+
+    /** This function returns a string containing the name of the unit of surface brightness
+        adopted by the program for output, depending on the selected flux output style. */
+    QString usurfacebrightness() const;
+
+    /** This function converts the wavelength surface brightness \f$f_\lambda\f$ for wavelength
+        \f$\lambda\f$ from the internally used SI units to the program's flux output style
+        (neutral, wavelength or frequency) and units. */
+    double osurfacebrightness(double lambda, double flambda) const;
+
     //======================== Data Members ========================
 
 protected:
@@ -451,6 +533,9 @@ protected:
     QHash<QString,QString> _unitForQty;
 
 private:
+    // discoverable attributes
+    FluxOutputStyle _fluxOutputStyle;
+
     // values to be initialized by calling initCache() in the constructor of a derived class
     QString _ulength;
     QString _udistance;
@@ -467,10 +552,12 @@ private:
     QString _uenergy;
     QString _ubolluminosity;
     QString _umonluminosity;
-    QString _ubolflux;
-    QString _umonflux;
-    QString _ubolsurfacebrightness;
-    QString _umonsurfacebrightness;
+    QString _uneutralfluxdensity;
+    QString _uneutralsurfacebrightness;
+    QString _uwavelengthfluxdensity;
+    QString _uwavelengthsurfacebrightness;
+    QString _ufrequencyfluxdensity;
+    QString _ufrequencysurfacebrightness;
     QString _utemperature;
     QString _uangle;
     QString _uposangle;
@@ -492,10 +579,12 @@ private:
     double _cenergy;
     double _cbolluminosity;
     double _cmonluminosity;
-    double _cbolflux;
-    double _cmonflux;
-    double _cbolsurfacebrightness;
-    double _cmonsurfacebrightness;
+    double _cneutralfluxdensity;
+    double _cneutralsurfacebrightness;
+    double _cwavelengthfluxdensity;
+    double _cwavelengthsurfacebrightness;
+    double _cfrequencyfluxdensity;
+    double _cfrequencysurfacebrightness;
     double _ctemperature;
     double _cangle;
     double _cposangle;

@@ -173,7 +173,7 @@ void SingleFrameInstrument::calibrateAndWriteDataCubes(QList< Array*> farrays, Q
                 int m = i + _Nxp*j + _Nxp*_Nyp*ell;
                 foreach (Array* farr, farrays)
                 {
-                    (*farr)[m] = units->obolsurfacebrightness(lambda*(*farr)[m]);
+                    (*farr)[m] = units->osurfacebrightness(lambda, (*farr)[m]);
                 }
             }
         }
@@ -188,7 +188,7 @@ void SingleFrameInstrument::calibrateAndWriteDataCubes(QList< Array*> farrays, Q
         find<Log>()->info("Writing " + fnames[q] + " flux to FITS file " + fitsfilename + "...");
         FITSInOut::write(fitsfilename, *(farrays[q]), _Nxp, _Nyp, Nlambda,
                        units->olength(_xpres), units->olength(_ypres),
-                       units->ubolsurfacebrightness(), units->ulength());
+                       units->usurfacebrightness(), units->ulength());
     }
 }
 

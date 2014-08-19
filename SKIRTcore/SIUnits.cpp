@@ -27,10 +27,12 @@ SIUnits::SIUnits()
     _unitForQty["energy"] = "J";
     _unitForQty["bolluminosity"] = "W";
     _unitForQty["monluminosity"] = "W/m";
-    _unitForQty["bolflux"] = "W/m2";
-    _unitForQty["monflux"] = "W/m3";
-    _unitForQty["bolsurfacebrightness"] = "W/m2/sr";
-    _unitForQty["monsurfacebrightness"] = "W/m3/sr";
+    _unitForQty["neutralfluxdensity"] = "W/m2";
+    _unitForQty["neutralsurfacebrightness"] = "W/m2/sr";
+    _unitForQty["wavelengthfluxdensity"] = "W/m3";
+    _unitForQty["wavelengthsurfacebrightness"] = "W/m3/sr";
+    _unitForQty["frequencyfluxdensity"] = "W/m2/Hz";
+    _unitForQty["frequencysurfacebrightness"] = "W/m2/Hz/sr";
     _unitForQty["temperature"] = "K";
     _unitForQty["angle"] = "rad";
     _unitForQty["posangle"] = "rad";

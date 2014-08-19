@@ -138,20 +138,35 @@ namespace
             _factor["monluminosity W/micron"] = 1e6;
             _factor["monluminosity Lsun/micron"] = _Lsun * 1e6;
 
-            // bolometric flux
-            _factor["bolflux W/m2"] = 1.;
+            // neutral flux density (lambda F_lambda = nu F_nu)
+            _factor["neutralfluxdensity W/m2"] = 1.;
 
-            // monochromatic flux
-            _factor["monflux W/m3"] = 1.;
-            _factor["monflux W/m2/micron"] = 1e6;
+            // neutral surface brightness (lambda f_lambda = nu f_nu)
+            _factor["neutralsurfacebrightness W/m2/sr"] = 1.;
+            _factor["neutralsurfacebrightness W/m2/arcsec2"] = 1. / pow(M_PI/(180.*3600.),2);
 
-            // bolometric surface brightness
-            _factor["bolsurfacebrightness W/m2/sr"] = 1.;
-            _factor["bolsurfacebrightness W/m2/arcsec2"] = 1. / pow(M_PI/(180.*3600.),2);
+            // wavelength flux density (F_lambda)
+            _factor["wavelengthfluxdensity W/m3"] = 1.;
+            _factor["wavelengthfluxdensity W/m2/micron"] = 1e6;
 
-            // monochromatic surface brightness
-            _factor["monsurfacebrightness W/m3/sr"] = 1.;
-            _factor["monsurfacebrightness W/m2/micron/arcsec2"] = 1e6 / pow(M_PI/(180.*3600.),2);
+            // wavelength surface brightness (f_lambda)
+            _factor["wavelengthsurfacebrightness W/m3/sr"] = 1.;
+            _factor["wavelengthsurfacebrightness W/m2/micron/sr"] = 1e6;
+            _factor["wavelengthsurfacebrightness W/m2/micron/arcsec2"] = 1e6 / pow(M_PI/(180.*3600.),2);
+
+            // frequency flux density (F_nu)
+            _factor["frequencyfluxdensity W/m2/Hz"] = 1.;
+            _factor["frequencyfluxdensity Jy"] = 1e-26;
+            _factor["frequencyfluxdensity mJy"] = 1e-29;
+            _factor["frequencyfluxdensity MJy"] = 1e-20;
+
+            // frequency surface brightness (f_nu)
+            _factor["frequencysurfacebrightness W/m2/Hz/sr"] = 1.;
+            _factor["frequencysurfacebrightness W/m2/Hz/arcsec2"] = 1. / pow(M_PI/(180.*3600.),2);
+            _factor["frequencysurfacebrightness Jy/sr"] = 1e-26;
+            _factor["frequencysurfacebrightness Jy/arcsec2"] = 1e-26 / pow(M_PI/(180.*3600.),2);
+            _factor["frequencysurfacebrightness MJy/sr"] = 1e-20;
+            _factor["frequencysurfacebrightness MJy/arcsec2"] = 1e-20 / pow(M_PI/(180.*3600.),2);
 
             // temperature
             _factor["temperature K"] = 1.;
@@ -181,6 +196,7 @@ namespace
 ////////////////////////////////////////////////////////////////////
 
 Units::Units()
+    : _fluxOutputStyle(Neutral)
 {
     // initialize static dictionary only if needed (to avoid function call and locking)
     if (!_initialized) initialize();
@@ -205,10 +221,12 @@ void Units::initCache()
     _uenergy = _unitForQty["energy"];
     _ubolluminosity = _unitForQty["bolluminosity"];
     _umonluminosity = _unitForQty["monluminosity"];
-    _ubolflux = _unitForQty["bolflux"];
-    _umonflux = _unitForQty["monflux"];
-    _ubolsurfacebrightness = _unitForQty["bolsurfacebrightness"];
-    _umonsurfacebrightness = _unitForQty["monsurfacebrightness"];
+    _uneutralfluxdensity = _unitForQty["neutralfluxdensity"];
+    _uneutralsurfacebrightness = _unitForQty["neutralsurfacebrightness"];
+    _uwavelengthfluxdensity = _unitForQty["wavelengthfluxdensity"];
+    _uwavelengthsurfacebrightness = _unitForQty["wavelengthsurfacebrightness"];
+    _ufrequencyfluxdensity = _unitForQty["frequencyfluxdensity"];
+    _ufrequencysurfacebrightness = _unitForQty["frequencysurfacebrightness"];
     _utemperature = _unitForQty["temperature"];
     _uangle = _unitForQty["angle"];
     _uposangle = _unitForQty["posangle"];
@@ -230,15 +248,31 @@ void Units::initCache()
     _cenergy = in("energy", _uenergy);
     _cbolluminosity = in("bolluminosity", _ubolluminosity);
     _cmonluminosity = in("monluminosity", _umonluminosity);
-    _cbolflux = in("bolflux", _ubolflux);
-    _cmonflux = in("monflux", _umonflux);
-    _cbolsurfacebrightness = in("bolsurfacebrightness", _ubolsurfacebrightness);
-    _cmonsurfacebrightness = in("monsurfacebrightness", _umonsurfacebrightness);
+    _cneutralfluxdensity = in("neutralfluxdensity", _uneutralfluxdensity);
+    _cneutralsurfacebrightness = in("neutralsurfacebrightness", _uneutralsurfacebrightness);
+    _cwavelengthfluxdensity = in("wavelengthfluxdensity", _uwavelengthfluxdensity);
+    _cwavelengthsurfacebrightness = in("wavelengthsurfacebrightness", _uwavelengthsurfacebrightness);
+    _cfrequencyfluxdensity = in("frequencyfluxdensity", _ufrequencyfluxdensity);
+    _cfrequencysurfacebrightness = in("frequencysurfacebrightness", _ufrequencysurfacebrightness);
     _ctemperature = in("temperature", _utemperature);
     _cangle = in("angle", _uangle);
     _cposangle = in("posangle", _uposangle);
     _csolidangle = in("solidangle", _usolidangle);
     _cpressure = in("pressure", _upressure);
+}
+
+////////////////////////////////////////////////////////////////////
+
+void Units::setFluxOutputStyle(Units::FluxOutputStyle value)
+{
+    _fluxOutputStyle = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+Units::FluxOutputStyle Units::fluxOutputStyle() const
+{
+    return _fluxOutputStyle;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -708,86 +742,128 @@ double Units::omonluminosity(double Llambda) const
 
 ////////////////////////////////////////////////////////////////////
 
-QString Units::ubolflux() const
+QString Units::uneutralfluxdensity() const
 {
-    return _ubolflux;
+    return _uneutralfluxdensity;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double Units::ibolflux(double F) const
+double Units::ineutralfluxdensity(double lambdaFlambda) const
 {
-    return F*_cbolflux;
+    return lambdaFlambda*_cneutralfluxdensity;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double Units::obolflux(double F) const
+double Units::oneutralfluxdensity(double lambdaFlambda) const
 {
-    return F/_cbolflux;
+    return lambdaFlambda/_cneutralfluxdensity;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-QString Units::umonflux() const
+QString Units::uneutralsurfacebrightness() const
 {
-    return _umonflux;
+    return _uneutralsurfacebrightness;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double Units::imonflux(double Flambda) const
+double Units::ineutralsurfacebrightness(double lambdaflambda) const
 {
-    return Flambda*_cmonflux;
+    return lambdaflambda*_cneutralsurfacebrightness;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double Units::omonflux(double Flambda) const
+double Units::oneutralsurfacebrightness(double lambdaflambda) const
 {
-    return Flambda/_cmonflux;
+    return lambdaflambda/_cneutralsurfacebrightness;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-QString Units::ubolsurfacebrightness() const
+QString Units::uwavelengthfluxdensity() const
 {
-    return _ubolsurfacebrightness;
+    return _uwavelengthfluxdensity;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double Units::ibolsurfacebrightness(double f) const
+double Units::iwavelengthfluxdensity(double Flambda) const
 {
-    return f*_cbolsurfacebrightness;
+    return Flambda*_cwavelengthfluxdensity;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double Units::obolsurfacebrightness(double f) const
+double Units::owavelengthfluxdensity(double Flambda) const
 {
-    return f/_cbolsurfacebrightness;
+    return Flambda/_cwavelengthfluxdensity;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-QString Units::umonsurfacebrightness() const
+QString Units::uwavelengthsurfacebrightness() const
 {
-    return _umonsurfacebrightness;
+    return _uwavelengthsurfacebrightness;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double Units::imonsurfacebrightness(double flambda) const
+double Units::iwavelengthsurfacebrightness(double flambda) const
 {
-    return flambda*_cmonsurfacebrightness;
+    return flambda*_cwavelengthsurfacebrightness;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double Units::omonsurfacebrightness(double flambda) const
+double Units::owavelengthsurfacebrightness(double flambda) const
 {
-    return flambda/_cmonsurfacebrightness;
+    return flambda/_cwavelengthsurfacebrightness;
+}
+
+////////////////////////////////////////////////////////////////////
+
+QString Units::ufrequencyfluxdensity() const
+{
+    return _ufrequencyfluxdensity;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double Units::ifrequencyfluxdensity(double Fnu) const
+{
+    return Fnu*_cfrequencyfluxdensity;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double Units::ofrequencyfluxdensity(double Fnu) const
+{
+    return Fnu/_cfrequencyfluxdensity;
+}
+
+////////////////////////////////////////////////////////////////////
+
+QString Units::ufrequencysurfacebrightness() const
+{
+    return _ufrequencysurfacebrightness;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double Units::ifrequencysurfacebrightness(double fnu) const
+{
+    return fnu*_cfrequencysurfacebrightness;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double Units::ofrequencysurfacebrightness(double fnu) const
+{
+    return fnu/_cfrequencysurfacebrightness;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -872,6 +948,79 @@ double Units::ipressure(double p) const
 double Units::opressure(double p) const
 {
     return p/_cpressure;
+}
+
+////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+
+QString Units::sfluxdensity() const
+{
+    switch (_fluxOutputStyle)
+    {
+    case Wavelength: return "F_lambda";
+    case Frequency:  return "F_nu";
+    default:         return "lambda*F_lambda";
+    }
+}
+
+////////////////////////////////////////////////////////////////////
+
+QString Units::ufluxdensity() const
+{
+    switch (_fluxOutputStyle)
+    {
+    case Wavelength: return uwavelengthfluxdensity();
+    case Frequency:  return ufrequencyfluxdensity();
+    default:         return uneutralfluxdensity();
+    }
+}
+
+////////////////////////////////////////////////////////////////////
+
+double Units::ofluxdensity(double lambda, double Flambda) const
+{
+    switch (_fluxOutputStyle)
+    {
+    case Wavelength: return owavelengthfluxdensity(Flambda);
+    case Frequency:  return ofrequencyfluxdensity(lambda*lambda*Flambda/_c);
+    default:         return oneutralfluxdensity(lambda*Flambda);
+    }
+}
+
+////////////////////////////////////////////////////////////////////
+
+QString Units::ssurfacebrightness() const
+{
+    switch (_fluxOutputStyle)
+    {
+    case Wavelength: return "f_lambda";
+    case Frequency:  return "f_nu";
+    default:         return "lambda*f_lambda";
+    }
+}
+
+////////////////////////////////////////////////////////////////////
+
+QString Units::usurfacebrightness() const
+{
+    switch (_fluxOutputStyle)
+    {
+    case Wavelength: return uwavelengthsurfacebrightness();
+    case Frequency:  return ufrequencysurfacebrightness();
+    default:         return uneutralsurfacebrightness();
+    }
+}
+
+////////////////////////////////////////////////////////////////////
+
+double Units::osurfacebrightness(double lambda, double flambda) const
+{
+    switch (_fluxOutputStyle)
+    {
+    case Wavelength: return owavelengthsurfacebrightness(flambda);
+    case Frequency:  return ofrequencysurfacebrightness(lambda*lambda*flambda/_c);
+    default:         return oneutralsurfacebrightness(lambda*flambda);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
