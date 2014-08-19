@@ -5,9 +5,13 @@
 
 #include "WizardEngine.hpp"
 
-#include "SimulationItem.hpp"
 #include "BasicChoiceWizardPane.hpp"
+#include "CreateRootWizardPane.hpp"
+#include "SimulationItem.hpp"
+#include "SimulationItemDiscovery.hpp"
 #include <QLabel>
+
+using namespace SimulationItemDiscovery;
 
 ////////////////////////////////////////////////////////////////////
 
@@ -32,7 +36,7 @@ bool WizardEngine::canAdvance()
     case BasicChoice:
         return _choice != Unknown;
     case CreateRoot:
-        return true;
+        return _root != 0;
     case ConstructHierarchy:
         return true;
     case SaveHierarchy:
@@ -122,6 +126,16 @@ void WizardEngine::setBasicChoice(int newChoice)
 
 ////////////////////////////////////////////////////////////////////
 
+void WizardEngine::setRootType(QByteArray newRootType)
+{
+    if (_root && itemType(_root)==newRootType) return;
+    delete _root;
+    _root = createSimulationItem(newRootType);
+    emit canAdvanceChangedTo(canAdvance());
+}
+
+////////////////////////////////////////////////////////////////////
+
 QWidget* WizardEngine::createPane()
 {
     switch (_state)
@@ -129,7 +143,11 @@ QWidget* WizardEngine::createPane()
     case BasicChoice:
         return new BasicChoiceWizardPane(_choice, this);
     case CreateRoot:
-        return new QLabel("Dummy wizard pane for state CreateRoot");
+        {
+            QByteArray currentType = _root ? itemType(_root) : "";
+            QByteArray abstractType = _choice==NewSki ? "Simulation" : "FitScheme";
+            return new CreateRootWizardPane(abstractType, currentType, this);
+        }
     case ConstructHierarchy:
         return new QLabel("Dummy wizard pane for state ConstructHierarchy");
     case SaveHierarchy:

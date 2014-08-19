@@ -24,14 +24,16 @@ QMAKE_CXXFLAGS_RELEASE -= -O2
 QMAKE_CXXFLAGS_RELEASE += -O3
 
 # include libraries internal to the project
-INCLUDEPATH += $$PWD/../Fundamentals $$PWD/../Discover $$PWD/../SKIRTcore
-DEPENDPATH += $$PWD/../Fundamentals $$PWD/../Discover $$PWD/../SKIRTcore
+INCLUDEPATH += $$PWD/../Fundamentals $$PWD/../Discover $$PWD/../SKIRTcore $$PWD/../FitSKIRTcore
+DEPENDPATH += $$PWD/../Fundamentals $$PWD/../Discover $$PWD/../SKIRTcore $$PWD/../FitSKIRTcore
 unix: LIBS += -L$$OUT_PWD/../Fundamentals/ -lfundamentals \
               -L$$OUT_PWD/../Discover/ -ldiscover \
-              -L$$OUT_PWD/../SKIRTcore/ -lskirtcore
+              -L$$OUT_PWD/../SKIRTcore/ -lskirtcore \
+              -L$$OUT_PWD/../FitSKIRTcore/ -lfitskirtcore
 unix: PRE_TARGETDEPS += $$OUT_PWD/../Fundamentals/libfundamentals.a \
                         $$OUT_PWD/../Discover/libdiscover.a \
-                        $$OUT_PWD/../SKIRTcore/libskirtcore.a
+                        $$OUT_PWD/../SKIRTcore/libskirtcore.a \
+                        $$OUT_PWD/../FitSKIRTcore/libfitskirtcore.a
 
 # create a header file containing a reasonably unique description of the git version and
 # touch SkirtMakeUp.cpp so it always gets recompiled to update the version number and time stamp
@@ -52,10 +54,12 @@ HEADERS += \
     SkirtMakeUp.hpp \
     MainWindow.hpp \
     WizardEngine.hpp \
-    BasicChoiceWizardPane.hpp
+    BasicChoiceWizardPane.hpp \
+    CreateRootWizardPane.hpp
 
 SOURCES += \
     SkirtMakeUp.cpp \
     MainWindow.cpp \
     WizardEngine.cpp \
-    BasicChoiceWizardPane.cpp
+    BasicChoiceWizardPane.cpp \
+    CreateRootWizardPane.cpp

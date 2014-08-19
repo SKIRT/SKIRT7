@@ -20,10 +20,10 @@ BasicChoiceWizardPane::BasicChoiceWizardPane(int initialChoice, QObject* target)
     // create the group of radio buttons that allow the user to make the basic choice
     auto question = new QLabel("What would you like to do? Please select one of the following options:");
     auto choice1 = new QRadioButton("Create and configure a new SKIRT parameter file");
-    auto choice2 = new QRadioButton("Review and adjust an existing SKIRT parameter file");
+    auto choice2 = new QRadioButton("Create and configure a new FitScheme file");
     auto buttonGroup = new QButtonGroup;
-    buttonGroup->addButton(choice1);
-    buttonGroup->addButton(choice2);
+    buttonGroup->addButton(choice1, 1);
+    buttonGroup->addButton(choice2, 2);
 
     // select the initial choice
     auto selected = buttonGroup->button(initialChoice);

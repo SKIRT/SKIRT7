@@ -76,6 +76,12 @@ public slots:
     /** This function updates the basic choice to the specified value. */
     void setBasicChoice(int newChoice);
 
+    /** If the current root does not have the specified type (or if there is no current root), this
+        function deletes the current simulation hierarchy (if present), and replaces it by a newly
+        created root simulation item of the specified type. If the current root already has the
+        specified type, this function does nothing. */
+    void setRootType(QByteArray newRootType);
+
     // ================== GUI Generation ====================
 
 public:
@@ -94,7 +100,7 @@ private:
     State _state;
 
     // the basic choice; always valid but remains Unknown until BasicChoice has been completed at least once
-    enum Choice { Unknown, NewSki };
+    enum Choice { Unknown, NewSki, NewFski };
     Choice _choice;
 
     // the simulation item hiearchy under construction; pointer has ownership;
