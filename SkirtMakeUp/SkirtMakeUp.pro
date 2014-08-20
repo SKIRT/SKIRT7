@@ -55,11 +55,15 @@ HEADERS += \
     MainWindow.hpp \
     WizardEngine.hpp \
     BasicChoiceWizardPane.hpp \
-    CreateRootWizardPane.hpp
+    CreateRootWizardPane.hpp \
+    PropertyWizardPane.hpp \
+    ItemPropertyWizardPane.hpp
 
 SOURCES += \
     SkirtMakeUp.cpp \
     MainWindow.cpp \
     WizardEngine.cpp \
     BasicChoiceWizardPane.cpp \
-    CreateRootWizardPane.cpp
+    CreateRootWizardPane.cpp \
+    PropertyWizardPane.cpp \
+    ItemPropertyWizardPane.cpp

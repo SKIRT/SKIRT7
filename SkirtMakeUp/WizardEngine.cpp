@@ -7,8 +7,17 @@
 
 #include "BasicChoiceWizardPane.hpp"
 #include "CreateRootWizardPane.hpp"
+#include "ItemPropertyWizardPane.hpp"
 #include "SimulationItem.hpp"
 #include "SimulationItemDiscovery.hpp"
+#include "BoolPropertyHandler.hpp"
+#include "DoublePropertyHandler.hpp"
+#include "DoubleListPropertyHandler.hpp"
+#include "EnumPropertyHandler.hpp"
+#include "IntPropertyHandler.hpp"
+#include "ItemListPropertyHandler.hpp"
+#include "ItemPropertyHandler.hpp"
+#include "StringPropertyHandler.hpp"
 #include <QLabel>
 
 using namespace SimulationItemDiscovery;
@@ -36,9 +45,13 @@ bool WizardEngine::canAdvance()
     case BasicChoice:
         return _choice != Unknown;
     case CreateRoot:
-        return _root != 0;
+        {
+            QByteArray currentType = _root ? itemType(_root) : "";
+            QByteArray abstractType = _choice==NewSki ? "Simulation" : "FitScheme";
+            return SimulationItemDiscovery::inherits(currentType, abstractType);
+        }
     case ConstructHierarchy:
-        return true;
+        return _propertyValid;
     case SaveHierarchy:
         return false;
     }
@@ -62,26 +75,35 @@ bool WizardEngine::isDirty()
 
 void WizardEngine::advance()
 {
-    if (canAdvance())
+    switch (_state)
     {
-        switch (_state)
+    case BasicChoice:
         {
-        case BasicChoice:
             _state = CreateRoot;
-            emitStateChanged();
-            break;
-        case CreateRoot:
-            _state = ConstructHierarchy;
-            emitStateChanged();
-            break;
-        case ConstructHierarchy:
-            _state = SaveHierarchy;
-            emitStateChanged();
-            break;
-        case SaveHierarchy:
-            break;
         }
+        break;
+    case CreateRoot:
+        {
+            _state = ConstructHierarchy;
+            _current = _root;
+            _propertyIndex = 0; // assumes that the root has at least one property
+            _propertyValid = false;
+        }
+        break;
+    case ConstructHierarchy:
+        {
+            if (_propertyIndex+1 < properties(_current).size())
+            {
+                _propertyIndex++;
+                _propertyValid = false;
+            }
+            else _state = SaveHierarchy;
+        }
+        break;
+    case SaveHierarchy:
+        break;
     }
+    emitStateChanged();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -93,18 +115,28 @@ void WizardEngine::retreat()
     case BasicChoice:
         break;
     case CreateRoot:
-        _state = BasicChoice;
-        emitStateChanged();
+        {
+            _state = BasicChoice;
+        }
         break;
     case ConstructHierarchy:
-        _state = CreateRoot;
-        emitStateChanged();
+        {
+            if (_propertyIndex > 0)
+            {
+                _propertyIndex--;
+                _propertyValid = false;
+            }
+            else _state = CreateRoot;
+        }
         break;
     case SaveHierarchy:
-        _state = ConstructHierarchy;
-        emitStateChanged();
+        {
+            _state = ConstructHierarchy;
+            _propertyValid = false;
+        }
         break;
     }
+    emitStateChanged();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -136,12 +168,22 @@ void WizardEngine::setRootType(QByteArray newRootType)
 
 ////////////////////////////////////////////////////////////////////
 
+void WizardEngine::setPropertyValid(bool valid)
+{
+    _propertyValid = valid;
+    emit canAdvanceChangedTo(canAdvance());
+}
+
+////////////////////////////////////////////////////////////////////
+
 QWidget* WizardEngine::createPane()
 {
     switch (_state)
     {
     case BasicChoice:
-        return new BasicChoiceWizardPane(_choice, this);
+        {
+            return new BasicChoiceWizardPane(_choice, this);
+        }
     case CreateRoot:
         {
             QByteArray currentType = _root ? itemType(_root) : "";
@@ -149,7 +191,25 @@ QWidget* WizardEngine::createPane()
             return new CreateRootWizardPane(abstractType, currentType, this);
         }
     case ConstructHierarchy:
-        return new QLabel("Dummy wizard pane for state ConstructHierarchy");
+        {
+            PropertyHandlerPtr handler = createPropertyHandler(_current, properties(_current)[_propertyIndex]);
+            if (handler.dynamicCast<BoolPropertyHandler>())
+                return new ItemPropertyWizardPane(handler, this);
+            if (handler.dynamicCast<IntPropertyHandler>())
+                return new ItemPropertyWizardPane(handler, this);
+            if (handler.dynamicCast<DoublePropertyHandler>())
+                return new ItemPropertyWizardPane(handler, this);
+            if (handler.dynamicCast<DoubleListPropertyHandler>())
+                return new ItemPropertyWizardPane(handler, this);
+            if (handler.dynamicCast<StringPropertyHandler>())
+                return new ItemPropertyWizardPane(handler, this);
+            if (handler.dynamicCast<EnumPropertyHandler>())
+                return new ItemPropertyWizardPane(handler, this);
+            if (handler.dynamicCast<ItemPropertyHandler>())
+                return new ItemPropertyWizardPane(handler, this);
+            if (handler.dynamicCast<ItemListPropertyHandler>())
+                return new ItemPropertyWizardPane(handler, this);
+        }
     case SaveHierarchy:
         return new QLabel("Dummy wizard pane for state SaveHierarchy");
     }

@@ -3,8 +3,9 @@
 ////       © Astronomical Observatory, Ghent University         ////
 //////////////////////////////////////////////////////////////////*/
 
-#include "CreateRootWizardPane.hpp"
+#include "ItemPropertyWizardPane.hpp"
 
+#include "ItemPropertyHandler.hpp"
 #include "SimulationItemDiscovery.hpp"
 #include <QVBoxLayout>
 #include <QLabel>
@@ -16,18 +17,20 @@ using namespace SimulationItemDiscovery;
 
 ////////////////////////////////////////////////////////////////////
 
-CreateRootWizardPane::CreateRootWizardPane(QByteArray abstractType, QByteArray initialType, QObject* target)
+ItemPropertyWizardPane::ItemPropertyWizardPane(PropertyHandlerPtr handler, QObject* target)
+    : PropertyWizardPane(handler, target)
 {
     // create the layout so that we can add stuff one by one
     auto layout = new QVBoxLayout;
 
     // add the question
-    layout->addWidget(new QLabel("Please select one of the following options for the type of "
-                                 + title(abstractType) + ":"));
+    layout->addWidget(new QLabel("Please select one of the following options for " + handler->title() + ":"));
 
     // add the radio buttons reflecting the possible choices, putting them into a button group as well
     auto buttonGroup = new QButtonGroup;
-    for (auto choiceType : descendants(abstractType))
+    auto myhandler = handlerCast<ItemPropertyHandler>();
+    QByteArray initialType = myhandler->value() ? itemType(myhandler->value()) : "";
+    for (auto choiceType : descendants(myhandler->baseType()))
     {
         auto choiceTitle = title(choiceType);
         if (!choiceTitle.isEmpty()) choiceTitle.replace(0, 1, choiceTitle[0].toUpper());
@@ -39,12 +42,15 @@ CreateRootWizardPane::CreateRootWizardPane(QByteArray abstractType, QByteArray i
         choiceButton->setProperty("choiceType", choiceType);
 
         // select the button corresponding to the initial choice
-        if (choiceType==initialType) choiceButton->setChecked(true);
+        if (choiceType==initialType)
+        {
+            choiceButton->setChecked(true);
+            emit propertyValidChanged(true);
+        }
     }
 
-    // connect the button group to ourselves, and ourselves to the target
+    // connect the button group to ourselves
     connect(buttonGroup, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(selectTypeFor(QAbstractButton*)));
-    connect(this, SIGNAL(rootTypeChanged(QByteArray)), target, SLOT(setRootType(QByteArray)));
 
     // finalize the layout and assign it to ourselves
     layout->addStretch();
@@ -53,9 +59,11 @@ CreateRootWizardPane::CreateRootWizardPane(QByteArray abstractType, QByteArray i
 
 ////////////////////////////////////////////////////////////////////
 
-void CreateRootWizardPane::selectTypeFor(QAbstractButton* button)
+void ItemPropertyWizardPane::selectTypeFor(QAbstractButton* button)
 {
-    emit rootTypeChanged(button->property("choiceType").toByteArray());
+    auto myhandler = handlerCast<ItemPropertyHandler>();
+    myhandler->setToNewItemOfType(button->property("choiceType").toByteArray());
+    emit propertyValidChanged(true);
 }
 
 ////////////////////////////////////////////////////////////////////

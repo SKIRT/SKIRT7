@@ -82,6 +82,10 @@ public slots:
         specified type, this function does nothing. */
     void setRootType(QByteArray newRootType);
 
+    /** This function updates the flag that indicates whether the value of the property currently
+        being handled is valid. */
+    void setPropertyValid(bool valid);
+
     // ================== GUI Generation ====================
 
 public:
@@ -103,13 +107,21 @@ private:
     enum Choice { Unknown, NewSki, NewFski };
     Choice _choice;
 
-    // the simulation item hiearchy under construction; pointer has ownership;
+    // the simulation item hierarchy under construction; pointer has ownership;
     // always valid but remains null until CreateRoot has been completed at least once
     SimulationItem* _root;
 
     // the simulation item currently being handled; pointer is a reference without ownership;
     // valid only during ConstructHierarchy
     SimulationItem* _current;
+
+    // the zero-based index of the property currently being handled (in the current simulation item);
+    // valid only during ConstructHierarchy
+    int _propertyIndex;
+
+    // true if the value of the property being handled is valid, false otherwise
+    // valid only during ConstructHierarchy
+    bool _propertyValid;
 };
 
 ////////////////////////////////////////////////////////////////////
