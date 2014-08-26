@@ -193,7 +193,7 @@ void PanMonteCarloSimulation::dodustselfabsorptionchunk(size_t index)
                 int m = NR::locate_clip(Xv,X);
                 Position bfr = _pds->randomPositionInCell(m);
                 Direction bfk = _random->direction();
-                pp.launch(false,L,ell,bfr,bfk);
+                pp.launch(L,ell,bfr,bfk);
                 while (true)
                 {
                     _pds->fillOpticalDepth(&pp);
@@ -267,7 +267,7 @@ void PanMonteCarloSimulation::dodustemissionchunk(size_t index)
                 int m = NR::locate_clip(Xv,X);
                 Position bfr = _pds->randomPositionInCell(m);
                 Direction bfk = _random->direction();
-                pp.launch(false,L,ell,bfr,bfk);
+                pp.launch(L,ell,bfr,bfk);
                 peeloffemission(&pp,&ppp);
                 while (true)
                 {

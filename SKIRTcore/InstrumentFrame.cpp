@@ -11,6 +11,7 @@
 #include "LockFree.hpp"
 #include "PhotonPackage.hpp"
 #include "MultiFrameInstrument.hpp"
+#include "StellarSystem.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
 
@@ -41,6 +42,8 @@ void InstrumentFrame::setupSelfBefore()
 
     // copy information from parent instrument
     _instrument = find<MultiFrameInstrument>();
+    _writeTotal = _instrument->writeTotal();
+    _writeStellarComps = _instrument->writeStellarComps();
     _distance = _instrument->distance();
     double inclination = _instrument->inclination();
     double azimuth = _instrument->azimuth();
@@ -52,8 +55,9 @@ void InstrumentFrame::setupSelfBefore()
     _cospa = cos(positionangle);
     _sinpa = sin(positionangle);
 
-    // initialize pixel frame
-    _ftotv.resize(_Nxp*_Nyp);
+    // initialize pixel frame(s)
+    if (_writeTotal) _ftotv.resize(_Nxp*_Nyp);
+    if (_writeStellarComps) _fcompvv.resize(find<StellarSystem>()->Ncomp(), _Nxp*_Nyp);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -145,13 +149,41 @@ void InstrumentFrame::detect(PhotonPackage* pp)
         double extf = exp(-taupath);
         double Lextf = L*extf;
 
-        LockFree::add(_ftotv[l], Lextf);
+        if (_writeTotal) LockFree::add(_ftotv[l], Lextf);
+        if (_writeStellarComps && pp->isStellar()) LockFree::add(_fcompvv(pp->stellarCompIndex(),l), Lextf);
     }
 }
 
 ////////////////////////////////////////////////////////////////////
 
 void InstrumentFrame::calibrateAndWriteData(int ell)
+{
+    // lists of f-array pointers, and the corresponding file names
+    QList< Array* > farrays;
+    QStringList fnames;
+
+    if (_writeTotal)
+    {
+        farrays << &_ftotv;
+        fnames << "total";
+    }
+    if (_writeStellarComps)
+    {
+        int Ncomp = find<StellarSystem>()->Ncomp();
+        for (int k=0; k<Ncomp; k++)
+        {
+            farrays << &(_fcompvv[k]);
+            fnames << "stellar_" + QString::number(k);
+        }
+    }
+
+    // calibrate and output the arrays
+    calibrateAndWriteDataFrames(ell, farrays, fnames);
+}
+
+////////////////////////////////////////////////////////////////////
+
+void InstrumentFrame::calibrateAndWriteDataFrames(int ell, QList<Array*> farrays, QStringList fnames)
 {
     Units* units = find<Units>();
     WavelengthGrid* lambdagrid = find<WavelengthGrid>();
@@ -176,15 +208,22 @@ void InstrumentFrame::calibrateAndWriteData(int ell)
     double unitfactor = units->osurfacebrightness(lambdagrid->lambda(ell), 1.);
 
     // perform the conversion, in place
-    _ftotv *= (unitfactor / (dlambda * area * fourpid2));
+    foreach (Array* farr, farrays)
+    {
+        (*farr) *= (unitfactor / (dlambda * area * fourpid2));
+    }
 
-    // write a FITS file
-    QString filename = find<FilePaths>()->output(_instrument->instrumentName()
-                                                 + "_total_" + QString::number(ell) + ".fits");
-    find<Log>()->info("Writing total flux " + QString::number(ell) + " to FITS file " + filename + "...");
-    FITSInOut::write(filename, _ftotv, _Nxp, _Nyp, 1,
-                   units->olength(_xpres), units->olength(_ypres),
-                   units->usurfacebrightness(), units->ulength());
+    // write a FITS file for each array
+    for (int q = 0; q < farrays.size(); q++)
+    {
+        QString filename = find<FilePaths>()->output(_instrument->instrumentName()
+                                                     + "_" + fnames[q] + "_" + QString::number(ell) + ".fits");
+        find<Log>()->info("Writing " + fnames[q] + " flux " + QString::number(ell)
+                                                     + " to FITS file " + filename + "...");
+        FITSInOut::write(filename, *(farrays[q]), _Nxp, _Nyp, 1,
+                       units->olength(_xpres), units->olength(_ypres),
+                       units->usurfacebrightness(), units->ulength());
+    }
 }
 
 ////////////////////////////////////////////////////////////////////

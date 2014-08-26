@@ -25,6 +25,14 @@ class MultiFrameInstrument : public DistantInstrument
     Q_CLASSINFO("Title", "an instrument with a different frame per wavelength (for use with FitSKIRT)")
     Q_CLASSINFO("AllowedIf", "OligoMonteCarloSimulation")
 
+    Q_CLASSINFO("Property", "writeTotal")
+    Q_CLASSINFO("Title", "output the total flux")
+    Q_CLASSINFO("Default", "yes")
+
+    Q_CLASSINFO("Property", "writeStellarComps")
+    Q_CLASSINFO("Title", "output the flux emitted from each stellar component seperately")
+    Q_CLASSINFO("Default", "no")
+
     Q_CLASSINFO("Property", "frames")
     Q_CLASSINFO("Title", "the instrument frames (one for each wavelength)")
     Q_CLASSINFO("Default", "InstrumentFrame")
@@ -43,6 +51,21 @@ protected:
     //======== Setters & Getters for Discoverable Attributes =======
 
 public:
+    /** Sets the flag that indicates whether or not to output the total flux. The default value is
+        true. */
+    Q_INVOKABLE void setWriteTotal(bool value);
+
+    /** Returns the flag that indicates whether or not to output the total flux. */
+    Q_INVOKABLE bool writeTotal() const;
+
+    /** Sets the flag that indicates whether or not to output the flux emitted from each stellar
+        component in a seperate file. The default value is false. */
+    Q_INVOKABLE void setWriteStellarComps(bool value);
+
+    /** Returns the flag that indicates whether or not to output the flux emitted from each stellar
+        component in a seperate file. */
+    Q_INVOKABLE bool writeStellarComps() const;
+
     /** This function adds an instrument frame to the multi-frame instrument. There must be exactly
         one frame for each wavelength in the oligochromatic simulation's wavelength grid. The frames
         are assumed to be in the same order as the wavelengths. */
@@ -67,6 +90,8 @@ public:
 
 private:
     // discoverable attributes
+    bool _writeTotal;
+    bool _writeStellarComps;
     QList<InstrumentFrame*> _frames;
 };
 

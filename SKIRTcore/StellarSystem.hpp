@@ -62,6 +62,9 @@ public:
         the whole system. */
     int dimension() const;
 
+    /** This function returns the number of components in the stellar system. */
+    int Ncomp() const;
+
     /** This function returns the monochromatic luminosity \f$L_\ell\f$ of the stellar system at
         the wavelength index \f$\ell\f$, which is the sum of the luminosities of the stellar
         components in the system. */

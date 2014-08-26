@@ -76,7 +76,7 @@ void GeometricStellarComp::launch(PhotonPackage* pp, int ell, double L) const
 {
     Position bfr = _geom->generatePosition();
     Direction bfk = _geom->generateDirection(bfr);
-    pp->launch(true,L,ell,bfr,bfk);
+    pp->launch(L,ell,bfr,bfk);
     pp->setAngularDistribution(_geom);
 }
 

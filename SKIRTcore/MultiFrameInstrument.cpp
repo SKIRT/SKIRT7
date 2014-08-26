@@ -14,6 +14,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////
 
 MultiFrameInstrument::MultiFrameInstrument()
+    : _writeTotal(true), _writeStellarComps(false)
 {
 }
 
@@ -26,6 +27,34 @@ void MultiFrameInstrument::setupSelfBefore()
     // verify attribute values
     if (_frames.size() != find<WavelengthGrid>()->Nlambda())
         throw FATALERROR("Number of instrument frames must equal number of wavelengths");
+}
+
+////////////////////////////////////////////////////////////////////
+
+void MultiFrameInstrument::setWriteTotal(bool value)
+{
+    _writeTotal = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+bool MultiFrameInstrument::writeTotal() const
+{
+    return _writeTotal;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void MultiFrameInstrument::setWriteStellarComps(bool value)
+{
+    _writeStellarComps = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+bool MultiFrameInstrument::writeStellarComps() const
+{
+    return _writeStellarComps;
 }
 
 ////////////////////////////////////////////////////////////////////
