@@ -238,7 +238,6 @@ void MonteCarloSimulation::peeloffscattering(PhotonPackage* pp, PhotonPackage* p
 
 void MonteCarloSimulation::simulateescapeandabsorption(PhotonPackage* pp, bool dustemission)
 {
-    const double taumin = 1e-3;
     double taupath = pp->tau();
     int ell = pp->ell();
     double L = pp->luminosity();
@@ -249,7 +248,7 @@ void MonteCarloSimulation::simulateescapeandabsorption(PhotonPackage* pp, bool d
     if (Ncomp==1)
     {
         double albedo = _ds->mix(0)->albedo(ell);
-        double expfactor = (taupath>taumin) ? 1.0-exp(-taupath) : taupath*(1.0-0.5*taupath);
+        double expfactor = -expm1(-taupath);
         if (dustemission)
         {
             int Ncells = pp->size();
@@ -260,7 +259,7 @@ void MonteCarloSimulation::simulateescapeandabsorption(PhotonPackage* pp, bool d
                 {
                     double taustart = (n==0) ? 0.0 : pp->tau(n-1);
                     double dtau = pp->dtau(n);
-                    double expfactorm = (dtau>taumin) ? 1.0-exp(-dtau) : dtau*(1.0-0.5*dtau);
+                    double expfactorm = -expm1(-dtau);
                     double Lintm = L * exp(-taustart) * expfactorm;
                     double Labsm = (1.0-albedo) * Lintm;
                     _ds->absorb(m,ell,Labsm,ynstellar);
@@ -301,7 +300,7 @@ void MonteCarloSimulation::simulateescapeandabsorption(PhotonPackage* pp, bool d
                 double albedo = (kext>0.0) ? ksca/kext : 0.0;
                 double taustart = (n==0) ? 0.0 : pp->tau(n-1);
                 double dtau = pp->dtau(n);
-                double expfactorm = (dtau>taumin) ? 1.0-exp(-dtau) : dtau*(1.0-0.5*dtau);
+                double expfactorm = -expm1(-dtau);
                 double Lintm = L * exp(-taustart) * expfactorm;
                 double Lscam = albedo * Lintm;
                 Lsca += Lscam;
