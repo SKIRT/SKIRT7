@@ -186,7 +186,7 @@ void PanMonteCarloSimulation::dodustselfabsorptionchunk(size_t index)
         quint64 remaining = _chunksize;
         while (remaining > 0)
         {
-            quint64 count = qMin(remaining, LOG_CHUNK_SIZE);
+            quint64 count = qMin(remaining, _logchunksize);
             for (quint64 i=0; i<count; i++)
             {
                 double X = _random->uniform();
@@ -260,7 +260,7 @@ void PanMonteCarloSimulation::dodustemissionchunk(size_t index)
         quint64 remaining = _chunksize;
         while (remaining > 0)
         {
-            quint64 count = qMin(remaining, LOG_CHUNK_SIZE);
+            quint64 count = qMin(remaining, _logchunksize);
             for (quint64 i=0; i<count; i++)
             {
                 double X = _random->uniform();
@@ -272,10 +272,11 @@ void PanMonteCarloSimulation::dodustemissionchunk(size_t index)
                 while (true)
                 {
                     _pds->fillOpticalDepth(&pp);
+                    if (_continuousScattering) continuouspeeloffscattering(&pp,&ppp);
                     simulateescapeandabsorption(&pp,false);
                     if (pp.luminosity() <= Lmin) break;
                     simulatepropagation(&pp);
-                    peeloffscattering(&pp,&ppp);
+                    if (!_continuousScattering) peeloffscattering(&pp,&ppp);
                     simulatescattering(&pp);
                 }
             }

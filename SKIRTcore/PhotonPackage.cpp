@@ -59,6 +59,19 @@ void PhotonPackage::launchScatteringPeelOff(const PhotonPackage* pp, Direction b
 
 ////////////////////////////////////////////////////////////////////
 
+void PhotonPackage::launchScatteringPeelOff(const PhotonPackage* pp, Position bfr, Direction bfk, double w)
+{
+    _L = pp->_L * w;
+    _ell = pp->_ell;
+    _bfr = bfr;
+    _bfk = bfk;
+    _nscatt = pp->_nscatt + 1;
+    _stellar = pp->_stellar;
+    _ad = 0;
+}
+
+////////////////////////////////////////////////////////////////////
+
 void PhotonPackage::setStellarOrigin(int stellarCompIndex)
 {
     _stellar = stellarCompIndex;

@@ -61,6 +61,16 @@ public:
         lost. */
     void launchScatteringPeelOff(const PhotonPackage* pp, Direction bfk, double w);
 
+    /** This function initializes a peel off photon package being sent to an instrument for a
+        scattering event. The arguments specify the base photon package from which the peel off
+        derives, the position at which the peel off occurs, the direction towards the instrument,
+        and the luminosity fraction (as a multiplication factor). The function copies the relevant
+        values from the base photon package to the peel off photon package, updates the peel off
+        position, direction and luminosity, and increments the scattering counter, invalidating the
+        current path. The base photon package remains unchanged. All information about the previous
+        life cycle in the peel off photon package is lost. */
+    void launchScatteringPeelOff(const PhotonPackage* pp, Position bfr, Direction bfk, double w);
+
     /** This function establishes the origin of the photon package as stellar emission (the default
         is dust emission) and registers the index of the emitting stellar component. This
         information is used by some instruments to record fluxes seperately based on their origin.

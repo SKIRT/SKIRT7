@@ -25,7 +25,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////
 
 MonteCarloSimulation::MonteCarloSimulation()
-    : _lambdagrid(0), _ss(0), _ds(0), _is(0), _packages(0)
+    : _lambdagrid(0), _ss(0), _ds(0), _is(0), _packages(0), _continuousScattering(false)
 {
 }
 
@@ -65,6 +65,9 @@ void MonteCarloSimulation::setupSelfAfter()
         _chunksize = ceil(_packages/_Nchunks);
         _Npp = _Nchunks*_chunksize;
     }
+
+    // determine the log frequency; continuous scattering is much slower!
+    _logchunksize = _continuousScattering ? 5000 : 50000;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -101,6 +104,20 @@ void MonteCarloSimulation::setPackages(double value)
 double MonteCarloSimulation::packages() const
 {
     return _packages;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void MonteCarloSimulation::setContinuousScattering(bool value)
+{
+    _continuousScattering = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+bool MonteCarloSimulation::continuousScattering() const
+{
+    return _continuousScattering;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -164,7 +181,7 @@ void MonteCarloSimulation::dostellaremissionchunk(size_t index)
         quint64 remaining = _chunksize;
         while (remaining > 0)
         {
-            quint64 count = qMin(remaining, LOG_CHUNK_SIZE);
+            quint64 count = qMin(remaining, _logchunksize);
             for (quint64 i=0; i<count; i++)
             {
                 _ss->launch(&pp,ell,L);
@@ -172,10 +189,11 @@ void MonteCarloSimulation::dostellaremissionchunk(size_t index)
                 if (_ds) while (true)
                 {
                     _ds->fillOpticalDepth(&pp);
+                    if (_continuousScattering) continuouspeeloffscattering(&pp,&ppp);
                     simulateescapeandabsorption(&pp,_ds->dustemission());
                     if (pp.luminosity() <= Lmin) break;
                     simulatepropagation(&pp);
-                    peeloffscattering(&pp,&ppp);
+                    if (!_continuousScattering) peeloffscattering(&pp,&ppp);
                     simulatescattering(&pp);
                 }
             }
@@ -236,6 +254,65 @@ void MonteCarloSimulation::peeloffscattering(PhotonPackage* pp, PhotonPackage* p
 
 ////////////////////////////////////////////////////////////////////
 
+void MonteCarloSimulation::continuouspeeloffscattering(PhotonPackage *pp, PhotonPackage *ppp)
+{
+    int ell = pp->ell();
+    Position bfr = pp->position();
+    Direction bfk = pp->direction();
+
+    int Ncomp = _ds->Ncomp();
+    QVarLengthArray<double,4> kappascav(Ncomp);
+    QVarLengthArray<double,4> kappaextv(Ncomp);
+    for (int h=0; h<Ncomp; h++)
+    {
+        DustMix* mix = _ds->mix(h);
+        kappascav[h] = mix->kappasca(ell);
+        kappaextv[h] = mix->kappaext(ell);
+    }
+
+    int Ncells = pp->size();
+    for (int n=0; n<Ncells; n++)
+    {
+        int m = pp->m(n);
+        if (m!=-1)
+        {
+            QVarLengthArray<double,4> wv(Ncomp);
+            double ksca = 0.0;
+            double kext = 0.0;
+            for (int h=0; h<Ncomp; h++)
+            {
+                double rho = _ds->density(m,h);
+                wv[h] = rho*kappascav[h];
+                ksca += rho*kappascav[h];
+                kext += rho*kappaextv[h];
+            }
+            if (ksca>0.0)
+            {
+                for (int h=0; h<Ncomp; h++) wv[h] /= ksca;
+                double albedo = ksca/kext;
+                double tau0 = (n==0) ? 0.0 : pp->tau(n-1);
+                double dtau = pp->dtau(n);
+                double s0 = (n==0) ? 0.0 : pp->s(n-1);
+                double ds = pp->ds(n);
+                double factorm = albedo * exp(-tau0) * (-expm1(-dtau));
+                double s = s0 + _random->uniform()*ds;
+                Position bfrnew(bfr+s*bfk);
+                foreach (Instrument* instr, _is->instruments())
+                {
+                    Direction bfknew = instr->bfkobs(bfrnew);
+                    double w = 0.0;
+                    for (int h=0; h<Ncomp; h++) w += wv[h] * _ds->mix(h)->phasefunction(ell,bfk,bfknew);
+
+                    ppp->launchScatteringPeelOff(pp, bfrnew, bfknew, factorm*w);
+                    instr->detect(ppp);
+                }
+            }
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////
+
 void MonteCarloSimulation::simulateescapeandabsorption(PhotonPackage* pp, bool dustemission)
 {
     double taupath = pp->tau();
@@ -271,7 +348,7 @@ void MonteCarloSimulation::simulateescapeandabsorption(PhotonPackage* pp, bool d
     }
 
     // Difficult case: there are different dust components.
-    // The absorption/scattering in each cell has to weighted by the density contribution of the component.
+    // The absorption/scattering in each cell is weighted by the density contribution of the component.
     else
     {
         Array kappascav(Ncomp);
