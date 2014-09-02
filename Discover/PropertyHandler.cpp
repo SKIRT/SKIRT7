@@ -5,6 +5,7 @@
 
 #include "PropertyHandler.hpp"
 #include "SimulationItemDiscovery.hpp"
+#include "BoolPropertyHandler.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
@@ -53,8 +54,15 @@ QByteArray PropertyHandler::type() const
 
 QString PropertyHandler::title() const
 {
-    if(_attributes.contains("Title")) return _attributes["Title"];
+    if (_attributes.contains("Title")) return _attributes["Title"];
     return "unknown property";
+}
+
+////////////////////////////////////////////////////////////////////
+
+bool PropertyHandler::isSilent() const
+{
+    return BoolPropertyHandler::toBool(_attributes["Silent"]);
 }
 
 ////////////////////////////////////////////////////////////////////

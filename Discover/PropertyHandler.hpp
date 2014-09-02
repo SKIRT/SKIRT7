@@ -46,6 +46,11 @@ public:
     /** Returns the title (used for display to a user) for the handled property. */
     QString title() const;
 
+    /** Returns true if the handled property is silent, i.e. an interactive Q&A session should
+        not ask for a value corresponding to this property. A silent property must have an
+        appropriate default value. */
+    bool isSilent() const;
+
     /** Returns true if the handled property is optional (i.e. its value may remain unset), or
         false if not. The default implementation in this abstract class returns false; this
         function must be overridden by property handler subclasses that support optional values. */

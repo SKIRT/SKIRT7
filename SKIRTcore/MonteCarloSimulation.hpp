@@ -42,6 +42,7 @@ class MonteCarloSimulation : public Simulation
     Q_CLASSINFO("Property", "continuousScattering")
     Q_CLASSINFO("Title", "use continuous scattering")
     Q_CLASSINFO("Default", "no")
+    Q_CLASSINFO("Silent", "yes")
 
     //============= Construction - Setup - Destruction =============
 
