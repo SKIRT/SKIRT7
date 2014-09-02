@@ -142,7 +142,7 @@ private:
         \f[ y=(j+\frac{1}{2})/N_\mathrm{pixels,y} \f]
         \f[ \alpha=\arcsin(2y-1) \f]
         \f[ \theta=\arccos(\frac{2\alpha+\sin 2\alpha}{\pi}) \f]
-        \f[ \phi=\frac{\pi(2x-1)}{\cos\alpha}) \f]
+        \f[ \phi=\frac{\pi(2x-1)}{\cos\alpha} \f]
     */
     void writedepthmap() const;
 
