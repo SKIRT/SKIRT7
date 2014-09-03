@@ -6,17 +6,18 @@
 #include "WizardEngine.hpp"
 
 #include "BasicChoiceWizardPane.hpp"
-#include "CreateRootWizardPane.hpp"
-#include "ItemPropertyWizardPane.hpp"
-#include "SimulationItem.hpp"
-#include "SimulationItemDiscovery.hpp"
 #include "BoolPropertyHandler.hpp"
-#include "DoublePropertyHandler.hpp"
+#include "CreateRootWizardPane.hpp"
 #include "DoubleListPropertyHandler.hpp"
+#include "DoublePropertyHandler.hpp"
+#include "DoublePropertyWizardPane.hpp"
 #include "EnumPropertyHandler.hpp"
 #include "IntPropertyHandler.hpp"
 #include "ItemListPropertyHandler.hpp"
 #include "ItemPropertyHandler.hpp"
+#include "ItemPropertyWizardPane.hpp"
+#include "SimulationItem.hpp"
+#include "SimulationItemDiscovery.hpp"
 #include "StringPropertyHandler.hpp"
 #include <QLabel>
 
@@ -198,7 +199,7 @@ QWidget* WizardEngine::createPane()
             if (handler.dynamicCast<IntPropertyHandler>())
                 return new ItemPropertyWizardPane(handler, this);
             if (handler.dynamicCast<DoublePropertyHandler>())
-                return new ItemPropertyWizardPane(handler, this);
+                return new DoublePropertyWizardPane(handler, this);
             if (handler.dynamicCast<DoubleListPropertyHandler>())
                 return new ItemPropertyWizardPane(handler, this);
             if (handler.dynamicCast<StringPropertyHandler>())

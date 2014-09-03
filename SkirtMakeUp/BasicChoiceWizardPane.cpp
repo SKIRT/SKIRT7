@@ -18,7 +18,7 @@ BasicChoiceWizardPane::BasicChoiceWizardPane(int initialChoice, QObject* target)
     auto title = new QLabel("Welcome to the SKIRT MakeUp wizard!");
 
     // create the group of radio buttons that allow the user to make the basic choice
-    auto question = new QLabel("What would you like to do? Please select one of the following options:");
+    auto question = new QLabel("What would you like to do? Select one of the following options:");
     auto choice1 = new QRadioButton("Create and configure a new SKIRT parameter file");
     auto choice2 = new QRadioButton("Create and configure a new FitScheme file");
     auto buttonGroup = new QButtonGroup;

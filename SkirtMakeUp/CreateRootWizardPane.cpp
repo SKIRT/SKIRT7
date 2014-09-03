@@ -22,8 +22,7 @@ CreateRootWizardPane::CreateRootWizardPane(QByteArray abstractType, QByteArray i
     auto layout = new QVBoxLayout;
 
     // add the question
-    layout->addWidget(new QLabel("Please select one of the following options for the type of "
-                                 + title(abstractType) + ":"));
+    layout->addWidget(new QLabel("Select one of the following options for the type of " + title(abstractType) + ":"));
 
     // add the radio buttons reflecting the possible choices, putting them into a button group as well
     auto buttonGroup = new QButtonGroup;

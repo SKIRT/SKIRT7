@@ -57,7 +57,8 @@ HEADERS += \
     BasicChoiceWizardPane.hpp \
     CreateRootWizardPane.hpp \
     PropertyWizardPane.hpp \
-    ItemPropertyWizardPane.hpp
+    ItemPropertyWizardPane.hpp \
+    DoublePropertyWizardPane.hpp
 
 SOURCES += \
     SkirtMakeUp.cpp \
@@ -66,4 +67,5 @@ SOURCES += \
     BasicChoiceWizardPane.cpp \
     CreateRootWizardPane.cpp \
     PropertyWizardPane.cpp \
-    ItemPropertyWizardPane.cpp
+    ItemPropertyWizardPane.cpp \
+    DoublePropertyWizardPane.cpp
