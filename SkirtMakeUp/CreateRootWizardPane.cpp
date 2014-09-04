@@ -18,6 +18,16 @@ using namespace SimulationItemDiscovery;
 
 CreateRootWizardPane::CreateRootWizardPane(QByteArray abstractType, QByteArray initialType, QObject* target)
 {
+    // connect ourselves to the target
+    connect(this, SIGNAL(rootTypeChanged(QByteArray)), target, SLOT(setRootType(QByteArray)));
+
+    // if there is currently no root, create one using the first option in the list
+    if (initialType.isEmpty())
+    {
+        initialType = descendants(abstractType)[0];
+        emit rootTypeChanged(initialType);
+    }
+
     // create the layout so that we can add stuff one by one
     auto layout = new QVBoxLayout;
 
@@ -41,9 +51,8 @@ CreateRootWizardPane::CreateRootWizardPane(QByteArray abstractType, QByteArray i
         if (choiceType==initialType) choiceButton->setChecked(true);
     }
 
-    // connect the button group to ourselves, and ourselves to the target
+    // connect the button group to ourselves
     connect(buttonGroup, SIGNAL(buttonClicked(QAbstractButton*)), this, SLOT(selectTypeFor(QAbstractButton*)));
-    connect(this, SIGNAL(rootTypeChanged(QByteArray)), target, SLOT(setRootType(QByteArray)));
 
     // finalize the layout and assign it to ourselves
     layout->addStretch();

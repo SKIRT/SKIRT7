@@ -26,7 +26,7 @@ using namespace SimulationItemDiscovery;
 ////////////////////////////////////////////////////////////////////
 
 WizardEngine::WizardEngine(QObject* parent)
-    : QObject(parent), _state(BasicChoice), _choice(Unknown), _root(0), _current(0)
+    : QObject(parent), _state(BasicChoice), _choice(NewSki), _root(0), _current(0)
 {
 }
 
@@ -189,6 +189,7 @@ QWidget* WizardEngine::createPane()
         {
             QByteArray currentType = _root ? itemType(_root) : "";
             QByteArray abstractType = _choice==NewSki ? "Simulation" : "FitScheme";
+            if (!SimulationItemDiscovery::inherits(currentType, abstractType)) currentType.clear();
             return new CreateRootWizardPane(abstractType, currentType, this);
         }
     case ConstructHierarchy:
