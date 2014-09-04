@@ -44,9 +44,8 @@ double DraineGraphiteGrainComposition::enthalpyfunction(double T)
     double h = Units::k() * ( TD1*fn(2,T/TD1) + 2.*TD2*fn(2,T/TD2) );
 
     // convert to enthalpy per kg
-    const double A_r = 12.0107;     // relative atomic mass for carbon (in atomic mass units == 1 g/mol)
-    const double M_u = 1e-3;        // g -> kg
-    return h * Units::NA() / (A_r * M_u);
+    const double Mcarbon = 12.015;     // mass of carbon in units of M_p
+    return h / (Mcarbon * Units::massproton());
 }
 
 //////////////////////////////////////////////////////////////////////
