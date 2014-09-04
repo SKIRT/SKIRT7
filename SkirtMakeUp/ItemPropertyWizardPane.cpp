@@ -6,7 +6,6 @@
 #include "ItemPropertyWizardPane.hpp"
 
 #include "ItemPropertyHandler.hpp"
-#include "SimulationItem.hpp"
 #include "SimulationItemDiscovery.hpp"
 #include <QVBoxLayout>
 #include <QLabel>
@@ -71,8 +70,7 @@ ItemPropertyWizardPane::ItemPropertyWizardPane(PropertyHandlerPtr handler, QObje
         // if the property has never been configured by the user,
         // and this button corresponds to the default or forced type,
         // store a newly created item into the property
-        if (!hdlr->target()->property(hdlr->name()+"_configured").toBool()
-            && (choiceType==defaultType || choiceType==forcedType))
+        if (!isPropertyConfigured() && (choiceType==defaultType || choiceType==forcedType))
         {
             hdlr->setToNewItemOfType(choiceType);
             // adjust the current type to trigger the next "if"
@@ -113,7 +111,7 @@ void ItemPropertyWizardPane::selectTypeFor(QAbstractButton* button)
     }
 
     // make the target item remember that this property was configured by the user
-    hdlr->target()->setProperty(hdlr->name()+"_configured", true);
+    setPropertyConfigured();
 
     // signal the change
     emit propertyValidChanged(true);

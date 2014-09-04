@@ -42,6 +42,16 @@ protected:
         type, the function returns null. */
     template <class T> T* handlerCast() { return _handler.dynamicCast<T>().data(); }
 
+    /** This function stores a flag in the target simulation item to indicate that the user
+      has configured the property being handled during this session. */
+    void setPropertyConfigured();
+
+    /** This function returns true if the setPropertyConfigured() was called during this session
+        for this combination of target simulation item and property, and false otherwise. In other
+        words, it returns true if the property being handled has been configured by the user for
+        the target simulation item. */
+    bool isPropertyConfigured();
+
     // ================== Data Members ====================
 
 private:

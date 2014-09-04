@@ -38,6 +38,23 @@ DoublePropertyWizardPane::DoublePropertyWizardPane(PropertyHandlerPtr handler, Q
     // finalize the layout and assign it to ourselves
     layout->addStretch();
     setLayout(layout);
+
+    // if the property was never configured, put the default value or a blank in the text field
+    if (!isPropertyConfigured())
+    {
+        if (hdlr->hasDefaultValue())
+        {
+            field->setText(hdlr->toString(hdlr->defaultValue()));
+            hdlr->setValue(hdlr->defaultValue());    // also update the property value
+        }
+        else
+        {
+            field->setText("");
+        }
+    }
+
+    // ensure proper validity state
+    emitPropertyValidChanged(field->text());
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -46,17 +63,26 @@ void DoublePropertyWizardPane::updateValue(const QString& text)
 {
     auto hdlr = handlerCast<DoublePropertyHandler>();
 
-    // verify that value is valid and within range
+    // verify that value is valid and within range before setting it
     double value = hdlr->toDouble(text);
     if (hdlr->isValid(text) && value >= hdlr->minValue() && value <= hdlr->maxValue())
     {
         hdlr->setValue(value);
-        emit propertyValidChanged(true);
+        setPropertyConfigured();
     }
-    else
-    {
-        emit propertyValidChanged(false);
-    }
+    emitPropertyValidChanged(text);
+}
+
+
+////////////////////////////////////////////////////////////////////
+
+void DoublePropertyWizardPane::emitPropertyValidChanged(const QString& text)
+{
+    auto hdlr = handlerCast<DoublePropertyHandler>();
+
+    double value = hdlr->toDouble(text);
+    bool valid = hdlr->isValid(text) && value >= hdlr->minValue() && value <= hdlr->maxValue();
+    emit propertyValidChanged(valid);
 }
 
 ////////////////////////////////////////////////////////////////////
