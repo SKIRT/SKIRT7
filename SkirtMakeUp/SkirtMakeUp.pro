@@ -59,7 +59,8 @@ HEADERS += \
     PropertyWizardPane.hpp \
     ItemPropertyWizardPane.hpp \
     DoublePropertyWizardPane.hpp \
-    IntPropertyWizardPane.hpp
+    IntPropertyWizardPane.hpp \
+    EnumPropertyWizardPane.hpp
 
 SOURCES += \
     SkirtMakeUp.cpp \
@@ -70,4 +71,5 @@ SOURCES += \
     PropertyWizardPane.cpp \
     ItemPropertyWizardPane.cpp \
     DoublePropertyWizardPane.cpp \
-    IntPropertyWizardPane.cpp
+    IntPropertyWizardPane.cpp \
+    EnumPropertyWizardPane.cpp

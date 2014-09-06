@@ -12,6 +12,7 @@
 #include "DoublePropertyHandler.hpp"
 #include "DoublePropertyWizardPane.hpp"
 #include "EnumPropertyHandler.hpp"
+#include "EnumPropertyWizardPane.hpp"
 #include "IntPropertyHandler.hpp"
 #include "IntPropertyWizardPane.hpp"
 #include "ItemListPropertyHandler.hpp"
@@ -297,7 +298,7 @@ QWidget* WizardEngine::createPane()
             if (handler.dynamicCast<StringPropertyHandler>())
                 return new QLabel("Dummy wizard pane for String");
             if (handler.dynamicCast<EnumPropertyHandler>())
-                return new QLabel("Dummy wizard pane for Enum");
+                return new EnumPropertyWizardPane(handler, this);
             if (handler.dynamicCast<ItemPropertyHandler>())
                 return new ItemPropertyWizardPane(handler, this);
             if (handler.dynamicCast<ItemListPropertyHandler>())
