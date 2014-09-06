@@ -58,7 +58,8 @@ HEADERS += \
     CreateRootWizardPane.hpp \
     PropertyWizardPane.hpp \
     ItemPropertyWizardPane.hpp \
-    DoublePropertyWizardPane.hpp
+    DoublePropertyWizardPane.hpp \
+    IntPropertyWizardPane.hpp
 
 SOURCES += \
     SkirtMakeUp.cpp \
@@ -68,4 +69,5 @@ SOURCES += \
     CreateRootWizardPane.cpp \
     PropertyWizardPane.cpp \
     ItemPropertyWizardPane.cpp \
-    DoublePropertyWizardPane.cpp
+    DoublePropertyWizardPane.cpp \
+    IntPropertyWizardPane.cpp

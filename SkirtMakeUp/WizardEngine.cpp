@@ -13,6 +13,7 @@
 #include "DoublePropertyWizardPane.hpp"
 #include "EnumPropertyHandler.hpp"
 #include "IntPropertyHandler.hpp"
+#include "IntPropertyWizardPane.hpp"
 #include "ItemListPropertyHandler.hpp"
 #include "ItemPropertyHandler.hpp"
 #include "ItemPropertyWizardPane.hpp"
@@ -74,6 +75,35 @@ bool WizardEngine::isDirty()
 
 ////////////////////////////////////////////////////////////////////
 
+namespace
+{
+    // returns the property index for the specified child item in the specified parent item
+    int propertyIndexForChild(SimulationItem* parent, SimulationItem* child)
+    {
+        int index = 0;
+        for (auto property : properties(parent))
+        {
+            PropertyHandlerPtr handler = createPropertyHandler(parent, property);
+
+            // check the value of item properties
+            auto itemhandler = handler.dynamicCast<ItemPropertyHandler>();
+            if (itemhandler && itemhandler->value() == child) return index;
+
+            // check the values of item list properties
+            auto itemlisthandler = handler.dynamicCast<ItemListPropertyHandler>();
+            if (itemlisthandler)
+            {
+                for (auto item : itemlisthandler->value()) if (item == child) return index;
+            }
+
+            index++;
+        }
+        return 0;  // this should never happen
+    }
+}
+
+////////////////////////////////////////////////////////////////////
+
 void WizardEngine::advance()
 {
     switch (_state)
@@ -93,12 +123,40 @@ void WizardEngine::advance()
         break;
     case ConstructHierarchy:
         {
-            if (_propertyIndex+1 < properties(_current).size())
+            // if the property being handled is an item, and the item has properties, then descend the hierarchy
+            auto handler = createPropertyHandler(_current, properties(_current)[_propertyIndex]);
+            auto itemhandler = handler.dynamicCast<ItemPropertyHandler>();
+            if (itemhandler && itemhandler->value() && properties(itemhandler->value()).size()>0)
             {
-                _propertyIndex++;
-                _propertyValid = false;
+                _current = itemhandler->value();
+                _propertyIndex = 0;
             }
-            else _state = SaveHierarchy;
+
+            // otherwise, if the property being handled is an item list, ...  TO DO
+            // ...
+
+            // otherwise, if this was the last property at this level, move up the hierarchy to a level where
+            // there are properties to advance to; if we encounter the root item, then move to the SaveHierarchy state
+            else
+            {
+                while (_propertyIndex+1 == properties(_current).size())
+                {
+                    if (_current == _root)
+                    {
+                        _state = SaveHierarchy;
+                        break;
+                    }
+                    auto parent = dynamic_cast<SimulationItem*>(_current->parent());
+                    _propertyIndex = propertyIndexForChild(parent, _current);
+                    _current = parent;
+                }
+
+                // advance to the next property (meaningless and harmless if state has changed to SaveHierarchy)
+                _propertyIndex++;
+            }
+
+            // indicate property invalid (meaningless and harmless if state has changed to SaveHierarchy)
+            _propertyValid = false;
         }
         break;
     case SaveHierarchy:
@@ -122,12 +180,45 @@ void WizardEngine::retreat()
         break;
     case ConstructHierarchy:
         {
-            if (_propertyIndex > 0)
+            // if this was the first property at this level, move up the hierarchy to the previous level
+            // unless this is already the root item, in which case we move to the CreateRoot state
+            if (_propertyIndex == 0)
+            {
+                if (_current == _root)
+                {
+                    _state = CreateRoot;
+                }
+                else
+                {
+                    auto parent = dynamic_cast<SimulationItem*>(_current->parent());
+                    _propertyIndex = propertyIndexForChild(parent, _current);
+                    _current = parent;
+                }
+            }
+
+            // otherwise, retreat to the previous property, and descend its hierarchy as deep as possible
+            else
             {
                 _propertyIndex--;
-                _propertyValid = false;
-            }
-            else _state = CreateRoot;
+                while (true)
+                {
+                    // if the current property is an item, and the item has properties, then descend the hierarchy
+                    auto handler = createPropertyHandler(_current, properties(_current)[_propertyIndex]);
+                    auto itemhandler = handler.dynamicCast<ItemPropertyHandler>();
+                    if (itemhandler && itemhandler->value() && properties(itemhandler->value()).size()>0)
+                    {
+                        _current = itemhandler->value();
+                        _propertyIndex = properties(itemhandler->value()).size() - 1;
+                    }
+                    else break;
+
+                    // otherwise, if the property being handled is an item list, ...  TO DO
+                    // ...
+                }
+             }
+
+            // indicate property invalid (meaningless and harmless if state has changed to CreateRoot)
+            _propertyValid = false;
         }
         break;
     case SaveHierarchy:
@@ -196,21 +287,21 @@ QWidget* WizardEngine::createPane()
         {
             PropertyHandlerPtr handler = createPropertyHandler(_current, properties(_current)[_propertyIndex]);
             if (handler.dynamicCast<BoolPropertyHandler>())
-                return new ItemPropertyWizardPane(handler, this);
+                return new QLabel("Dummy wizard pane for Bool");
             if (handler.dynamicCast<IntPropertyHandler>())
-                return new ItemPropertyWizardPane(handler, this);
+                return new IntPropertyWizardPane(handler, this);
             if (handler.dynamicCast<DoublePropertyHandler>())
                 return new DoublePropertyWizardPane(handler, this);
             if (handler.dynamicCast<DoubleListPropertyHandler>())
-                return new ItemPropertyWizardPane(handler, this);
+                return new QLabel("Dummy wizard pane for Double List");
             if (handler.dynamicCast<StringPropertyHandler>())
-                return new ItemPropertyWizardPane(handler, this);
+                return new QLabel("Dummy wizard pane for String");
             if (handler.dynamicCast<EnumPropertyHandler>())
-                return new ItemPropertyWizardPane(handler, this);
+                return new QLabel("Dummy wizard pane for Enum");
             if (handler.dynamicCast<ItemPropertyHandler>())
                 return new ItemPropertyWizardPane(handler, this);
             if (handler.dynamicCast<ItemListPropertyHandler>())
-                return new ItemPropertyWizardPane(handler, this);
+                return new QLabel("Dummy wizard pane for Item List");
         }
     case SaveHierarchy:
         return new QLabel("Dummy wizard pane for state SaveHierarchy");

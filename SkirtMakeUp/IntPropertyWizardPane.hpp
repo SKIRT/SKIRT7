@@ -1,0 +1,42 @@
+/*//////////////////////////////////////////////////////////////////
+////       SKIRT -- an advanced radiative transfer code         ////
+////       © Astronomical Observatory, Ghent University         ////
+//////////////////////////////////////////////////////////////////*/
+
+#ifndef INTPROPERTYWIZARDPANE_HPP
+#define INTPROPERTYWIZARDPANE_HPP
+
+#include "PropertyWizardPane.hpp"
+
+////////////////////////////////////////////////////////////////////
+
+/** An IntPropertyWizardPane instance displays the user interface corresponding to an
+    IntPropertyHandler. When the user changes the edit field, the corresponding value is updated in
+    the target property. */
+class IntPropertyWizardPane : public PropertyWizardPane
+{
+    Q_OBJECT
+
+    // ============= Construction and Destruction =============
+
+public:
+    /** The default (and only) constructor creates and initializes the GUI for this pane. For a
+        description of the arguments, see the PropertyWizardPane constructor. */
+    explicit IntPropertyWizardPane(PropertyHandlerPtr handler, QObject* target);
+
+    // ==================== Event Handling ====================
+
+public slots:
+    /** This function stores the value corresponding to the specified text string into the target
+        property. */
+    void updateValue(const QString& text);
+
+private:
+    /** This function emits a propertyValidChanged(bool) signal with the appropriate argument
+        depending on the value of the specified text. */
+    void emitPropertyValidChanged(const QString& text);
+};
+
+////////////////////////////////////////////////////////////////////
+
+#endif // INTPROPERTYWIZARDPANE_HPP
