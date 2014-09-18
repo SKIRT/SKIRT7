@@ -266,11 +266,8 @@ HEADERS += \
     RangeGrainSizeDistribution.hpp \
     SingleGrainSizeDistribution.hpp \
     Trust2Geometry.hpp \
-<<<<<<< HEAD
-    SolarPatchGeometry.hpp
-=======
+    SolarPatchGeometry.hpp \
     SphericalHoleGeometry.hpp
->>>>>>> 65ae1ac87d8a37e1c24d97510a957b5f54616ef8
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -497,8 +494,5 @@ SOURCES += \
     RangeGrainSizeDistribution.cpp \
     SingleGrainSizeDistribution.cpp \
     Trust2Geometry.cpp \
-<<<<<<< HEAD
-    SolarPatchGeometry.cpp
-=======
+    SolarPatchGeometry.cpp \
     SphericalHoleGeometry.cpp
->>>>>>> 65ae1ac87d8a37e1c24d97510a957b5f54616ef8
