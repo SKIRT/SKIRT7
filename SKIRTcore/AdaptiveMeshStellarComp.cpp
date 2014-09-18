@@ -1,7 +1,7 @@
 /*//////////////////////////////////////////////////////////////////
 ////       SKIRT -- an advanced radiative transfer code         ////
 ////       © Astronomical Observatory, Ghent University         ////
-//////////////////////////////////////////////////////////////////*/
+///////////////////////////////////////////////////////////////// */
 
 #include "AdaptiveMesh.hpp"
 #include "AdaptiveMeshFile.hpp"
@@ -213,7 +213,7 @@ void AdaptiveMeshStellarComp::launch(PhotonPackage* pp, int ell, double L) const
     int m = NR::locate_clip(_Xvv[ell], _random->uniform());
     Position bfr = _mesh->randomPosition(_random, m);
     Direction bfk = _random->direction();
-    pp->launch(true,L,ell,bfr,bfk);
+    pp->launch(L,ell,bfr,bfk);
 }
 
 //////////////////////////////////////////////////////////////////////

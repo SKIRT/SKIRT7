@@ -1,7 +1,7 @@
 /*//////////////////////////////////////////////////////////////////
 ////       SKIRT -- an advanced radiative transfer code         ////
 ////       © Astronomical Observatory, Ghent University         ////
-//////////////////////////////////////////////////////////////////*/
+///////////////////////////////////////////////////////////////// */
 
 #ifndef MONTECARLOSIMULATION_HPP
 #define MONTECARLOSIMULATION_HPP
@@ -38,6 +38,11 @@ class MonteCarloSimulation : public Simulation
     Q_CLASSINFO("MinValue", "0")
     Q_CLASSINFO("MaxValue", "1e15")
     Q_CLASSINFO("Default", "1e6")
+
+    Q_CLASSINFO("Property", "continuousScattering")
+    Q_CLASSINFO("Title", "use continuous scattering")
+    Q_CLASSINFO("Default", "no")
+    Q_CLASSINFO("Silent", "yes")
 
     //============= Construction - Setup - Destruction =============
 
@@ -98,6 +103,13 @@ public:
         exactly as specified by the setPackages() function (i.e. the value is not yet adjusted). */
     Q_INVOKABLE double packages() const;
 
+    /** Sets the flag that indicates whether continuous scattering should be used. The default
+        value is false. */
+    Q_INVOKABLE void setContinuousScattering(bool value);
+
+    /** Returns the flag that indicates whether continuous scattering should be used. */
+    Q_INVOKABLE bool continuousScattering() const;
+
     //======================== Other Functions =======================
 
 public:
@@ -118,10 +130,6 @@ protected:
         must be called regularly while processing photon packages. The argument specifies the
         number of photon packages processed since the most recent invocation in the same thread. */
     void logprogress(quint64 extraDone);
-
-    /** This constant specifies the suggested number of photon packages to be processed between
-        invocations of the logprogress() function. */
-    const quint64 LOG_CHUNK_SIZE = 50000;
 
     /** This function drives the stellar emission phase in a Monte Carlo simulation. It consists of
         a parallelized loop that iterates over \f$N_{\text{pp}}\times N_\lambda\f$ monochromatic
@@ -188,6 +196,25 @@ protected:
         the photon package that was just emitted; the second argument provides a placeholder peel
         off photon package for use by the function. */
     void peeloffscattering(PhotonPackage* pp, PhotonPackage* ppp);
+
+    /** This function simulates the continuous peel-off of a series of photon packages along the
+        path of the original photon package. It should be called before the
+        simulateescapeandabsorption() function, because it assumes that the photon package still
+        has its original luminosity. Peel-off photon packages are created for each non-empty dust
+        cell in the original photon package's path, and for every instrument in the instrument
+        system. Each peel-off package starts at a random location \f${\bf{r}}_{\text{cell}}\f$
+        within the originating dust cell and along the original photon package's path, and is
+        forced to propagate in the direction towards the observer \f${\bf{k}}_{\text{obs}}\f$. The
+        luminosity of the peel-off photon package is derived from the original package's luminosity
+        through \f$L_\text{ppp}=L_\text{pp}\,w_\text{cell}\,w_\text{obs}\f$. The first weight
+        factor represents the luminosity fraction scattered in this cell, which is calculated as
+        \f[ w_\text{cell} = \varpi_\ell \left( {\text{e}}^{-\tau_{\ell,n-1}} -
+        {\text{e}}^{-\tau_{\ell,n}} \right), \f] with \f$\varpi_\ell\f$ the scattering albedo of
+        the dust and \f$\tau_{\ell,n}\f$ the optical depth measured from the initial position of
+        the path until the exit point of the \f$n\f$'th dust cell along the path. The second weight
+        factor \f$w_{\text{obs}}\f$ compensates for the change in propagation direction, and is
+        determined as explained for the function peeloffscattering(). */
+    void continuouspeeloffscattering(PhotonPackage* pp, PhotonPackage* ppp);
 
     /** This function simulates the escape from the system and the absorption by dust of a fraction
         of the luminosity of a photon package. It actually splits the luminosity \f$L_\ell\f$ of
@@ -284,12 +311,14 @@ protected:
     // *** discoverable attributes managed by this class ***
     InstrumentSystem* _is;
     double _packages;       // the specified number of photon packages to be launched per wavelength
+    bool _continuousScattering;  // true if continuous scattering should be used
 
     // *** data members initialized by this class during setup ***
     quint64 _Nlambda;       // the number of wavelengths in the simulation's wavelength grid
     quint64 _Nchunks;       // the number of chunks to be launched per wavelength
     quint64 _chunksize;     // the number of photon packages in one chunk
     quint64 _Npp;           // the precise number of photon packages to be launched per wavelength
+    quint64 _logchunksize;  // the number of photon packages to be processed between logprogress() invocations
 
 private:
     // *** data members used by the XXXprogress() functions in this class ***

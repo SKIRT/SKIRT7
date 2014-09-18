@@ -1,7 +1,7 @@
 /*//////////////////////////////////////////////////////////////////
 ////       SKIRT -- an advanced radiative transfer code         ////
 ////       © Astronomical Observatory, Ghent University         ////
-//////////////////////////////////////////////////////////////////*/
+///////////////////////////////////////////////////////////////// */
 
 #include <cmath>
 #include <fstream>
@@ -337,7 +337,7 @@ Array PanDustSystem::meanintensityv(int m) const
         }
         double J = Labs(m,ell) / (kappaabsrho*fac) / lambdagrid->dlambda(ell);
         // guard against (rare) situations where both Labs and kappa*fac are zero
-        Jv[ell] = isfinite(J) ? J : 0.0;
+        Jv[ell] = std::isfinite(J) ? J : 0.0;
     }
     return Jv;
 }

@@ -1,7 +1,7 @@
 /*//////////////////////////////////////////////////////////////////
 ////       SKIRT -- an advanced radiative transfer code         ////
 ////       © Astronomical Observatory, Ghent University         ////
-//////////////////////////////////////////////////////////////////*/
+///////////////////////////////////////////////////////////////// */
 
 #ifndef SIMULATIONITEM_HPP
 #define SIMULATIONITEM_HPP
@@ -56,17 +56,17 @@ protected:
 
 public:
     /** This template function looks for a simulation item of a specific type in the hierarchy
-        containing the receiving object, and returns a pointer to that item. The function guarantees
-        that setup has been invoked on the item before it is returned. If no appropriate item is
-        found, a FatalError is thrown. The class specified as template parameter must inherit from
-        SimulationItem. The function searches for an appropriate item among all ancestors of the
-        receiving item (including the receiving item itself) and their immediate children. In other
-        words, it recursively runs upwards along the ancestors and goes just one level down for
-        each ancestor. The function returns the first appropriate item found; if multiple items of
-        the same type exist in the hierarchy, there is no telling which one of these will be
-        returned. If no appropriate item is found, the function never returns so there is no need to
-        check for null pointers. */
-    template<class T> T* find() const;
+        containing the receiving object, and returns a pointer to that item. If the \em setup flag
+        is true (the default value), the function invokes the setup() function on the item before
+        it is returned. If no appropriate item is found, a FatalError is thrown. The class
+        specified as template parameter must inherit from SimulationItem. The function searches for
+        an appropriate item among all ancestors of the receiving item (including the receiving item
+        itself) and their immediate children. In other words, it recursively runs upwards along the
+        ancestors and goes just one level down for each ancestor. The function returns the first
+        appropriate item found; if multiple items of the same type exist in the hierarchy, there is
+        no telling which one of these will be returned. If no appropriate item is found, the
+        function never returns so there is no need to check for null pointers. */
+    template<class T> T* find(bool setup = true) const;
 
 private:
     /** This is the private implementation used by the find() template function. It takes a class
@@ -110,16 +110,16 @@ protected:
 
 ////////////////////////////////////////////////////////////////////
 
-template<class T> T* SimulationItem::find() const
+template<class T> inline T* SimulationItem::find(bool setup) const
 {
     T* item = dynamic_cast<T*>(find(T::staticMetaObject.className()));
-    item->setup();  // ensure the item has been setup
+    if (setup) item->setup();  // ensure the item has been setup
     return item;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-template<class T> T* SimulationItem::interface()
+template<class T> inline T* SimulationItem::interface()
 {
     foreach (SimulationItem* candidate, interfaceCandidates(typeid(T)))
     {

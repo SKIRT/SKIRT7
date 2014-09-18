@@ -459,8 +459,9 @@ to suit your needs in the following ways:
 
 \note On the Ghent University High Performance Computing (HPC) system, it is highly recommended that you use
 the Intel C++ compiler. To accomplish this, add the option "-platform linux-icc-64" in the \c makeQt_everywhere.sh
-script, and \em before you execute the script, load the \c ictce module in addition to the \c jobs module.
-You will need to (re)load this modules before (re)building SKIRT as well.
+script, and \em before you execute the script, load the both the \c ictce/7.1.2 and \c GCC/4.8.3 modules
+in addition to the \c jobs module (the Intel C++ compiler needs some headers provided by GCC for full C++11 support).
+You will need to (re)load these modules before (re)building SKIRT as well.
 
 After editing the script as needed, enter the following shell commands to build Qt from source (it takes a while!):
 

@@ -1,7 +1,7 @@
 /*//////////////////////////////////////////////////////////////////
 ////       SKIRT -- an advanced radiative transfer code         ////
 ////       © Astronomical Observatory, Ghent University         ////
-//////////////////////////////////////////////////////////////////*/
+///////////////////////////////////////////////////////////////// */
 
 #include "PhotonPackage.hpp"
 #include "AngularDistribution.hpp"
@@ -11,20 +11,20 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////
 
 PhotonPackage::PhotonPackage()
-    : _stellar(true), _L(0), _ell(0), _nscatt(0), _ad(0)
+    : _L(0), _ell(0), _nscatt(0), _stellar(-1), _ad(0)
 {
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void PhotonPackage::launch(bool stellar, double L, int ell, Position bfr, Direction bfk)
+void PhotonPackage::launch(double L, int ell, Position bfr, Direction bfk)
 {
-    _stellar = stellar;
     _L = L;
     _ell = ell;
     _bfr = bfr;
     _bfk = bfk;
     _nscatt = 0;
+    _stellar = -1;
     _ad = 0;
 }
 
@@ -32,12 +32,12 @@ void PhotonPackage::launch(bool stellar, double L, int ell, Position bfr, Direct
 
 void PhotonPackage::launchEmissionPeelOff(const PhotonPackage* pp, Direction bfk)
 {
-    _stellar = pp->_stellar;
     _L = pp->_L;
     _ell = pp->_ell;
     _bfr = pp->_bfr;
     _bfk = bfk;
     _nscatt = 0;
+    _stellar = pp->_stellar;
     _ad = 0;
 
     // apply emission direction bias if not isotropic
@@ -48,13 +48,33 @@ void PhotonPackage::launchEmissionPeelOff(const PhotonPackage* pp, Direction bfk
 
 void PhotonPackage::launchScatteringPeelOff(const PhotonPackage* pp, Direction bfk, double w)
 {
-    _stellar = pp->_stellar;
     _L = pp->_L * w;
     _ell = pp->_ell;
     _bfr = pp->_bfr;
     _bfk = bfk;
     _nscatt = pp->_nscatt + 1;
+    _stellar = pp->_stellar;
     _ad = 0;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void PhotonPackage::launchScatteringPeelOff(const PhotonPackage* pp, Position bfr, Direction bfk, double w)
+{
+    _L = pp->_L * w;
+    _ell = pp->_ell;
+    _bfr = bfr;
+    _bfk = bfk;
+    _nscatt = pp->_nscatt + 1;
+    _stellar = pp->_stellar;
+    _ad = 0;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void PhotonPackage::setStellarOrigin(int stellarCompIndex)
+{
+    _stellar = stellarCompIndex;
 }
 
 ////////////////////////////////////////////////////////////////////

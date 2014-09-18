@@ -1,7 +1,7 @@
 /*//////////////////////////////////////////////////////////////////
 ////       SKIRT -- an advanced radiative transfer code         ////
 ////       © Astronomical Observatory, Ghent University         ////
-//////////////////////////////////////////////////////////////////*/
+///////////////////////////////////////////////////////////////// */
 
 #include <cmath>
 #include <fstream>
@@ -454,9 +454,6 @@ namespace
         Log* _log;
         int _ell;
 
-        // dust grid path: allocated once so it can be reused
-        DustGridPath _dgp;
-
     public:
         // constructor
         WriteDepthMap(const DustSystem* ds)
@@ -470,7 +467,7 @@ namespace
             _ell = max(0, ds->find<WavelengthGrid>()->nearest(Units::lambdaV()));
         }
 
-         // the parallized loop body; calculates the results for a single line in the image
+        // the parallized loop body; calculates the results for a single line in the image
         void body(size_t j)
         {
             double y = (j+0.5) / Npy;
@@ -504,10 +501,9 @@ namespace
     private:
         double opticaldepth(int ell, Position bfr, Direction bfk)
         {
-            _dgp.setPosition(bfr);
-            _dgp.setDirection(bfk);
-            _grid->path(&_dgp);
-            return _dgp.opticalDepth(KappaRho(_ds, ell));
+            DustGridPath dgp(bfr, bfk);
+            _grid->path(&dgp);
+            return dgp.opticalDepth(KappaRho(_ds, ell));
         }
     };
 }

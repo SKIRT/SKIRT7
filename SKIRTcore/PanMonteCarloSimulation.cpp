@@ -1,7 +1,7 @@
 /*//////////////////////////////////////////////////////////////////
 ////       SKIRT -- an advanced radiative transfer code         ////
 ////       © Astronomical Observatory, Ghent University         ////
-//////////////////////////////////////////////////////////////////*/
+///////////////////////////////////////////////////////////////// */
 
 #include "Log.hpp"
 #include "NR.hpp"
@@ -186,14 +186,14 @@ void PanMonteCarloSimulation::dodustselfabsorptionchunk(size_t index)
         quint64 remaining = _chunksize;
         while (remaining > 0)
         {
-            quint64 count = qMin(remaining, LOG_CHUNK_SIZE);
+            quint64 count = qMin(remaining, _logchunksize);
             for (quint64 i=0; i<count; i++)
             {
                 double X = _random->uniform();
                 int m = NR::locate_clip(Xv,X);
                 Position bfr = _pds->randomPositionInCell(m);
                 Direction bfk = _random->direction();
-                pp.launch(false,L,ell,bfr,bfk);
+                pp.launch(L,ell,bfr,bfk);
                 while (true)
                 {
                     _pds->fillOpticalDepth(&pp);
@@ -260,22 +260,23 @@ void PanMonteCarloSimulation::dodustemissionchunk(size_t index)
         quint64 remaining = _chunksize;
         while (remaining > 0)
         {
-            quint64 count = qMin(remaining, LOG_CHUNK_SIZE);
+            quint64 count = qMin(remaining, _logchunksize);
             for (quint64 i=0; i<count; i++)
             {
                 double X = _random->uniform();
                 int m = NR::locate_clip(Xv,X);
                 Position bfr = _pds->randomPositionInCell(m);
                 Direction bfk = _random->direction();
-                pp.launch(false,L,ell,bfr,bfk);
+                pp.launch(L,ell,bfr,bfk);
                 peeloffemission(&pp,&ppp);
                 while (true)
                 {
                     _pds->fillOpticalDepth(&pp);
+                    if (_continuousScattering) continuouspeeloffscattering(&pp,&ppp);
                     simulateescapeandabsorption(&pp,false);
                     if (pp.luminosity() <= Lmin) break;
                     simulatepropagation(&pp);
-                    peeloffscattering(&pp,&ppp);
+                    if (!_continuousScattering) peeloffscattering(&pp,&ppp);
                     simulatescattering(&pp);
                 }
             }

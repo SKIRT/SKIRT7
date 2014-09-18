@@ -1,7 +1,7 @@
 /*//////////////////////////////////////////////////////////////////
 ////       SKIRT -- an advanced radiative transfer code         ////
 ////       © Astronomical Observatory, Ghent University         ////
-//////////////////////////////////////////////////////////////////*/
+///////////////////////////////////////////////////////////////// */
 
 #include "RegisterSimulationItems.hpp"
 #include "SimulationItemRegistry.hpp"
@@ -121,6 +121,7 @@
 #include "SingleGrainSizeDistribution.hpp"
 #include "SmoothingKernel.hpp"
 #include "SpheGeometry.hpp"
+#include "SphericalHoleGeometry.hpp"
 #include "SpheroidalGeometry.hpp"
 #include "StarburstSED.hpp"
 #include "StellarSurfaceGeometry.hpp"
@@ -240,6 +241,7 @@ void RegisterSimulationItems::registerAll()
     add<ClumpyGeometry>();
     add<SpheroidalGeometry>();
     add<TriaxialGeometry>();
+    add<SphericalHoleGeometry>();
 
     add<SmoothingKernel>(false);
     add<UniformSmoothingKernel>();

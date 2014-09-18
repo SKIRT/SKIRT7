@@ -654,6 +654,9 @@ the documentation or source code for the relevant property handler (as listed in
                         <TD>Allowed for properties of type Int, Double, DoubleList</TD></TR>
 <TR><TD>MaxValue</TD>   <TD>Maximum value for the property, in the same format as in a ski file</TD>
                         <TD>Allowed for properties of type Int, Double, and DoubleList</TD></TR>
+<TR><TD>Silent</TD>     <TD>If "true" the property value is silent, i.e. an interactive Q&A session should
+                            not ask for this property; a silent property must have a default value</TD>
+                        <TD>Allowed for all property types</TD></TR>
 <TR><TD>Optional</TD>   <TD>If "true" the property value is optional, i.e. it can be a zero pointer or an empty list;
                             otherwise a value is required (the default)</TD>
                         <TD>Allowed for properties of type Item and ItemList</TD></TR>
