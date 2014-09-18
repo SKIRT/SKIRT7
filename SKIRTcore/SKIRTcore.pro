@@ -265,7 +265,8 @@ HEADERS += \
     StellarSurfaceGeometry.hpp \
     RangeGrainSizeDistribution.hpp \
     SingleGrainSizeDistribution.hpp \
-    Trust2Geometry.hpp
+    Trust2Geometry.hpp \
+    SolarPatchGeometry.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -491,4 +492,5 @@ SOURCES += \
     StellarSurfaceGeometry.cpp \
     RangeGrainSizeDistribution.cpp \
     SingleGrainSizeDistribution.cpp \
-    Trust2Geometry.cpp
+    Trust2Geometry.cpp \
+    SolarPatchGeometry.cpp

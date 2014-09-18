@@ -112,6 +112,7 @@
 #include "RingGeometry.hpp"
 #include "SEDInstrument.hpp"
 #include "SIUnits.hpp"
+#include "SolarPatchGeometry.hpp"
 #include "SPHDustDistribution.hpp"
 #include "SPHStellarComp.hpp"
 #include "SersicGeometry.hpp"
@@ -226,6 +227,7 @@ void RegisterSimulationItems::registerAll()
     add<ExpDiskSpiralArmsGeometry>();
     add<NetzerAccretionDiskGeometry>();
     add<StellarSurfaceGeometry>();
+    add<SolarPatchGeometry>();
     add<UniformCuboidGeometry>();
     add<Trust1Geometry>();
     add<Trust2Geometry>();
