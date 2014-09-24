@@ -179,7 +179,7 @@ public:
         linear interpolation to determine \f$\phi\f$. */
     Position generatePosition() const;
 
-    /** This pure virtual function returns the surface mass density along the X-axis, i.e.
+    /** This function returns the surface mass density along the X-axis, i.e.
         the integration of the mass density along the entire X-axis, \f[
         \Sigma_X = \int_{-\infty}^\infty \rho(x,0,0)\, {\text{d}}x.\f] For an exponential
         disc with spiral arm perturbation, this integral cannot be calculated
@@ -191,7 +191,7 @@ public:
         if there is no radial truncation. */
     double SigmaX() const;
 
-    /** This pure virtual function returns the surface mass density along the Y-axis, i.e.
+    /** This function returns the surface mass density along the Y-axis, i.e.
         the integration of the mass density along the entire Y-axis, \f[
         \Sigma_Y = \int_{-\infty}^\infty \rho(0,y,0)\, {\text{d}}y.\f] For an exponential
         disc with spiral arm perturbation, this integral cannot be calculated
@@ -203,16 +203,17 @@ public:
         if there is no radial truncation. */
     double SigmaY() const;
 
-    /** This pure virtual function returns the surface mass density along the Z-axis, i.e.
+    /** This function returns the surface mass density along the Z-axis, i.e.
         the integration of the mass density along the entire Z-axis, \f[
         \Sigma_Z = \int_{-\infty}^\infty \rho(0,0,z)\, {\text{d}}z.\f] For an exponential disc
-        geometrt with spiral arm perturbation, this integral is not really well defined, as the
+        geometry with spiral arm perturbation, this integral is not really well defined, as the
         logarithmic spiral perturbation winds ever stronger when we get closer to the Z-axis. We
         use the Z-axis surface density of the corresponding unperturbed model, i.e. \f[ \Sigma_Z
         = 2\,\rho_0 h_z \left( 1 - {\text{e}}^{-z_{\text{max}}/h_z} \right), \f]
         which reduces to \f$ \Sigma_Z = 2\, \rho_0 h_z \f$ if there is no vertical
         truncation. */
     double SigmaZ() const;
+
 
     //======================== Data Members ========================
 

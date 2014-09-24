@@ -123,6 +123,7 @@
 #include "SpheGeometry.hpp"
 #include "SphericalHoleGeometry.hpp"
 #include "SpheroidalGeometry.hpp"
+#include "SpiralStructureGeometry.hpp"
 #include "StarburstSED.hpp"
 #include "StellarSurfaceGeometry.hpp"
 #include "StellarSystem.hpp"
@@ -224,6 +225,7 @@ void RegisterSimulationItems::registerAll()
     add<TTauriDiskGeometry>();
     add<RingGeometry>();
     add<TorusGeometry>();
+    add<SpheroidalGeometry>();
     add<GenGeometry>(false);
     add<ExpDiskSpiralArmsGeometry>();
     add<NetzerAccretionDiskGeometry>();
@@ -239,9 +241,9 @@ void RegisterSimulationItems::registerAll()
     add<VoronoiGeometry>();
     add<OffsetGeometry>();
     add<ClumpyGeometry>();
-    add<SpheroidalGeometry>();
     add<TriaxialGeometry>();
     add<SphericalHoleGeometry>();
+    add<SpiralStructureGeometry>();
 
     add<SmoothingKernel>(false);
     add<UniformSmoothingKernel>();
