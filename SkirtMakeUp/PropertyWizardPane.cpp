@@ -18,9 +18,9 @@ PropertyWizardPane::PropertyWizardPane(PropertyHandlerPtr handler, QObject* targ
 
 ////////////////////////////////////////////////////////////////////
 
-void PropertyWizardPane::setPropertyConfigured()
+void PropertyWizardPane::setPropertyConfigured(bool configured)
 {
-    _handler->target()->setProperty(_handler->name()+"_configured", true);
+    _handler->target()->setProperty(_handler->name()+"_configured", configured);
 }
 
 ////////////////////////////////////////////////////////////////////

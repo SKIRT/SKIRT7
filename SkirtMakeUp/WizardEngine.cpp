@@ -7,8 +7,10 @@
 
 #include "BasicChoiceWizardPane.hpp"
 #include "BoolPropertyHandler.hpp"
+#include "BoolPropertyWizardPane.hpp"
 #include "CreateRootWizardPane.hpp"
 #include "DoubleListPropertyHandler.hpp"
+#include "DoubleListPropertyWizardPane.hpp"
 #include "DoublePropertyHandler.hpp"
 #include "DoublePropertyWizardPane.hpp"
 #include "EnumPropertyHandler.hpp"
@@ -16,11 +18,13 @@
 #include "IntPropertyHandler.hpp"
 #include "IntPropertyWizardPane.hpp"
 #include "ItemListPropertyHandler.hpp"
+#include "ItemListPropertyWizardPane.hpp"
 #include "ItemPropertyHandler.hpp"
 #include "ItemPropertyWizardPane.hpp"
 #include "SimulationItem.hpp"
 #include "SimulationItemDiscovery.hpp"
 #include "StringPropertyHandler.hpp"
+#include "StringPropertyWizardPane.hpp"
 #include <QLabel>
 
 using namespace SimulationItemDiscovery;
@@ -288,21 +292,21 @@ QWidget* WizardEngine::createPane()
         {
             PropertyHandlerPtr handler = createPropertyHandler(_current, properties(_current)[_propertyIndex]);
             if (handler.dynamicCast<BoolPropertyHandler>())
-                return new QLabel("Dummy wizard pane for Bool");
+                return new BoolPropertyWizardPane(handler, this);
             if (handler.dynamicCast<IntPropertyHandler>())
                 return new IntPropertyWizardPane(handler, this);
             if (handler.dynamicCast<DoublePropertyHandler>())
                 return new DoublePropertyWizardPane(handler, this);
             if (handler.dynamicCast<DoubleListPropertyHandler>())
-                return new QLabel("Dummy wizard pane for Double List");
+                return new DoubleListPropertyWizardPane(handler, this);
             if (handler.dynamicCast<StringPropertyHandler>())
-                return new QLabel("Dummy wizard pane for String");
+                return new StringPropertyWizardPane(handler, this);
             if (handler.dynamicCast<EnumPropertyHandler>())
                 return new EnumPropertyWizardPane(handler, this);
             if (handler.dynamicCast<ItemPropertyHandler>())
                 return new ItemPropertyWizardPane(handler, this);
             if (handler.dynamicCast<ItemListPropertyHandler>())
-                return new QLabel("Dummy wizard pane for Item List");
+                return new ItemListPropertyWizardPane(handler, this);
         }
     case SaveHierarchy:
         return new QLabel("Dummy wizard pane for state SaveHierarchy");

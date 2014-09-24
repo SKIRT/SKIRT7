@@ -60,7 +60,11 @@ HEADERS += \
     ItemPropertyWizardPane.hpp \
     DoublePropertyWizardPane.hpp \
     IntPropertyWizardPane.hpp \
-    EnumPropertyWizardPane.hpp
+    EnumPropertyWizardPane.hpp \
+    ItemListPropertyWizardPane.hpp \
+    DoubleListPropertyWizardPane.hpp \
+    BoolPropertyWizardPane.hpp \
+    StringPropertyWizardPane.hpp
 
 SOURCES += \
     SkirtMakeUp.cpp \
@@ -72,4 +76,8 @@ SOURCES += \
     ItemPropertyWizardPane.cpp \
     DoublePropertyWizardPane.cpp \
     IntPropertyWizardPane.cpp \
-    EnumPropertyWizardPane.cpp
+    EnumPropertyWizardPane.cpp \
+    ItemListPropertyWizardPane.cpp \
+    DoubleListPropertyWizardPane.cpp \
+    BoolPropertyWizardPane.cpp \
+    StringPropertyWizardPane.cpp

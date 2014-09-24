@@ -3,17 +3,18 @@
 ////       © Astronomical Observatory, Ghent University         ////
 //////////////////////////////////////////////////////////////////*/
 
-#ifndef DOUBLEPROPERTYWIZARDPANE_HPP
-#define DOUBLEPROPERTYWIZARDPANE_HPP
+#ifndef ITEMLISTPROPERTYWIZARDPANE_HPP
+#define ITEMLISTPROPERTYWIZARDPANE_HPP
 
 #include "PropertyWizardPane.hpp"
+class QAbstractButton;
 
 ////////////////////////////////////////////////////////////////////
 
-/** A DoublePropertyWizardPane instance displays the user interface corresponding to a
-    DoublePropertyHandler. When the user changes the edit field, the corresponding value is updated
-    in the target property. */
-class DoublePropertyWizardPane : public PropertyWizardPane
+/** An ItemListPropertyWizardPane instance displays the user interface corresponding to an
+    ItemListPropertyHandler. When the user makes a choice, a new simulation item of the selected
+    type is created and added to the target property. */
+class ItemListPropertyWizardPane : public PropertyWizardPane
 {
     Q_OBJECT
 
@@ -22,16 +23,12 @@ class DoublePropertyWizardPane : public PropertyWizardPane
 public:
     /** The default (and only) constructor creates and initializes the GUI for this pane. For a
         description of the arguments, see the PropertyWizardPane constructor. */
-    explicit DoublePropertyWizardPane(PropertyHandlerPtr handler, QObject* target);
+    explicit ItemListPropertyWizardPane(PropertyHandlerPtr handler, QObject* target);
 
     // ==================== Event Handling ====================
 
-public slots:
-    /** This function stores the value corresponding to the specified text string into the target
-        property. */
-    void updateValue(const QString& text);
 };
 
 ////////////////////////////////////////////////////////////////////
 
-#endif // DOUBLEPROPERTYWIZARDPANE_HPP
+#endif // ITEMLISTPROPERTYWIZARDPANE_HPP

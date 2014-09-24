@@ -30,11 +30,6 @@ public slots:
     /** This function stores the value corresponding to the specified text string into the target
         property. */
     void updateValue(const QString& text);
-
-private:
-    /** This function emits a propertyValidChanged(bool) signal with the appropriate argument
-        depending on the value of the specified text. */
-    void emitPropertyValidChanged(const QString& text);
 };
 
 ////////////////////////////////////////////////////////////////////

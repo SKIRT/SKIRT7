@@ -3,47 +3,32 @@
 ////       © Astronomical Observatory, Ghent University         ////
 //////////////////////////////////////////////////////////////////*/
 
-#include "DoublePropertyWizardPane.hpp"
+#include "StringPropertyWizardPane.hpp"
 
-#include "DoublePropertyHandler.hpp"
+#include "StringPropertyHandler.hpp"
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 
 ////////////////////////////////////////////////////////////////////
 
-namespace
-{
-    // returns true if text is a valid double, and the value is within range
-    bool isValidAndInRange(DoublePropertyHandler* hdlr, QString text)
-    {
-        if (!hdlr->isValid(text)) return false;
-        double value = hdlr->toDouble(text);
-        if (value < hdlr->minValue() || value > hdlr->maxValue()) return false;
-        return true;
-    }
-}
-
-////////////////////////////////////////////////////////////////////
-
-DoublePropertyWizardPane::DoublePropertyWizardPane(PropertyHandlerPtr handler, QObject* target)
+StringPropertyWizardPane::StringPropertyWizardPane(PropertyHandlerPtr handler, QObject* target)
     : PropertyWizardPane(handler, target)
 {
-    auto hdlr = handlerCast<DoublePropertyHandler>();
+    auto hdlr = handlerCast<StringPropertyHandler>();
 
     // create the layout so that we can add stuff one by one
     auto layout = new QVBoxLayout;
 
     // add the message
     auto message = "Enter " + hdlr->title();
-    message += " [" + hdlr->toString(hdlr->minValue()) + "," + hdlr->toString(hdlr->maxValue()) + "]";
-    if (hdlr->hasDefaultValue()) message += " (" + hdlr->toString(hdlr->defaultValue()) + ")";
+    if (hdlr->hasDefaultValue()) message += " (" + hdlr->defaultValue() + ")";
     message += ":";
     layout->addWidget(new QLabel(message));
 
     // add the edit field
     auto field = new QLineEdit;
-    field->setText(hdlr->toString(hdlr->value()));
+    field->setText(hdlr->value());
     layout->addWidget(field);
 
     // connect the field to ourselves
@@ -58,7 +43,7 @@ DoublePropertyWizardPane::DoublePropertyWizardPane(PropertyHandlerPtr handler, Q
     {
         if (hdlr->hasDefaultValue())
         {
-            field->setText(hdlr->toString(hdlr->defaultValue()));
+            field->setText(hdlr->defaultValue());
             hdlr->setValue(hdlr->defaultValue());    // also update the property value
         }
         else
@@ -68,18 +53,19 @@ DoublePropertyWizardPane::DoublePropertyWizardPane(PropertyHandlerPtr handler, Q
     }
 
     // ensure proper validity state
-    emit propertyValidChanged(isValidAndInRange(hdlr, field->text()));
+    emit propertyValidChanged(!field->text().isEmpty());
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void DoublePropertyWizardPane::updateValue(const QString& text)
+void StringPropertyWizardPane::updateValue(const QString& text)
 {
-    auto hdlr = handlerCast<DoublePropertyHandler>();
+    auto hdlr = handlerCast<StringPropertyHandler>();
 
-    // verify that value is valid and within range before setting it
-    bool valid = isValidAndInRange(hdlr, text);
-    if (valid) hdlr->setValue(hdlr->toDouble(text));
+    // verify that value is non-empty before setting it
+    QString value = text.simplified();
+    bool valid = !value.isEmpty();
+    if (valid) hdlr->setValue(value);
     setPropertyConfigured(valid);
     emit propertyValidChanged(valid);
 }

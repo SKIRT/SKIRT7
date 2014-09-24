@@ -12,6 +12,20 @@
 
 ////////////////////////////////////////////////////////////////////
 
+namespace
+{
+    // returns true if text is a valid integer, and the value is within range
+    bool isValidAndInRange(IntPropertyHandler* hdlr, QString text)
+    {
+        if (!hdlr->isValid(text)) return false;
+        int value = hdlr->toInt(text);
+        if (value < hdlr->minValue() || value > hdlr->maxValue()) return false;
+        return true;
+    }
+}
+
+////////////////////////////////////////////////////////////////////
+
 IntPropertyWizardPane::IntPropertyWizardPane(PropertyHandlerPtr handler, QObject* target)
     : PropertyWizardPane(handler, target)
 {
@@ -54,7 +68,7 @@ IntPropertyWizardPane::IntPropertyWizardPane(PropertyHandlerPtr handler, QObject
     }
 
     // ensure proper validity state
-    emitPropertyValidChanged(field->text());
+    emit propertyValidChanged(isValidAndInRange(hdlr, field->text()));
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -64,24 +78,9 @@ void IntPropertyWizardPane::updateValue(const QString& text)
     auto hdlr = handlerCast<IntPropertyHandler>();
 
     // verify that value is valid and within range before setting it
-    double value = hdlr->toInt(text);
-    if (hdlr->isValid(text) && value >= hdlr->minValue() && value <= hdlr->maxValue())
-    {
-        hdlr->setValue(value);
-        setPropertyConfigured();
-    }
-    emitPropertyValidChanged(text);
-}
-
-
-////////////////////////////////////////////////////////////////////
-
-void IntPropertyWizardPane::emitPropertyValidChanged(const QString& text)
-{
-    auto hdlr = handlerCast<IntPropertyHandler>();
-
-    double value = hdlr->toInt(text);
-    bool valid = hdlr->isValid(text) && value >= hdlr->minValue() && value <= hdlr->maxValue();
+    bool valid = isValidAndInRange(hdlr, text);
+    if (valid) hdlr->setValue(hdlr->toInt(text));
+    setPropertyConfigured(valid);
     emit propertyValidChanged(valid);
 }
 

@@ -26,7 +26,7 @@ ItemPropertyWizardPane::ItemPropertyWizardPane(PropertyHandlerPtr handler, QObje
     auto layout = new QVBoxLayout;
 
     // add the question
-    layout->addWidget(new QLabel("Select one of the following options for " + handler->title() + ":"));
+    layout->addWidget(new QLabel("Select one of the following options for " + hdlr->title() + ":"));
 
     // determine the current and default item types
     QByteArray currentType = hdlr->value() ? itemType(hdlr->value()) : "";
@@ -73,6 +73,7 @@ ItemPropertyWizardPane::ItemPropertyWizardPane(PropertyHandlerPtr handler, QObje
         if (!isPropertyConfigured() && (choiceType==defaultType || choiceType==forcedType))
         {
             hdlr->setToNewItemOfType(choiceType);
+            setPropertyConfigured();
             // adjust the current type to trigger the next "if"
             currentType = choiceType;
         }

@@ -3,17 +3,17 @@
 ////       © Astronomical Observatory, Ghent University         ////
 //////////////////////////////////////////////////////////////////*/
 
-#ifndef DOUBLEPROPERTYWIZARDPANE_HPP
-#define DOUBLEPROPERTYWIZARDPANE_HPP
+#ifndef DOUBLELISTPROPERTYWIZARDPANE_HPP
+#define DOUBLELISTPROPERTYWIZARDPANE_HPP
 
 #include "PropertyWizardPane.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
-/** A DoublePropertyWizardPane instance displays the user interface corresponding to a
+/** A DoubleListPropertyWizardPane instance displays the user interface corresponding to a
     DoublePropertyHandler. When the user changes the edit field, the corresponding value is updated
     in the target property. */
-class DoublePropertyWizardPane : public PropertyWizardPane
+class DoubleListPropertyWizardPane : public PropertyWizardPane
 {
     Q_OBJECT
 
@@ -22,7 +22,7 @@ class DoublePropertyWizardPane : public PropertyWizardPane
 public:
     /** The default (and only) constructor creates and initializes the GUI for this pane. For a
         description of the arguments, see the PropertyWizardPane constructor. */
-    explicit DoublePropertyWizardPane(PropertyHandlerPtr handler, QObject* target);
+    explicit DoubleListPropertyWizardPane(PropertyHandlerPtr handler, QObject* target);
 
     // ==================== Event Handling ====================
 
@@ -34,4 +34,4 @@ public slots:
 
 ////////////////////////////////////////////////////////////////////
 
-#endif // DOUBLEPROPERTYWIZARDPANE_HPP
+#endif // DOUBLELISTPROPERTYWIZARDPANE_HPP

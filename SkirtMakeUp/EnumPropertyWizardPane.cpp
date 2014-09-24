@@ -26,7 +26,7 @@ EnumPropertyWizardPane::EnumPropertyWizardPane(PropertyHandlerPtr handler, QObje
     auto layout = new QVBoxLayout;
 
     // add the question
-    layout->addWidget(new QLabel("Select one of the following options for " + handler->title() + ":"));
+    layout->addWidget(new QLabel("Select one of the following options for " + hdlr->title() + ":"));
 
     // determine the current and default values
     QString currentKey = hdlr->value();
