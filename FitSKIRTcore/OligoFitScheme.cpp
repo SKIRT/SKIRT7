@@ -105,17 +105,12 @@ double OligoFitScheme::objective(AdjustableSkirtSimulation::ReplacementDict repl
                                  QList<double> *DiskLuminosities, QList<double> *BulgeRatios, QList<double> *Chis,
                                  int index)
 {
-    //make ConditionDict for disk and bulge simulations
-    AdjustableSkirtSimulation::ConditionDict conditionsBulge;
-    conditionsBulge["bulge"] = true;
-    conditionsBulge["disk"] = false;
-    AdjustableSkirtSimulation::ConditionDict conditionsDisk;
-    conditionsDisk["bulge"] = false;
-    conditionsDisk["disk"] = true;
-    QString disk_fix = "tmp/disk_"+QString::number(index);
-    QString bulge_fix = "tmp/bulge_"+QString::number(index);
-    _simulation->performWith(conditionsDisk, replacement, disk_fix );
-    _simulation->performWith(conditionsBulge, replacement, bulge_fix);
+    //perform the adjusted simulation
+    QString prefix = "tmp/tmp_"+QString::number(index);
+    _simulation->performWith(replacement, prefix);
+    QString instrname = find<AdjustableSkirtSimulation>()->instrname();
+    find<Log>()->info("instrname : "+instrname);
+
 
     //read the simulation frames and compare the frame size with the reference image
     int counter=0;
@@ -125,10 +120,10 @@ double OligoFitScheme::objective(AdjustableSkirtSimulation::ReplacementDict repl
     {
         int nx,ny,nz; //dummy values;
         Array diskTotal, bulgeTotal;
-        QString filepath = _paths->output(disk_fix+"_lol_total_"+QString::number(counter)+".fits");
+        QString filepath = _paths->output(prefix+"_"+instrname+"_stellar_0_"+QString::number(counter)+".fits");
         FITSInOut::read(filepath,diskTotal,nx,ny,nz);
 
-        filepath = _paths->output(bulge_fix+"_lol_total_"+QString::number(counter)+".fits");
+        filepath = _paths->output(prefix+"_"+instrname+"_stellar_1_"+QString::number(counter)+".fits");
         FITSInOut::read(filepath,bulgeTotal,nx,ny,nz);
 
         int framesize = (rima->xdim())*(rima->ydim());

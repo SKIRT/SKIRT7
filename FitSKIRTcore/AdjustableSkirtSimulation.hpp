@@ -54,11 +54,17 @@ public:
     //====================== Other functions =======================
 
 public:
-    /** A shorthand type definition for a condition dictionary as passed to performWith(). */
-    typedef QHash<QString, bool> ConditionDict;
-
     /** A shorthand type definition for a replacement dictionary as passed to performWith(). */
     typedef QHash<QString, QPair<double,QString> > ReplacementDict;
+
+    /** This function returns the number of luminosity components in the simulation. */
+    int ncomponents() const;
+
+    /** This function returns the number of frames in the simulation. */
+    int nframes() const;
+
+    /** This function returns the instrument name used in the simulation. */
+    QString instrname() const;
 
     /** This function returns the wavelength of frame at positon \em ind. */
     double wavelength(int ind) const;
@@ -127,15 +133,14 @@ brackets and the label). If the label matches one of the keys in the replacement
 handed to this function, the corresponding value is substituted in the ski file. If there
 is no match, the value provided in the ski file (after the colon) serves as a default.
 */
-    void performWith(ConditionDict conditions, ReplacementDict replacements, QString prefix=QString());
+    void performWith(ReplacementDict replacements, QString prefix=QString());
 
 private:
     /** This private function performs the specified adjustments on the previously loaded ski content
         as described for the performWith() function, and returns the result. If the arguments are missing,
         all conditions are considered to be "true" (i.e. all conditional content is included) and all
         attributes use the default values as provided in the original ski file. */
-    QByteArray adjustedSkiContent(ConditionDict conditions = ConditionDict(),
-                                  ReplacementDict replacements = ReplacementDict());
+    QByteArray adjustedSkiContent(ReplacementDict replacements = ReplacementDict());
 
     //======================== Data Members ========================
 
@@ -145,6 +150,9 @@ private:
     QByteArray _skiContent;   // the content of the ski file, without modifications
 
     Units* _units;                      // the units system stolen from the default simulation hierarchy
+    int _ncomponents;                   // the number of components stolen from the default simulation hierarchy
+    int _nframes;                       // the number of frames stolen from the default simulation hierarchy
+    QString _instrname;                 // the instrument name stolen from the default simulation hierarchy
     QList<double> _wavelengthgrid;      // the wavelengths stolen from the default simulation hierarchy
     QList<double> _xpress;              // the x increment stolen from the default simulation hierarchy
     QList<double> _ypress;              // the y increment stolen from the default simulation hierarchy

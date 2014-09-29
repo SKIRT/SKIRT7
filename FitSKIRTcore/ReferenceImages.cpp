@@ -95,20 +95,20 @@ void ReferenceImages::writeOutBest(int index, int consec) const
 {
     int counter=0;
 
-    QString disk_fix = "tmp/disk_"+QString::number(index);
-    QString bulge_fix = "tmp/bulge_"+QString::number(index);
+    QString prefix = "tmp/tmp_"+QString::number(index);
     FilePaths* path = find<FilePaths>();
     Units* units = find<Units>();
     AdjustableSkirtSimulation* adjSS = find<AdjustableSkirtSimulation>();
+    QString instrname = adjSS->instrname();
     find<Log>()->info("Found best fit");
 
     foreach (ReferenceImage* rima, _rimages)
     {
         int nx, ny, nz;
         Array diskTotal, bulgeTotal;
-        QString filepath = path->output(disk_fix+"_lol_total_"+QString::number(counter)+".fits");
+        QString filepath = path->output(prefix+"_"+instrname+"_stellar_0_"+QString::number(counter)+".fits");
         FITSInOut::read(filepath,diskTotal,nx,ny,nz);
-        filepath = path->output(bulge_fix+"_lol_total_"+QString::number(counter)+".fits");
+        filepath = path->output(prefix+"_"+instrname+"_stellar_1_"+QString::number(counter)+".fits");
         FITSInOut::read(filepath,bulgeTotal,nx,ny,nz);
         rima->returnFrame(&diskTotal, &bulgeTotal);
 
@@ -123,7 +123,6 @@ void ReferenceImages::writeOutBest(int index, int consec) const
 
         counter++;
     }
-
 }
 
 //////////////////////////////////////////////////////////////////////

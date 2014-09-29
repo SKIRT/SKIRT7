@@ -15,6 +15,7 @@
 #include "MultiFrameInstrument.hpp"
 #include "ParallelFactory.hpp"
 #include "Simulation.hpp"
+#include "StellarSystem.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
 #include "XmlHierarchyCreator.hpp"
@@ -87,22 +88,20 @@ void AdjustableSkirtSimulation::setupSelfBefore()
     find<Log>()->info("Performing the simulation with default attribute values...");
     simulation->setup();
 
-    // steal the units system and the wavelength grid from the simulation
-    _units = simulation->find<Units>();
-    _units->setParent(0);
-    WavelengthGrid* grid = simulation->find<WavelengthGrid>();
-    int gridlength = grid->lambdav().size();
-    for(int i=0;i<gridlength;i++)
-    {
-        _wavelengthgrid.append((grid->lambdav())[i]);
-    }
-
+    // steal the frames and instrument name from the simulation
     InstrumentSystem* instrSys = simulation->find<InstrumentSystem>();
     MultiFrameInstrument* multiframe = instrSys->find<MultiFrameInstrument>();
+    StellarSystem* stelsys = simulation->find<StellarSystem>();
+    _nframes = multiframe->frames().length();
+    _instrname = multiframe->instrumentName();
+    _ncomponents = stelsys->Ncomp();
+    find<Log>()->info("Number of frames in this simulation: " + QString::number(_nframes));
+    find<Log>()->info("Number of stellar components in this simulation: " + QString::number(_ncomponents));
+    find<Log>()->info("Instrument name is : " + _instrname);
     foreach (InstrumentFrame* insFrame, multiframe->frames()){
         _xpress.append(2.00*insFrame->extentX()*(insFrame->pixelsX()-1));
         _ypress.append(2.00*insFrame->extentY()*(insFrame->pixelsY()-1));
-    }
+    }    // steal the frames and instrument name from the simulation
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -121,14 +120,13 @@ QString AdjustableSkirtSimulation::skiName() const
 
 ////////////////////////////////////////////////////////////////////
 
-void AdjustableSkirtSimulation::performWith(AdjustableSkirtSimulation::ConditionDict conditions,
-                                            AdjustableSkirtSimulation::ReplacementDict replacements,
+void AdjustableSkirtSimulation::performWith(AdjustableSkirtSimulation::ReplacementDict replacements,
                                             QString prefix)
 {
     // construct the simulation from the ski content; use shared pointer for automatic clean-up
     XmlHierarchyCreator creator;
     QSharedPointer<Simulation> simulation( creator.createHierarchy<Simulation>(
-                                                adjustedSkiContent(conditions, replacements)) );
+                                                adjustedSkiContent(replacements)) );
 
     // setup any simulation attributes that are not loaded from the ski content
     // copy file paths
@@ -142,65 +140,19 @@ void AdjustableSkirtSimulation::performWith(AdjustableSkirtSimulation::Condition
     if (threads > 0) simulation->parallelFactory()->setMaxThreadCount(threads);
     // suppress log messages
     simulation->log()->setLowestLevel(Log::Error);
-
-    // output a ski file reflecting this simulation for later reference
-    //XmlHierarchyWriter writer1;
-    //writer1.writeHierarchy(simulation.data(), itsfilepaths->output("params.xml"));
-
     // run the simulation
     simulation->setupAndRun();
 }
 
 ////////////////////////////////////////////////////////////////////
 
-QByteArray AdjustableSkirtSimulation::adjustedSkiContent(AdjustableSkirtSimulation::ConditionDict conditions,
-                                                         AdjustableSkirtSimulation::ReplacementDict replacements)
+QByteArray AdjustableSkirtSimulation::adjustedSkiContent(AdjustableSkirtSimulation::ReplacementDict replacements)
 {
     QByteArray in, out;
 
-    // process curly brackets
-    {
-        in = _skiContent;
-        out.clear();
-
-        // loop over input; index points at the next byte to be processed
-        int index = 0;
-        while (true)
-        {
-            // look for left bracket
-            int leftindex = in.indexOf('{', index);
-            if (leftindex<0) break;
-
-            // look for right bracket
-            int rightindex = in.indexOf('}', leftindex+1);
-            if (rightindex<0) throw FATALERROR("Curly brackets not balanced in ski file");
-
-            // look for colon
-            int colonindex = in.indexOf(':', leftindex+1);
-            if (colonindex<0 || colonindex>rightindex)
-                throw FATALERROR("Curly brackets don't enclose colon in ski file");
-
-            // get the label
-            QByteArray label = in.mid(leftindex+1, colonindex-leftindex-1);
-
-            // if the label is in the conditions dict with a value of false, remove the section, otherwise copy it
-            if (conditions.contains(label) && !conditions[label])
-                out += in.mid(index, leftindex-index);     // copy everything up to the left bracket
-            else
-                out += in.mid(index, rightindex-index+1);  // copy everything up to and including the right bracket
-
-            // in both cases, put the input index beyond the right bracket
-            index = rightindex+1;
-        }
-
-        // no more brackets -> copy the rest of the input
-        out += in.mid(index);
-    }
-
     // process square brackets
     {
-        in = out;
-        out.clear();
+        in = _skiContent;
 
         // loop over input; index points at the next byte to be processed
         int index = 0;
@@ -242,6 +194,27 @@ QByteArray AdjustableSkirtSimulation::adjustedSkiContent(AdjustableSkirtSimulati
         if (out.contains(']')) throw FATALERROR("Square brackets not balanced in ski file");
     }
     return out;
+}
+
+////////////////////////////////////////////////////////////////////
+
+int AdjustableSkirtSimulation::ncomponents() const
+{
+    return _ncomponents;
+}
+
+////////////////////////////////////////////////////////////////////
+
+int AdjustableSkirtSimulation::nframes() const
+{
+    return _nframes;
+}
+
+////////////////////////////////////////////////////////////////////
+
+QString AdjustableSkirtSimulation::instrname() const
+{
+    return _instrname;
 }
 
 ////////////////////////////////////////////////////////////////////
