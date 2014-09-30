@@ -109,17 +109,18 @@ double OligoFitScheme::objective(AdjustableSkirtSimulation::ReplacementDict repl
     QString prefix = "tmp/tmp_"+QString::number(index);
     _simulation->performWith(replacement, prefix);
     QString instrname = find<AdjustableSkirtSimulation>()->instrname();
-    find<Log>()->info("instrname : "+instrname);
-
 
     //read the simulation frames and compare the frame size with the reference image
     int counter=0;
-    QList<Array> DiskSimulations, BulgeSimulations;
+    QList<Array> Simulations;
+    QList<QList<Array>> frames;
+    QList<QList<double>> luminosities;
 
     foreach (ReferenceImage* rima, _rimages->images())
     {
         int nx,ny,nz; //dummy values;
         Array diskTotal, bulgeTotal;
+
         QString filepath = _paths->output(prefix+"_"+instrname+"_stellar_0_"+QString::number(counter)+".fits");
         FITSInOut::read(filepath,diskTotal,nx,ny,nz);
 
@@ -132,14 +133,19 @@ double OligoFitScheme::objective(AdjustableSkirtSimulation::ReplacementDict repl
         if (framesize != disksize && framesize != bulgesize)
             throw FATALERROR("Simulations and Reference Images have different dimensions");
 
-        DiskSimulations.append(diskTotal);
-        BulgeSimulations.append(bulgeTotal);
+        Simulations.append(diskTotal);
+        Simulations.append(bulgeTotal);
+        frames.append(Simulations);
+        Simulations.clear();
+        luminosities.append(*(DiskLuminosities));
+        luminosities.append(*(BulgeRatios));
+        DiskLuminosities->clear();
+        BulgeRatios->clear();
         counter++;
     }
 
     //determine the best fitting luminosities and lowest chi2 value
-    double test_chi2functions = _rimages->chi2(&DiskSimulations, &BulgeSimulations,
-                                               DiskLuminosities, BulgeRatios, Chis);
+    double test_chi2functions = _rimages->chi2(&frames,&luminosities, Chis);
     return test_chi2functions;
 }
 

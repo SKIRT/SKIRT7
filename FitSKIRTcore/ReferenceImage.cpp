@@ -82,16 +82,19 @@ LumSimplex* ReferenceImage::lumSimplex() const
 
 ////////////////////////////////////////////////////////////////////
 
-double ReferenceImage::chi2(Array *Dframe, Array *Bframe,
-                            double &Dlum, double &B2Dratio) const
+double ReferenceImage::chi2(QList<Array> *frames, QList<double> *luminosities) const
 {
+    //HERE IS WHERE I'LL HAVE TO DECIDE WHICH OPTIMIZATION ALGORITHM FOR LUM FIT
+
     double chi_value = 0;
+    double dlum,b2d;
 
-    _convolution->convolve(Dframe, _xdim, _ydim);
-    _convolution->convolve(Bframe, _xdim, _ydim);
+    _convolution->convolve(&((*frames)[0]), _xdim, _ydim);
+    _convolution->convolve(&((*frames)[1]), _xdim, _ydim);
 
-    _lumsimplex->optimize(&_refim,Dframe,Bframe,Dlum,B2Dratio,chi_value);
-
+    _lumsimplex->optimize(&_refim,&((*frames)[0]),&((*frames)[1]),dlum,b2d,chi_value);
+    luminosities->append(dlum);
+    luminosities->append(b2d);
     return chi_value;
 }
 

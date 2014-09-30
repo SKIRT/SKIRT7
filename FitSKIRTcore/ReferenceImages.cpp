@@ -66,22 +66,21 @@ int ReferenceImages::size() const
 }
 //////////////////////////////////////////////////////////////////////
 
-double ReferenceImages::chi2(QList<Array> *DiskSimulations,
-                             QList<Array> *BulgeSimulations, QList<double> *DiskLuminosities,
-                             QList<double> *BulgeRatios, QList<double> *Chis)
+double ReferenceImages::chi2(QList<QList<Array>> *frames,
+                             QList<QList<double>> *luminosities, QList<double> *Chis)
 {
-    if (DiskSimulations->size() != _rimages.size())
+    if (frames->size() != _rimages.size())
         throw FATALERROR("Number of simulation frames does not match the number of reference frames");
     int counter=0;
     double chi2_sum=0;
 
     foreach (ReferenceImage* rima, _rimages)
     {
-        double dlum, b2d, chi;
-        chi=rima->chi2(&((*DiskSimulations)[counter]), &((*BulgeSimulations)[counter]), dlum, b2d);
+        double chi;
+        chi=rima->chi2(&((*frames)[counter]), &((*luminosities)[counter]));
+
+        find<Log>()->info("LUMINOSITIES:  "+QString::number((*luminosities)[counter][0])+"  "+QString::number((*luminosities)[counter][1]));
         chi2_sum += chi;
-        DiskLuminosities->append(dlum);
-        BulgeRatios->append(b2d);
         Chis->append(chi);
 
         counter++;

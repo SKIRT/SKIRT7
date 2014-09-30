@@ -57,8 +57,7 @@ public:
         It requires a list of disk and bulge simulations and returns a list of best fitting luminosities.
         Apart from being used as input, both simulations are adapted in place to contain the same masked regions
         as their corresponding reference image. */
-    double chi2(QList<Array> *DiskSimulations, QList<Array> *BulgeSimulations,
-                QList<double> *DiskLuminosities, QList<double> *BulgeRatios, QList<double> *Chis);
+    double chi2(QList<QList<Array>> *frames, QList<QList<double>> *luminosities, QList<double> *Chis);
 
     /** Writes out the best fitting and residual frames between simulated and reference images. */
     void writeOutBest(int index, int consec) const;

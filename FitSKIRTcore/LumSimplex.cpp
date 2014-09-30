@@ -274,7 +274,6 @@ void LumSimplex::optimize(const Array *Rframe, Array *Dframe,
     Array *disk = Dframe;
     Array *bulge = Bframe;
 
-
     double simplex[3][3];
 
     //Alpha, Beta, Gamma and Delta are simplex optimization parameters

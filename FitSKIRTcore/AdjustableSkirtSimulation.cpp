@@ -78,12 +78,6 @@ void AdjustableSkirtSimulation::setupSelfBefore()
     // suppress log messages
     simulation->log()->setLowestLevel(Log::Error);
 
-    // output a ski file and a latex file reflecting this simulation for later reference
-    //XmlHierarchyWriter writer1;
-    //writer1.writeHierarchy(simulation.data(), itsfilepaths->output("params.xml"));
-    //LatexHierarchyWriter writer2;
-    //writer2.writeHierarchy(simulation.data(), itsfilepaths->output("params.tex"));
-
     // run the simulation
     find<Log>()->info("Performing the simulation with default attribute values...");
     simulation->setup();
