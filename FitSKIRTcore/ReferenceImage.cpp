@@ -18,7 +18,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////
 
 ReferenceImage::ReferenceImage()
-    :_convolution(0), _lumsimplex(0)
+    :_convolution(0)
 {
 }
 
@@ -64,24 +64,35 @@ Convolution* ReferenceImage::convolution() const
 {
     return _convolution;
 }
+//////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////
-
-void ReferenceImage::setLumSimplex(LumSimplex* value)
+void ReferenceImage::setMinLuminosities(QList<double> value)
 {
-    if (_lumsimplex) delete _lumsimplex;
-    _lumsimplex = value;
-    if (_lumsimplex) _lumsimplex->setParent(this);
+    _minLum = value;
 }
 
-////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
-LumSimplex* ReferenceImage::lumSimplex() const
+QList<double> ReferenceImage::minLuminosities() const
 {
-    return _lumsimplex;
+    return _minLum;
 }
 
-////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+
+void ReferenceImage::setMaxLuminosities(QList<double> value)
+{
+    _maxLum = value;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+QList<double> ReferenceImage::maxLuminosities() const
+{
+    return _maxLum;
+}
+
+//////////////////////////////////////////////////////////////////////
 
 double ReferenceImage::chi2(QList<Array> *frames, QList<double> *monoluminosities) const
 {
@@ -89,6 +100,8 @@ double ReferenceImage::chi2(QList<Array> *frames, QList<double> *monoluminositie
 
     if (find<AdjustableSkirtSimulation>()->ncomponents() != 2)
         throw FATALERROR("Number of luminosity components differs from 2!");
+    if (_minLum.size() != 2 && _maxLum.size() != 2)
+        throw FATALERROR("Number of luminosity boundaries differs from 2!");
 
     double chi_value = 0;
     double dlum,b2d;
@@ -96,9 +109,15 @@ double ReferenceImage::chi2(QList<Array> *frames, QList<double> *monoluminositie
     _convolution->convolve(&((*frames)[0]), _xdim, _ydim);
     _convolution->convolve(&((*frames)[1]), _xdim, _ydim);
 
-    _lumsimplex->optimize(&_refim,&((*frames)[0]),&((*frames)[1]),dlum,b2d,chi_value);
+    LumSimplex lumsim;
+    lumsim.setMinDlum(_minLum[0]);
+    lumsim.setMaxDlum(_maxLum[0]);
+    lumsim.setMinB2D(_minLum[1]/_minLum[0]);
+    lumsim.setMaxB2D(_maxLum[1]/_maxLum[0]);
+
+    lumsim.optimize(&_refim,&((*frames)[0]),&((*frames)[1]),dlum,b2d,chi_value);
     monoluminosities->append(dlum);
-    monoluminosities->append(b2d);
+    monoluminosities->append(dlum*b2d);
     find<Log>()->info("LUMINOSITIES:  "+QString::number((*monoluminosities)[0])+"  "+QString::number((*monoluminosities)[1]));
 
     return chi_value;
@@ -109,13 +128,19 @@ double ReferenceImage::chi2(QList<Array> *frames, QList<double> *monoluminositie
 void ReferenceImage::returnFrame(QList<Array> *frames) const
 {
     double chi_value, dlum, b2d;
-    if (frames->size() != 2)
-        throw FATALERROR("Number of luminosity components differs from 2!");
 
+    if (frames->size() != 2)
+        throw FATALERROR("CAN NOT RETURN FRAME IF NCOMP NOT 2!");
     _convolution->convolve(&(*frames)[0], _xdim, _ydim);
     _convolution->convolve(&(*frames)[1], _xdim, _ydim);
 
-    _lumsimplex->optimize(&_refim,&(*frames)[0],&(*frames)[1],dlum,b2d,chi_value);
+    LumSimplex lumsim;
+    lumsim.setMinDlum(_minLum[0]);
+    lumsim.setMaxDlum(_maxLum[0]);
+    lumsim.setMinB2D(_minLum[1]/_minLum[0]);
+    lumsim.setMaxB2D(_maxLum[1]/_maxLum[0]);
+
+    lumsim.optimize(&_refim,&((*frames)[0]),&((*frames)[1]),dlum,b2d,chi_value);
 
     (*frames)[0] = dlum*((*frames)[0] + b2d*((*frames)[1]));
     (*frames)[1]= abs(_refim-(*frames)[0])/abs(_refim);

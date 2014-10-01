@@ -10,7 +10,6 @@
 #include "SimulationItem.hpp"
 
 class Convolution;
-class LumSimplex;
 
 ////////////////////////////////////////////////////////////////////
 
@@ -28,8 +27,11 @@ class ReferenceImage : public SimulationItem
     Q_CLASSINFO("Property", "convolution")
     Q_CLASSINFO("Title", "the convolution properties")
 
-    Q_CLASSINFO("Property","lumSimplex")
-    Q_CLASSINFO("Title","the luminosity simplex boundaries")
+    Q_CLASSINFO("Property","minLuminosities")
+    Q_CLASSINFO("Title","the minimum luminosity boundaries")
+
+    Q_CLASSINFO("Property","maxLuminosities")
+    Q_CLASSINFO("Title","the maximum luminosity boundaries")
 
     //============ Construction - Setup - Destruction  =============
 
@@ -55,11 +57,22 @@ public:
     /** Returns the convolution properties for the reference image. */
     Q_INVOKABLE Convolution* convolution() const;
 
-    /** Sets the LumSimplex properties for the reference image. */
-    Q_INVOKABLE void setLumSimplex(LumSimplex* value);
+    /** Sets the list of minimum luminosities, one for each wavelength in the simulation's wavelength grid.
+        The list should have the same length as the simulation's wavelength grid. */
+    Q_INVOKABLE void setMinLuminosities(QList<double> value);
 
-    /** Returns the LumSimplex properties for the reference image. */
-    Q_INVOKABLE LumSimplex* lumSimplex() const;
+    /** Returns the list of minimum luminosities, one for each wavelength in the simulation's wavelength
+        grid. */
+    Q_INVOKABLE QList<double> minLuminosities() const;
+
+    /** Sets the list of maximum luminosities, one for each wavelength in the simulation's wavelength grid.
+        The list should have the same length as the simulation's wavelength grid. */
+    Q_INVOKABLE void setMaxLuminosities(QList<double> value);
+
+    /** Returns the list of maximum luminosities, one for each wavelength in the simulation's wavelength
+        grid. */
+    Q_INVOKABLE QList<double> maxLuminosities() const;
+
 
     //====================== Other functions =======================
 
@@ -88,7 +101,8 @@ private:
     // data members
     QString _path;
     Convolution* _convolution;
-    LumSimplex* _lumsimplex;
+    QList<double> _minLum;
+    QList<double> _maxLum;
     Array _refim;
     int _xdim;
     int _ydim;
