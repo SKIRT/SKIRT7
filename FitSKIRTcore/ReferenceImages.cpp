@@ -103,22 +103,24 @@ void ReferenceImages::writeOutBest(int index, int consec) const
     foreach (ReferenceImage* rima, _rimages)
     {
         int nx, ny, nz;
-        Array diskTotal, bulgeTotal;
-        QString filepath = path->output(prefix+"_"+instrname+"_stellar_0_"+QString::number(counter)+".fits");
-        FITSInOut::read(filepath,diskTotal,nx,ny,nz);
-        filepath = path->output(prefix+"_"+instrname+"_stellar_1_"+QString::number(counter)+".fits");
-        FITSInOut::read(filepath,bulgeTotal,nx,ny,nz);
-        rima->returnFrame(&diskTotal, &bulgeTotal);
+        QList<Array> Total;
+        QString filepath;
+        for(int i =0; i<adjSS->ncomponents();i++){
+            Array CompTotal;
+            filepath = path->output(prefix+"_"+instrname+"_stellar_"+QString::number(i)+"_"+QString::number(counter)+".fits");
+            FITSInOut::read(filepath,CompTotal,nx,ny,nz);
+            Total.append(CompTotal);
+        }
 
+        rima->returnFrame(&Total);
         filepath = path->output("Best_"+QString::number(consec)+"_"+QString::number(counter)+".fits");
-        FITSInOut::write(filepath, diskTotal, nx, ny, nz,
+        FITSInOut::write(filepath, Total[0], nx, ny, nz,
                        units->olength(adjSS->xpress(counter)), units->olength(adjSS->ypress(counter)),
                        units->usurfacebrightness(), units->ulength());
         filepath =  path->output("Residual_"+QString::number(consec)+"_"+QString::number(counter)+".fits");
-        FITSInOut::write(filepath, bulgeTotal, nx, ny, nz,
+        FITSInOut::write(filepath, Total[1], nx, ny, nz,
                        units->olength(adjSS->xpress(counter)), units->olength(adjSS->ypress(counter)),
                        units->usurfacebrightness(), units->ulength());
-
         counter++;
     }
 }

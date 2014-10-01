@@ -71,7 +71,7 @@ public:
 
     /** Returns the simulations which are altered in place to contain the same masks
         and the corresponding residual frame. */
-    void returnFrame(Array *Dframe, Array *Bframe) const;
+    void returnFrame(QList<Array> *frames) const;
 
     /** Returns the number of pixels in the reference frame in the x direction. */
     int xdim() const;

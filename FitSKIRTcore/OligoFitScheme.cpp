@@ -112,26 +112,25 @@ double OligoFitScheme::objective(AdjustableSkirtSimulation::ReplacementDict repl
     int counter=0;
     QList<Array> Simulations;
     QList<QList<Array>> frames;
+    FilePaths* path = find<FilePaths>();
 
     foreach (ReferenceImage* rima, _rimages->images())
     {
         int nx,ny,nz; //dummy values;
-        Array diskTotal, bulgeTotal;
+        QString filepath;
 
-        QString filepath = _paths->output(prefix+"_"+instrname+"_stellar_0_"+QString::number(counter)+".fits");
-        FITSInOut::read(filepath,diskTotal,nx,ny,nz);
-
-        filepath = _paths->output(prefix+"_"+instrname+"_stellar_1_"+QString::number(counter)+".fits");
-        FITSInOut::read(filepath,bulgeTotal,nx,ny,nz);
+        for(int i =0; i<_simulation->ncomponents();i++){
+            Array CompTotal;
+            filepath = path->output(prefix+"_"+instrname+"_stellar_"+QString::number(i)+"_"+QString::number(counter)+".fits");
+            FITSInOut::read(filepath,CompTotal,nx,ny,nz);
+            Simulations.append(CompTotal);
+        }
 
         int framesize = (rima->xdim())*(rima->ydim());
-        int disksize = diskTotal.size();
-        int bulgesize = bulgeTotal.size();
-        if (framesize != disksize && framesize != bulgesize)
+        int simsize = Simulations[0].size();
+        if (framesize != simsize)
             throw FATALERROR("Simulations and Reference Images have different dimensions");
 
-        Simulations.append(diskTotal);
-        Simulations.append(bulgeTotal);
         frames.append(Simulations);
         Simulations.clear();
         counter++;

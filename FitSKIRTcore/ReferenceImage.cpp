@@ -106,17 +106,19 @@ double ReferenceImage::chi2(QList<Array> *frames, QList<double> *monoluminositie
 
 ////////////////////////////////////////////////////////////////////
 
-void ReferenceImage::returnFrame(Array *Dframe, Array *Bframe) const
+void ReferenceImage::returnFrame(QList<Array> *frames) const
 {
     double chi_value, dlum, b2d;
+    if (frames->size() != 2)
+        throw FATALERROR("Number of luminosity components differs from 2!");
 
-    _convolution->convolve(Dframe, _xdim, _ydim);
-    _convolution->convolve(Bframe, _xdim, _ydim);
+    _convolution->convolve(&(*frames)[0], _xdim, _ydim);
+    _convolution->convolve(&(*frames)[1], _xdim, _ydim);
 
-    _lumsimplex->optimize(&_refim,Dframe,Bframe,dlum,b2d,chi_value);
+    _lumsimplex->optimize(&_refim,&(*frames)[0],&(*frames)[1],dlum,b2d,chi_value);
 
-    *Dframe = dlum*((*Dframe) + b2d*((*Bframe)));
-    *Bframe = abs(_refim-(*Dframe))/abs(_refim);
+    (*frames)[0] = dlum*((*frames)[0] + b2d*((*frames)[1]));
+    (*frames)[1]= abs(_refim-(*frames)[0])/abs(_refim);
 }
 
 ////////////////////////////////////////////////////////////////////
