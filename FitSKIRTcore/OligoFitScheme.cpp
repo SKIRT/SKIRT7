@@ -15,7 +15,6 @@
 #include "ParameterRanges.hpp"
 #include "ReferenceImage.hpp"
 #include "ReferenceImages.hpp"
-#include <QList>
 
 ////////////////////////////////////////////////////////////////////
 
@@ -102,8 +101,7 @@ Optimization* OligoFitScheme::optim() const
 ////////////////////////////////////////////////////////////////////
 
 double OligoFitScheme::objective(AdjustableSkirtSimulation::ReplacementDict replacement,
-                                 QList<double> *DiskLuminosities, QList<double> *BulgeRatios, QList<double> *Chis,
-                                 int index)
+                                 QList<QList<double> >*luminosities, QList<double> *Chis, int index)
 {
     //perform the adjusted simulation
     QString prefix = "tmp/tmp_"+QString::number(index);
@@ -114,7 +112,6 @@ double OligoFitScheme::objective(AdjustableSkirtSimulation::ReplacementDict repl
     int counter=0;
     QList<Array> Simulations;
     QList<QList<Array>> frames;
-    QList<QList<double>> luminosities;
 
     foreach (ReferenceImage* rima, _rimages->images())
     {
@@ -137,15 +134,11 @@ double OligoFitScheme::objective(AdjustableSkirtSimulation::ReplacementDict repl
         Simulations.append(bulgeTotal);
         frames.append(Simulations);
         Simulations.clear();
-        luminosities.append(*(DiskLuminosities));
-        luminosities.append(*(BulgeRatios));
-        DiskLuminosities->clear();
-        BulgeRatios->clear();
         counter++;
     }
 
     //determine the best fitting luminosities and lowest chi2 value
-    double test_chi2functions = _rimages->chi2(&frames,&luminosities, Chis);
+    double test_chi2functions = _rimages->chi2(&frames,luminosities, Chis);
     return test_chi2functions;
 }
 

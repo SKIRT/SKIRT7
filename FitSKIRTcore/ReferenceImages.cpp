@@ -77,12 +77,11 @@ double ReferenceImages::chi2(QList<QList<Array>> *frames,
     foreach (ReferenceImage* rima, _rimages)
     {
         double chi;
-        chi=rima->chi2(&((*frames)[counter]), &((*luminosities)[counter]));
-
-        find<Log>()->info("LUMINOSITIES:  "+QString::number((*luminosities)[counter][0])+"  "+QString::number((*luminosities)[counter][1]));
+        QList<double> monolum;
+        chi=rima->chi2(&((*frames)[counter]), &(monolum));
+        luminosities->append(monolum);
         chi2_sum += chi;
         Chis->append(chi);
-
         counter++;
     }
     return chi2_sum;

@@ -178,19 +178,20 @@ QVariant Optimization::chi2(QVariant input)
         counter++;
     }
     OligoFitScheme* oligofit = find<OligoFitScheme>();
-    QList<double> DiskLuminosities, BulgeRatios, Chis;
-    double chi_sum = oligofit->objective((*replacementsGenome),&DiskLuminosities,&BulgeRatios,&Chis, index);
-
-    QList<QVariant> output, diskl, bulger, chivalues;
-    for(int i=0; i<DiskLuminosities.size(); i++)
+    QList<double> Chis;
+    QList<QList<double>> luminosities;
+    double chi_sum = oligofit->objective((*replacementsGenome),&luminosities,&Chis, index);
+    QList<QVariant> output, lumis, chivalues;
+    for(int i=0; i<luminosities.size(); i++)
     {
-        diskl.append(DiskLuminosities[i]);
-        bulger.append(BulgeRatios[i]);
+        for(int j=0; j<(luminosities[i]).size(); j++)
+        {
+            lumis.append((luminosities[i])[j]);
+        }
         chivalues.append(Chis[i]);
     }
     output.append(chi_sum);
-    output.insert(output.size(),diskl);
-    output.insert(output.size(),bulger);
+    output.insert(output.size(),lumis);
     output.insert(output.size(),chivalues);
 
     return output;
@@ -201,7 +202,6 @@ QVariant Optimization::chi2(QVariant input)
 
 void Optimization::splitChi()
 {
-
     QVector<QVariant> data(_genValues.size());
 
     for(int i =0;i<_genValues.size();i++)
@@ -223,19 +223,22 @@ void Optimization::splitChi()
     {
         QList<QVariant> output = data[i].toList();
         double chi_sum = output[0].toDouble();
-        QList<QVariant> diskl = output[1].toList();
-        QList<QVariant> bulger = output[2].toList();
-        QList<QVariant> chivalues = output[3].toList();
-        QList<double> DiskLuminosities, BulgeRatios, Chis;
-        for(int j = 0; j<diskl.size(); j++)
+        QList<QVariant> lumis = output[1].toList();
+        QList<QVariant> chivalues = output[2].toList();
+        QList<double> Chis;
+        QList<double> All_luminosities;
+
+        for(int j = 0; j<lumis.size(); j++)
         {
-            DiskLuminosities.append(diskl[j].toDouble());
-            BulgeRatios.append(bulger[j].toDouble());
+            All_luminosities.append(lumis[j].toDouble());
+        }
+        for(int j = 0; j<chivalues.size(); j++)
+        {
             Chis.append(chivalues[j].toDouble());
         }
+
         _genScores[i]=chi_sum;
-        _genLum[i]=DiskLuminosities;
-        _genBulgeratios[i]=BulgeRatios;
+        _genLum[i]=All_luminosities;
         _genChis[i]=Chis;
 
     }
@@ -275,7 +278,6 @@ void Optimization::writeLine(std::ofstream *stream, int i)
         (*stream)<<(_genUnitsValues[i])[j]<<" ";
     (*stream)<<_genScores[i]<<" ";
     writeList(stream, _genLum[i]);
-    writeList(stream, _genBulgeratios[i]);
     writeList(stream, _genChis[i]);
     (*stream)<<endl;
 }
@@ -318,7 +320,6 @@ void Optimization::PopEvaluate(GAPopulation & p)
     }
     _genScores.resize(_genIndices.size());
     _genLum.resize(_genIndices.size());
-    _genBulgeratios.resize(_genIndices.size());
     _genChis.resize(_genIndices.size());
 
     //Calculate the objective function values in parallel
@@ -350,7 +351,6 @@ void Optimization::clearGen(const QString & dirName)
     _genScores.clear();
     _genValues.clear();
     _genLum.clear();
-    _genBulgeratios.clear();
     _genChis.clear();
     _genUnitsValues.clear();
 

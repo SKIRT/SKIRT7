@@ -5,6 +5,7 @@
 
 #include "ReferenceImage.hpp"
 
+#include "AdjustableSkirtSimulation.hpp"
 #include "Convolution.hpp"
 #include "FatalError.hpp"
 #include "FilePaths.hpp"
@@ -82,9 +83,12 @@ LumSimplex* ReferenceImage::lumSimplex() const
 
 ////////////////////////////////////////////////////////////////////
 
-double ReferenceImage::chi2(QList<Array> *frames, QList<double> *luminosities) const
+double ReferenceImage::chi2(QList<Array> *frames, QList<double> *monoluminosities) const
 {
     //HERE IS WHERE I'LL HAVE TO DECIDE WHICH OPTIMIZATION ALGORITHM FOR LUM FIT
+
+    if (find<AdjustableSkirtSimulation>()->ncomponents() != 2)
+        throw FATALERROR("Number of luminosity components differs from 2!");
 
     double chi_value = 0;
     double dlum,b2d;
@@ -93,8 +97,10 @@ double ReferenceImage::chi2(QList<Array> *frames, QList<double> *luminosities) c
     _convolution->convolve(&((*frames)[1]), _xdim, _ydim);
 
     _lumsimplex->optimize(&_refim,&((*frames)[0]),&((*frames)[1]),dlum,b2d,chi_value);
-    luminosities->append(dlum);
-    luminosities->append(b2d);
+    monoluminosities->append(dlum);
+    monoluminosities->append(b2d);
+    find<Log>()->info("LUMINOSITIES:  "+QString::number((*monoluminosities)[0])+"  "+QString::number((*monoluminosities)[1]));
+
     return chi_value;
 }
 

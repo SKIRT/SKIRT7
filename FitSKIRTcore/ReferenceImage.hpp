@@ -67,7 +67,7 @@ public:
     /** Returns the \f$\chi^2\f$ value between the reference image and input frame.
         It returns the simulations which are altered in place to contain the same masks and
         it returns the best fitting luminosities. */
-    double chi2(QList<Array> *frames, QList<double> *luminosities) const;
+    double chi2(QList<Array> *frames, QList<double> *monoluminosities) const;
 
     /** Returns the simulations which are altered in place to contain the same masks
         and the corresponding residual frame. */
