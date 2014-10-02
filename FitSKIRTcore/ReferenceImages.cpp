@@ -111,7 +111,6 @@ void ReferenceImages::writeOutBest(int index, int consec) const
             FITSInOut::read(filepath,CompTotal,nx,ny,nz);
             Total.append(CompTotal);
         }
-
         rima->returnFrame(&Total);
         filepath = path->output("Best_"+QString::number(consec)+"_"+QString::number(counter)+".fits");
         FITSInOut::write(filepath, Total[0], nx, ny, nz,

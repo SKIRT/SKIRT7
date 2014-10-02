@@ -47,7 +47,8 @@ HEADERS += \
     ParameterRanges.hpp \
     ReferenceImage.hpp \
     ReferenceImages.hpp \
-    RegisterFitSchemeItems.hpp
+    RegisterFitSchemeItems.hpp \
+    GoldenSection.hpp
 
 SOURCES += \
     AdjustableSkirtSimulation.cpp \
@@ -60,4 +61,5 @@ SOURCES += \
     ParameterRanges.cpp \
     ReferenceImage.cpp \
     ReferenceImages.cpp \
-    RegisterFitSchemeItems.cpp
+    RegisterFitSchemeItems.cpp \
+    GoldenSection.cpp
