@@ -48,7 +48,8 @@ HEADERS += \
     ReferenceImage.hpp \
     ReferenceImages.hpp \
     RegisterFitSchemeItems.hpp \
-    GoldenSection.hpp
+    GoldenSection.hpp \
+    GALumfit.hpp
 
 SOURCES += \
     AdjustableSkirtSimulation.cpp \
@@ -62,4 +63,5 @@ SOURCES += \
     ReferenceImage.cpp \
     ReferenceImages.cpp \
     RegisterFitSchemeItems.cpp \
-    GoldenSection.cpp
+    GoldenSection.cpp \
+    GALumfit.cpp

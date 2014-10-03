@@ -84,7 +84,7 @@ void GoldenSection::optimize(const Array *Rframe, Array *frame, double &lum, dou
 
     _ref = Rframe;
     Array *sim = frame;
-    double GOLD = 1-0.61803;
+    double GOLD = 0.3819660113;
 
     double chi = 1;
     double lumvalue = 1;
