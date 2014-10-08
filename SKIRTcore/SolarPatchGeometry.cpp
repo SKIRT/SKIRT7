@@ -53,7 +53,7 @@ double SolarPatchGeometry::radius() const
 double SolarPatchGeometry::density(Position bfr) const
 {
     if (bfr.height() != 0.0) return 0.0;
-    if (bfr.cylradius() < _Rmax) return 0.0;
+    if (bfr.cylradius() > _Rmax) return 0.0;
     return numeric_limits<double>::infinity();
 }
 
