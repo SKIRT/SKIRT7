@@ -49,6 +49,8 @@ void ReferenceImages::setupSelfBefore()
 
     // verify that there is at least one range
     if (_rimages.isEmpty()) throw FATALERROR("There are no reference images");
+    if (find<AdjustableSkirtSimulation>()->nframes() != _rimages.size())
+        throw FATALERROR("Number of instrument frames does not match the number of reference frames");
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -70,7 +72,7 @@ double ReferenceImages::chi2(QList<QList<Array>> *frames,
                              QList<QList<double>> *luminosities, QList<double> *Chis)
 {
     if (frames->size() != _rimages.size())
-        throw FATALERROR("Number of simulation frames does not match the number of reference frames");
+        throw FATALERROR("Total number of simulated frames does not match the number of reference frames");
     int counter=0;
     double chi2_sum=0;
 
@@ -107,7 +109,8 @@ void ReferenceImages::writeOutBest(int index, int consec) const
         QString filepath;
         for(int i =0; i<adjSS->ncomponents();i++){
             Array CompTotal;
-            filepath = path->output(prefix+"_"+instrname+"_stellar_"+QString::number(i)+"_"+QString::number(counter)+".fits");
+            filepath = path->output(prefix+"_"+instrname+"_stellar_"+
+                                    QString::number(i)+"_"+QString::number(counter)+".fits");
             FITSInOut::read(filepath,CompTotal,nx,ny,nz);
             Total.append(CompTotal);
         }
