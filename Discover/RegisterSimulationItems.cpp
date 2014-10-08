@@ -45,7 +45,6 @@
 #include "EinastoGeometry.hpp"
 #include "EnstatiteGrainComposition.hpp"
 #include "ExpDiskGeometry.hpp"
-#include "ExpDiskSpiralArmsGeometry.hpp"
 #include "ExtragalacticUnits.hpp"
 #include "FaceOnDustCompNormalization.hpp"
 #include "FileGrainComposition.hpp"
@@ -227,7 +226,6 @@ void RegisterSimulationItems::registerAll()
     add<TorusGeometry>();
     add<SpheroidalGeometry>();
     add<GenGeometry>(false);
-    add<ExpDiskSpiralArmsGeometry>();
     add<NetzerAccretionDiskGeometry>();
     add<StellarSurfaceGeometry>();
     add<SolarPatchGeometry>();

@@ -93,7 +93,6 @@ HEADERS += \
     EdgeOnDustCompNormalization.hpp \
     EinastoGeometry.hpp \
     ExpDiskGeometry.hpp \
-    ExpDiskSpiralArmsGeometry.hpp \
     ExtragalacticUnits.hpp \
     FITSInOut.hpp \
     FaceOnDustCompNormalization.hpp \
@@ -326,7 +325,6 @@ SOURCES += \
     EdgeOnDustCompNormalization.cpp \
     EinastoGeometry.cpp \
     ExpDiskGeometry.cpp \
-    ExpDiskSpiralArmsGeometry.cpp \
     ExtragalacticUnits.cpp \
     FITSInOut.cpp \
     FaceOnDustCompNormalization.cpp \
