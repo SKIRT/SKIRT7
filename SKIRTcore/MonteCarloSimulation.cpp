@@ -25,7 +25,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////
 
 MonteCarloSimulation::MonteCarloSimulation()
-    : _lambdagrid(0), _ss(0), _ds(0), _is(0), _packages(0), _continuousScattering(false)
+    : _is(0), _packages(0), _continuousScattering(false), _lambdagrid(0), _ss(0), _ds(0)
 {
 }
 
@@ -43,15 +43,13 @@ void MonteCarloSimulation::setupSelfBefore()
 
 ////////////////////////////////////////////////////////////////////
 
-void MonteCarloSimulation::setupSelfAfter()
+void MonteCarloSimulation::setChunkParams(double packages)
 {
-    Simulation::setupSelfAfter();
-
-    // cache frequently used parameters
+    // cache the number of wavelengths
     _Nlambda = _lambdagrid->Nlambda();
 
     // determine the number of chunks and the corresponding chunk size
-    if (_packages <= 0)
+    if (packages <= 0)
     {
         _Nchunks = 0;
         _chunksize = 0;
@@ -61,8 +59,8 @@ void MonteCarloSimulation::setupSelfAfter()
     {
         int Nthreads = _parfac->maxThreadCount();
         if (Nthreads == 1) _Nchunks = 1;
-        else _Nchunks = ceil( qMin(_packages/2e4, qMax(_packages/1e7, 10.*Nthreads/_Nlambda)) );
-        _chunksize = ceil(_packages/_Nchunks);
+        else _Nchunks = ceil( qMin(packages/2e4, qMax(packages/1e7, 10.*Nthreads/_Nlambda)) );
+        _chunksize = ceil(packages/_Nchunks);
         _Npp = _Nchunks*_chunksize;
     }
 
@@ -134,7 +132,7 @@ void MonteCarloSimulation::initprogress(QString phase)
     _phase = phase;
     _Ndone = 0;
 
-    _log->info("(" + QString::number(_packages,'g') + " photon packages for "
+    _log->info("(" + QString::number(_Npp) + " photon packages for "
                + (_Nlambda==1 ? QString("a single wavelength") : QString("each of %1 wavelengths").arg(_Nlambda))
                + ")");
     _timer.start();
@@ -162,6 +160,7 @@ void MonteCarloSimulation::logprogress(quint64 extraDone)
 void MonteCarloSimulation::runstellaremission()
 {
     TimeLogger logger(_log, "the stellar emission phase");
+    setChunkParams(_packages);
     initprogress("stellar emission");
     Parallel* parallel = find<ParallelFactory>()->parallel();
     parallel->call(this, &MonteCarloSimulation::dostellaremissionchunk, _Nchunks*_Nlambda);

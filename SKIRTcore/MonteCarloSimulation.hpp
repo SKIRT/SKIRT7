@@ -54,12 +54,15 @@ protected:
         system is optional and thus it may have a null value. */
     void setupSelfBefore();
 
-    /** This function determines how the photon packages should be split over chunks. A chunk is
-        the unit of parallelization in the simulation, i.e. multiple chunks may be performed
-        simultaneously in different execution threads. The number of photons launched in a chunk,
-        called the chunk size, is the same for all chunks in the simulation. All photon packages in
-        a chunk have the same wavelength. If no photon packages must be launched for the
-        simulation, the number of chunks is trivially zero. If there is only a single execution
+    /** This function determines how the specified number of photon packages should be split over
+        chunks, and stores the resulting parameters in protected data members. It should be called
+        at the start of each photon shooting phase.
+
+        A chunk is the unit of parallelization in the simulation, i.e. multiple chunks may be
+        performed simultaneously in different execution threads. The number of photons launched in
+        a chunk, called the chunk size, is the same for all chunks in the simulation. All photon
+        packages in a chunk have the same wavelength. If no photon packages must be launched for
+        the simulation, the number of chunks is trivially zero. If there is only a single execution
         thread, there is no reason to split the photon packages into chunks, so the number of
         chunks per wavelength is set to one, and the chunk size is equal to the number of photon
         packages per wavelength. Otherwise the number of chunks is determined using a heuristic
@@ -75,7 +78,7 @@ protected:
         \max(\frac{N_\text{pp}}{S_\text{max}}, \frac{b\,N_\text{threads}}{N_\lambda})) \right]\f]
         where \f$S_\text{min}=10^4\f$ is the minimum chunk size, \f$S_\text{max}=10^7\f$ is the
         maximum chunk size, and \f$b=10\f$ is the load balancing safety factor. */
-    void setupSelfAfter();
+    void setChunkParams(double packages);
 
     //======== Setters & Getters for Discoverable Attributes =======
 
@@ -302,18 +305,20 @@ protected:
 
     //======================== Data Members ========================
 
+private:
+    // *** discoverable attributes managed by this class ***
+    InstrumentSystem* _is;
+    double _packages;       // the specified number of photon packages to be launched per wavelength
+    bool _continuousScattering;  // true if continuous scattering should be used
+
 protected:
     // *** discoverable attributes to be setup by a subclass ***
     WavelengthGrid* _lambdagrid;
     StellarSystem* _ss;
     DustSystem* _ds;
 
-    // *** discoverable attributes managed by this class ***
-    InstrumentSystem* _is;
-    double _packages;       // the specified number of photon packages to be launched per wavelength
-    bool _continuousScattering;  // true if continuous scattering should be used
-
-    // *** data members initialized by this class during setup ***
+protected:
+    // *** data members initialized by this class through the setChunkParams() function ***
     quint64 _Nlambda;       // the number of wavelengths in the simulation's wavelength grid
     quint64 _Nchunks;       // the number of chunks to be launched per wavelength
     quint64 _chunksize;     // the number of photon packages in one chunk

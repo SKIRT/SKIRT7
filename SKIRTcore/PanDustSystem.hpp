@@ -33,6 +33,13 @@ class PanDustSystem : public DustSystem
     Q_CLASSINFO("Default", "AllCellsDustLib")
     Q_CLASSINFO("RelevantIf", "dustEmissivity")
 
+    Q_CLASSINFO("Property", "emissionBoost")
+    Q_CLASSINFO("Title", "the factor by which to boost the number of dust emission photon packages")
+    Q_CLASSINFO("MinValue", "1")
+    Q_CLASSINFO("MaxValue", "1000")
+    Q_CLASSINFO("Default", "1")
+    Q_CLASSINFO("RelevantIf", "dustEmissivity")
+
     Q_CLASSINFO("Property", "selfAbsorption")
     Q_CLASSINFO("Title", "include dust self-absorption")
     Q_CLASSINFO("Default", "yes")
@@ -83,6 +90,17 @@ public:
 
     /** Returns the dust library object for this dust system, or null if there is no dust emission. */
     Q_INVOKABLE DustLib* dustLib() const;
+
+    /** Sets the multiplication factor by which to boost the number of photon packages sent during
+        the dust emission phase. The default value is 1, i.e. use the same number of photon
+        packages as during the stellar emission phase. A higher value increases the resolution of
+        infrared images at the cost of extra run-time. If dust emission is turned off, the boost
+        value is irrelevant. */
+    Q_INVOKABLE void setEmissionBoost(int value);
+
+    /** Returns the multiplication factor by which to boost the number of photon packages sent
+        during the dust emission phase. If dust emission is turned off, this function returns 1. */
+    Q_INVOKABLE int emissionBoost() const;
 
     /** Sets the flag indicating whether to include dust self-absorption. The default value is
         true. If dust emission is turned off, the value of this flag is irrelevant. */
@@ -207,6 +225,7 @@ private:
     // data members to be set before setup is invoked
     DustEmissivity* _dustemissivity;
     DustLib* _dustlib;
+    int _emissionBoost;
     bool _selfabsorption;
     bool _writeEmissivity;
     bool _writeTemp;
