@@ -59,6 +59,7 @@ double GoldenSection::function(Array *frame, double x)
     double chi = 0;
     int arraysize = frame->size();
 
+    //calculate the chi2 value and take over masked regions
     for (int m=0; m<arraysize; m++)
     {
         double total_sim = x * ((*frame)[m]);
@@ -92,6 +93,7 @@ void GoldenSection::optimize(const Array *Rframe, Array *frame, double &lum, dou
     double a0 = _minLum;
     double b0 = _maxLum;
 
+    //loop to constrain the best fitting luminosity by removing the worst boundary
     for(int j=0;j<300;j++){
 
         double d=(b0-a0)*GOLD;
@@ -110,13 +112,15 @@ void GoldenSection::optimize(const Array *Rframe, Array *frame, double &lum, dou
             lumvalue=b1;
             chi=chib1;
         }
-        if(abs(prev_lumvalue-lumvalue)/lumvalue <= 1e-5 && j!=0) j=300;
+
+        //condition to end fitting if the value does not change significantly
+        if(abs(prev_lumvalue-lumvalue)/lumvalue <= 1e-8 && j>=20) j=300;
         else prev_lumvalue = lumvalue;
+        cout<<lumvalue<<" "<<chi<<endl;
     }
     chi2=chi;
     lum=lumvalue;
     frame = sim;
-
 }
 
 ////////////////////////////////////////////////////////////////////

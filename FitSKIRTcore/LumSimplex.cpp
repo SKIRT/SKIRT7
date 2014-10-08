@@ -100,7 +100,7 @@ double LumSimplex::function(Array *disk, Array *bulge, double x, double y)
 
     for (int m=0; m<arraysize; m++)
     {
-        double total_sim = x * ((*disk)[m] + y * (*bulge)[m]);
+        double total_sim = x * (*disk)[m] + y * (*bulge)[m];
         double sigma = sqrt( abs((*_ref)[m]) + total_sim);
         if ((*_ref)[m]==0)
         {
@@ -180,17 +180,20 @@ void LumSimplex::initialize(Array *disk, Array *bulge, double simplex[3][3])
     double y_max = y_1;
 
     //determine the point with highest chi2
-    if (function( disk, bulge, x_1,y_1) > function( disk, bulge, x_2,y_2) && function( disk, bulge, x_1,y_1) > function( disk, bulge, x_3,y_3))
+    if (function( disk, bulge, x_1,y_1) > function( disk, bulge, x_2,y_2) &&
+        function( disk, bulge, x_1,y_1) > function( disk, bulge, x_3,y_3))
     {
         x_max = x_1;
         y_max = y_1;
     }
-    if (function( disk, bulge, x_2,y_2) > function( disk, bulge, x_1,y_1) && function( disk, bulge, x_2,y_2) > function( disk, bulge, x_3,y_3))
+    if (function( disk, bulge, x_2,y_2) > function( disk, bulge, x_1,y_1) &&
+        function( disk, bulge, x_2,y_2) > function( disk, bulge, x_3,y_3))
     {
         x_max = x_2;
         y_max = y_2;
     }
-    if (function( disk, bulge, x_3,y_3) > function( disk, bulge, x_2,y_2) && function( disk, bulge, x_3,y_3) > function( disk, bulge, x_1,y_1))
+    if (function( disk, bulge, x_3,y_3) > function( disk, bulge, x_2,y_2) &&
+        function( disk, bulge, x_3,y_3) > function( disk, bulge, x_1,y_1))
     {
         x_max = x_3;
         y_max = y_3;
@@ -331,8 +334,8 @@ void LumSimplex::optimize(const Array *Rframe, Array *Dframe,
 
 ////////////////////////////////////////////////////////////////////
 
-void LumSimplex::setCenterReflected(Array *disk, Array *bulge,
-                                    double simplex[3][3], double center[], double reflected[], int counter, double Alpha)
+void LumSimplex::setCenterReflected(Array *disk, Array *bulge, double simplex[3][3], double center[],
+                                    double reflected[], int counter, double Alpha)
 {
     double averx = 0;
     double avery = 0;

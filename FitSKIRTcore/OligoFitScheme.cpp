@@ -121,7 +121,8 @@ double OligoFitScheme::objective(AdjustableSkirtSimulation::ReplacementDict repl
 
         for(int i =0; i<_simulation->ncomponents();i++){
             Array CompTotal;
-            filepath = path->output(prefix+"_"+instrname+"_stellar_"+QString::number(i)+"_"+QString::number(counter)+".fits");
+            filepath = path->output(prefix+"_"+instrname+"_stellar_"+
+                                    QString::number(i)+"_"+QString::number(counter)+".fits");
             FITSInOut::read(filepath,CompTotal,nx,ny,nz);
             Simulations.append(CompTotal);
         }

@@ -286,7 +286,7 @@ void Optimization::writeLine(std::ofstream *stream, int i)
 
 void Optimization::PopEvaluate(GAPopulation & p)
 {
-    find<Log>()->info("------ Evaluating current generation -----");
+    find<Log>()->info("------ Evaluating generation "+QString::number(_ga->statistics().generation()) +" -----");
 
     //creating a temporary folder to store the simulations
     QString folderpath = find<FilePaths>()->output("tmp");

@@ -103,7 +103,7 @@ public:
     /** If the photon package has a stellar origin, this function returns the index of the emitting
         stellar component. If the photon package has a dust emission origin, this function returns
         -1. */
-    bool stellarCompIndex() const { return _stellar; }
+    int stellarCompIndex() const { return _stellar; }
 
     /** This function returns the luminosity of the photon package. */
     double luminosity() const { return _L; }

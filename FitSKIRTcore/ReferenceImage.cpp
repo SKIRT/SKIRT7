@@ -127,11 +127,11 @@ double ReferenceImage::chi2(QList<Array> *frames, QList<double> *monoluminositie
         LumSimplex lumsim;
         lumsim.setMinDlum(_minLum[0]);
         lumsim.setMaxDlum(_maxLum[0]);
-        lumsim.setMinB2D(_minLum[1]/_minLum[0]);
-        lumsim.setMaxB2D(_maxLum[1]/_maxLum[0]);
+        lumsim.setMinB2D(_minLum[1]);
+        lumsim.setMaxB2D(_maxLum[1]);
         lumsim.optimize(&_refim,&((*frames)[0]),&((*frames)[1]),dlum,b2d,chi_value);
         monoluminosities->append(dlum);
-        monoluminosities->append(dlum*b2d);
+        monoluminosities->append(b2d);
     }
     if (find<AdjustableSkirtSimulation>()->ncomponents() >= 3)
     {
@@ -148,7 +148,7 @@ double ReferenceImage::chi2(QList<Array> *frames, QList<double> *monoluminositie
 void ReferenceImage::returnFrame(QList<Array> *frames) const
 {
     double chi_value;
-    bool oneDfit;
+    bool oneDfit=false;
     for(int i =0;i<frames->size();i++)
     {
        _convolution->convolve(&((*frames)[i]), _xdim, _ydim);
@@ -174,7 +174,7 @@ void ReferenceImage::returnFrame(QList<Array> *frames) const
         lumsim.setMinB2D(_minLum[1]/_minLum[0]);
         lumsim.setMaxB2D(_maxLum[1]/_maxLum[0]);
         lumsim.optimize(&_refim,&((*frames)[0]),&((*frames)[1]),dlum,b2d,chi_value);
-        (*frames)[0] = dlum*((*frames)[0] + b2d*((*frames)[1]));
+        (*frames)[0] = dlum*(*frames)[0] + b2d*(*frames)[1];
         (*frames)[1]= abs(_refim-(*frames)[0])/abs(_refim);
     }
     if (find<AdjustableSkirtSimulation>()->ncomponents() >= 3)
