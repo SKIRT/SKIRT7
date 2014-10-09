@@ -172,6 +172,33 @@ void WizardEngine::advance()
 
 ////////////////////////////////////////////////////////////////////
 
+namespace
+{
+    // private helper function used in retreat():
+    // starting from the current item & property index, descend the hierarchy as deep as possible,
+    // and update the current item & property index in place
+    void descendToDeepest(SimulationItem*& _current, int& _propertyIndex)
+    {
+        while (true)
+        {
+            // if the current property is an item, and the item has properties, then descend the hierarchy
+            auto handler = createPropertyHandler(_current, properties(_current)[_propertyIndex]);
+            auto itemhandler = handler.dynamicCast<ItemPropertyHandler>();
+            if (itemhandler && itemhandler->value() && properties(itemhandler->value()).size()>0)
+            {
+                _current = itemhandler->value();
+                _propertyIndex = properties(_current).size() - 1;
+            }
+            else break;
+
+            // otherwise, if the property being handled is an item list, ...  TO DO
+            // ...
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////
+
 void WizardEngine::retreat()
 {
     switch (_state)
@@ -205,21 +232,7 @@ void WizardEngine::retreat()
             else
             {
                 _propertyIndex--;
-                while (true)
-                {
-                    // if the current property is an item, and the item has properties, then descend the hierarchy
-                    auto handler = createPropertyHandler(_current, properties(_current)[_propertyIndex]);
-                    auto itemhandler = handler.dynamicCast<ItemPropertyHandler>();
-                    if (itemhandler && itemhandler->value() && properties(itemhandler->value()).size()>0)
-                    {
-                        _current = itemhandler->value();
-                        _propertyIndex = properties(itemhandler->value()).size() - 1;
-                    }
-                    else break;
-
-                    // otherwise, if the property being handled is an item list, ...  TO DO
-                    // ...
-                }
+                descendToDeepest(_current, _propertyIndex);
              }
 
             // indicate property invalid (meaningless and harmless if state has changed to CreateRoot)
@@ -228,8 +241,14 @@ void WizardEngine::retreat()
         break;
     case SaveHierarchy:
         {
+            // go back to hierarchy construction
             _state = ConstructHierarchy;
             _propertyValid = false;
+
+            // descend the existing hierarchy as deep as possible
+            _current = _root;
+            _propertyIndex = properties(_root).size() - 1; // assumes that the root has at least one property
+            descendToDeepest(_current, _propertyIndex);
         }
         break;
     }
