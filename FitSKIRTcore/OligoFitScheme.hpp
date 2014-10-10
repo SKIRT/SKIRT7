@@ -25,6 +25,10 @@ class OligoFitScheme : public FitScheme
     Q_CLASSINFO("Property", "simulation")
     Q_CLASSINFO("Title", "the SKIRT simulation to be run for this fit scheme")
 
+    Q_CLASSINFO("Property", "fixedSeed")
+    Q_CLASSINFO("Title", "Do you want a fixed seed (only for testing purposes)")
+    Q_CLASSINFO("Default", "no")
+
     Q_CLASSINFO("Property", "parameterRanges")
     Q_CLASSINFO("Title", "the parameter ranges")
 
@@ -53,6 +57,12 @@ public:
 
     /** Returns the SKIRT simulation to be run for this fit scheme. */
     Q_INVOKABLE AdjustableSkirtSimulation* simulation() const;
+
+    /** Sets the boolean value whether to use a fixed seed or not. */
+    Q_INVOKABLE void setFixedSeed(bool value);
+
+    /** Returns the boolean value whether to use a fixed seed or not. */
+    Q_INVOKABLE bool fixedSeed() const;
 
     /** Sets the parameterranges for this fit scheme. */
     Q_INVOKABLE void setParameterRanges(ParameterRanges* value);
@@ -85,6 +95,7 @@ public:
 protected:
     // data members
     AdjustableSkirtSimulation* _simulation;
+    bool _fixedSeed;
     ParameterRanges* _ranges;
     ReferenceImages* _rimages;
     Optimization* _optim;

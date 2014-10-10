@@ -116,7 +116,6 @@ void GoldenSection::optimize(const Array *Rframe, Array *frame, double &lum, dou
         //condition to end fitting if the value does not change significantly
         if(abs(prev_lumvalue-lumvalue)/lumvalue <= 1e-8 && j>=20) j=300;
         else prev_lumvalue = lumvalue;
-        cout<<lumvalue<<" "<<chi<<endl;
     }
     chi2=chi;
     lum=lumvalue;

@@ -155,7 +155,11 @@ bool Optimization::done()
 
 void Optimization::initialize()
 {
-   return _ga->initialize();
+   if(find<OligoFitScheme>()->fixedSeed())
+        return _ga->initialize(4357);
+   else
+       return _ga->initialize();
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -286,7 +290,7 @@ void Optimization::writeLine(std::ofstream *stream, int i)
 
 void Optimization::PopEvaluate(GAPopulation & p)
 {
-    find<Log>()->info("------ Evaluating generation "+QString::number(_ga->statistics().generation()) +" -----");
+    find<Log>()->info("Evaluating generation "+QString::number(_ga->statistics().generation()));
 
     //creating a temporary folder to store the simulations
     QString folderpath = find<FilePaths>()->output("tmp");
@@ -326,7 +330,7 @@ void Optimization::PopEvaluate(GAPopulation & p)
     splitChi();
 
     //set the individuals scores and write out all and the best solutions
-    find<Log>()->info("------ Setting Scores -----");
+    find<Log>()->info("Setting Scores");
     for (int i=0; i<_genIndices.size(); i++)
     {
         p.individual(_genIndices[i]).score(_genScores[i]);

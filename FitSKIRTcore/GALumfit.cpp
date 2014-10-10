@@ -99,6 +99,20 @@ void GALumfit::setupSelfBefore()
 
 ////////////////////////////////////////////////////////////////////
 
+void GALumfit::setFixedSeed(bool value)
+{
+    _fixedSeed = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+bool GALumfit::fixedSeed() const
+{
+    return _fixedSeed;
+}
+
+////////////////////////////////////////////////////////////////////
+
 void GALumfit::setMinLuminosities(QList<double> value)
 {
     _minLum = value;
@@ -166,13 +180,15 @@ void GALumfit::optimize(const Array *Rframe, QList<Array> *frames, QList<double>
     _ga->scoreFrequency(0);  // was 1e-22 implicitly converted to integer 0
     _ga->selectScores(GAStatistics::AllScores);
     _ga->flushFrequency(0);  // was 1e-22 implicitly converted to integer 0
-    _ga->initialize();
+    if(_fixedSeed) _ga->initialize(4357);
+    else _ga->initialize();
 
     //loop over the GA untill it is done and print out the best fitting values
     GARealGenome& best_genome = (GARealGenome&) _ga->statistics().bestIndividual();
     while(!_ga->done())_ga->step();
     for(int i=0;i<_minLum.size();i++) lumis->append(pow(10,best_genome.gene(i)));
     chi2=best_genome.score();
+
 
 }
 

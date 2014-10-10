@@ -25,12 +25,16 @@ class GALumfit : public SimulationItem
 
     Q_CLASSINFO("Title", "GA luminosity optimization")
 
+    Q_CLASSINFO("Property", "fixedSeed")
+    Q_CLASSINFO("Title", "Do you want a fixed seed (only for testing purposes)")
+    Q_CLASSINFO("Default", "no")
+
     Q_CLASSINFO("Property", "minlum")
-    Q_CLASSINFO("Title", "the minimum luminosity in solar units")
+    Q_CLASSINFO("Title", "the minimum luminosities in solar units")
     Q_CLASSINFO("Default", "1e8")
 
     Q_CLASSINFO("Property", "maxlum")
-    Q_CLASSINFO("Title", "the maximum luminosity in solar units")
+    Q_CLASSINFO("Title", "the maximum luminosities in solar units")
     Q_CLASSINFO("Default", "1e10")
 
     //============= Construction - Setup - Destruction =============
@@ -45,6 +49,12 @@ protected:
     //======== Setters & Getters for Discoverable Attributes =======
 
 public:
+    /** Sets the boolean value whether to use a fixed seed or not. */
+    Q_INVOKABLE void setFixedSeed(bool value);
+
+    /** Returns the boolean value whether to use a fixed seed or not. */
+    Q_INVOKABLE bool fixedSeed() const;
+
     /** Sets the list of minimum luminosities, one for each wavelength in the simulation's wavelength grid.
         The list should have the same length as the simulation's wavelength grid. */
     Q_INVOKABLE void setMinLuminosities(QList<double> value);
@@ -78,6 +88,7 @@ private:
     QList<double> _minLum;
     QList<double> _maxLum;
     const Array *_ref;
+    bool _fixedSeed = false;
 
 };
 

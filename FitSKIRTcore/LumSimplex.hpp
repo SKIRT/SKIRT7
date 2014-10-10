@@ -30,11 +30,11 @@ class LumSimplex : public SimulationItem
     Q_CLASSINFO("Title", "the maximum Disk luminosity in solar units")
     Q_CLASSINFO("Default", "1e10")
 
-    Q_CLASSINFO("Property", "minB2D")
+    Q_CLASSINFO("Property", "minblum")
     Q_CLASSINFO("Title", "the minimum Bulge-to-Disk ratio")
     Q_CLASSINFO("Default", "0.1")
 
-    Q_CLASSINFO("Property", "maxB2D")
+    Q_CLASSINFO("Property", "maxblum")
     Q_CLASSINFO("Title", "the maximum Bulge-to-Disk ratio")
     Q_CLASSINFO("Default", "1.5")
 
@@ -63,16 +63,16 @@ public:
     Q_INVOKABLE double maxDlum() const;
 
     /** Sets the minimal Bulge-to-Disk ratio. */
-    Q_INVOKABLE void setMinB2D(double value);
+    Q_INVOKABLE void setMinblum(double value);
 
     /** Returns the minimal Bulge-to-Disk ratio.*/
-    Q_INVOKABLE double minB2D() const;
+    Q_INVOKABLE double minblum() const;
 
     /** Sets the maximal Bulge-to-Disk ratio. */
-    Q_INVOKABLE void setMaxB2D(double value);
+    Q_INVOKABLE void setMaxblum(double value);
 
     /** Returns the maximal Bulge-to-Disk ratio.*/
-    Q_INVOKABLE double maxB2D() const;
+    Q_INVOKABLE double maxblum() const;
 
     //======================== Other Functions =======================
 public:
@@ -80,7 +80,7 @@ public:
         The disk and bulge simulations are adapted so they contain the same mask as the reference image.
         Together with the adapted simulations and best fitting parameters, the lowest \f$\chi^2\f$ value is returned.*/
     void optimize(const Array *Rframe, Array *Dframe, Array *Bframe,
-                  double &Dlum, double &B2Dratio, double &chi2);
+                  double &Dlum, double &blumratio, double &chi2);
 
 private:
     /** This function determines if the x- or y-value is present in the simplex. */
@@ -122,8 +122,8 @@ private:
 private:
     double _minDlum;
     double _maxDlum;
-    double _minB2D;
-    double _maxB2D;
+    double _minblum;
+    double _maxblum;
     const Array *_ref;
 };
 

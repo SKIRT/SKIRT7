@@ -14,6 +14,7 @@
 #include "GoldenSection.hpp"
 #include "Log.hpp"
 #include "LumSimplex.hpp"
+#include "OligoFitScheme.hpp"
 
 using namespace std;
 
@@ -99,7 +100,6 @@ QList<double> ReferenceImage::maxLuminosities() const
 double ReferenceImage::chi2(QList<Array> *frames, QList<double> *monoluminosities) const
 {
     //HERE IS WHERE I'LL HAVE TO DECIDE WHICH OPTIMIZATION ALGORITHM FOR LUM FIT
-
     double chi_value = 0;
     for(int i =0;i<frames->size();i++)
     {
@@ -123,15 +123,15 @@ double ReferenceImage::chi2(QList<Array> *frames, QList<double> *monoluminositie
         if (_minLum.size() != 2 && _maxLum.size() != 2)
             throw FATALERROR("Number of luminosity boundaries differs from 2!");
 
-        double dlum,b2d;
+        double dlum,blum;
         LumSimplex lumsim;
         lumsim.setMinDlum(_minLum[0]);
         lumsim.setMaxDlum(_maxLum[0]);
-        lumsim.setMinB2D(_minLum[1]);
-        lumsim.setMaxB2D(_maxLum[1]);
-        lumsim.optimize(&_refim,&((*frames)[0]),&((*frames)[1]),dlum,b2d,chi_value);
+        lumsim.setMinblum(_minLum[1]);
+        lumsim.setMaxblum(_maxLum[1]);
+        lumsim.optimize(&_refim,&((*frames)[0]),&((*frames)[1]),dlum,blum,chi_value);
         monoluminosities->append(dlum);
-        monoluminosities->append(b2d);
+        monoluminosities->append(blum);
     }
     if (find<AdjustableSkirtSimulation>()->ncomponents() >= 3)
     {
@@ -167,20 +167,21 @@ void ReferenceImage::returnFrame(QList<Array> *frames) const
 
     if (frames->size() == 2 && !oneDfit)
     {
-        double dlum, b2d;
+        double dlum, blum;
         LumSimplex lumsim;
         lumsim.setMinDlum(_minLum[0]);
         lumsim.setMaxDlum(_maxLum[0]);
-        lumsim.setMinB2D(_minLum[1]/_minLum[0]);
-        lumsim.setMaxB2D(_maxLum[1]/_maxLum[0]);
-        lumsim.optimize(&_refim,&((*frames)[0]),&((*frames)[1]),dlum,b2d,chi_value);
-        (*frames)[0] = dlum*(*frames)[0] + b2d*(*frames)[1];
+        lumsim.setMinblum(_minLum[1]);
+        lumsim.setMaxblum(_maxLum[1]);
+        lumsim.optimize(&_refim,&((*frames)[0]),&((*frames)[1]),dlum,blum,chi_value);
+        (*frames)[0] = dlum*(*frames)[0] + blum*(*frames)[1];
         (*frames)[1]= abs(_refim-(*frames)[0])/abs(_refim);
     }
     if (find<AdjustableSkirtSimulation>()->ncomponents() >= 3)
     {
         GALumfit GAlumi;
         QList<double> monoluminosities;
+        GAlumi.setFixedSeed(find<OligoFitScheme>()->fixedSeed());
         GAlumi.setMinLuminosities(_minLum);
         GAlumi.setMaxLuminosities(_maxLum);
         GAlumi.optimize(&_refim,frames,&(monoluminosities),chi_value);

@@ -52,6 +52,20 @@ AdjustableSkirtSimulation* OligoFitScheme::simulation() const
 
 ////////////////////////////////////////////////////////////////////
 
+void OligoFitScheme::setFixedSeed(bool value)
+{
+    _fixedSeed = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+bool OligoFitScheme::fixedSeed() const
+{
+    return _fixedSeed;
+}
+
+////////////////////////////////////////////////////////////////////
+
 void OligoFitScheme::setParameterRanges(ParameterRanges* value)
 {
     if (_ranges) delete _ranges;

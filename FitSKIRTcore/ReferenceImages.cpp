@@ -100,7 +100,7 @@ void ReferenceImages::writeOutBest(int index, int consec) const
     Units* units = find<Units>();
     AdjustableSkirtSimulation* adjSS = find<AdjustableSkirtSimulation>();
     QString instrname = adjSS->instrname();
-    find<Log>()->info("Found best fit");
+    find<Log>()->info("Found new best fit");
 
     foreach (ReferenceImage* rima, _rimages)
     {

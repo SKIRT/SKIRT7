@@ -54,30 +54,30 @@ double LumSimplex::maxDlum() const
 
 ////////////////////////////////////////////////////////////////////
 
-void LumSimplex::setMinB2D(double value)
+void LumSimplex::setMinblum(double value)
 {
-    _minB2D = value;
+    _minblum = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double LumSimplex::minB2D() const
+double LumSimplex::minblum() const
 {
-    return _minB2D;
+    return _minblum;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void LumSimplex::setMaxB2D(double value)
+void LumSimplex::setMaxblum(double value)
 {
-    _maxB2D = value;
+    _maxblum = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double LumSimplex::maxB2D() const
+double LumSimplex::maxblum() const
 {
-    return _maxB2D;
+    return _maxblum;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -169,13 +169,13 @@ void LumSimplex::initialize(Array *disk, Array *bulge, double simplex[3][3])
 {
     //determine the initial simplex points
     double xle = _maxDlum - _minDlum;
-    double yle = _maxB2D - _minB2D;
+    double yle = _maxblum - _minblum;
     double x_1 = _minDlum + 0.8*xle;
-    double y_1 = _minB2D + 0.5*yle;
+    double y_1 = _minblum + 0.5*yle;
     double x_2 = _minDlum + 0.45*xle;
-    double y_2 = _minB2D + 0.05*yle;
+    double y_2 = _minblum + 0.05*yle;
     double x_3 = _minDlum + 0.20*xle;
-    double y_3 = _minB2D + 0.82*yle;
+    double y_3 = _minblum + 0.82*yle;
     double x_max = x_1;
     double y_max = y_1;
 
@@ -219,7 +219,7 @@ void LumSimplex::initialize(Array *disk, Array *bulge, double simplex[3][3])
 void LumSimplex::nearEdgeCorrections(double simplex[3][3], double Dpoint[], int counter) const
 {
     double xle = _maxDlum - _minDlum;
-    double yle = _maxB2D - _minB2D;
+    double yle = _maxblum - _minblum;
     int mod = counter/2;
 
     if (Dpoint[0]> _maxDlum)
@@ -232,15 +232,15 @@ void LumSimplex::nearEdgeCorrections(double simplex[3][3], double Dpoint[], int 
         if (inSimplex(simplex, _minDlum,0)) Dpoint[0] = _minDlum + (1+mod) * 0.01 * xle;
         else Dpoint[0] = _minDlum;
     }
-    if (Dpoint[1]> _maxB2D)
+    if (Dpoint[1]> _maxblum)
     {
-        if (inSimplex(simplex, _maxB2D,1)) Dpoint[1] = _maxB2D - (1+mod) * 0.01 * yle;
-        else Dpoint[1] = _maxB2D;
+        if (inSimplex(simplex, _maxblum,1)) Dpoint[1] = _maxblum - (1+mod) * 0.01 * yle;
+        else Dpoint[1] = _maxblum;
     }
-    if (Dpoint[1]<_minB2D)
+    if (Dpoint[1]<_minblum)
     {
-        if (inSimplex(simplex, _minB2D,1)) Dpoint[1] = _minB2D + (1+mod) * 0.01 * yle;
-        else Dpoint[1] = _minB2D;
+        if (inSimplex(simplex, _minblum,1)) Dpoint[1] = _minblum + (1+mod) * 0.01 * yle;
+        else Dpoint[1] = _minblum;
     }
 }
 
@@ -270,7 +270,7 @@ void LumSimplex::place(Array *disk, Array *bulge,
 ////////////////////////////////////////////////////////////////////
 
 void LumSimplex::optimize(const Array *Rframe, Array *Dframe,
-                          Array *Bframe, double &Dlum, double &B2Dratio, double &chi2)
+                          Array *Bframe, double &Dlum, double &blumratio, double &chi2)
 {
 
     _ref = Rframe;
@@ -324,7 +324,7 @@ void LumSimplex::optimize(const Array *Rframe, Array *Dframe,
     }
 
     Dlum = simplex[0][0];
-    B2Dratio = simplex[1][0];
+    blumratio = simplex[1][0];
     chi2 = simplex[2][0];
 
     Dframe = disk;

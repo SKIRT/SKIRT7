@@ -82,7 +82,9 @@ void AdjustableSkirtSimulation::setupSelfBefore()
     find<Log>()->info("Performing the simulation with default attribute values...");
     simulation->setup();
 
-    // steal the frames and instrument name from the simulation
+    // steal the instrument, frames and instrument name from the simulation
+    _units = simulation->find<Units>();
+    _units->setParent(0);
     InstrumentSystem* instrSys = simulation->find<InstrumentSystem>();
     MultiFrameInstrument* multiframe = instrSys->find<MultiFrameInstrument>();
     StellarSystem* stelsys = simulation->find<StellarSystem>();
@@ -144,9 +146,10 @@ QByteArray AdjustableSkirtSimulation::adjustedSkiContent(AdjustableSkirtSimulati
 {
     QByteArray in, out;
 
-    // process square brackets
+    // process curly brackets
     {
         in = _skiContent;
+        out.clear();
 
         // loop over input; index points at the next byte to be processed
         int index = 0;
