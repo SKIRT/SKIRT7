@@ -28,7 +28,7 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////
 
 PanDustSystem::PanDustSystem()
-    : _dustemissivity(0), _dustlib(0), _selfabsorption(true), _writeEmissivity(false),
+    : _dustemissivity(0), _dustlib(0), _emissionBoost(1), _selfabsorption(true), _writeEmissivity(false),
       _writeTemp(true), _writeISRF(true), _Nlambda(0)
 {
 }
@@ -183,6 +183,20 @@ void PanDustSystem::setDustLib(DustLib* value)
 DustLib* PanDustSystem::dustLib() const
 {
     return _dustlib;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void PanDustSystem::setEmissionBoost(int value)
+{
+    _emissionBoost = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+int PanDustSystem::emissionBoost() const
+{
+    return _dustemissivity ? _emissionBoost : 1;
 }
 
 ////////////////////////////////////////////////////////////////////

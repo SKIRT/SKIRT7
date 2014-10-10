@@ -72,42 +72,26 @@ Position Trust2Geometry::generatePosition() const
     double X = _random->uniform();
     if (X<_M0)
     {
-        double dd0 = 0.0;
-        double x, y, z;
-        while (dd0<_R0*_R0)
+        while (true)
         {
-            x = (2.0*_random->uniform()-1.0) * _L0;
-            y = (2.0*_random->uniform()-1.0) * _L0;
-            z = (2.0*_random->uniform()-1.0) * _L0;
-            dd0 = (x+_L0)*(x+_L0) + (y+_L0)*(y+_L0) + (z+_L0)*(z+_L0);
+            double x = (2.0*_random->uniform()-1.0) * _L0;
+            double y = (2.0*_random->uniform()-1.0) * _L0;
+            double z = (2.0*_random->uniform()-1.0) * _L0;
+            double dd0 = (x+_L0)*(x+_L0) + (y+_L0)*(y+_L0) + (z+_L0)*(z+_L0);
+            if (dd0>=_R0*_R0) return Position(x,y,z);
         }
-        return Position(x,y,z);
     }
     else if (X<_M0+_M1)
     {
         Direction bfk = _random->direction();
-        double kx, ky, kz;
-        bfk.cartesian(kx,ky,kz);
         double r = _R1*pow(_random->uniform(),1.0/3.0);
-        double x1, y1, z1;
-        _bfr1.cartesian(x1,y1,z1);
-        double x = x1 + r*kx;
-        double y = y1 + r*ky;
-        double z = z1 + r*kz;
-        return Position(x,y,z);
+        return Position(_bfr1+r*bfk);
     }
     else
     {
         Direction bfk = _random->direction();
-        double kx, ky, kz;
-        bfk.cartesian(kx,ky,kz);
         double r = _R2*pow(_random->uniform(),1.0/3.0);
-        double x2, y2, z2;
-        _bfr2.cartesian(x2,y2,z2);
-        double x = x2 + r*kx;
-        double y = y2 + r*ky;
-        double z = z2 + r*kz;
-        return Position(x,y,z);
+        return Position(_bfr2+r*bfk);
     }
 }
 
