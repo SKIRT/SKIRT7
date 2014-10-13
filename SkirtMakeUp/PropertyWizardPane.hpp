@@ -29,6 +29,11 @@ public:
 
     // ==================== Event Handling ====================
 
+    /** This function ensures that the first focus-enabled widget in the pane receives the focus
+        when the pane is shown. */
+protected:
+    void showEvent(QShowEvent* event);
+
 signals:
     /** This signal is emitted when the value of the property has changed in such a way that it may
         have become valid or invalid. */

@@ -18,6 +18,14 @@ PropertyWizardPane::PropertyWizardPane(PropertyHandlerPtr handler, QObject* targ
 
 ////////////////////////////////////////////////////////////////////
 
+void PropertyWizardPane::showEvent(QShowEvent* event)
+{
+    focusNextChild();
+    QWidget::showEvent(event);
+}
+
+////////////////////////////////////////////////////////////////////
+
 void PropertyWizardPane::setPropertyConfigured(bool configured)
 {
     _handler->target()->setProperty(_handler->name()+"_configured", configured);
