@@ -97,6 +97,27 @@ void MainWindow::replaceWizardPane()
 
 ////////////////////////////////////////////////////////////////////
 
+void MainWindow::keyPressEvent(QKeyEvent* event)
+{
+    switch (event->key())
+    {
+    case Qt::Key_Left:
+    case Qt::Key_Up:
+    case Qt::Key_PageUp:
+        _wizard->retreat();
+        break;
+    case Qt::Key_Right:
+    case Qt::Key_Down:
+    case Qt::Key_PageDown:
+        _wizard->advance();
+        break;
+    default:
+        QMainWindow::keyPressEvent(event);
+    }
+}
+
+////////////////////////////////////////////////////////////////////
+
 void MainWindow::closeEvent(QCloseEvent *event)
 {
     if (_wizard->isDirty())

@@ -45,6 +45,10 @@ public slots:
     void replaceWizardPane();
 
 protected:
+    /** This function is invoked for key presses that aren't handled in a sub-pane. It handles the
+        keyboard shortcuts for the advance and retreat actions. */
+    void keyPressEvent(QKeyEvent *event);
+
     /** This function is invoked when the user attempts to close the main window or to quit the
         application. If there are any unsaved changes, the function offers the user a chance to
         cancel the close or quit operation. Otherwise, or if the user decides to quit anyway, the
