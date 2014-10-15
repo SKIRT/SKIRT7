@@ -277,7 +277,8 @@ HEADERS += \
     ProcessAssigner.hpp \
     IdenticalAssigner.hpp \
     StaggeredAssigner.hpp \
-    SequentialAssigner.hpp
+    SequentialAssigner.hpp \
+    StokesVector.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -513,4 +514,5 @@ SOURCES += \
     ProcessAssigner.cpp \
     IdenticalAssigner.cpp \
     StaggeredAssigner.cpp \
-    SequentialAssigner.cpp
+    SequentialAssigner.cpp \
+    StokesVector.cpp
