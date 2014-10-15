@@ -254,6 +254,13 @@ public:
         component. */
     DustMix* mix(int h) const;
 
+    /** This function returns a pointer to a dust mixture that is selected randomly among the dust
+        mixes of the dust components in the dust system. If we have just a single dust component,
+        this is simple. If there are multiple dust components, the relative probability of
+        selecting the dust mix for a particular dust component \f$h\f$ is given by
+        \f$\kappa_\ell^{\text{sca}}(h)\,\rho({\bf{r}},h)\f$ at wavelength index \f$\ell\f$. */
+    DustMix* randomMixForPosition(Position bfr, int ell) const;
+
     /** This function returns the number of the dust cell that contains the position
         \f${\boldsymbol{r}}\f$. The function just passes the call to corresponding function of the
         dust grid structure. */

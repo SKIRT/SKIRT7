@@ -17,10 +17,12 @@
 #include "FilePaths.hpp"
 #include "FITSInOut.hpp"
 #include "Log.hpp"
+#include "NR.hpp"
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
 #include "PeerToPeerCommunicator.hpp"
 #include "PhotonPackage.hpp"
+#include "Random.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
 #include <QVarLengthArray>
@@ -794,6 +796,24 @@ int DustSystem::Ncomp() const
 DustMix* DustSystem::mix(int h) const
 {
     return _dd->mix(h);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+DustMix* DustSystem::randomMixForPosition(Position bfr, int ell) const
+{
+    int hmix = 0;
+    if (_Ncomp>1)
+    {
+        int m = whichcell(bfr);
+        if (m>=0)
+        {
+            Array Xv;
+            NR::cdf(Xv, _Ncomp, [this,ell,m](int h){return mix(h)->kappasca(ell)*density(m,h);} );
+            hmix = NR::locate_clip(Xv, find<Random>()->uniform());
+        }
+    }
+    return mix(hmix);
 }
 
 //////////////////////////////////////////////////////////////////////

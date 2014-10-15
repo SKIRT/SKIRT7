@@ -12,6 +12,7 @@
 #include "FilePaths.hpp"
 #include "Log.hpp"
 #include "NR.hpp"
+#include "PhotonPackage.hpp"
 #include "PlanckFunction.hpp"
 #include "Random.hpp"
 #include "Units.hpp"
@@ -442,99 +443,54 @@ double DustMix::albedo(int ell) const
     return _albedov[ell];
 }
 
-//////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
 
-double DustMix::asymmpar(int ell, int c) const
+double DustMix::phasefunction(const PhotonPackage* pp, Direction bfknew) const
 {
-    return _asymmparvv[c][ell];
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double DustMix::asymmpar(int ell) const
-{
-    return _asymmparv[ell];
+    double cosalpha = Direction::dot(pp->direction(), bfknew);
+    double g = _asymmparv[pp->ell()];
+    double t = 1.0+g*g-2*g*cosalpha;
+    return (1.0-g)*(1.0+g)/sqrt(t*t*t);
 }
 
 ////////////////////////////////////////////////////////////////////
 
-namespace
+Direction DustMix::generatenewdirection(const PhotonPackage* pp) const
 {
-    double static_phasefunction(double g, double cosalpha)
+    double g = _asymmparv[pp->ell()];
+    if (fabs(g)<1e-6) return _random->direction();
+    double phiprime = 2.0*M_PI*_random->uniform();
+    double cosphiprime = cos(phiprime);
+    double sinphiprime = sin(phiprime);
+    double f = ((1.0-g)*(1.0+g))/(1.0-g+2.0*g*_random->uniform());
+    double costhetaprime = (1.0+g*g-f*f)/(2.0*g);
+    double sinthetaprime = sqrt(fabs((1.0-costhetaprime)*(1.0+costhetaprime)));
+    double kx, ky, kz;
+    pp->direction().cartesian(kx,ky,kz);
+    double kxnew, kynew, kznew;
+    if (kz>0.99999)
     {
-        double t = 1.0+g*g-2*g*cosalpha;
-        return (1.0-g)*(1.0+g)/sqrt(t*t*t);
+        kxnew = cosphiprime * sinthetaprime;
+        kynew = sinphiprime * sinthetaprime;
+        kznew = costhetaprime;
     }
-}
-
-////////////////////////////////////////////////////////////////////
-
-double DustMix::phasefunction(int ell, int c, Direction bfk1, Direction bfk2) const
-{
-    return static_phasefunction(asymmpar(ell,c), Direction::dot(bfk1,bfk2));
-}
-
-////////////////////////////////////////////////////////////////////
-
-double DustMix::phasefunction(int ell, Direction bfk1, Direction bfk2) const
-{
-    return static_phasefunction(asymmpar(ell), Direction::dot(bfk1,bfk2));
-}
-
-////////////////////////////////////////////////////////////////////
-
-namespace
-{
-    Direction static_newdirection(Random* random, double g, Direction bfk)
+    else if (kz<-0.99999)
     {
-        if (fabs(g)<1e-6) return random->direction();
-        double phiprime = 2.0*M_PI*random->uniform();
-        double cosphiprime = cos(phiprime);
-        double sinphiprime = sin(phiprime);
-        double f = ((1.0-g)*(1.0+g))/(1.0-g+2.0*g*random->uniform());
-        double costhetaprime = (1.0+g*g-f*f)/(2.0*g);
-        double sinthetaprime = sqrt(fabs((1.0-costhetaprime)*(1.0+costhetaprime)));
-        double kx, ky, kz;
-        bfk.cartesian(kx,ky,kz);
-        double kxnew, kynew, kznew;
-        if (kz>0.99999)
-        {
-            kxnew = cosphiprime * sinthetaprime;
-            kynew = sinphiprime * sinthetaprime;
-            kznew = costhetaprime;
-        }
-        else if (kz<-0.99999)
-        {
-            kxnew = cosphiprime * sinthetaprime;
-            kynew = sinphiprime * sinthetaprime;
-            kznew = -costhetaprime;
-        }
-        else
-        {
-            double root = sqrt(fabs((1.0-kz)*(1.0+kz)));
-            kxnew = sinthetaprime/root*(-kx*kz*cosphiprime+ky*sinphiprime)
-                    + kx*costhetaprime;
-            kynew = -sinthetaprime/root*(ky*kz*cosphiprime+kx*sinphiprime)
-                    + ky*costhetaprime;
-            kznew = root*sinthetaprime*cosphiprime
-                    + kz*costhetaprime;
-        }
-        return Direction(kxnew,kynew,kznew);
+        kxnew = cosphiprime * sinthetaprime;
+        kynew = sinphiprime * sinthetaprime;
+        kznew = -costhetaprime;
     }
-}
-
-////////////////////////////////////////////////////////////////////
-
-Direction DustMix::generatenewdirection(int ell, int c, Direction bfk) const
-{
-    return static_newdirection(_random, asymmpar(ell,c), bfk);
-}
-
-////////////////////////////////////////////////////////////////////
-
-Direction DustMix::generatenewdirection(int ell, Direction bfk) const
-{
-    return static_newdirection(_random, asymmpar(ell), bfk);
+    else
+    {
+        double root = sqrt(fabs((1.0-kz)*(1.0+kz)));
+        kxnew = sinthetaprime/root*(-kx*kz*cosphiprime+ky*sinphiprime)
+                + kx*costhetaprime;
+        kynew = -sinthetaprime/root*(ky*kz*cosphiprime+kx*sinphiprime)
+                + ky*costhetaprime;
+        kznew = root*sinthetaprime*cosphiprime
+                + kz*costhetaprime;
+    }
+    return Direction(kxnew,kynew,kznew);
 }
 
 ////////////////////////////////////////////////////////////////////
