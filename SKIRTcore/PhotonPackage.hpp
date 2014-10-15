@@ -64,11 +64,11 @@ public:
         derives, the direction towards the instrument, and the luminosity bias (as a multiplication
         factor). The function copies the relevant values from the base photon package to the peel
         off photon package, updates the peel off direction and luminosity, and increments the
-        scattering counter. The polarization state of the peel off photon package is initialized to
-        the state of the base photon package. This state should be properly updated through the
-        StokesVector class functions. The current path of the peel off photon package is
-        invalidated, and all information about its previous life cycle is lost. The base photon
-        package remains unchanged. */
+        scattering counter. The peel off photon package is initialized to an unpolarized state; the
+        polarization state should be properly updated after the launch through the StokesVector
+        class functions. The current path of the peel off photon package is invalidated, and all
+        information about its previous life cycle is lost. The base photon package remains
+        unchanged. */
     void launchScatteringPeelOff(const PhotonPackage* pp, Direction bfk, double w);
 
     /** This function initializes a peel off photon package being sent to an instrument for a
@@ -76,11 +76,11 @@ public:
         derives, the position at which the peel off occurs, the direction towards the instrument,
         and the luminosity fraction (as a multiplication factor). The function copies the relevant
         values from the base photon package to the peel off photon package, updates the peel off
-        position, direction and luminosity, and increments the scattering counter. The polarization
-        state of the peel off photon package is initialized to the state of the base photon
-        package. This state should be properly updated through the StokesVector class functions.
-        The current path of the peel off photon package is invalidated, and all information about
-        its previous life cycle is lost. The base photon package remains unchanged. */
+        position, direction and luminosity, and increments the scattering counter. The peel off
+        photon package is initialized to an unpolarized state; the polarization state should be
+        properly updated after the launch through the StokesVector class functions. The current
+        path of the peel off photon package is invalidated, and all information about its previous
+        life cycle is lost. The base photon package remains unchanged. */
     void launchScatteringPeelOff(const PhotonPackage* pp, Position bfr, Direction bfk, double w);
 
     /** This function establishes the origin of the photon package as stellar emission (the default

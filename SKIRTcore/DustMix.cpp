@@ -445,7 +445,7 @@ double DustMix::albedo(int ell) const
 
 ////////////////////////////////////////////////////////////////////
 
-double DustMix::phasefunction(const PhotonPackage* pp, Direction bfknew) const
+double DustMix::phaseFunctionValue(const PhotonPackage* pp, Direction bfknew) const
 {
     double cosalpha = Direction::dot(pp->direction(), bfknew);
     double g = _asymmparv[pp->ell()];
@@ -455,7 +455,7 @@ double DustMix::phasefunction(const PhotonPackage* pp, Direction bfknew) const
 
 ////////////////////////////////////////////////////////////////////
 
-Direction DustMix::generatenewdirection(const PhotonPackage* pp) const
+Direction DustMix::scatteringDirectionAndPolarization(StokesVector* out, const PhotonPackage* pp) const
 {
     double g = _asymmparv[pp->ell()];
     if (fabs(g)<1e-6) return _random->direction();
@@ -491,6 +491,13 @@ Direction DustMix::generatenewdirection(const PhotonPackage* pp) const
                 + kz*costhetaprime;
     }
     return Direction(kxnew,kynew,kznew);
+}
+
+////////////////////////////////////////////////////////////////////
+
+void DustMix::scatteringPeelOffPolarization(StokesVector* out, const PhotonPackage* pp)
+{
+
 }
 
 ////////////////////////////////////////////////////////////////////
