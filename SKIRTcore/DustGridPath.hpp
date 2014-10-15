@@ -46,10 +46,10 @@ public:
     void setDirection(const Direction& bfk) { _bfk = bfk; }
 
     /** This function returns the initial position of the path. */
-    const Position& position() const { return _bfr; }
+    Position position() const { return _bfr; }
 
     /** This function returns the propagation direction along the path. */
-    const Direction& direction() const { return _bfk; }
+    Direction direction() const { return _bfk; }
 
     // ------- Handling geometric data on path segments -------
 

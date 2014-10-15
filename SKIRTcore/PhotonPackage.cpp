@@ -22,10 +22,11 @@ void PhotonPackage::launch(double L, int ell, Position bfr, Direction bfk)
     _L = L;
     _ell = ell;
     _bfr = bfr;
-    _bfk = bfk;
+    _bfk_prev = _bfk = bfk;
     _nscatt = 0;
     _stellar = -1;
     _ad = 0;
+    clearStokes();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -35,10 +36,12 @@ void PhotonPackage::launchEmissionPeelOff(const PhotonPackage* pp, Direction bfk
     _L = pp->_L;
     _ell = pp->_ell;
     _bfr = pp->_bfr;
-    _bfk = bfk;
+    _bfk_prev = _bfk = bfk;
     _nscatt = 0;
     _stellar = pp->_stellar;
     _ad = 0;
+    clearStokes();
+    _bfk_prev = _bfk;
 
     // apply emission direction bias if not isotropic
     if (pp->_ad) _L *= pp->_ad->probabilityForDirection(_bfr, _bfk);
@@ -52,9 +55,11 @@ void PhotonPackage::launchScatteringPeelOff(const PhotonPackage* pp, Direction b
     _ell = pp->_ell;
     _bfr = pp->_bfr;
     _bfk = bfk;
+    _bfk_prev = pp->_bfk;
     _nscatt = pp->_nscatt + 1;
     _stellar = pp->_stellar;
     _ad = 0;
+    setStokes(pp);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -65,9 +70,11 @@ void PhotonPackage::launchScatteringPeelOff(const PhotonPackage* pp, Position bf
     _ell = pp->_ell;
     _bfr = bfr;
     _bfk = bfk;
+    _bfk_prev = pp->_bfk;
     _nscatt = pp->_nscatt + 1;
     _stellar = pp->_stellar;
     _ad = 0;
+    setStokes(pp);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -96,6 +103,7 @@ void PhotonPackage::propagate(double s)
 void PhotonPackage::scatter(Direction bfk)
 {
     _nscatt++;
+    _bfk_prev = _bfk;
     _bfk = bfk;
     _ad = 0;
 }
