@@ -240,27 +240,40 @@ void MonteCarloSimulation::peeloffscattering(PhotonPackage* pp, PhotonPackage* p
     int ell = pp->ell();
     Position bfr = pp->position();
 
-    // Determination of the weighting factors of the phase functions corresponding to
-    // the different dust components: each component h is weighted by kappasca(h)*rho(m,h).
-    Array wv(Ncomp);
+    // Determine the weighting factors of the phase functions corresponding to
+    // the different dust components: each component h is weighted by kappasca(h)*rho(m,h)
+    QVarLengthArray<double,4> wv(Ncomp);
     if (Ncomp==1)
         wv[0] = 1.0;
     else
     {
         int m = _ds->whichcell(bfr);
-        if (m==-1) throw FATALERROR("The scattering event seems to take place outside the dust grid");
+        if (m==-1) return; // abort peel-off
         for (int h=0; h<Ncomp; h++) wv[h] = _ds->mix(h)->kappasca(ell) * _ds->density(m,h);
-        wv /= wv.sum();
+        double sum = 0;
+        for (int h=0; h<Ncomp; h++) sum += wv[h];
+        if (sum<=0) return; // abort peel-off
+        for (int h=0; h<Ncomp; h++) wv[h] /= sum;
     }
 
     // Now do the actual peel-off
     foreach (Instrument* instr, _is->instruments())
     {
         Direction bfknew = instr->bfkobs(bfr);
-        double w = 0.0;
+        double I = 0, Q = 0, U = 0, V = 0;
         for (int h=0; h<Ncomp; h++)
-            w += wv[h] * _ds->mix(h)->phasefunction(pp, bfknew);
-        ppp->launchScatteringPeelOff(pp, bfknew, w);
+        {
+            DustMix* mix = _ds->mix(h);
+            double w = wv[h] * mix->phaseFunctionValue(pp, bfknew);
+            StokesVector sv;
+            mix->scatteringPeelOffPolarization(&sv, pp);
+            I += w * sv.stokesI();
+            Q += w * sv.stokesQ();
+            U += w * sv.stokesU();
+            V += w * sv.stokesV();
+        }
+        ppp->launchScatteringPeelOff(pp, bfknew, I);
+        ppp->setStokes(I, Q, U, V);
         instr->detect(ppp);
     }
 }
@@ -313,9 +326,20 @@ void MonteCarloSimulation::continuouspeeloffscattering(PhotonPackage *pp, Photon
                 foreach (Instrument* instr, _is->instruments())
                 {
                     Direction bfknew = instr->bfkobs(bfrnew);
-                    double w = 0.0;
-                    for (int h=0; h<Ncomp; h++) w += wv[h] * _ds->mix(h)->phasefunction(pp, bfknew);
-                    ppp->launchScatteringPeelOff(pp, bfrnew, bfknew, factorm*w);
+                    double I = 0, Q = 0, U = 0, V = 0;
+                    for (int h=0; h<Ncomp; h++)
+                    {
+                        DustMix* mix = _ds->mix(h);
+                        double w = wv[h] * mix->phaseFunctionValue(pp, bfknew);
+                        StokesVector sv;
+                        mix->scatteringPeelOffPolarization(&sv, pp);
+                        I += w * sv.stokesI();
+                        Q += w * sv.stokesQ();
+                        U += w * sv.stokesU();
+                        V += w * sv.stokesV();
+                    }
+                    ppp->launchScatteringPeelOff(pp, bfrnew, bfknew, factorm*I);
+                    ppp->setStokes(I, Q, U, V);
                     instr->detect(ppp);
                 }
             }
@@ -422,7 +446,7 @@ void MonteCarloSimulation::simulatescattering(PhotonPackage* pp)
     DustMix* mix = _ds->randomMixForPosition(pp->position(), pp->ell());
 
     // Now perform the scattering using this dust mix
-    Direction bfknew = mix->generatenewdirection(pp);
+    Direction bfknew = mix->scatteringDirectionAndPolarization(pp, pp);
     pp->scatter(bfknew);
 }
 

@@ -27,9 +27,6 @@ public:
     /** This function sets the Stokes vector to an unpolarized state. */
     void clearStokes() { _Q = 0; _U = 0; _V = 0; }
 
-    /** This function sets the Stokes vector to a copy of the specified Stokes vector. */
-    void setStokes(const StokesVector* sv) { _Q = sv->_Q; _U = sv->_U; _V = sv->_V; }
-
     /** This function sets the Stokes vector to the specified parameter values, after normalizing
         them through division by \f$I\f$. If \f$I=0\f$, the Stokes vector is set to an unpolarized state.
         */
