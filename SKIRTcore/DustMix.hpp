@@ -11,6 +11,7 @@
 #include "Direction.hpp"
 #include "SimulationItem.hpp"
 class Random;
+class PhotonPackage;
 class WavelengthGrid;
 
 ////////////////////////////////////////////////////////////////////
@@ -258,37 +259,21 @@ public:
         index \f$\ell\f$. */
     double albedo(int ell) const;
 
-    /** This function returns the scattering asymmetry parameter \f$g_{c,\ell}\f$ of the \f$c\f$'th
-        dust population at wavelength index \f$\ell\f$. */
-    double asymmpar(int ell, int c) const;
+    /** This function returns the value of the scattering phase function in case the specified
+        photon package is scattered to the specified new direction. For a dustmix that doesn't
+        support polarization, the function returns \f$\Phi_\ell({\bf{k}}_{\text{pp}},
+        {\bf{k}}_{\text{new}})\f$ for the current propagation direction of the photon package
+        \f${\bf{k}}_{\text{pp}}\f$ and the specified new direction \f${\bf{k}}_{\text{new}}\f$, at
+        wavelength index \f$\ell\f$ of the photon package. */
+    double phasefunction(const PhotonPackage* pp, Direction bfknew) const;
 
-    /** This function returns the mean asymmetry parameter \f$g_\ell\f$ of the dust mixture at
-        wavelength index \f$\ell\f$. */
-    double asymmpar(int ell) const;
-
-    /** This function returns the phase function \f$\Phi_{\ell,c}({\bf{k}},{\bf{k}}')\f$
-        corresponding to the \f$c\f$'th dust population for two directions \f${\bf{k}}\f$ and
-        \f${\bf{k}}'\f$, at wavelength index \f$\ell\f$. */
-    double phasefunction(int ell, int c, Direction bfk1, Direction bfk2) const;
-
-    /** This function returns the mean phase function \f$\Phi_\ell({\bf{k}},{\bf{k}}')\f$ for two
-        directions \f${\bf{k}}\f$ and \f${\bf{k}}'\f$, at wavelength index \f$\ell\f$. */
-    double phasefunction(int ell, Direction bfk1, Direction bfk2) const;
-
-    /** This function generates a new direction \f${\bf{k}}_{\text{new}}\f$ after a scattering
-        event off a dust grain of the \f$c\f$'th dust population, given that the original direction
-        before the scattering event is \f${\bf{k}}\f$. This new direction is to be generated from
-        the normalized two-dimensional probability distribution \f[ p({\bf{k}}_{\text{new}})\,
-        {\text{d}}{\bf{k}}_{\text{new}} = \Phi_{\ell,c}({\bf{k}}_{\text{new}}, {\bf{k}})\,
-        {\text{d}}{\bf{k}}_{\text{new}}. \f] */
-    Direction generatenewdirection(int ell, int c, Direction bfk) const;
-
-    /** This function generates a new direction \f${\bf{k}}_{\text{new}}\f$ after a scattering
-        event, given that the original direction before the scattering event is \f${\bf{k}}\f$.
-        This new direction is to be generated from the normalized two-dimensional probability
-        distribution \f[ p({\bf{k}}_{\text{new}})\, {\text{d}}{\bf{k}}_{\text{new}} =
-        \Phi_\ell({\bf{k}}_{\text{new}}, {\bf{k}})\, {\text{d}}{\bf{k}}_{\text{new}}. \f] */
-    Direction generatenewdirection(int ell, Direction bfk) const;
+    /** This function generates a new direction \f${\bf{k}}_{\text{new}}\f$ in case the specified
+        photon package scatters. For a dustmix that doesn't support polarization, the function
+        generates the new direction from the normalized two-dimensional probability distribution
+        \f[ p({\bf{k}}_{\text{new}})\, {\text{d}}{\bf{k}}_{\text{new}} =
+        \Phi_\ell({\bf{k}}_{\text{new}}, {\bf{k}}_{\text{pp}})\, {\text{d}}{\bf{k}}_{\text{new}}
+        \f] at wavelength index \f$\ell\f$ of the photon package. */
+    Direction generatenewdirection(const PhotonPackage* pp) const;
 
     /** This function returns the Planck-integrated absorption cross section per hydrogen atom
         \f$\varsigma_{\text{P},c}^{\text{abs}}(T)\f$ of the \f$c\f$'th dust population for the

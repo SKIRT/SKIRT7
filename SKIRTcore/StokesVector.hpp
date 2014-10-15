@@ -10,11 +10,11 @@
 
 /** An object of the StokesVector class describes the polarization state of a photon (package), and
     offers functions to apply certain transformations to it. Specifically, a Stokes vector contains
-    the four Stokes parameters $I$, $Q$, $U$, and $V$. The first parameter ($I$) indicates the
-    total intensity, and the remaining parameters ($Q$, $U$, and $V$) represent various degrees of
+    the four Stokes parameters \f$I\f$, \f$Q\f$, \f$U\f$, and \f$V\f$. The first parameter (\f$I\f$) indicates the
+    total intensity, and the remaining parameters (\f$Q\f$, \f$U\f$, and \f$V\f$) represent various degrees of
     linear and circular polarization. Stokes parameters have a dimension of intensity. However, in
     our implementation, the parameters are normalized to dimensionless values through division by
-    $I$. Consequently $I=1$ at all times, so that this parameter does not need to be stored. */
+    \f$I\f$. Consequently \f$I=1\f$ at all times, so that this parameter does not need to be stored. */
 class StokesVector
 {
 public:
@@ -31,25 +31,25 @@ public:
     void setStokes(const StokesVector* sv) { _Q = sv->_Q; _U = sv->_U; _V = sv->_V; }
 
     /** This function sets the Stokes vector to the specified parameter values, after normalizing
-        them through division by $I$. If $I=0$, the Stokes vector is set to an unpolarized state.
+        them through division by \f$I\f$. If \f$I=0\f$, the Stokes vector is set to an unpolarized state.
         */
     void setStokes(double I, double Q, double U, double V);
 
     // ------------ getters --------------
 
-    /** This function returns the Stokes parameter I, which is always equal to one. */
+    /** This function returns the Stokes parameter \f$I\f$, which is always equal to one. */
     double stokesI() const { return 1.; }
 
-    /** This function returns the Stokes parameter Q. */
+    /** This function returns the Stokes parameter \f$Q\f$. */
     double stokesQ() const { return _Q; }
 
-    /** This function returns the Stokes parameter U. */
+    /** This function returns the Stokes parameter \f$U\f$. */
     double stokesU() const { return _U; }
 
-    /** This function returns the Stokes parameter V. */
+    /** This function returns the Stokes parameter \f$V\f$. */
     double stokesV() const { return _V; }
 
-    /** This function returns the Stokes parameters in the specified arguments. */
+    /** This function returns the Stokes parameters in the provided arguments. */
     void stokes(double& I, double& Q, double& U, double& V) { I = 1.; Q = _Q; U = _U; V = _V; }
 
     // -------- calculated properties -------

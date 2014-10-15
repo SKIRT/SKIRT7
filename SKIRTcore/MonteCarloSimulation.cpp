@@ -254,13 +254,12 @@ void MonteCarloSimulation::peeloffscattering(PhotonPackage* pp, PhotonPackage* p
     }
 
     // Now do the actual peel-off
-    Direction bfkold = pp->direction();
     foreach (Instrument* instr, _is->instruments())
     {
         Direction bfknew = instr->bfkobs(bfr);
         double w = 0.0;
         for (int h=0; h<Ncomp; h++)
-            w += wv[h] * _ds->mix(h)->phasefunction(ell,bfkold,bfknew);
+            w += wv[h] * _ds->mix(h)->phasefunction(pp, bfknew);
         ppp->launchScatteringPeelOff(pp, bfknew, w);
         instr->detect(ppp);
     }
@@ -315,8 +314,7 @@ void MonteCarloSimulation::continuouspeeloffscattering(PhotonPackage *pp, Photon
                 {
                     Direction bfknew = instr->bfkobs(bfrnew);
                     double w = 0.0;
-                    for (int h=0; h<Ncomp; h++) w += wv[h] * _ds->mix(h)->phasefunction(ell,bfk,bfknew);
-
+                    for (int h=0; h<Ncomp; h++) w += wv[h] * _ds->mix(h)->phasefunction(pp, bfknew);
                     ppp->launchScatteringPeelOff(pp, bfrnew, bfknew, factorm*w);
                     instr->detect(ppp);
                 }
@@ -420,27 +418,11 @@ void MonteCarloSimulation::simulatepropagation(PhotonPackage* pp)
 
 void MonteCarloSimulation::simulatescattering(PhotonPackage* pp)
 {
-    int ell = pp->ell();
-    int Ncomp = _ds->Ncomp();
+    // Randomly select a dust mix; the probability of each dust component h is weighted by kappasca(h)*rho(m,h)
+    DustMix* mix = _ds->randomMixForPosition(pp->position(), pp->ell());
 
-    // Select a phase function. If we have just a single dust component, this is simple.
-    // If there are multiple dust components, we randomly select the phase function, where the
-    // probability of the phase function of each dust component h is weighted by kappasca(h)*rho(m,h).
-    int hmix = 0;
-    if (Ncomp>1)
-    {
-        Position bfr = pp->position();
-        int m = _ds->whichcell(bfr);
-        if (m==-1) throw FATALERROR("The scattering event seems to take place outside the dust grid");
-        Array Xv;
-        NR::cdf(Xv, Ncomp, [this,ell,m](int h){return _ds->mix(h)->kappasca(ell)*_ds->density(m,h);} );
-        hmix = NR::locate_clip(Xv, _random->uniform());
-    }
-    DustMix* mix = _ds->mix(hmix);
-
-    // Now just perform the scattering
-    Direction bfkold = pp->direction();
-    Direction bfknew = mix->generatenewdirection(ell,bfkold);
+    // Now perform the scattering using this dust mix
+    Direction bfknew = mix->generatenewdirection(pp);
     pp->scatter(bfknew);
 }
 
