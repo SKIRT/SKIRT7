@@ -174,7 +174,7 @@ protected:
         one for every instrument in the instrument system, that we force to propagate in the
         direction of the observer(s) instead of in the propagation direction \f${\bf{k}}\f$
         determined randomly by the scattering process. Each peel-off photon package has the same
-        characteristics as the original photon package, apart from two differences. The first one
+        characteristics as the original photon package, apart from three differences. The first one
         is, obviously, that the propagation direction is altered to the direction
         \f${\bf{k}}_{\text{obs}}\f$ towards the observer. The second difference is that we have to
         alter the luminosity of the photon package to compensate for this change in propagation
@@ -194,10 +194,13 @@ protected:
         the scattering event takes place, and \f$\kappa_{\ell,h}^{\text{sca}}\f$ and
         \f$\Phi_{\ell,h}\f$ are the scattering coefficient and phase function corresponding to the
         \f$h\f$'th dust component respectively (both evaluated at the wavelength index \f$\ell\f$
-        of the photon package). For each instrument in the instrument system, the function creates
-        such a peel-off photon package and feeds it to the instrument. The first argument specifies
-        the photon package that was just emitted; the second argument provides a placeholder peel
-        off photon package for use by the function. */
+        of the photon package). The third difference is that the polarization state of the peel off
+        photon package is adjusted. If there are multiple dust components, the weight factors
+        described above are used not just for the luminosity but also for the components of the
+        Stokes vector. For each instrument in the instrument system, the function creates such a
+        peel-off photon package and feeds it to the instrument. The first argument specifies the
+        photon package that was just emitted; the second argument provides a placeholder peel off
+        photon package for use by the function. */
     void peeloffscattering(PhotonPackage* pp, PhotonPackage* ppp);
 
     /** This function simulates the continuous peel-off of a series of photon packages along the
@@ -285,17 +288,18 @@ protected:
     /** This function simulates a scattering event of a photon package. Most of the properties of
         the photon package remain unaltered, including the position and the luminosity. The
         properties that change are the number of scattering events experienced by the photon
-        package (this is obviously increased by one) and the propagation direction, which is
-        generated randomly. If there is only one dust component, the propagation direction is
-        sampled from from the scattering phase function. If there are several components, the
-        function first generates a random dust component (where the relative weight of each dust
-        component is equal to \f[ w_h = \frac{ \kappa_{\ell,h}^{\text{sca}}\, \rho_{h,m} }{
-        \sum_{h'} \kappa_{\ell,h'}^{\text{sca}}\, \rho_{h',m} }, \f] where \f$\rho_{m,h}\f$ is the
-        density of the dust corresponding to the \f$h\f$'th dust component in the dust cell where
-        the scattering event takes place, and \f$\kappa_{\ell,h}^{\text{sca}}\f$ is the scattering
-        coefficient corresponding to the \f$h\f$'th dust component respectively. When a random dust
-        component is generated, a random propagation direction is generated randomly from the
-        corresponding scattering phase function. */
+        package (this is obviously increased by one) the propagation direction, which is generated
+        randomly, and the polarization state. If there is only one dust component, the propagation
+        direction and polarization state are obtained from the scattering phase function. If there
+        are several components, the function first generates a random dust component (where the
+        relative weight of each dust component is equal to \f[ w_h = \frac{
+        \kappa_{\ell,h}^{\text{sca}}\, \rho_{h,m} }{ \sum_{h'} \kappa_{\ell,h'}^{\text{sca}}\,
+        \rho_{h',m} }, \f] where \f$\rho_{m,h}\f$ is the density of the dust corresponding to the
+        \f$h\f$'th dust component in the dust cell where the scattering event takes place, and
+        \f$\kappa_{\ell,h}^{\text{sca}}\f$ is the scattering coefficient corresponding to the
+        \f$h\f$'th dust component respectively. When a random dust component is generated, a random
+        propagation direction and polarization state are obtained from the corresponding scattering
+        phase function. */
     void simulatescattering(PhotonPackage* pp);
 
     /** This function performs the final step in a Monte Carlo simulation. It writes out the useful

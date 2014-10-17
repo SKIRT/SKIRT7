@@ -266,7 +266,7 @@ void MonteCarloSimulation::peeloffscattering(PhotonPackage* pp, PhotonPackage* p
             DustMix* mix = _ds->mix(h);
             double w = wv[h] * mix->phaseFunctionValue(pp, bfknew);
             StokesVector sv;
-            mix->scatteringPeelOffPolarization(&sv, pp);
+            mix->scatteringPeelOffPolarization(&sv, pp, bfknew);
             I += w * sv.stokesI();
             Q += w * sv.stokesQ();
             U += w * sv.stokesU();
@@ -332,7 +332,7 @@ void MonteCarloSimulation::continuouspeeloffscattering(PhotonPackage *pp, Photon
                         DustMix* mix = _ds->mix(h);
                         double w = wv[h] * mix->phaseFunctionValue(pp, bfknew);
                         StokesVector sv;
-                        mix->scatteringPeelOffPolarization(&sv, pp);
+                        mix->scatteringPeelOffPolarization(&sv, pp, bfknew);
                         I += w * sv.stokesI();
                         Q += w * sv.stokesQ();
                         U += w * sv.stokesU();
