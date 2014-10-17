@@ -23,7 +23,8 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////
 
 DustMix::DustMix()
-    : _writeMix(true), _writeMeanMix(true), _lambdagrid(0), _Nlambda(0), _random(0), _Npop(0), _mu(0)
+    : _writeMix(true), _writeMeanMix(true), _lambdagrid(0), _Nlambda(0), _random(0), _Npop(0), _mu(0),
+      _polarization(false)
 {
 }
 
@@ -445,26 +446,100 @@ double DustMix::albedo(int ell) const
 
 ////////////////////////////////////////////////////////////////////
 
+namespace
+{
+    // this helper function returns the appropriate t index for the specified value of theta,
+    // given the specified number of theta values in the arrays
+    int indexForTheta(double theta, int Ntheta)
+    {
+        double dt = M_PI/(Ntheta-1);
+        int t = static_cast<int>(theta/dt+0.5);
+        if (t<0) t = 0;
+        else if (t>=Ntheta) t = Ntheta-1;
+        return t;
+    }
+}
+
+////////////////////////////////////////////////////////////////////
+
 double DustMix::phaseFunctionValue(const PhotonPackage* pp, Direction bfknew) const
 {
-    double cosalpha = Direction::dot(pp->direction(), bfknew);
-    double g = _asymmparv[pp->ell()];
-    double t = 1.0+g*g-2*g*cosalpha;
-    return (1.0-g)*(1.0+g)/sqrt(t*t*t);
+    if (_polarization)
+    {
+        double theta = acos(Direction::dot(pp->direction(),bfknew));
+        double phi;
+        if (pp->nScatt() == 0)
+        {
+            phi = 2.0*M_PI*_random->uniform();
+        }
+        else
+        {
+            Direction nold = Direction::cross(pp->previousDirection(),pp->direction());
+            Direction nnew = Direction::cross(pp->direction(),bfknew);
+            double x = Direction::dot(nold,nnew)/(nold.norm()*nnew.norm());
+            if (x > 1.0) x = 1.0;
+            else if (x < -1.0) x = -1.0;
+            phi = acos(x);
+        }
+
+        int ell = pp->ell();
+        double polDegree = pp->linearPolarizationDegree();
+        double N = 0.0;
+        double dt = M_PI/(_Ntheta-1);
+        for (int t=0; t<_Ntheta; t++)
+        {
+            N += 2.0*_S11vv(ell,t)*sin(t*dt)*dt;
+        }
+
+        int t = indexForTheta(theta, _Ntheta);
+        return N*(_S11vv(ell,t)-_S12vv(ell,t)*polDegree*cos(2.0*phi));
+    }
+    else
+    {
+        double cosalpha = Direction::dot(pp->direction(), bfknew);
+        double g = _asymmparv[pp->ell()];
+        double t = 1.0+g*g-2*g*cosalpha;
+        return (1.0-g)*(1.0+g)/sqrt(t*t*t);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
 
 Direction DustMix::scatteringDirectionAndPolarization(StokesVector* out, const PhotonPackage* pp) const
 {
-    double g = _asymmparv[pp->ell()];
-    if (fabs(g)<1e-6) return _random->direction();
-    double phiprime = 2.0*M_PI*_random->uniform();
-    double cosphiprime = cos(phiprime);
-    double sinphiprime = sin(phiprime);
-    double f = ((1.0-g)*(1.0+g))/(1.0-g+2.0*g*_random->uniform());
-    double costhetaprime = (1.0+g*g-f*f)/(2.0*g);
-    double sinthetaprime = sqrt(fabs((1.0-costhetaprime)*(1.0+costhetaprime)));
+    // determine the angles between the previous and new direction
+    double costhetaprime, sinthetaprime, cosphiprime, sinphiprime;
+    if (_polarization)
+    {
+        int ell = pp->ell();
+        double polDegree = pp->linearPolarizationDegree();
+        double polAng = pp->polarizationAngle();
+        double thetaprime = sampleTheta(ell);
+        double phiprime = samplePhi(ell,thetaprime,polDegree);
+        cosphiprime = cos(phiprime);
+        sinphiprime = sin(phiprime);
+        costhetaprime = cos(thetaprime);
+        sinthetaprime = sin(thetaprime);
+
+        // also calculate and store the new polarization state
+        *out = *pp;
+        out->rotateStokes(M_PI+polAng-phiprime);
+        int t = indexForTheta(thetaprime, _Ntheta);
+        out->applyMueller(_S11vv(ell,t), _S12vv(ell,t), _S33vv(ell,t), _S34vv(ell,t));
+    }
+    else
+    {
+        double g = _asymmparv[pp->ell()];
+        if (fabs(g)<1e-6) return _random->direction();
+        double phiprime = 2.0*M_PI*_random->uniform();
+        cosphiprime = cos(phiprime);
+        sinphiprime = sin(phiprime);
+        double f = ((1.0-g)*(1.0+g))/(1.0-g+2.0*g*_random->uniform());
+        costhetaprime = (1.0+g*g-f*f)/(2.0*g);
+        sinthetaprime = sqrt(fabs((1.0-costhetaprime)*(1.0+costhetaprime)));
+    }
+
+    // determine the new direction from the old direction and the relative change
     double kx, ky, kz;
     pp->direction().cartesian(kx,ky,kz);
     double kxnew, kynew, kznew;
@@ -495,9 +570,51 @@ Direction DustMix::scatteringDirectionAndPolarization(StokesVector* out, const P
 
 ////////////////////////////////////////////////////////////////////
 
-void DustMix::scatteringPeelOffPolarization(StokesVector* out, const PhotonPackage* pp)
+void DustMix::scatteringPeelOffPolarization(StokesVector* out, const PhotonPackage* pp, Direction bfknew)
 {
+    if (_polarization)
+    {
+        double theta = acos(Direction::dot(pp->direction(),bfknew));
+        double phi;
+        if (pp->nScatt() == 0)
+        {
+            phi = 2.0*M_PI*_random->uniform();
+        }
+        else
+        {
+            Direction nold = Direction::cross(pp->previousDirection(),pp->direction());
+            Direction nnew = Direction::cross(pp->direction(),bfknew);
+            double x = Direction::dot(nold,nnew)/(nold.norm()*nnew.norm());
+            if (x > 1.0) x = 1.0;
+            else if (x < -1.0) x = -1.0;
+            phi = acos(x);
+        }
 
+        // calculate and store the new polarization state
+        *out = *pp;
+        out->rotateStokes(phi);
+        int t = indexForTheta(theta, _Ntheta);
+        int ell = pp->ell();
+        out->applyMueller(_S11vv(ell,t), _S12vv(ell,t), _S33vv(ell,t), _S34vv(ell,t));
+
+        // because a peel-off photon is to be detected on the instrument,
+        // we need to adjust its Stokes parameters to the reference direction
+
+        double kx, ky, kz;
+        pp->direction().cartesian(kx,ky,kz);
+        double kxnew, kynew, kznew;
+        bfknew.cartesian(kxnew,kynew,kznew);
+        double dot = kx*kxnew+ky*kynew+kz*kznew;
+        double rootkznew = sqrt(fabs((1.0-kznew)*(1.0+kznew)));
+        double rootdot = sqrt(fabs(1.0-dot*dot));
+        double cosgamma = kznew*dot-kz/rootkznew/rootdot;
+        double singamma = ky*kxnew-kx*kynew/rootkznew/rootdot;
+        double cosdoublegamma =  1.0-2.0*singamma*singamma;
+        double sindoublegamma = 2.0*singamma*cosgamma;
+
+        double doublegamma = 0; // TO DO
+        out->rotateStokes(doublegamma);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -540,6 +657,36 @@ double DustMix::equilibrium(const Array& Jv, int c) const
         planckabs += sigmaabs(ell,c) * Jv[ell] * _lambdagrid->dlambda(ell);
     }
     return invplanckabs(planckabs,c);
+}
+
+////////////////////////////////////////////////////////////////////
+
+double DustMix::sampleTheta(int ell) const
+{
+    int r = static_cast<int>(_random->uniform()*_Nsamples);
+    if (r<0) r = 0;
+    else if (r>=_Nsamples) r = _Nsamples-1;
+    return _thetavv(ell,r);
+}
+
+////////////////////////////////////////////////////////////////////
+
+double DustMix::samplePhi(int ell, double theta, double polDegree) const
+{
+    int t = indexForTheta(theta, _Ntheta);
+    double rand = _random->uniform();
+    double p1 = 0;
+    double p2 = 2.0*M_PI;
+    double N = 1.0/(2.0*M_PI);
+    do
+    {
+        double p = (p2+p1)/2.0;
+        double f = N*(p-_S12vv(ell,t)/_S11vv(ell,t)*polDegree*sin(2.0*p)/2.0)-rand;
+        if (f >= 0) p2 = p;
+        else        p1 = p;
+    }
+    while (p2-p1 > M_PI/180.0);
+    return (p2+p1)/2.0;
 }
 
 //////////////////////////////////////////////////////////////////////
