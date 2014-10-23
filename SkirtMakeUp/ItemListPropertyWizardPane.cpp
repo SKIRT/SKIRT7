@@ -24,6 +24,9 @@ ItemListPropertyWizardPane::ItemListPropertyWizardPane(PropertyHandlerPtr handle
 {
     auto hdlr = handlerCast<ItemListPropertyHandler>();
 
+    // connect our edit-sub-item signal to the wizard
+    connect(this, SIGNAL(advanceToEditSubItem(int)), target, SLOT(advanceToEditSubItem(int)));
+
     // ---- construct the overall layout ----
 
     // create the layout so that we can add stuff one by one
@@ -104,9 +107,7 @@ void ItemListPropertyWizardPane::addItem()
 
 void ItemListPropertyWizardPane::editItem()
 {
-    // dummy implementation --- TODO
-
-    setButtonsEnabled();
+    emit advanceToEditSubItem(retrieveSelectedRow());
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -126,7 +127,7 @@ void ItemListPropertyWizardPane::removeItem()
 void ItemListPropertyWizardPane::storeSelectedRow(int row)
 {
     auto hdlr = handlerCast<ItemListPropertyHandler>();
-    hdlr->target()->setProperty(hdlr->name()+"_configured", row);
+    hdlr->target()->setProperty(hdlr->name()+"_row", row);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -134,7 +135,7 @@ void ItemListPropertyWizardPane::storeSelectedRow(int row)
 int ItemListPropertyWizardPane::retrieveSelectedRow()
 {
     auto hdlr = handlerCast<ItemListPropertyHandler>();
-    return hdlr->target()->property(hdlr->name()+"_configured").toInt();
+    return hdlr->target()->property(hdlr->name()+"_row").toInt();
 }
 
 ////////////////////////////////////////////////////////////////////

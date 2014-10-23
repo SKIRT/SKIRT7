@@ -53,6 +53,10 @@ public slots:
         canRetreat() returns true. */
     void retreat();
 
+    /** This function advances the wizard to a state that starts editing the specified item in the
+        current item list property. */
+    void advanceToEditSubItem(int subItemIndex);
+
 signals:
     /** This signal is emitted when the return value of the canAdvance() function may have changed.
         The argument specifies the new value. */
@@ -118,6 +122,11 @@ private:
     // the zero-based index of the property currently being handled (in the current simulation item);
     // valid only during ConstructHierarchy
     int _propertyIndex;
+
+    // the zero-based index of the currently selected sub-item of the current item list property,
+    // or -1 when editing the item list property itself;
+    // valid only if the current property is an item list
+    int _subItemIndex;
 
     // true if the value of the property being handled is valid, false otherwise
     // valid only during ConstructHierarchy

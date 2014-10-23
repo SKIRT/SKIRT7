@@ -44,6 +44,10 @@ public slots:
         row persistent during a particular session from one display of the wizard to the next. */
     void storeSelectedRow(int row);
 
+signals:
+    /** This signal is emitted when the "Edit" button is pressed. */
+    void advanceToEditSubItem(int subItemIndex);
+
 private:
     /** This function returns the zero-based index of the currently selected row for this
         combination of target simulation item and item list property. If the item list property has

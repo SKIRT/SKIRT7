@@ -64,7 +64,8 @@ HEADERS += \
     ItemListPropertyWizardPane.hpp \
     DoubleListPropertyWizardPane.hpp \
     BoolPropertyWizardPane.hpp \
-    StringPropertyWizardPane.hpp
+    StringPropertyWizardPane.hpp \
+    SubItemPropertyWizardPane.hpp
 
 SOURCES += \
     SkirtMakeUp.cpp \
@@ -80,4 +81,5 @@ SOURCES += \
     ItemListPropertyWizardPane.cpp \
     DoubleListPropertyWizardPane.cpp \
     BoolPropertyWizardPane.cpp \
-    StringPropertyWizardPane.cpp
+    StringPropertyWizardPane.cpp \
+    SubItemPropertyWizardPane.cpp
