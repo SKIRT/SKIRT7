@@ -19,11 +19,18 @@ StellarSystem::StellarSystem()
 
 //////////////////////////////////////////////////////////////////////
 
-void StellarSystem::addComponent(StellarComp* value)
+void StellarSystem::insertComponent(int index, StellarComp* value)
 {
     if (!value) throw FATALERROR("Stellar component pointer shouldn't be null");
     value->setParent(this);
-    _scv << value;
+    _scv.insert(index, value);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void StellarSystem::removeComponent(int index)
+{
+    delete _scv.takeAt(index);
 }
 
 //////////////////////////////////////////////////////////////////////

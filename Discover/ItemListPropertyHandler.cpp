@@ -37,11 +37,11 @@ QByteArray ItemListPropertyHandler::ptrType() const
 
 ////////////////////////////////////////////////////////////////////
 
-bool ItemListPropertyHandler::addPlainValue(QObject *value)
+bool ItemListPropertyHandler::insertPlainValue(int index, QObject *value)
 {
     if (value && SimulationItemDiscovery::inherits(value->metaObject()->className(), baseType()))
     {
-        bool success = QMetaObject::invokeMethod(_target, adder().constData(),
+        bool success = QMetaObject::invokeMethod(_target, inserter().constData(), Q_ARG(int, index),
                                                  QGenericArgument(ptrType().constData(), &value));
         if (success) _changed = true;
         return success;
@@ -53,15 +53,42 @@ bool ItemListPropertyHandler::addPlainValue(QObject *value)
 
 bool ItemListPropertyHandler::addValue(SimulationItem* value)
 {
-    return addPlainValue(value);
+    return insertValue(this->value().size(), value);
 }
 
 ////////////////////////////////////////////////////////////////////
 
 bool ItemListPropertyHandler::addNewItemOfType(QByteArray itemType)
 {
+    return insertNewItemOfType(this->value().size(), itemType);
+}
+
+////////////////////////////////////////////////////////////////////
+
+bool ItemListPropertyHandler::insertValue(int index, SimulationItem* value)
+{
+    return insertPlainValue(index, value);
+}
+
+////////////////////////////////////////////////////////////////////
+
+bool ItemListPropertyHandler::insertNewItemOfType(int index, QByteArray itemType)
+{
     const QMetaObject* metaObject = SimulationItemRegistry::metaObject(itemType);
-    if (metaObject) return addPlainValue(metaObject->newInstance());
+    if (metaObject) return insertPlainValue(index, metaObject->newInstance());
+    return false;
+}
+
+////////////////////////////////////////////////////////////////////
+
+bool ItemListPropertyHandler::removeValueAt(int index)
+{
+    if (index >= 0 && index < value().size())
+    {
+        bool success = QMetaObject::invokeMethod(_target, remover().constData(), Q_ARG(int, index));
+        if (success) _changed = true;
+        return success;
+    }
     return false;
 }
 

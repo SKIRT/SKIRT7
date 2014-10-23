@@ -42,6 +42,23 @@ public:
         specified item type is inappropriate). */
     bool addNewItemOfType(QByteArray itemType);
 
+    /** Inserts the specified simulation item at the specified index into the list held by the
+        handled property in the target item. The target item assumes ownership of the specified
+        instance. The function returns false if the item couldn't be added (e.g. because it has an
+        inappropriate type). */
+    bool insertValue(int index, SimulationItem* value);
+
+    /** Constructs a new instance of the specified simulation item type and inserts it at the
+        specified index into the list held by the handled property in the target item. The target
+        item assumes ownership of the new instance. The function returns false if a new item
+        couldn't be added (e.g. because the specified item type is inappropriate). */
+    bool insertNewItemOfType(int index, QByteArray itemType);
+
+    /** Removes the simulation item with the specified zero-based index from the list held by the
+        handled property in the target item. The removed simulation item is deleted. The function
+        returns false if the item couldn't be removed (e.g. because the index is out of range). */
+    bool removeValueAt(int index);
+
     /** Returns the value of the handled property in the target item. */
     QList<SimulationItem*> value() const;
 
@@ -66,9 +83,9 @@ public:
     void acceptVisitor(PropertyHandlerVisitor* visitor);
 
 private:
-    /** Adds the specified pointer to the list held by the handled property in the target item. The
-        target item assumes ownership of the new instance. */
-    bool addPlainValue(QObject* value);
+    /** Inserts the specified pointer at the specified index into the list held by the handled
+        property in the target item. The target item assumes ownership of the new instance. */
+    bool insertPlainValue(int index, QObject* value);
 };
 
 ////////////////////////////////////////////////////////////////////

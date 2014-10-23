@@ -141,11 +141,18 @@ double VoronoiDustDistribution::extentZ() const
 
 //////////////////////////////////////////////////////////////////////
 
-void VoronoiDustDistribution::addComponent(MeshDustComponent* value)
+void VoronoiDustDistribution::insertComponent(int index, MeshDustComponent* value)
 {
     if (!value) throw FATALERROR("Dust component pointer shouldn't be null");
     value->setParent(this);
-    _dcv << value;
+    _dcv.insert(index, value);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void VoronoiDustDistribution::removeComponent(int index)
+{
+    delete _dcv.takeAt(index);
 }
 
 //////////////////////////////////////////////////////////////////////

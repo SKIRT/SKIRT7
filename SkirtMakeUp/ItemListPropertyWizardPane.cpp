@@ -89,6 +89,14 @@ void ItemListPropertyWizardPane::addItem()
     // add a new item of the default type to the property's list
     // *** this assumes that an ItemList property always has a default type ***
     auto defaultType = hdlr->defaultItemType();
+    for (auto choiceType : descendants(hdlr->baseType()))
+    {
+        if (SimulationItemDiscovery::inherits(choiceType,defaultType))
+        {
+            defaultType = choiceType;
+            break;
+        }
+    }
     bool success = hdlr->addNewItemOfType(defaultType);
 
     // add a corresponding line to the list widget
@@ -116,8 +124,10 @@ void ItemListPropertyWizardPane::removeItem()
 {
     if (_listWidget->count() > 0)
     {
-        // dummy implementation --- TODO
-        delete _listWidget->takeItem(_listWidget->currentRow());
+        int index = _listWidget->currentRow();
+        delete _listWidget->takeItem(index);
+        auto hdlr = handlerCast<ItemListPropertyHandler>();
+        hdlr->removeValueAt(index);
     }
     setButtonsEnabled();
 }

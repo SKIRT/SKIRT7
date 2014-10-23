@@ -102,8 +102,11 @@ protected:
     /** Returns the name of the setter for the handled property. */
     QByteArray setter() const;
 
-    /** Returns the name of the adder for the handled property. */
-    QByteArray adder() const;
+    /** Returns the name of the inserter for the handled property. */
+    QByteArray inserter() const;
+
+    /** Returns the name of the remover for the handled property. */
+    QByteArray remover() const;
 
     /** Returns the name of the getter for the handled property. */
     QByteArray getter() const;

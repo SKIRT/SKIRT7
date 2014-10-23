@@ -59,11 +59,18 @@ bool MultiFrameInstrument::writeStellarComps() const
 
 ////////////////////////////////////////////////////////////////////
 
-void MultiFrameInstrument::addFrame(InstrumentFrame* value)
+void MultiFrameInstrument::insertFrame(int index, InstrumentFrame* value)
 {
     if (!value) throw FATALERROR("Instrument frame pointer shouldn't be null");
     value->setParent(this);
-    _frames << value;
+    _frames.insert(index, value);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void MultiFrameInstrument::removeFrame(int index)
+{
+    delete _frames.takeAt(index);
 }
 
 ////////////////////////////////////////////////////////////////////

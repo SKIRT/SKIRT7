@@ -34,19 +34,15 @@ SubItemPropertyWizardPane::SubItemPropertyWizardPane(PropertyHandlerPtr handler,
     QByteArray currentType = itemType(hdlr->value()[selectedIndex()]);
     QByteArray defaultType = hdlr->hasDefaultValue() ? hdlr->defaultItemType() : "";
 
-    // if there is only one choice, make it the forced item type
-    auto choiceList = descendants(hdlr->baseType());
-    QByteArray forcedType = choiceList.size()==1 ? choiceList[0] : "";
-
     // make a button group to contain the radio buttons reflecting the possible choices
     auto buttonGroup = new QButtonGroup;
 
     // add the choices
-    for (auto choiceType : choiceList)
+    for (auto choiceType : descendants(hdlr->baseType()))
     {
         auto choiceTitle = title(choiceType);
         if (!choiceTitle.isEmpty()) choiceTitle.replace(0, 1, choiceTitle[0].toUpper());
-        if (choiceType==defaultType) choiceTitle += "  [default]";
+        if (SimulationItemDiscovery::inherits(choiceType,defaultType)) choiceTitle += "  [default]";
         auto choiceButton = new QRadioButton(choiceTitle);
         buttonGroup->addButton(choiceButton);
         layout->addWidget(choiceButton);
@@ -84,9 +80,14 @@ void SubItemPropertyWizardPane::selectTypeFor(QAbstractButton* button)
 {
     auto hdlr = handlerCast<ItemListPropertyHandler>();
 
-    // update the value
+    // update the value if needed
     auto newType = button->property("choiceType").toByteArray();
-    if (itemType(hdlr->value()[selectedIndex()]) != newType) hdlr->addNewItemOfType(newType);
+    int index = selectedIndex();
+    if (itemType(hdlr->value()[index]) != newType)
+    {
+        hdlr->removeValueAt(index);
+        hdlr->insertNewItemOfType(index, newType);
+    }
 
     // signal the change
     emit propertyValidChanged(true);

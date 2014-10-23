@@ -40,8 +40,11 @@ protected:
     //======== Setters & Getters for Discoverable Attributes =======
 
 public:
-    /** This function adds a dust component to the distribution. */
-    Q_INVOKABLE void addComponent(DustComp* value);
+    /** This function inserts a dust component into the distribution at the specified index. */
+    Q_INVOKABLE void insertComponent(int index, DustComp* value);
+
+    /** This function removes the dust component with the specified index from the distribution. */
+    Q_INVOKABLE void removeComponent(int index);
 
     /** This function returns the list of dust components in the distribution. */
     Q_INVOKABLE QList<DustComp*> components() const;

@@ -37,8 +37,11 @@ protected:
     //======== Setters & Getters for Discoverable Attributes =======
 
 public:
-    /** This function adds a parameter range to the system. */
-    Q_INVOKABLE void addRange(ParameterRange* value);
+    /** This function inserts a parameter range into the system at the specified index. */
+    Q_INVOKABLE void insertRange(int index, ParameterRange* value);
+
+    /** This function removes the parameter range with the specified index from the system. */
+    Q_INVOKABLE void removeRange(int index);
 
     /** This function returns the list of parameter ranges in the system. */
     Q_INVOKABLE QList<ParameterRange*> ranges() const;

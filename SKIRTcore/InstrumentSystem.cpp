@@ -17,11 +17,18 @@ InstrumentSystem::InstrumentSystem()
 
 //////////////////////////////////////////////////////////////////////
 
-void InstrumentSystem::addInstrument(Instrument* value)
+void InstrumentSystem::insertInstrument(int index, Instrument* value)
 {
     if (!value) throw FATALERROR("Instrument pointer shouldn't be null");
     value->setParent(this);
-    _instruments << value;
+    _instruments.insert(index, value);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void InstrumentSystem::removeInstrument(int index)
+{
+    delete _instruments.takeAt(index);
 }
 
 //////////////////////////////////////////////////////////////////////

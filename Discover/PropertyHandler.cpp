@@ -137,12 +137,23 @@ QByteArray PropertyHandler::setter() const
 
 ////////////////////////////////////////////////////////////////////
 
-QByteArray PropertyHandler::adder() const
+QByteArray PropertyHandler::inserter() const
 {
     QByteArray result = name();
     result[0] = toupper(result[0]);     // first letter to uppercase
     result.truncate(result.length()-1); // remove the plural "s"
-    result.prepend("add");              // add prefix
+    result.prepend("insert");           // add prefix
+    return result;
+}
+
+////////////////////////////////////////////////////////////////////
+
+QByteArray PropertyHandler::remover() const
+{
+    QByteArray result = name();
+    result[0] = toupper(result[0]);     // first letter to uppercase
+    result.truncate(result.length()-1); // remove the plural "s"
+    result.prepend("remove");           // add prefix
     return result;
 }
 

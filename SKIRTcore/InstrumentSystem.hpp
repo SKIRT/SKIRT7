@@ -37,8 +37,11 @@ public:
     //======== Setters & Getters for Discoverable Attributes =======
 
 public:
-    /** This function adds an instrument to the instrument system. */
-    Q_INVOKABLE void addInstrument(Instrument* value);
+    /** This function inserts an instrument into the instrument system at the specified index. */
+    Q_INVOKABLE void insertInstrument(int index, Instrument* value);
+
+    /** This function removes the instrument with the specified index from the instrument system. */
+    Q_INVOKABLE void removeInstrument(int index);
 
     /** This function returns the list of instruments in the instrument system. */
     Q_INVOKABLE QList<Instrument*> instruments() const;
