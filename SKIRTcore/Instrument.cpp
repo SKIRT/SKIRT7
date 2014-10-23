@@ -1,7 +1,7 @@
 /*//////////////////////////////////////////////////////////////////
 ////       SKIRT -- an advanced radiative transfer code         ////
 ////       © Astronomical Observatory, Ghent University         ////
-//////////////////////////////////////////////////////////////////*/
+///////////////////////////////////////////////////////////////// */
 
 #include "Instrument.hpp"
 #include "DustSystem.hpp"
@@ -25,7 +25,9 @@ void Instrument::setupSelfBefore()
 
     try
     {
-        _ds = find<DustSystem>();
+        // get a pointer to the dust system without performing setup
+        // to avoid catching (and hiding) fatal errors during such setup
+        _ds = find<DustSystem>(false);
     }
     catch (FatalError)
     {

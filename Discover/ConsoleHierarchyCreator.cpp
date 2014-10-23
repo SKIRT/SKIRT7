@@ -1,7 +1,7 @@
 /*//////////////////////////////////////////////////////////////////
 ////       SKIRT -- an advanced radiative transfer code         ////
 ////       © Astronomical Observatory, Ghent University         ////
-//////////////////////////////////////////////////////////////////*/
+///////////////////////////////////////////////////////////////// */
 
 #include "BoolPropertyHandler.hpp"
 #include "ConsoleHierarchyCreator.hpp"
@@ -50,7 +50,7 @@ void ConsoleHierarchyCreator::setupProperties(SimulationItem* item)
     foreach (PropertyHandlerPtr handler, createPropertyHandlersList(item))
     {
         // distribute to setup methods depending on property type (using visitor pattern)
-        if (handler->isRelevant()) handler->acceptVisitor(this);
+        if (!handler->isSilent() && handler->isRelevant()) handler->acceptVisitor(this);
     }
 }
 

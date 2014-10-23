@@ -93,7 +93,6 @@ HEADERS += \
     EdgeOnDustCompNormalization.hpp \
     EinastoGeometry.hpp \
     ExpDiskGeometry.hpp \
-    ExpDiskSpiralArmsGeometry.hpp \
     ExtragalacticUnits.hpp \
     FITSInOut.hpp \
     FaceOnDustCompNormalization.hpp \
@@ -265,7 +264,10 @@ HEADERS += \
     StellarSurfaceGeometry.hpp \
     RangeGrainSizeDistribution.hpp \
     SingleGrainSizeDistribution.hpp \
-    Trust2Geometry.hpp
+    Trust2Geometry.hpp \
+    SolarPatchGeometry.hpp \
+    SphericalHoleGeometry.hpp \
+    SpiralStructureGeometry.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -323,7 +325,6 @@ SOURCES += \
     EdgeOnDustCompNormalization.cpp \
     EinastoGeometry.cpp \
     ExpDiskGeometry.cpp \
-    ExpDiskSpiralArmsGeometry.cpp \
     ExtragalacticUnits.cpp \
     FITSInOut.cpp \
     FaceOnDustCompNormalization.cpp \
@@ -491,4 +492,7 @@ SOURCES += \
     StellarSurfaceGeometry.cpp \
     RangeGrainSizeDistribution.cpp \
     SingleGrainSizeDistribution.cpp \
-    Trust2Geometry.cpp
+    Trust2Geometry.cpp \
+    SolarPatchGeometry.cpp \
+    SphericalHoleGeometry.cpp \
+    SpiralStructureGeometry.cpp

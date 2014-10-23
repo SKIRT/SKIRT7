@@ -88,10 +88,18 @@ int StellarSystem::dimension() const
 
 //////////////////////////////////////////////////////////////////////
 
+int StellarSystem::Ncomp() const
+{
+    return _scv.size();
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void StellarSystem::launch(PhotonPackage* pp, int ell, double L) const
 {
     int h = NR::locate_clip(_Xvv[ell], _random->uniform());
     _scv[h]->launch(pp,ell,L);
+    pp->setStellarOrigin(h);
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -1,12 +1,12 @@
 /*//////////////////////////////////////////////////////////////////
 ////       SKIRT -- an advanced radiative transfer code         ////
 ////       © Astronomical Observatory, Ghent University         ////
-//////////////////////////////////////////////////////////////////*/
+///////////////////////////////////////////////////////////////// */
 
 #ifndef INSTRUMENTFRAME_HPP
 #define INSTRUMENTFRAME_HPP
 
-#include "Array.hpp"
+#include "ArrayTable.hpp"
 #include "SimulationItem.hpp"
 class PhotonPackage;
 class MultiFrameInstrument;
@@ -101,13 +101,26 @@ private:
 
 public:
     /** This function simulates the detection of a photon package by the instrument frame. It
-        operates similarly to SimpleInstrument::detect(), but for a single wavelength. */
+        operates similarly to SimpleInstrument::detect(), but for a single wavelength. If the
+        parent multi-frame instrument has the writeTotal flag turned on, this function records the
+        total flux. If the writeStellarComps flag is turned on, this function records the flux for
+        each stellar component seperately. */
     void detect(PhotonPackage* pp);
 
     /** This function properly calibrates and outputs the instrument data. It operates similarly to
         SimpleInstrument::write(), but for the single wavelength specified through its wavelength
-        index \f$\ell\f$, and using a filename that includes that wavelength index. */
+        index \f$\ell\f$. If the parent multi-frame instrument has the writeTotal flag turned on,
+        this function outputs the total flux in a correspondingly named file. If the parent
+        multi-frame instrument has the writeStellarComps flag turned on, this function writes the
+        flux for each stellar component in a seperate output file, with a name that includes the
+        stellar component index. In all cases, the name of each output file includes the wavelength
+        index. */
     void calibrateAndWriteData(int ell);
+
+private:
+    /** This private function properly calibrates and outputs the instrument data. It is invoked
+        from the public calibrateAndWriteData() function. */
+    void calibrateAndWriteDataFrames(int ell, QList<Array*> farrays, QStringList fnames);
 
     //======================== Data Members ========================
 
@@ -126,6 +139,8 @@ private:
 
     // data members copied from the parent multi-frame instrument during setup
     MultiFrameInstrument* _instrument;
+    bool _writeTotal;
+    bool _writeStellarComps;
     double _distance;
     double _cosphi, _sinphi;
     double _costheta, _sintheta;
@@ -133,6 +148,7 @@ private:
 
     // total flux per pixel
     Array _ftotv;
+    ArrayTable<2> _fcompvv;
 };
 
 ////////////////////////////////////////////////////////////////////

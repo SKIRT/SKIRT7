@@ -1,7 +1,7 @@
 /*//////////////////////////////////////////////////////////////////
 ////       SKIRT -- an advanced radiative transfer code         ////
 ////       © Astronomical Observatory, Ghent University         ////
-//////////////////////////////////////////////////////////////////*/
+///////////////////////////////////////////////////////////////// */
 
 #ifndef PHOTONPACKAGE_HPP
 #define PHOTONPACKAGE_HPP
@@ -36,12 +36,11 @@ public:
     PhotonPackage();
 
     /** This function initializes the photon package for a new life cycle. The arguments specify
-        the origin (emission by a star or by a dust grain), the luminosity, the wavelength index,
-        the starting position and the propagation direction. The function copies the values
-        provided in the arguments to the corresponding data members and initializes the other data
-        members to default values, invalidating the current path. All information about the
-        previous life cycle is lost. */
-    void launch(bool stellar, double L, int ell, Position bfr, Direction bfk);
+        the luminosity, the wavelength index, the starting position and the propagation direction.
+        The function copies the values provided in the arguments to the corresponding data members
+        and initializes the other data members to default values, invalidating the current path.
+        All information about the previous life cycle is lost. */
+    void launch(double L, int ell, Position bfr, Direction bfk);
 
     /** This function initializes a peel off photon package being sent to an instrument for an
         emission event. The arguments specify the base photon package from which the peel off
@@ -61,6 +60,22 @@ public:
         unchanged. All information about the previous life cycle in the peel off photon package is
         lost. */
     void launchScatteringPeelOff(const PhotonPackage* pp, Direction bfk, double w);
+
+    /** This function initializes a peel off photon package being sent to an instrument for a
+        scattering event. The arguments specify the base photon package from which the peel off
+        derives, the position at which the peel off occurs, the direction towards the instrument,
+        and the luminosity fraction (as a multiplication factor). The function copies the relevant
+        values from the base photon package to the peel off photon package, updates the peel off
+        position, direction and luminosity, and increments the scattering counter, invalidating the
+        current path. The base photon package remains unchanged. All information about the previous
+        life cycle in the peel off photon package is lost. */
+    void launchScatteringPeelOff(const PhotonPackage* pp, Position bfr, Direction bfk, double w);
+
+    /** This function establishes the origin of the photon package as stellar emission (the default
+        is dust emission) and registers the index of the emitting stellar component. This
+        information is used by some instruments to record fluxes seperately based on their origin.
+        This function should be called only just after launch. */
+    void setStellarOrigin(int stellarCompIndex);
 
     /** This function sets the angular distribution of the emission at the photon package's origin.
         It should be called only just after launch. */
@@ -83,7 +98,12 @@ public:
     // ------- Getting trivial properties -------
 
     /** This function returns true if the photon package has a stellar origin, false otherwise. */
-    bool isStellar() const { return _stellar; }
+    bool isStellar() const { return _stellar >= 0; }
+
+    /** If the photon package has a stellar origin, this function returns the index of the emitting
+        stellar component. If the photon package has a dust emission origin, this function returns
+        -1. */
+    int stellarCompIndex() const { return _stellar; }
 
     /** This function returns the luminosity of the photon package. */
     double luminosity() const { return _L; }
@@ -106,10 +126,10 @@ public:
     // ------- Data members -------
 
 private:
-    bool _stellar;
     double _L;
     int _ell;
     int _nscatt;
+    int _stellar;
     const AngularDistribution* _ad;
 };
 

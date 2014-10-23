@@ -1,7 +1,7 @@
 /*//////////////////////////////////////////////////////////////////
 ////       SKIRT -- an advanced radiative transfer code         ////
 ////       © Astronomical Observatory, Ghent University         ////
-//////////////////////////////////////////////////////////////////*/
+///////////////////////////////////////////////////////////////// */
 
 #include "DraineSilicateGrainComposition.hpp"
 #include "SpecialFunctions.hpp"
@@ -44,9 +44,8 @@ double DraineSilicateGrainComposition::enthalpyfunction(double T)
     double h = Units::k() * ( 2.*TD1*fn(2,T/TD1) + TD2*fn(3,T/TD2) );
 
     // convert to enthalpy per kg
-    const double A_r = 12.0107;     // relative atomic mass for carbon (in atomic mass units == 1 g/mol)
-    const double M_u = 1e-3;        // g -> kg
-    return h * Units::NA() / (A_r * M_u);
+    const double Msilicate = (24.3050+55.845+28.0855+15.9994*4)/7;     // mass of MgFeSiO4 in units of M_p
+    return h / (Msilicate * Units::massproton());
 }
 
 //////////////////////////////////////////////////////////////////////

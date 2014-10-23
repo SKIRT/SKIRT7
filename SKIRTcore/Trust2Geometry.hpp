@@ -1,7 +1,7 @@
 /*//////////////////////////////////////////////////////////////////
 ////       SKIRT -- an advanced radiative transfer code         ////
 ////       © Astronomical Observatory, Ghent University         ////
-//////////////////////////////////////////////////////////////////*/
+///////////////////////////////////////////////////////////////// */
 
 #ifndef TRUST2GEOMETRY_HPP
 #define TRUST2GEOMETRY_HPP
@@ -11,7 +11,7 @@
 ////////////////////////////////////////////////////////////////////
 
 /** The Trust2Geometry class is a subclass of the GenGeometry class and describes the geometry of two
-    constant density sphere, embedded in a low-density medium. It is to be used as one of the benchmark
+    constant density spheres, embedded in a low-density medium. It is to be used as one of the benchmark
     models for the suite of TRUST 3D benchmark models. Contrary to the model presciption, we have moved
     the entire geometry so that the centre of the coordinate system is located at the centre of the
     system. More precisely, the density can be written as a sum of three components, \f[ \rho({\bf{r}})
@@ -62,21 +62,21 @@ public:
         the entire X-axis, \f[ \Sigma_X = \int_{-\infty}^\infty \rho(x,0,0)\, {\text{d}}x. \f]
         As the X-axis does not intersect the first sphere, we just have to take into account the
         contribution of the low-density cube and the second sphere. One finds fairly easily
-        \f[ \Sigma_X = 2\,\rho_0\,L_0 + 2\,\rho_2 \sqrt{R_2^2-y_2^-z_2^2}. \f] */
+        \f[ \Sigma_X = 2\,\rho_0\,L_0 + 2\,\rho_2 \sqrt{R_2^2-y_2^2-z_2^2}. \f] */
     double SigmaX() const;
 
     /** This function returns the Y-axis surface density, i.e. the integration of the density along
         the entire Y-axis, \f[ \Sigma_Y = \int_{-\infty}^\infty \rho(0,y,0)\, {\text{d}}y. \f]
         As the Y-axis does not intersect the first sphere, we just have to take into account the
         contribution of the low-density cube and the second sphere. One finds fairly easily
-        \f[ \Sigma_Y = 2\,\rho_0\,L_0 + 2\,\rho_2 \sqrt{R_2^2-x_2^-z_2^2}. \f] */
+        \f[ \Sigma_Y = 2\,\rho_0\,L_0 + 2\,\rho_2 \sqrt{R_2^2-x_2^2-z_2^2}. \f] */
     double SigmaY() const;
 
     /** This function returns the Z-axis surface density, i.e. the integration of the density along
         the entire Z-axis, \f[ \Sigma_Z = \int_{-\infty}^\infty \rho(0,0,z)\, {\text{d}}z. \f]
-        As the Y-axis does not intersect the first sphere, we just have to take into account the
+        As the Z-axis does not intersect the first sphere, we just have to take into account the
         contribution of the low-density cube and the second sphere. One finds fairly easily
-        \f[ \Sigma_Z = 2\,\rho_0\,L_0 + 2\,\rho_2 \sqrt{R_2^2-y_2^-z_2^2}. \f] */
+        \f[ \Sigma_Z = 2\,\rho_0\,L_0 + 2\,\rho_2 \sqrt{R_2^2-x_2^2-y_2^2}. \f] */
     double SigmaZ() const;
 
     //======================== Data Members ========================

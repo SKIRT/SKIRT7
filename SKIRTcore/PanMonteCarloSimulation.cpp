@@ -1,7 +1,7 @@
 /*//////////////////////////////////////////////////////////////////
 ////       SKIRT -- an advanced radiative transfer code         ////
 ////       © Astronomical Observatory, Ghent University         ////
-//////////////////////////////////////////////////////////////////*/
+///////////////////////////////////////////////////////////////// */
 
 #include "Log.hpp"
 #include "NR.hpp"
@@ -105,56 +105,74 @@ void PanMonteCarloSimulation::rundustselfabsorption()
 {
     TimeLogger logger(_log, "the dust self-absorption phase");
 
-    const int Ncyclesmax = 100;
-    const double epsmax = 0.005;
-    Array Labsdusttotv(Ncyclesmax+1);
+    // Initialize the total absorbed luminosity in the previous cycle
+    double prevLabsdusttot = 0.;
 
-    for (int cycle=1; cycle<=Ncyclesmax; cycle++)
+    // Perform three "stages" of max 100 cycles each; the first stage uses 10 times less photon packages
+    const int Nstages = 3;
+    const char* stage_name[] = {"first-stage", "second-stage", "last-stage"};
+    const double stage_factor[] = {1./10., 1./3., 1.};
+    const double stage_epsmax[] = {0.010, 0.007, 0.005};
+    for (int stage=0; stage<Nstages; stage++)
     {
-        TimeLogger logger(_log, "the dust self-absorption cycle " + QString::number(cycle));
-
-        // Construct the dust emission spectra
-        _log->info("Calculating dust emission spectra...");
-        _pds->calculatedustemission();
-        _log->info("Dust emission spectra calculated.");
-
-        // Determine the bolometric luminosity that is absorbed in every cell (and that will hence be re-emitted).
-        for (int m=0; m<_Ncells; m++)
-            _Labsbolv[m] = _pds->Labs(m);
-
-        // Set the absorbed dust luminosity to zero in all cells
-        _pds->rebootLabsdust();
-
-        // Run a simulation
-        initprogress("dust self-absorption cycle " + QString::number(cycle));
-        Parallel* parallel = find<ParallelFactory>()->parallel();
-        parallel->call(this, &PanMonteCarloSimulation::dodustselfabsorptionchunk, _Nchunks*_Nlambda);
-
-        // Update the absorbed luminosity in each cell. Save the total absorbed luminosity in the vector Labstotv.
-        Labsdusttotv[cycle] = _pds->Labsdusttot();
-        _log->info("The total absorbed stellar luminosity is "
-                   + QString::number(_units->obolluminosity(_pds->Labsstellartot())) + " "
-                   + _units->ubolluminosity() );
-        _log->info("The total absorbed dust luminosity is "
-                   + QString::number(_units->obolluminosity(Labsdusttotv[cycle])) + " "
-                   + _units->ubolluminosity() );
-
-        // Check the criterion to terminate the self-absorption cycle. We use the criterion that the total
-        // absorbed dust luminosity should be changed by less than epsmax compared to the previous cycle.
-        double eps = fabs((Labsdusttotv[cycle]-Labsdusttotv[cycle-1])/Labsdusttotv[cycle]);
-        if (eps<epsmax)
+        const int Ncyclesmax = 100;
+        bool convergence = false;
+        for (int cycle=1; cycle<=Ncyclesmax; cycle++)
         {
-            _log->info("Convergence reached; the last increase in the absorbed dust luminosity was "
-                       + QString::number(eps*100, 'f', 2) + "%");
-            return;
+            TimeLogger logger(_log, "the " + QString(stage_name[stage]) + " dust self-absorption cycle "
+                              + QString::number(cycle));
+
+            // Construct the dust emission spectra
+            _log->info("Calculating dust emission spectra...");
+            _pds->calculatedustemission();
+            _log->info("Dust emission spectra calculated.");
+
+            // Determine the bolometric luminosity that is absorbed in every cell (and that will hence be re-emitted).
+            for (int m=0; m<_Ncells; m++)
+                _Labsbolv[m] = _pds->Labs(m);
+
+            // Set the absorbed dust luminosity to zero in all cells
+            _pds->rebootLabsdust();
+
+            // Perform dust self-absorption, using the appropriate number of packages for the current stage
+            setChunkParams(packages()*stage_factor[stage]);
+            initprogress(QString(stage_name[stage]) + " dust self-absorption cycle " + QString::number(cycle));
+            Parallel* parallel = find<ParallelFactory>()->parallel();
+            parallel->call(this, &PanMonteCarloSimulation::dodustselfabsorptionchunk, _Nchunks*_Nlambda);
+
+            // Determine and log the total absorbed luminosity in the vector Labstotv.
+            double Labsdusttot = _pds->Labsdusttot();
+            _log->info("The total absorbed stellar luminosity is "
+                       + QString::number(_units->obolluminosity(_pds->Labsstellartot())) + " "
+                       + _units->ubolluminosity() );
+            _log->info("The total absorbed dust luminosity is "
+                       + QString::number(_units->obolluminosity(Labsdusttot)) + " "
+                       + _units->ubolluminosity() );
+
+            // Check the criteria to terminate the self-absorption cycle:
+            // - the total absorbed dust luminosity should change by less than epsmax compared to the previous cycle;
+            // - the last stage must perform at least 2 cycles (to make sure that the energy is properly distributed)
+            double eps = fabs((Labsdusttot-prevLabsdusttot)/Labsdusttot);
+            prevLabsdusttot = Labsdusttot;
+            if ( (stage<Nstages-1 || cycle>1) && eps<stage_epsmax[stage])
+            {
+                _log->info("Convergence reached; the last increase in the absorbed dust luminosity was "
+                           + QString::number(eps*100, 'f', 2) + "%");
+                convergence = true;
+                break;
+            }
+            else
+            {
+                _log->info("Convergence not yet reached; the increase in the absorbed dust luminosity was "
+                           + QString::number(eps*100, 'f', 2) + "%");
+            }
         }
-        else
+        if (!convergence)
         {
-            _log->info("Convergence not yet reached; the increase in the absorbed dust luminosity was "
-                       + QString::number(eps*100, 'f', 2) + "%");
+            _log->error("Convergence not yet reached after " + QString::number(Ncyclesmax) + " "
+                        + QString(stage_name[stage]) + " cycles!");
         }
     }
-    _log->error("Convergence not yet reached after " + QString::number(Ncyclesmax) + " cycles!");
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -186,14 +204,14 @@ void PanMonteCarloSimulation::dodustselfabsorptionchunk(size_t index)
         quint64 remaining = _chunksize;
         while (remaining > 0)
         {
-            quint64 count = qMin(remaining, LOG_CHUNK_SIZE);
+            quint64 count = qMin(remaining, _logchunksize);
             for (quint64 i=0; i<count; i++)
             {
                 double X = _random->uniform();
                 int m = NR::locate_clip(Xv,X);
                 Position bfr = _pds->randomPositionInCell(m);
                 Direction bfk = _random->direction();
-                pp.launch(false,L,ell,bfr,bfk);
+                pp.launch(L,ell,bfr,bfk);
                 while (true)
                 {
                     _pds->fillOpticalDepth(&pp);
@@ -225,7 +243,8 @@ void PanMonteCarloSimulation::rundustemission()
     for (int m=0; m<_Ncells; m++)
         _Labsbolv[m] = _pds->Labs(m);
 
-    // perform the actual dust emission
+    // Perform the actual dust emission, possibly using more photon packages to obtain decent resolution
+    setChunkParams(packages()*_pds->emissionBoost());
     initprogress("dust emission");
     Parallel* parallel = find<ParallelFactory>()->parallel();
     parallel->call(this, &PanMonteCarloSimulation::dodustemissionchunk, _Nchunks*_Nlambda);
@@ -260,22 +279,23 @@ void PanMonteCarloSimulation::dodustemissionchunk(size_t index)
         quint64 remaining = _chunksize;
         while (remaining > 0)
         {
-            quint64 count = qMin(remaining, LOG_CHUNK_SIZE);
+            quint64 count = qMin(remaining, _logchunksize);
             for (quint64 i=0; i<count; i++)
             {
                 double X = _random->uniform();
                 int m = NR::locate_clip(Xv,X);
                 Position bfr = _pds->randomPositionInCell(m);
                 Direction bfk = _random->direction();
-                pp.launch(false,L,ell,bfr,bfk);
+                pp.launch(L,ell,bfr,bfk);
                 peeloffemission(&pp,&ppp);
                 while (true)
                 {
                     _pds->fillOpticalDepth(&pp);
+                    if (continuousScattering()) continuouspeeloffscattering(&pp,&ppp);
                     simulateescapeandabsorption(&pp,false);
                     if (pp.luminosity() <= Lmin) break;
                     simulatepropagation(&pp);
-                    peeloffscattering(&pp,&ppp);
+                    if (!continuousScattering()) peeloffscattering(&pp,&ppp);
                     simulatescattering(&pp);
                 }
             }

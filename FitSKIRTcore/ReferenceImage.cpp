@@ -1,23 +1,27 @@
 /*//////////////////////////////////////////////////////////////////
 ////       SKIRT -- an advanced radiative transfer code         ////
 ////       © Astronomical Observatory, Ghent University         ////
-//////////////////////////////////////////////////////////////////*/
+///////////////////////////////////////////////////////////////// */
 
 #include "ReferenceImage.hpp"
 
+#include "AdjustableSkirtSimulation.hpp"
 #include "Convolution.hpp"
 #include "FatalError.hpp"
 #include "FilePaths.hpp"
 #include "FITSInOut.hpp"
+#include "GALumfit.hpp"
+#include "GoldenSection.hpp"
 #include "Log.hpp"
 #include "LumSimplex.hpp"
+#include "OligoFitScheme.hpp"
 
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////
 
 ReferenceImage::ReferenceImage()
-    :_convolution(0), _lumsimplex(0)
+    :_convolution(0)
 {
 }
 
@@ -63,51 +67,131 @@ Convolution* ReferenceImage::convolution() const
 {
     return _convolution;
 }
+//////////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////
-
-void ReferenceImage::setLumSimplex(LumSimplex* value)
+void ReferenceImage::setMinLuminosities(QList<double> value)
 {
-    if (_lumsimplex) delete _lumsimplex;
-    _lumsimplex = value;
-    if (_lumsimplex) _lumsimplex->setParent(this);
+    _minLum = value;
 }
 
-////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
-LumSimplex* ReferenceImage::lumSimplex() const
+QList<double> ReferenceImage::minLuminosities() const
 {
-    return _lumsimplex;
+    return _minLum;
 }
 
-////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
-double ReferenceImage::chi2(Array *Dframe, Array *Bframe,
-                            double &Dlum, double &B2Dratio) const
+void ReferenceImage::setMaxLuminosities(QList<double> value)
 {
+    _maxLum = value;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+QList<double> ReferenceImage::maxLuminosities() const
+{
+    return _maxLum;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+double ReferenceImage::chi2(QList<Array> *frames, QList<double> *monoluminosities) const
+{
+    //HERE IS WHERE I'LL HAVE TO DECIDE WHICH OPTIMIZATION ALGORITHM FOR LUM FIT
     double chi_value = 0;
+    for(int i =0;i<frames->size();i++)
+    {
+       _convolution->convolve(&((*frames)[i]), _xdim, _ydim);
+    }
 
-    _convolution->convolve(Dframe, _xdim, _ydim);
-    _convolution->convolve(Bframe, _xdim, _ydim);
+    if (find<AdjustableSkirtSimulation>()->ncomponents() == 1)
+    {
+        double lum;
+        if (_minLum.size() != 1 && _maxLum.size() != 1)
+            throw FATALERROR("Number of luminosity boundaries differs from 1!");
+        GoldenSection gold;
+        gold.setMinlum(_minLum[0]);
+        gold.setMaxlum(_maxLum[0]);
+        gold.optimize(&_refim,&((*frames)[0]),lum,chi_value);
+        monoluminosities->append(lum);
+    }
 
-    _lumsimplex->optimize(&_refim,Dframe,Bframe,Dlum,B2Dratio,chi_value);
+    if (find<AdjustableSkirtSimulation>()->ncomponents() == 2)
+    {
+        if (_minLum.size() != 2 && _maxLum.size() != 2)
+            throw FATALERROR("Number of luminosity boundaries differs from 2!");
 
+        double dlum,blum;
+        LumSimplex lumsim;
+        lumsim.setMinDlum(_minLum[0]);
+        lumsim.setMaxDlum(_maxLum[0]);
+        lumsim.setMinblum(_minLum[1]);
+        lumsim.setMaxblum(_maxLum[1]);
+        lumsim.optimize(&_refim,&((*frames)[0]),&((*frames)[1]),dlum,blum,chi_value);
+        monoluminosities->append(dlum);
+        monoluminosities->append(blum);
+    }
+    if (find<AdjustableSkirtSimulation>()->ncomponents() >= 3)
+    {
+        GALumfit GAlumi;
+        GAlumi.setMinLuminosities(_minLum);
+        GAlumi.setMaxLuminosities(_maxLum);
+        GAlumi.optimize(&_refim,frames,monoluminosities,chi_value);
+    }
     return chi_value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void ReferenceImage::returnFrame(Array *Dframe, Array *Bframe) const
+void ReferenceImage::returnFrame(QList<Array> *frames) const
 {
-    double chi_value, dlum, b2d;
+    double chi_value;
+    bool oneDfit=false;
+    for(int i =0;i<frames->size();i++)
+    {
+       _convolution->convolve(&((*frames)[i]), _xdim, _ydim);
+    }
+    if (frames->size() == 1)
+    {
+        GoldenSection gold;
+        double lum;
+        gold.setMinlum(_minLum[0]);
+        gold.setMaxlum(_maxLum[0]);
+        gold.optimize(&_refim,&((*frames)[0]),lum,chi_value);
+        (*frames)[0] = lum*((*frames)[0] + 0);
+        (*frames).append(abs(_refim-(*frames)[0])/abs(_refim));
+        oneDfit=true;
+    }
 
-    _convolution->convolve(Dframe, _xdim, _ydim);
-    _convolution->convolve(Bframe, _xdim, _ydim);
-
-    _lumsimplex->optimize(&_refim,Dframe,Bframe,dlum,b2d,chi_value);
-
-    *Dframe = dlum*((*Dframe) + b2d*((*Bframe)));
-    *Bframe = abs(_refim-(*Dframe))/abs(_refim);
+    if (frames->size() == 2 && !oneDfit)
+    {
+        double dlum, blum;
+        LumSimplex lumsim;
+        lumsim.setMinDlum(_minLum[0]);
+        lumsim.setMaxDlum(_maxLum[0]);
+        lumsim.setMinblum(_minLum[1]);
+        lumsim.setMaxblum(_maxLum[1]);
+        lumsim.optimize(&_refim,&((*frames)[0]),&((*frames)[1]),dlum,blum,chi_value);
+        (*frames)[0] = dlum*(*frames)[0] + blum*(*frames)[1];
+        (*frames)[1]= abs(_refim-(*frames)[0])/abs(_refim);
+    }
+    if (find<AdjustableSkirtSimulation>()->ncomponents() >= 3)
+    {
+        GALumfit GAlumi;
+        QList<double> monoluminosities;
+        GAlumi.setFixedSeed(find<OligoFitScheme>()->fixedSeed());
+        GAlumi.setMinLuminosities(_minLum);
+        GAlumi.setMaxLuminosities(_maxLum);
+        GAlumi.optimize(&_refim,frames,&(monoluminosities),chi_value);
+        (*frames)[0] = monoluminosities[0]*(*frames)[0];
+        for(int i =1;i<monoluminosities.size();i++)
+        {
+            (*frames)[0] = (*frames)[0] + monoluminosities[i]*(*frames)[i];
+        }
+        (*frames)[1]= abs(_refim-(*frames)[0])/abs(_refim);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////

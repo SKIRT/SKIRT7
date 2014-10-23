@@ -1,7 +1,7 @@
 /*//////////////////////////////////////////////////////////////////
 ////       SKIRT -- an advanced radiative transfer code         ////
 ////       © Astronomical Observatory, Ghent University         ////
-//////////////////////////////////////////////////////////////////*/
+///////////////////////////////////////////////////////////////// */
 
 #ifndef OPTIMIZATION_HPP
 #define OPTIMIZATION_HPP
@@ -141,7 +141,6 @@ private:
     QVector<double> _genScores;
     QList<QVector<double> > _genValues;
     QList<QVector<double> > _genUnitsValues;
-    QVector<QList<double> > _genBulgeratios;
     QVector<QList<double> > _genLum;
     QVector<QList<double> > _genChis;
 

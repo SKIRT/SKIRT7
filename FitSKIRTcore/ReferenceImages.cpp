@@ -1,7 +1,7 @@
 /*//////////////////////////////////////////////////////////////////
 ////       SKIRT -- an advanced radiative transfer code         ////
 ////       © Astronomical Observatory, Ghent University         ////
-//////////////////////////////////////////////////////////////////*/
+///////////////////////////////////////////////////////////////// */
 
 #include "ReferenceImages.hpp"
 
@@ -49,6 +49,8 @@ void ReferenceImages::setupSelfBefore()
 
     // verify that there is at least one range
     if (_rimages.isEmpty()) throw FATALERROR("There are no reference images");
+    if (find<AdjustableSkirtSimulation>()->nframes() != _rimages.size())
+        throw FATALERROR("Number of instrument frames does not match the number of reference frames");
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -66,24 +68,22 @@ int ReferenceImages::size() const
 }
 //////////////////////////////////////////////////////////////////////
 
-double ReferenceImages::chi2(QList<Array> *DiskSimulations,
-                             QList<Array> *BulgeSimulations, QList<double> *DiskLuminosities,
-                             QList<double> *BulgeRatios, QList<double> *Chis)
+double ReferenceImages::chi2(QList<QList<Array>> *frames,
+                             QList<QList<double>> *luminosities, QList<double> *Chis)
 {
-    if (DiskSimulations->size() != _rimages.size())
-        throw FATALERROR("Number of simulation frames does not match the number of reference frames");
+    if (frames->size() != _rimages.size())
+        throw FATALERROR("Total number of simulated frames does not match the number of reference frames");
     int counter=0;
     double chi2_sum=0;
 
     foreach (ReferenceImage* rima, _rimages)
     {
-        double dlum, b2d, chi;
-        chi=rima->chi2(&((*DiskSimulations)[counter]), &((*BulgeSimulations)[counter]), dlum, b2d);
+        double chi;
+        QList<double> monolum;
+        chi=rima->chi2(&((*frames)[counter]), &(monolum));
+        luminosities->append(monolum);
         chi2_sum += chi;
-        DiskLuminosities->append(dlum);
-        BulgeRatios->append(b2d);
         Chis->append(chi);
-
         counter++;
     }
     return chi2_sum;
@@ -95,35 +95,36 @@ void ReferenceImages::writeOutBest(int index, int consec) const
 {
     int counter=0;
 
-    QString disk_fix = "tmp/disk_"+QString::number(index);
-    QString bulge_fix = "tmp/bulge_"+QString::number(index);
+    QString prefix = "tmp/tmp_"+QString::number(index);
     FilePaths* path = find<FilePaths>();
     Units* units = find<Units>();
     AdjustableSkirtSimulation* adjSS = find<AdjustableSkirtSimulation>();
-    find<Log>()->info("Found best fit");
+    QString instrname = adjSS->instrname();
+    find<Log>()->info("Found new best fit");
 
     foreach (ReferenceImage* rima, _rimages)
     {
         int nx, ny, nz;
-        Array diskTotal, bulgeTotal;
-        QString filepath = path->output(disk_fix+"_lol_total_"+QString::number(counter)+".fits");
-        FITSInOut::read(filepath,diskTotal,nx,ny,nz);
-        filepath = path->output(bulge_fix+"_lol_total_"+QString::number(counter)+".fits");
-        FITSInOut::read(filepath,bulgeTotal,nx,ny,nz);
-        rima->returnFrame(&diskTotal, &bulgeTotal);
-
+        QList<Array> Total;
+        QString filepath;
+        for(int i =0; i<adjSS->ncomponents();i++){
+            Array CompTotal;
+            filepath = path->output(prefix+"_"+instrname+"_stellar_"+
+                                    QString::number(i)+"_"+QString::number(counter)+".fits");
+            FITSInOut::read(filepath,CompTotal,nx,ny,nz);
+            Total.append(CompTotal);
+        }
+        rima->returnFrame(&Total);
         filepath = path->output("Best_"+QString::number(consec)+"_"+QString::number(counter)+".fits");
-        FITSInOut::write(filepath, diskTotal, nx, ny, nz,
+        FITSInOut::write(filepath, Total[0], nx, ny, nz,
                        units->olength(adjSS->xpress(counter)), units->olength(adjSS->ypress(counter)),
                        units->usurfacebrightness(), units->ulength());
         filepath =  path->output("Residual_"+QString::number(consec)+"_"+QString::number(counter)+".fits");
-        FITSInOut::write(filepath, bulgeTotal, nx, ny, nz,
+        FITSInOut::write(filepath, Total[1], nx, ny, nz,
                        units->olength(adjSS->xpress(counter)), units->olength(adjSS->ypress(counter)),
                        units->usurfacebrightness(), units->ulength());
-
         counter++;
     }
-
 }
 
 //////////////////////////////////////////////////////////////////////

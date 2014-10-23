@@ -1,7 +1,7 @@
 /*//////////////////////////////////////////////////////////////////
 ////       SKIRT -- an advanced radiative transfer code         ////
 ////       © Astronomical Observatory, Ghent University         ////
-//////////////////////////////////////////////////////////////////*/
+///////////////////////////////////////////////////////////////// */
 
 #include <fstream>
 #include <iomanip>
@@ -168,7 +168,7 @@ void SPHStellarComp::launch(PhotonPackage* pp, int ell, double L) const
     double h = _random->gauss()*_hv[i];
     Position bfr = Position(_rv[i] + h*_random->direction());
     Direction bfk = _random->direction();
-    pp->launch(true,L,ell,bfr,bfk);
+    pp->launch(L,ell,bfr,bfk);
 }
 
 //////////////////////////////////////////////////////////////////////

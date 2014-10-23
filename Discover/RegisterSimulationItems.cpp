@@ -1,7 +1,7 @@
 /*//////////////////////////////////////////////////////////////////
 ////       SKIRT -- an advanced radiative transfer code         ////
 ////       © Astronomical Observatory, Ghent University         ////
-//////////////////////////////////////////////////////////////////*/
+///////////////////////////////////////////////////////////////// */
 
 #include "RegisterSimulationItems.hpp"
 #include "SimulationItemRegistry.hpp"
@@ -45,7 +45,6 @@
 #include "EinastoGeometry.hpp"
 #include "EnstatiteGrainComposition.hpp"
 #include "ExpDiskGeometry.hpp"
-#include "ExpDiskSpiralArmsGeometry.hpp"
 #include "ExtragalacticUnits.hpp"
 #include "FaceOnDustCompNormalization.hpp"
 #include "FileGrainComposition.hpp"
@@ -112,6 +111,7 @@
 #include "RingGeometry.hpp"
 #include "SEDInstrument.hpp"
 #include "SIUnits.hpp"
+#include "SolarPatchGeometry.hpp"
 #include "SPHDustDistribution.hpp"
 #include "SPHStellarComp.hpp"
 #include "SersicGeometry.hpp"
@@ -120,7 +120,9 @@
 #include "SingleGrainSizeDistribution.hpp"
 #include "SmoothingKernel.hpp"
 #include "SpheGeometry.hpp"
+#include "SphericalHoleGeometry.hpp"
 #include "SpheroidalGeometry.hpp"
+#include "SpiralStructureGeometry.hpp"
 #include "StarburstSED.hpp"
 #include "StellarSurfaceGeometry.hpp"
 #include "StellarSystem.hpp"
@@ -222,10 +224,11 @@ void RegisterSimulationItems::registerAll()
     add<TTauriDiskGeometry>();
     add<RingGeometry>();
     add<TorusGeometry>();
+    add<SpheroidalGeometry>();
     add<GenGeometry>(false);
-    add<ExpDiskSpiralArmsGeometry>();
     add<NetzerAccretionDiskGeometry>();
     add<StellarSurfaceGeometry>();
+    add<SolarPatchGeometry>();
     add<UniformCuboidGeometry>();
     add<Trust1Geometry>();
     add<Trust2Geometry>();
@@ -236,8 +239,9 @@ void RegisterSimulationItems::registerAll()
     add<VoronoiGeometry>();
     add<OffsetGeometry>();
     add<ClumpyGeometry>();
-    add<SpheroidalGeometry>();
     add<TriaxialGeometry>();
+    add<SphericalHoleGeometry>();
+    add<SpiralStructureGeometry>();
 
     add<SmoothingKernel>(false);
     add<UniformSmoothingKernel>();
