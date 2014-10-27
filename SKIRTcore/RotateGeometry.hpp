@@ -13,15 +13,16 @@
 /** The RotateGeometry class is a Geometry decorator that applies an arbitrary rotation to
     any geometry. For the rotation, we use the general framework of the three Euler angles
     that can be used to decompose any rotation into a sequence of three individual rotations
-    over the principle axes. If we denote the original axes of the coordinate system as XYZ,
-    we apply the following set of rotations (the so-called X-convention):
-    (1) the first rotation is by an angle \f$alpha\f$ about the Z axis.
-    (2) the second rotation is by an angle \f$\beta\f$ about the new X' axis.
-    (3) the third rotation is by an angle \f$\gamma\f$ about the new Z'' axis.
+    over the principle axes. We apply the following set of rotations (the so-called
+    X-convention):
+    <ul>
+    <li> the first rotation is by an angle \f$\alpha\f$ about the Z axis.
+    <li> the second rotation is by an angle \f$\beta\f$ about the new X' axis.
+    <li> the third rotation is by an angle \f$\gamma\f$ about the new Z'' axis.
+    </ul>
     If the original position of a vector is denoted as \f${\bf{r}}_{\text{orig}}\f$, the
-    new position can be found as \f${\bf{r}} = {\bf{R}}\,{\bf{r}}\f$, where the rotation
-    matrix \f${\bf{R}}\f$ is given by the sequence of three individual simple rotation
-    matrices
+    new position can be found as \f${\bf{r}} = {\bf{R}}\,{\bf{r}}_{\text{orig}}\f$, where
+    the rotation matrix \f${\bf{R}}\f$ is given by
     \f[
     {\bf{R}}
     =
@@ -104,22 +105,22 @@ public:
     /** Returns the geometry to be offset (i.e. the geometry being decorated). */
     Q_INVOKABLE Geometry* geometry() const;
 
-    /** Sets the first Euler angle alpha. */
+    /** Sets the first Euler angle \f$alpha\f$. */
     Q_INVOKABLE void setEuleralpha(double value);
 
-    /** Returns the first Euler angle alpha. */
+    /** Returns the first Euler angle \f$alpha\f$. */
     Q_INVOKABLE double euleralpha() const;
 
-    /** Sets the second Euler angle beta. */
+    /** Sets the second Euler angle \f$beta\f$. */
     Q_INVOKABLE void setEulerbeta(double value);
 
-    /** Returns the second Euler angle beta. */
+    /** Returns the second Euler angle \f$beta\f$. */
     Q_INVOKABLE double eulerbeta() const;
 
-    /** Sets the third Euler angle gamma. */
+    /** Sets the third Euler angle \f$gamma\f$. */
     Q_INVOKABLE void setEulergamma(double value);
 
-    /** Returns the third Euler angle gamma. */
+    /** Returns the third Euler angle \f$gamma\f$. */
     Q_INVOKABLE double eulergamma() const;
 
     //======================== Other Functions =======================
@@ -127,14 +128,14 @@ public:
 public:
     /** This function returns the density \f$\rho({\bf{r}})\f$ at the position
         \f${\bf{r}}\f$. It calls the density() function for the geometry being decorated with
-        the derotated position \f${\bf{R}}^{\text{T}}\,{\bf{r}}\f$ as an argument. */
+        the derotated position \f${\bf{r}}_{\text{orig}} = {\bf{R}}^{\text{T}}\,{\bf{r}}\f$ as
+        the argument. */
     double density(Position bfr) const;
 
     /** This function generates a random position from the geometry, by drawing a random
         point from the three-dimensional probability density \f$p({\bf{r}})\, {\text{d}}{\bf{r}} =
         \rho({\bf{r}})\, {\text{d}}{\bf{r}}\f$. It calls the density() function for the geometry
-        being decorated and returns the rotated position \f${\bf{R}}\,{\bf{r}}\f$.
-        */
+        being decorated and rotates the resulting position \f${\bf{r}}_{\text{orig}}\f$. */
     Position generatePosition() const;
 
     /** This function returns the X-axis surface density, i.e. the integration of the density
