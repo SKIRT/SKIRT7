@@ -267,7 +267,8 @@ HEADERS += \
     Trust2Geometry.hpp \
     SolarPatchGeometry.hpp \
     SphericalHoleGeometry.hpp \
-    SpiralStructureGeometry.hpp
+    SpiralStructureGeometry.hpp \
+    RotateGeometry.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -495,4 +496,5 @@ SOURCES += \
     Trust2Geometry.cpp \
     SolarPatchGeometry.cpp \
     SphericalHoleGeometry.cpp \
-    SpiralStructureGeometry.cpp
+    SpiralStructureGeometry.cpp \
+    RotateGeometry.cpp
