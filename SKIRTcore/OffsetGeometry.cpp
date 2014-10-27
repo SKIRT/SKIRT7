@@ -128,3 +128,25 @@ const
 }
 
 ////////////////////////////////////////////////////////////////////
+
+double
+OffsetGeometry::probabilityForDirection(Position bfr, Direction bfk)
+const
+{
+    double x,y,z;
+    bfr.cartesian(x,y,z);
+    return _geometry->probabilityForDirection(Position(x-_offsetX, y-_offsetY, z-_offsetZ),bfk);
+}
+
+////////////////////////////////////////////////////////////////////
+
+Direction
+OffsetGeometry::generateDirection(Position bfr)
+const
+{
+    double x,y,z;
+    bfr.cartesian(x,y,z);
+    return _geometry->generateDirection(Position(x-_offsetX, y-_offsetY, z-_offsetZ));
+}
+
+////////////////////////////////////////////////////////////////////

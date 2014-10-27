@@ -105,22 +105,22 @@ public:
     /** Returns the geometry to be offset (i.e. the geometry being decorated). */
     Q_INVOKABLE Geometry* geometry() const;
 
-    /** Sets the first Euler angle \f$alpha\f$. */
+    /** Sets the first Euler angle \f$\alpha\f$. */
     Q_INVOKABLE void setEuleralpha(double value);
 
-    /** Returns the first Euler angle \f$alpha\f$. */
+    /** Returns the first Euler angle \f$\alpha\f$. */
     Q_INVOKABLE double euleralpha() const;
 
-    /** Sets the second Euler angle \f$beta\f$. */
+    /** Sets the second Euler angle \f$\beta\f$. */
     Q_INVOKABLE void setEulerbeta(double value);
 
-    /** Returns the second Euler angle \f$beta\f$. */
+    /** Returns the second Euler angle \f$\beta\f$. */
     Q_INVOKABLE double eulerbeta() const;
 
-    /** Sets the third Euler angle \f$gamma\f$. */
+    /** Sets the third Euler angle \f$\gamma\f$. */
     Q_INVOKABLE void setEulergamma(double value);
 
-    /** Returns the third Euler angle \f$gamma\f$. */
+    /** Returns the third Euler angle \f$\gamma\f$. */
     Q_INVOKABLE double eulergamma() const;
 
     //======================== Other Functions =======================
