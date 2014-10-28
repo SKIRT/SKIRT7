@@ -110,6 +110,7 @@
 #include "RadialDustCompNormalization.hpp"
 #include "Random.hpp"
 #include "RingGeometry.hpp"
+#include "RotateGeometry.hpp"
 #include "SEDInstrument.hpp"
 #include "SIUnits.hpp"
 #include "SolarPatchGeometry.hpp"
@@ -239,6 +240,7 @@ void RegisterSimulationItems::registerAll()
     add<AdaptiveMeshGeometry>();
     add<VoronoiGeometry>();
     add<OffsetGeometry>();
+    add<RotateGeometry>();
     add<ClumpyGeometry>();
     add<TriaxialGeometry>();
     add<SphericalHoleGeometry>();

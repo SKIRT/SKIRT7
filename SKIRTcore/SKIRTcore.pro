@@ -272,7 +272,8 @@ HEADERS += \
     SpiralStructureGeometry.hpp \
     ProcessCommunicator.hpp \
     PeerToPeerCommunicator.hpp \
-    MasterSlaveCommunicator.hpp
+    MasterSlaveCommunicator.hpp \
+    RotateGeometry.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -503,4 +504,5 @@ SOURCES += \
     SpiralStructureGeometry.cpp \
     ProcessCommunicator.cpp \
     PeerToPeerCommunicator.cpp \
-    MasterSlaveCommunicator.cpp
+    MasterSlaveCommunicator.cpp \
+    RotateGeometry.cpp
