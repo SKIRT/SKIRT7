@@ -14,6 +14,7 @@
 #include "NR.hpp"
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
+#include "PeerToPeerCommunicator.hpp"
 #include "PhotonPackage.hpp"
 #include "Random.hpp"
 #include "StellarSystem.hpp"
@@ -47,7 +48,6 @@ void MonteCarloSimulation::setChunkParams(double packages)
 {
     // cache the number of wavelengths
     _Nlambda = _lambdagrid->Nlambda();
-
     // determine the number of chunks and the corresponding chunk size
     if (packages <= 0)
     {
@@ -58,10 +58,23 @@ void MonteCarloSimulation::setChunkParams(double packages)
     else
     {
         int Nthreads = _parfac->maxThreadCount();
-        if (Nthreads == 1) _Nchunks = 1;
-        else _Nchunks = ceil( qMin(packages/2e4, qMax(packages/1e7, 10.*Nthreads/_Nlambda)) );
-        _chunksize = ceil(packages/_Nchunks);
-        _Npp = _Nchunks*_chunksize;
+        int Nprocs = _communicator->getSize();
+
+        if (Nprocs * Nthreads == 1)
+        {
+            _Nchunks = 1;
+            _chunksize = packages;
+            _Npp = packages;
+        }
+        else
+        {
+            int myPackages = packages/Nprocs;
+            _log->info("(" + QString::number(myPackages) + " is the number of my packages)");
+            _Nchunks = ceil( qMin(myPackages/2e4, qMax(myPackages/1e7, 10.*Nthreads/_Nlambda)) );
+            _log->info("(" + QString::number(_Nchunks) + " is the number of chunks per wavelength)");
+            _chunksize = ceil(myPackages/_Nchunks);
+            _Npp = Nprocs*_Nchunks*_chunksize;  // ON ALL PROCESSES!!
+        }
     }
 
     // determine the log frequency; continuous scattering is much slower!
@@ -150,7 +163,7 @@ void MonteCarloSimulation::logprogress(quint64 extraDone)
     if (_timer.elapsed() > 3000)
     {
         _timer.restart();
-        double completed = _Ndone * 100. / (_Npp*_Nlambda);
+        double completed = _Ndone * 100. / (_Nchunks*_chunksize*_Nlambda);
         _log->info("Launched " + _phase + " photon packages: " + QString::number(completed,'f',1) + "%");
     }
 }

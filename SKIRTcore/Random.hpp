@@ -42,6 +42,8 @@ protected:
         numbers, using the current value of the seed. */
     void setupSelfBefore();
 
+    void initialize(int Nthreads);
+
     //======== Setters & Getters for Discoverable Attributes =======
 
 public:
@@ -55,6 +57,9 @@ public:
     //======================== Other Functions =======================
 
 public:
+    /** This function .. */
+    void randomize();
+
     /** This function generates a random uniform deviate, i.e. a random double precision number in
         the interval [0,1]. For details how this is exactly done, see the information at
         http://www.math.keio.ac.jp/matumoto/emt.html. */

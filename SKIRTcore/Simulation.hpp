@@ -10,6 +10,7 @@
 class FilePaths;
 class Log;
 class ParallelFactory;
+class PeerToPeerCommunicator;
 class Random;
 class Units;
 
@@ -92,6 +93,9 @@ public:
     /** Returns the logging mechanism for this simulation hierarchy. */
     ParallelFactory* parallelFactory() const;
 
+    /** Returns the ... */
+    PeerToPeerCommunicator* getCommunicator() const;
+
     /** Sets the random number generator for this simulation hierarchy. By default, an instance of
         the Random class is used with the default seed. */
     Q_INVOKABLE void setRandom(Random* value);
@@ -110,11 +114,12 @@ public:
 
 protected:
     // data members
-    FilePaths* _paths;          // the file paths object for the simulation
-    Log* _log;                  // the logging mechanism for the simulation
-    ParallelFactory* _parfac;   // the parallel factory for the simulation
-    Random* _random;            // the random number generator for the simulation
-    Units* _units;              // the units system for the simulation
+    FilePaths* _paths;                          // the file paths object for the simulation
+    Log* _log;                                  // the logging mechanism for the simulation
+    ParallelFactory* _parfac;                   // the parallel factory for the simulation
+    PeerToPeerCommunicator* _communicator;      // the process communicator for the simulation
+    Random* _random;                            // the random number generator for the simulation
+    Units* _units;                              // the units system for the simulation
 };
 
 ////////////////////////////////////////////////////////////////////

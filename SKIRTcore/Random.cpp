@@ -9,6 +9,7 @@
 #include "Log.hpp"
 #include "NR.hpp"
 #include "ParallelFactory.hpp"
+#include "PeerToPeerCommunicator.hpp"
 #include "Position.hpp"
 #include "Random.hpp"
 
@@ -31,6 +32,14 @@ void Random::setupSelfBefore()
     int Nthreads = _parfac->maxThreadCount();
     _mtv.resize(Nthreads);
     _mtiv.resize(Nthreads);
+
+    initialize(Nthreads);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void Random::initialize(int Nthreads)
+{
     unsigned long seed = _seed;
     for (int thread=0; thread<Nthreads; thread++)
     {
@@ -58,6 +67,19 @@ void Random::setSeed(int seed)
 int Random::seed() const
 {
     return _seed;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void Random::randomize()
+{
+    PeerToPeerCommunicator* communicator = find<PeerToPeerCommunicator>();
+
+    int Nthreads = _parfac->maxThreadCount();
+
+    _seed = _seed + Nthreads * communicator->getRank();
+
+    initialize(Nthreads);
 }
 
 //////////////////////////////////////////////////////////////////////

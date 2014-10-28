@@ -6,6 +6,7 @@
 #include "Instrument.hpp"
 #include "DustSystem.hpp"
 #include "FatalError.hpp"
+#include "PeerToPeerCommunicator.hpp"
 #include "PhotonPackage.hpp"
 
 using namespace std;
@@ -33,6 +34,15 @@ void Instrument::setupSelfBefore()
     {
         _ds = 0;
     }
+}
+
+////////////////////////////////////////////////////////////////////
+
+void Instrument::sumResults(QList< Array*> arrays)
+{
+    PeerToPeerCommunicator * communicator = find<PeerToPeerCommunicator>();
+
+    foreach (Array* arr, arrays) communicator->sum(*arr, false);
 }
 
 ////////////////////////////////////////////////////////////////////

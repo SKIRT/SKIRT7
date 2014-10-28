@@ -57,6 +57,8 @@ FrameInstrument::write()
     farrays << &_ftotv;
     fnames << "total";
 
+    sumResults(farrays);
+
     // calibrate and output the arrays
     calibrateAndWriteDataCubes(farrays, fnames);
 }

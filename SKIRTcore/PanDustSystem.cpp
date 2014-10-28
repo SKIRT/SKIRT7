@@ -20,6 +20,7 @@
 #include "PanDustSystem.hpp"
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
+#include "PeerToPeerCommunicator.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
 
@@ -330,7 +331,16 @@ double PanDustSystem::Labsdusttot() const
         for (int m=0; m<_Ncells; m++)
             for (int ell=0; ell<_Nlambda; ell++)
                 sum += _Labsdustvv(m,ell);
-    return sum;
+    //return sum;
+
+    PeerToPeerCommunicator * communicator = find<PeerToPeerCommunicator>();
+
+    Array arr(1);
+    arr[0] = sum;
+
+    communicator->sum(arr, true);
+
+    return arr[0];
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -358,9 +368,25 @@ Array PanDustSystem::meanintensityv(int m) const
 
 ////////////////////////////////////////////////////////////////////
 
-void PanDustSystem::calculatedustemission()
+void PanDustSystem::calculatedustemission(bool ynstellar)
 {
-    if (_dustemissivity) _dustlib->calculate();
+    if (_dustemissivity)
+    {
+        sumResults(ynstellar);
+        _dustlib->calculate();
+    }
+}
+
+////////////////////////////////////////////////////////////////////
+
+void PanDustSystem::sumResults(bool ynstellar)
+{
+    PeerToPeerCommunicator * communicator = find<PeerToPeerCommunicator>();
+
+    Array* arr;
+    arr = ynstellar ? _Labsstelvv.getArray() : _Labsdustvv.getArray();
+
+    communicator->sum(*arr, true);
 }
 
 ////////////////////////////////////////////////////////////////////

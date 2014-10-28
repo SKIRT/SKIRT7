@@ -5,11 +5,13 @@
 
 #include "QDateTime"
 #include "Log.hpp"
+#include "PeerToPeerCommunicator.hpp"
+#include "ProcessManager.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
 Log::Log()
-    : _lowestLevel(Info), _link(0)
+    : _lowestLevel(Info), _link(0), _procName(QString(""))
 {
 }
 
@@ -45,10 +47,27 @@ Log* Log::linkedLog() const
 
 ////////////////////////////////////////////////////////////////////
 
+void Log::setProcessName(int rank)
+{
+    if (_link) _link->setProcessName(rank);
+    _procName = "[Process " + QString::number(rank) + "] ";
+}
+
+////////////////////////////////////////////////////////////////////
+
 void Log::info(QString message)
 {
+#ifndef DEBUG
+    if (!ProcessManager::isRoot()) return;
+#endif
+
     if (_link) _link->info(message);
+
+#ifdef DEBUG
+    if (Info >= _lowestLevel) output(timestamp() + "   " + _procName + message, Info);
+#else
     if (Info >= _lowestLevel) output(timestamp() + "   " + message, Info);
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -56,15 +75,24 @@ void Log::info(QString message)
 void Log::warning(QString message)
 {
     if (_link) _link->warning(message);
-    if (Warning >= _lowestLevel) output(timestamp() + " ! " + message, Warning);
+    if (Warning >= _lowestLevel) output(timestamp() + " ! " + _procName + message, Warning);
 }
 
 ////////////////////////////////////////////////////////////////////
 
 void Log::success(QString message)
 {
+#ifndef DEBUG
+    if (!ProcessManager::isRoot()) return;
+#endif
+
     if (_link) _link->success(message);
+
+#ifdef DEBUG
+    if (Success >= _lowestLevel) output(timestamp() + " - " + _procName + message, Success);
+#else
     if (Success >= _lowestLevel) output(timestamp() + " - " + message, Success);
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -72,7 +100,7 @@ void Log::success(QString message)
 void Log::error(QString message)
 {
     if (_link) _link->error(message);
-    if (Error >= _lowestLevel) output(timestamp() + " * *** Error: " + message, Error);
+    if (Error >= _lowestLevel) output(timestamp() + " * *** Error: " + _procName + message, Error);
 }
 
 ////////////////////////////////////////////////////////////////////

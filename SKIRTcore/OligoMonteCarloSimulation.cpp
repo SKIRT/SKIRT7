@@ -69,6 +69,7 @@ OligoDustSystem* OligoMonteCarloSimulation::dustSystem() const
 void OligoMonteCarloSimulation::runSelf()
 {
     runstellaremission();
+
     write();
 }
 

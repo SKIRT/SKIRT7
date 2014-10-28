@@ -58,6 +58,9 @@ SimpleInstrument::write()
     fnames << "total";
     Fnames << "total flux";
 
+    sumResults(farrays);
+    sumResults(Farrays);
+
     // calibrate and output the arrays
     calibrateAndWriteDataCubes(farrays, fnames);
     calibrateAndWriteSEDs(Farrays, Fnames);

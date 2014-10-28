@@ -6,7 +6,7 @@
 #include <QCoreApplication>
 #include "FitSkirtCommandLineHandler.hpp"
 #include "FitSkirtMain.hpp"
-#include "MasterSlaveManager.hpp"
+#include "ProcessManager.hpp"
 #include "RegisterFitSchemeItems.hpp"
 #include "RegisterSimulationItems.hpp"
 #include "SignalHandler.hpp"
@@ -18,7 +18,7 @@
 int main(int argc, char** argv)
 {
     // initialize remote communication capability, if present
-    MasterSlaveManager::initialize(&argc, &argv);
+    ProcessManager::initialize(&argc, &argv);
 
     // construct application object for argument parsing and such,
     // but don't run the event loop because we don't need it
@@ -39,7 +39,7 @@ int main(int argc, char** argv)
     int status = handler.perform();
 
     // finalize remote communication capability, if present
-    MasterSlaveManager::finalize();
+    ProcessManager::finalize();
     return status;
 }
 

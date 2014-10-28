@@ -9,6 +9,7 @@
 #include "FatalError.hpp"
 #include "FilePaths.hpp"
 #include "Log.hpp"
+#include "PeerToPeerCommunicator.hpp"
 #include "PhotonPackage.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
@@ -108,6 +109,9 @@ Direction DistantInstrument::bfkobs(const Position& /*bfr*/) const
 
 void DistantInstrument::calibrateAndWriteSEDs(QList< Array* > Farrays, QStringList Fnames)
 {
+    PeerToPeerCommunicator* communicator = find<PeerToPeerCommunicator>();
+    if (communicator->getRank()) return;
+
     WavelengthGrid* lambdagrid = find<WavelengthGrid>();
     int Nlambda = find<WavelengthGrid>()->Nlambda();
 

@@ -18,8 +18,8 @@ SUBDIRS += \
     GAlib \
     Voro \
     Fundamentals \
-    SKIRTcore \
     MPIsupport \
+    SKIRTcore \
     Discover \
     SKIRTmain \
     FitSKIRTcore \

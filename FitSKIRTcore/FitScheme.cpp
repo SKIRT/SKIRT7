@@ -8,7 +8,7 @@
 #include "Console.hpp"
 #include "FatalError.hpp"
 #include "FilePaths.hpp"
-#include "MasterSlaveManager.hpp"
+#include "MasterSlaveCommunicator.hpp"
 #include "Optimization.hpp"
 #include "SIUnits.hpp"
 #include "TimeLogger.hpp"
@@ -21,8 +21,8 @@ FitScheme::FitScheme()
     _paths->setParent(this);
     _log = new Console();
     _log->setParent(this);
-    _mgr = new MasterSlaveManager();
-    _mgr->setParent(this);
+    _communicator = new MasterSlaveCommunicator();
+    _communicator->setParent(this);
     _units = new SIUnits();
     _units->setParent(this);
     _parallelSimulations = 1;
@@ -49,13 +49,13 @@ void FitScheme::run()
     // verify setup
     if (_state < SetupDone) throw FATALERROR("Fit scheme has not been setup before being run");
 
-    _mgr->acquireSlaves();
-    if(_mgr->isMaster())
+    _communicator->acquireSlaves();
+    if(_communicator->isMaster())
     {
         TimeLogger logger(_log, "fitting");
         runSelf();
     }
-    _mgr->releaseSlaves();
+    _communicator->releaseSlaves();
 }
 
 ////////////////////////////////////////////////////////////////////

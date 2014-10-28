@@ -52,6 +52,8 @@ SEDInstrument::write()
     Farrays << &_Ftotv;
     Fnames << "total flux";
 
+    sumResults(Farrays);
+
     // calibrate and output the arrays
     calibrateAndWriteSEDs(Farrays, Fnames);
 }

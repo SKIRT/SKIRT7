@@ -12,7 +12,7 @@
 #include "Convolution.hpp"
 #include "FitScheme.hpp"
 #include "LumSimplex.hpp"
-#include "MasterSlaveManager.hpp"
+#include "MasterSlaveCommunicator.hpp"
 #include "OligoFitScheme.hpp"
 #include "Optimization.hpp"
 #include "ParameterRange.hpp"
@@ -36,7 +36,7 @@ void RegisterFitSchemeItems::registerAll()
     add<AdjustableSkirtSimulation>();
     add<Convolution>();
     add<LumSimplex>();
-    add<MasterSlaveManager>();
+    add<MasterSlaveCommunicator>();
     add<Optimization>();
     add<ParameterRanges>();
     add<ParameterRange>();

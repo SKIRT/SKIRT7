@@ -3,6 +3,7 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
+#include "ProcessManager.hpp"
 #include <QCoreApplication>
 #include "SkirtCommandLineHandler.hpp"
 #include "RegisterSimulationItems.hpp"
@@ -15,6 +16,8 @@
 
 int main(int argc, char** argv)
 {
+    ProcessManager::initialize(&argc, &argv);
+
     // construct application object for argument parsing and such,
     // but don't run the event loop because we don't need it
     QCoreApplication app(argc, argv);
@@ -30,7 +33,11 @@ int main(int argc, char** argv)
 
     // get and handle the command line arguments
     SkirtCommandLineHandler handler(app.arguments());
-    return handler.perform();
+    int status = handler.perform();
+
+    ProcessManager::finalize();
+
+    return status;
 }
 
 //////////////////////////////////////////////////////////////////////

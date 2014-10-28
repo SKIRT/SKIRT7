@@ -11,6 +11,7 @@
 #include "Direction.hpp"
 #include "Position.hpp"
 #include "SimulationItem.hpp"
+class Array;
 class DustSystem;
 class PhotonPackage;
 
@@ -39,6 +40,9 @@ protected:
 
     /** This function performs setup for the instrument. */
     void setupSelfBefore();
+
+    /** This function .. */
+    void sumResults(QList< Array*> arrays);
 
     //======== Setters & Getters for Discoverable Attributes =======
 

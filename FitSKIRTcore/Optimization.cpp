@@ -9,7 +9,7 @@
 #include "FatalError.hpp"
 #include "FilePaths.hpp"
 #include "Log.hpp"
-#include "MasterSlaveManager.hpp"
+#include "MasterSlaveCommunicator.hpp"
 #include "OligoFitScheme.hpp"
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
@@ -74,11 +74,11 @@ void Optimization::setupSelfBefore()
     _ga->flushFrequency(0);  // was 1e-22 implicitly converted to integer 0
 
     //must be done before initiliazing the GA
-    MasterSlaveManager * mgr = find<MasterSlaveManager>();
+    MasterSlaveCommunicator * communicator = find<MasterSlaveCommunicator>();
     FitScheme * fitsch = find<FitScheme>();
-    mgr->setLocalSlaveCount(fitsch->parallelSimulationCount());
-    mgr->registerTask(this, &Optimization::chi2);
-    if(mgr->isMaster())
+    communicator->setLocalSlaveCount(fitsch->parallelSimulationCount());
+    communicator->registerTask(this, &Optimization::chi2);
+    if(communicator->isMaster())
     {
         QString filepath =path->outputPath()+path->outputPrefix()+"_allsimulations.dat";
         _stream.open(filepath.toLocal8Bit().constData());
@@ -220,8 +220,8 @@ void Optimization::splitChi()
         totalVarList.insert(totalVarList.size(),valuesVarList);
         data[i]=totalVarList;
     }
-    MasterSlaveManager* mgr = find<MasterSlaveManager>();
-    data = mgr->performTask(data);
+    MasterSlaveCommunicator* communicator = find<MasterSlaveCommunicator>();
+    data = communicator->performTask(data);
 
     for(int i =0;i<_genValues.size();i++)
     {

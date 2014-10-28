@@ -19,14 +19,16 @@ QMAKE_CXXFLAGS_RELEASE -= -O2
 QMAKE_CXXFLAGS_RELEASE += -O3
 
 # include libraries internal to the project
-INCLUDEPATH += $$PWD/../Fundamentals $$PWD/../Cfitsio $$PWD/../Voro
-DEPENDPATH += $$PWD/../Fundamentals $$PWD/../Cfitsio $$PWD/../Voro
+INCLUDEPATH += $$PWD/../Fundamentals $$PWD/../Cfitsio $$PWD/../Voro $$PWD/../MPIsupport
+DEPENDPATH += $$PWD/../Fundamentals $$PWD/../Cfitsio $$PWD/../Voro $$PWD/../MPIsupport
 unix: LIBS += -L$$OUT_PWD/../Fundamentals/ -lfundamentals \
               -L$$OUT_PWD/../Cfitsio/ -lcfitsio \
-              -L$$OUT_PWD/../Voro/ -lvoro
+              -L$$OUT_PWD/../Voro/ -lvoro \
+              -L$$OUT_PWD/../MPIsupport/ -lmpisupport
 unix: PRE_TARGETDEPS += $$OUT_PWD/../Fundamentals/libfundamentals.a \
                         $$OUT_PWD/../Cfitsio/libcfitsio.a \
-                        $$OUT_PWD/../Voro/libvoro.a
+                        $$OUT_PWD/../Voro/libvoro.a \
+                        $$OUT_PWD/../MPIsupport/libmpisupport.a
 
 #--------------------------------------------------
 # source and header files: maintained by Qt creator
@@ -267,7 +269,10 @@ HEADERS += \
     Trust2Geometry.hpp \
     SolarPatchGeometry.hpp \
     SphericalHoleGeometry.hpp \
-    SpiralStructureGeometry.hpp
+    SpiralStructureGeometry.hpp \
+    ProcessCommunicator.hpp \
+    PeerToPeerCommunicator.hpp \
+    MasterSlaveCommunicator.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -495,4 +500,7 @@ SOURCES += \
     Trust2Geometry.cpp \
     SolarPatchGeometry.cpp \
     SphericalHoleGeometry.cpp \
-    SpiralStructureGeometry.cpp
+    SpiralStructureGeometry.cpp \
+    ProcessCommunicator.cpp \
+    PeerToPeerCommunicator.cpp \
+    MasterSlaveCommunicator.cpp

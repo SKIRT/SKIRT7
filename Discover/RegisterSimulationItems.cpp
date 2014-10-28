@@ -96,6 +96,7 @@
 #include "PanMonteCarloSimulation.hpp"
 #include "PanStellarComp.hpp"
 #include "ParticleTreeDustGridStructure.hpp"
+#include "PeerToPeerCommunicator.hpp"
 #include "PegaseSED.hpp"
 #include "PerspectiveInstrument.hpp"
 #include "PlummerGeometry.hpp"
@@ -356,6 +357,9 @@ void RegisterSimulationItems::registerAll()
     add<KuruczSED>();
     add<QuasarSED>();
     add<FileSED>();
+
+    add<ProcessCommunicator>(false);
+    add<PeerToPeerCommunicator>();
 }
 
 ////////////////////////////////////////////////////////////////////

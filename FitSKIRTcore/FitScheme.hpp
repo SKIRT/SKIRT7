@@ -9,7 +9,7 @@
 #include "SimulationItem.hpp"
 class FilePaths;
 class Log;
-class MasterSlaveManager;
+class MasterSlaveCommunicator;
 class Units;
 
 ////////////////////////////////////////////////////////////////////
@@ -82,10 +82,10 @@ public:
     Log* log() const;
 
     /** Sets the mechanism to perform parallel tasks for this fit scheme. */
-    void setMgr(MasterSlaveManager* value);
+    void setComm(MasterSlaveCommunicator* value);
 
     /** Returns the mechanism to perform parallel tasks for this fit scheme. */
-    MasterSlaveManager* mgr() const;
+    MasterSlaveCommunicator* comm() const;
 
     /** Sets the units system for this fit scheme. By default, an instance of the SIUnits class is
         used. */
@@ -114,12 +114,12 @@ public:
 
 protected:
     // data members
-    FilePaths* _paths;          // the file paths object for the fit scheme
-    Log* _log;                  // the logging mechanism for the fit scheme
-    MasterSlaveManager* _mgr;   // the mechanism to perform parallel tasks
-    Units* _units;              // the units system for the fit scheme
-    int _parallelSimulations;   // the number of parallel simulations
-    int _parallelThreads;       // the number of parallel theads per simulation
+    FilePaths* _paths;                          // the file paths object for the fit scheme
+    Log* _log;                                  // the logging mechanism for the fit scheme
+    MasterSlaveCommunicator* _communicator;     // the mechanism to perform parallel tasks
+    Units* _units;                              // the units system for the fit scheme
+    int _parallelSimulations;                   // the number of parallel simulations
+    int _parallelThreads;                       // the number of parallel theads per simulation
 };
 
 ////////////////////////////////////////////////////////////////////

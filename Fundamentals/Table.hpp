@@ -96,6 +96,7 @@ public:
     void resize(size_t n0, size_t n1) { _n[0] = n0; _n[1] = n1; resize_base(); }
     const double& operator()(size_t i, size_t j) const { return _v[i*_n[1]+j]; }
     double& operator()(size_t i, size_t j) { return _v[i*_n[1]+j]; }
+    Array* getArray() { return &_v; }
 };
 
 // The template specialization for 3 dimensions

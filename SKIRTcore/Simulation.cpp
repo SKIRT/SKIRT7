@@ -7,6 +7,7 @@
 #include "FatalError.hpp"
 #include "FilePaths.hpp"
 #include "ParallelFactory.hpp"
+#include "PeerToPeerCommunicator.hpp"
 #include "Random.hpp"
 #include "Simulation.hpp"
 #include "SIUnits.hpp"
@@ -22,6 +23,8 @@ Simulation::Simulation()
     _log->setParent(this);
     _parfac = new ParallelFactory();
     _parfac->setParent(this);
+    _communicator = new PeerToPeerCommunicator();
+    _communicator->setParent(this);
     _random = new Random();
     _random->setParent(this);
     _units = new SIUnits();
@@ -57,8 +60,14 @@ void Simulation::run()
 void Simulation::setupAndRun()
 {
     _log->setup(); // ensure the log is properly setup before first use
-    TimeLogger logger(_log, "simulation " + _paths->outputPrefix());
+
+    QString processInfo = _communicator->isMultiProc() ? " with " + QString::number(_communicator->getSize()) + " processes." : "";
+
+    TimeLogger logger(_log, "simulation " + _paths->outputPrefix() + processInfo);
     setup();
+
+    if (_communicator->isMultiProc()) _random->randomize();
+
     run();
 }
 
@@ -108,6 +117,13 @@ void Simulation::setParallelFactory(ParallelFactory* value)
 ParallelFactory* Simulation::parallelFactory() const
 {
     return _parfac;
+}
+
+////////////////////////////////////////////////////////////////////
+
+PeerToPeerCommunicator* Simulation::getCommunicator() const
+{
+    return _communicator;
 }
 
 ////////////////////////////////////////////////////////////////////

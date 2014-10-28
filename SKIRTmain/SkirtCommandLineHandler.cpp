@@ -18,6 +18,8 @@
 #include "MemoryStatistics.hpp"
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
+#include "PeerToPeerCommunicator.hpp"
+#include "ProcessManager.hpp"
 #include "Simulation.hpp"
 #include "SmileSchemaWriter.hpp"
 #include "SkirtCommandLineHandler.hpp"
@@ -70,6 +72,8 @@ int SkirtCommandLineHandler::perform()
 
 int SkirtCommandLineHandler::doInteractive()
 {
+    if (ProcessManager::isMultiProc()) throw FATALERROR("Interactive mode cannot be run with multiple processes!");
+
     _console.info("Interactively constructing a simulation...");
 
     // ask for the name of the ski file in which to save the result
@@ -254,7 +258,12 @@ void SkirtCommandLineHandler::doSimulation(size_t index)
     simulation->log()->setLinkedLog(log);
     if (_parallelSims > 1 || _args.isPresent("-b")) simulation->log()->setLowestLevel(Log::Success);
 
+    PeerToPeerCommunicator* communicator = simulation->getCommunicator();
+
+    if (communicator->isMultiProc()) simulation->log()->setProcessName(communicator->getRank());
+
     // output a ski file and a latex file reflecting this simulation for later reference
+    if (communicator->isRoot())
     {
         XmlHierarchyWriter writer1;
         writer1.writeHierarchy(simulation.data(), simulation->filePaths()->output("parameters.xml"));

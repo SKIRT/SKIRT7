@@ -49,6 +49,10 @@ public:
         messages. */
     Log* linkedLog() const;
 
+
+    /** This function .. */
+    void setProcessName(int rank);
+
     //======================== Other Functions =======================
 
 public:
@@ -80,6 +84,7 @@ protected:
 private:
     Level _lowestLevel;
     Log* _link;
+    QString _procName;
 };
 
 ////////////////////////////////////////////////////////////////////

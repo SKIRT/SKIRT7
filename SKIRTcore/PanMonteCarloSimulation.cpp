@@ -96,6 +96,7 @@ void PanMonteCarloSimulation::runSelf()
         if (_pds && _pds->selfAbsorption()) rundustselfabsorption();
         rundustemission();
     }
+
     write();
 }
 
@@ -124,7 +125,7 @@ void PanMonteCarloSimulation::rundustselfabsorption()
 
             // Construct the dust emission spectra
             _log->info("Calculating dust emission spectra...");
-            _pds->calculatedustemission();
+            _pds->calculatedustemission(!(stage+cycle-1));
             _log->info("Dust emission spectra calculated.");
 
             // Determine the bolometric luminosity that is absorbed in every cell (and that will hence be re-emitted).
@@ -236,7 +237,7 @@ void PanMonteCarloSimulation::rundustemission()
 
     // Construct the dust emission spectra
     _log->info("Calculating dust emission spectra...");
-    _pds->calculatedustemission();
+    _pds->calculatedustemission(false);
     _log->info("Dust emission spectra calculated.");
 
     // Determine the bolometric luminosity that is absorbed in every cell (and that will hence be re-emitted).

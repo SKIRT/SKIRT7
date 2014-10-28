@@ -7,6 +7,7 @@
 #include "FilePaths.hpp"
 #include "FITSInOut.hpp"
 #include "Log.hpp"
+#include "PeerToPeerCommunicator.hpp"
 #include "PhotonPackage.hpp"
 #include "SingleFrameInstrument.hpp"
 #include "Units.hpp"
@@ -119,6 +120,9 @@ int SingleFrameInstrument::pixelondetector(const PhotonPackage* pp) const
 
 void SingleFrameInstrument::calibrateAndWriteDataCubes(QList< Array*> farrays, QStringList fnames)
 {
+    PeerToPeerCommunicator* communicator = find<PeerToPeerCommunicator>();
+    if (!communicator->isRoot()) return;
+
     WavelengthGrid* lambdagrid = find<WavelengthGrid>();
     int Nlambda = lambdagrid->Nlambda();
 

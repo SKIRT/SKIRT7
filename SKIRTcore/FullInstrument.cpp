@@ -134,6 +134,9 @@ FullInstrument::write()
         Fnames << (QString::number(nscatt) + "-times scattered flux");
     }
 
+    sumResults(farrays);
+    sumResults(Farrays);
+
     // calibrate and output the arrays
     calibrateAndWriteDataCubes(farrays, fnames);
     calibrateAndWriteSEDs(Farrays, Fnames);

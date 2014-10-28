@@ -19,6 +19,7 @@
 #include "Log.hpp"
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
+#include "PeerToPeerCommunicator.hpp"
 #include "PhotonPackage.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
@@ -78,20 +79,22 @@ void DustSystem::setupSelfAfter()
         find<ParallelFactory>()->parallel()->call(this, &DustSystem::setSampleDensityBody, _Ncells);
     }
 
+    PeerToPeerCommunicator* communicator = find<PeerToPeerCommunicator>();
+
     // Perform a convergence check on the grid.
-    if (_writeConvergence) writeconvergence();
+    if (_writeConvergence && communicator->isRoot()) writeconvergence();
 
     // Write the density in the xy plane and the xz plane to a file.
-    if (_writeDensity) writedensity();
+    if (_writeDensity && communicator->isRoot()) writedensity();
 
     // Output optical depth map as seen from the center
-    if (_writeDepthMap) writedepthmap();
+    if (_writeDepthMap && communicator->isRoot()) writedepthmap();
 
     // Calculate and output some quality metrics for the dust grid
-    if (_writeQuality) writequality();
+    if (_writeQuality && communicator->isRoot()) writequality();
 
     // Output properties for all cells in the dust grid
-    if (_writeCellProperties) writecellproperties();
+    if (_writeCellProperties && communicator->isRoot()) writecellproperties();
 }
 
 ////////////////////////////////////////////////////////////////////
