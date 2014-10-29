@@ -14,7 +14,7 @@ this step, you should also have determined the FWHM of the PSF in every frame, k
 have an estimate on the distance of your object.
 
 
-\section Overview 
+\section Overview
 \subsection Outline
 
 After your data has been properly reduced and prepared, the first step consists of creating a template file of the model
@@ -26,15 +26,15 @@ written out separately. As the total frame is not used, it is recommended to set
 
 Once the Q&A session has been ended and the ski files has been created, the file has to be adjusted to make the
 difference between the fixed and variable parameters in the simulation. For example suppose the radial scale is one of
-the free parameter we have to replace the following. 
+the free parameter we have to replace the following.
 
-\verbatim 
-radialScale="4400 pc" 
-\endverbatim 
-by 
 \verbatim
-radialScale="[stellar_length:4400 pc]" 
-\endverbatim 
+radialScale="4400 pc"
+\endverbatim
+by
+\verbatim
+radialScale="[stellar_length:4400 pc]"
+\endverbatim
 
 The square brackets mark the position of a variable parameter while
 the string before the colon is the parameter's label. The square brackets will be ignored if you run SKIRT on this
@@ -50,13 +50,13 @@ simulations. Once the Q&A session ask the label of your free parameter you shoul
 in the .ski file. For the example listed above this is "stellar_lenght" (without the quotation marks). The best option
 is to copy/paste them as you want to avoid any typos (for example inlination instead inclination) at this stage.
 FitSKIRT suports five quantities for free parameters at this point.
- 
-\verbatim 
-1. Dimensionless 
-2. Length 
-3. Distance 
-4. Mass 
-5. Position angle 
+
+\verbatim
+1. Dimensionless
+2. Length
+3. Distance
+4. Mass
+5. Position angle
 \endverbatim
 
 Choose the appropriate option and enter the lower and upper boundary. You then have the option to add any number of free
@@ -72,11 +72,11 @@ afterwards directly.
 The final step consists of setting the genetic algorithm parameters (see the Fine-tuning section for more information).
 
 The process can then be started with any number of threads (default is set to the maximum number available) and the
-output can be written to a different folder. 
+output can be written to a different folder.
 
-\verbatim 
-fitskirt -t 1 -o ./fit1 ranges.fski 
-\endverbatim 
+\verbatim
+fitskirt -t 1 -o ./fit1 ranges.fski
+\endverbatim
 
 This starts fitskirt using only 1 core and writing out the resutls to the "fit1" folder. In order to get an estimate on
 the accuracy of the fit on the final parameters, you can rerun the code a number of times (for example, five) and using
@@ -103,15 +103,15 @@ Notice that the individuals will always be spread uniformly over your parameter 
 gaussian around the center of your boundaries).
 
 The mutation probability can be set a bit higher (up to 10%) if there are only a few free parameters. As it is defined
-for a single parameter, the number of new values per generations is simply the mutation
-probability*#parameters*#individuals. For 8 or more free parameters it is advised not to set it to high as you would
+for a single parameter, the number of new values per generations is simply the mutation probability
+parameters of the individuals. For 8 or more free parameters it is advised not to set it to high as you would
 mutate almost every individual and, consequently, hindering your global optimisation process. In case of a mutation, the
 new value is determined randomly out of a gaussian distribution centered around the original value. As a result this
 parameter partially controls how well you have explored your optimum locally in the end.
 
 The crossover rate determines the percentage of indivuals that is kept every generation. The standard value, 0.65,
 therefore eliminates about the third worst individuals every generation. This value should not be set to low, to avoid
-narrowing down to one region to fast and ending up in a local optimum. 
+narrowing down to one region to fast and ending up in a local optimum.
 
 
 \subsection HPC-FitSKIRT
@@ -156,7 +156,7 @@ mympirun /user/home/gent/vsc405/vsc40553/SKIRT7/release/FitSKIRTmain/fitskirt -s
 \endverbatim
 
 
-\section NGC4013 
+\section NGC4013
 
 In this section we show a step-by-step setup for a FitSKIRT fit using a flattened Sersic profile for the central bulge
 and double exponential for the stellar disk and dust disk will be constructed. The data used in this tutorial is
@@ -199,11 +199,11 @@ lines
 and replace them by this
 
 \verbatim
-<MultiFrameInstrument instrumentName="lol" distance="10 Mpc" inclination="[inclination:90 deg]" 
-<ExpDiskGeometry radialScale="[stellar_length:4400 pc]" axialScale="[stellar_height:500 pc]" 
+<MultiFrameInstrument instrumentName="lol" distance="10 Mpc" inclination="[inclination:90 deg]"
+<ExpDiskGeometry radialScale="[stellar_length:4400 pc]" axialScale="[stellar_height:500 pc]"
 <SpheroidalGeometry flattening="[flattening:0.5]">
 <SersicGeometry index="[sersic_index:2.5]" radius="[bulge_radius:2500 pc]"/>
-<ExpDiskGeometry radialScale="[dust_length:6600 pc]" axialScale="[dust_height:250 pc]" 
+<ExpDiskGeometry radialScale="[dust_length:6600 pc]" axialScale="[dust_height:250 pc]"
 <DustMassDustCompNormalization dustMass="[dust_mass:4e7 Msun]"/>
 \endverbatim
 
@@ -226,12 +226,12 @@ Possible choices for the units system:
    1. SI units
    2. Stellar units (length in AU, distance in pc)
    3. Extragalactic units (length in pc, distance in Mpc)
-Enter one of these numbers [1,3] (3): 
+Enter one of these numbers [1,3] (3):
 Possible choices for the output style for flux density and surface brightness:
-   1. Neutral: λ F_λ = ν F_ν
-   2. Wavelength: F_λ
-   3. Frequency: F_ν
-Enter one of these numbers [1,3] (1): 
+   1. Neutral: lambda F_lambda = nu F_nu
+   2. Wavelength: F_lambda
+   3. Frequency: F_nu
+Enter one of these numbers [1,3] (1):
 Possible choices for the SKIRT simulation to be run for this fit scheme:
    1. An adjustable SKIRT simulation
 Automatically selected the only choice: 1
@@ -248,7 +248,7 @@ Next choose for the random seed and start entering the free parameters.
 The example below shows one example for the physical quantity, Position angle.
 
 \verbatim
-Do you want to Do you want a fixed seed (only for testing purposes)? [yes/no] (no): 
+Do you want to Do you want a fixed seed (only for testing purposes)? [yes/no] (no):
 Possible choices for the parameter ranges:
    1. A list of parameter ranges
 Automatically selected the only choice: 1
@@ -263,8 +263,8 @@ Possible choices for the type of physical quantity represented by this parameter
    4. Mass
    5. Position angle
 Enter one of these numbers [1,5] (2): 5
-Enter the minimum value in this parameter range [-∞ deg,∞ deg]: 86
-Enter the maximum value in this parameter range [-∞ deg,∞ deg]: 92
+Enter the minimum value in this parameter range [-.. deg,.. deg]: 86
+Enter the maximum value in this parameter range [-.. deg,.. deg]: 92
 \endverbatim
 
 Make sure to include the other free parameters, giving them appropriate quantities and ranges. Notice that a Distance
@@ -286,20 +286,20 @@ Possible choices for the convolution properties:
    1. Convolution setup
 Automatically selected the only choice: 1
 Enter the full width at half max in pixels [0,1000] (3): 1.7
-Enter the dimension in pixels of the psf frame [0,1000] (6): 
-Enter the minimum luminosity boundaries [-∞,∞]: 1e5
-Enter the maximum luminosity boundaries [-∞,∞]: 1e7
+Enter the dimension in pixels of the psf frame [0,1000] (6):
+Enter the minimum luminosity boundaries [-..,..]: 1e5
+Enter the maximum luminosity boundaries [-..,..]: 1e7
 Possible choices for item #2 in the reference images list:
    1. A reference image
-Enter one of these numbers or zero to terminate the list [0,1] (1): 1   
+Enter one of these numbers or zero to terminate the list [0,1] (1): 1
 Enter the path to this reference image: ./reference/g.fits
 Possible choices for the convolution properties:
    1. Convolution setup
 Automatically selected the only choice: 1
-Enter the full width at half max in pixels [0,1000] (3): 1.6 
-Enter the dimension in pixels of the psf frame [0,1000] (6): 
-Enter the minimum luminosity boundaries [-∞,∞]: 1e6
-Enter the maximum luminosity boundaries [-∞,∞]: 1e8
+Enter the full width at half max in pixels [0,1000] (3): 1.6
+Enter the dimension in pixels of the psf frame [0,1000] (6):
+Enter the minimum luminosity boundaries [-..,..]: 1e6
+Enter the maximum luminosity boundaries [-..,..]: 1e8
 Possible choices for item #3 in the reference images list:
    1. A reference image
 Enter one of these numbers or zero to terminate the list [0,1] (1): 0
@@ -315,8 +315,8 @@ Possible choices for the optimization properties:
 Automatically selected the only choice: 1
 Enter the number of individuals in the population [0,1000] (100): 200
 Enter the number of generations to be evaluated  [0,1000] (100): 100
-Enter the mutation probability [0,1] (0.03): 
-Enter the crossover rate [0,1] (0.65): 
+Enter the mutation probability [0,1] (0.03):
+Enter the crossover rate [0,1] (0.65):
 Successfully created fski file 'tutorial.fski'.
 To run the fit use the command: fitskirt tutorial
 \endverbatim
@@ -336,7 +336,7 @@ you can find the complete fski file.
 \verbatim
 <?xml version="1.0" encoding="UTF-8"?>
 <!--SKIRT radiative transfer simulations - © 2012-2014 Astronomical Observatory, Ghent University-->
-<skirt-simulation-hierarchy type="FitScheme" format="6.1" producer="FitSKIRT v7 (git 109-fbb9c3b-dirty built on Oct 21 2014 at 11:13:01)" time="2014-10-22T16:52:40">
+<skirt-simulation-hierarchy type="FitScheme" format="6.1" producer="FitSKIRT v7 ..." time="...">
     <OligoFitScheme fixedSeed="yes">
         <units type="Units">
             <ExtragalacticUnits fluxOutputStyle="Neutral"/>
@@ -447,23 +447,23 @@ tutorial_BESTsimulations.dat (see below) contains only the simulations which, at
 on the first line is therefore the first radiative transfer model done, because by definition it was the best model at
 that point. The last line gives you the final solution. As this is not the clearest way to get an overview of your run,
 make sure to look at the fitskirt_results.py script that comes with the PTS toolkit (see
-http://www.skirt.ugent.be/pts/_fit_s_k_i_r_t_guide.html). 
+http://www.skirt.ugent.be/pts/_fit_s_k_i_r_t_guide.html).
 
 The best fitting models are given as tutorial_Best_X_Y.fits where X corresponds to the best fitting solution in
 tutorial_BESTsimulations.dat and Y is the wavelength (in this case 0 being u-band and 1 being g-band). These frames are
 adjusted to the correct luminosity, convolved with the correct beam and have the same masked regions as the reference
 frames. Additionally a corresponding residual frame is created, tutorial_Residual_X_Y.fits, defined as
-abs(reference_frame - tutorial_Best_X_Y.fits)/abs(reference_frame). 
+abs(reference_frame - tutorial_Best_X_Y.fits)/abs(reference_frame).
 
 As a final comparison open tutorial_BESTsimulations.dat file. If you have used the exact same values as mentioned here
 you should get the following content:
 
 \verbatim
-0 91.1797 7145.96 558.521 0.95842 5.9267 863.562 3933.79 657.367 2.96175e+07 1.86388 3.47816e+06 7.44731e+06 1.16656e+06 2.83055e+06 1.20996 0.653925 
-1 91.4654 5219.54 640.2 0.681499 1.47608 3173.66 9080.32 53.0504 4.267e+07 1.82351 2.48662e+06 2.5702e+06 870138 1.04774e+06 1.1697 0.653808 
-2 91.6289 3250.48 306.137 0.897166 6.1312 1986.91 6925.8 627.842 3.80441e+07 1.74795 8.80891e+06 5.09352e+06 2.55459e+06 1.94144e+06 1.15268 0.59527 
-3 91.3737 3009.58 625.44 0.562385 2.12825 2689.87 2355.36 182.31 8.86875e+06 1.6638 2.85547e+06 2.88826e+06 1.12063e+06 1.11203e+06 1.10279 0.561012 
-4 91.3737 3009.58 625.44 0.562385 2.12825 2689.87 1883.33 182.31 8.86875e+06 1.65994 2.82915e+06 2.83591e+06 1.08691e+06 1.14905e+06 1.10212 0.557816 
+0 91.1797 7145.96 558.521 0.95842 5.9267 863.562 3933.79 657.367 2.96175e+07 1.86388 3.47816e+06 7.44731e+06 1.16656e+06 2.83055e+06 1.20996 0.653925
+1 91.4654 5219.54 640.2 0.681499 1.47608 3173.66 9080.32 53.0504 4.267e+07 1.82351 2.48662e+06 2.5702e+06 870138 1.04774e+06 1.1697 0.653808
+2 91.6289 3250.48 306.137 0.897166 6.1312 1986.91 6925.8 627.842 3.80441e+07 1.74795 8.80891e+06 5.09352e+06 2.55459e+06 1.94144e+06 1.15268 0.59527
+3 91.3737 3009.58 625.44 0.562385 2.12825 2689.87 2355.36 182.31 8.86875e+06 1.6638 2.85547e+06 2.88826e+06 1.12063e+06 1.11203e+06 1.10279 0.561012
+4 91.3737 3009.58 625.44 0.562385 2.12825 2689.87 1883.33 182.31 8.86875e+06 1.65994 2.82915e+06 2.83591e+06 1.08691e+06 1.14905e+06 1.10212 0.557816
 \endverbatim
 
 So in this case your best fitting model is on the fifth line and can be seen in tutorial_Best_4_0.fits and
@@ -471,7 +471,7 @@ tutorial_Best_4_1.fits and corresponding residuals. Again notice that this is no
 and should only be used in the context of this tutorial. If you want to make an actual fit of this galaxy, put off the
 fixed seed, change your photon packages to about 5e5, your populationsize to 200 and 100 generations. Also run your
 simulation using more than 1 thread or use mpi to run fitskirt. However, this fit will run much much longer and is not
-useful to quickly test your results. 
+useful to quickly test your results.
 
 Also notice that, although this tutorial was based on an edge-on spiral galaxy it is not limited to this case. Feel free
 to choose any free parameters or models which suit your case.
