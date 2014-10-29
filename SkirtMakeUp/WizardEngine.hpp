@@ -90,6 +90,10 @@ public slots:
         being handled is valid. */
     void setPropertyValid(bool valid);
 
+    /** This function clears the dirty flag and remembers the filepath in which the hierarchy was
+        saved. */
+    void hierarchyWasSaved(QString filepath);
+
     // ================== GUI Generation ====================
 
 public:
@@ -131,6 +135,10 @@ private:
     // true if the value of the property being handled is valid, false otherwise
     // valid only during ConstructHierarchy
     bool _propertyValid;
+
+    // the path of the file to which the current hierarchy has already been saved (although it may have changed),
+    // or the empty string if it has never been saved
+    QString _filepath;
 };
 
 ////////////////////////////////////////////////////////////////////

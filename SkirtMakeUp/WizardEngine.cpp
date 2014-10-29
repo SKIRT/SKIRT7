@@ -19,14 +19,14 @@
 #include "IntPropertyWizardPane.hpp"
 #include "ItemListPropertyHandler.hpp"
 #include "ItemListPropertyWizardPane.hpp"
-#include "SubItemPropertyWizardPane.hpp"
 #include "ItemPropertyHandler.hpp"
 #include "ItemPropertyWizardPane.hpp"
+#include "SaveWizardPane.hpp"
 #include "SimulationItem.hpp"
 #include "SimulationItemDiscovery.hpp"
 #include "StringPropertyHandler.hpp"
 #include "StringPropertyWizardPane.hpp"
-#include <QLabel>
+#include "SubItemPropertyWizardPane.hpp"
 
 using namespace SimulationItemDiscovery;
 
@@ -332,6 +332,13 @@ void WizardEngine::setPropertyValid(bool valid)
 
 ////////////////////////////////////////////////////////////////////
 
+void WizardEngine::hierarchyWasSaved(QString filepath)
+{
+    _filepath = filepath;
+}
+
+////////////////////////////////////////////////////////////////////
+
 QWidget* WizardEngine::createPane()
 {
     switch (_state)
@@ -371,7 +378,7 @@ QWidget* WizardEngine::createPane()
             }
         }
     case SaveHierarchy:
-        return new QLabel("Dummy wizard pane for state SaveHierarchy");
+        return new SaveWizardPane(_root, _filepath, this);
     }
 }
 
