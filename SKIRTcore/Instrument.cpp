@@ -42,7 +42,7 @@ void Instrument::sumResults(QList< Array*> arrays)
 {
     PeerToPeerCommunicator * communicator = find<PeerToPeerCommunicator>();
 
-    foreach (Array* arr, arrays) communicator->sum(*arr, false);
+    foreach (Array* arr, arrays) communicator->sum(*arr);
 }
 
 ////////////////////////////////////////////////////////////////////

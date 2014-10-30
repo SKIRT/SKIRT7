@@ -58,6 +58,7 @@ SimpleInstrument::write()
     fnames << "total";
     Fnames << "total flux";
 
+    // Sum the flux arrays element-wise across the different processes
     sumResults(farrays);
     sumResults(Farrays);
 

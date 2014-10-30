@@ -187,7 +187,12 @@ public:
         results. If dust emission is turned off, this function does nothing. */
     void calculatedustemission(bool ynstellar);
 
-    /** This function .. */
+    /** This function is used to sum the absorbed luminosities in the panchromatic dust system across
+        the different processes in the multiprocessing environment. This function must be provided with
+        a boolean argument, indicating whether the absorbed stellar luminosities (in _Labsstelvv) or
+        the absorbed thermal luminosities (in _Labsdustvv) must be summed. The communication is
+        performed by calling the sum_all() function of the PeerToPeerCommunicator object, which is
+        found with the discovery mechanism. */
     void sumResults(bool ynstellar);
 
     /** This function returns the luminosity \f$L_\ell\f$ at the wavelength index \f$\ell\f$ in the

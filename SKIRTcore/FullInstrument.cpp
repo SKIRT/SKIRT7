@@ -134,6 +134,7 @@ FullInstrument::write()
         Fnames << (QString::number(nscatt) + "-times scattered flux");
     }
 
+    // Sum the flux arrays element-wise across the different processes
     sumResults(farrays);
     sumResults(Farrays);
 

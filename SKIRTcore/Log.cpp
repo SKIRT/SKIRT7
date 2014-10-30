@@ -3,6 +3,7 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
+#include "FatalError.hpp"
 #include "QDateTime"
 #include "Log.hpp"
 #include "PeerToPeerCommunicator.hpp"
@@ -13,6 +14,30 @@
 Log::Log()
     : _lowestLevel(Info), _link(0), _procName(QString(""))
 {
+}
+
+////////////////////////////////////////////////////////////////////
+
+void Log::setupSelfBefore()
+{
+    PeerToPeerCommunicator* communicator;
+
+    try
+    {
+        // get a pointer to the PeerToPeerCommunicator without performing setup
+        // to avoid catching (and hiding) fatal errors during such setup
+        communicator = find<PeerToPeerCommunicator>(false);
+    }
+    catch (FatalError)
+    {
+        return;
+    }
+
+    // Do the find operation again, now to perform the setup of the
+    // PeerToPeerCommunicator so that the correct rank is initialized
+    communicator = find<PeerToPeerCommunicator>();
+
+    if (communicator->isMultiProc()) setProcessName(communicator->getRank());
 }
 
 ////////////////////////////////////////////////////////////////////

@@ -7,29 +7,35 @@
 #include "PeerToPeerCommunicator.hpp"
 #include "ProcessManager.hpp"
 
-PeerToPeerCommunicator::PeerToPeerCommunicator()
-{
-}
+////////////////////////////////////////////////////////////////////
 
-void PeerToPeerCommunicator::sum(Array& arr, bool toall)
+void PeerToPeerCommunicator::sum(Array& arr)
 {
     if (!isMultiProc()) return;
 
     Array results(arr.size());
 
-    if (toall)
-    {
-        ProcessManager::sum_all(&(arr[0]),&results[0],arr.size());
-        arr = results;
-    }
-    else
-    {
-        ProcessManager::sum(&(arr[0]),&results[0],arr.size(),0);
-        if (!_rank) arr = results;
-    }
+    ProcessManager::sum(&(arr[0]),&results[0],arr.size(),0);
+    if (isRoot()) arr = results;
 }
+
+////////////////////////////////////////////////////////////////////
+
+void PeerToPeerCommunicator::sum_all(Array& arr)
+{
+    if (!isMultiProc()) return;
+
+    Array results(arr.size());
+
+    ProcessManager::sum_all(&(arr[0]),&results[0],arr.size());
+    arr = results;
+}
+
+////////////////////////////////////////////////////////////////////
 
 bool PeerToPeerCommunicator::isRoot()
 {
-    return !_rank;
+    return !getRank();
 }
+
+////////////////////////////////////////////////////////////////////

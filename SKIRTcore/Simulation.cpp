@@ -61,7 +61,7 @@ void Simulation::setupAndRun()
 {
     _log->setup(); // ensure the log is properly setup before first use
 
-    QString processInfo = _communicator->isMultiProc() ? " with " + QString::number(_communicator->getSize()) + " processes." : "";
+    QString processInfo = _communicator->isMultiProc() ? " with " + QString::number(_communicator->getSize()) + " processes" : "";
 
     TimeLogger logger(_log, "simulation " + _paths->outputPrefix() + processInfo);
     setup();

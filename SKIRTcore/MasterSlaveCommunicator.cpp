@@ -80,6 +80,14 @@ int MasterSlaveCommunicator::taskCount() const
 }
 
 ////////////////////////////////////////////////////////////////////
+
+int MasterSlaveCommunicator::master() const
+{
+    return 0;
+}
+
+////////////////////////////////////////////////////////////////////
+
 bool MasterSlaveCommunicator::isMaster() const
 {
     return !isSlave();
@@ -89,7 +97,7 @@ bool MasterSlaveCommunicator::isMaster() const
 
 bool MasterSlaveCommunicator::isSlave() const
 {
-    return _performing || (isMultiProc() && _rank);
+    return _performing || (isMultiProc() && getRank());
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -192,7 +200,6 @@ QVector<QVariant> MasterSlaveCommunicator::performTask(QVector<QVariant> inputVe
 
 ////////////////////////////////////////////////////////////////////
 
-#ifdef BUILDING_WITH_MPI
 namespace
 {
     // serialize a QVariant object into a QByteArray, verifying the maximum length of the result
@@ -216,28 +223,28 @@ namespace
         return QVariant(stream);
     }
 }
-#endif
 
 ////////////////////////////////////////////////////////////////////
 
 QVector<QVariant> MasterSlaveCommunicator::master_command_loop(int taskIndex, QVector<QVariant> inputVector)
 {
-#ifdef BUILDING_WITH_MPI
     // prepare an output vector of the appropriate size
     int numitems = inputVector.size();
     QVector<QVariant> outputVector(numitems);
 
     // prepare a vector to remember the index of most recent item handed out to each slave
-    QVector<int> itemForSlave(_Nprocs);
+    QVector<int> itemForSlave(getSize());
 
     // the index of the next item to be handed out
     int numsent = 0;
 
     // hand out an item to each slave (unless there are less items than slaves)
-    for (int slave=1; slave<_Nprocs && numsent<numitems; slave++,numsent++)
+    for (int slave=1; slave<getSize() && numsent<numitems; slave++,numsent++)
     {
         QByteArray buffer = toByteArray(_bufsize, inputVector[numsent]);
-        MPI_Send(buffer.data(), buffer.size(), MPI_BYTE, slave, taskIndex, MPI_COMM_WORLD);
+
+        ProcessManager::sendByteBuffer(buffer, slave, taskIndex);
+
         itemForSlave[slave] = numsent;
     }
 
@@ -246,9 +253,8 @@ QVector<QVariant> MasterSlaveCommunicator::master_command_loop(int taskIndex, QV
     for (int i=0; i<numitems; i++)
     {
         // receive a message from any slave
-        MPI_Status status;
-        MPI_Recv(resultbuffer.data(), _bufsize, MPI_BYTE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-        int slave = status.MPI_SOURCE;
+        int slave;
+        ProcessManager::receiveByteBuffer(resultbuffer, slave);
 
         // put the result in the output vector
         outputVector[itemForSlave[slave]] = toVariant(resultbuffer);
@@ -257,53 +263,48 @@ QVector<QVariant> MasterSlaveCommunicator::master_command_loop(int taskIndex, QV
         if (numsent<numitems)
         {
             QByteArray buffer = toByteArray(_bufsize, inputVector[numsent]);
-            MPI_Send(buffer.data(), buffer.size(), MPI_BYTE, slave, taskIndex, MPI_COMM_WORLD);
+
+            ProcessManager::sendByteBuffer(buffer, slave, taskIndex);
+
             itemForSlave[slave] = numsent;
             numsent++;
         }
     }
     return outputVector;
-#else
-    Q_UNUSED(taskIndex)
-    return inputVector;
-#endif
 }
 
 ////////////////////////////////////////////////////////////////////
 
 void MasterSlaveCommunicator::slave_obey_loop()
 {
-#ifdef BUILDING_WITH_MPI
     QByteArray inbuffer(_bufsize, 0);
     while (true)
     {
         // receive the next message from the master
-        MPI_Status status;
-        MPI_Recv(inbuffer.data(), _bufsize, MPI_BYTE, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+        int tag;
+        ProcessManager::receiveByteBuffer(inbuffer, master(), tag);
 
         // if the message tag specifies a non-existing task, terminate the obey loop
-        if (status.MPI_TAG < 0 || status.MPI_TAG >= _tasks.size()) break;
+        if (tag < 0 || tag >= _tasks.size()) break;
 
         // perform the requested task, deserializing and serializing QVariant from/to buffer
-        QByteArray outbuffer = toByteArray(_bufsize, _tasks[status.MPI_TAG]->perform(toVariant(inbuffer)));
+        QByteArray outbuffer = toByteArray(_bufsize, _tasks[tag]->perform(toVariant(inbuffer)));
 
         // send the result back to the master
-        MPI_Send(outbuffer.data(), outbuffer.size(), MPI_BYTE, 0, status.MPI_TAG, MPI_COMM_WORLD);
+        ProcessManager::sendByteBuffer(outbuffer, master(), tag);
     }
-#endif
 }
 
 ////////////////////////////////////////////////////////////////////
 
 void MasterSlaveCommunicator::stop_obeying()
 {
-#ifdef BUILDING_WITH_MPI
-    for (int slave=1; slave<_Nprocs; slave++)
+    for (int slave=1; slave<getSize(); slave++)
     {
         // send an empty message with a tag that specifies a non-existing task
-        MPI_Send(0, 0, MPI_BYTE, slave, _tasks.size(), MPI_COMM_WORLD);
+        QByteArray emptybuffer;
+        ProcessManager::sendByteBuffer(emptybuffer, slave, _tasks.size());
     }
-#endif
 }
 
 ////////////////////////////////////////////////////////////////////

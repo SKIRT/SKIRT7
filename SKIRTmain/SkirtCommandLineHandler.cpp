@@ -260,7 +260,7 @@ void SkirtCommandLineHandler::doSimulation(size_t index)
 
     PeerToPeerCommunicator* communicator = simulation->getCommunicator();
 
-    if (communicator->isMultiProc()) simulation->log()->setProcessName(communicator->getRank());
+    //if (communicator->isMultiProc()) simulation->log()->setProcessName(communicator->getRank());
 
     // output a ski file and a latex file reflecting this simulation for later reference
     if (communicator->isRoot())

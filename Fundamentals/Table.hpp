@@ -76,6 +76,14 @@ public:
 
     // Sets all values in the table to zero.
     void clear() { _v = 0; }
+
+    /** This function returns a pointer to the internal array of the Table object. Because this is
+        very dirty, using this function should be avoid in almost all cases. This function is only
+        used in the SKIRT code for the MPI communications, which require a set of contiguous data.
+        Calling the getArray() function avoids the need of copying the elements of Table objects
+        into arrays before passing them to MPI communication functions, which would cause a
+        significant overhead. */
+    Array* getArray() { return &_v; }
 };
 
 ////////////////////////////////////////////////////////////////////
@@ -96,7 +104,6 @@ public:
     void resize(size_t n0, size_t n1) { _n[0] = n0; _n[1] = n1; resize_base(); }
     const double& operator()(size_t i, size_t j) const { return _v[i*_n[1]+j]; }
     double& operator()(size_t i, size_t j) { return _v[i*_n[1]+j]; }
-    Array* getArray() { return &_v; }
 };
 
 // The template specialization for 3 dimensions

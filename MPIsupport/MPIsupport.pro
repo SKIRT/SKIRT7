@@ -22,12 +22,6 @@ LIBS += -L/usr/local/lib/ -lmpi
 QMAKE_CXXFLAGS_RELEASE -= -O2
 QMAKE_CXXFLAGS_RELEASE += -O3
 
-# include libraries internal to the project
-#INCLUDEPATH += $$PWD/../SKIRTcore
-#DEPENDPATH += $$PWD/../SKIRTcore
-#unix: LIBS += -L$$OUT_PWD/../SKIRTcore/ -lskirtcore
-#unix: PRE_TARGETDEPS += $$OUT_PWD/../SKIRTcore/libskirtcore.a
-
 # use MPI compiler if available (invoke 'which' via bash in login script mode to honor PATHS on Mac OS X)
 MPI_COMPILER = $$system(bash -lc "'which mpiicpc'")
 isEmpty(MPI_COMPILER) {

@@ -42,6 +42,14 @@ protected:
         numbers, using the current value of the seed. */
     void setupSelfBefore();
 
+private:
+    /** This function serves as the body of two different functions: the setupSelfBefore() function and
+        the randomize() function. Based on the seed stored in the _seed attribute, this function
+        generates random sequences for each different thread in the simulation. This is done by
+        incrementing the seed with each increment of the thread number. During setup, the _seed
+        variable is equal on each process, providing them with the same random sequences. When this
+        function is called from randomize(), each process has given a different seed, yielding
+        different random sequences for every thread in the multiprocessing environment. */
     void initialize(int Nthreads);
 
     //======== Setters & Getters for Discoverable Attributes =======
@@ -57,7 +65,11 @@ public:
     //======================== Other Functions =======================
 
 public:
-    /** This function .. */
+    /** This function is used to give each thread in the multiprocessing environment a different random
+        seed and regenerating their random sequences. This function uses the find algorithm to obtain a
+        pointer to the PeerToPeerCommunicator object. Next, the _seed variable is shifted by exactly
+        the number of threads for each successive process. At least, the initialize() function is
+        called with the number of threads as an argument. */
     void randomize();
 
     /** This function generates a random uniform deviate, i.e. a random double precision number in

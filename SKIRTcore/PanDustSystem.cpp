@@ -338,7 +338,7 @@ double PanDustSystem::Labsdusttot() const
     Array arr(1);
     arr[0] = sum;
 
-    communicator->sum(arr, true);
+    communicator->sum_all(arr);
 
     return arr[0];
 }
@@ -386,7 +386,7 @@ void PanDustSystem::sumResults(bool ynstellar)
     Array* arr;
     arr = ynstellar ? _Labsstelvv.getArray() : _Labsdustvv.getArray();
 
-    communicator->sum(*arr, true);
+    communicator->sum_all(*arr);
 }
 
 ////////////////////////////////////////////////////////////////////

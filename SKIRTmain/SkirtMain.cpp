@@ -16,6 +16,7 @@
 
 int main(int argc, char** argv)
 {
+    // initialize remote communication capability, if present
     ProcessManager::initialize(&argc, &argv);
 
     // construct application object for argument parsing and such,
@@ -35,6 +36,7 @@ int main(int argc, char** argv)
     SkirtCommandLineHandler handler(app.arguments());
     int status = handler.perform();
 
+    // finalize remote communication capability, if present
     ProcessManager::finalize();
 
     return status;

@@ -57,6 +57,7 @@ FrameInstrument::write()
     farrays << &_ftotv;
     fnames << "total";
 
+    // Sum the flux arrays element-wise across the different processes
     sumResults(farrays);
 
     // calibrate and output the arrays
