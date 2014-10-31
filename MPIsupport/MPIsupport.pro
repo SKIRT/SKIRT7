@@ -15,8 +15,10 @@ TARGET = mpisupport
 QT -= gui
 CONFIG *= staticlib create_prl thread c++11
 
-INCLUDEPATH += /usr/local/include
-LIBS += -L/usr/local/lib/ -lmpi
+macx {
+    INCLUDEPATH += /usr/local/include
+    LIBS += -L/usr/local/lib/ -lmpi
+}
 
 # compile with maximum optimization
 QMAKE_CXXFLAGS_RELEASE -= -O2

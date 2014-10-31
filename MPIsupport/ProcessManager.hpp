@@ -93,7 +93,6 @@ public:
     static bool isMultiProc();
 
 private:
-
     static std::atomic<int> requests;   // This atomic integer is used to store the number of active requests for MPI
 
 };

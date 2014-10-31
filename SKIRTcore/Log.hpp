@@ -26,12 +26,13 @@ protected:
     Log();
 
     /** The purpose of this function is setting the _procName attribute, using the rank of the process.
-        This rank is obtained by using the find algorithm to search for a PeerToPeerCommunicator
-        object. If none is found, because for example the simulation hierarchy has not yet been
-        created, the function returns and _procName retains its empty state. If the find algorithm does
-        succeed, the find algorithm is applied again, this time to invoke the setup of the
-        PeerToPeerCommunicator object, if this is not yet done. Then, the rank is obtained from the
-        PeerToPeerCommunicator and passed as an argument to the setProcessName() function. */
+        This rank is obtained by using the find algorithm to search for an instance of a
+        ProcessCommunicator subclass. If none is found, because for example the simulation or fitscheme
+        hierarchy has not yet been created, the function returns and _procName retains its empty state.
+        If the find algorithm does succeed, the find algorithm is applied again, this time to invoke
+        the setup of the ProcessCommunicator object, if this is not yet done. Then, the rank is
+        obtained from the ProcessCommunicator and passed as an argument to the setProcessName()
+        function. */
     void setupSelfBefore();
 
     //======== Setters & Getters for Discoverable Attributes =======

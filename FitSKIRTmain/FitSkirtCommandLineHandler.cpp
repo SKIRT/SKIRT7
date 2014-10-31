@@ -16,6 +16,7 @@
 #include "LatexHierarchyWriter.hpp"
 #include "FitScheme.hpp"
 #include "FitSkirtCommandLineHandler.hpp"
+#include "ProcessManager.hpp"
 #include "StopWatch.hpp"
 #include "TimeLogger.hpp"
 #include "XmlHierarchyCreator.hpp"
@@ -63,6 +64,8 @@ int FitSkirtCommandLineHandler::perform()
 
 int FitSkirtCommandLineHandler::doInteractive()
 {
+    if (ProcessManager::isMultiProc()) throw FATALERROR("Interactive mode cannot be run with multiple processes!");
+
     _console.info("Interactively constructing a fit scheme...");
 
     // ask for the name of the fski file in which to save the result

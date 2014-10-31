@@ -51,6 +51,8 @@ void Simulation::run()
     // verify setup
     if (_state < SetupDone) throw FATALERROR("Simulation has not been setup before being run");
 
+    if (_communicator->isMultiProc()) _random->randomize();
+
     TimeLogger logger(_log, "the simulation run");
     runSelf();
 }
@@ -62,12 +64,9 @@ void Simulation::setupAndRun()
     _log->setup(); // ensure the log is properly setup before first use
 
     QString processInfo = _communicator->isMultiProc() ? " with " + QString::number(_communicator->getSize()) + " processes" : "";
-
     TimeLogger logger(_log, "simulation " + _paths->outputPrefix() + processInfo);
+
     setup();
-
-    if (_communicator->isMultiProc()) _random->randomize();
-
     run();
 }
 

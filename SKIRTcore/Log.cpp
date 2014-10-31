@@ -6,7 +6,7 @@
 #include "FatalError.hpp"
 #include "QDateTime"
 #include "Log.hpp"
-#include "PeerToPeerCommunicator.hpp"
+#include "ProcessCommunicator.hpp"
 #include "ProcessManager.hpp"
 
 ////////////////////////////////////////////////////////////////////
@@ -20,13 +20,13 @@ Log::Log()
 
 void Log::setupSelfBefore()
 {
-    PeerToPeerCommunicator* communicator;
+    ProcessCommunicator* communicator;
 
     try
     {
         // get a pointer to the PeerToPeerCommunicator without performing setup
         // to avoid catching (and hiding) fatal errors during such setup
-        communicator = find<PeerToPeerCommunicator>(false);
+        communicator = find<ProcessCommunicator>(false);
     }
     catch (FatalError)
     {
@@ -35,7 +35,7 @@ void Log::setupSelfBefore()
 
     // Do the find operation again, now to perform the setup of the
     // PeerToPeerCommunicator so that the correct rank is initialized
-    communicator = find<PeerToPeerCommunicator>();
+    communicator = find<ProcessCommunicator>();
 
     if (communicator->isMultiProc()) setProcessName(communicator->getRank());
 }

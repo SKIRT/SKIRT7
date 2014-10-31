@@ -258,11 +258,8 @@ void SkirtCommandLineHandler::doSimulation(size_t index)
     simulation->log()->setLinkedLog(log);
     if (_parallelSims > 1 || _args.isPresent("-b")) simulation->log()->setLowestLevel(Log::Success);
 
-    PeerToPeerCommunicator* communicator = simulation->getCommunicator();
-
-    //if (communicator->isMultiProc()) simulation->log()->setProcessName(communicator->getRank());
-
     // output a ski file and a latex file reflecting this simulation for later reference
+    PeerToPeerCommunicator* communicator = simulation->getCommunicator();
     if (communicator->isRoot())
     {
         XmlHierarchyWriter writer1;
