@@ -82,7 +82,13 @@ EnumPropertyWizardPane::EnumPropertyWizardPane(PropertyHandlerPtr handler, QObje
 void EnumPropertyWizardPane::updateValueFor(QAbstractButton* button)
 {
     auto hdlr = handlerCast<EnumPropertyHandler>();
-    hdlr->setValue(button->property("choiceKey").toString());
+
+    QString newValue = button->property("choiceKey").toString();
+    if (hdlr->value() != newValue)
+    {
+        hdlr->setValue(newValue);
+        emit propertyValueChanged();
+    }
     setPropertyConfigured();
     emit propertyValidChanged(true);
 }

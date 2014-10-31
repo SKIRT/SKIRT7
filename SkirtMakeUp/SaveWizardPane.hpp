@@ -25,7 +25,7 @@ public:
         argument provides a pointer to the root of the simulation item hierarchy. The last argument
         specifies the object that will be notified of a succesfull save through invocation of the
         object's relevant slot. */
-    explicit SaveWizardPane(SimulationItem* root, QString filepath, QObject* target);
+    explicit SaveWizardPane(SimulationItem* root, QString filepath, bool dirty, QObject* target);
 
     // ==================== Event Handling ====================
 
@@ -46,6 +46,10 @@ private:
         notifies the target object by emitting a hierarchyWasSaved() signal. */
     void saveToFile(QString filepath);
 
+    /** This function enables or disables the push buttons depending on the filename and dirty
+        state. */
+    void setButtonsEnabled();
+
 signals:
     /** This signal is emitted after the simulation item hierarchy has been successfully saved. */
     void hierarchyWasSaved(QString filepath);
@@ -55,6 +59,7 @@ signals:
 private:
     SimulationItem* _root;
     QString _filepath;
+    bool _dirty;
     QPushButton* _saveButton;
     QPushButton* _saveAsButton;
 };

@@ -44,6 +44,11 @@ public:
         otherwise. */
     bool isDirty();
 
+    /** This function returns the path of the file to which the current hierarchy has already been
+        saved (although it may have changed since then), or the empty string if it has never been
+        saved. */
+    QString filepath();
+
 public slots:
     /** This function advances the wizard to the next state. It should only be called if
         canAdvance() returns true. */
@@ -69,6 +74,13 @@ signals:
     /** This signal is emitted when the state of the wizard has changed. */
     void stateChanged();
 
+    /** This signal is emitted when the filename in which the current hierarchy was saved has
+        changed. */
+    void titleChanged();
+
+    /** This signal is emitted when the dirty state of the current hierarchy has changed. */
+    void dirtyChanged();
+
 public:
     /** This function emits the stateChanged(), canAdvanceChangedTo() and canRetreatChangedTo()
         signals. */
@@ -90,6 +102,9 @@ public slots:
         being handled is valid. */
     void setPropertyValid(bool valid);
 
+    /** This function sets the dirty flag. */
+    void hierarchyWasChanged();
+
     /** This function clears the dirty flag and remembers the filepath in which the hierarchy was
         saved. */
     void hierarchyWasSaved(QString filepath);
@@ -107,37 +122,44 @@ public:
     // ================== Data Members ====================
 
 private:
+    // ---- data members representing the state of the wizard ----
+
     // the top-level state; always valid
     enum State { BasicChoice, CreateRoot, ConstructHierarchy, SaveHierarchy };
-    State _state;
+    State _state = BasicChoice;
 
-    // the basic choice; always valid but remains Unknown until BasicChoice has been completed at least once
+    // the basic choice; always valid
     enum Choice { Unknown, NewSki, NewFski };
-    Choice _choice;
+    Choice _choice = NewSki;
 
     // the simulation item hierarchy under construction; pointer has ownership;
     // always valid but remains null until CreateRoot has been completed at least once
-    SimulationItem* _root;
+    SimulationItem* _root = 0;
 
     // the simulation item currently being handled; pointer is a reference without ownership;
     // valid only during ConstructHierarchy
-    SimulationItem* _current;
+    SimulationItem* _current = 0;
 
     // the zero-based index of the property currently being handled (in the current simulation item);
     // valid only during ConstructHierarchy
-    int _propertyIndex;
+    int _propertyIndex = -1;
 
     // the zero-based index of the currently selected sub-item of the current item list property,
     // or -1 when editing the item list property itself;
     // valid only if the current property is an item list
-    int _subItemIndex;
+    int _subItemIndex = -1;
 
     // true if the value of the property being handled is valid, false otherwise
     // valid only during ConstructHierarchy
-    bool _propertyValid;
+    bool _propertyValid = false;
+
+    // ---- data members related to the state of the wizard ----
+
+    // true if the current hierarchy holds unsaved information, false otherwise; always valid
+    bool _dirty = false;
 
     // the path of the file to which the current hierarchy has already been saved (although it may have changed),
-    // or the empty string if it has never been saved
+    // or the empty string if it has never been saved; always valid
     QString _filepath;
 };
 

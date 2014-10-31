@@ -65,7 +65,11 @@ void StringPropertyWizardPane::updateValue(const QString& text)
     // verify that value is non-empty before setting it
     QString value = text.simplified();
     bool valid = !value.isEmpty();
-    if (valid) hdlr->setValue(value);
+    if (valid && value!=hdlr->value())
+    {
+        hdlr->setValue(value);
+        emit propertyValueChanged();
+    }
     setPropertyConfigured(valid);
     emit propertyValidChanged(valid);
 }

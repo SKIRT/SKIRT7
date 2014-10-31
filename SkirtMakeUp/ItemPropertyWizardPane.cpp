@@ -104,11 +104,19 @@ void ItemPropertyWizardPane::selectTypeFor(QAbstractButton* button)
     if (button->property("choiceType").isValid())
     {
         auto newType = button->property("choiceType").toByteArray();
-        if (!hdlr->value() || itemType(hdlr->value()) != newType) hdlr->setToNewItemOfType(newType);
+        if (!hdlr->value() || itemType(hdlr->value()) != newType)
+        {
+            hdlr->setToNewItemOfType(newType);
+            emit propertyValueChanged();
+        }
     }
     else
     {
-        if (hdlr->value()) hdlr->setToNull();
+        if (hdlr->value())
+        {
+            hdlr->setToNull();
+            emit propertyValueChanged();
+        }
     }
 
     // make the target item remember that this property was configured by the user

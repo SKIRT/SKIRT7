@@ -98,6 +98,7 @@ void ItemListPropertyWizardPane::addItem()
         }
     }
     bool success = hdlr->addNewItemOfType(defaultType);
+    if (success) emit propertyValueChanged();
 
     // add a corresponding line to the list widget
     if (success)
@@ -128,6 +129,7 @@ void ItemListPropertyWizardPane::removeItem()
         delete _listWidget->takeItem(index);
         auto hdlr = handlerCast<ItemListPropertyHandler>();
         hdlr->removeValueAt(index);
+        emit propertyValueChanged();
     }
     setButtonsEnabled();
 }

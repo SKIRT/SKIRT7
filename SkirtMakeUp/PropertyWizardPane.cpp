@@ -14,6 +14,7 @@ PropertyWizardPane::PropertyWizardPane(PropertyHandlerPtr handler, QObject* targ
 {
     _handler = handler;
     connect(this, SIGNAL(propertyValidChanged(bool)), target, SLOT(setPropertyValid(bool)));
+    connect(this, SIGNAL(propertyValueChanged()), target, SLOT(hierarchyWasChanged()));
 }
 
 ////////////////////////////////////////////////////////////////////

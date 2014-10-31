@@ -33,7 +33,7 @@ using namespace SimulationItemDiscovery;
 ////////////////////////////////////////////////////////////////////
 
 WizardEngine::WizardEngine(QObject* parent)
-    : QObject(parent), _state(BasicChoice), _choice(NewSki), _root(0), _current(0)
+    : QObject(parent)
 {
 }
 
@@ -76,7 +76,14 @@ bool WizardEngine::canRetreat()
 
 bool WizardEngine::isDirty()
 {
-    return _state == ConstructHierarchy;
+    return _dirty;
+}
+
+////////////////////////////////////////////////////////////////////
+
+QString WizardEngine::filepath()
+{
+    return _filepath;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -117,6 +124,7 @@ void WizardEngine::advance()
     case BasicChoice:
         {
             _state = CreateRoot;
+            emit titleChanged();
         }
         break;
     case CreateRoot:
@@ -320,6 +328,8 @@ void WizardEngine::setRootType(QByteArray newRootType)
     delete _root;
     _root = createSimulationItem(newRootType);
     emit canAdvanceChangedTo(canAdvance());
+    _dirty = true;
+    emit dirtyChanged();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -332,9 +342,20 @@ void WizardEngine::setPropertyValid(bool valid)
 
 ////////////////////////////////////////////////////////////////////
 
+void WizardEngine::hierarchyWasChanged()
+{
+    _dirty = true;
+    emit dirtyChanged();
+}
+
+////////////////////////////////////////////////////////////////////
+
 void WizardEngine::hierarchyWasSaved(QString filepath)
 {
     _filepath = filepath;
+    _dirty = false;
+    emit titleChanged();
+    emit dirtyChanged();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -378,7 +399,7 @@ QWidget* WizardEngine::createPane()
             }
         }
     case SaveHierarchy:
-        return new SaveWizardPane(_root, _filepath, this);
+        return new SaveWizardPane(_root, _filepath, _dirty, this);
     }
 }
 

@@ -18,11 +18,12 @@ using namespace SimulationItemDiscovery;
 
 ////////////////////////////////////////////////////////////////////
 
-SaveWizardPane::SaveWizardPane(SimulationItem* root, QString filepath, QObject* target)
+SaveWizardPane::SaveWizardPane(SimulationItem* root, QString filepath, bool dirty, QObject* target)
 {
     // remember the constructor arguments
     _root = root;
     _filepath = filepath;
+    _dirty = dirty;
 
     // connect ourselves to the target
     connect(this, SIGNAL(hierarchyWasSaved(QString)), target, SLOT(hierarchyWasSaved(QString)));
@@ -54,6 +55,9 @@ SaveWizardPane::SaveWizardPane(SimulationItem* root, QString filepath, QObject* 
     // finalize the layout and assign it to ourselves
     layout->addStretch();
     setLayout(layout);
+
+    // enable/disable our buttons
+    setButtonsEnabled();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -83,15 +87,29 @@ void SaveWizardPane::saveAs()
     if (!filepath.isEmpty()) saveToFile(filepath);
 }
 
+////////////////////////////////////////////////////////////////////
+
 void SaveWizardPane::saveToFile(QString filepath)
 {
     // save the hierarchy in the specified file
     XmlHierarchyWriter writer;
     writer.writeHierarchy(_root, filepath);
     _filepath = filepath;
+    _dirty = false;
 
     // notify the target
     emit hierarchyWasSaved(filepath);
+
+    // enable/disable our buttons
+    setButtonsEnabled();
+}
+
+////////////////////////////////////////////////////////////////////
+
+void SaveWizardPane::setButtonsEnabled()
+{
+    _saveButton->setEnabled(!_filepath.isEmpty() && _dirty);
+    _saveAsButton->setEnabled(true);
 }
 
 ////////////////////////////////////////////////////////////////////

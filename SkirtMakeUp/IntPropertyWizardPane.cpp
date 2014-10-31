@@ -78,8 +78,13 @@ void IntPropertyWizardPane::updateValue(const QString& text)
     auto hdlr = handlerCast<IntPropertyHandler>();
 
     // verify that value is valid and within range before setting it
+    int value = hdlr->toInt(text);
     bool valid = isValidAndInRange(hdlr, text);
-    if (valid) hdlr->setValue(hdlr->toInt(text));
+    if (valid && value!=hdlr->value())
+    {
+        hdlr->setValue(value);
+        emit propertyValueChanged();
+    }
     setPropertyConfigured(valid);
     emit propertyValidChanged(valid);
 }

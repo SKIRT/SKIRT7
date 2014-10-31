@@ -24,7 +24,7 @@ class PropertyWizardPane : public QWidget
 public:
     /** The default (and only) constructor retains a reference to the specified property handler so
         that it does not get deleted until the wizard pane is destroyed, and connects the
-        propertyValueChanged() signal to the specified target object. */
+        propertyValidChanged() and propertyValueChanged() signals to the specified target object. */
     explicit PropertyWizardPane(PropertyHandlerPtr handler, QObject* target);
 
     // ==================== Event Handling ====================
@@ -35,9 +35,14 @@ protected:
     void showEvent(QShowEvent* event);
 
 signals:
-    /** This signal is emitted when the value of the property has changed in such a way that it may
-        have become valid or invalid. */
+    /** This signal is emitted when the valid state of the property wizard pane (indicating whether
+        the wizard is allowed to advance) may have changed. */
     void propertyValidChanged(bool valid);
+
+    /** This signal is emitted when the value of the property being handled by this property wizard
+        pane has changed. The signal should only be emitted when the value actually did change, not
+        just when it might have changed. Thus the caller should check the previous property value. */
+    void propertyValueChanged();
 
     // ============== Access to data from subclasses ==========
 

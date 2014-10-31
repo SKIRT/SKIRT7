@@ -87,6 +87,7 @@ void SubItemPropertyWizardPane::selectTypeFor(QAbstractButton* button)
     {
         hdlr->removeValueAt(index);
         hdlr->insertNewItemOfType(index, newType);
+        emit propertyValueChanged();
     }
 
     // signal the change

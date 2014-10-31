@@ -70,8 +70,13 @@ void DoubleListPropertyWizardPane::updateValue(const QString& text)
     auto hdlr = handlerCast<DoubleListPropertyHandler>();
 
     // verify that text is valid and all numbers are within range before setting value
+    auto value = hdlr->toDoubleList(text);
     bool valid = isValidAndInRange(hdlr, text);
-    if (valid) hdlr->setValue(hdlr->toDoubleList(text));
+    if (valid && value!=hdlr->value())
+    {
+        hdlr->setValue(hdlr->toDoubleList(text));
+        emit propertyValueChanged();
+    }
     setPropertyConfigured(valid);
     emit propertyValidChanged(valid);
 }

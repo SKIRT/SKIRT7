@@ -96,7 +96,13 @@ BoolPropertyWizardPane::BoolPropertyWizardPane(PropertyHandlerPtr handler, QObje
 void BoolPropertyWizardPane::updateValueFor(int buttonID)
 {
     auto hdlr = handlerCast<BoolPropertyHandler>();
-    hdlr->setValue(buttonID ? true : false);
+
+    bool newValue = buttonID ? true : false;
+    if (hdlr->value() != newValue)
+    {
+        hdlr->setValue(newValue);
+        emit propertyValueChanged();
+    }
     setPropertyConfigured();
     emit propertyValidChanged(true);
 }

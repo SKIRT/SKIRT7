@@ -7,14 +7,15 @@
 
 #include "WizardEngine.hpp"
 #include <QApplication>
+#include <QFileInfo>
 #include <QFileOpenEvent>
 #include <QHBoxLayout>
-#include <QVBoxLayout>
 #include <QLabel>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSettings>
 #include <QStatusBar>
+#include <QVBoxLayout>
 
 ////////////////////////////////////////////////////////////////////
 
@@ -62,6 +63,8 @@ MainWindow::MainWindow()
     connect(_wizard, SIGNAL(canAdvanceChangedTo(bool)), advanceButton, SLOT(setEnabled(bool)));
     connect(_wizard, SIGNAL(canRetreatChangedTo(bool)), retreatButton, SLOT(setEnabled(bool)));
     connect(_wizard, SIGNAL(stateChanged()), this, SLOT(replaceWizardPane()));
+    connect(_wizard, SIGNAL(titleChanged()), this, SLOT(updateTitle()));
+    connect(_wizard, SIGNAL(dirtyChanged()), this, SLOT(updateDirtyState()));
     _wizard->emitStateChanged();
 }
 
@@ -95,6 +98,21 @@ void MainWindow::replaceWizardPane()
     _wizardLayout->addWidget(_wizardPane);
 }
 
+void MainWindow::updateTitle()
+{
+    QString filepath = _wizard->filepath();
+    QString file = filepath.isEmpty() ? QString("Untitled") : QFileInfo(filepath).fileName();
+    QString app = QCoreApplication::applicationName();
+    setWindowTitle(file + "[*] - " + app);
+}
+
+////////////////////////////////////////////////////////////////////
+
+void MainWindow::updateDirtyState()
+{
+    setWindowModified(_wizard->isDirty());
+}
+
 ////////////////////////////////////////////////////////////////////
 
 void MainWindow::keyPressEvent(QKeyEvent* event)
@@ -124,7 +142,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     {
         auto ret = QMessageBox::warning(this, QCoreApplication::applicationName(),
                                         "Do you want to discard your unsaved changes?",
-                                        QMessageBox::Discard | QMessageBox::Cancel);
+                                        QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Cancel);
         if (ret == QMessageBox::Cancel)
         {
             event->ignore();

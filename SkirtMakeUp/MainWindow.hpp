@@ -44,6 +44,14 @@ public slots:
         retrieved from the wizard engine. */
     void replaceWizardPane();
 
+    /** This function updates the window title to reflect the current filename, which can be
+        retrieved from the wizard engine. */
+    void updateTitle();
+
+    /** This function updates the window title bar to reflect the current dirty state, which can be
+        retrieved from the wizard engine. */
+    void updateDirtyState();
+
 protected:
     /** This function is invoked for key presses that aren't handled in a sub-pane. It handles the
         keyboard shortcuts for the advance and retreat actions. */

@@ -78,8 +78,13 @@ void DoublePropertyWizardPane::updateValue(const QString& text)
     auto hdlr = handlerCast<DoublePropertyHandler>();
 
     // verify that value is valid and within range before setting it
+    double value = hdlr->toDouble(text);
     bool valid = isValidAndInRange(hdlr, text);
-    if (valid) hdlr->setValue(hdlr->toDouble(text));
+    if (valid && value!=hdlr->value())
+    {
+        hdlr->setValue(value);
+        emit propertyValueChanged();
+    }
     setPropertyConfigured(valid);
     emit propertyValidChanged(valid);
 }
