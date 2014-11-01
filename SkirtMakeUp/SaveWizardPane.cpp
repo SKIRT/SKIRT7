@@ -28,36 +28,73 @@ SaveWizardPane::SaveWizardPane(SimulationItem* root, QString filepath, bool dirt
     // connect ourselves to the target
     connect(this, SIGNAL(hierarchyWasSaved(QString)), target, SLOT(hierarchyWasSaved(QString)));
 
+    // discover the type of hierarchy
+    bool skirt = SimulationItemDiscovery::inherits(itemType(_root), "MonteCarloSimulation");
+    QString filetype = skirt ? "SKIRT configuration" : "FitScheme";
+
     // create the layout so that we can add stuff one by one
     auto layout = new QVBoxLayout;
 
-    // add the caption, depending on the type of hierarchy
-    bool skirt = SimulationItemDiscovery::inherits(itemType(_root), "MonteCarloSimulation");
-    QString filetype = skirt ? "SKIRT parameter file" : "FitScheme file";
-    layout->addWidget(new QLabel("Press the appropriate button to save the " + filetype + ":"));
+    // ---- save ----
+    {
+        // add the caption
+        layout->addWidget(new QLabel("Press this button to save the " + filetype + " into the same file:"));
 
-    // add the push buttons for saving
-    _saveButton = new QPushButton("Save");
-    _saveAsButton = new QPushButton("Save As...");
-    auto buttonLayout = new QHBoxLayout;
-    layout->addLayout(buttonLayout);
-    buttonLayout->addWidget(_saveButton, 1);
-    buttonLayout->addWidget(_saveAsButton, 1);
-    buttonLayout->addStretch(2);
+        // add the button
+        _saveButton = new QPushButton("Save");
+        auto buttonLayout = new QHBoxLayout;
+        layout->addLayout(buttonLayout);
+        buttonLayout->addWidget(_saveButton, 1);
 
-    // connect the buttons to our respective slots
-    connect(_saveButton, SIGNAL(clicked()), this, SLOT(save()));
-    connect(_saveAsButton, SIGNAL(clicked()), this, SLOT(saveAs()));
+        // add the filepath label
+        _filepathLabel = new QLabel();
+        _filepathLabel->setWordWrap(true);
+        buttonLayout->addWidget(_filepathLabel, 4);
 
-    // add the exit caption
-    layout->addWidget(new QLabel("Close the window to exit the wizard."));
+        // connect the button
+        connect(_saveButton, SIGNAL(clicked()), this, SLOT(save()));
+    }
+
+    // ---- save as ----
+    {
+        // add the caption
+        layout->addWidget(new QLabel("Press this button to save the " + filetype + " into a new file:"));
+
+        // add the button
+        _saveAsButton = new QPushButton("Save As...");
+        auto buttonLayout = new QHBoxLayout;
+        layout->addLayout(buttonLayout);
+        buttonLayout->addWidget(_saveAsButton, 1);
+        buttonLayout->addStretch(4);
+
+        // connect the button
+        connect(_saveAsButton, SIGNAL(clicked()), this, SLOT(saveAs()));
+    }
+
+    // ---- quit ----
+    {
+        // add the caption
+        layout->addWidget(new QLabel("Press this button or close the window to exit the wizard:"));
+
+        // add the button
+        _quitButton = new QPushButton("Quit");
+        auto buttonLayout = new QHBoxLayout;
+        layout->addLayout(buttonLayout);
+        buttonLayout->addWidget(_quitButton, 1);
+        buttonLayout->addStretch(4);
+
+        // connect the button
+        connect(_quitButton, SIGNAL(clicked()), this, SLOT(quit()));
+    }
+
+    // --------
 
     // finalize the layout and assign it to ourselves
     layout->addStretch();
     setLayout(layout);
 
-    // enable/disable our buttons
-    setButtonsEnabled();
+    // enable/disable save button and fill the filepath label
+    updateSaveInfo();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -89,6 +126,13 @@ void SaveWizardPane::saveAs()
 
 ////////////////////////////////////////////////////////////////////
 
+void SaveWizardPane::quit()
+{
+    qApp->closeAllWindows();
+}
+
+////////////////////////////////////////////////////////////////////
+
 void SaveWizardPane::saveToFile(QString filepath)
 {
     // save the hierarchy in the specified file
@@ -100,16 +144,16 @@ void SaveWizardPane::saveToFile(QString filepath)
     // notify the target
     emit hierarchyWasSaved(filepath);
 
-    // enable/disable our buttons
-    setButtonsEnabled();
+    // update our UI
+    updateSaveInfo();
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void SaveWizardPane::setButtonsEnabled()
+void SaveWizardPane::updateSaveInfo()
 {
     _saveButton->setEnabled(!_filepath.isEmpty() && _dirty);
-    _saveAsButton->setEnabled(true);
+    _filepathLabel->setText(_filepath);
 }
 
 ////////////////////////////////////////////////////////////////////

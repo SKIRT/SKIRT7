@@ -8,6 +8,7 @@
 
 #include <QWidget>
 class SimulationItem;
+class QLabel;
 class QPushButton;
 
 ////////////////////////////////////////////////////////////////////
@@ -41,14 +42,17 @@ public slots:
         emitting a hierarchyWasSaved() signal. */
     void saveAs();
 
+    /** This function attempts to quit the application. */
+    void quit();
+
 private:
     /** This private function saves the simulation item hierarchy to the specfied file path, and
         notifies the target object by emitting a hierarchyWasSaved() signal. */
     void saveToFile(QString filepath);
 
-    /** This function enables or disables the push buttons depending on the filename and dirty
-        state. */
-    void setButtonsEnabled();
+    /** This function enables or disables the Save push button depending on the filename and dirty
+        state, and puts the current filepath into the corresponding label. */
+    void updateSaveInfo();
 
 signals:
     /** This signal is emitted after the simulation item hierarchy has been successfully saved. */
@@ -60,8 +64,10 @@ private:
     SimulationItem* _root;
     QString _filepath;
     bool _dirty;
+    QLabel* _filepathLabel;
     QPushButton* _saveButton;
     QPushButton* _saveAsButton;
+    QPushButton* _quitButton;
 };
 
 ////////////////////////////////////////////////////////////////////
