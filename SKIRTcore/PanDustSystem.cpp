@@ -513,6 +513,9 @@ namespace
 
 void PanDustSystem::write() const
 {
+    PeerToPeerCommunicator * communicator = find<PeerToPeerCommunicator>();
+    if (!communicator->isRoot()) return;
+
     DustSystem::write();
 
     // If requested, output the interstellar radiation field in every dust cell to a data file
