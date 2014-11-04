@@ -66,7 +66,8 @@ HEADERS += \
     BoolPropertyWizardPane.hpp \
     StringPropertyWizardPane.hpp \
     SubItemPropertyWizardPane.hpp \
-    SaveWizardPane.hpp
+    SaveWizardPane.hpp \
+    OpenWizardPane.hpp
 
 SOURCES += \
     SkirtMakeUp.cpp \
@@ -84,4 +85,5 @@ SOURCES += \
     BoolPropertyWizardPane.cpp \
     StringPropertyWizardPane.cpp \
     SubItemPropertyWizardPane.cpp \
-    SaveWizardPane.cpp
+    SaveWizardPane.cpp \
+    OpenWizardPane.cpp

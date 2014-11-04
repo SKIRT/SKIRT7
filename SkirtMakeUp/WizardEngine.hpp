@@ -8,7 +8,6 @@
 
 #include <QObject>
 class SimulationItem;
-class QWidget;
 
 ////////////////////////////////////////////////////////////////////
 
@@ -98,6 +97,12 @@ public slots:
         specified type, this function does nothing. */
     void setRootType(QByteArray newRootType);
 
+    /** This function deletes the current simulation hierarchy (if present), and replaces it by the
+        new simulation hierarchy specified through it root item. The function adopts ownership for
+        specified hierarchy. This function further clears the dirty flag and remembers the filepath
+        from which the hierarchy was loaded. */
+    void hierarchyWasLoaded(SimulationItem* root, QString filepath);
+
     /** This function updates the flag that indicates whether the value of the property currently
         being handled is valid. */
     void setPropertyValid(bool valid);
@@ -125,11 +130,11 @@ private:
     // ---- data members representing the state of the wizard ----
 
     // the top-level state; always valid
-    enum State { BasicChoice, CreateRoot, ConstructHierarchy, SaveHierarchy };
+    enum State { BasicChoice, CreateRoot, OpenHierarchy, ConstructHierarchy, SaveHierarchy };
     State _state = BasicChoice;
 
     // the basic choice; always valid
-    enum Choice { Unknown, NewSki, NewFski };
+    enum Choice { Unknown, NewSki, NewFski, OpenSki, OpenFski };
     Choice _choice = NewSki;
 
     // the simulation item hierarchy under construction; pointer has ownership;

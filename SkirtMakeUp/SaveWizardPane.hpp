@@ -23,8 +23,10 @@ class SaveWizardPane : public QWidget
 
 public:
     /** The default (and only) constructor creates and initializes the GUI for this pane. The first
-        argument provides a pointer to the root of the simulation item hierarchy. The last argument
-        specifies the object that will be notified of a succesfull save through invocation of the
+        argument provides a pointer to the root of the simulation item hierarchy. The subsequent
+        arguments provide the filepath in which the simulation item hierarchy has been previously
+        saved, if any, and the current dirty state of the hierarchy. The last argument specifies
+        the object that will be notified of a successful save operation through invocation of the
         object's relevant slot. */
     explicit SaveWizardPane(SimulationItem* root, QString filepath, bool dirty, QObject* target);
 

@@ -22,7 +22,6 @@
 MainWindow::MainWindow()
 {
     // setup the window, restoring previous position and size
-    setWindowTitle(QCoreApplication::applicationName());
     setMinimumSize(680, 510);
     readSettings();
 
@@ -66,6 +65,10 @@ MainWindow::MainWindow()
     connect(_wizard, SIGNAL(titleChanged()), this, SLOT(updateTitle()));
     connect(_wizard, SIGNAL(dirtyChanged()), this, SLOT(updateDirtyState()));
     _wizard->emitStateChanged();
+
+    // set the window title (assumes the wizard has been setup)
+    updateTitle();
+    updateDirtyState();
 }
 
 ////////////////////////////////////////////////////////////////////

@@ -21,6 +21,7 @@
 #include "ItemListPropertyWizardPane.hpp"
 #include "ItemPropertyHandler.hpp"
 #include "ItemPropertyWizardPane.hpp"
+#include "OpenWizardPane.hpp"
 #include "SaveWizardPane.hpp"
 #include "SimulationItem.hpp"
 #include "SimulationItemDiscovery.hpp"
@@ -55,9 +56,11 @@ bool WizardEngine::canAdvance()
     case CreateRoot:
         {
             QByteArray currentType = _root ? itemType(_root) : "";
-            QByteArray abstractType = _choice==NewSki ? "Simulation" : "FitScheme";
+            QByteArray abstractType = (_choice==NewSki || _choice==OpenSki) ? "Simulation" : "FitScheme";
             return SimulationItemDiscovery::inherits(currentType, abstractType);
         }
+    case OpenHierarchy:
+        return !_filepath.isEmpty();
     case ConstructHierarchy:
         return _propertyValid;
     case SaveHierarchy:
@@ -123,8 +126,12 @@ void WizardEngine::advance()
     {
     case BasicChoice:
         {
+            _state = (_choice==OpenSki || _choice==OpenFski) ? OpenHierarchy : CreateRoot;
+        }
+        break;
+    case OpenHierarchy:
+        {
             _state = CreateRoot;
-            emit titleChanged();
         }
         break;
     case CreateRoot:
@@ -227,9 +234,14 @@ void WizardEngine::retreat()
     {
     case BasicChoice:
         break;
-    case CreateRoot:
+    case OpenHierarchy:
         {
             _state = BasicChoice;
+        }
+        break;
+    case CreateRoot:
+        {
+            _state = (_choice==OpenSki || _choice==OpenFski) ? OpenHierarchy : BasicChoice;
         }
         break;
     case ConstructHierarchy:
@@ -316,8 +328,20 @@ void WizardEngine::emitStateChanged()
 
 void WizardEngine::setBasicChoice(int newChoice)
 {
-    _choice = static_cast<Choice>(newChoice);
-    emit canAdvanceChangedTo(canAdvance());
+    if (_choice != static_cast<Choice>(newChoice))
+    {
+        // update the choice
+        _choice = static_cast<Choice>(newChoice);
+
+        // clear the current hierarchy and the related state
+        delete _root;
+        _root = 0;
+        _filepath.clear();
+        _dirty = false;
+        emit titleChanged();
+        emit dirtyChanged();
+        emit canAdvanceChangedTo(canAdvance());
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -330,6 +354,15 @@ void WizardEngine::setRootType(QByteArray newRootType)
     emit canAdvanceChangedTo(canAdvance());
     _dirty = true;
     emit dirtyChanged();
+}
+
+////////////////////////////////////////////////////////////////////
+
+void WizardEngine::hierarchyWasLoaded(SimulationItem* root, QString filepath)
+{
+    delete _root;
+    _root = root;
+    hierarchyWasSaved(filepath);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -356,6 +389,7 @@ void WizardEngine::hierarchyWasSaved(QString filepath)
     _dirty = false;
     emit titleChanged();
     emit dirtyChanged();
+    emit canAdvanceChangedTo(canAdvance());
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -366,14 +400,18 @@ QWidget* WizardEngine::createPane()
     {
     case BasicChoice:
         {
-            return new BasicChoiceWizardPane(_choice, this);
+            return new BasicChoiceWizardPane(_choice, _dirty, this);
         }
     case CreateRoot:
         {
             QByteArray currentType = _root ? itemType(_root) : "";
-            QByteArray abstractType = _choice==NewSki ? "Simulation" : "FitScheme";
+            QByteArray abstractType = (_choice==NewSki || _choice==OpenSki) ? "Simulation" : "FitScheme";
             if (!SimulationItemDiscovery::inherits(currentType, abstractType)) currentType.clear();
             return new CreateRootWizardPane(abstractType, currentType, this);
+        }
+    case OpenHierarchy:
+        {
+            return new OpenWizardPane(_choice==OpenSki, _filepath, _dirty, this);
         }
     case ConstructHierarchy:
         {
@@ -399,7 +437,9 @@ QWidget* WizardEngine::createPane()
             }
         }
     case SaveHierarchy:
-        return new SaveWizardPane(_root, _filepath, _dirty, this);
+        {
+            return new SaveWizardPane(_root, _filepath, _dirty, this);
+        }
     }
 }
 
