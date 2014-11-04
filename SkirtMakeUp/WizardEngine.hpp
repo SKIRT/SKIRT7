@@ -124,6 +124,10 @@ public:
         corresponding portion of SimulationItem hierarchy under construction. */
     QWidget* createPane();
 
+    /** This function returns a human-readable description of the path to the property currently
+        being handled in the simulation item hierarchy. */
+    QString hierarchyPath();
+
     // ================== Data Members ====================
 
 private:

@@ -29,6 +29,15 @@ MainWindow::MainWindow()
     statusBar()->addPermanentWidget(new QLabel(QCoreApplication::applicationVersion()));
     statusBar()->showMessage("Ready to roll", 3000);
 
+    // create the label that will display the current path in the simulation item hierarchy
+    _pathLabel = new QLabel;
+    _pathLabel->setWordWrap(true);
+    auto pathLayout = new QHBoxLayout;
+    pathLayout->addWidget(_pathLabel);
+    auto pathArea = new QFrame;
+    pathArea->setFrameStyle(QFrame::StyledPanel);
+    pathArea->setLayout(pathLayout);
+
     // create the pane that holds the buttons to drive the wizard
     auto advanceButton = new QPushButton("Continue");
     auto retreatButton = new QPushButton("Back");
@@ -36,7 +45,7 @@ MainWindow::MainWindow()
     buttonGroupLayout->addWidget(retreatButton);
     buttonGroupLayout->addWidget(advanceButton);
     auto buttonLayout = new QHBoxLayout;
-    buttonLayout->addStretch(2);
+    buttonLayout->addWidget(pathArea, 2);
     buttonLayout->addLayout(buttonGroupLayout, 1);
 
     // create the pane that will hold the wizard UI
@@ -99,6 +108,8 @@ void MainWindow::replaceWizardPane()
     delete _wizardPane;
     _wizardPane = _wizard->createPane();
     _wizardLayout->addWidget(_wizardPane);
+
+    _pathLabel->setText(_wizard->hierarchyPath());
 }
 
 void MainWindow::updateTitle()

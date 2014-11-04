@@ -444,3 +444,25 @@ QWidget* WizardEngine::createPane()
 }
 
 ////////////////////////////////////////////////////////////////////
+
+QString WizardEngine::hierarchyPath()
+{
+    QString result;
+
+    if (_state == ConstructHierarchy)
+    {
+        // on the lowest level, show item type and property name
+        result = itemType(_current) + " : " + properties(_current)[_propertyIndex];
+
+        // for higher levels, show only item type
+        SimulationItem* current = dynamic_cast<SimulationItem*>(_current->parent());
+        while (current)
+        {
+            result = itemType(current) + " \u2192 " + result;
+            current = dynamic_cast<SimulationItem*>(current->parent());
+        }
+    }
+    return result;
+}
+
+////////////////////////////////////////////////////////////////////

@@ -8,6 +8,7 @@
 
 #include <QMainWindow>
 class WizardEngine;
+class QLabel;
 class QLayout;
 
 ////////////////////////////////////////////////////////////////////
@@ -70,6 +71,7 @@ private:
     WizardEngine* _wizard;
     QWidget* _wizardPane;
     QLayout* _wizardLayout;
+    QLabel* _pathLabel;
 };
 
 ////////////////////////////////////////////////////////////////////
