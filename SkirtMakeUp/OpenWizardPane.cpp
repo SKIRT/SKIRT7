@@ -58,12 +58,36 @@ OpenWizardPane::OpenWizardPane(bool skirt, QString filepath, bool dirty, QObject
 
 ////////////////////////////////////////////////////////////////////
 
+namespace
+{
+    // this function sets all properties in a simulation hierarchy to the "user-configured-this-property" state
+    // so that property wizard panes won't replace the value by a fresh default (this is somewhat of a hack...);
+    // the function calls itself recursively to process the children of the specified root item
+    void setAllPropertiesConfigured(SimulationItem* root)
+    {
+        // process all immediate properties of the specified root item
+        for (auto property : properties(root))
+        {
+            root->setProperty(property+"_configured", true);
+        }
+
+        // process all children of the specified root item
+        for (auto child : root->children())
+        {
+            SimulationItem* item = dynamic_cast<SimulationItem*>(child);
+            if (item) setAllPropertiesConfigured(item);
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////
+
 void OpenWizardPane::open()
 {
     // if the current hierarchy is dirty, give the user a chance to opt out
     if (_dirty)
     {
-        auto ret = QMessageBox::warning(dynamic_cast<QWidget*>(parent()), qApp->applicationName(),
+        auto ret = QMessageBox::warning(this, qApp->applicationName(),
                                         "Do you want to discard your unsaved changes?",
                                         QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Cancel);
         if (ret == QMessageBox::Cancel) return;
@@ -100,6 +124,10 @@ void OpenWizardPane::open()
         {
             _filepath = filepath;
             _dirty = false;
+
+            // set all properties to the "user-configured-this-property" state
+            // so that property wizard panes won't replace the value by a fresh default
+            setAllPropertiesConfigured(root);
 
             // notify the target, handing over ownership for the new hierarchy
             emit hierarchyWasLoaded(root, _filepath);

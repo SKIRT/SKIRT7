@@ -68,7 +68,7 @@ void BasicChoiceWizardPane::setBasicChoice(int choice)
         // if the current hierarchy is dirty, give the user a chance to cancel the change
         if (_dirty)
         {
-            auto ret = QMessageBox::warning(dynamic_cast<QWidget*>(parent()), qApp->applicationName(),
+            auto ret = QMessageBox::warning(this, qApp->applicationName(),
                                             "Do you want to discard your unsaved changes?",
                                             QMessageBox::Discard | QMessageBox::Cancel, QMessageBox::Cancel);
             update = (ret == QMessageBox::Discard);
