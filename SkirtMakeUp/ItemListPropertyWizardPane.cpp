@@ -6,6 +6,8 @@
 #include "ItemListPropertyWizardPane.hpp"
 
 #include "ItemListPropertyHandler.hpp"
+#include "ItemPropertyHandler.hpp"
+#include "StringPropertyHandler.hpp"
 #include "SimulationItem.hpp"
 #include "SimulationItemDiscovery.hpp"
 #include <QVBoxLayout>
@@ -16,6 +18,31 @@
 #include <QVariant>
 
 using namespace SimulationItemDiscovery;
+
+////////////////////////////////////////////////////////////////////
+
+namespace
+{
+    // return a description for the specified simulation item containing the item type
+    // and the name and value of the first item or string property in the item
+    QString descriptionForItem(SimulationItem* item)
+    {
+        for (auto handler : createPropertyHandlersList(item))
+        {
+            auto itemhandler = handler.dynamicCast<ItemPropertyHandler>();
+            if (itemhandler && itemhandler->value())
+            {
+                return itemType(item) + " (" + itemhandler->name() + ": " + itemType(itemhandler->value()) + ")";
+            }
+            auto stringhandler = handler.dynamicCast<StringPropertyHandler>();
+            if (stringhandler && !stringhandler->value().isEmpty())
+            {
+                return itemType(item) + " (" + stringhandler->name() + ": " + stringhandler->value() + ")";
+            }
+        }
+        return itemType(item);
+    }
+}
 
 ////////////////////////////////////////////////////////////////////
 
@@ -69,7 +96,9 @@ ItemListPropertyWizardPane::ItemListPropertyWizardPane(PropertyHandlerPtr handle
     for (auto item : hdlr->value())
     {
         index++;
-        _listWidget->addItem(new QListWidgetItem(QString::number(index) + ": " + itemType(item)));
+        QString label = QString::number(index) + ": " + descriptionForItem(item);
+        if (!item->property("item_complete").toBool()) label += "  \u2190 editing incomplete !";
+        _listWidget->addItem(new QListWidgetItem(label));
     }
 
     // restore the selection
@@ -164,7 +193,9 @@ void ItemListPropertyWizardPane::setButtonsEnabled()
 
     // validate/invalidate property
     auto hdlr = handlerCast<ItemListPropertyHandler>();
-    emit propertyValidChanged(hasItems || hdlr->isOptional());
+    bool complete = true;
+    for (auto item : hdlr->value()) if (!item->property("item_complete").toBool()) complete = false;
+    emit propertyValidChanged(complete && (hasItems || hdlr->isOptional()));
 }
 
 ////////////////////////////////////////////////////////////////////

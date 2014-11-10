@@ -28,6 +28,7 @@
 #include "StringPropertyHandler.hpp"
 #include "StringPropertyWizardPane.hpp"
 #include "SubItemPropertyWizardPane.hpp"
+#include <QVariant>
 
 using namespace SimulationItemDiscovery;
 
@@ -171,11 +172,17 @@ void WizardEngine::advance()
             {
                 while (_propertyIndex+1 == properties(_current).size())
                 {
+                    // indicate that the item we're backing out of is "complete"
+                    _current->setProperty("item_complete", true);
+
+                    // special case for root
                     if (_current == _root)
                     {
                         _state = SaveHierarchy;
                         break;
                     }
+
+                    // move up the hierarchy
                     auto parent = dynamic_cast<SimulationItem*>(_current->parent());
                     _propertyIndex = propertyIndexForChild(parent, _current);
                     _current = parent;
@@ -379,6 +386,14 @@ void WizardEngine::hierarchyWasChanged()
 {
     _dirty = true;
     emit dirtyChanged();
+
+    // indicate that the current item and all its ascendants are incomplete
+    QObject* current = _current;
+    while (current)
+    {
+        current->setProperty("item_complete", false);
+        current = current->parent();
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
