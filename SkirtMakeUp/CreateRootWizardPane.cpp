@@ -46,6 +46,7 @@ CreateRootWizardPane::CreateRootWizardPane(QByteArray abstractType, QByteArray i
 
         // associate the item type corresponding to this button with the button object
         choiceButton->setProperty("choiceType", choiceType);
+        choiceButton->setToolTip(choiceType);
 
         // select the button corresponding to the initial choice
         if (choiceType==initialType) choiceButton->setChecked(true);

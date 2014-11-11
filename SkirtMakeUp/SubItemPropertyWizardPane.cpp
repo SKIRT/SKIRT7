@@ -50,6 +50,7 @@ SubItemPropertyWizardPane::SubItemPropertyWizardPane(PropertyHandlerPtr handler,
 
         // associate the item type corresponding to this button with the button object
         choiceButton->setProperty("choiceType", choiceType);
+        choiceButton->setToolTip(choiceType);
 
         // if this button corresponds to the current type, select it
         if (choiceType==currentType)

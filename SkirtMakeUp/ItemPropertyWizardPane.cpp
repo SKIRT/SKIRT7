@@ -67,6 +67,7 @@ ItemPropertyWizardPane::ItemPropertyWizardPane(PropertyHandlerPtr handler, QObje
 
         // associate the item type corresponding to this button with the button object
         choiceButton->setProperty("choiceType", choiceType);
+        choiceButton->setToolTip(choiceType);
 
         // if the property has never been configured by the user,
         // and this button corresponds to the default or forced type,
