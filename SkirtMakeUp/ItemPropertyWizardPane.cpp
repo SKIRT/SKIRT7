@@ -7,6 +7,7 @@
 
 #include "ItemPropertyHandler.hpp"
 #include "SimulationItemDiscovery.hpp"
+#include "SimulationItemTools.hpp"
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QRadioButton>
@@ -33,7 +34,7 @@ ItemPropertyWizardPane::ItemPropertyWizardPane(PropertyHandlerPtr handler, QObje
     QByteArray defaultType = hdlr->hasDefaultValue() ? hdlr->defaultItemType() : "";
 
     // if there is only one choice, make it the forced item type
-    auto choiceList = descendants(hdlr->baseType());
+    auto choiceList = SimulationItemTools::allowedDescendants(hdlr->baseType(),hdlr->target());
     QByteArray forcedType = (choiceList.size()==1 && !hdlr->isOptional()) ? choiceList[0] : "";
 
     // make a button group to contain the radio buttons reflecting the possible choices

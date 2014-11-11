@@ -67,7 +67,8 @@ HEADERS += \
     StringPropertyWizardPane.hpp \
     SubItemPropertyWizardPane.hpp \
     SaveWizardPane.hpp \
-    OpenWizardPane.hpp
+    OpenWizardPane.hpp \
+    SimulationItemTools.hpp
 
 SOURCES += \
     SkirtMakeUp.cpp \
@@ -86,4 +87,5 @@ SOURCES += \
     StringPropertyWizardPane.cpp \
     SubItemPropertyWizardPane.cpp \
     SaveWizardPane.cpp \
-    OpenWizardPane.cpp
+    OpenWizardPane.cpp \
+    SimulationItemTools.cpp

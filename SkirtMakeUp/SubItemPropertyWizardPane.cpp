@@ -7,6 +7,7 @@
 
 #include "ItemListPropertyHandler.hpp"
 #include "SimulationItemDiscovery.hpp"
+#include "SimulationItemTools.hpp"
 #include "SimulationItem.hpp"
 #include <QVBoxLayout>
 #include <QLabel>
@@ -38,7 +39,7 @@ SubItemPropertyWizardPane::SubItemPropertyWizardPane(PropertyHandlerPtr handler,
     auto buttonGroup = new QButtonGroup;
 
     // add the choices
-    for (auto choiceType : descendants(hdlr->baseType()))
+    for (auto choiceType : SimulationItemTools::allowedDescendants(hdlr->baseType(),hdlr->target()))
     {
         auto choiceTitle = title(choiceType);
         if (!choiceTitle.isEmpty()) choiceTitle.replace(0, 1, choiceTitle[0].toUpper());
@@ -71,7 +72,7 @@ SubItemPropertyWizardPane::SubItemPropertyWizardPane(PropertyHandlerPtr handler,
 int SubItemPropertyWizardPane::selectedIndex()
 {
     auto hdlr = handlerCast<ItemListPropertyHandler>();
-    return hdlr->target()->property(hdlr->name()+"_row").toInt();
+    return SimulationItemTools::retrieveSelectedRow(hdlr->target(), hdlr->name());
 }
 
 ////////////////////////////////////////////////////////////////////

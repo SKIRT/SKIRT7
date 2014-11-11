@@ -6,6 +6,7 @@
 #include "OpenWizardPane.hpp"
 
 #include "SimulationItemDiscovery.hpp"
+#include "SimulationItemTools.hpp"
 #include "Simulation.hpp"
 #include "FatalError.hpp"
 #include "FitScheme.hpp"
@@ -58,30 +59,6 @@ OpenWizardPane::OpenWizardPane(bool skirt, QString filepath, bool dirty, QObject
 
 ////////////////////////////////////////////////////////////////////
 
-namespace
-{
-    // this function sets all properties in a simulation hierarchy to the "user-configured-this-property" state
-    // so that property wizard panes won't replace the value by a fresh default (this is somewhat of a hack...);
-    // the function calls itself recursively to process the children of the specified root item
-    void setAllPropertiesConfigured(SimulationItem* root)
-    {
-        // process all immediate properties of the specified root item
-        for (auto property : properties(root))
-        {
-            root->setProperty(property+"_configured", true);
-        }
-
-        // process all children of the specified root item
-        for (auto child : root->children())
-        {
-            SimulationItem* item = dynamic_cast<SimulationItem*>(child);
-            if (item) setAllPropertiesConfigured(item);
-        }
-    }
-}
-
-////////////////////////////////////////////////////////////////////
-
 void OpenWizardPane::open()
 {
     // if the current hierarchy is dirty, give the user a chance to opt out
@@ -127,7 +104,11 @@ void OpenWizardPane::open()
 
             // set all properties to the "user-configured-this-property" state
             // so that property wizard panes won't replace the value by a fresh default
-            setAllPropertiesConfigured(root);
+            SimulationItemTools::setHierarchyConfigured(root);
+
+            // set all items to the "complete" state
+            // so that the wizard doesn't force users to descend into each subitem in item list
+            SimulationItemTools::setHierarchyComplete(root);
 
             // notify the target, handing over ownership for the new hierarchy
             emit hierarchyWasLoaded(root, _filepath);

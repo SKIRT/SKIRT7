@@ -25,6 +25,7 @@
 #include "SaveWizardPane.hpp"
 #include "SimulationItem.hpp"
 #include "SimulationItemDiscovery.hpp"
+#include "SimulationItemTools.hpp"
 #include "StringPropertyHandler.hpp"
 #include "StringPropertyWizardPane.hpp"
 #include "SubItemPropertyWizardPane.hpp"
@@ -173,7 +174,7 @@ void WizardEngine::advance()
                 while (_propertyIndex+1 == properties(_current).size())
                 {
                     // indicate that the item we're backing out of is "complete"
-                    _current->setProperty("item_complete", true);
+                    SimulationItemTools::setItemComplete(_current);
 
                     // special case for root
                     if (_current == _root)
@@ -386,14 +387,7 @@ void WizardEngine::hierarchyWasChanged()
 {
     _dirty = true;
     emit dirtyChanged();
-
-    // indicate that the current item and all its ascendants are incomplete
-    QObject* current = _current;
-    while (current)
-    {
-        current->setProperty("item_complete", false);
-        current = current->parent();
-    }
+    SimulationItemTools::setItemIncomplete(_current);
 }
 
 ////////////////////////////////////////////////////////////////////

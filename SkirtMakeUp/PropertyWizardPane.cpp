@@ -6,7 +6,7 @@
 #include "PropertyWizardPane.hpp"
 
 #include "SimulationItem.hpp"
-#include <QVariant>
+#include "SimulationItemTools.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
@@ -29,14 +29,14 @@ void PropertyWizardPane::showEvent(QShowEvent* event)
 
 void PropertyWizardPane::setPropertyConfigured(bool configured)
 {
-    _handler->target()->setProperty(_handler->name()+"_configured", configured);
+    SimulationItemTools::setPropertyConfigured(_handler->target(), _handler->name(), configured);
 }
 
 ////////////////////////////////////////////////////////////////////
 
 bool PropertyWizardPane::isPropertyConfigured()
 {
-    return _handler->target()->property(_handler->name()+"_configured").toBool();
+    return SimulationItemTools::isPropertyConfigured(_handler->target(), _handler->name());
 }
 
 ////////////////////////////////////////////////////////////////////
