@@ -207,6 +207,14 @@ void WizardEngine::advance()
     case SaveHierarchy:
         break;
     }
+
+    // skip silent and irrelevant properties
+    if (_state == ConstructHierarchy)
+    {
+        auto handler = createPropertyHandler(_current, properties(_current)[_propertyIndex]);
+        if (handler->isSilent() || !handler->isRelevant()) advance();
+    }
+
     emitStateChanged();
 }
 
@@ -311,6 +319,14 @@ void WizardEngine::retreat()
         }
         break;
     }
+
+    // skip silent and irrelevant properties
+    if (_state == ConstructHierarchy)
+    {
+        auto handler = createPropertyHandler(_current, properties(_current)[_propertyIndex]);
+        if (handler->isSilent() || !handler->isRelevant()) retreat();
+    }
+
     emitStateChanged();
 }
 
