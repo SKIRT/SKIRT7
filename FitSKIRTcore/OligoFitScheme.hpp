@@ -26,7 +26,7 @@ class OligoFitScheme : public FitScheme
     Q_CLASSINFO("Title", "the SKIRT simulation to be run for this fit scheme")
 
     Q_CLASSINFO("Property", "fixedSeed")
-    Q_CLASSINFO("Title", "Do you want a fixed seed (only for testing purposes)")
+    Q_CLASSINFO("Title", "have a fixed seed (only for testing purposes)")
     Q_CLASSINFO("Default", "no")
 
     Q_CLASSINFO("Property", "parameterRanges")
