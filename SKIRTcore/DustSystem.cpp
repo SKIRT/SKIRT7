@@ -79,22 +79,22 @@ void DustSystem::setupSelfAfter()
         find<ParallelFactory>()->parallel()->call(this, &DustSystem::setSampleDensityBody, _Ncells);
     }
 
-    PeerToPeerCommunicator* communicator = find<PeerToPeerCommunicator>();
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
 
     // Perform a convergence check on the grid.
-    if (_writeConvergence && communicator->isRoot()) writeconvergence();
+    if (_writeConvergence && comm->isRoot()) writeconvergence();
 
     // Write the density in the xy plane and the xz plane to a file.
-    if (_writeDensity && communicator->isRoot()) writedensity();
+    if (_writeDensity && comm->isRoot()) writedensity();
 
     // Output optical depth map as seen from the center
-    if (_writeDepthMap && communicator->isRoot()) writedepthmap();
+    if (_writeDepthMap && comm->isRoot()) writedepthmap();
 
     // Calculate and output some quality metrics for the dust grid
-    if (_writeQuality && communicator->isRoot()) writequality();
+    if (_writeQuality && comm->isRoot()) writequality();
 
     // Output properties for all cells in the dust grid
-    if (_writeCellProperties && communicator->isRoot()) writecellproperties();
+    if (_writeCellProperties && comm->isRoot()) writecellproperties();
 }
 
 ////////////////////////////////////////////////////////////////////

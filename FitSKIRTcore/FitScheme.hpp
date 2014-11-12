@@ -114,12 +114,12 @@ public:
 
 protected:
     // data members
-    FilePaths* _paths;                          // the file paths object for the fit scheme
-    Log* _log;                                  // the logging mechanism for the fit scheme
-    MasterSlaveCommunicator* _communicator;     // the mechanism to perform parallel tasks
-    Units* _units;                              // the units system for the fit scheme
-    int _parallelSimulations;                   // the number of parallel simulations
-    int _parallelThreads;                       // the number of parallel theads per simulation
+    FilePaths* _paths;                  // the file paths object for the fit scheme
+    Log* _log;                          // the logging mechanism for the fit scheme
+    MasterSlaveCommunicator* _comm;     // the mechanism to perform parallel tasks
+    Units* _units;                      // the units system for the fit scheme
+    int _parallelSimulations;           // the number of parallel simulations
+    int _parallelThreads;               // the number of parallel theads per simulation
 };
 
 ////////////////////////////////////////////////////////////////////

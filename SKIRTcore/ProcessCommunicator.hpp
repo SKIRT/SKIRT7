@@ -57,9 +57,10 @@ public:
     bool isMultiProc() const;
 
 private:
-
     int _rank;      // The rank of the process
     int _Nprocs;    // The number of processes in the environment
 };
+
+////////////////////////////////////////////////////////////////////
 
 #endif // PROCESSCOMMUNICATOR_HPP

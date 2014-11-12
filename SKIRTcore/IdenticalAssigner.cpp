@@ -3,35 +3,42 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
-#include "AllCellsDustLib.hpp"
-#include "DustSystem.hpp"
+#include "FatalError.hpp"
+#include "IdenticalAssigner.hpp"
 #include "PeerToPeerCommunicator.hpp"
-#include "WavelengthGrid.hpp"
-
-using namespace std;
 
 ////////////////////////////////////////////////////////////////////
 
-AllCellsDustLib::AllCellsDustLib()
+IdenticalAssigner::IdenticalAssigner()
 {
 }
 
 ////////////////////////////////////////////////////////////////////
 
-int AllCellsDustLib::entries() const
+void IdenticalAssigner::assign(size_t size)
 {
-    return find<DustSystem>()->Ncells();
+    _nvalues = size;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-std::vector<int> AllCellsDustLib::mapping() const
+size_t IdenticalAssigner::absoluteIndex(size_t relativeIndex)
 {
-    // create a mapping from each cell index to identical library index
-    int Ncells = find<DustSystem>()->Ncells();
-    vector<int> nv(Ncells);
-    for (int m=0; m<Ncells; m++) nv[m] = m;
-    return nv;
+    return relativeIndex;
+}
+
+////////////////////////////////////////////////////////////////////
+
+int IdenticalAssigner::rankForIndex(size_t /*index*/) const
+{
+    throw FATALERROR("This function should never be called");
+}
+
+////////////////////////////////////////////////////////////////////
+
+bool IdenticalAssigner::parallel() const
+{
+    return false;
 }
 
 ////////////////////////////////////////////////////////////////////

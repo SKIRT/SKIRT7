@@ -81,6 +81,13 @@ public:
         the communication to proceed. */
     static void sum_all(double* my_array, double* result_array, int nvalues);
 
+    /** This function is used to broadcast an array of double values from one process to all other
+        processes. A pointer to the first value is passed as the first argument, the number of values
+        as the second and the rank of the sending process as the final argument. All processes must call this function
+        for the communication to proceed. The array passed to this function by the receiving processes gets overwritten
+        during the communication with the values stored in the array passed by the root. */
+    static void broadcast(double* my_array, int nvalues, int root);
+
     /** This function returns a boolean indicating whether the process is assigned as root or not. The rank of
         the process is always the 'true' rank, irrespective of whether the object that calls this function has
         acquired the MPI resource or not. */

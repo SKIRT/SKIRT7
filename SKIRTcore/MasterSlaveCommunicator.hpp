@@ -11,6 +11,8 @@
 #include "ParallelFactory.hpp"
 #include "ProcessCommunicator.hpp"
 
+////////////////////////////////////////////////////////////////////
+
 /** An object of the MasterSlaveCommunicator class, inheriting from ProcessCommunicator, represents
     an environment or ensemble of processes, which are able to communicate according to the
     master-slave model. This means that all communications go through a single process, called the
@@ -32,24 +34,24 @@ public:
     Compute(int size, double factor)
         : _size(size), _factor(factor)
     {
-        _communicator.setLocalSlaveCount(4);
-        _communicator.registerTask(this, &Compute::doSingle);
+        _comm.setLocalSlaveCount(4);
+        _comm.registerTask(this, &Compute::doSingle);
     }
     void setup()
     {
-        _communicator.acquireSlaves();
+        _comm.acquireSlaves();
     }
     ~Compute()
     {
-        _communicator.releaseSlaves();
+        _comm.releaseSlaves();
     }
     void doIt()
     {
-        if (_communicator.isMaster())
+        if (_comm.isMaster())
         {
             QVector<QVariant> data(_size);
             for (int i=0; i<_size; i++) data[i] = (double)i;
-            data = _communicator.performTask(data);
+            data = _comm.performTask(data);
             for (int i=0; i<_size; i++) std::cout << data[i].toDouble() << " ";
             std::cout << std::endl;
         }
@@ -58,7 +60,7 @@ private:
     QVariant doSingle(QVariant input) { return input.toDouble()*_factor; }
     int _size;
     double _factor;
-    MasterSlaveCommunicator _communicator;
+    MasterSlaveCommunicator _comm;
 };
 
 int main(int argc, char** argv)
@@ -246,7 +248,7 @@ private:
     /** Registers the specified task and returns the assigned task index. */
     int registerTask(Task* task);
 
-    //============= Private Functions for multiprocessing Operation =========
+    //====== Private Functions for multiprocessing Operation =======
 
     /** Implements the command loop for the master process. */
     QVector<QVariant> master_command_loop(int taskIndex, QVector<QVariant> inputVector);

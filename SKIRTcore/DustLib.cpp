@@ -11,6 +11,7 @@
 #include "PanDustSystem.hpp"
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
+#include "PeerToPeerCommunicator.hpp"
 #include "WavelengthGrid.hpp"
 
 using namespace std;
@@ -18,7 +19,24 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////
 
 DustLib::DustLib()
+    : _assigner(0)
 {
+}
+
+////////////////////////////////////////////////////////////////////
+
+void DustLib::setAssigner(ProcessAssigner* value)
+{
+    if (_assigner) delete _assigner;
+    _assigner = value;
+    if (_assigner) _assigner->setParent(this);
+}
+
+////////////////////////////////////////////////////////////////////
+
+ProcessAssigner* DustLib::assigner() const
+{
+    return _assigner;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -137,10 +155,16 @@ void DustLib::calculate()
     int Nlib = entries();
     _nv = mapping();
 
-    // calculate the emissivity for each library entry
+    // assign each process to a set of library entries
+    _assigner->assign(Nlib);
+
+    // calculate the emissivity for each library entry assigned to this process
     EmissionCalculator calc(_Lvv, _nv, Nlib, this);
     Parallel* parallel = find<ParallelFactory>()->parallel();
-    parallel->call(&calc, Nlib);
+    parallel->call(&calc, _assigner->nvalues(), _assigner);
+
+    // assemble _Lvv from the information stored at different processes, if the work is done in parallel processes
+    if (_assigner->parallel()) assemble();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -149,6 +173,37 @@ double DustLib::luminosity(int m, int ell) const
 {
     int n = _nv[m];
     return n>=0 ? _Lvv[n][ell] : 0.;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void DustLib::assemble()
+{
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+
+    size_t Ncells = _nv.size();
+    if (_Lvv.size(0) == Ncells)     // _Lvv is indexed on m, the index of the dust cells
+    {
+        for (size_t m = 0; m < Ncells; m++) // for each dust cell
+        {
+            size_t n = _nv[m];                      // get the library index for this dust cell ..
+            int rank = _assigner->rankForIndex(n);    // .. to determine which process calculated the emission SED
+
+            // finally, broadcast the emission SED from that process to all the other processes
+            comm->broadcast(_Lvv[m],rank);
+        }
+
+    }
+    else    // _Lvv is indexed on n, the library entry index
+    {
+        for (size_t n = 0; n < _Lvv.size(0); n++)   // for each library entry
+        {
+            int rank = _assigner->rankForIndex(n);    // determine which process calculated the emission SED of this entry
+
+            // broadcast the emission SED from that process to all the other processes
+            comm->broadcast(_Lvv[n],rank);
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////////

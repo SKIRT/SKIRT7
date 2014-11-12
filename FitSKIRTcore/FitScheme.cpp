@@ -21,8 +21,8 @@ FitScheme::FitScheme()
     _paths->setParent(this);
     _log = new Console();
     _log->setParent(this);
-    _communicator = new MasterSlaveCommunicator();
-    _communicator->setParent(this);
+    _comm = new MasterSlaveCommunicator();
+    _comm->setParent(this);
     _units = new SIUnits();
     _units->setParent(this);
     _parallelSimulations = 1;
@@ -49,13 +49,13 @@ void FitScheme::run()
     // verify setup
     if (_state < SetupDone) throw FATALERROR("Fit scheme has not been setup before being run");
 
-    _communicator->acquireSlaves();
-    if(_communicator->isMaster())
+    _comm->acquireSlaves();
+    if(_comm->isMaster())
     {
         TimeLogger logger(_log, "fitting");
         runSelf();
     }
-    _communicator->releaseSlaves();
+    _comm->releaseSlaves();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -64,7 +64,7 @@ void FitScheme::setupAndRun()
 {
     _log->setup(); // ensure the log is properly setup before first use
 
-    QString processInfo = _communicator->isMultiProc() ? " with " + QString::number(_communicator->getSize()) + " processes" : "";
+    QString processInfo = _comm->isMultiProc() ? " with " + QString::number(_comm->getSize()) + " processes" : "";
     TimeLogger logger(_log, "fit scheme " + _paths->outputPrefix() + processInfo);
 
     setup();

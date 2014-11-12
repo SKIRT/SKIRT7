@@ -20,13 +20,13 @@ Log::Log()
 
 void Log::setupSelfBefore()
 {
-    ProcessCommunicator* communicator;
+    ProcessCommunicator* comm;
 
     try
     {
-        // get a pointer to the PeerToPeerCommunicator without performing setup
+        // get a pointer to the ProcessCommunicator without performing setup
         // to avoid catching (and hiding) fatal errors during such setup
-        communicator = find<ProcessCommunicator>(false);
+        comm = find<ProcessCommunicator>(false);
     }
     catch (FatalError)
     {
@@ -35,9 +35,9 @@ void Log::setupSelfBefore()
 
     // Do the find operation again, now to perform the setup of the
     // PeerToPeerCommunicator so that the correct rank is initialized
-    communicator = find<ProcessCommunicator>();
+    comm = find<ProcessCommunicator>();
 
-    if (communicator->isMultiProc()) setProcessName(communicator->getRank());
+    if (comm->isMultiProc()) setProcessName(comm->getRank());
 }
 
 ////////////////////////////////////////////////////////////////////

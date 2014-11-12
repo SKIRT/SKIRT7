@@ -331,14 +331,13 @@ double PanDustSystem::Labsdusttot() const
         for (int m=0; m<_Ncells; m++)
             for (int ell=0; ell<_Nlambda; ell++)
                 sum += _Labsdustvv(m,ell);
-    //return sum;
 
-    PeerToPeerCommunicator * communicator = find<PeerToPeerCommunicator>();
+    PeerToPeerCommunicator * comm = find<PeerToPeerCommunicator>();
 
     Array arr(1);
     arr[0] = sum;
 
-    communicator->sum_all(arr);
+    comm->sum_all(arr);
 
     return arr[0];
 }
@@ -381,12 +380,12 @@ void PanDustSystem::calculatedustemission(bool ynstellar)
 
 void PanDustSystem::sumResults(bool ynstellar)
 {
-    PeerToPeerCommunicator * communicator = find<PeerToPeerCommunicator>();
+    PeerToPeerCommunicator * comm = find<PeerToPeerCommunicator>();
 
     Array* arr;
     arr = ynstellar ? _Labsstelvv.getArray() : _Labsdustvv.getArray();
 
-    communicator->sum_all(*arr);
+    comm->sum_all(*arr);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -513,8 +512,8 @@ namespace
 
 void PanDustSystem::write() const
 {
-    PeerToPeerCommunicator * communicator = find<PeerToPeerCommunicator>();
-    if (!communicator->isRoot()) return;
+    PeerToPeerCommunicator * comm = find<PeerToPeerCommunicator>();
+    if (!comm->isRoot()) return;
 
     DustSystem::write();
 

@@ -59,6 +59,7 @@
 #include "GenGeometry.hpp"
 #include "GenLinCubDustGridStructure.hpp"
 #include "GreyBodyDustEmissivity.hpp"
+#include "IdenticalAssigner.hpp"
 #include "InstrumentFrame.hpp"
 #include "InstrumentSystem.hpp"
 #include "InterstellarDustMix.hpp"
@@ -112,6 +113,7 @@
 #include "RingGeometry.hpp"
 #include "RotateGeometry.hpp"
 #include "SEDInstrument.hpp"
+#include "SequentialAssigner.hpp"
 #include "SIUnits.hpp"
 #include "SolarPatchGeometry.hpp"
 #include "SPHDustDistribution.hpp"
@@ -125,6 +127,7 @@
 #include "SphericalHoleGeometry.hpp"
 #include "SpheroidalGeometry.hpp"
 #include "SpiralStructureGeometry.hpp"
+#include "StaggeredAssigner.hpp"
 #include "StarburstSED.hpp"
 #include "StellarSurfaceGeometry.hpp"
 #include "StellarSystem.hpp"
@@ -362,6 +365,11 @@ void RegisterSimulationItems::registerAll()
 
     add<ProcessCommunicator>(false);
     add<PeerToPeerCommunicator>();
+
+    add<ProcessAssigner>(false);
+    add<IdenticalAssigner>();
+    add<StaggeredAssigner>();
+    add<SequentialAssigner>();
 }
 
 ////////////////////////////////////////////////////////////////////

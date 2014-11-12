@@ -23,8 +23,8 @@ Simulation::Simulation()
     _log->setParent(this);
     _parfac = new ParallelFactory();
     _parfac->setParent(this);
-    _communicator = new PeerToPeerCommunicator();
-    _communicator->setParent(this);
+    _comm = new PeerToPeerCommunicator();
+    _comm->setParent(this);
     _random = new Random();
     _random->setParent(this);
     _units = new SIUnits();
@@ -51,7 +51,7 @@ void Simulation::run()
     // verify setup
     if (_state < SetupDone) throw FATALERROR("Simulation has not been setup before being run");
 
-    if (_communicator->isMultiProc()) _random->randomize();
+    if (_comm->isMultiProc()) _random->randomize();
 
     TimeLogger logger(_log, "the simulation run");
     runSelf();
@@ -63,7 +63,7 @@ void Simulation::setupAndRun()
 {
     _log->setup(); // ensure the log is properly setup before first use
 
-    QString processInfo = _communicator->isMultiProc() ? " with " + QString::number(_communicator->getSize()) + " processes" : "";
+    QString processInfo = _comm->isMultiProc() ? " with " + QString::number(_comm->getSize()) + " processes" : "";
     TimeLogger logger(_log, "simulation " + _paths->outputPrefix() + processInfo);
 
     setup();
@@ -122,7 +122,7 @@ ParallelFactory* Simulation::parallelFactory() const
 
 PeerToPeerCommunicator* Simulation::getCommunicator() const
 {
-    return _communicator;
+    return _comm;
 }
 
 ////////////////////////////////////////////////////////////////////

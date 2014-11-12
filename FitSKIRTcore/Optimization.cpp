@@ -74,11 +74,11 @@ void Optimization::setupSelfBefore()
     _ga->flushFrequency(0);  // was 1e-22 implicitly converted to integer 0
 
     //must be done before initiliazing the GA
-    MasterSlaveCommunicator * communicator = find<MasterSlaveCommunicator>();
+    MasterSlaveCommunicator * comm = find<MasterSlaveCommunicator>();
     FitScheme * fitsch = find<FitScheme>();
-    communicator->setLocalSlaveCount(fitsch->parallelSimulationCount());
-    communicator->registerTask(this, &Optimization::chi2);
-    if(communicator->isMaster())
+    comm->setLocalSlaveCount(fitsch->parallelSimulationCount());
+    comm->registerTask(this, &Optimization::chi2);
+    if(comm->isMaster())
     {
         QString filepath =path->outputPath()+path->outputPrefix()+"_allsimulations.dat";
         _stream.open(filepath.toLocal8Bit().constData());
@@ -220,8 +220,8 @@ void Optimization::splitChi()
         totalVarList.insert(totalVarList.size(),valuesVarList);
         data[i]=totalVarList;
     }
-    MasterSlaveCommunicator* communicator = find<MasterSlaveCommunicator>();
-    data = communicator->performTask(data);
+    MasterSlaveCommunicator* comm = find<MasterSlaveCommunicator>();
+    data = comm->performTask(data);
 
     for(int i =0;i<_genValues.size();i++)
     {

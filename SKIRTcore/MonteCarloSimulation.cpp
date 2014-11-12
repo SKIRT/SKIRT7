@@ -58,7 +58,7 @@ void MonteCarloSimulation::setChunkParams(double packages)
     else
     {
         int Nthreads = _parfac->maxThreadCount();
-        int Nprocs = _communicator->getSize();
+        int Nprocs = _comm->getSize();
 
         if (Nprocs * Nthreads == 1)
         {
@@ -69,11 +69,9 @@ void MonteCarloSimulation::setChunkParams(double packages)
         else
         {
             int myPackages = packages/Nprocs;
-            //_log->info("(" + QString::number(myPackages) + " is the number of my packages)");
             _Nchunks = ceil( qMin(myPackages/2e4, qMax(myPackages/1e7, 10.*Nthreads/_Nlambda)) );
-            //_log->info("(" + QString::number(_Nchunks) + " is the number of chunks per wavelength)");
             _chunksize = ceil(myPackages/_Nchunks);
-            _Npp = Nprocs*_Nchunks*_chunksize;  // ON ALL PROCESSES!!
+            _Npp = Nprocs*_Nchunks*_chunksize;
         }
     }
 
@@ -149,8 +147,8 @@ void MonteCarloSimulation::initprogress(QString phase)
                + (_Nlambda==1 ? QString("a single wavelength") : QString("each of %1 wavelengths").arg(_Nlambda))
                + ")");
 
-    if (_communicator->isMultiProc()) _log->info("(" + QString::number(_Nchunks*_chunksize) + " photon packages "
-                                                 + "per wavelength per process)");
+    if (_comm->isMultiProc()) _log->info("(" + QString::number(_Nchunks*_chunksize) + " photon packages "
+                                         + "per wavelength per process)");
 
     _timer.start();
 }

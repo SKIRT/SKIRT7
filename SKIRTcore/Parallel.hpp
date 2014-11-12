@@ -13,6 +13,7 @@
 #include <QThread>
 #include <QWaitCondition>
 #include "ParallelTarget.hpp"
+#include "ProcessAssigner.hpp"
 class FatalError;
 class ParallelFactory;
 
@@ -81,14 +82,18 @@ public:
     int threadCount() const;
 
     /** Calls the body() function of the specified specified target object \em limit times, with the
-        value of the \em index argument ranging from 0 to \em limit-1. The work is distributed over
-        the parallel threads in an unpredicable manner. */
-    void call(ParallelTarget* target, size_t limit);
+        value of the \em index argument ranging from 0 to \em limit-1. The work is distributed over the
+        parallel threads in an unpredicable manner. As an optional argument, a pointer to a
+        ProcessAssigner can be passed. This object is then used to convert the indices ranging from 0
+        to \em limit-1 to absolute indices, spanning a greater value range. */
+    void call(ParallelTarget* target, size_t limit, ProcessAssigner* assigner = 0);
 
     /** Calls the specified member function for the specified target object \em limit times, with
         the value of the \em index argument ranging from 0 to \em limit-1. The work is distributed
-        over the parallel threads in an unpredicable manner. */
-    template<class T> void call(T* targetObject, void (T::*targetMember)(size_t index), size_t limit);
+        over the parallel threads in an unpredicable manner. As an optional argument, a pointer to a
+        ProcessAssigner can be passed. This object is then used to convert the indices ranging from 0
+        to \em limit-1 to absolute indices, spanning a greater value range. */
+    template<class T> void call(T* targetObject, void (T::*targetMember)(size_t index), size_t limit, ProcessAssigner* assigner = 0);
 
 private:
     /** The function that gets executed inside each of the parallel threads. */
@@ -165,6 +170,7 @@ private:
     int _active;                // the number of parallel threads that are still doing some work
     FatalError* _exception;     // a pointer to a heap-allocated copy of the exception thrown by a work thread
                                 // or zero if no exception was thrown
+    ProcessAssigner* _assigner; // a pointer to the process assigner, if present
 
     // data member shared by all threads; changes are atomic (no need for protection)
     std::atomic<size_t> _next;  // the current index of the for loop being implemented
@@ -173,10 +179,10 @@ private:
 ////////////////////////////////////////////////////////////////////
 
 // outermost portion of the call() template function implementation
-template<class T> void Parallel::call(T* targetObject, void (T::*targetMember)(size_t index), size_t limit)
+template<class T> void Parallel::call(T* targetObject, void (T::*targetMember)(size_t index), size_t limit, ProcessAssigner* assigner)
 {
     Target<T> target(targetObject, targetMember);
-    call(&target, limit);
+    call(&target, limit, assigner);
 }
 
 ////////////////////////////////////////////////////////////////////

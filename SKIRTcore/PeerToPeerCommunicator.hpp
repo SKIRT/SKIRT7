@@ -6,6 +6,7 @@
 #ifndef PEERTOPEERCOMMUNICATOR_HPP
 #define PEERTOPEERCOMMUNICATOR_HPP
 
+#include "ArrayTable.hpp"
 #include "ProcessCommunicator.hpp"
 class Array;
 
@@ -26,8 +27,10 @@ class PeerToPeerCommunicator : public ProcessCommunicator
 {
     Q_OBJECT
 
+    //====================== Other Functions =======================
+
 public:
-    /** This function is used for summing an Array element-wise across the different processes in the
+    /** This function is used for summing an Array of element-wise across the different processes in the
         communicator. The resulting values are then stored in the same Array passed to this function,
         on the root process. */
     void sum(Array& arr);
@@ -37,9 +40,16 @@ public:
         on all processes in the communicator. */
     void sum_all(Array& arr);
 
+    /** This function is used for broadcasting the values in an Array from one particular process to
+        all other processes in this communicator. The rank of the sending process is indicated with the
+        second argument. */
+    void broadcast(Array& arr, int sender);
+
     /** This function returns whether the process is assigned as the root within this communicator
         or not. */
     bool isRoot();
 };
+
+////////////////////////////////////////////////////////////////////
 
 #endif // PEERTOPEERCOMMUNICATOR_HPP

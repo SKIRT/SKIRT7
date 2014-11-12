@@ -259,8 +259,8 @@ void SkirtCommandLineHandler::doSimulation(size_t index)
     if (_parallelSims > 1 || _args.isPresent("-b")) simulation->log()->setLowestLevel(Log::Success);
 
     // output a ski file and a latex file reflecting this simulation for later reference
-    PeerToPeerCommunicator* communicator = simulation->getCommunicator();
-    if (communicator->isRoot())
+    PeerToPeerCommunicator* comm = simulation->getCommunicator();
+    if (comm->isRoot())
     {
         XmlHierarchyWriter writer1;
         writer1.writeHierarchy(simulation.data(), simulation->filePaths()->output("parameters.xml"));

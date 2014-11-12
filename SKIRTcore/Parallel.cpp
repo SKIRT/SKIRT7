@@ -10,6 +10,7 @@
 ////////////////////////////////////////////////////////////////////
 
 Parallel::Parallel(int threadCount, ParallelFactory* factory)
+    : _assigner(0)
 {
     // remember the current thread
     _parentThread = QThread::currentThread();
@@ -60,7 +61,7 @@ int Parallel::threadCount() const
 
 ////////////////////////////////////////////////////////////////////
 
-void Parallel::call(ParallelTarget* target, size_t limit)
+void Parallel::call(ParallelTarget* target, size_t limit, ProcessAssigner* assigner)
 {
     // verify that we're being called from our parent thread
     if (QThread::currentThread() != _parentThread)
@@ -69,6 +70,7 @@ void Parallel::call(ParallelTarget* target, size_t limit)
     // copy the arguments so they can be used from any of the threads
     _target = target;
     _limit = limit;
+    _assigner = assigner;
 
     // initialize the number of active threads (i.e. not waiting for new work)
     _active = _threads.size();
@@ -87,6 +89,9 @@ void Parallel::call(ParallelTarget* target, size_t limit)
 
     // wait until all parallel threads are done
     waitForThreads();
+
+    // set the assigner pointer to null for further use of this Parallel instance
+    _assigner = 0;
 
     // check for and process the exception, if any
     if (_exception)
@@ -126,9 +131,12 @@ void Parallel::doWork()
         // do work as long as some is available
         forever
         {
-            size_t index = _next++;         // get the next index atomically
-            if (index >= _limit) break;     // break if no more are available
-            _target->body(index);           // execute the body
+            size_t index = _next++;                  // get the next index atomically
+            if (index >= _limit) break;              // break if no more are available
+
+            // execute the body
+            if (_assigner) { _target->body(_assigner->absoluteIndex(index)); }
+            else { _target->body(index); }
         }
     }
     catch (FatalError& error)

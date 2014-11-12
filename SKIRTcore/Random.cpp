@@ -73,11 +73,11 @@ int Random::seed() const
 
 void Random::randomize()
 {
-    PeerToPeerCommunicator* communicator = find<PeerToPeerCommunicator>();
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
 
     int Nthreads = _parfac->maxThreadCount();
 
-    _seed = _seed + Nthreads * communicator->getRank();
+    _seed = _seed + Nthreads * comm->getRank();
 
     initialize(Nthreads);
 }

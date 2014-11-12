@@ -131,6 +131,15 @@ void ProcessManager::sum_all(double* my_array, double* result_array, int nvalues
 
 //////////////////////////////////////////////////////////////////////
 
+void ProcessManager::broadcast(double* my_array, int nvalues, int root)
+{
+#ifdef BUILDING_WITH_MPI
+    MPI_Bcast(my_array, nvalues, MPI_DOUBLE, root, MPI_COMM_WORLD);
+#endif
+}
+
+//////////////////////////////////////////////////////////////////////
+
 bool ProcessManager::isRoot()
 {
 #ifdef BUILDING_WITH_MPI

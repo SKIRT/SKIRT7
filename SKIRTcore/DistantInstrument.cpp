@@ -109,8 +109,8 @@ Direction DistantInstrument::bfkobs(const Position& /*bfr*/) const
 
 void DistantInstrument::calibrateAndWriteSEDs(QList< Array* > Farrays, QStringList Fnames)
 {
-    PeerToPeerCommunicator* communicator = find<PeerToPeerCommunicator>();
-    if (communicator->getRank()) return;
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+    if (comm->getRank()) return;
 
     WavelengthGrid* lambdagrid = find<WavelengthGrid>();
     int Nlambda = find<WavelengthGrid>()->Nlambda();

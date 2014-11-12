@@ -273,7 +273,11 @@ HEADERS += \
     ProcessCommunicator.hpp \
     PeerToPeerCommunicator.hpp \
     MasterSlaveCommunicator.hpp \
-    RotateGeometry.hpp
+    RotateGeometry.hpp \
+    ProcessAssigner.hpp \
+    IdenticalAssigner.hpp \
+    StaggeredAssigner.hpp \
+    SequentialAssigner.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -505,4 +509,8 @@ SOURCES += \
     ProcessCommunicator.cpp \
     PeerToPeerCommunicator.cpp \
     MasterSlaveCommunicator.cpp \
-    RotateGeometry.cpp
+    RotateGeometry.cpp \
+    ProcessAssigner.cpp \
+    IdenticalAssigner.cpp \
+    StaggeredAssigner.cpp \
+    SequentialAssigner.cpp

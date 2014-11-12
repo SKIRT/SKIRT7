@@ -3,48 +3,47 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
-#include "Array.hpp"
 #include "PeerToPeerCommunicator.hpp"
-#include "ProcessManager.hpp"
+#include "StaggeredAssigner.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
-void PeerToPeerCommunicator::sum(Array& arr)
+StaggeredAssigner::StaggeredAssigner()
 {
-    if (!isMultiProc()) return;
-
-    Array results(arr.size());
-
-    ProcessManager::sum(&(arr[0]),&results[0],arr.size(),0);
-    if (isRoot()) arr = results;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void PeerToPeerCommunicator::sum_all(Array& arr)
+void StaggeredAssigner::assign(size_t size)
 {
-    if (!isMultiProc()) return;
+    _comm = find<PeerToPeerCommunicator>();
 
-    Array results(arr.size());
-
-    ProcessManager::sum_all(&(arr[0]),&results[0],arr.size());
-    arr = results;
+    for (size_t i = 0; i < size; i++)
+    {
+        if (i % _comm->getSize() == _comm->getRank()) _nvalues++;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void PeerToPeerCommunicator::broadcast(Array& arr, int sender)
+size_t StaggeredAssigner::absoluteIndex(size_t relativeIndex)
 {
-    if (!isMultiProc()) return;
-
-    ProcessManager::broadcast(&(arr[0]),arr.size(),sender);
+    size_t absoluteIndex = _comm->getRank() + relativeIndex * _comm->getSize();
+    return absoluteIndex;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-bool PeerToPeerCommunicator::isRoot()
+int StaggeredAssigner::rankForIndex(size_t index) const
 {
-    return !getRank();
+    return (index % _comm->getSize());
+}
+
+////////////////////////////////////////////////////////////////////
+
+bool StaggeredAssigner::parallel() const
+{
+    return true;
 }
 
 ////////////////////////////////////////////////////////////////////

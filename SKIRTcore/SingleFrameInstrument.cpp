@@ -120,8 +120,8 @@ int SingleFrameInstrument::pixelondetector(const PhotonPackage* pp) const
 
 void SingleFrameInstrument::calibrateAndWriteDataCubes(QList< Array*> farrays, QStringList fnames)
 {
-    PeerToPeerCommunicator* communicator = find<PeerToPeerCommunicator>();
-    if (!communicator->isRoot()) return;
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+    if (!comm->isRoot()) return;
 
     WavelengthGrid* lambdagrid = find<WavelengthGrid>();
     int Nlambda = lambdagrid->Nlambda();
