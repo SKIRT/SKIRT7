@@ -45,6 +45,7 @@ EnumPropertyWizardPane::EnumPropertyWizardPane(PropertyHandlerPtr handler, QObje
         if (!choiceTitle.isEmpty()) choiceTitle.replace(0, 1, choiceTitle[0].toUpper());
         if (choiceKey==defaultKey) choiceTitle += "  [default]";
         auto choiceButton = new QRadioButton(choiceTitle);
+        choiceButton->setFocusPolicy(Qt::NoFocus);
         buttonGroup->addButton(choiceButton);
         layout->addWidget(choiceButton);
 

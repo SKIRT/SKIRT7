@@ -29,6 +29,10 @@ BasicChoiceWizardPane::BasicChoiceWizardPane(int initialChoice, bool dirty, QObj
     auto choice2 = new QRadioButton("Create and configure a new FitScheme file");
     auto choice3 = new QRadioButton("Open and edit an existing SKIRT parameter file");
     auto choice4 = new QRadioButton("Open and edit an existing FitScheme file");
+    choice1->setFocusPolicy(Qt::NoFocus);
+    choice2->setFocusPolicy(Qt::NoFocus);
+    choice3->setFocusPolicy(Qt::NoFocus);
+    choice4->setFocusPolicy(Qt::NoFocus);
     _buttonGroup = new QButtonGroup;
     _buttonGroup->addButton(choice1, 1);
     _buttonGroup->addButton(choice2, 2);

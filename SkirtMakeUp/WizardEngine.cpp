@@ -68,6 +68,7 @@ bool WizardEngine::canAdvance()
     case SaveHierarchy:
         return false;
     }
+    return false;   // to satisfy some compilers
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -466,6 +467,7 @@ QWidget* WizardEngine::createPane()
             return new SaveWizardPane(_root, _filepath, _dirty, this);
         }
     }
+    return 0;   // to satisfy some compilers
 }
 
 ////////////////////////////////////////////////////////////////////

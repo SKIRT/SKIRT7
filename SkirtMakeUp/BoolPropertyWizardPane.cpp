@@ -34,6 +34,7 @@ BoolPropertyWizardPane::BoolPropertyWizardPane(PropertyHandlerPtr handler, QObje
 
         // add the choice button the group and to the layout
         auto choiceButton = new QRadioButton(QString("No") + (isDefault ? "  [default]" : ""));
+        choiceButton->setFocusPolicy(Qt::NoFocus);
         buttonGroup->addButton(choiceButton, 0);
         layout->addWidget(choiceButton);
 
@@ -62,6 +63,7 @@ BoolPropertyWizardPane::BoolPropertyWizardPane(PropertyHandlerPtr handler, QObje
 
         // add the choice button the group and to the layout
         auto choiceButton = new QRadioButton(QString("Yes") + (isDefault ? "  [default]" : ""));
+        choiceButton->setFocusPolicy(Qt::NoFocus);
         buttonGroup->addButton(choiceButton, 1);
         layout->addWidget(choiceButton);
 

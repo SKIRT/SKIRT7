@@ -45,6 +45,7 @@ SubItemPropertyWizardPane::SubItemPropertyWizardPane(PropertyHandlerPtr handler,
         if (!choiceTitle.isEmpty()) choiceTitle.replace(0, 1, choiceTitle[0].toUpper());
         if (SimulationItemDiscovery::inherits(choiceType,defaultType)) choiceTitle += "  [default]";
         auto choiceButton = new QRadioButton(choiceTitle);
+        choiceButton->setFocusPolicy(Qt::NoFocus);
         buttonGroup->addButton(choiceButton);
         layout->addWidget(choiceButton);
 

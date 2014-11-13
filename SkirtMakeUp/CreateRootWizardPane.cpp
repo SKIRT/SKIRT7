@@ -41,6 +41,7 @@ CreateRootWizardPane::CreateRootWizardPane(QByteArray abstractType, QByteArray i
         auto choiceTitle = title(choiceType);
         if (!choiceTitle.isEmpty()) choiceTitle.replace(0, 1, choiceTitle[0].toUpper());
         auto choiceButton = new QRadioButton(choiceTitle);
+        choiceButton->setFocusPolicy(Qt::NoFocus);
         buttonGroup->addButton(choiceButton);
         layout->addWidget(choiceButton);
 

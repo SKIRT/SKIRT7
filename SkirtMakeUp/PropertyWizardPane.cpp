@@ -21,6 +21,7 @@ PropertyWizardPane::PropertyWizardPane(PropertyHandlerPtr handler, QObject* targ
 
 void PropertyWizardPane::showEvent(QShowEvent* event)
 {
+    setFocus();
     focusNextChild();
     QWidget::showEvent(event);
 }

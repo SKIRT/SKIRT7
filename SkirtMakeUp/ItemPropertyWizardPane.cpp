@@ -44,6 +44,7 @@ ItemPropertyWizardPane::ItemPropertyWizardPane(PropertyHandlerPtr handler, QObje
     if (hdlr->isOptional())
     {
         auto choiceButton = new QRadioButton("None");
+        choiceButton->setFocusPolicy(Qt::NoFocus);
         buttonGroup->addButton(choiceButton);
         layout->addWidget(choiceButton);
 
@@ -62,6 +63,7 @@ ItemPropertyWizardPane::ItemPropertyWizardPane(PropertyHandlerPtr handler, QObje
         if (!choiceTitle.isEmpty()) choiceTitle.replace(0, 1, choiceTitle[0].toUpper());
         if (choiceType==defaultType) choiceTitle += "  [default]";
         auto choiceButton = new QRadioButton(choiceTitle);
+        choiceButton->setFocusPolicy(Qt::NoFocus);
         buttonGroup->addButton(choiceButton);
         layout->addWidget(choiceButton);
 
