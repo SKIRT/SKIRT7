@@ -33,13 +33,11 @@ unix: PRE_TARGETDEPS += $$OUT_PWD/../Fundamentals/libfundamentals.a \
                         $$OUT_PWD/../FitSKIRTcore/libfitskirtcore.a \
                         $$OUT_PWD/../MPIsupport/libmpisupport.a
 
-# use MPI linker if available (invoke 'which' via bash in login script mode to honor PATHS on Mac OS X)
-MPI_COMPILER = $$system(bash -lc "'which mpiicpc'")
-isEmpty(MPI_COMPILER) {
-    MPI_COMPILER = $$system(bash -lc "'which mpicxx'")
-}
+# use MPI compiler/linker if available
+include(../BuildOptions.pri)
 !isEmpty(MPI_COMPILER) {
-    message (using MPI linker $$MPI_COMPILER)
+    QMAKE_CXXFLAGS += -DBUILDING_WITH_MPI
+    QMAKE_CXX = $$MPI_COMPILER
     QMAKE_LINK = $$MPI_COMPILER
 }
 
