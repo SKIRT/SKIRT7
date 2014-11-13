@@ -7,8 +7,8 @@
 #define DUSTLIB_HPP
 
 #include "ArrayTable.hpp"
-#include "ProcessAssigner.hpp"
 #include "SimulationItem.hpp"
+class ProcessAssigner;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -29,14 +29,20 @@ class DustLib : public SimulationItem
     Q_CLASSINFO("Title", "a dust library")
 
     Q_CLASSINFO("Property", "assigner")
-    Q_CLASSINFO("Title", "the process assigner")
+    Q_CLASSINFO("Title", "the parallel process assignment scheme")
     Q_CLASSINFO("Default", "SequentialAssigner")
+    Q_CLASSINFO("Optional", "true")
+    Q_CLASSINFO("Silent", "true")
 
     //============= Construction - Setup - Destruction =============
 
 protected:
     /** Default constructor. */
     DustLib();
+
+    /** This function creates a default assigner if no assigner has been set during construction
+        (which can happen since the assigner property is silent and optional). */
+    void setupSelfBefore();
 
     //======== Setters & Getters for Discoverable Attributes =======
 

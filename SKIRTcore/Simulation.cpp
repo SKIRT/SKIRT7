@@ -72,27 +72,9 @@ void Simulation::setupAndRun()
 
 ////////////////////////////////////////////////////////////////////
 
-void Simulation::setFilePaths(FilePaths* value)
-{
-    if (_paths) delete _paths;
-    _paths = value;
-    if (_paths) _paths->setParent(this);
-}
-
-////////////////////////////////////////////////////////////////////
-
 FilePaths* Simulation::filePaths() const
 {
     return _paths;
-}
-
-////////////////////////////////////////////////////////////////////
-
-void Simulation::setLog(Log* value)
-{
-    if (_log) delete _log;
-    _log = value;
-    if (_log) _log->setParent(this);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -104,15 +86,6 @@ Log* Simulation::log() const
 
 ////////////////////////////////////////////////////////////////////
 
-void Simulation::setParallelFactory(ParallelFactory* value)
-{
-    if (_parfac) delete _parfac;
-    _parfac = value;
-    if (_parfac) _parfac->setParent(this);
-}
-
-////////////////////////////////////////////////////////////////////
-
 ParallelFactory* Simulation::parallelFactory() const
 {
     return _parfac;
@@ -120,7 +93,7 @@ ParallelFactory* Simulation::parallelFactory() const
 
 ////////////////////////////////////////////////////////////////////
 
-PeerToPeerCommunicator* Simulation::getCommunicator() const
+PeerToPeerCommunicator* Simulation::communicator() const
 {
     return _comm;
 }

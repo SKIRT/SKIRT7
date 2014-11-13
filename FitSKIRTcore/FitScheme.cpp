@@ -73,15 +73,6 @@ void FitScheme::setupAndRun()
 
 ////////////////////////////////////////////////////////////////////
 
-void FitScheme::setFilePaths(FilePaths* value)
-{
-    if (_paths) delete _paths;
-    _paths = value;
-    if (_paths) _paths->setParent(this);
-}
-
-////////////////////////////////////////////////////////////////////
-
 FilePaths* FitScheme::filePaths() const
 {
     return _paths;
@@ -89,34 +80,9 @@ FilePaths* FitScheme::filePaths() const
 
 ////////////////////////////////////////////////////////////////////
 
-void FitScheme::setLog(Log* value)
-{
-    if (_log) delete _log;
-    _log = value;
-    if (_log) _log->setParent(this);
-}
-
-////////////////////////////////////////////////////////////////////
-
 Log* FitScheme::log() const
 {
     return _log;
-}
-
-////////////////////////////////////////////////////////////////////
-
-void FitScheme::setUnits(Units *value)
-{
-    if (_units) delete _units;
-    _units = value;
-    if (_units) _units->setParent(this);
-}
-
-////////////////////////////////////////////////////////////////////
-
-Units *FitScheme::units() const
-{
-    return _units;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -145,6 +111,22 @@ void FitScheme::setParallelThreadCount(int value)
 int FitScheme::parallelThreadCount() const
 {
     return _parallelThreads;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void FitScheme::setUnits(Units *value)
+{
+    if (_units) delete _units;
+    _units = value;
+    if (_units) _units->setParent(this);
+}
+
+////////////////////////////////////////////////////////////////////
+
+Units *FitScheme::units() const
+{
+    return _units;
 }
 
 ////////////////////////////////////////////////////////////////////

@@ -86,6 +86,8 @@ void ProcessManager::sendByteBuffer(QByteArray& buffer, int receiver, int tag)
 {
 #ifdef BUILDING_WITH_MPI
     MPI_Send(buffer.data(), buffer.size(), MPI_BYTE, receiver, tag, MPI_COMM_WORLD);
+#else
+    Q_UNUSED(buffer) Q_UNUSED(receiver) Q_UNUSED(tag)
 #endif
 }
 
@@ -97,6 +99,8 @@ void ProcessManager::receiveByteBuffer(QByteArray& buffer, int& sender)
     MPI_Status status;
     MPI_Recv(buffer.data(), buffer.size(), MPI_BYTE, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
     sender = status.MPI_SOURCE;
+#else
+    Q_UNUSED(buffer) Q_UNUSED(sender)
 #endif
 }
 
@@ -108,6 +112,8 @@ void ProcessManager::receiveByteBuffer(QByteArray &buffer, int sender, int& tag)
     MPI_Status status;
     MPI_Recv(buffer.data(), buffer.size(), MPI_BYTE, sender, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
     tag = status.MPI_TAG;
+#else
+    Q_UNUSED(buffer) Q_UNUSED(sender) Q_UNUSED(tag)
 #endif
 }
 
@@ -117,6 +123,8 @@ void ProcessManager::sum(double* my_array, double* result_array, int nvalues, in
 {
 #ifdef BUILDING_WITH_MPI
     MPI_Reduce(my_array, result_array, nvalues, MPI_DOUBLE, MPI_SUM, root, MPI_COMM_WORLD);
+#else
+    Q_UNUSED(my_array) Q_UNUSED(result_array) Q_UNUSED(nvalues) Q_UNUSED(root)
 #endif
 }
 
@@ -126,6 +134,8 @@ void ProcessManager::sum_all(double* my_array, double* result_array, int nvalues
 {
 #ifdef BUILDING_WITH_MPI
     MPI_Allreduce(my_array, result_array, nvalues, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+#else
+    Q_UNUSED(my_array) Q_UNUSED(result_array) Q_UNUSED(nvalues)
 #endif
 }
 
@@ -135,6 +145,8 @@ void ProcessManager::broadcast(double* my_array, int nvalues, int root)
 {
 #ifdef BUILDING_WITH_MPI
     MPI_Bcast(my_array, nvalues, MPI_DOUBLE, root, MPI_COMM_WORLD);
+#else
+    Q_UNUSED(my_array) Q_UNUSED(nvalues) Q_UNUSED(root)
 #endif
 }
 

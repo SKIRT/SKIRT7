@@ -26,7 +26,7 @@ class FitScheme : public SimulationItem
     Q_OBJECT
     Q_CLASSINFO("Title", "the fit scheme")
 
-    // Note: the file paths, log and parallel properties are not declared because (in the current implementation)
+    // Note: the file paths, log and parallel properties are not declared because
     // they are initialized based on command-line options, not from the fski file
 
     Q_CLASSINFO("Property", "units")
@@ -37,7 +37,8 @@ class FitScheme : public SimulationItem
 
 protected:
     /** The default constructor; it is protected since this is an abstract class. The constructor
-        provides useful defaults for all attributes defined in this class. This is an exception to
+        initializes the non-discoverable attributes and provides useful defaults for all
+        discoverable attributes defined in this class.  This is an exception to
         the rule that all attributes in the fit scheme hierarchy must be explicitly set before
         invoking setup(). */
     FitScheme();
@@ -64,35 +65,14 @@ protected:
         performed. Its implementation must be provided by a subclass. */
     virtual void runSelf() = 0;
 
-    //======== Setters & Getters for Discoverable Attributes =======
+    //======== Setters & Getters for Non-Discoverable Attributes =======
 
 public:
-    /** Sets the input/output file paths object for this fit scheme. By default, an instance of the
-        FilePaths class is used with the default paths and no filename prefix. */
-    void setFilePaths(FilePaths* value);
-
     /** Returns the input/output file paths object for this fit scheme. */
     FilePaths* filePaths() const;
 
-    /** Sets the logging mechanism for this fit scheme. By default, an instance of the Console
-        class is used. */
-    void setLog(Log* value);
-
     /** Returns the logging mechanism for this fit scheme. */
     Log* log() const;
-
-    /** Sets the mechanism to perform parallel tasks for this fit scheme. */
-    void setComm(MasterSlaveCommunicator* value);
-
-    /** Returns the mechanism to perform parallel tasks for this fit scheme. */
-    MasterSlaveCommunicator* comm() const;
-
-    /** Sets the units system for this fit scheme. By default, an instance of the SIUnits class is
-        used. */
-    Q_INVOKABLE void setUnits(Units* value);
-
-    /** Returns the units system for this fit scheme. */
-    Q_INVOKABLE Units* units() const;
 
     /** Sets the number of SKIRT simulations performed in parallel by this fit scheme. By default,
         the number of parallel simulations is equal to one (i.e. simulations are serialized). */
@@ -109,6 +89,16 @@ public:
     /** Returns the number of parallel threads for each SKIRT simulation performed by this fit
         scheme. */
     int parallelThreadCount() const;
+
+    //======== Setters & Getters for Discoverable Attributes =======
+
+public:
+    /** Sets the units system for this fit scheme. By default, an instance of the SIUnits class is
+        used. */
+    Q_INVOKABLE void setUnits(Units* value);
+
+    /** Returns the units system for this fit scheme. */
+    Q_INVOKABLE Units* units() const;
 
     //======================== Data Members ========================
 

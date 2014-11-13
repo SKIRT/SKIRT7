@@ -42,9 +42,16 @@ class Simulation : public SimulationItem
 
 protected:
     /** The default constructor; it is protected since this is an abstract class. The constructor
-        provides useful defaults for all attributes defined in this class. This is an exception to
-        the rule that all attributes in the simulation hierarchy must be explicitly set before
-        invoking setup() */
+        initializes the non-discoverable attributes and provides useful defaults for all
+        discoverable attributes defined in this class. This is an exception to the rule that all
+        attributes in the simulation hierarchy must be explicitly set before invoking setup().
+        Specifically, the \em filePaths attribute is set to an instance of the FilePaths class with
+        default paths and no filename prefix; the \em log attribute is set to an instance of the
+        Console class; the \em parallelFactory attribute is set to an instance of the
+        ParallelFactory class with the default maximum number of parallel threads; the \em
+        communicator attribute is set to an instance of the PeerToPeerCommunicator class; the \em
+        random attribute is set to an instance of the Random class, and the \em units attribute is
+        set to an instance of the SIUnits class. */
     Simulation();
 
 public:
@@ -69,33 +76,24 @@ protected:
         Its implementation must be provided by a subclass. */
     virtual void runSelf() = 0;
 
-    //======== Setters & Getters for Discoverable Attributes =======
+    //======== Getters for Non-Discoverable Attributes =======
 
 public:
-    /** Sets the input/output file paths object for this simulation hierarchy. By default, an
-        instance of the FilePaths class is used with the default paths and no filename prefix. */
-    void setFilePaths(FilePaths* value);
-
     /** Returns the input/output file paths object for this simulation hierarchy. */
     FilePaths* filePaths() const;
 
-    /** Sets the logging mechanism for this simulation hierarchy. By default, an instance of the
-        Console class is used. */
-    void setLog(Log* value);
-
     /** Returns the logging mechanism for this simulation hierarchy. */
     Log* log() const;
-
-    /** Sets the parallel factory for this simulation hierarchy. By default, a factory is used with
-        the default maximum number of parallel threads. */
-    void setParallelFactory(ParallelFactory* value);
 
     /** Returns the logging mechanism for this simulation hierarchy. */
     ParallelFactory* parallelFactory() const;
 
     /** Returns the PeerToPeerCommunicator of the simulation. */
-    PeerToPeerCommunicator* getCommunicator() const;
+    PeerToPeerCommunicator* communicator() const;
 
+    //======== Setters & Getters for Discoverable Attributes =======
+
+public:
     /** Sets the random number generator for this simulation hierarchy. By default, an instance of
         the Random class is used with the default seed. */
     Q_INVOKABLE void setRandom(Random* value);

@@ -12,6 +12,7 @@
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
 #include "PeerToPeerCommunicator.hpp"
+#include "SequentialAssigner.hpp"
 #include "WavelengthGrid.hpp"
 
 using namespace std;
@@ -21,6 +22,15 @@ using namespace std;
 DustLib::DustLib()
     : _assigner(0)
 {
+}
+
+////////////////////////////////////////////////////////////////////
+
+void DustLib::setupSelfBefore()
+{
+    SimulationItem::setupSelfBefore();
+
+    if (!_assigner) setAssigner(new SequentialAssigner());
 }
 
 ////////////////////////////////////////////////////////////////////
