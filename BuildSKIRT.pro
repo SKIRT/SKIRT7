@@ -10,17 +10,23 @@
 
 TEMPLATE = subdirs
 
-# add subdirectories in order of dependency,
-# i.e. a project must be listed after any projects on which it depends
+# add subdirectories in alphabetical order
 SUBDIRS += \
-    DoxStyle \
     Cfitsio \
-    GAlib \
-    Voro \
+    Discover \
+    DoxStyle \
+    FitSKIRTcore \
+    FitSKIRTmain \
     Fundamentals \
+    GAlib \
     MPIsupport \
     SKIRTcore \
-    Discover \
     SKIRTmain \
-    FitSKIRTcore \
-    FitSKIRTmain
+    Voro
+
+# define dependencies between subprojects
+SKIRTcore.depends    = Cfitsio Voro Fundamentals MPIsupport
+Discover.depends     = Cfitsio Voro Fundamentals MPIsupport SKIRTcore
+SKIRTmain.depends    = Cfitsio Voro Fundamentals MPIsupport SKIRTcore Discover
+FitSKIRTcore.depends = GAlib Cfitsio Voro Fundamentals MPIsupport SKIRTcore Discover
+FitSKIRTmain.depends = GAlib Cfitsio Voro Fundamentals MPIsupport SKIRTcore Discover FitSKIRTcore

@@ -23,10 +23,14 @@ QMAKE_CXXFLAGS_RELEASE += -O3
 INCLUDEPATH += $$PWD/../Fundamentals $$PWD/../Discover $$PWD/../SKIRTcore $$PWD/../MPIsupport
 DEPENDPATH += $$PWD/../Fundamentals $$PWD/../Discover $$PWD/../SKIRTcore $$PWD/../MPIsupport
 unix: LIBS += -L$$OUT_PWD/../Fundamentals/ -lfundamentals \
+              -L$$OUT_PWD/../Cfitsio/ -lcfitsio \
+              -L$$OUT_PWD/../Voro/ -lvoro \
               -L$$OUT_PWD/../Discover/ -ldiscover \
               -L$$OUT_PWD/../SKIRTcore/ -lskirtcore \
               -L$$OUT_PWD/../MPIsupport/ -lmpisupport
 unix: PRE_TARGETDEPS += $$OUT_PWD/../Fundamentals/libfundamentals.a \
+                        $$OUT_PWD/../Cfitsio/libcfitsio.a \
+                        $$OUT_PWD/../Voro/libvoro.a \
                         $$OUT_PWD/../Discover/libdiscover.a \
                         $$OUT_PWD/../SKIRTcore/libskirtcore.a \
                         $$OUT_PWD/../MPIsupport/libmpisupport.a
