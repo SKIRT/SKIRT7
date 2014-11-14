@@ -20,7 +20,8 @@ void StaggeredAssigner::assign(size_t size)
 
     for (size_t i = 0; i < size; i++)
     {
-        if (i % _comm->getSize() == _comm->getRank()) _nvalues++;
+        int rank = i % _comm->getSize();
+        if (rank == _comm->getRank()) _nvalues++;
     }
 }
 
