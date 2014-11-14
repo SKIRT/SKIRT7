@@ -76,8 +76,10 @@ void Random::randomize()
     PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
 
     int Nthreads = _parfac->maxThreadCount();
+    _mtv.resize(Nthreads);      // Because the number of threads can be different during and after the setup
+    _mtiv.resize(Nthreads);     // of the simulation.
 
-    _seed = _seed + Nthreads * comm->getRank();
+    _seed = _seed + Nthreads * comm->rank();
 
     initialize(Nthreads);
 }

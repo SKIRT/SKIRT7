@@ -20,8 +20,8 @@ void StaggeredAssigner::assign(size_t size)
 
     for (size_t i = 0; i < size; i++)
     {
-        int rank = i % _comm->getSize();
-        if (rank == _comm->getRank()) _nvalues++;
+        int rank = i % _comm->size();
+        if (rank == _comm->rank()) _nvalues++;
     }
 }
 
@@ -29,7 +29,7 @@ void StaggeredAssigner::assign(size_t size)
 
 size_t StaggeredAssigner::absoluteIndex(size_t relativeIndex)
 {
-    size_t absoluteIndex = _comm->getRank() + relativeIndex * _comm->getSize();
+    size_t absoluteIndex = _comm->rank() + relativeIndex * _comm->size();
     return absoluteIndex;
 }
 
@@ -37,7 +37,7 @@ size_t StaggeredAssigner::absoluteIndex(size_t relativeIndex)
 
 int StaggeredAssigner::rankForIndex(size_t index) const
 {
-    return (index % _comm->getSize());
+    return (index % _comm->size());
 }
 
 ////////////////////////////////////////////////////////////////////

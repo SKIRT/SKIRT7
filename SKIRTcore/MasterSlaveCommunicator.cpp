@@ -97,7 +97,7 @@ bool MasterSlaveCommunicator::isMaster() const
 
 bool MasterSlaveCommunicator::isSlave() const
 {
-    return _performing || (isMultiProc() && getRank());
+    return _performing || (isMultiProc() && rank());
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -233,13 +233,13 @@ QVector<QVariant> MasterSlaveCommunicator::master_command_loop(int taskIndex, QV
     QVector<QVariant> outputVector(numitems);
 
     // prepare a vector to remember the index of most recent item handed out to each slave
-    QVector<int> itemForSlave(getSize());
+    QVector<int> itemForSlave(size());
 
     // the index of the next item to be handed out
     int numsent = 0;
 
     // hand out an item to each slave (unless there are less items than slaves)
-    for (int slave=1; slave<getSize() && numsent<numitems; slave++,numsent++)
+    for (int slave=1; slave<size() && numsent<numitems; slave++,numsent++)
     {
         QByteArray buffer = toByteArray(_bufsize, inputVector[numsent]);
 
@@ -299,7 +299,7 @@ void MasterSlaveCommunicator::slave_obey_loop()
 
 void MasterSlaveCommunicator::stop_obeying()
 {
-    for (int slave=1; slave<getSize(); slave++)
+    for (int slave=1; slave<size(); slave++)
     {
         // send an empty message with a tag that specifies a non-existing task
         QByteArray emptybuffer;

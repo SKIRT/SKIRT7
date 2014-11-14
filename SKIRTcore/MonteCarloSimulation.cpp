@@ -58,7 +58,7 @@ void MonteCarloSimulation::setChunkParams(double packages)
     else
     {
         int Nthreads = _parfac->maxThreadCount();
-        int Nprocs = _comm->getSize();
+        int Nprocs = _comm->size();
 
         if (Nprocs * Nthreads == 1)
         {

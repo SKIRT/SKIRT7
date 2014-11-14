@@ -37,7 +37,7 @@ void Log::setupSelfBefore()
     // PeerToPeerCommunicator so that the correct rank is initialized
     comm = find<ProcessCommunicator>();
 
-    if (comm->isMultiProc()) setProcessName(comm->getRank());
+    if (comm->isMultiProc()) setProcessName(comm->rank());
 }
 
 ////////////////////////////////////////////////////////////////////

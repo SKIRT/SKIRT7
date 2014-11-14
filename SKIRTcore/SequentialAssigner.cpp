@@ -18,8 +18,8 @@ void SequentialAssigner::assign(size_t size)
 {
     _comm = find<PeerToPeerCommunicator>();
 
-    int nprocs = _comm->getSize();   // The number of processes
-    int rank = _comm->getRank();     // The rank of this process
+    int nprocs = _comm->size();   // The number of processes
+    int rank = _comm->rank();     // The rank of this process
 
     _quotient = size / nprocs;
     _remainder = size % nprocs;

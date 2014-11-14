@@ -9,6 +9,10 @@
 
 ////////////////////////////////////////////////////////////////////
 
+#define ROOT 0
+
+////////////////////////////////////////////////////////////////////
+
 void PeerToPeerCommunicator::sum(Array& arr)
 {
     if (!isMultiProc()) return;
@@ -44,7 +48,7 @@ void PeerToPeerCommunicator::broadcast(Array& arr, int sender)
 
 bool PeerToPeerCommunicator::isRoot()
 {
-    return !getRank();
+    return (rank() == ROOT);
 }
 
 ////////////////////////////////////////////////////////////////////

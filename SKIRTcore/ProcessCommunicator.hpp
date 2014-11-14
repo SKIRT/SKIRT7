@@ -46,11 +46,11 @@ public:
     ~ProcessCommunicator();
 
     /** This function returns the rank of the process. */
-    int getRank() const;
+    int rank() const;
 
     /** This function returns the size of the communicator, meaning the number of processes that are in
         its environment. */
-    int getSize() const;
+    int size() const;
 
     /** This function returns true when multiple processes are in the environment of this communicator,
         and false when there is only one process (when the MPI resource is not available or turned on). */
