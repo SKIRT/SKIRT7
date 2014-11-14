@@ -29,14 +29,14 @@ void ProcessCommunicator::setupSelfBefore()
 
 ////////////////////////////////////////////////////////////////////
 
-int ProcessCommunicator::getRank() const
+int ProcessCommunicator::rank() const
 {
     return _rank;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-int ProcessCommunicator::getSize() const
+int ProcessCommunicator::size() const
 {
     return _Nprocs;
 }

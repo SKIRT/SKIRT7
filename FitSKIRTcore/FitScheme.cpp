@@ -64,7 +64,7 @@ void FitScheme::setupAndRun()
 {
     _log->setup(); // ensure the log is properly setup before first use
 
-    QString processInfo = _comm->isMultiProc() ? " with " + QString::number(_comm->getSize()) + " processes" : "";
+    QString processInfo = _comm->isMultiProc() ? " with " + QString::number(_comm->size()) + " processes" : "";
     TimeLogger logger(_log, "fit scheme " + _paths->outputPrefix() + processInfo);
 
     setup();

@@ -11,6 +11,7 @@
 #include "FilePaths.hpp"
 #include "Log.hpp"
 #include "NR.hpp"
+#include "PeerToPeerCommunicator.hpp"
 #include "PhotonPackage.hpp"
 #include "Random.hpp"
 #include "SPHStellarComp.hpp"
@@ -98,8 +99,10 @@ void SPHStellarComp::setupSelfBefore()
         NR::cdf(_Xvv[ell], Lvv[ell]);
     }
 
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+
     // if requested, write a data file with the luminosities per wavelength
-    if (_writeLuminosities)
+    if (_writeLuminosities && comm->isRoot())
     {
         Units* units = find<Units>();
         WavelengthGrid* lambdagrid = find<WavelengthGrid>();
