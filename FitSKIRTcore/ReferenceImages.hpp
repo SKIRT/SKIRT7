@@ -38,8 +38,11 @@ protected:
     //======== Setters & Getters for Discoverable Attributes =======
 
 public:
-    /** This function adds an image to the system. */
-    Q_INVOKABLE void addImage(ReferenceImage* value);
+    /** This function inserts an image into the system at the specified index. */
+    Q_INVOKABLE void insertImage(int index, ReferenceImage* value);
+
+    /** This function removes the image with the specified index from the system. */
+    Q_INVOKABLE void removeImage(int index);
 
     /** This function returns the list of reference images in the system. */
     Q_INVOKABLE QList<ReferenceImage*> images() const;

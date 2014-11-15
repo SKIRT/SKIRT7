@@ -29,7 +29,7 @@ QByteArray ItemPropertyHandler::baseType() const
 
 ////////////////////////////////////////////////////////////////////
 
-bool ItemPropertyHandler::setPlainValue(QObject *value)
+bool ItemPropertyHandler::setPlainValue(QObject* value)
 {
     if (value && SimulationItemDiscovery::inherits(value->metaObject()->className(), baseType()))
     {
@@ -55,6 +55,14 @@ bool ItemPropertyHandler::setToNewItemOfType(QByteArray itemType)
     const QMetaObject* metaObject = SimulationItemRegistry::metaObject(itemType);
     if (metaObject) return setPlainValue(metaObject->newInstance());
     return false;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void ItemPropertyHandler::setToNull()
+{
+    QObject* value = 0;
+    QMetaObject::invokeMethod(_target, setter().constData(), QGenericArgument(type().constData(), &value));
 }
 
 ////////////////////////////////////////////////////////////////////

@@ -20,11 +20,18 @@ CompDustDistribution::CompDustDistribution()
 
 //////////////////////////////////////////////////////////////////////
 
-void CompDustDistribution::addComponent(DustComp* value)
+void CompDustDistribution::insertComponent(int index, DustComp* value)
 {
     if (!value) throw FATALERROR("Dust component pointer shouldn't be null");
     value->setParent(this);
-    _dcv << value;
+    _dcv.insert(index, value);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void CompDustDistribution::removeComponent(int index)
+{
+    delete _dcv.takeAt(index);
 }
 
 //////////////////////////////////////////////////////////////////////

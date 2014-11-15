@@ -46,8 +46,11 @@ protected:
     //======== Setters & Getters for Discoverable Attributes =======
 
 public:
-    /** This function adds a stellar component to the system. */
-    Q_INVOKABLE void addComponent(StellarComp* value);
+    /** This function inserts a stellar component into the stellar system at the specified index. */
+    Q_INVOKABLE void insertComponent(int index, StellarComp* value);
+
+    /** This function removes the stellar component with the specified index from the stellar system. */
+    Q_INVOKABLE void removeComponent(int index);
 
     /** This function returns the list of stellar components in the system. */
     Q_INVOKABLE QList<StellarComp*> components() const;

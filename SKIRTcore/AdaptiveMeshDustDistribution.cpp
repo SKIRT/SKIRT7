@@ -142,11 +142,18 @@ double AdaptiveMeshDustDistribution::extentZ() const
 
 //////////////////////////////////////////////////////////////////////
 
-void AdaptiveMeshDustDistribution::addComponent(MeshDustComponent* value)
+void AdaptiveMeshDustDistribution::insertComponent(int index, MeshDustComponent* value)
 {
     if (!value) throw FATALERROR("Dust component pointer shouldn't be null");
     value->setParent(this);
-    _dcv << value;
+    _dcv.insert(index, value);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void AdaptiveMeshDustDistribution::removeComponent(int index)
+{
+    delete _dcv.takeAt(index);
 }
 
 //////////////////////////////////////////////////////////////////////

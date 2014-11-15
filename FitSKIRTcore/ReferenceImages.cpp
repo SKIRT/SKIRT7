@@ -27,11 +27,18 @@ ReferenceImages::ReferenceImages()
 
 //////////////////////////////////////////////////////////////////////
 
-void ReferenceImages::addImage(ReferenceImage* value)
+void ReferenceImages::insertImage(int index, ReferenceImage* value)
 {
     if (!value) throw FATALERROR("Referenceimage pointer shouldn't be null");
     value->setParent(this);
-    _rimages << value;
+    _rimages.insert(index, value);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void ReferenceImages::removeImage(int index)
+{
+    delete _rimages.takeAt(index);
 }
 
 //////////////////////////////////////////////////////////////////////

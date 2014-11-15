@@ -23,7 +23,7 @@ class PanMonteCarloSimulation : public MonteCarloSimulation
 
     Q_CLASSINFO("Property", "wavelengthGrid")
     Q_CLASSINFO("Title", "the wavelength grid")
-    Q_CLASSINFO("Default", "PanWavelengthGrid")
+    Q_CLASSINFO("Default", "LogWavelengthGrid")
 
     Q_CLASSINFO("Property", "stellarSystem")
     Q_CLASSINFO("Title", "the stellar system")

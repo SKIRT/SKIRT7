@@ -24,7 +24,7 @@ namespace
     QString _resourcePath;
 
     // relative paths to check for presence of dat folder
-    const char* _datpaths[] = { "dat", "../dat", "../../git/dat", "../svn/dat" };
+    const char* _datpaths[] = { "dat", "../dat", "../../git/dat", "../svn/dat", "../Resources" };
     const int _Ndatpaths = sizeof(_datpaths) / sizeof(const char*);
 
     // sets the static application and resource paths, or throws an error if there is a problem

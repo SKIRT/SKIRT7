@@ -10,7 +10,7 @@
 
 TEMPLATE = subdirs
 
-# add subdirectories in alphabetical order
+# add subproject subdirectories in arbitrary (preferably alphabetical) order
 SUBDIRS += \
     Cfitsio \
     Discover \
@@ -24,9 +24,14 @@ SUBDIRS += \
     SKIRTmain \
     Voro
 
+# conditionally add GUI subproject subdirectories
+include(BuildOptions.pri)
+BUILDING_GUI:SUBDIRS += SkirtMakeUp
+
 # define dependencies between subprojects
 SKIRTcore.depends    = Cfitsio Voro Fundamentals MPIsupport
 Discover.depends     = Cfitsio Voro Fundamentals MPIsupport SKIRTcore
 SKIRTmain.depends    = Cfitsio Voro Fundamentals MPIsupport SKIRTcore Discover
 FitSKIRTcore.depends = GAlib Cfitsio Voro Fundamentals MPIsupport SKIRTcore Discover
 FitSKIRTmain.depends = GAlib Cfitsio Voro Fundamentals MPIsupport SKIRTcore Discover FitSKIRTcore
+BUILDING_GUI:SkirtMakeUp.depends = GAlib Cfitsio Voro Fundamentals MPIsupport SKIRTcore Discover FitSKIRTcore

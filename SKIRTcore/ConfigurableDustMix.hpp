@@ -38,8 +38,11 @@ protected:
     //======== Setters & Getters for Discoverable Attributes =======
 
 public:
-    /** This function adds a dust population to the dust mix. */
-    Q_INVOKABLE void addPopulation(DustMixPopulation* value);
+    /** This function inserts a dust population into the dust mix at the specified index. */
+    Q_INVOKABLE void insertPopulation(int index, DustMixPopulation* value);
+
+    /** This function removes the population with the specified index from the dust mix. */
+    Q_INVOKABLE void removePopulation(int index);
 
     /** This function returns the list of dust populations in the dust mix. */
     Q_INVOKABLE QList<DustMixPopulation*> populations() const;

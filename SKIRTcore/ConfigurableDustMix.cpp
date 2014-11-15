@@ -34,11 +34,18 @@ void ConfigurableDustMix::setupSelfBefore()
 
 ////////////////////////////////////////////////////////////////////
 
-void ConfigurableDustMix::addPopulation(DustMixPopulation* value)
+void ConfigurableDustMix::insertPopulation(int index, DustMixPopulation* value)
 {
     if (!value) throw FATALERROR("DustMixPopulation pointer shouldn't be null");
     value->setParent(this);
-    _populations << value;
+    _populations.insert(index, value);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void ConfigurableDustMix::removePopulation(int index)
+{
+    delete _populations.takeAt(index);
 }
 
 ////////////////////////////////////////////////////////////////////

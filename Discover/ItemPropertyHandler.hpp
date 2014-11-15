@@ -37,6 +37,10 @@ public:
         be set (e.g. because the specified item type is inappropriate). */
     bool setToNewItemOfType(QByteArray itemType);
 
+    /** Sets the value of the handled property in the target item to a null pointer, removing any
+        previously owned simulation item. */
+    void setToNull();
+
     /** Returns the value of the handled property in the target item. */
     SimulationItem* value() const;
 

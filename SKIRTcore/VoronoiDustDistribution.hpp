@@ -111,8 +111,11 @@ public:
     /** Returns the outer radius of the domain in the Z direction. */
     Q_INVOKABLE double extentZ() const;
 
-    /** This function adds a dust component to the distribution. */
-    Q_INVOKABLE void addComponent(MeshDustComponent* value);
+    /** This function inserts a dust component into the distribution at the specified index. */
+    Q_INVOKABLE void insertComponent(int index, MeshDustComponent* value);
+
+    /** This function removes the dust component with the specified index from the distribution. */
+    Q_INVOKABLE void removeComponent(int index);
 
     /** This function returns the list of dust components in the distribution. */
     Q_INVOKABLE QList<MeshDustComponent*> components() const;

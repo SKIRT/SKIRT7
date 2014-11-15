@@ -17,11 +17,18 @@ ParameterRanges::ParameterRanges()
 
 //////////////////////////////////////////////////////////////////////
 
-void ParameterRanges::addRange(ParameterRange* value)
+void ParameterRanges::insertRange(int index, ParameterRange* value)
 {
     if (!value) throw FATALERROR("Parameter range pointer shouldn't be null");
     value->setParent(this);
-    _prs << value;
+    _prs.insert(index, value);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void ParameterRanges::removeRange(int index)
+{
+    delete _prs.takeAt(index);
 }
 
 //////////////////////////////////////////////////////////////////////

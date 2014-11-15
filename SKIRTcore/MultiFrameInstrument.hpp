@@ -66,10 +66,14 @@ public:
         component in a seperate file. */
     Q_INVOKABLE bool writeStellarComps() const;
 
-    /** This function adds an instrument frame to the multi-frame instrument. There must be exactly
-        one frame for each wavelength in the oligochromatic simulation's wavelength grid. The frames
-        are assumed to be in the same order as the wavelengths. */
-    Q_INVOKABLE void addFrame(InstrumentFrame* value);
+    /** This function inserts an instrument frame into the multi-frame instrument at the specified
+        index. There must be exactly one frame for each wavelength in the oligochromatic
+        simulation's wavelength grid. The frames are assumed to be in the same order as the
+        wavelengths. */
+    Q_INVOKABLE void insertFrame(int index, InstrumentFrame* value);
+
+    /** This function removes the frame with the specified index from the multi-frame instrument. */
+    Q_INVOKABLE void removeFrame(int index);
 
     /** This function returns the list of instruments in the instrument system. */
     Q_INVOKABLE QList<InstrumentFrame*> frames() const;
