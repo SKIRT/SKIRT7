@@ -7,9 +7,11 @@
 # build a release version of skirt in the "release" directory
 # using your current local copy of the code
 #
+# By default the build uses five parallel threads; you can
+# specify another number as the first command line argument
+#
 
 # determine the qmake install path
-
 
 # try the path targeted by the one-click Qt installer
 if [ -e "$HOME/Qt5.2.1/5.2.1/clang_64/bin/qmake" ]
@@ -38,4 +40,4 @@ fi
 
 # create the make file and perform the build
 $QMAKEPATH BuildSKIRT.pro -o ../release/Makefile CONFIG+=release
-make -w -C ../release
+make -j ${1:-5} -w -C ../release
