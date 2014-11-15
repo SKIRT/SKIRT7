@@ -44,15 +44,17 @@ include(../BuildOptions.pri)
 }
 
 # create a header file containing a reasonably unique description of the git version and
-# touch SkirtMain.cpp so it always gets recompiled to update the version number and time stamp
+# ensure that SkirtMain.cpp gets recompiled to update the version number and time stamp
 A_QUOTE = "\'\"\'"
 A_SEMICOLON = "\';\'"
-build_version.commands = cd ../../git && \
-                         echo const char* git_version = $$A_QUOTE`git rev-list HEAD | wc -l`-`git describe --dirty --always` $$A_QUOTE $$A_SEMICOLON > SKIRTmain/git_version.h && \
-                         touch SKIRTmain/SkirtMain.cpp && \
+versionTarget.target = ../../git/SKIRTmain/git_version.h
+versionTarget.depends = FORCE
+versionTarget.commands = cd ../../git ; \
+                         echo const char* git_version = $$A_QUOTE`git rev-list HEAD | wc -l`-`git describe --dirty --always` $$A_QUOTE $$A_SEMICOLON > SKIRTmain/git_version.h ; \
                          cd $$OUT_PWD
-QMAKE_EXTRA_TARGETS += build_version
-PRE_TARGETDEPS += build_version
+PRE_TARGETDEPS += ../../git/SKIRTmain/git_version.h
+QMAKE_EXTRA_TARGETS += versionTarget
+HEADERS += git_version.h
 
 #--------------------------------------------------
 # source and header files: maintained by Qt creator

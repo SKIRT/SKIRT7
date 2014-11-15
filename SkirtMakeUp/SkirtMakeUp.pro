@@ -36,15 +36,17 @@ unix: PRE_TARGETDEPS += $$OUT_PWD/../Fundamentals/libfundamentals.a \
                         $$OUT_PWD/../FitSKIRTcore/libfitskirtcore.a
 
 # create a header file containing a reasonably unique description of the git version and
-# touch SkirtMakeUp.cpp so it always gets recompiled to update the version number and time stamp
+# ensure that SkirtMakeUp.cpp gets recompiled to update the version number and time stamp
 A_QUOTE = "\'\"\'"
 A_SEMICOLON = "\';\'"
-build_version.commands = cd ../../git && \
-                         echo const char* git_version = $$A_QUOTE`git rev-list HEAD | wc -l`-`git describe --dirty --always` $$A_QUOTE $$A_SEMICOLON > SkirtMakeUp/git_version.h && \
-                         touch SkirtMakeUp/SkirtMakeUp.cpp && \
+versionTarget.target = ../../git/SkirtMakeUp/git_version.h
+versionTarget.depends = FORCE
+versionTarget.commands = cd ../../git ; \
+                         echo const char* git_version = $$A_QUOTE`git rev-list HEAD | wc -l`-`git describe --dirty --always` $$A_QUOTE $$A_SEMICOLON > SkirtMakeUp/git_version.h ; \
                          cd $$OUT_PWD
-QMAKE_EXTRA_TARGETS += build_version
-PRE_TARGETDEPS += build_version
+PRE_TARGETDEPS += ../../git/SkirtMakeUp/git_version.h
+QMAKE_EXTRA_TARGETS += versionTarget
+HEADERS += git_version.h
 
 #--------------------------------------------------
 # source and header files: maintained by Qt creator
