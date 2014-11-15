@@ -121,7 +121,14 @@ void SaveWizardPane::saveAs()
     QString filepath = QFileDialog::getSaveFileName(this, caption, directory, filter);
 
     // if the user did not cancel, save the file
-    if (!filepath.isEmpty()) saveToFile(filepath);
+    if (!filepath.isEmpty())
+    {
+        // add ski/fski extension if needed
+        QString extension = skirt ? ".ski" : ".fski";
+        if (!filepath.endsWith(extension)) filepath += extension;
+
+        saveToFile(filepath);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
