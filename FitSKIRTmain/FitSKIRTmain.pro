@@ -39,13 +39,8 @@ unix: PRE_TARGETDEPS += $$OUT_PWD/../Fundamentals/libfundamentals.a \
                         $$OUT_PWD/../Voro/libvoro.a \
                         $$OUT_PWD/../MPIsupport/libmpisupport.a
 
-# use MPI compiler/linker if available
-include(../BuildOptions.pri)
-!isEmpty(MPI_COMPILER) {
-    QMAKE_CXXFLAGS += -DBUILDING_WITH_MPI
-    QMAKE_CXX = $$MPI_COMPILER
-    QMAKE_LINK = $$MPI_COMPILER
-}
+# Enable MPI compilation if required
+include(../BuildUtils/EnableMPI.pri)
 
 # create a header file containing a reasonably unique description of the git version and
 # ensure that FitSkirtMain.cpp gets recompiled to update the version number and time stamp

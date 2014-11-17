@@ -19,17 +19,8 @@ CONFIG *= staticlib create_prl thread c++11
 QMAKE_CXXFLAGS_RELEASE -= -O2
 QMAKE_CXXFLAGS_RELEASE += -O3
 
-# use MPI compiler/linker if available
-include(../BuildOptions.pri)
-!isEmpty(MPI_COMPILER) {
-    QMAKE_CXXFLAGS += -DBUILDING_WITH_MPI
-    QMAKE_CXX = $$MPI_COMPILER
-    QMAKE_LINK = $$MPI_COMPILER
-    macx {
-        INCLUDEPATH += /usr/local/include
-        LIBS += -L/usr/local/lib/ -lmpi
-    }
-}
+# Enable MPI compilation if required
+include(../BuildUtils/EnableMPI.pri)
 
 #--------------------------------------------------
 # source and header files: maintained by Qt creator

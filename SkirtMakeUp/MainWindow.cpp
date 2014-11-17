@@ -112,6 +112,8 @@ void MainWindow::replaceWizardPane()
     _pathLabel->setText(_wizard->hierarchyPath());
 }
 
+////////////////////////////////////////////////////////////////////
+
 void MainWindow::updateTitle()
 {
     QString filepath = _wizard->filepath();

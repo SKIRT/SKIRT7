@@ -25,7 +25,7 @@ SUBDIRS += \
     Voro
 
 # conditionally add GUI subproject subdirectories
-include(BuildOptions.pri)
+include(BuildUtils/BuildOptions.pri)
 BUILDING_GUI:SUBDIRS += SkirtMakeUp
 
 # define dependencies between subprojects
