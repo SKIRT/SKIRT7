@@ -35,9 +35,6 @@ unix: PRE_TARGETDEPS += $$OUT_PWD/../Fundamentals/libfundamentals.a \
                         $$OUT_PWD/../SKIRTcore/libskirtcore.a \
                         $$OUT_PWD/../FitSKIRTcore/libfitskirtcore.a
 
-# Enable MPI compilation if required
-include(../BuildUtils/EnableMPI.pri)
-
 # create a header file containing a reasonably unique description of the git version and
 # ensure that SkirtMakeUp.cpp gets recompiled to update the version number and time stamp
 A_QUOTE = "\'\"\'"

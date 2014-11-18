@@ -4,7 +4,9 @@
 #-------------------------------------------------
 
 #-------------------------------------------------------------------------
-# Do not change the lines below unless you're an expert...
+# This qmake include file enables the MPI compiler/linker for the project,
+# assuming that the BUILDING_WITH_MPI configuration flag is turned on,
+# and that the MPI compiler/linker can be located on the host system.
 #-------------------------------------------------------------------------
 
 include(BuildOptions.pri)
@@ -23,17 +25,14 @@ BUILDING_WITH_MPI {
     }
 }
 
-# inform the user
+# use MPI compiler/linker if available, and inform the user
 BUILDING_WITH_MPI {
     message (using MPI compiler $$MPI_COMPILER)
-}
-
-# use MPI compiler/linker if available
-!isEmpty(MPI_COMPILER) {
     QMAKE_CXXFLAGS += -DBUILDING_WITH_MPI
     QMAKE_CXX = $$MPI_COMPILER
     QMAKE_LINK = $$MPI_COMPILER
     QMAKE_LFLAGS += $$system($$MPI_COMPILER --showme:link)
     QMAKE_CXXFLAGS += $$system($$MPI_COMPILER --showme:compile)
     QMAKE_CXXFLAGS_RELEASE = $$QMAKE_CXXFLAGS
+    QMAKE_CXXFLAGS_DEBUG = $$QMAKE_CXXFLAGS
 }
