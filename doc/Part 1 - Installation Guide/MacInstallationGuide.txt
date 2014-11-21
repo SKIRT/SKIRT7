@@ -1,0 +1,557 @@
+/**
+
+\page InstallMac Installing and developing SKIRT on Mac OS X
+
+This section explains how to install and configure the complete development environment for SKIRT on
+Mac OS X 10.9 (Mavericks) and Mac OS X 10.10 (Yosemite) including the capability to generate HTML and PDF documentation for SKIRT.
+Mac OS X is written on top of a Unix system (\em not Linux) customized by Apple. This means that most of the standard
+Unix tools are available, but things are sufficiently different to warrant a separate treatment.
+
+Some of the installation steps described below require you to enter Unix shell commands in a Terminal window.
+In most cases, you will need to be or become super-user (for example using \c sudo \c bash) for the commands
+to run successfully.
+
+If you only want to install SKIRT for your radiative transfer problems without adding modifications to the source code, read through sections:
+
+- \ref InstallMacComp
+- \ref InstallMacQt
+- \ref InstallMacGetPublic
+- \ref InstallMacBuildNoQtCreator
+- \ref InstallMacVerify
+
+For setting SKIRT up for development and building, follow the instructions in:
+
+- \ref InstallMacComp 
+- \ref InstallMacQt
+- \ref InstallMacGetDevelop
+- \ref InstallMacDeveloper
+- \ref InstallMacVerify
+- \ref InstallMacDoxStyle
+- \ref InstallMacDoxygen
+- \ref InstallMacDevelop
+
+If you want instructions to install OpenMPI on Mac OS X for use with SKIRT, you can also read the following guide:
+
+- \ref InstallMacMPI
+
+\page InstallMacComp Installing the compiler
+
+SKIRT is written in C++11, the C++ flavor that was standardized in 2011, extending the language with new features.
+Hence you need to install a recent C++ compiler.
+On Mac OS X this is accomplished by installing the Xcode development environment, which is
+freely available from the App Store. Download and install the latest version, and then launch the Xcode application
+at least once to complete installation. You should see the startup screen shown below. SKIRT was tested with Xcode 6.1 which installs the Apple C++ compiler Clang (Apple LLVM version 6.0 based on LLVM 3.5svn).
+
+\image html xcode.jpeg
+\image latex xcode.jpeg
+
+\note It is important that you launch the Xcode application at least once to complete installation
+of the command line tools that will be used by the Qt development environment.
+
+\note You need to install the full Xcode application; installing the <em>Command Line Tools for Xcode</em> package
+is not sufficient (and not needed).
+
+\page InstallMacQt Installing the Qt development environment
+
+SKIRT is based on the Qt 5.3 development environment (but also works with Qt 5.2). 
+In addition to run-time libraries and build tools, Qt offers
+a convenient integrated code editor called Qt Creator. All of these components can be installed on Mac OS X with
+a single installer.
+
+<i> Step-by-step instructions: </i>
+
+<b> Download the binaries for OS X </b>
+
+  - Go to the <a href="http://qt-project.org/downloads">Qt download page</a>.
+  - At the bottom of the page, click on 'show downloads'.
+  - Find 'Qt 5.3.2 for Mac (456 MB)' and download it.
+
+<b> Open the installer </b>
+
+  - Open the '.dmg' file that you just downloaded to mount the installation disk.
+  - When the mounting has finished, the following Finder window will appear:
+  
+    \image html qtinstaller.png
+	\image latex qtinstaller.png
+
+  - Double-click on the installer and follow the instructions. Leave the default settings.
+  - At the end of the installation, you can choose to open Qt Creator (see: Developing SKIRT with Qt Creator), but you don't need to.
+
+<b> Configure the installation for Mac OS X 10.9 and 10.10 </b>
+
+  - Navigate to the installation folder: "yourname > Qt5.3.2 > 5.3 > clang_64 > mkspecs"
+  
+	\image html qtmkspecspath.jpeg
+	\image latex qtmkspecspath.jpeg
+
+  - Open the file 'qdevice.pri' with the default text editor (right click -> Open with.. -> Other.. and find TextEdit) or any other preferred editor.
+  - Change the following line:
+
+        !host_build:QMAKE_MAC_SDK = macosx10.8
+		
+	so that it states the version number for your system (10.9 for Mavericks and 10.10 for Yosemite). The screenshot below shows the modified file for OS X Yosemite:
+	
+	\image html pribestand.png
+	\image latex pribestand.png
+
+  - Save the file.
+  - If Qt Creator is open, restart it.
+
+<b> Make a shortcut to Qt Creator </b> 
+
+  - Use Finder or Spotlight to locate the \em Qt \em Creator application in the newly installed directory,
+    and drag the application icon to your dock (or add it to your preferred application launcher).
+
+\page InstallMacGetPublic Getting the public SKIRT source code
+
+To work with SKIRT, you need to copy the source code to your local file system. First create a directory hierarchy that
+will hold the SKIRT source code, binaries and run-time information. The top-level directory can have any name (for
+example \c SKIRT) and can be located anywhere, but the subdirectories should be named as indicated below. Execute the following commands in a Terminal 
+window to create the SKIRT directory in your home folder.
+
+\verbatim
+cd [ENTER]
+mkdir SKIRT [ENTER]
+cd SKIRT [ENTER]
+mkdir debug doc release run git [ENTER]
+\endverbatim
+
+The most recent stable version of the SKIRT source code is available from the
+<a href="https://github.com/SKIRT/SKIRT">public SKIRT GitHub repository</a> at
+<a href="https://github.com">GitHub.com</a>.
+While any user can freely retrieve the code from this repository (even anonymously), only the core SKIRT team
+has write access to it.
+
+If you just want to use the stable version of SKIRT without making any code contributions, you can simply clone
+the public repository as an anonymous user:
+
+\verbatim
+cd ~/SKIRT [ENTER]
+git clone https://github.com/SKIRT/SKIRT.git git [ENTER]
+\endverbatim
+
+This command will produce different kinds of output.
+
+\page InstallMacGetDevelop Getting the SKIRT source code (for developers)
+
+If you plan to make code contributions, there are two possibilities:
+
+- You can use the public SKIRT code (if you don't have a UGent account)
+- You can use the private SKIRT code (if you have a UGent account)
+
+In the first case, you should create an account at
+<a href="https://github.com">GitHub.com</a>,
+fork the <a href="https://github.com/SKIRT/SKIRT">SKIRT repository</a> and then clone your own fork to your computer.
+This allows you to push your modifications to your own fork and initiate a pull request when you want to contribute
+the changes to the project. Refer to the online GitHub documentation for more information about this process. 
+
+The other option is to use the the current development version of the SKIRT source code, stored in a \em private GitHub repository hosted
+on the Ghent University's web servers. You can access this repository only if you have a UGent account \em and
+the core SKIRT team has specifically granted you read-only or read/write access rights to the repository.
+
+If you have a UGent account and the core SKIRT team has granted you access rights to the SKIRT repository, use the instructions below to obtain the SKIRT source code. 
+
+<i> Step-by-step instructions: </i>
+
+<b> Configure git </b>
+
+- Before using the git client, you should configure it with your user name and email address. This is especially important if you plan to contribute code to the SKIRT repository. 
+  Perform the following commands in a Terminal window, replacing the placeholders with your own name and email address:
+
+      git config --global user.name "Your Name" [ENTER]
+      git config --global user.email "yourname@organization.org" [ENTER]
+
+<b> Check for existing keys </b>
+
+- Type the following in a Terminal window:
+
+      ls -al ~/.ssh [ENTER]
+
+- If there is a key with extension '.pub' present, skip the next step.
+
+<b> Generate a SSH key </b>
+
+- Again in the Terminal window, type:
+
+      cd [ENTER]
+      ssh-keygen -t rsa -C "yourname@organization.org" [ENTER]
+      [ENTER]
+
+- Type a new password and press [ENTER]
+- Type this password again and press [ENTER]
+- You should see the following output:
+
+      Your identification has been saved in /Users/yourname/.ssh/id_rsa.
+      Your public key has been saved in /Users/yourname/.ssh/id_rsa.pub.
+      The key fingerprint is:
+      XX:XX:XX:XX:XX ... yourname@organization.org
+      The key's randomart image is:
+      +--[ RSA 2048]----+
+      |                 |
+      |          XX     |
+      |       X XX   X  |
+      |         X   XX  |
+      |       X XX   X  |
+      |         XX XX   |
+      |                 |
+      |           X     |
+      |                 |
+      +-----------------+
+
+<b> Add your new key to the ssh-agent </b>
+
+- Type the following in Terminal:
+
+      eval "$(ssh-agent -s)" [ENTER]
+
+- You should see the following output:
+
+      Agent pid XXXXX
+
+- Type:
+
+      ssh-add ~/.ssh/id_rsa [ENTER]
+
+- You wil see the following output:
+
+      Enter passphrase for /Users/yourname/.ssh/id_rsa:
+	
+- Enter your password and press [ENTER].
+- You will see the following output:
+
+      Identity added: /Users/yourname/.ssh/id_rsa (/Users/yourname/.ssh/id_rsa)
+
+<b> Add the SSH key to your github.ugent account </b>
+
+- Navigate to github.ugent.be and log in.
+- Click on your username (top right).
+- Click on 'Edit profile' (top right).
+- Go to 'SSH keys'.
+- Press 'Add SSH key'.
+- As the Title, enter something that identifies your computer (for example: Personal MacBook).
+- Go back to the terminal and copy your SSH key by typing:
+
+      pbcopy < ~/.ssh/id_rsa.pub [ENTER]
+
+- Back on the website, paste ([cmd] + V) in the 'Key' text field.
+- Click 'Add key'.
+- After adding your key, you should wait about 10 minutes before continuing with the next step.
+
+<b> Clone the private repository </b>
+
+- In Terminal, type:
+
+      cd [ENTER]
+      cd SKIRT [ENTER]
+      git clone ...
+
+- You will see the following output:
+
+      The authenticity of host 'github.ugent.be (XXX.XXX.XXX.XX)' can't be established. 
+      RSA key fingerprint is XX:XX:XX:XX:XX ... .
+      Are you sure you want to continue connecting (yes/no)? 
+
+- Type:
+
+      yes [ENTER]
+
+- You will see different kinds of output.
+- To update your local copy of the source code after changes were made to the repository from which you cloned it, use:
+
+      cd ~/SKIRT/git [ENTER]
+      git pull [ENTER]
+
+\page InstallMacBuildNoQtCreator Building SKIRT on Mac OS X without Qt Creator
+
+<i> Step-by-step instructions: </i>
+
+<b> Navigate to the SKIRT git directory in Terminal </b>
+
+  - Type the following command in a Terminal window:
+
+        cd ~/SKIRT/git [ENTER]
+
+<b> Make the shell script executable. </b>
+
+  - Type:
+
+        chmod +rx makeSKIRT.sh [ENTER]
+
+<b> Execute the shell script to build SKIRT </b>
+
+  - Type:
+
+        ./makeSKIRT.sh [ENTER]
+
+  - You will see lots of output. Depending on the system, the build can take a while.
+
+
+\page InstallMacVerify Verifying your installation 
+
+<i> Step-by-step instructions: </i>
+
+<b> Add the SKIRT release directory to your path. </b>
+
+  - In Terminal, type:
+
+        cd [ENTER]
+        open ~/.bash_profile [ENTER]
+
+  - If you get the following warning:
+
+        The file /Users/XXX/.bash_profile does not exist.
+
+    go to the next step. If a file opens in your text editor, skip the next step.
+
+<b> Create a .bash_profile </b>
+
+  - Open the default text editor (TextEdit) in OS X.
+  - Under the 'Format' menu, select 'Make Plain Text'.
+
+  - Type the following line:
+
+        export PATH=~/SKIRT/release/SKIRTmain:~/SKIRT/release/FitSKIRTmain:$PATH
+
+  - Next, save the file. In the popup window, do as follows:
+
+    - As name, type: .bash_profile
+    - As the location, select your home folder (XXX)
+    - UNCHECK the box before 'Use '.txt' if no extension is used.
+	
+  - If you press 'Save', you will get a warning similar to:
+
+        Only the system can use names starting with a dot (.).
+
+    Press <Use '.'> anyway.
+
+  - Skip the next step.
+
+<b> Modify the .bash_profile file. </b>
+
+  - Add the following line to your .bash_profile:
+
+        export PATH=~/SKIRT/release/SKIRTmain:~/SKIRT/release/FitSKIRTmain:$PATH
+
+  - Next, save the file and go to the final step.
+
+<b> Testing everything out. </b>
+
+  - Close any open Terminal window.
+  - Launch a new Terminal window.
+  - Type:
+
+        skirt [ENTER]
+	
+  - If you see the following messages:
+
+        /DATE/ /TIME/	Welcome to SKIRT v7 (...)
+        /DATE/ /TIME/	Interactively constructing a simulation...
+        /DATE/ /TIME/ ? Enter the name of the ski file to be created:
+
+    your SKIRT installation has succeeded. You can either follow the instructions in the Terminal window to create a ski (skirt simulation) file or press [CTRL] + C to exit the program. 
+   
+  - To get information about how you can use SKIRT, you can type 'skirt -h', which will yield the following output:
+   
+        /DATE/ /TIME/ Welcome to SKIRT v___
+        /DATE/ /TIME/ * *** Error: Invalid command line arguments
+        /DATE/ /TIME/ !
+        /DATE/ /TIME/ ! To create a new ski file interactively:    skirt
+        /DATE/ /TIME/ ! To run a simulation with default options:  skirt <ski-filename>
+        /DATE/ /TIME/ !
+        /DATE/ /TIME/ !   skirt [-b] [-s <simulations>] [-t <threads>]
+        /DATE/ /TIME/ !         [-k] [-i <dirpath>] [-o <dirpath>]
+        /DATE/ /TIME/ !         [-r] {<filepath>}*
+        /DATE/ /TIME/ ...
+
+  - You can also proceed with the \ref UsersGuide or \ref FSUsersGuide.
+
+\page InstallMacDeveloper Develop and build SKIRT on Mac OS X with Qt Creator
+
+\section InstallMacConf Configuring the Qt development environment
+
+Before proceeding, you should configure Qt Creator according to the following instructions.
+Launch the Qt Creator application if necessary, and choose the "Qt Creator->Preferences..." menu item to open
+the preferences panel. On the various tabs listed below, make the specified adjustments (leaving all other
+settings untouched), and at the end press the OK button to confirm the changes.
+
+<i> Step-by-step instructions: </i>
+
+- Launch the Qt Creator application and choose the "Qt Creator->Preferences..." menu item to open the preferences dialog.
+
+- Select the "Build&Run->Compilers" tab and verify that Qt automatically detected the Clang compiler installed on your
+    computer. If not, manually add a suitable compiler and press the "Apply" button.
+
+- Select the "Build&Run->Qt Versions" tab and verify that Qt automatically detected the Qt version you just installed
+    (Qt 5.2.1 if you used the installer mentioned above). If not, manually add an appropriate Qt version.
+
+- Select the "Build&Run->Kits" tab. Remove any lines listed other than "Desktop (Default)" (select each of the
+    lines in turn and press the "Remove" button). Select the line "Desktop (Default)" and verify and/or configure
+    its properties: "Compiler" should be "Clang x86 64-bit", and "Qt version" should be the version you installed
+    (i.e. Qt 5.2.1 if you used the installer mentioned above).
+
+- "Text Editor -> Behavior" tab
+    - Tab size: 4
+    - Backspace indentation: Follow Previous Indents
+    - In entire document: On
+    - Default encoding: UTF-8
+    - UTF-8 BOM: Always Delete
+
+- "Text Editor -> Display" tab
+    - Display right margin at column: 120
+    - Highlight current line: On
+
+- "Help -> Documentation" tab
+    - download the SKIRT.qch compressed help file from
+      <a href="http://www.skirt.ugent.be/downloads">www.skirt.ugent.be/downloads</a>, place it in 
+	  the doc folder in your main SKIRT directory (yourname/SKIRT/doc) and add it to the documentation available in Qt Creator.
+
+- "C++ -> Code Style" tab
+    - press the "Import..." button, select the file <tt>~/SKIRT/git/doc/SkirtCodeStyle.xml</tt>
+      and press the "Open" button
+
+- "C++ -> File Naming" tab
+    - Header suffix: hpp
+    - Lower case filenames: Off
+    - License template: press the "Choose..." button, select the file <tt>~/SKIRT/git/doc/LicenseTemplate.txt</tt>
+      and press the "Open" button
+
+- "Build & Run -> General" tab
+    - Save all files before build: On
+    - Open Compile Output pane when building: On
+    - Clear old application output on a new run: On
+    - Merge stderr and stdout: On
+    - Default build directory: "../%{CurrentBuild:Name}"
+
+- Finally press the "OK" buttun to accept the changes and close the preferences dialog.
+
+\section InstallMacBuild Building SKIRT with Qt Creator
+
+To build SKIRT from within Qt Creator, you need to open the main Qt project included with the source code.
+In Qt Creator, choose the menu item "File->Open File or Project...", locate the Qt project
+file \c BuildSKIRT.pro inside your \c SKIRT/git directory, and press the "Open" button from within the dialog.
+
+Qt Creator now opens a configuration pane for the BuildSKIRT project in its main window. Simply press the
+"Configure Project..." button without changing any of the values, which causes Qt Creator to switch to
+regular "Edit" mode. However you still need to adjust the project configuration.
+
+\image html configureproject.png
+\image latex configureproject.png
+
+Select "Projects" mode in the left margin and select the "Build & Run" tab. There should be two subtabs called
+"Build" and "Run", placed under a "Desktop" header stating your Qt and compiler version. First select the "Build" subtab. There are two build
+configurations called "Debug" and "Release", which can be selected through the "Edit build configuration" popup.
+For each configuration, change the "Build directory" to one of the directories you created earlier
+(\c SKIRT/debug for the debug configuration, \c SKIRT/release for the release configuration).
+
+Still in "Projects" mode, now select the "Run" subtab. In the "Run configuration" popup, select the
+"SKIRTmain" item. Now change the "Working directory" to the \c SKIRT/run directory
+you created earlier. Turn off the "Run in terminal" option;
+this causes SKIRT's log messages to appear inside Qt Creator rather than in a separate Terminal window.
+
+\image html sourcetree.png
+\image latex sourcetree.png
+
+Finally go back to "Edit" mode (icon in left margin). Here you can browse, view and edit the source tree.
+To compile and build the complete SKIRT code (including FitSKIRT), click the hammer icon in the left margin.
+
+\image html compileSKIRTQt.jpeg
+\image latex compileSKIRTQt.jpeg
+
+\page InstallMacDoxStyle Installing the documentation streamliner
+
+If you plan on writing or updating SKIRT code documentation, you may wish to configure DoxStyle,
+a tool to assist with formatting /**-style documentation blocks in .hpp files.
+DoxStyle is automatically included and built as part of the buildSKIRT project.
+
+To configure Qt Creator so that you can easily use DoxStyle, choose the "Qt Creator->Preferences..." menu item to open
+the preferences panel, and make the adjustments on the various tabs as listed below, pressing the OK button at the end.
+
+ - "Environment -> External Tools" tab
+   - Add a new category called "DoxStyle"
+   - Add a new item called "Streamline Selection" to this category
+   - Configure the attributes for this item as follows:
+     - Description: "Streamlines the doxygen blocks in the selection"
+     - Executable: path to the DoxStyle executable: ~/SKIRT/release/DoxStyle/doxstyle
+     - Arguments: empty
+     - Working directory: empty
+     - Output: Replace Selection
+     - Error output: Ignore
+     - Modifies current document: off
+     - Input: "%{CurrentDocument:Selection}"
+
+ - "Environment -> Keyboard" tab
+    - In the long item list, select "Tools -> External.Streamline_Selection"
+    - In the "Key sequence" field, enter the shortcut combination Alt-Command-I (on Mac) or Alt-Ctrl-I (on Ubuntu)
+
+For information on how to use DoxStyle, see \ref DevStyleFormat.
+
+\page InstallMacDoxygen Installing the documentation generator
+
+This section is only relevant if you wish to (re-)generate the SKIRT documentation.
+The SKIRT documentation is generated from the source files by Doxygen. This free open source application requires
+a TeX distribution to handle mathematical formulas, and it uses the Dots tool in the Graphviz graph visualization
+software to generate class diagrams.
+
+<i> Step-by-step instructions: </i>
+
+<b> Installing a Tex distribution </b>
+
+- If you already have a recent Tex distribution installed, you can probably skip this step.
+- Go to the <a href="http://tug.org/mactex/">MacTex website</a> and download the latest version (MacTex-2014). It comes in the form of a '.pkg' file.
+- When the download is complete (this can take a while), open the installer and follow the instructions.
+
+<b> Installing Doxygen </b>
+
+- Go to the <a href="http://www.stack.nl/~dimitri/doxygen/download.html">Doxygen download page</a>.
+- Scroll down and download the binary distribution for Mac OS X 10.5 and later (Doxygen-1.8.8.dmg).
+- If the download is complete, open the '.dmg' file. This will mount the Doxygen installation disk.
+- In the Finder window that appears, drag the DoxyGen application to your applications folder (in the left menu).
+
+<b> Installing the Graphviz Graph Visualization Software </b>
+
+- Browse to the <a href="http://www.graphviz.org/Download_macos.php">Graphviz download page</a>.
+- Locate the graphviz-2.36.0.pkg package and download it.
+- Open the package. If a warning similar as below occurs, locate the '.pkg' file in a Finder window. Otherwise, follow the instructions and ignore the next steps.
+- Right-click on the file and chose 'Open'.
+- In the warning window that pops up, simply press 'continue' to proceed with the installation.
+
+For information on how to actually generate the documentation, see \ref DevBuildDocs.
+
+\page InstallMacDevelop Developing SKIRT
+
+\page InstallMacMPI Installing OpenMPI on Mac OS X
+
+<i> Step-by-step instructions: </i>
+
+<b> Download the source code </b>
+
+- Navigate to the  <a href="http://www.open-mpi.org/software/">OpenMPI webpage</a>.
+- Download the file 'openmpi-1.8.3.tar.gz'.
+- When the download has finished, click on the resulting 'openmpi-1.8.3.tar' file and it should automatically be unpacked.
+
+<b> Compile and install the source code </b>
+
+- Open Terminal and navigate to the newly created folder called 'openmpi-1.8.3' with the command:
+
+      cd ~/XXX/Downloads/openmpi-1.8.3 [ENTER]
+
+- Then, type:
+
+      ./configure --prefix=/usr/local [ENTER]
+
+- You will see lots of output. If this procedure has finished, type:
+
+      make all [ENTER]
+
+- Again, different kinds of output will appear. Finally, type:
+
+      sudo make install [ENTER]
+
+- After again lots of output, check the installation by executing the following commands:
+
+      which mpicxx [ENTER]
+	  which mpirun [ENTER]
+
+- If either of these commands does NOT show any output, something is not right.
+
+*/

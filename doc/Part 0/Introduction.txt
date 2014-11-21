@@ -2,8 +2,8 @@
 
 \mainpage Introduction
 
-\image html SkirtLogoSmall.png
-\image latex SkirtLogoSmall.png
+\image html SkirtLogoSmaller.png
+\image latex SkirtLogoSmaller.png
 
 © Astronomical Observatory, Ghent University.
 

@@ -16,7 +16,7 @@ want to adapt or extend it to suit your needs.
 
 \section DevDirs Directory Structure
 
-The SKIRT source code is contained in an online repository and can be obtained as described in \ref InstallMacGet.
+The SKIRT source code is contained in an online repository and can be obtained as described in \ref InstallMac.
 The files are organized in a directory structure; your local copy may look as follows:
 
 \verbatim
