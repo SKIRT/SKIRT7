@@ -3,7 +3,7 @@
 \page InstallMacDoxStyle Installing the documentation streamliner
 
 If you plan on writing or updating SKIRT code documentation, you may wish to configure DoxStyle,
-a tool to assist with formatting /**-style documentation blocks in .hpp files.
+a tool to assist with formatting "/ **"-style documentation blocks in .hpp files.
 DoxStyle is automatically included and built as part of the buildSKIRT project.
 
 To configure Qt Creator so that you can easily use DoxStyle, choose the "Qt Creator->Preferences..." menu item to open

@@ -1,5 +1,0 @@
-/**
-
-\page InstallMacDevelop Developing SKIRT
-
-*/

@@ -69,12 +69,12 @@ Proceed as described in \ref InstallMac.
 
 \section InstallUbuConf Configuring the development environment
 
-Proceed as described in \ref InstallMacConf, keeping in mind that on Ubuntu "Preferences" are called "Options",
+Proceed as described in \ref InstallMacConfigQt, keeping in mind that on Ubuntu "Preferences" are called "Options",
 and that the corresponding dialog is accessed by selecting the "Tools->Options..." menu item.
 
 \section InstallUbuBuild Building SKIRT
 
-Proceed as described in \ref InstallMacBuild.
+Proceed as described in \ref InstallMacBuildQtCreator.
 
 \section InstallUbuDoxStyle Installing the documentation streamliner
 

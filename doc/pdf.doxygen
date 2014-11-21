@@ -780,7 +780,7 @@ FILE_PATTERNS          = *.hpp \
 # be searched for input files as well.
 # The default value is: NO.
 
-RECURSIVE              = NO
+RECURSIVE              = YES
 
 # The EXCLUDE tag can be used to specify files and/or directories that should be
 # excluded from the INPUT source files. This way you can easily exclude a
@@ -842,7 +842,7 @@ EXAMPLE_RECURSIVE      = NO
 # that contain images that are to be included in the documentation (see the
 # \image command).
 
-IMAGE_PATH             = doc
+IMAGE_PATH             = doc/images
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should
 # invoke to filter for each input file. Doxygen will invoke the filter program
@@ -1820,18 +1820,6 @@ GENERATE_XML           = NO
 # This tag requires that the tag GENERATE_XML is set to YES.
 
 XML_OUTPUT             = xml
-
-# The XML_SCHEMA tag can be used to specify a XML schema, which can be used by a
-# validating XML parser to check the syntax of the XML files.
-# This tag requires that the tag GENERATE_XML is set to YES.
-
-XML_SCHEMA             =
-
-# The XML_DTD tag can be used to specify a XML DTD, which can be used by a
-# validating XML parser to check the syntax of the XML files.
-# This tag requires that the tag GENERATE_XML is set to YES.
-
-XML_DTD                =
 
 # If the XML_PROGRAMLISTING tag is set to YES doxygen will dump the program
 # listings (including syntax highlighting and cross-referencing information) to

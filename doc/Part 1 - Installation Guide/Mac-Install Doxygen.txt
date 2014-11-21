@@ -22,13 +22,23 @@ software to generate class diagrams.
 - If the download is complete, open the '.dmg' file. This will mount the Doxygen installation disk.
 - In the Finder window that appears, drag the DoxyGen application to your applications folder (in the left menu).
 
+  \image html doxygen_mounted.jpeg
+  \image latex doxygen_mounted.jpeg
+
 <b> Installing the Graphviz Graph Visualization Software </b>
 
 - Browse to the <a href="http://www.graphviz.org/Download_macos.php">Graphviz download page</a>.
 - Locate the graphviz-2.36.0.pkg package and download it.
 - Open the package. If a warning similar as below occurs, locate the '.pkg' file in a Finder window. Otherwise, follow the instructions and ignore the next steps.
+
+  \image html graphviz-warning1.png
+  \image latex graphviz-warning1.png
+  
 - Right-click on the file and chose 'Open'.
-- In the warning window that pops up, simply press 'continue' to proceed with the installation.
+- In the warning window that pops up, press 'Open' again to proceed with the installation.
+
+  \image html graphviz-warning2.png
+  \image latex graphviz-warning2.png
 
 For information on how to actually generate the documentation, see \ref DevBuildDocs.
 

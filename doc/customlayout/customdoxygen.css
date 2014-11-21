@@ -10,7 +10,7 @@ body, table, div, p, dl,
 table.directory, #nav-tree,#nav-tree .label {
 font-family: "Segoe UI", "Lucida Sans Unicode", Helvetica, Arial, Verdana, 'Roboto', sans-serif;
 color: #111;
-font-size: 1rem;
+font-size: 0.9rem;
 }
 .arrow,
 .navpath li.navelem a,
@@ -31,7 +31,7 @@ pre.fragment, div.line,
 #projectname,#projectbrief,
 h1, h2, h3 {
 	font-family: "Segoe UI Light", 'Source Sans Pro', sans-serif;
-	margin: 1.75em 0 .2em 0;
+	margin: 0em 0 .2em 0;
 	font-weight: 200;
 }
 #projectname{color:#00aff0;font-weight:300;}
@@ -50,25 +50,25 @@ h1, h1.groupheader {
 	font-weight: 200;
   color: #000000;
   letter-spacing: 0.00em;
-  font-size: 3rem;
-  line-height: 3rem;
+  font-size: 2rem;
+  line-height: 2rem;
 }
 h2, h2.groupheader {
 	font-weight: 200;
   color: #000000;
   letter-spacing: 0.00em;
-  font-size: 2.2rem;
-  line-height: 2.3rem;
+  font-size: 1.5rem;
+  line-height: 1.5rem;
   letter-spacing: 0.01em;
 	border-bottom: none;
-	margin: 1.75em 0 .2em 0;
+	margin: 0em 0 .2em 0;
 	padding: 0px;
 	width: 100%;
 }
 h3.groupheader {
 	font-weight: 200;
-	font-size: 2.0rem;
-	line-height: 2.1rem;
+	font-size: 1.2rem;
+	line-height: 1.2rem;
 	color: #000;
 }
 h1, h2, h3, h4, h5, h6 {
@@ -99,7 +99,7 @@ p.endli {
 	margin-bottom: 0px;
 }
 p.enddd {
-	margin-bottom: 4px;
+	margin-bottom: 3px;
 }
 p.endtd {
 	margin-bottom: 2px;
