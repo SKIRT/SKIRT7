@@ -231,13 +231,13 @@ Most importantly, you can apply correct indentation and alignment to a piece of 
  - select one or more lines of code (possibly the whole file) in the Qt Creator editor
  - choose the "Edit->Advanced->Auto-indent Selection" menu item \em or press Command-I (on Mac) or Ctrl-I (on Ubuntu).
 
-In .cpp files regular //-style comments are used for annotating the implementation. In .hpp files /**-style
+In .cpp files regular //-style comments are used for annotating the implementation. In .hpp files "/ **"-style
 Doxygen documentation blocks are used to document the code. These structured comments are used to
 generate HTML and PDF formatted documentation for SKIRT.
 
 Assuming you installed the DoxStyle tool as described in \ref InstallMacDoxStyle or \ref InstallUbuDoxStyle,
 you can automatically reformat documentation blocks in the Qt Creator editor as follows:
- - select a section of code that contains one or more /**-style documentation blocks (you may select regular code
+ - select a section of code that contains one or more "/ **"-style documentation blocks (you may select regular code
    as well, possibly even the whole file)
  - choose the "Tools->External->DoxStyle->Streamline Selection" menu item \em or
    press Alt-Command-I (on Mac) or Alt-Ctrl-I (on Ubuntu).
@@ -819,7 +819,7 @@ a new .ski file during an interactive Q&A session.
 You should also remove the getters and setters for the truncation parameters, the corresponding Q_CLASSINFO() macros,
 and the corresponding data members, since these parameters are not needed in the new class.
 
-While updating the documentation, take care to follow the rules for comments in /**-style documentation blocks.
+While updating the documentation, take care to follow the rules for comments in "/ **"-style documentation blocks.
 These comments are processed by the <a href="http://www.doxygen.org">Doxygen</a> utility to produce
 the SKIRT manual in HTML and PDF formats. It is \em really important to write decent comments for every function.
 When in doubt about the syntax for formatting comments, look for examples elsewhere in the SKIRT source code or
