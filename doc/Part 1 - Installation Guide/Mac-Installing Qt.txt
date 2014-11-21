@@ -1,0 +1,54 @@
+/**
+
+\page InstallMacQt Installing the Qt development environment
+
+SKIRT is based on the Qt 5.3 development environment (but also works with Qt 5.2). 
+In addition to run-time libraries and build tools, Qt offers
+a convenient integrated code editor called Qt Creator. All of these components can be installed on Mac OS X with
+a single installer.
+
+<i> Step-by-step instructions: </i>
+
+<b> Download the binaries for OS X </b>
+
+  - Go to the <a href="http://qt-project.org/downloads">Qt download page</a>.
+  - At the bottom of the page, click on 'show downloads'.
+  - Find 'Qt 5.3.2 for Mac (456 MB)' and download it.
+
+<b> Open the installer </b>
+
+  - Open the '.dmg' file that you just downloaded to mount the installation disk.
+  - When the mounting has finished, the following Finder window will appear:
+  
+    \image html qtinstaller.png
+	\image latex qtinstaller.png
+
+  - Double-click on the installer and follow the instructions. Leave the default settings.
+  - At the end of the installation, you can choose to open Qt Creator (see: Developing SKIRT with Qt Creator), but you don't need to.
+
+<b> Configure the installation for Mac OS X 10.9 and 10.10 </b>
+
+  - Navigate to the installation folder: "yourname > Qt5.3.2 > 5.3 > clang_64 > mkspecs"
+  
+	\image html qtmkspecspath.jpeg
+	\image latex qtmkspecspath.jpeg
+
+  - Open the file 'qdevice.pri' with the default text editor (right click -> Open with.. -> Other.. and find TextEdit) or any other preferred editor.
+  - Change the following line:
+
+        !host_build:QMAKE_MAC_SDK = macosx10.8
+		
+	so that it states the version number for your system (10.9 for Mavericks and 10.10 for Yosemite). The screenshot below shows the modified file for OS X Yosemite:
+	
+	\image html pribestand.png
+	\image latex pribestand.png
+
+  - Save the file.
+  - If Qt Creator is open, restart it.
+
+<b> Make a shortcut to Qt Creator </b> 
+
+  - Use Finder or Spotlight to locate the \em Qt \em Creator application in the newly installed directory,
+    and drag the application icon to your dock (or add it to your preferred application launcher).
+	
+*/

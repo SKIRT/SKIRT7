@@ -1,0 +1,38 @@
+/**
+
+\page InstallMacMPI Installing OpenMPI on Mac OS X
+
+<i> Step-by-step instructions: </i>
+
+<b> Download the source code </b>
+
+- Navigate to the  <a href="http://www.open-mpi.org/software/">OpenMPI webpage</a>.
+- Download the file 'openmpi-1.8.3.tar.gz'.
+- When the download has finished, click on the resulting 'openmpi-1.8.3.tar' file and it should automatically be unpacked.
+
+<b> Compile and install the source code </b>
+
+- Open Terminal and navigate to the newly created folder called 'openmpi-1.8.3' with the command:
+
+      cd ~/XXX/Downloads/openmpi-1.8.3 [ENTER]
+
+- Then, type:
+
+      ./configure --prefix=/usr/local [ENTER]
+
+- You will see lots of output. If this procedure has finished, type:
+
+      make all [ENTER]
+
+- Again, different kinds of output will appear. Finally, type:
+
+      sudo make install [ENTER]
+
+- After again lots of output, check the installation by executing the following commands:
+
+      which mpicxx [ENTER]
+	  which mpirun [ENTER]
+
+- If either of these commands does NOT show any output, something is not right.
+
+*/

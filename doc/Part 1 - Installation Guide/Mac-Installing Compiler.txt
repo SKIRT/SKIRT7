@@ -1,0 +1,20 @@
+/**
+
+\page InstallMacComp Installing the compiler
+
+SKIRT is written in C++11, the C++ flavor that was standardized in 2011, extending the language with new features.
+Hence you need to install a recent C++ compiler.
+On Mac OS X this is accomplished by installing the Xcode development environment, which is
+freely available from the App Store. Download and install the latest version, and then launch the Xcode application
+at least once to complete installation. You should see the startup screen shown below. SKIRT was tested with Xcode 6.1 which installs the Apple C++ compiler Clang (Apple LLVM version 6.0 based on LLVM 3.5svn).
+
+\image html xcode.jpeg
+\image latex xcode.jpeg
+
+\note It is important that you launch the Xcode application at least once to complete installation
+of the command line tools that will be used by the Qt development environment.
+
+\note You need to install the full Xcode application; installing the <em>Command Line Tools for Xcode</em> package
+is not sufficient (and not needed).
+
+*/
