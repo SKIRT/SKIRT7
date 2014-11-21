@@ -46,7 +46,7 @@ in the source code repository, which is why these directories are \em not inside
 The \c git directory contains three types of information:
   - Immediately inside the \c git directory reside the main project file \c BuildSKIRT.pro and some
     shell scripts used for installing and building SKIRT or its documentation. For more information,
-    see \ref InstallMacBuild, \ref InstallSrcBuild, \ref InstallSrcQt, and \ref DevBuildDocs.
+    see \ref InstallMac, \ref InstallSrcBuild, \ref InstallSrcQt, and \ref DevBuildDocs.
   - Directories with short all-lower-case names contain support files, such as resource files read by the code
     at run time (\c dat), extra documentation that doesn't fit inside the source files (\c doc), and Mathematica
     notebooks for some of the geometry calculations (\c math).
@@ -218,7 +218,7 @@ uses the older conventions (the chameleon rule again).
 
 \subsection DevStyleFormat Formatting the code
 
-Before editing any SKIRT code, configure the Qt Creator development environment as described in \ref InstallMacConf
+Before editing any SKIRT code, configure the Qt Creator development environment as described in \ref InstallMacConfigQt
 or \ref InstallUbuConf. All SKIRT code must:
 - use indentation and alignment as configured by the file <tt>~/SKIRT/git/doc/SkirtCodeStyle.xml</tt>.
 - keep all lines within the 120 character limit (as indicated by the right margin in the Qt Creator editor).

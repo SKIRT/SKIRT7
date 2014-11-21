@@ -24,11 +24,11 @@ For setting SKIRT up for development and building, follow the instructions in:
 - \ref InstallMacComp 
 - \ref InstallMacQt
 - \ref InstallMacGetDevelop
-- \ref InstallMacDeveloper
+- \ref InstallMacConfigQt 
+- \ref InstallMacBuildQtCreator
 - \ref InstallMacVerify
 - \ref InstallMacDoxStyle
 - \ref InstallMacDoxygen
-- \ref InstallMacDevelop
 
 If you want instructions to install OpenMPI on Mac OS X for use with SKIRT, you can also read the following guide:
 

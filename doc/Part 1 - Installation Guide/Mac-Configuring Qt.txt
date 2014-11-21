@@ -1,0 +1,60 @@
+/**
+
+\page InstallMacConfigQt Configuring the Qt development environment
+
+Before proceeding, you should configure Qt Creator according to the following instructions.
+Launch the Qt Creator application if necessary, and choose the "Qt Creator->Preferences..." menu item to open
+the preferences panel. On the various tabs listed below, make the specified adjustments (leaving all other
+settings untouched), and at the end press the OK button to confirm the changes.
+
+<i> Step-by-step instructions: </i>
+
+- Launch the Qt Creator application and choose the "Qt Creator->Preferences..." menu item to open the preferences dialog.
+
+- Select the "Build&Run->Compilers" tab and verify that Qt automatically detected the Clang compiler installed on your
+    computer. If not, manually add a suitable compiler and press the "Apply" button.
+
+- Select the "Build&Run->Qt Versions" tab and verify that Qt automatically detected the Qt version you just installed
+    (Qt 5.2.1 if you used the installer mentioned above). If not, manually add an appropriate Qt version.
+
+- Select the "Build&Run->Kits" tab. Remove any lines listed other than "Desktop (Default)" (select each of the
+    lines in turn and press the "Remove" button). Select the line "Desktop (Default)" and verify and/or configure
+    its properties: "Compiler" should be "Clang x86 64-bit", and "Qt version" should be the version you installed
+    (i.e. Qt 5.2.1 if you used the installer mentioned above).
+
+- "Text Editor -> Behavior" tab
+    - Tab size: 4
+    - Backspace indentation: Follow Previous Indents
+    - In entire document: On
+    - Default encoding: UTF-8
+    - UTF-8 BOM: Always Delete
+
+- "Text Editor -> Display" tab
+    - Display right margin at column: 120
+    - Highlight current line: On
+
+- "Help -> Documentation" tab
+    - download the SKIRT.qch compressed help file from
+      <a href="http://www.skirt.ugent.be/downloads">www.skirt.ugent.be/downloads</a>, place it in 
+	  the doc folder in your main SKIRT directory (yourname/SKIRT/doc) and add it to the documentation available in Qt Creator.
+
+- "C++ -> Code Style" tab
+    - press the "Import..." button, select the file <tt>~/SKIRT/git/doc/SkirtCodeStyle.xml</tt>
+      and press the "Open" button
+
+- "C++ -> File Naming" tab
+    - Header suffix: hpp
+    - Lower case filenames: Off
+    - License template: press the "Choose..." button, select the file <tt>~/SKIRT/git/doc/LicenseTemplate.txt</tt>
+      and press the "Open" button
+
+- "Build & Run -> General" tab
+    - Save all files before build: On
+    - Open Compile Output pane when building: On
+    - Clear old application output on a new run: On
+    - Merge stderr and stdout: On
+    - Default build directory: "../%{CurrentBuild:Name}"
+
+- Finally press the "OK" buttun to accept the changes and close the preferences dialog.
+
+*/
