@@ -5,7 +5,7 @@
 \image html SkirtLogoSmaller.png
 \image latex SkirtLogoSmaller.png
 
-<center><i> The SKIRT logo © Astronomical Observatory, Ghent University. </i></center>
+<center> The SKIRT logo <i> © Astronomical Observatory, Ghent University. </i> </center>
 
 <b> Quick access to: </b>
 
