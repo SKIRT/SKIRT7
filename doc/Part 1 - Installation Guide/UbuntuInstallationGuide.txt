@@ -1,0 +1,84 @@
+/**
+
+\page InstallUbuntu Installing and developing SKIRT on Ubuntu Desktop
+
+This section explains how to install and configure the development environment for SKIRT on Ubuntu Desktop 14.04,
+one of the most popular Linux distributions. At this time there are no
+instructions for generating SKIRT documentation on Ubuntu, although this should be possible if the need arises.
+
+Some of the installation steps described below require you to enter Unix shell commands in a Terminal window.
+In most cases, you will need to be or become super-user (for example using \c sudo \c bash) for the commands
+to run successfully.
+
+\section InstallUbuPacks Installing development tools
+
+SKIRT is written in C++11, the C++ flavor that was standardized in 2011, extending the language with new features.
+The SKIRT source code resides in an online GitHub repository, which you can access from your computer
+through the \c git client. Hence you need to install a recent C++ compiler and the \c git client.
+
+On Ubuntu you can accomplish this easily by installing the appropriate packages using the standard package manager.
+From a Terminal window, simply enter:
+
+\verbatim
+apt-get install g++
+apt-get install git
+\endverbatim
+
+\section InstallUbuGit Configuring the source control client
+
+Before using the \c git client, you should configure it with your user name and email address. This is
+especially important if you plan to contribute code to the SKIRT repository. Perform the following commands,
+replacing the placeholders with your own name and email address:
+
+\verbatim
+git config --global user.name "John Smith"
+git config --global user.email john.smith@smithsonian.org
+\endverbatim
+
+\section InstallUbuQt Installing the Qt development environment
+
+SKIRT is based on the Qt 5.2 development environment. In addition to run-time libraries and build tools, Qt offers
+a convenient integrated code editor called Qt Creator. All of these components can be installed on Ubuntu with
+a single installer.
+
+Go to the <a href="http://qt-project.org/downloads">Qt download page</a> and download the file called
+\c qt-opensource-linux-x64-5.2.1.run . Make the downloaded file executable and run it as follows:
+
+\verbatim
+chmod +rx qt-opensource-linux-x64-5.2.1.run
+./qt-opensource-linux-x64-5.2.1.run
+\endverbatim
+
+Follow the instructions in the installer wizard for a standard install.
+Once the installation completed, locate and launch the Qt Creator application.
+Choose the "Tools->Options..." menu item to open the options dialog.
+
+Select the "Build&Run->Compilers" tab and verify that Qt automatically detected the gcc compiler installed on your
+computer. If not, manually add a suitable compiler and press the "Apply" button.
+Select the "Build&Run->Qt Versions" tab and verify that Qt automatically detected the Qt version you just installed
+(Qt 5.2.1 if you used the installer mentioned above). If not, manually add an appropriate Qt version.
+Select the "Build&Run->Kits" tab. Remove any lines listed other than "Desktop (Default)" (select each of the
+lines in turn and press the "Remove" button). Select the line "Desktop (Default)" and verify and/or configure
+its properties: "Compiler" should be "gcc x86 64-bit", and "Qt version" should be the version you installed
+(i.e. Qt 5.2.1 if you used the installer mentioned above).
+Finally press the "OK" buttun to accept the changes and close the preferences dialog.
+
+\section InstallUbuGet Getting the SKIRT source code
+
+Proceed as described in \ref InstallMac.
+
+\section InstallUbuConf Configuring the development environment
+
+Proceed as described in \ref InstallMacConf, keeping in mind that on Ubuntu "Preferences" are called "Options",
+and that the corresponding dialog is accessed by selecting the "Tools->Options..." menu item.
+
+\section InstallUbuBuild Building SKIRT
+
+Proceed as described in \ref InstallMacBuild.
+
+\section InstallUbuDoxStyle Installing the documentation streamliner
+
+Proceed as described in \ref InstallMacDoxStyle, keeping in mind that on Ubuntu "Preferences" are called "Options",
+and that the corresponding dialog is accessed by selecting the "Tools->Options..." menu item.
+
+*/

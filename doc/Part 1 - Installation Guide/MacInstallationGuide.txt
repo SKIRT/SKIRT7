@@ -1,0 +1,37 @@
+/**
+
+\page InstallMac Installing and developing SKIRT on Mac OS X
+
+This section explains how to install and configure the complete development environment for SKIRT on
+Mac OS X 10.9 (Mavericks) and Mac OS X 10.10 (Yosemite) including the capability to generate HTML and PDF documentation for SKIRT.
+Mac OS X is written on top of a Unix system (\em not Linux) customized by Apple. This means that most of the standard
+Unix tools are available, but things are sufficiently different to warrant a separate treatment.
+
+Some of the installation steps described below require you to enter Unix shell commands in a Terminal window.
+In most cases, you will need to be or become super-user (for example using \c sudo \c bash) for the commands
+to run successfully.
+
+If you only want to install SKIRT for your radiative transfer problems without adding modifications to the source code, read through sections:
+
+- \ref InstallMacComp
+- \ref InstallMacQt
+- \ref InstallMacGetPublic
+- \ref InstallMacBuildNoQtCreator
+- \ref InstallMacVerify
+
+For setting SKIRT up for development and building, follow the instructions in:
+
+- \ref InstallMacComp 
+- \ref InstallMacQt
+- \ref InstallMacGetDevelop
+- \ref InstallMacDeveloper
+- \ref InstallMacVerify
+- \ref InstallMacDoxStyle
+- \ref InstallMacDoxygen
+- \ref InstallMacDevelop
+
+If you want instructions to install OpenMPI on Mac OS X for use with SKIRT, you can also read the following guide:
+
+- \ref InstallMacMPI
+
+*/

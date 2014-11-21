@@ -1,0 +1,82 @@
+/**
+
+\page InstallMacVerify Verifying your installation 
+
+<i> Step-by-step instructions: </i>
+
+<b> Add the SKIRT release directory to your path. </b>
+
+  - In Terminal, type:
+
+        cd [ENTER]
+        open ~/.bash_profile [ENTER]
+
+  - If you get the following warning:
+
+        The file /Users/XXX/.bash_profile does not exist.
+
+    go to the next step. If a file opens in your text editor, skip the next step.
+
+<b> Create a .bash_profile </b>
+
+  - Open the default text editor (TextEdit) in OS X.
+  - Under the 'Format' menu, select 'Make Plain Text'.
+
+  - Type the following line:
+
+        export PATH=~/SKIRT/release/SKIRTmain:~/SKIRT/release/FitSKIRTmain:$PATH
+
+  - Next, save the file. In the popup window, do as follows:
+
+    - As name, type: .bash_profile
+    - As the location, select your home folder (XXX)
+    - UNCHECK the box before 'Use '.txt' if no extension is used.
+	
+  - If you press 'Save', you will get a warning similar to:
+
+        Only the system can use names starting with a dot (.).
+
+    Press <Use '.'> anyway.
+
+  - Skip the next step.
+
+<b> Modify the .bash_profile file. </b>
+
+  - Add the following line to your .bash_profile:
+
+        export PATH=~/SKIRT/release/SKIRTmain:~/SKIRT/release/FitSKIRTmain:$PATH
+
+  - Next, save the file and go to the final step.
+
+<b> Testing everything out. </b>
+
+  - Close any open Terminal window.
+  - Launch a new Terminal window.
+  - Type:
+
+        skirt [ENTER]
+	
+  - If you see the following messages:
+
+        /DATE/ /TIME/	Welcome to SKIRT v7 (...)
+        /DATE/ /TIME/	Interactively constructing a simulation...
+        /DATE/ /TIME/ ? Enter the name of the ski file to be created:
+
+    your SKIRT installation has succeeded. You can either follow the instructions in the Terminal window to create a ski (skirt simulation) file or press [CTRL] + C to exit the program. 
+   
+  - To get information about how you can use SKIRT, you can type 'skirt -h', which will yield the following output:
+   
+        /DATE/ /TIME/ Welcome to SKIRT v___
+        /DATE/ /TIME/ * *** Error: Invalid command line arguments
+        /DATE/ /TIME/ !
+        /DATE/ /TIME/ ! To create a new ski file interactively:    skirt
+        /DATE/ /TIME/ ! To run a simulation with default options:  skirt <ski-filename>
+        /DATE/ /TIME/ !
+        /DATE/ /TIME/ !   skirt [-b] [-s <simulations>] [-t <threads>]
+        /DATE/ /TIME/ !         [-k] [-i <dirpath>] [-o <dirpath>]
+        /DATE/ /TIME/ !         [-r] {<filepath>}*
+        /DATE/ /TIME/ ...
+
+  - You can also proceed with the \ref UsersGuide or \ref FSUsersGuide.
+  
+*/

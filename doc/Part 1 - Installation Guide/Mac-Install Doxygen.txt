@@ -1,0 +1,35 @@
+/**
+
+\page InstallMacDoxygen Installing the documentation generator
+
+This section is only relevant if you wish to (re-)generate the SKIRT documentation.
+The SKIRT documentation is generated from the source files by Doxygen. This free open source application requires
+a TeX distribution to handle mathematical formulas, and it uses the Dots tool in the Graphviz graph visualization
+software to generate class diagrams.
+
+<i> Step-by-step instructions: </i>
+
+<b> Installing a Tex distribution </b>
+
+- If you already have a recent Tex distribution installed, you can probably skip this step.
+- Go to the <a href="http://tug.org/mactex/">MacTex website</a> and download the latest version (MacTex-2014). It comes in the form of a '.pkg' file.
+- When the download is complete (this can take a while), open the installer and follow the instructions.
+
+<b> Installing Doxygen </b>
+
+- Go to the <a href="http://www.stack.nl/~dimitri/doxygen/download.html">Doxygen download page</a>.
+- Scroll down and download the binary distribution for Mac OS X 10.5 and later (Doxygen-1.8.8.dmg).
+- If the download is complete, open the '.dmg' file. This will mount the Doxygen installation disk.
+- In the Finder window that appears, drag the DoxyGen application to your applications folder (in the left menu).
+
+<b> Installing the Graphviz Graph Visualization Software </b>
+
+- Browse to the <a href="http://www.graphviz.org/Download_macos.php">Graphviz download page</a>.
+- Locate the graphviz-2.36.0.pkg package and download it.
+- Open the package. If a warning similar as below occurs, locate the '.pkg' file in a Finder window. Otherwise, follow the instructions and ignore the next steps.
+- Right-click on the file and chose 'Open'.
+- In the warning window that pops up, simply press 'continue' to proceed with the installation.
+
+For information on how to actually generate the documentation, see \ref DevBuildDocs.
+
+*/
