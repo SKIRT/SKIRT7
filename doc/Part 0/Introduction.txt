@@ -5,7 +5,7 @@
 \image html SkirtLogoSmaller.png
 \image latex SkirtLogoSmaller.png
 
-© Astronomical Observatory, Ghent University.
+<i> © Astronomical Observatory, Ghent University. </i>
 
 SKIRT is a state-of-the-art software code for simulating continuum radiation transfer in dusty astrophysical systems,
 such as galaxies and accretion disks. SKIRT employs the Monte Carlo technique to emulate the relevant physical
