@@ -14,8 +14,8 @@
 SpiralStructureGeometry::SpiralStructureGeometry()
     : GenGeometry(),
       _geometry(0),
-      _m(0), _p(0), _R0(0), _phi0(0), _w(0), _N(0), _tanp(0), _CN(0),
-      _Nphi(0), _dphi(0), _Ngamma(0), _dgamma(0), _Xvv()
+      _m(0), _p(0), _R0(0), _phi0(0), _w(0), _N(0), _tanp(0), _CN(0), _c(0)
+//      _Nphi(0), _dphi(0), _Ngamma(0), _dgamma(0), _Xvv()
 {
 }
 
@@ -37,24 +37,25 @@ SpiralStructureGeometry::setupSelfBefore()
     // cache frequently used values
     _tanp = tan(_p);
     _CN = sqrt(M_PI) * SpecialFunctions::gamma(_N+1.0) / SpecialFunctions::gamma(_N+0.5);
+    _c = 1.0+(_CN-1.0)*_w;
 
     // setup the vector of phi values for the cumulative distribution
-    _Nphi = 360;
-    _dphi = 2.0*M_PI/_Nphi;
-    _Ngamma = 720;
-    _dgamma = 2.0*M_PI/_Ngamma;
-    _Xvv.resize(_Ngamma+1, _Nphi+1);
-    for (int k=0; k<=_Ngamma; k++)
-    {
-        double gamma = k*_dgamma;
-        for (int i=0; i<=_Nphi; i++)
-        {
-            double phi = i*_dphi;
-            _Xvv(k,i) = 1.0/(2.0*M_PI)
-                * ( (1.0-_w)*phi + 2.0*_w*_CN/_m *
-                    (integratesin2n(0.5*_m*gamma,_N) - integratesin2n(0.5*_m*(gamma-phi),_N)));
-        }
-    }
+    // _Nphi = 360;
+    // _dphi = 2.0*M_PI/_Nphi;
+    // _Ngamma = 720;
+    // _dgamma = 2.0*M_PI/_Ngamma;
+    // _Xvv.resize(_Ngamma+1, _Nphi+1);
+    // for (int k=0; k<=_Ngamma; k++)
+    // {
+    //     double gamma = k*_dgamma;
+    //     for (int i=0; i<=_Nphi; i++)
+    //     {
+    //        double phi = i*_dphi;
+    //        _Xvv(k,i) = 1.0/(2.0*M_PI)
+    //            * ( (1.0-_w)*phi + 2.0*_w*_CN/_m *
+    //                (integratesin2n(0.5*_m*gamma,_N) - integratesin2n(0.5*_m*(gamma-phi),_N)));
+    //     }
+    // }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -186,9 +187,7 @@ const
 {
     double R, phi, z;
     bfr.cylindrical(R,phi,z);
-    double gamma = log(R/_R0)/_tanp + _phi0 + 0.5*M_PI/_m;
-    double perturbation = (1.0-_w) + _w*_CN*pow(sin(0.5*_m*(gamma-phi)),2*_N);
-    return _geometry->density(R,z) * perturbation;
+    return _geometry->density(R,z) * perturbation(R,z);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -200,15 +199,25 @@ const
     Position bfr = _geometry->generatePosition();
     double R, dummyphi, z;
     bfr.cylindrical(R,dummyphi,z);
-    double gamma = log(R/_R0)/_tanp + _phi0 + 0.5*M_PI/_m;
-    gamma -= floor(gamma/(2.0*M_PI))*2.0*M_PI; // ensure that gamma is between 0 and 2*pi
-    int k = static_cast<int>(gamma/_dgamma);
-    const Array& Xv = _Xvv[k];
-    double X = _random->uniform();
-    int i = NR::locate_clip(Xv,X);
-    double p = (X-Xv[i])/(Xv[i+1]-Xv[i]);
-    double phi = (i+p)*_dphi;
+    double c = 1.0+(_CN-1.0)*_w;
+    double phi, t;
+    do
+    {
+        phi = 2.0*M_PI*_random->uniform();
+        t = _random->uniform()*c/perturbation(R,phi);
+    }
+    while (t>1);
     return Position(R,phi,z,Position::CYLINDRICAL);
+
+    // double gamma = log(R/_R0)/_tanp + _phi0 + 0.5*M_PI/_m;
+    // gamma -= floor(gamma/(2.0*M_PI))*2.0*M_PI; // ensure that gamma is between 0 and 2*pi
+    // int k = static_cast<int>(gamma/_dgamma);
+    // const Array& Xv = _Xvv[k];
+    // double X = _random->uniform();
+    // int i = NR::locate_clip(Xv,X);
+    // double p = (X-Xv[i])/(Xv[i+1]-Xv[i]);
+    // double phi = (i+p)*_dphi;
+    // return Position(R,phi,z,Position::CYLINDRICAL);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -241,13 +250,23 @@ const
 ////////////////////////////////////////////////////////////////////
 
 double
-SpiralStructureGeometry::integratesin2n(double x, int n)
+SpiralStructureGeometry::perturbation(double R, double phi)
 const
 {
-    double ans = x;
-    for (int j=1; j<=n; j++)
-        ans = (ans*(2.0*j-1.0)-cos(x)*pow(sin(x),2.0*j-1))/(2.0*j);
-    return ans;
+    double gamma = log(R/_R0)/_tanp + _phi0 + 0.5*M_PI/_m;
+    return (1.0-_w) + _w*_CN*pow(sin(0.5*_m*(gamma-phi)),2*_N);
 }
+
+////////////////////////////////////////////////////////////////////
+
+// double
+// SpiralStructureGeometry::integratesin2n(double x, int n)
+// const
+// {
+//     double ans = x;
+//     for (int j=1; j<=n; j++)
+//         ans = (ans*(2.0*j-1.0)-cos(x)*pow(sin(x),2.0*j-1))/(2.0*j);
+//     return ans;
+// }
 
 ////////////////////////////////////////////////////////////////////
