@@ -1,6 +1,6 @@
 /**
 
-\page InstallMacMPI Installing OpenMPI on Mac OS X
+\page InstallMacMPI Installing OpenMPI
 
 <i> Step-by-step instructions: </i>
 
@@ -14,7 +14,7 @@
 
 - Open Terminal and navigate to the newly created folder called 'openmpi-1.8.3' with the command:
 
-      cd ~/XXX/Downloads/openmpi-1.8.3 [ENTER]
+      cd ~/yourname/Downloads/openmpi-1.8.3 [ENTER]
 
 - Then, type:
 

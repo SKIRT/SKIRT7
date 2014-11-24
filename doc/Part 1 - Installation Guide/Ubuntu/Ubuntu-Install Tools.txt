@@ -1,0 +1,28 @@
+/**
+
+\page InstallUbuntuPacks Installing development tools on Ubuntu
+
+SKIRT is written in C++11, the C++ flavor that was standardized in 2011, extending the language with new features.
+The SKIRT source code resides in an online GitHub repository, which you can access from your computer
+through the \c git client. Hence you need to install a recent C++ compiler and the \c git client.
+
+On Ubuntu you can accomplish this easily by installing the appropriate packages using the standard package manager.
+Open a new Terminal window:
+
+\image html ubuntuTerminal.png
+\image latex ubuntuTerminal.png
+
+and enter the following commands:
+
+\verbatim
+sudo apt-get install g++ [ENTER]
+sudo apt-get install git [ENTER]
+\endverbatim
+
+For both procedures, you will be asked for your password and prompted with the following message:
+
+    Do you want to continue? [Y/n]
+
+Provide your password and type Y [ENTER] where needed.
+
+*/

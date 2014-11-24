@@ -24,7 +24,7 @@ the preferences panel, and make the adjustments on the various tabs as listed be
 
  - "Environment -> Keyboard" tab
     - In the long item list, select "Tools -> External.Streamline_Selection"
-    - In the "Key sequence" field, enter the shortcut combination Alt-Command-I (on Mac) or Alt-Ctrl-I (on Ubuntu)
+    - In the "Key sequence" field, enter the shortcut combination [Alt] + [Cmd + [I] (on Mac) or [Alt] + [Ctrl] + [I] (on Ubuntu)
 
 For information on how to use DoxStyle, see \ref DevStyleFormat.
 

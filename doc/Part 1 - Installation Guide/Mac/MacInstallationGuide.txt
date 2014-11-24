@@ -2,6 +2,9 @@
 
 \page InstallMac Installing and developing SKIRT on Mac OS X
 
+\image html osx.jpg
+\image latex osx.jpg
+
 This section explains how to install and configure the complete development environment for SKIRT on
 Mac OS X 10.9 (Mavericks) and Mac OS X 10.10 (Yosemite) including the capability to generate HTML and PDF documentation for SKIRT.
 Mac OS X is written on top of a Unix system (\em not Linux) customized by Apple. This means that most of the standard

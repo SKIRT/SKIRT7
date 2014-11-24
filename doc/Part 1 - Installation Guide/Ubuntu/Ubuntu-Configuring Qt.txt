@@ -1,26 +1,24 @@
 /**
 
-\page InstallMacConfigQt Configuring the Qt development environment
+\page InstallUbuntuConfigQt Configuring the Qt development environment
 
 Before proceeding, you should configure Qt Creator according to the following instructions.
-Launch the Qt Creator application if necessary, and choose the "Qt Creator->Preferences..." menu item to open
+Launch the Qt Creator application and choose the "Tools->Options..." menu item to open
 the preferences panel. On the various tabs listed below, make the specified adjustments (leaving all other
 settings untouched), and at the end press the OK button to confirm the changes.
 
 <i> Step-by-step instructions: </i>
 
-- Launch the Qt Creator application and choose the "Qt Creator->Preferences..." menu item to open the preferences dialog.
-
-- Select the "Build&Run->Compilers" tab and verify that Qt automatically detected the Clang compiler installed on your
+- Select the "Build&Run->Compilers" tab and verify that Qt automatically detected the GCC compiler installed on your
     computer. If not, manually add a suitable compiler and press the "Apply" button.
 
 - Select the "Build&Run->Qt Versions" tab and verify that Qt automatically detected the Qt version you just installed
-    (Qt 5.2.1 if you used the installer mentioned above). If not, manually add an appropriate Qt version.
+    (Qt 5.3 if you followed this manual). If not, manually add an appropriate Qt version.
 
 - Select the "Build&Run->Kits" tab. Remove any lines listed other than "Desktop (Default)" (select each of the
     lines in turn and press the "Remove" button). Select the line "Desktop (Default)" and verify and/or configure
-    its properties: "Compiler" should be "Clang x86 64-bit", and "Qt version" should be the version you installed
-    (i.e. Qt 5.2.1 if you used the installer mentioned above).
+    its properties: "Compiler" should be "GCC x86 64-bit", and "Qt version" should be the version you installed
+    (i.e. Qt 5.3 if you followed this manual).
 
 - "Text Editor -> Behavior" tab
     - Tab size: 4
