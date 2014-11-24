@@ -1,6 +1,6 @@
 /**
 
-\page InstallMacBuildNoQtCreator Building SKIRT on Mac OS X without Qt Creator
+\page InstallMacBuildNoQtCreator Building SKIRT without Qt Creator
 
 <i> Step-by-step instructions: </i>
 
@@ -22,6 +22,6 @@
 
         ./makeSKIRT.sh [ENTER]
 
-  - You will see lots of output. Depending on the system, the build can take a while.
+  - You will see lots of output. Depending on your system, the build can take a while.
   
 */

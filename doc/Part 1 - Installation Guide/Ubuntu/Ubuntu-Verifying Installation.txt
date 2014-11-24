@@ -1,0 +1,49 @@
+/**
+
+\page InstallUbuntuVerify Verifying your installation 
+
+<i> Step-by-step instructions: </i>
+
+<b> Add the SKIRT release directory to your path. </b>
+
+  - In Terminal, type:
+
+        cd [ENTER]
+        gedit ~/.bashrc [ENTER]
+
+    This will open the .bashrc file in a text editor window.
+
+  - Add the following line to the end of your .bashrc:
+
+        export PATH=~/SKIRT/release/SKIRTmain:~/SKIRT/release/FitSKIRTmain:$PATH
+
+    Apart from possible other user-defined lines, your .bashrc should now look as follows:
+
+    \image html skirtPATHUbuntu.png
+    \image latex skirtPATHUbuntu.png
+
+  - Next, save the file.
+
+<b> Testing everything out. </b>
+
+  - Close any open Terminal window.
+  - Launch a new Terminal window.
+  - Type:
+
+        skirt [ENTER]
+	
+  - If you see the following messages:
+
+    \image html skirtinteractiveUbuntu.jpeg
+	\image latex skirtinteractiveUbuntu.jpeg
+
+    your SKIRT installation has succeeded. You can either follow the instructions in the Terminal window to create a ski (skirt simulation) file or press [CTRL] + C to exit the program. 
+   
+  - To get information about how you can use SKIRT, you can type 'skirt -h', which will yield the following output:
+   
+   \image html skirthelpUbuntu.jpeg
+   \image latex skirthelpUbuntu.jpeg
+
+  - You can also proceed with the \ref UsersGuide or \ref FSUsersGuide.
+  
+*/

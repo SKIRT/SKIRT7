@@ -219,7 +219,7 @@ uses the older conventions (the chameleon rule again).
 \subsection DevStyleFormat Formatting the code
 
 Before editing any SKIRT code, configure the Qt Creator development environment as described in \ref InstallMacConfigQt
-or \ref InstallUbuConf. All SKIRT code must:
+or \ref InstallUbuntuConfigQt. All SKIRT code must:
 - use indentation and alignment as configured by the file <tt>~/SKIRT/git/doc/SkirtCodeStyle.xml</tt>.
 - keep all lines within the 120 character limit (as indicated by the right margin in the Qt Creator editor).
 
@@ -235,7 +235,7 @@ In .cpp files regular //-style comments are used for annotating the implementati
 Doxygen documentation blocks are used to document the code. These structured comments are used to
 generate HTML and PDF formatted documentation for SKIRT.
 
-Assuming you installed the DoxStyle tool as described in \ref InstallMacDoxStyle or \ref InstallUbuDoxStyle,
+Assuming you installed the DoxStyle tool as described in \ref InstallMacDoxStyle,
 you can automatically reformat documentation blocks in the Qt Creator editor as follows:
  - select a section of code that contains one or more "/ **"-style documentation blocks (you may select regular code
    as well, possibly even the whole file)
