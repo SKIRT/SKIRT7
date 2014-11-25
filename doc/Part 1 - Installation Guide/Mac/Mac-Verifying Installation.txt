@@ -19,7 +19,7 @@
 
 <b> Create a .bash_profile </b>
 
-  - Open the default text editor (TextEdit) in OS X.
+  - Open the default text editor (TextEdit) in OS X and create a new blank text document.
   - Under the 'Format' menu, select 'Make Plain Text'.
 
   - Type the following line:
@@ -31,7 +31,10 @@
     - As name, type: .bash_profile
     - As the location, select your home folder (yourname)
     - UNCHECK the box before 'Use '.txt' if no extension is used.
-	
+
+    \image html makebashprofile.jpeg
+	\image latex makebashprofile.jpeg
+
   - If you press 'Save', you will get a warning similar to:
 
         Only the system can use names starting with a dot (.).

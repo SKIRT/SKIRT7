@@ -1,0 +1,36 @@
+/**
+
+\page InstallUbuntuBuildQtCreator Building SKIRT with Qt Creator
+
+To build SKIRT from within Qt Creator, you need to open the main Qt project included with the source code.
+In Qt Creator, choose the menu item "File->Open File or Project...", locate the Qt project
+file \c BuildSKIRT.pro inside your \c SKIRT/git directory, and press the "Open" button from within the dialog.
+
+Qt Creator now opens a configuration pane for the BuildSKIRT project in its main window. Simply press the
+"Configure Project..." button without changing any of the values, which causes Qt Creator to switch to
+regular "Edit" mode. However you still need to adjust the project configuration.
+
+\image html configureprojectUbuntu.png
+\image latex configureprojectUbuntu.png
+
+Select "Projects" mode in the left margin and select the "Build & Run" tab. There should be two subtabs called
+"Build" and "Run", placed under a "Desktop" header stating your Qt and compiler version. First select the "Build" subtab. There are two build
+configurations called "Debug" and "Release", which can be selected through the "Edit build configuration" popup.
+For each configuration, change the "Build directory" to one of the directories you created earlier
+(\c SKIRT/debug for the debug configuration, \c SKIRT/release for the release configuration).
+
+Still in "Projects" mode, now select the "Run" subtab. In the "Run configuration" popup, select the
+"SKIRTmain" item. Now change the "Working directory" to the \c SKIRT/run directory
+you created earlier. Turn off the "Run in terminal" option;
+this causes SKIRT's log messages to appear inside Qt Creator rather than in a separate Terminal window.
+
+\image html sourcetreeUbuntu.png
+\image latex sourcetreeUbuntu.png
+
+Finally go back to "Edit" mode (icon in left margin). Here you can browse, view and edit the source tree.
+To compile and build the complete SKIRT code (including FitSKIRT), click the hammer icon in the left margin.
+
+\image html compileSKIRTQtUbuntu.jpeg
+\image latex compileSKIRTQtUbuntu.jpeg
+
+*/
