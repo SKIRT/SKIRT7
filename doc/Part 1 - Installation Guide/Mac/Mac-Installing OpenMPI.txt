@@ -29,6 +29,8 @@
 
       sudo make install [ENTER]
 
+  If you are prompted for your password, type it and and press <tt>[ENTER]</tt>.
+
 - After again lots of output, check the installation by executing the following commands:
 
       which mpicxx [ENTER]
