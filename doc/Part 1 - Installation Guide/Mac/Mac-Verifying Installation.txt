@@ -4,7 +4,7 @@
 
 <i> Step-by-step instructions: </i>
 
-<b> Add the SKIRT release directory to your path. </b>
+<b> Add the <tt>SKIRT</tt> release directory to your path. </b>
 
   - In Terminal, type:
 
@@ -64,7 +64,7 @@
     \image html skirtinteractive.jpeg
 	\image latex skirtinteractive.jpeg
 
-    your SKIRT installation has succeeded. You can either follow the instructions in the Terminal window to create a ski (skirt simulation) file or press [CTRL] + C to exit the program. 
+    your <tt>SKIRT</tt> installation has succeeded. You can either follow the instructions in the Terminal window to create a ski (skirt simulation) file or press [CTRL] + C to exit the program. 
    
   - To get information about how you can use SKIRT, you can type 'skirt -h', which will yield the following output:
    

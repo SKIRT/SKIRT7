@@ -15,7 +15,7 @@ font-size: 0.9rem;
 .arrow,
 .navpath li.navelem a,
 #navrow4 a,.icon, span.mlabel,
-tt, code, kbd, samp, a.el,
+kbd, samp, a.el,
 pre.fragment, div.line,
 .mdescLeft, .mdescRight,
 .memItemLeft, .memItemRight,
@@ -24,6 +24,26 @@ pre.fragment, div.line,
 .params .paramdir {
 	font-family: "Lucida Sans Unicode", 'Courier New', courier, Courier, monospace;
 }
+
+code, tt {
+font-family: Consolas, 'Courier New', courier, Courier, monospace;
+color: #111;
+font-size: 0.9rem;
+}
+
+.arrow,
+.navpath li.navelem a,
+#navrow4 a,.icon, span.mlabel,
+kbd, samp,
+pre.fragment, div.line,
+.mdescLeft, .mdescRight,
+.memItemLeft, .memItemRight,
+.memTemplItemLeft, .memTemplItemRight, .memTemplParams,
+.memname,
+.params .paramdir {
+	font-family: Consolas, 'Courier New', courier, Courier, monospace;
+}
+
 .title,
 .fieldtable th{
 	font-family: "Cambria", serif;
@@ -61,7 +81,7 @@ h2, h2.groupheader {
   line-height: 1.5rem;
   letter-spacing: 0.01em;
 	border-bottom: none;
-	margin: 0em 0 .2em 0;
+	margin: 0.7em 0 .2em 0;
 	padding: 0px;
 	width: 100%;
 }

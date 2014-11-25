@@ -4,7 +4,7 @@
 
 <i> Step-by-step instructions: </i>
 
-<b> Navigate to the SKIRT git directory in Terminal </b>
+<b> Navigate to the <tt>SKIRT</tt> git directory in Terminal </b>
 
   - Type the following command in a Terminal window:
 
@@ -16,7 +16,7 @@
 
         chmod +rx makeSKIRT.sh [ENTER]
 
-<b> Execute the shell script to build SKIRT </b>
+<b> Execute the shell script to build <tt>SKIRT</tt></b>
 
   - Type:
 

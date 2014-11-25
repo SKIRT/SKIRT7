@@ -1,6 +1,6 @@
 /**
 
-\mainpage Introduction
+\mainpage The official SKIRT homepage
 
 \image html SkirtLogoSmaller.png
 \image latex SkirtLogoSmaller.png
