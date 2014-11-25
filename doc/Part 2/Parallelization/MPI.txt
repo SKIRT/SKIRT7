@@ -1,0 +1,454 @@
+/**
+
+\page ParallelizationMPI MPI parallelization
+
+\section MPIscheme Parallelization scheme
+
+The design of the MPI parallelization follows that of the thread parallelization. 
+In this way, we have one well-defined way in which <tt>SKIRT</tt>  handles parallelization, which is clear for every user. 
+This means that we let the processes work together on simulating the \f$N_{\lambda}\f$ photon packages of a particular wavelength, 
+while they work on different wavelengths at the same time.
+
+Because each process basically performs an independent <tt>SKIRT</tt>  simulation, the same rules must apply for the number of chunks within each 
+process for a good load balancing between its threads. The work is already well balanced between the processes, 
+since they execute the same algorithm, for the same wavelengths. For that reason, only one process logs the simulation progress (see further). 
+The number and amount of chunks is determined in the same way as explained above, with the difference that a reduced number of packages is 
+used in each process. The total number of packages desired by the user is first divided by the number of parallel processes \f$P\f$ to obtain 
+this reduced number. 
+
+Note that if the simulation of the \f$N\f$ photon packages across the different processes would still be seen as one entire simulation 
+during the calculation of the number of chunks and the chunksize, one could get unwanted behaviour. 
+Suppose that we want to impose the same conditions on the number of chunks as in the non-MPI case, 
+from the perspective that we may then change the number of threads \f$T\f$ by \f$P \times T\f$, denoting the total number of threads in the simulation, 
+running in different processes. The number of photon packages is unchanged. This leads then to the following conditions on \f$N_C\f$:
+
+\f[ \frac{N}{10^7} < N_C < \frac{N}{2 \times 10^4} \f]
+\f[ N_C > 10 \times \frac{P \times T}{N_{\lambda}} \f]
+
+The difference with the non-MPI case is the factor \f$P\f$ in the last statement, denoting the <em>number of parallel processes</em>. 
+The number of chunks obtained by the reasoning above must be divided by \f$P\f$ to obtain the number of chunks that each process 
+should simulate per wavelength. Now imagine that we start a <tt>SKIRT</tt>  simulation with a relatively small number of threads (take 1) 
+and processes (take 3), but with a large number of wavelengths (let’s say 150). 
+The number of photon packages is not relevant for this reasoning. 
+We have a simulation with a total of 3 threads, albeit running in different processes. 
+By the above equations, this case is treated in the same way as a non-MPI situation with 3 parallel threads. 
+The load balancing condition requires a minimum of 10 chunks per thread, irrespective of wavelengths. 
+Because the number of wavelengths is fairly high, this condition is certainly met when only using one single chunk for each wavelength 
+(which is of course the minimum – chunks can never represent multiple wavelengths). 
+The right hand side of the second equation will evaluate to a value smaller than one, 
+but will be rounded to exactly one in the <tt>SKIRT</tt>  code. In a single-process <tt>SKIRT</tt> , this is ideal behaviour: 
+the number of chunks per wavelength is minimal (reducing overhead) but still more than 10 chunks are simulated by each thread 
+(providing good load balance). With MPI however, disaster follows: the number of chunks per wavelength (equal to one) 
+is divided by the number of processes (3) and we obtain a value of 0.333. Clearly, the logic is failing: by imposing the above equations, 
+one assumes that a good load-balancing is obtained, since there are so many wavelengths and only little threads. 
+The MPI parallelization however differs in the sense that <em>all processes</em> always simulate <em>all wavelengths</em>. 
+Consequently, the chunks (of different wavelengths) do not get distributed amongst the threads (residing at different processes) as assumed.
+
+From the moment the number of chunks and chunksize have been calculated, each process can carry out an independent 
+radiative transfer simulation of stellar photon packages. For an oligochromatic simulation, 
+this must be followed by a single communication phase where the fluxes received in the instruments are collected by a single process, 
+after which this process writes the results to file. A panchromatic simulation involves some more communication, 
+due to the fact that thermal emission spectra have to be calculated based on the absorption of the stellar photons. 
+Since these photons are simulated by different processes, their absorbed luminosities have to be sent from their corresponding process 
+to all other processes. Subsequently, the thermal emission spectrum calculation can be initiated on each process simultaneously, 
+yielding the same outcome. This procedure of launching photons, recording their absorption and communicating between processes is 
+iterated for a couple of times during the panchromatic simulation. Eventually, the same communication is needed for the instruments 
+as with the oligochromatic simulations.
+
+\section MPIimplementation Implementation
+
+\subsection MPIimplementation_processmanager The ProcessManager class
+
+To provide a convenient interface to the MPI library, a class called ProcessManager is added to the <tt>SKIRT</tt>  code. 
+Its source and header files are placed under a directory called MPIsupport. 
+The ProcessManager class is the only place in the <tt>SKIRT</tt>  code here explicit calls to the MPI library are allowed. 
+The ProcessManager source file can be compiled with our without MPI, depending on whether the MPI compiler can be detected on the system. 
+If it is compiled with MPI, the MPI header is included and the appropriate calls to the MPI library are inserted. 
+Otherwise, these calls are ignored and the ProcessManager class always returns default values to the rest of the code 
+(number of processes = 1, rank of the process = 0). <tt>SKIRT</tt>  can then be run as usual, without the MPI functionality. 
+
+No instances of the ProcessManager can be created. Its members include only static functions and variables. 
+The constructor is deleted so that the compiler ensures that it can never be called. 
+The reason is that the ProcessManager reflects a \em resource, being the MPI environment. 
+Within the runtime of a program, this resource is available <em>once and only once</em> (this is defined in the MPI standard). 
+As soon as the MPI environment is initiated, the rest of the code can call certain operations that perform communications between the \f$n\f$ processes. 
+The number of processes \f$n\f$ is \em always specified at the very moment the program launches, and can \em never be changed during runtime. 
+Hence, it is meaningless to create multiple objects during the course of the program, all with the purpose of representing the 
+same collection of processes. The ability to communicate between the processes and to inquire the n and the process’ rank can thus indeed 
+be seen as a solitary resource. 
+
+A solitary resource can be handed out once and further requests for it must be answered with a negative response. 
+Only if the resource is released again, a next request results in a positive reply. 
+Let’s translate that in case the resource is MPI and the way to obtain it is through the ProcessManager class. 
+The first time ProcessManager is asked whether an MPI environment is present, it can happily reply by stating the number of 
+processes \f$n\f$ and the rank of the process that requested the information. If the number \f$n\f$ is greater than one, 
+that process knows that it is part of a parallel program and executes the code accordingly. 
+If \f$n=1\f$, MPI is either absent or the MPI environment trivially consists of one process.
+Consequently, the entire simulation is run by this process. When a first request has been performed, a next request to 
+the ProcessManager will always result in a ‘non-MPI’ answer: \f$n=1\f$ and a rank of zero. 
+Any request thereafter results in the very same answer. The number of performed request can be conveniently stored in a static 
+variable of the ProcessManager class. This variable is increased with one after every request, 
+and decreased with one whenever such a request is release again. With every request, the value of the counter is checked. 
+Only if it is zero, the correct number of n processes is returned to the caller. 
+
+As we already mentioned, the MPI environment must always be initialized (once) and subsequently finalized (once) again. 
+Both operations can be performed by a call to resp. the initialize and finalize functions of the ProcessManager class. 
+The request to acquire MPI is managed by a function called acquireMPI and releasing the MPI resource is done by the releaseMPI function. 
+The private variable that stores the number of requests is called requests, and is of type std::atomic<int>. 
+Objects of the atomic type are free from data races, meaning that if one thread writes to an atomic variable while another thread reads from it, 
+the behaviour is well defined. In other words, making requests an atomic int instead of a regular int avoids situations where two different threads 
+try to increase (calling acquireMPI) or decrease (calling releaseMPI) its value at the same time, leaving the requests counter in an incorrect state. 
+
+\subsection MPIimplementation_processcommunicators The Process Communicators
+
+When either a Simulation or FitScheme object calls acquireMPI, it obtains a number of processes and a rank, which it is supposed to 
+remember for the rest of the object’s lifetime. Instead of creating new data members in the Simulation and FitScheme class, 
+this information is stored in an object we call a \em communicator. We added a new abstract class, ProcessCommunicator, 
+which acts as a base class for the classes PeerToPeerCommunicator and MasterSlaveCommunicator. 
+The base class provides two data members: _rank and _Nprocs. Their values are defined during the ProcessCommunicator constructor, 
+which calls the acquireMPI function of ProcessManager. ProcessManager also defines a (virtual) destructor (calling releaseMPI) and a 
+few functions such as getRank, getSize and isMultiProc. 
+
+<tt>SKIRT</tt> and <tt>FitSKIRT</tt> use a different MPI parallelization strategy. Whereas in <tt>SKIRT</tt> , we try to obtain as much independence as possible 
+between processes (despite the occasional gathering of data), FitSKIRT lets one process give directions to what other processes should work on. 
+That is why we have two separate classes, PeerToPeerCommunicator and MasterSlaveCommunicator, for <tt>SKIRT</tt>  and <tt>FitSKIRT</tt> respectively. 
+<em>Their purpose is to implement communication functions</em>, specific for the needs of the <tt>SKIRT</tt> and <tt>FitSKIRT</tt> design. 
+These functions, in turn, can use a shared set of lower-level communication functions in the ProcessManager class. 
+The latter are supposed to call the MPI library directly and deal with data buffers of fundamental types only. 
+
+Both the Simulation and the FitScheme class create their communicator, denoted by the member variable _communicator, in their constructor. 
+They do this by calling new PeerToPeerCommunicator() and new MasterSlaveCommunicator() respectively. 
+The base class ProcessCommunicator inherits from SimulationItem so that a pointer to the PeerToPeerCommunicator or MasterSlaveCommunicator 
+can be obtained at runtime with the find command from other classes in the <tt>SKIRT/FitSKIRT</tt> hierarchy.  
+
+\subsection MPIimplementation_skirtsimulation A SKIRT simulation
+
+A <tt>SKIRT</tt> simulation is represented by an object of either the class OligoMonteCarloSimulation or the class PanMonteCarloSimulation, 
+depending on the type of simulation. Both classes inherit from the MonteCarloSimulation class, which in turn inherits from the Simulation class. 
+The simulation is started by invoking the setupAndRun function, implemented in Simulation. This function calls two other functions of Simulation, 
+setup and run. The setup function iterates over all objects in the simulation hierarchy, creating and initializing their data structures. 
+It is in this phase that for example the dust system (class DustSystem) calculates the volumes and densities of the dust cells, 
+the random generator (class Random) generates the random sequences for the different threads, the wavelength grid 
+(class OligoWavelengthGrid and PanWavelengthGrid) calculates the wavelength bin widths, etc. 
+
+After the setup, the run function of Simulation is invoked. This function executes the runSelf function of either OligoMonteCarloSimulation 
+or PanMonteCarloSimulation. In the former, this function invokes the <em>stellar emission phase</em> and the <em>writing phase</em>. 
+In the latter, this function invokes the <em>stellar emission</em>, <em>dust selfabsorption</em>, <em>dust emission</em> and <em>writing</em> phases. 
+The runstellaremission function, implemented by MonteCarloSimulation, calculates the number and the size of the chunks and then 
+calls the dostellaremissionchunk function for each chunk (with or without parallel threads). 
+The chunk number and size calculation is done by a separate function, setChunkParams. 
+As explained in \ref MPIscheme, the implementation of this calculation is slightly changed to accommodate the MPI parallelization. 
+As indicated below, the number of processes \f$P\f$ (Nprocs) has been included in the calculation. 
+This number is obtained from the new ProcessCommunicator class. 
+
+\code
+int Nthreads = _parfac->maxThreadCount();
+int Nprocs = _comm->size();
+
+if (Nprocs * Nthreads == 1)
+{
+    _Nchunks = 1;
+    _chunksize = packages;
+    _Npp = packages;
+}
+else
+{
+    int myPackages = packages/Nprocs;
+    _Nchunks = ceil( qMin(myPackages/2e4, qMax(myPackages/1e7, 10.*Nthreads/_Nlambda)) );
+    _chunksize = ceil(myPackages/_Nchunks);
+    _Npp = Nprocs*_Nchunks*_chunksize;
+}
+\endcode
+
+A distinction is made between two cases: the \em serial and \em parallel case. If the number of processes and threads per process are both equal to one, 
+it is best to set the number of chunks per wavelength to one to minimize the overhead. In the other case, we first divide the total number of 
+packages per wavelength by P, to obtain a good load balancing between the processes. After that, the number of the chunks is calculated as usual 
+and stored in the variable _Nchunks. The chunksize is also calculated and stored in _chunksize. Note that the _Npp variable stores the <em>total 
+number of photon packages per wavelength</em>, combining the chunks of the different processes. Its value is for example used when the 
+luminosity of the photon packages is determined from the total luminosity to be emitted at a certain wavelength. 
+
+For the oligochromatic simulations, no other noteworthy changes were made to the <tt>SKIRT</tt> algorithm, 
+except for the communication in the writing phase (see subsection 3.2.5: The instruments) and a minor change in the Random class explained 
+in the next subsection. For the panchromatic simulations, more changes were necessary, related to the calculation of the dust emission. 
+This is explained in \ref MPIimplementation_emissioncalculation.
+
+\subsection MPIimplementation_randomness Randomness
+
+The construction of some types of dust grids (e.g. an octree grid), during the setup of the simulation, depends on random numbers. 
+Because of the dynamical way in which threads assign themselves to available work, this leads to the fact that two consecutive runs of a 
+<tt>SKIRT</tt> simulation with the same number of threads will almost never have an identical dust grid (for those types). 
+Since the processes in a MPI parallelized <tt>SKIRT</tt> simulation are essentially independent <tt>SKIRT</tt> simulations, this would result in inconsistent grids 
+across the processes and the program would most likely crash during some communication operation. 
+Remember, in panchromatic simulations, we require the processes to send the absorbed luminosities in each dust cell to the other processes. 
+If the dust grids are organized in a different way across processes, with differing number of cells, this communication is doomed to fail. 
+Even in oligochromatic simulations, we want the different processes to simulate exactly the same system. 
+Therefore, we need two conditions for the MPI parallelization regarding the setup of the <tt>SKIRT</tt> simulations. 
+Firstly, the setup can only be single threaded and secondly, these single threads must have the same random sequence on all processes. 
+The second condition is fulfilled anyway since the random seed is read in from the ski file or otherwise given a default, hardcoded value. 
+
+For the actual simulation of photon packages, however, we need to give each thread, <em>across all processes, a different</em> random seed. 
+This is to prevent of course that the thread with the same index (and seed) is assigned to the first wavelength on two different processes, 
+after which the two threads will essentially simulate identical photons. This procedure is implemented by the randomize function in the Random class. 
+This function is called from Simulation, between the execution of setup and run. The name is obvious because without this function, 
+the threads with the same index would have exactly the same sequence on all processes. 
+
+Schematically, the algorithm of the randomize function goes as follows:
+
+-# Find the PeerToPeerCommunicator within the simulation hierarchy.
+-# Obtain the number of parallel threads in each process from the ParallelFactory object. 
+   A pointer to the parallel factory is stored in a member called _parfac.
+-# Give the first thread of each process a different seed, shift these seeds by exactly the number of threads. 
+   Store the seed in the member _seed at each process.
+-# Execute the algorithm that is also used in the setup of the Random class, to create a random sequence for all the threads. 
+   The random sequence of thread zero is created from the _seed variable, the random sequence of thread 1 is created from incrementing 
+   _seed by 1, and so on. Thus for \f$T\f$ threads, a set of \f$T\f$ consecutive seeds are used. Since the value of _seed is shifted by \f$T\f$ 
+   on each subsequent process, the \f$P \times T\f$ different threads of the program have \f$P \times T\f$ different seeds. 
+
+The implementation of the randomize function is listed below.
+
+\code
+void Random::randomize()
+{
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+
+    int Nthreads = _parfac->maxThreadCount();
+    _mtv.resize(Nthreads);      // Because the number of threads can be different during
+    _mtiv.resize(Nthreads);     // and after the setup of the simulation.
+
+    _seed = _seed + Nthreads * comm->rank();
+
+    initialize(Nthreads);
+}
+\endcode
+
+Because in the last procedure, we need to reuse code of the setupSelfBefore function of Random, 
+we have moved this piece of code to a separate (<em>protected</em>) function, which is called initialize. 
+As an argument, this function needs the number of threads, obtained from the parallel factory. 
+Internally, it uses the _seed member to initialize the random sequences. 
+
+\subsection MPIimplementation_instruments The instruments
+
+For an \em oligochromatic simulation, the stellar emission phase is immediately followed by the writing phase, 
+where instruments and dust system write out their information. The instruments of the different processes must add their values together 
+and store the result at one single process, which then writes out the information. There are different instruments, 
+all inheriting from the Instrument class. They all have their own private data members, which are arrays that represent the acquired fluxes. 
+The number of such arrays differs from one instrument subclass to the other. They also differ in name and size.
+
+We have implemented a function, called sumResults, in the Instrument base class that is responsible for summing the values in a 
+certain list of flux arrays across the different processes. Some subclasses have only one such list, other instruments have more. 
+Therefore, each subclass calls the sumResults function a different number of times. The choice of implementing the summing procedure in the 
+shared Instrument base class over implementing that procedure in each derived class separately provides clarity, 
+improves modularity (adding new instrument classes) and prevents needless duplication of code.
+
+The Instrument subclasses (SimpleInstrument, SEDInstrument, FullInstrument, FrameInstrument) contain a function write, 
+which is called from the InstrumentSystem class for each instrument in the simulation. In this function, 
+each instrument places pointers to its flux arrays (type Array) into a list of type QList. 
+This is typically a list called farrays for their (potential) pixel data arrays and a list called Farrays for their (potential) SED data arrays. 
+These two lists (if present) are then respectively passed to the functions calibrateAndWriteDataCubes and calibrateAndWriteSEDs. 
+These functions are implemented in the SingleFrameInstrument and DistantInstrument classes, from which the concrete instrument classes inherit. 
+Before these functions are called, first the communication between the processes must be performed. 
+This is done by calling the sumResults function for each list of flux arrays. In other words, sumResults is either called once with an farrays 
+list as an argument, once with an Farrays list as an argument, or twice for both lists.
+
+The implementation of the sumResults function in Instrument is as follows:
+
+\code
+void Instrument::sumResults(QList< Array*> arrays)
+{
+    PeerToPeerCommunicator * comm = find<PeerToPeerCommunicator>();
+    foreach (Array* arr, arrays) comm->sum(*arr);
+}
+\endcode
+
+A pointer to the PeerToPeerCommunicator instance of the simulation hierarchy is obtained by using the find operation. 
+For each (flux) array in the list passed to sumResults, the sum function of the PeerToPeerCommunicator class is called. 
+An additional argument of false is passed, indicating that not every process should receive the result of the summation, 
+but only the root process.
+
+The sum function makes sure that the values in the array pointed to by arr are summed element wise across the processes, 
+and that the results are stored in the <em>original array in the memory of the process with rank zero</em>. 
+The sum function can also be used to apply a summing procedure where each process obtains the results afterwards, 
+if its second argument is set to true. In the end, the difference in this argument leads to different MPI operations to be called. 
+This distinction is made as follows:
+
+- If the argument is true, the sum_all function of the ProcessManager class is called. 
+  The arguments passed to this function are: the address of the <em>original array</em>, the address of a <em>newly created array</em> of the same size, 
+  and the size of the arrays. After the sum_all function returns, the results are stored in the new array <em>at each process</em>. 
+  Each process then copies the values of that array into its original array.
+- If the argument is false, the sum function of the ProcessManager class is called. 
+  The arguments passed to this function are: the address of the original array, the address of a newly created array of the same size, 
+  the size of the arrays and the rank of the receiving process. <em>Only this process</em> will obtain the results of the summation procedure, 
+  stored in the new array. This process then copies these results back into its original array.
+
+The sum and sum_all functions of the ProcessManager class are just simple wrappers around the MPI_Reduce and MPI_Allreduce functions respectively. 
+After the calls to the sumResults function have returned, the calibrateAndWriteDataCubes and calibrateAndWriteSEDs are called. 
+These functions convert the flux data into appropriate units and subsequently write this data to file. 
+Before it does so, however, it first checks whether the process has rank zero. 
+This is done by calling the isRoot function of the PeerToPeerCommunicator. If it does, it executes the rest of the algorithm. 
+If not, the function returns. 
+
+\subsection MPIimplementation_emissioncalculation The dust emission calculation
+
+For a \em panchromatic simulation, extra phases are involved before the writing phase. These phases involve a repeated simulation 
+of (stellar or thermal) photon packages during which the absorbed luminosities in the dust cells should be stored. 
+This absorption information is used when the calculatedustemission function of the PanDustSystem class is called. 
+Similar as with the instruments where the fluxes are summed <em>wavelength/pixel-wise</em>, the luminosities should be summed <em>dustcell-wise</em>
+across the processes. The difference is that now each process should store the results afterwards, as each process still has to 
+continue with the simulation. 
+
+The summing of the absorbed luminosities is implemented in the calculatedustemission function of the PanDustSystem, 
+before the actual calculation starts. It is implemented at this level since it is the PanDustSystem class that stores the 
+absorption information, in the form of two container variables: _Labsstelvv and _Labsdustvv. 
+These containers are of the type Table<2>, i.e. a two-dimensional instance of the template class Table. 
+It can be constructed by specifying its dimensions \f$n_0\f$ and \f$n_1\f$  and its elements can be accessed by specifying two indices (i,j). 
+Internally, it consists of an Array of size \f$n_0 \times n_1\f$. 
+
+There are two different circumstances in which we want to calculate the dust emission. 
+The first is when we have just launched stellar photon packages, and we want to calculate the emission based on the absorption 
+of these photon packages to initiate the first dust selfabsorption cycle. 
+The other situation happens after each dust selfabsorption cycle, where the absorption luminosities of thermal photon packages get updated. 
+In this case, we want to recalculate the dust emission because on these updated thermal absorptions (stored in _Labsdustvv), 
+whereas the absorption luminosities of stellar photon packages (stored in _Labsstelvv) have not been altered. 
+Thus, in the first situation we want to sum the values of the _Labsdustvv across the processes, 
+whereas in the second situation we need to sum the values of _Labsdustvv across the processes. 
+Therefore, the calculatedustemission function takes a boolean argument ynstellar to determine whether it is called after a 
+stellar emission phase or after a dust selfabsorption phase.  
+
+The dust selfabsorption phase consists of 3 stages. During each such stage, a simulation of thermal photon packages is performed 
+repeatedly (in so-called cycles), until a certain convergence is reached on the total absorbed luminosity of thermal photon packages. 
+The first stage, second stage and third stage respectively launch 1/10, 1/3 and 1 times the number of photon packages used for 
+the stellar emission phase. A stage is finished when the total absorbed thermal luminosity convergence or the maximum number of 
+cycles (which is 100) is reached. Only in the <em>first cycle of the first stage</em>, the absorbed stellar luminosities have to be 
+communicated between the different processes. Once the summed stellar luminosities are stored in each processor’s memory, 
+these values are not changed anymore during the simulation. The argument ynstellar passed to calculatedustemission 
+should thus only be true when the stage variable is zero (because the stage index starts from zero) and the 
+cycle variable is one (because this index starts with one). Therefore, the following statement is implemented in the body 
+of the rundustselfabsorption loop:
+
+\code
+_pds->calculatedustemission(!(stage+cycle-1));
+\endcode
+
+The variable _pds is a pointer to the dust system used for panchromatic simulations. The calculatedustemission function does the following:
+
+- First, it checks whether dust emission is turned on or off. If it is turned of (one can choose to do so in the ski file), 
+  then the function immediately returns (it does nothing).
+- If dust emission is enabled, the sumResults function of the same class is called, which performs the communication. 
+  The argument ynstellar is passed on to this function.
+- After sumResults, the actual calculation is executed. This is done by calling the calculate function of the _dustlib object, 
+  an instance of one of the DustLib subclasses.
+
+The algorithm of the sumResults function of PanDustSystem is listed below. Note that it is somewhat similar to the sumResults function 
+in Instrument, and therefore bearing the same name.
+
+\code
+void PanDustSystem::sumResults(bool ynstellar)
+{
+    PeerToPeerCommunicator * comm = find<PeerToPeerCommunicator>();
+
+    Array* arr;
+    arr = ynstellar ? _Labsstelvv.getArray() : _Labsdustvv.getArray();
+
+    comm->sum_all(*arr);
+}
+\endcode
+
+First, a pointer to the PeerToPeerCommunicator is obtained with the find function. 
+Then, an empty pointer to an object of type Array is constructed. The ynstellar flag determines which Array the pointer will point to. 
+If ynstellar is true, a pointer to the internal array of _Labsstelvv is obtained and assigned to arr. Otherwise, 
+the same is done with the _Labsdustvv object. Finally, the sum function of the PeerToPeerCommunicator is called, 
+passing the array pointed to by arr and a flag of true as its arguments. By setting the second argument to true, 
+we impose that the results of the summation are stored at \em each individual process.
+
+After the summing of the luminosities, each process applies the <em>same procedure</em> (calculating the dust emissivity) on the <em>same data</em>. 
+This procedure can be parallelized too; but this has not been done yet. Because the calculation on each process will in principle 
+yield the same results, no communication is needed before simulating the next round of photon packages.
+
+After the dust selfabsorption and dust emission phases, the instruments add their flux values together just as in the oligochromatic simulations, 
+after which the root process writes out the results. 
+
+\subsection MPIimplementation_logging Logging
+
+SKIRT uses an advanced logging mechanism that clearly marks the beginning and end of the different simulation phases, 
+provides timestamps to the log messages, and allows for two (or possibly more) Log objects to be linked, so that the parent 
+(in case of SKIRT, the <em>console logger</em>) passes the messages to the child (the <em>file logger</em>). 
+
+The console logger, an instance of the Console class – inheriting from Log – is created by its default constructor during 
+the construction of the SkirtCommandLineHandler object. After its construction, the console logger prints a welcome message.
+
+When the perform function of the SkirtCommandLineHandler class is called, <tt>SKIRT</tt> determines whether to start a (series of) simulation(s) 
+or execute its <em>interactive mode</em> where the user can create a \em ski file. 
+Because the interactive mode is very basic and depends on sequential user input, it is not parallelized in any way. 
+Therefore, we have taken care that if <tt>SKIRT</tt> is somehow started in interactive mode (for example by not providing any command line arguments) 
+<em>with MPI</em>, the program is shut down with an error message. This is done by calling the isMultiProc function of the ProcessManager 
+class at the beginning of the doInteractive function, and throwing a FATALERROR when the former returns true. 
+
+In <em>simulation mode</em>, the console prints out that it is constructing a simulation for the specified <em>ski</em>-file(s). 
+After that, an object of the Simulation class is constructed. Using its default constructer, 
+a new object of the Console class is created as a data member. This object will be solely responsible for all further logging 
+during the simulation. Another logger, of the class FileLog, is linked to the Console logger and writes out the exact same 
+messages to a file during the simulation. 
+
+The actual simulation is executed by calling the setupAndRun function of the Simulation class. 
+This function calls two other functions, setup and run. All of this is not important without MPI, but if we do use multiple processes, 
+we want the logging mechanism to adapt to the situation. Imagine that we don’t change anything in the logging algorithm. 
+Then we would have a whole bunch of processes, all thinking they are executing an independent simulation, 
+logging messages to the terminal and to a file. This would result in a mess of redundant information. 
+On the other hand, it could be useful for some types of messages to always reach the user, 
+irrespective of which process wants to log them. Error messages, for example, are not necessarily expected to occur in each process at the same time. 
+It is therefore certainly desired to always output these messages; otherwise the program could crash without apparent reason. 
+
+It is obvious that different kinds of messages require a different treatment. There are, in SKIRT, four kinds of messages: 
+info, warning, success and error. Info messages are used for showing the progress of the simulation(s) and providing 
+general info about the simulation name, <tt>SKIRT</tt> version etc. Warnings are used when unexpected behaviour occurs somewhere during the simulation, 
+but it can be solved or handled without affecting the results or performance of the program. 
+Still, the user may want to be informed by the unexpected event. 
+Errors are similar, however, the program should usually be terminated after an error is encountered. 
+A success message is not very different from an info message, but it is used to inform the user of the successful ending of a 
+particular simulation phase. Since the different processes execute the same algorithm, the info and success messages 
+they intend to show are identical. Subsequently, it is sufficient to let only one process, the root process, 
+output these messages to the console and to file. Thus, the following line is implemented at the beginning of the 
+info and success function of the Log class:
+
+\code
+if (!ProcessManager::isRoot()) return;
+\endcode
+
+Therefore, the info and success function do nothing for a process that is not the root, and otherwise it performs as usual. 
+In the warning and error function, the above line is not added. In these functions, an additional variable _procName is used. 
+This is object of type QString, and a data member of the Log class. In the initialization list of Log, 
+its value is defaulted to the empty string. Its value can be changed afterwards by calling the setProcessName function. 
+This function takes the rank i of the process (an int) as a parameter, and sets the process name to [Process i]. 
+The Log::setProcessName function is called in the setup of the Log baseclass, after a pointer to the ProcessCommunicator object is obtained
+and it is verified that this object has been set up itsself:
+
+\code
+void Log::setupSelfBefore()
+{
+    ProcessCommunicator* comm;
+
+    try
+    {
+        // get a pointer to the ProcessCommunicator without performing setup
+        // to avoid catching (and hiding) fatal errors during such setup
+        comm = find<ProcessCommunicator>(false);
+    }
+    catch (FatalError)
+    {
+        return;
+    }
+
+    // Do the find operation again, now to perform the setup of the
+    // PeerToPeerCommunicator so that the correct rank is initialized
+    comm = find<ProcessCommunicator>();
+
+    if (comm->isMultiProc()) setProcessName(comm->rank());
+}
+\endcode
+
+The Log::setProcessName function automatically calls itself also for the linked log. When Log::warning or Log::error is called afterwards, 
+the process name is shown after the timestamp and before the actual message. We have also added the process name to the 
+info and success log messages, when <tt>SKIRT</tt> is compiled in debug mode. Obviously, these messages are then also always output, 
+irrespective of the process. This allows for the user to find out which process causes the program to hang, for example. 
+
+*/

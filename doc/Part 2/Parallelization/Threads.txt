@@ -1,0 +1,35 @@
+/**
+
+\page ParallelizationThreads Thread parallelization
+
+In SKIRT, oligochromatic as well as panchromatic simulations are parallelized by means of multithreading. 
+The parallelization of both kinds of simulations is designed in the same way. 
+The number of photon packages to be simulated for each wavelength is specified by the user, take N. 
+This number is subdivided in a certain amount of chunks. The amount of chunks \f$N_C\f$ is determined by \f$N\f$ and the number of parallel threads \f$T\f$. 
+If the number of photon packages \f$N\f$ is zero, the number of chunks \f$N_C\f$ is also zero. Otherwise, there are two cases:
+
+ - 	\f$T=1\f$: In this case, SKIRT is run as a serial program. Put \f$N_C=1\f$. 
+    One chunk represents all photon packages to be launched for a certain wavelength. Each chunk (each wavelength) is simulated sequentially.
+ - 	\f$T>1\f$: In this case, different threads will simulate photon packages in parallel. 
+    The determination of the number of chunks per wavelength is a combination of load balancing of the different threads and setting 
+    upper and lower boundaries on the size of the chunks. If the chunks are too large, the load imbalance can still be large, 
+    and if they are too small, dealing with the large number of chunks can produce a significant overhead. 
+    To be specific, the number of chunks per wavelength obeys the following rules:
+    \f[ \frac{N}{10^7} < N_C < \frac{N}{2 \times 10^4} \f]
+    \f[N_C > 10 \times \frac{T}{N_{\lambda}} \f]
+    If we call \f$C=N/N_C\f$ the <em>size of the chunks</em>, this is equivalent to:
+    \f[2 \times 10^4 < C < 10^7 \f]
+    \f[\frac{N_C \times N_{\lambda}}{T} < 10 \f]
+    As \f$N_C \times N_{\lambda}\f$ represents the total number of chunks over all wavelengths, the last condition makes sure that 
+    <em>at least 10 chunks of photon packages are simulated by each thread</em> (on average). 
+    By dividing the work that has to be done by each thread into 10 smaller bits or more, 
+    combined with the fact that the threads dynamically assign themselves to these bits of work as they are available, 
+    one prevents the situation where one thread spends significantly more time on its work than others do on theirs.  
+    
+After the number of chunks has been determined, the size of the chunks \f$C\f$ is calculated by dividing the number of photon packages per 
+wavelength \f$N\f$ by the number of chunks per wavelength \f$N_C\f$.
+
+The \f$N_C \times N_{\lambda}\f$ chunks of photon packages that have to be simulated are executed in parallel by the different threads, 
+which pick the next chunk in row whenever they become available.  
+
+*/

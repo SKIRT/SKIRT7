@@ -1,0 +1,11 @@
+/**
+
+\page Parallelization Parallelization
+
+This topic consists of three parts:
+
+ - \ref ParallelizationIntroduction
+ - \ref ParallelizationThreads
+ - \ref ParallelizationMPI
+
+*/
