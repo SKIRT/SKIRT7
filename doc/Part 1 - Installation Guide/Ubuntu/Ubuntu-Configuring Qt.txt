@@ -34,7 +34,7 @@ settings untouched), and at the end press the OK button to confirm the changes.
 - "Help -> Documentation" tab
     - download the SKIRT.qch compressed help file from
       <a href="http://www.skirt.ugent.be/downloads">www.skirt.ugent.be/downloads</a>, place it in 
-	  the doc folder in your main SKIRT directory (yourname/SKIRT/doc) and add it to the documentation available in Qt Creator.
+	  the doc folder in your main <tt>SKIRT</tt> directory (<tt>yourname/SKIRT/doc</tt>) and add it to the documentation available in Qt Creator.
 
 - "C++ -> Code Style" tab
     - press the "Import..." button, select the file <tt>~/SKIRT/git/doc/SkirtCodeStyle.xml</tt>

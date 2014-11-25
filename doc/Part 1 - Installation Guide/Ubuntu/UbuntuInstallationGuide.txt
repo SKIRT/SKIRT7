@@ -5,15 +5,15 @@
 \image html ubuntulogo.png
 \image latex ubuntulogo.png
 
-This section explains how to install and configure the development environment for SKIRT on Ubuntu Desktop 12.04 and 14.04,
+This section explains how to install and configure the development environment for <tt>SKIRT</tt> on Ubuntu Desktop 12.04 and 14.04,
 the LTS releases of the most popular Linux distribution. At this time there are no
-instructions for generating SKIRT documentation on Ubuntu, although this should be possible if the need arises.
+instructions for generating <tt>SKIRT</tt> documentation on Ubuntu, although this should be possible if the need arises.
 
 Some of the installation steps described below require you to enter Unix shell commands in a Terminal window.
 In most cases, you will need to be or become super-user (for example using \c sudo \c bash) for the commands
 to run successfully.
 
-If you only want to install SKIRT for your radiative transfer problems without adding modifications to the source code, read through sections:
+If you only want to install <tt>SKIRT</tt> for your radiative transfer problems without adding modifications to the source code, read through sections:
 
 - \ref InstallUbuntuPacks
 - \ref InstallUbuntuQt
@@ -21,7 +21,7 @@ If you only want to install SKIRT for your radiative transfer problems without a
 - \ref InstallMacBuildNoQtCreator
 - \ref InstallUbuntuVerify
 
-For setting SKIRT up for development and building, follow the instructions in:
+For setting <tt>SKIRT</tt> up for development and building, follow the instructions in:
 
 - \ref InstallUbuntuPacks 
 - \ref InstallUbuntuQt
@@ -31,7 +31,7 @@ For setting SKIRT up for development and building, follow the instructions in:
 - \ref InstallUbuntuVerify
 - \ref InstallMacDoxStyle
 
-If you want instructions to install OpenMPI on Ubuntu for use with SKIRT, you can also read the following guide:
+If you want instructions to install <tt>OpenMPI</tt> on Ubuntu for use with <tt>SKIRT</tt>, you can also read the following guide:
 
 - \ref InstallMacMPI
 

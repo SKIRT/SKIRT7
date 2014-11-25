@@ -2,7 +2,7 @@
 
 \page InstallMacQt Installing the Qt development environment
 
-SKIRT is based on the Qt 5.3 development environment (but also works with Qt 5.2). 
+<tt>SKIRT</tt> is based on the Qt 5.3 development environment (but also works with Qt 5.2). 
 In addition to run-time libraries and build tools, Qt offers
 a convenient integrated code editor called Qt Creator. All of these components can be installed on Mac OS X with
 a single installer.
@@ -24,7 +24,7 @@ a single installer.
 	\image latex qtinstaller.png
 
   - Double-click on the installer and follow the instructions. Leave the default settings.
-  - At the end of the installation, you can choose to open Qt Creator (see: Developing SKIRT with Qt Creator), but you don't need to.
+  - At the end of the installation, you can choose to open Qt Creator (see: \ref InstallMacBuildQtCreator), but you don't need to.
 
 <b> Configure the installation for Mac OS X 10.9 and 10.10 </b>
 

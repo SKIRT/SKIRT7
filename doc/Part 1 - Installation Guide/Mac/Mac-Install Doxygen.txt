@@ -2,8 +2,8 @@
 
 \page InstallMacDoxygen Installing the documentation generator
 
-This section is only relevant if you wish to (re-)generate the SKIRT documentation.
-The SKIRT documentation is generated from the source files by Doxygen. This free open source application requires
+This section is only relevant if you wish to (re-)generate the <tt>SKIRT</tt> documentation.
+The <tt>SKIRT</tt> documentation is generated from the source files by Doxygen. This free open source application requires
 a TeX distribution to handle mathematical formulas, and it uses the Dots tool in the Graphviz graph visualization
 software to generate class diagrams.
 

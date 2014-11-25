@@ -9,11 +9,11 @@ If you plan to make code contributions, there are two possibilities:
 
 \section InstallMacGetDevelopPublic Use the public SKIRT code
 
-The public SKIRT code is hosted at <a href="https://github.com">GitHub.com</a> and always represents the most stable and thoroughly tested version of SKIRT. 
+The public <tt>SKIRT</tt>code is hosted at <a href="https://github.com">GitHub.com</a> and always represents the most stable and thoroughly tested version of SKIRT. 
 Despite not being the latest development version, developers without a UGent account are greatly encouraged to use this version as a starting point for their own contributions.
 This process is effortless due to the strength of the git tool and the GitHub website. 
 
-To setup a local repository and start developing (and using) SKIRT without a UGent account, follow the instructions below.
+To setup a local repository and start developing (and using) <tt>SKIRT</tt> without a UGent account, follow the instructions below.
 
 <i> Step-by-step instructions: </i>
 
@@ -28,7 +28,7 @@ To setup a local repository and start developing (and using) SKIRT without a UGe
 
 <b> Fork the SKIRT repository </b>
 
- - In the search bar on top of the page, type SKIRT [ENTER] to find the SKIRT repository.
+ - In the search bar on top of the page, type <tt>SKIRT [ENTER]</tt> to find the <tt>SKIRT</tt> repository.
  - Click on the repository that is listed as "SKIRT/SKIRT".
  - In the top right corner of the page, press "Fork" (see the screenshot below).
  - Your are immediately brought to a new repository "username/SKIRT", which is - at that moment - an exact clone of the original "SKIRT/SKIRT" repository.
@@ -38,19 +38,19 @@ To setup a local repository and start developing (and using) SKIRT without a UGe
  
 <b> Configure git </b>
 
-- Before using the git client, you should configure it with your user name and email address. This is especially important if you plan to contribute code to the SKIRT repository. 
+- Before using the git client, you should configure it with your user name and email address. This is especially important if you plan to contribute code to the <tt>SKIRT</tt>repository. 
   Perform the following commands in a Terminal window, replacing the placeholders with your own name and email address:
 
       git config --global user.name "Your Name" [ENTER]
       git config --global user.email "yourname@organization.org" [ENTER]
 	  
-<b> Clone your SKIRT fork to your computer </b>
+<b> Clone your <tt>SKIRT</tt>fork to your computer </b>
 
  - In a Terminal window, type the following:
  
        cd [ENTER]
-       mkdir SKIRT [ENTER]
-       cd SKIRT [ENTER]
+       mkdir <tt>SKIRT</tt>[ENTER]
+       cd <tt>SKIRT</tt>[ENTER]
        mkdir debug doc release run git [ENTER]
 
  - Back on your "username/SKIRT" repository, find the "Copy to clipboard" option on the right of the page (see the screenshot below). 
@@ -62,7 +62,7 @@ To setup a local repository and start developing (and using) SKIRT without a UGe
  - Go back to Terminal and type the following commands:
  
        cd [ENTER]
-       cd SKIRT [ENTER]
+       cd <tt>SKIRT</tt>[ENTER]
        git clone [PASTE] git [ENTER]
 
    where [PASTE] is to be replaced with [CMD] + [V] on Mac and [CTRL] + [SHIFT] + [V] on Ubuntu. The last command thus looks as follows:
@@ -73,19 +73,19 @@ To setup a local repository and start developing (and using) SKIRT without a UGe
    
  - You now have your forked repository cloned to your computer, where you can begin modifying it (see the \ref DevelopersGuide).
 
-\section InstallMacGetDevelopPrivate Use the private SKIRT code
+\section InstallMacGetDevelopPrivate Use the private <tt>SKIRT</tt>code
 
-The current development version of the SKIRT source code is stored in a \em private GitHub repository hosted
+The current development version of the <tt>SKIRT</tt>source code is stored in a \em private GitHub repository hosted
 on the Ghent University's web servers. You can access this repository only if you have a UGent account \em and
-the core SKIRT team has specifically granted you read-only or read/write access rights to the repository.
+the core <tt>SKIRT</tt>team has specifically granted you read-only or read/write access rights to the repository.
 
-If you have a UGent account and the core SKIRT team has granted you access rights to the SKIRT repository, use the instructions below to obtain the SKIRT source code. 
+If you have a UGent account and the core <tt>SKIRT</tt>team has granted you access rights to the <tt>SKIRT</tt>repository, use the instructions below to obtain the <tt>SKIRT</tt>source code. 
 
 <i> Step-by-step instructions: </i>
 
 <b> Configure git </b>
 
-- Before using the git client, you should configure it with your user name and email address. This is especially important if you plan to contribute code to the SKIRT repository. 
+- Before using the git client, you should configure it with your user name and email address. This is especially important if you plan to contribute code to the <tt>SKIRT</tt>repository. 
   Perform the following commands in a Terminal window, replacing the placeholders with your own name and email address:
 
       git config --global user.name "Your Name" [ENTER]
@@ -117,15 +117,15 @@ If you have a UGent account and the core SKIRT team has granted you access right
       XX:XX:XX:XX:XX ... yourname@organization.org
       The key's randomart image is:
       +--[ RSA 2048]----+
-      |                 
-      |          XX     
-      |       X XX   X  
-      |         X   XX  
-      |       X XX   X  
-      |         XX XX   
-      |                 
-      |           X     
-      |                 
+      |                 |
+      |          XX     |
+      |       X XX   X  |
+      |         X   XX  |
+      |       X XX   X  |
+      |         XX XX   |
+      |                 |
+      |           X     |
+      |                 |
       +-----------------+
 
 <b> Add your new key to the ssh-agent </b>
@@ -172,7 +172,7 @@ If you have a UGent account and the core SKIRT team has granted you access right
 - In Terminal, type:
 
       cd [ENTER]
-      cd SKIRT [ENTER]
+      cd <tt>SKIRT</tt>[ENTER]
       git clone ...
 
 - You will see the following output:
