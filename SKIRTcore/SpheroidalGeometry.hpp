@@ -15,8 +15,8 @@
     based on a spherical geometry. The properties of an SpheroidalGeometry object are a reference
     to the SpheGeometry object being decorated and the flattening parameter \f$q\f$.
     If the original spherical geometry is characterized by the density profile \f$
-    \rho_{\text{orig}}(r) \f$, the new geometry has as density \f[ \rho(R,z) = \frac{1}{q}\,
-    \rho_{\text{orig}}\left(\sqrt{R^2 + \frac{z^2}{q^2}}\right). \f] This new geometry is also
+    \rho_{\text{s}}(r) \f$, the new geometry has as density \f[ \rho(R,z) = \frac{1}{q}\,
+    \rho_{\text{s}}\left(\sqrt{R^2 + \frac{z^2}{q^2}}\right). \f] This new geometry is also
     normalized to one. */
 class SpheroidalGeometry : public AxGeometry
 {
@@ -63,7 +63,12 @@ public:
         the height \f$z\f$. It just implements the analytical formula. */
     double density(double R, double z) const;
 
-    /** TO DO. */
+    /** This function generates a random position from the geometry, by drawing a random
+        point from the three-dimensional probability density \f$p({\bf{r}})\, {\text{d}}{\bf{r}} =
+        \rho({\bf{r}})\, {\text{d}}{\bf{r}}\f$. It first generates a random position
+        \f${\bf{r}}_{\text{s}}\f$ by calling the generatePosition() function of the geometry
+        being decorated and applies a simple linear transformation to the coordinates, \f$x = x_{\text{s}},
+        y = y_{\text{s}}, z = q\,z_{\text{s}}\f$. */
     Position generatePosition() const;
 
     /** This function returns the radial surface density, i.e. the integration of
