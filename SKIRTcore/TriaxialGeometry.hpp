@@ -75,6 +75,7 @@ public:
         just implements the analytical formula. */
     double density(Position bfr) const;
 
+    /** TO DO. */
     Position generatePosition() const;
 
     /** This function returns the X-axis surface density, i.e. the integration of the density along

@@ -82,16 +82,6 @@ const
     double xs, ys, zs;
     bfrs.cartesian(xs,ys,zs);
     return Position(xs,ys,_q*zs);
-    // double m = _geometry->randomradius();
-    // double phi = 2.0*M_PI*_random->uniform();
-    // double cosphi = cos(phi);
-    // double sinphi = sin(phi);
-    // double costau = 2.0*_random->uniform()-1.0;
-    // double sintau = sqrt((1.0-costau)*(1.0+costau));
-    // double x = m*cosphi*sintau;
-    // double y = m*sinphi*sintau;
-    // double z = _q*m*costau;
-    // return Position(x,y,z);
 }
 
 ////////////////////////////////////////////////////////////////////

@@ -6,7 +6,6 @@
 #ifndef SPIRALSTRUCTUREGEOMETRY_HPP
 #define SPIRALSTRUCTUREGEOMETRY_HPP
 
-// #include "ArrayTable.hpp"
 #include "AxGeometry.hpp"
 #include "GenGeometry.hpp"
 
@@ -90,13 +89,6 @@ public:
 
     /** This function verifies the validity of the different parameters, and caches some
         frequently used combinations of them. */
-    //This setup function also fills
-    //    a two-dimensional vector with a discretized version of the function \f[
-    //    P(\phi) = \frac{1}{2\pi}\left\{ (1-w)\,\phi + \frac{2\,w\,C_N}{m}
-    //    \left[ I_N\left(\frac{m\gamma}{2}\right) - I_N\left(\frac{m(\gamma-\phi)}{2}\right) \right]
-    //    \right\}, \f] for different values of
-    //    \f$\phi\f$ and \f$\gamma\f$ between 0 and \f$2\pi\f$. This 2D vector is used as a lookup
-    //    table for the generation of random positions. */
     void setupSelfBefore();
 
     //======== Setters & Getters for Discoverable Attributes =======
@@ -147,7 +139,6 @@ public:
     //======================== Other Functions =======================
 
 public:
-
     /** This function returns the density \f$\rho({\bf{r}})\f$ at the position \f${\bf{r}}\f$. It
         just implements the analytical formula. */
     double density(Position bfr) const;
@@ -156,31 +147,6 @@ public:
         drawing a random point from the three-dimensional probability density
         \f$p({\bf{r}})\,{\text{d}}{\bf{r}} = \rho({\bf{r}})\, {\text{d}}{\bf{r}}\f$. We use a
         combination of the conditional distribution technique and the rejection technique. */
-//        As
-//        the decorator basically just alters the azimuthal distribution, we start by generating a
-//        random position from the original axisymmetric geometry that is being decorated, and we can
-//        use the cylindrical radius \f$R\f$ and height \f$z\f$.
-//
-//        Remains to determine a random azimuth \f$\phi\f$ from the appropriate one-dimensional probability
-//        distribution function (PDF). The PDF is not
-//        a uniform distribution as it was for the original axisymmetric model, but
-//        \f[ p(\phi)\,{\text{d}}\phi = \frac{1}{2\pi}
-//        \left\{ (1-w) + w\, C_N \sin^{2N} \left[ \frac{m\,(\gamma-\phi)}{2} \right]  \right\} \f]
-//        where \f[ \gamma = \frac{\ln (R/R_0)}{\tan p}+\phi_0+\frac{\pi}{2m} , \f] and \f$R\f$ is the cylindrical
-//        radius that we have already determined previously. The corresponding cumulative
-//        distribution function is \f[ P(\phi) =
-//        \frac{1}{2\pi}\left\{ (1-w)\,\phi + w\,C_N\,\int_0^\phi \sin^{2N} \left[ \frac{m\,(\gamma-\phi')}{2}
-//        \right] {\text{d}}\phi'. \right\} \f] If we use the special function \f[ I_n(x) = \int_0^x
-//        \sin^{2n} t\, {\text{d}}t, \f] this can be written as
-//        \f[ P(\phi) = \frac{1}{2\pi}\left\{ (1-w)\,\phi + \frac{2\,w\,C_N}{m}
-//        \left[ I_N\left(\frac{m\gamma}{2}\right) - I_N\left(\frac{m(\gamma-\phi)}{2}\right) \right]
-//        \right\}. \f]
-//        Generating a random
-//        \f$\phi\f$ can be realized by picking a uniform deviate \f${\cal{X}}\f$ and solving the
-//        equation \f$ P(\phi) = {\cal{X}}\f$ for \f$\phi\f$. This equation cannot be solved
-//        analytically in this case. We therefore use a lookup table in which a discretized version
-//        of \f$P(\phi)\f$ is stored for a large number of possible \f$\gamma\f$ values, and we use
-//        linear interpolation to determine \f$\phi\f$. */
     Position generatePosition() const;
 
     /** This function returns the surface mass density along the X-axis, i.e.
@@ -207,17 +173,8 @@ public:
     double SigmaZ() const;
 
 private:
-
-//   /* This private function returns the integral \f[ I_n(x) = \int_0^x
-//      \sin^{2n} t\, {\text{d}}t \f] for a positive integer value of \f$n\f$.
-//      It is calculated using the recursion formula
-//      \f[ I_n(x) = \frac{1}{2n}\left[-\sin^{2n-1}x\,\cos x + (2n-1)\,I_{n-1} \right],
-//      \f] together with the trivial seed \f$ I_0(x) = x \f$. */
-//   double integratesin2n(double x, int n) const;
-
     /** This private function implements the analytical formula for the perturbation \f$\xi(R,\phi)\f$. */
     double perturbation(double R, double phi) const;
-
 
     //======================== Data Members ========================
 
@@ -235,12 +192,6 @@ private:
     double _tanp;
     double _CN;
     double _c;
-    // int _Nphi;
-    // double _dphi;
-    // int _Ngamma;
-    // double _dgamma;
-    // ArrayTable<2> _Xvv;
-
 };
 
 ////////////////////////////////////////////////////////////////////

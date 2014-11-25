@@ -90,8 +90,6 @@ const
     bfr.cartesian(x,y,z);
     Position bfrs(x,y/_p,z/_q);
     return 1.0/_p/_q * _geometry->density(bfrs);
-    // double m = sqrt(x*x + y*y/(_p*_p) + z*z/(_q*_q));
-    // return 1.0/_p/_q * _geometry->density(m);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -104,16 +102,6 @@ const
     double xs, ys, zs;
     bfrs.cartesian(xs,ys,zs);
     return Position(xs,_p*ys,_q*zs);
-    // double m = _geometry->randomradius();
-    // double sigma = 2.0*M_PI*_random->uniform();
-    // double cossigma = cos(sigma);
-    // double sinsigma = sin(sigma);
-    // double costau = 2.0*_random->uniform()-1.0;
-    // double sintau = sqrt((1.0-costau)*(1.0+costau));
-    // double x = m*cossigma*sintau;
-    // double y = _p*m*sinsigma*sintau;
-    // double z = _q*m*costau;
-    // return Position(x,y,z);
 }
 
 ////////////////////////////////////////////////////////////////////

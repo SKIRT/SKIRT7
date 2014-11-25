@@ -63,6 +63,7 @@ public:
         the height \f$z\f$. It just implements the analytical formula. */
     double density(double R, double z) const;
 
+    /** TO DO. */
     Position generatePosition() const;
 
     /** This function returns the radial surface density, i.e. the integration of
