@@ -1,0 +1,43 @@
+/**
+
+\page DevDirs Directory Structure
+
+The SKIRT source code is contained in an online repository and can be obtained as described in \ref InstallationGuide.
+The files are organized in a directory structure; your local copy may look as follows:
+
+\verbatim
+~/SKIRT
+    debug
+    git
+        Cfitsio
+        dat
+        Discover
+        doc
+        ...
+    release
+        Cfitsio
+        Discover
+        ...
+    run
+\endverbatim
+
+The \c git directory contains an identical copy of the online SKIRT repository; it is usually placed inside a local
+directory called \c SKIRT in your home directory. The \c debug and \c release directories contain the result of
+building the SKIRT project, including the final binary executables. Always use the \c release build for
+"production" simulations; the code in the \c debug build is not optimized and runs several times slower.
+The \c run directory may contain input/output files involved in actually running SKIRT.
+The information in these last three directories obviously does not belong
+in the source code repository, which is why these directories are \em not inside the \c git directory.
+
+The \c git directory contains three types of information:
+  - Immediately inside the \c git directory reside the main project file \c BuildSKIRT.pro and some
+    shell scripts used for installing and building SKIRT or its documentation. For more information,
+    see \ref InstallMac, \ref InstallSrcBuild, \ref InstallSrcQt, and \ref DevBuildDocs.
+  - Directories with short all-lower-case names contain support files, such as resource files read by the code
+    at run time (\c dat), extra documentation that doesn't fit inside the source files (\c doc), and Mathematica
+    notebooks for some of the geometry calculations (\c math).
+  - Directories with mixed-case names contain the source code; each directory contains the sources for
+    a particular subproject, including the \c .pro project file, the \c .hpp header files and the
+    \c .cpp source files themselves. For more information, see \ref DevCodeStruct.
+
+*/
