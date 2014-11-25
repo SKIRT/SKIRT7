@@ -73,7 +73,7 @@ To setup a local repository and start developing (and using) <tt>SKIRT</tt> with
    
  - You now have your forked repository cloned to your computer, where you can begin modifying it (see the \ref DevelopersGuide).
 
-\section InstallMacGetDevelopPrivate Use the private <tt>SKIRT</tt>code
+\section InstallMacGetDevelopPrivate Use the private SKIRT code
 
 The current development version of the <tt>SKIRT</tt>source code is stored in a \em private GitHub repository hosted
 on the Ghent University's web servers. You can access this repository only if you have a UGent account \em and
