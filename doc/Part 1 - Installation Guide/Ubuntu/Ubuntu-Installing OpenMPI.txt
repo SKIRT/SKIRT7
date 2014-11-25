@@ -1,24 +1,27 @@
 /**
 
-\page InstallMacMPI Installing OpenMPI
+\page InstallUbuntuMPI Installing OpenMPI
 
 <i> Step-by-step instructions: </i>
 
 <b> Download the source code </b>
 
 - Navigate to the  <a href="http://www.open-mpi.org/software/">OpenMPI webpage</a>.
-- Download the file 'openmpi-1.8.3.tar.gz'.
-- When the download has finished, click on the resulting 'openmpi-1.8.3.tar' file and it should automatically be unpacked.
+- Download the file 'openmpi-1.8.3.tar.gz' to your Downloads folder.
 
 <b> Compile and install the source code </b>
 
-- Open Terminal and navigate to the newly created folder called 'openmpi-1.8.3' with the commands:
+- Open Terminal and unpack the newly downloaded file by typing the following commands:
 
-      cd
-      cd Downloads/openmpi-1.8.3 [ENTER]
+      cd [ENTER]
+      cd Downloads [ENTER]
+      tar xvfz openmpi-1.8.3.tar.gz [ENTER]
+
+  This will produce lots of output.
 
 - Then, type:
 
+      cd cd openmpi-1.8.3 [ENTER]
       ./configure --prefix=/usr/local [ENTER]
 
 - You will see lots of output. If this procedure has finished, type:

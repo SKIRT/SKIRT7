@@ -33,6 +33,6 @@ For setting <tt>SKIRT</tt> up for development and building, follow the instructi
 
 If you want instructions to install <tt>OpenMPI</tt> on Ubuntu for use with <tt>SKIRT</tt>, you can also read the following guide:
 
-- \ref InstallMacMPI
+- \ref InstallUbuntuMPI
 
 */
