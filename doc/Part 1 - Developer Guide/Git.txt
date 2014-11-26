@@ -2,4 +2,133 @@
 
 \page DevGit Working with git
 
+Although \c git has excellent <a href="http://git-scm.com/book/en/v2">documentation</a>,
+<a href="http://git-scm.com/videos">video tutorials</a> and
+<a href="https://try.github.io/levels/1/challenges/2">hands on tutorials</a> on its website, explaining
+its extensive set of features, most <tt>SKIRT</tt> developers will only need a handfull of these features. 
+This page provides a concise list of the most useful commands and "hacks" for using <tt>git</tt>, composited from our own hands-on experience. 
+The idea is that <tt>SKIRT</tt> developers who already have some understanding of \c git, can visit this page to recall some desired <tt>git</tt>.
+
+To facilitate finding the right command, the list below provides a quick access to the corresponding topic:
+
+- \ref DevGitFork
+- \ref DevGitClonePublic
+- \ref DevGitClonePrivate
+- \ref DevGitUpdate
+- \ref DevGitStatus
+- \ref DevGitStage
+- \ref DevGitCommit
+- \ref DevGitCreateBranch
+- \ref DevGitSwitchBranch
+- \ref DevGitLogNice
+- \ref DevGitStash
+- \ref DevGitPushPrivate
+- \ref DevGitPullRequest
+
+\section DevGitFork Forking a repository
+
+This is explained in \ref InstallMacGetDevelopPublic.
+
+\section DevGitClonePublic Cloning a public repository
+
+First make a new directory for your project (if necessary):
+
+    cd [wherever you want this directory] [ENTER]
+    mkdir [name of the project] [ENTER]
+
+Then, make a git directory:
+
+    cd [name of the project] [ENTER]
+    mkdir git [ENTER]
+      
+If you already have this directory, remove it with the following command:
+  
+    cd [name of the project] [ENTER]
+    rm -rf git [ENTER]
+      
+and add it again by typing: <tt>mkdir git [ENTER]</tt>.
+      
+Next, copy the https link of the public repository you want to clone to your clipboard. 
+
+Clone the repository with the following command:
+
+    git clone [PASTE] git
+      
+where <tt>[PASTE]</tt> is to be replaced with <tt>[CMD] + [V]</tt> on Mac and <tt>[CTRL] + [SHIFT] + [V]</tt> on Ubuntu.
+
+\section DevGitClonePrivate Cloning a personal or private repository
+
+Make sure to add the RSA key of your computer to your GitHub account. This is described in \ref InstallMacGetDevelopPrivate for
+a github.ugent.be account, but is analogous for a github.com account. Following the steps up to and including 
+"Add the SSH key to your github.ugent account".
+
+After you have waited about 10 minutes since you added your RSA key to your GitHub account, use the following commands to clone
+the repository to a certain directory:
+
+    cd [path/to/directory] [ENTER]
+    mkdir git [ENTER]
+    git clone [PASTE] git [ENTER]
+
+where <tt>[PASTE]</tt> should be replaced with the ssh link of the repository; found on its GitHub webpage:
+
+\image html githubsshlink.png
+\image latex githubsshlink.png  
+
+\section DevGitUpdate Updating your local repository
+
+To check whether there are updates to the repository you have cloned on your computer, you can type:
+
+    cd [path/to/directory] [ENTER]
+    cd git [ENTER]
+    git remote show origin [ENTER]
+    
+This will print multiple lines of output, but the last line should tell you whether your copy is up to date or not.
+If an update is available, use the following command to pull it to your local repository:
+
+    git pull origin [ENTER]
+
+\section DevGitStatus See the status of your local repository
+
+To get an overview of which files you changed, created or deleted since the last commit you can use the following command (in your git directory):
+
+    git status
+
+You will see a complete list of each file that differs from the state of your local repository when you last committed or pulled to it. You see
+unstaged files displayed in red and staged files displayed in green. If you created a new directory somewhere within the git directory, it will
+appear as one unstaged item (in red). From the moment you stage it (in green), it will appear as a list of the new files within that directory.
+
+\section DevGitStage Staging changes
+
+
+
+    git add --all
+
+\section DevGitCommit Commiting changes
+
+    git commit -m "Your message"
+
+\section DevGitCreateBranch Creating a new branch
+
+    git branch BranchName
+    
+\section DevGitSwitchBranch Switching between branches
+
+    git checkout BranchName
+
+\section DevGitLogNice Get an nice overview of branches and commits
+
+    git log --oneline --decorate --graph --all
+    
+\section DevGitStash Stashing changes and re-applying them (after a pull)
+
+    git stash
+    git pull
+    git stash pop
+
+\section DevGitPushPrivate Pushing to your private repository
+
+    git push 
+
+\section DevGitPullRequest Performing a pull request
+
 */
