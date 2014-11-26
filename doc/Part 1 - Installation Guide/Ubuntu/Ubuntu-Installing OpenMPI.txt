@@ -37,8 +37,18 @@
 - After again lots of output, check the installation by executing the following commands:
 
       which mpicxx [ENTER]
-	  which mpirun [ENTER]
+      which mpirun [ENTER]
 
 - If either of these commands does NOT show any output, something is not right.
+
+<b> Create the necessary links to the OpenMPI library </b>
+
+- In a terminal window, type the following:
+
+      sudo ldconfig /usr/local/lib [ENTER]
+
+  You will be prompted for your password. Type it in and press [ENTER].
+  
+- All done!
 
 */
