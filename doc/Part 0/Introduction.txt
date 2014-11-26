@@ -41,6 +41,12 @@ Among other things, <tt>SKIRT</tt>:
    or with the graphical component called <tt>SKIRT MakeUp</tt>.
  - Operates efficiently in both memory consumption and CPU time, using <b>shared memory parallelization</b> and <b>MPI parallelization</b>.
 
+<tt>SKIRT</tt> is completely written in C++ and has been designed with well-defined programming interfaces between components.
+Adding a new feature is usually as simple as adding another class; the user interface automatically adjusts to allow
+configuring the new options.
+
+\section SKIRTcomponents Components
+
 The <tt>SKIRT</tt> source tree includes <tt>FitSKIRT</tt>, an extension of the <tt>SKIRT</tt> code that automatically fits a 3D model to
 observed images of a dusty galaxy. <tt>FitSKIRT</tt> matches the output frames of <tt>SKIRT</tt> radiative transfer simulations
 to the observed images, searching the model parameter space through a genetic algorithm. For each new individual
@@ -48,8 +54,9 @@ constructed by the genetic procedure, <tt>FitSKIRT</tt> performs a <tt>SKIRT</tt
 individual's genes. The resulting simulated images are compared with the observed target images, and the result
 is fed back into the genetic algorithm as the quality measure for the individual.
 
-<tt>SKIRT</tt> is completely written in C++ and has been designed with well-defined programming interfaces between components.
-Adding a new feature is usually as simple as adding another class; the user interface automatically adjusts to allow
-configuring the new options.
+As an other extension to <tt>SKIRT</tt>, the "Python Toolkit for SKIRT" (<tt>PTS</tt>) has been created to
+help visualize and pre- and postprocess <tt>SKIRT</tt> data. <tt>PTS</tt> is available as an external
+package via its own <a href="https://github.com/SKIRT/PTS">GitHub repository</a> and the documentation can be 
+found <a href="http://www.skirt.ugent.be/pts/">here</a>.
 
 */
