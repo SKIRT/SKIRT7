@@ -11,6 +11,7 @@
 
 - The complete \ref SKIRTmanualindex, including an extensive installation guide, a user's guide, a developer's guide and a complete 
   documentation of the <tt>SKIRT</tt> code.
+- The <a href= "https://github.com/SKIRT/SKIRT">public GitHub repository for SKIRT</a>, hosting the current release version of the <tt>SKIRT</tt> code. 
 - The \ref LegalInfo page, providing licensing information, <tt>SKIRT</tt> publications and contact information.
 
 \section SKIRTIntro Introduction
