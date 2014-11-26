@@ -23,6 +23,12 @@ then
     QMAKEPATH=$HOME/Qt5.3.2/5.3/clang_64/bin/qmake
 fi
 
+# try the path targeted by the one-click Qt installer on Ubuntu
+if [ -e "$HOME/Qt5.3.2/5.3/gcc_64/bin/qmake" ]
+then
+    QMAKEPATH=$HOME/Qt5.3.2/5.3/gcc_64/bin/qmake
+fi
+
 # try the path targeted by ./makeQt_everywhere.sh
 if [ -e "$HOME/Qt/Desktop/5.3.2/bin/qmake" ]
 then
@@ -39,10 +45,16 @@ fi
 ## Search for the older Qt version that is also supported (and a lot of SKIRT users have)  ##
 #############################################################################################
 
-# try the path targeted by the one-click Qt installer
+# try the path targeted by the one-click Qt installer on Mac
 if [ -e "$HOME/Qt5.2.1/5.2.1/clang_64/bin/qmake" ]
 then
     QMAKEPATH=$HOME/Qt5.2.1/5.2.1/clang_64/bin/qmake
+fi
+
+# try the path targeted by the one-click Qt installer on Ubuntu
+if [ -e "$HOME/Qt5.2.1/5.2.1/gcc_64/bin/qmake" ]
+then
+    QMAKEPATH=$HOME/Qt5.2.1/5.2.1/gcc_64/bin/qmake
 fi
 
 # try the path targeted by ./makeQt_everywhere.sh
