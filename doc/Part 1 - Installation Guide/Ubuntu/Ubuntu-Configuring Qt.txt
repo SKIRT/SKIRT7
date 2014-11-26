@@ -43,7 +43,7 @@ settings untouched), and at the end press the OK button to confirm the changes.
 - "C++ -> File Naming" tab
     - Header suffix: hpp
     - Lower case filenames: Off
-    - License template: press the "Choose..." button, select the file <tt>~/SKIRT/git/doc/LicenseTemplate.txt</tt>
+    - License template: press the "Browse..." button, select the file <tt>~/SKIRT/git/doc/LicenseTemplate.txt</tt>
       and press the "Open" button
 
 - "Build & Run -> General" tab
