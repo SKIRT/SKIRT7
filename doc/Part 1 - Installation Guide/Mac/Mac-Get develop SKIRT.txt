@@ -9,7 +9,7 @@ If you plan to make code contributions, there are two possibilities:
 
 \section InstallMacGetDevelopPublic Use the public SKIRT code
 
-The public <tt>SKIRT</tt>code is hosted at <a href="https://github.com">GitHub.com</a> and always represents the most stable and thoroughly tested version of SKIRT. 
+The public <tt>SKIRT</tt> code is hosted at <a href="https://github.com">GitHub.com</a> and always represents the most stable and thoroughly tested version of <tt>SKIRT</tt>. 
 Despite not being the latest development version, developers without a UGent account are greatly encouraged to use this version as a starting point for their own contributions.
 This process is effortless due to the strength of the git tool and the GitHub website. 
 
@@ -26,7 +26,7 @@ To setup a local repository and start developing (and using) <tt>SKIRT</tt> with
  - You will receive an e-mail with a confirmation link. Go to the corresponding webpage and press "Confirm".
  - Stay logged in for the next step.
 
-<b> Fork the SKIRT repository </b>
+<b> Fork the <tt>SKIRT</tt> repository </b>
 
  - In the search bar on top of the page, type <tt>SKIRT [ENTER]</tt> to find the <tt>SKIRT</tt> repository.
  - Click on the repository that is listed as "SKIRT/SKIRT".
@@ -44,13 +44,13 @@ To setup a local repository and start developing (and using) <tt>SKIRT</tt> with
       git config --global user.name "Your Name" [ENTER]
       git config --global user.email "yourname@organization.org" [ENTER]
 	  
-<b> Clone your <tt>SKIRT</tt>fork to your computer </b>
+<b> Clone your <tt>SKIRT</tt> fork to your computer </b>
 
  - In a Terminal window, type the following:
  
        cd [ENTER]
-       mkdir <tt>SKIRT</tt>[ENTER]
-       cd <tt>SKIRT</tt>[ENTER]
+       mkdir SKIRT [ENTER]
+       cd SKIRT [ENTER]
        mkdir debug doc release run git [ENTER]
 
  - Back on your "username/SKIRT" repository, find the "Copy to clipboard" option on the right of the page (see the screenshot below). 
@@ -62,10 +62,10 @@ To setup a local repository and start developing (and using) <tt>SKIRT</tt> with
  - Go back to Terminal and type the following commands:
  
        cd [ENTER]
-       cd <tt>SKIRT</tt>[ENTER]
+       cd SKIRT [ENTER]
        git clone [PASTE] git [ENTER]
 
-   where [PASTE] is to be replaced with [CMD] + [V] on Mac and [CTRL] + [SHIFT] + [V] on Ubuntu. The last command thus looks as follows:
+   where <tt>[PASTE]</tt> is to be replaced with <tt>[CMD] + [V]</tt> on Mac and <tt>[CTRL] + [SHIFT] + [V]</tt> on Ubuntu. The last command thus looks as follows:
    
        git clone https://github.com/username/SKIRT.git git
 
@@ -75,11 +75,11 @@ To setup a local repository and start developing (and using) <tt>SKIRT</tt> with
 
 \section InstallMacGetDevelopPrivate Use the private SKIRT code
 
-The current development version of the <tt>SKIRT</tt>source code is stored in a \em private GitHub repository hosted
+The current development version of the <tt>SKIRT</tt> source code is stored in a \em private GitHub repository hosted
 on the Ghent University's web servers. You can access this repository only if you have a UGent account \em and
-the core <tt>SKIRT</tt>team has specifically granted you read-only or read/write access rights to the repository.
+the core <tt>SKIRT</tt> team has specifically granted you read-only or read/write access rights to the repository.
 
-If you have a UGent account and the core <tt>SKIRT</tt>team has granted you access rights to the <tt>SKIRT</tt>repository, use the instructions below to obtain the <tt>SKIRT</tt>source code. 
+If you have a UGent account and the core <tt>SKIRT</tt> team has granted you access rights to the <tt>SKIRT</tt> repository, use the instructions below to obtain the <tt>SKIRT</tt> source code. 
 
 <i> Step-by-step instructions: </i>
 
@@ -107,8 +107,8 @@ If you have a UGent account and the core <tt>SKIRT</tt>team has granted you acce
       ssh-keygen -t rsa -C "yourname@organization.org" [ENTER]
       [ENTER]
 
-- Type a new password and press [ENTER]
-- Type this password again and press [ENTER]
+- Type a new password and press <tt>[ENTER]</tt>
+- Type this password again and press <tt>[ENTER]</tt>
 - You should see the following output:
 
       Your identification has been saved in /Users/yourname/.ssh/id_rsa.
@@ -159,11 +159,16 @@ If you have a UGent account and the core <tt>SKIRT</tt>team has granted you acce
 - Go to 'SSH keys'.
 - Press 'Add SSH key'.
 - As the Title, enter something that identifies your computer (for example: Personal MacBook).
-- Go back to the terminal and copy your SSH key by typing:
+- If your are on <b>Mac</b>, go back to the terminal and copy your SSH key by typing:
 
       pbcopy < ~/.ssh/id_rsa.pub [ENTER]
+      
+- On <b>Ubuntu</b>, do the same with the following commands:
 
-- Back on the website, paste ([cmd] + V) in the 'Key' text field.
+      sudo apt-get install xclip [ENTER]
+      xclip -sel clip < ~/.ssh/id_rsa.pub [ENTER]
+
+- Back on the website, paste (<tt>[CMD] + [V]</tt> on Mac or <tt>[CTRL] + [V]</tt> on Ubuntu) in the 'Key' text field.
 - Click 'Add key'.
 - After adding your key, you should wait about 10 minutes before continuing with the next step.
 

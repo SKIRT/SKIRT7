@@ -54,7 +54,7 @@ If you use (portions of) this program in your work, please cite one or more of t
 
 \section LegalCon Contact
 
-We invite you to use SKIRT and FitSKIRT under the terms described above. We're also open to cooperation on selected
+We invite you to use <tt>SKIRT</tt> and <tt>FitSKIRT</tt> under the terms described above. We're also open to cooperation on selected
 projects. You can reach us via:
 
  - <a href = "http://users.ugent.be/~mbaes">Prof. Maarten Baes</a>, Astronomical Observatory, Ghent University
