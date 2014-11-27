@@ -1,0 +1,58 @@
+/**
+
+\page InstallUbuntuDoxygen Installing the documentation generator
+
+This section is only relevant if you wish to (re-)generate the <tt>SKIRT</tt> documentation.
+The <tt>SKIRT</tt> documentation is generated from the source files by Doxygen. This free open source application requires
+a TeX distribution to handle mathematical formulas, and it uses the Dots tool in the Graphviz graph visualization
+software to generate class diagrams.
+
+<i> Step-by-step instructions: </i>
+
+<b> Installing Doxygen </b>
+
+- Go to the <a href="http://www.stack.nl/~dimitri/doxygen/download.html">Doxygen download page</a>.
+- Scroll down and download the binary distribution for Linux x86-64 (doxygen-1.8.8.linux.bin.tar.gz) to your Downloads folder.
+- If the download is complete, open Terminal and enter the following commands to uncompress the file:
+
+      cd [ENTER]
+      cd Downloads [ENTER]
+      tar xvfz doxygen-1.8.8.linux.bin.tar.gz [ENTER]
+
+- Before doing the installation, we (strangely) have to change a configuration setting that would otherwise cause it to crash. To do this,
+  navigate to the new directory "doxygen-1.8.8" in Downloads containing the uncompressed binaries in your file browser.
+- Locate the file "Makefile.in" and open it in a text editor.
+- In this file, <b>remove</b> the line that reads:
+
+      $(INSTTOOL) -m 755 bin/doxytag    $(INSTALL)/bin
+      
+  Alternatively, precede it with a hashtag.
+- Save the file and go back to Terminal.
+- In your Terminal window, navigate to the "doxygen-1.8.8" directory (<tt>cd Downloads/doxygen-1.8.8</tt>) and then execute the following commands:
+
+      ./configure [ENTER]
+      sudo make install [ENTER]
+      
+- After that, you can check your installation by typing:
+
+      which doxygen [ENTER]
+      
+  This should produce the following output:
+  
+      /usr/local/bin/doxygen
+
+<b> Installing the Graphviz Graph Visualization Software </b>
+
+- Installing Graphviz on Ubuntu is straightforward. Simply open a Terminal window and type:
+
+      sudo apt-get install graphviz [ENTER]
+      
+- You can check the installation by typing the following command:
+
+      which dot [ENTER]
+      
+  which should produce the following: <tt>/usr/bin/dot</tt>
+
+For information on how to actually generate the documentation, see \ref DevBuildDocs.
+
+*/

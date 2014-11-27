@@ -17,10 +17,10 @@ a single installer.
 
  - Before you can run the file, you should make it executable by opening a Terminal window and typing the following commands:
 
-       cd
-       cd Downloads
-       chmod +rx qt-opensource-linux-x64-5.3.2.run
-       ./qt-opensource-linux-x64-5.3.2.run
+       cd [ENTER]
+       cd Downloads [ENTER]
+       chmod +rx qt-opensource-linux-x64-5.3.2.run [ENTER]
+       ./qt-opensource-linux-x64-5.3.2.run [ENTER]
 
  - Follow the instructions in the installer wizard for a standard install. Qt will be installed to your home directory (/home/yourname).
  - When the download is finished, don't launch Qt Creator just yet (uncheck the box at the end).

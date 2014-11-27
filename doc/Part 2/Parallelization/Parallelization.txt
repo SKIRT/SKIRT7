@@ -4,8 +4,8 @@
 
 This topic consists of three parts:
 
- - \ref ParallelizationIntroduction
- - \ref ParallelizationThreads
- - \ref ParallelizationMPI
+ - \subpage ParallelizationIntroduction
+ - \subpage ParallelizationThreads
+ - \subpage ParallelizationMPI
 
 */

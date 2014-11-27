@@ -1,0 +1,27 @@
+/**
+
+\page InstallUbuntuBuildNoQtCreator Building SKIRT without Qt Creator
+
+<i> Step-by-step instructions: </i>
+
+<b> Navigate to the <tt>SKIRT</tt> git directory in Terminal </b>
+
+  - Type the following command in a Terminal window:
+
+        cd ~/SKIRT/git [ENTER]
+
+<b> Make the shell script executable. </b>
+
+  - Type:
+
+        chmod +rx makeSKIRT.sh [ENTER]
+
+<b> Execute the shell script to build <tt>SKIRT</tt></b>
+
+  - Type:
+
+        ./makeSKIRT.sh [ENTER]
+
+  - You will see lots of output. Depending on your system, the build can take a while.
+  
+*/

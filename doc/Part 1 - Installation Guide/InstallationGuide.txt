@@ -18,9 +18,9 @@ You don't need to install Doxygen and the related tools unless you are a substan
 \section InstallTypes Types of installation
 
 Subsequent sections provide detailed installation instructions for three scenarios:
- - use and/or develop on <b>Mac OS X</b>: see \ref InstallMac
- - use and/or develop on <b>Ubuntu Desktop</b>: see \ref InstallUbuntu
- - use (with no or minor modifications) on a <b>Unix server</b>: see \ref InstallSource
+ - use and/or develop on <b>Mac OS X</b>: see \subpage InstallMac
+ - use and/or develop on <b>Ubuntu Desktop</b>: see \subpage InstallUbuntu
+ - use (with no or minor modifications) on a <b>Unix server</b>: see \subpage InstallSource
 
 The procedure for other scenarios, e.g. another desktop Unix flavor, can probably (hopefully) be inferred
 by picking and choosing from these instructions.
