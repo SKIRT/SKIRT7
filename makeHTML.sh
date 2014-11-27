@@ -10,8 +10,19 @@
 
 if [ -f $HOME/Qt5.3.2/5.3/clang_64/bin/qhelpgenerator ]
 then
-  # generate the html documentation in a temporary folder next to the git folder
-  /Applications/Doxygen.app/Contents/Resources/doxygen doc/html.doxygen
+  # On the Mac OS X platform
+  if [ "$(uname)" == "Darwin" ]
+  then
+    # generate html documentation in a temporary folder next to the git folder
+    /Applications/Doxygen.app/Contents/Resources/doxygen doc/html.doxygen     
+  
+  # On the Linux platform
+  elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]
+  then
+    # generate html documentation in a temporary folder next to the git folder
+    doxygen doc/html.doxygen
+  fi
+
   # move Qt compressed help file
   mkdir -p ../doc
   mv -f ../html/skirt.qch ../doc/SKIRT.qch
