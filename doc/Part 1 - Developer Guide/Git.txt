@@ -17,6 +17,7 @@ To facilitate finding the right command, the list below provides a quick access 
 - \ref DevGitUpdate
 - \ref DevGitStatus
 - \ref DevGitStage
+- \ref DevGitUnstage
 - \ref DevGitCommit
 - \ref DevGitCreateBranch
 - \ref DevGitSwitchBranch
@@ -91,7 +92,7 @@ If an update is available, use the following command to pull it to your local re
 
 To get an overview of which files you changed, created or deleted since the last commit you can use the following command (in your git directory):
 
-    git status
+    git status [ENTER]
 
 You will see a complete list of each file that differs from the state of your local repository when you last committed or pulled to it. You see
 unstaged files displayed in red and staged files displayed in green. If you created a new directory somewhere within the git directory, it will
@@ -99,31 +100,108 @@ appear as one unstaged item (in red). From the moment you stage it (in green), i
 
 \section DevGitStage Staging changes
 
+With git, you are not obliged to commit the entire state of your local repository, involving the changes you have made to every file since the previous commit or pull.
+Git features the so-called staging area, where you (virtually) place files you wish to include in your next commit. Consider for example that typing the
+<tt>git status</tt> command gives the following output:
 
+\image html gitstatus.png
+\image latex gitstatus.png
 
-    git add --all
+We see a list of all files that have undergone a change (the upper list) and a list of files that are new or "untracked" (the lower list). Files from the previous commit that are
+now deleted would also appear in the upper list. Currently, all file names are displayed in red, meaning that none of them are placed in the staging area. Performing
+a <tt>git commit</tt> command now would do nothing. Let's say that in our next commit, we want to include the new (untracked) file "doc/images/gitstatus.png" and the changes in the
+file "doc/Part 1 - Developer Guide/Git.txt". We can add these individual files to the staging area by performing the following commands (from within the git directory):
+
+    git add "doc/images/gitstatus.png" [ENTER]
+    git add "doc/Part 1 - Developer Guide/Git.txt" [ENTER]
+
+If you deleted a file since the last commit, this deletion can be staged for the next commit with the <tt>rm</tt> command, so:
+
+    git rm "somefile" [ENTER]
+    
+will remove "somefile" from the repository for every commit to follow.
+
+Performing the <tt>git status</tt> command after adding the two files mentioned above to the staging area would produce the following output:
+
+\image html gitstatus2.png
+\image latex gitstatus2.png
+
+The fact that these two files are now listed in green means that the next commit will include the changes in these two files (for commiting see \ref DevGitCommit).
+
+If you decide to add all the modified / new / deleted files to the staging area, you can use the following command:
+
+    git add --all [ENTER]
+    
+And proceed by performing the commit.
+
+\section DevGitUnstage Unstaging changes
+
+Let's say you have staged changes for the next commit but you changed your mind: you spotted a typo or you decide that you don't want to include the changes of a file 
+in the next commit at all. In this case you can always "unstage" the corresponding files; pulling them out of the staging area. Suppose you want to unstage the file "somefile", then the following
+command will do the trick:
+
+    git reset HEAD somefile [ENTER]
+    
+If you do <tt>git status</tt> now, you will see that "somefile" is displayed in red again.
+
+Unstaging also works if you have already altered the file before you thought of unstaging it. Performing the <tt>git reset HEAD</tt> command on the file
+will make it seem it was never staged at all. 
+
+\note If you staged a file and modified it afterwards, before commiting, performing a commit will only incorporate the changes present in the file when you added it to the staging area. Therefore,
+      after modifying a staged file it will appear twice when doing a <tt>git status</tt>, once in green (denoting the staged version) and once in red (corresponding with the newer, unstaged version). 
+      While seemingly confusing at first, this is a powerful git feature, since it allows you to stage some changes in a file, add some other files along with it, alter the first file with some new changes,
+      but only commit the earliest changes because it is seems more reasonable seperating the changes in multiple commits. 
 
 \section DevGitCommit Commiting changes
 
+Performing a commit is equivalent to saving a snapshot of a certain state of your local repository into your repository's history. Staged changes can be unstaged again, but once you've commited them
+they are (in principle) fixed. The history or timeline of your repository consists of a consecutive series of commits. 
+
+If you staged some files and want to commit them, you can perform the following command:
+
     git commit -m "Your message"
+    
+where you can replace the text between quotes by your own personal message (for example: "fixed the bug where it crashes on Ubuntu"). The state of your repository with the staged changes is saved to
+your harddisk, and is given a unique hash code to identify it. See \ref DevGitLogNice to see the timeline of your commits with their hash codes visually.
+
+\note It is important to note that performing a commit on your local repository will not automatically result in your commit being included in the remote repository where you pulled from. Adding local commits
+      to the timeline of the remote repository is called "pushing".
 
 \section DevGitCreateBranch Creating a new branch
 
-    git branch BranchName
-    
+Creating a new branch with as a starting point the last commit of the current branch, is as simple as performing the following command:
+
+    git branch BranchName [ENTER]
+
+You can add as many branches if you like. Typing <tt>git branch</tt> gives you a list of all the branches of your local repository. Note that creating a new branch does not automatically 
+brings you to this new branch, this is done by \ref DevGitSwitchBranch.
+
 \section DevGitSwitchBranch Switching between branches
 
-    git checkout BranchName
+From any branch, with a clean working directory, you can switch to another branch with the following command:
+
+    git checkout BranchName [ENTER]
+
+\note You should NOT switch branches with uncommited changes. Doing so will mess up your working directory!
 
 \section DevGitLogNice Get an nice overview of branches and commits
 
-    git log --oneline --decorate --graph --all
+To view the history of your local repository in a visual way, you can use the following command:
+
+    git log --oneline --decorate --graph --all [ENTER]
     
+This will result in a graph like the following:
+
+\image html gitlogoneline.png
+\image latex gitlogoneline.png
+
+Pressing [ENTER] will bring you further back in the history of your repository.
+
 \section DevGitStash Stashing changes and re-applying them (after a pull)
 
-    git stash
-    git pull
-    git stash pop
+    git stash [ENTER]
+    git pull [ENTER]
+    git stash pop [ENTER]
 
 \section DevGitPushPrivate Pushing to your private repository
 
