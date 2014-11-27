@@ -7,8 +7,8 @@ This guide will explain how to setup and use the FitSKIRT code to determine the 
 images. It is important to notice that at this point FitSKIRT can only be used with oligochromatic SKIRT simulations no
 further than 3~4 micron. The first section describes the general outline to setup a FitSKIRT simulation, some rules to
 fine-tune the code in order to get the best result and an example of how to use the code on the VSC-HPC cluster.
-The second section is a step-by-step tutorial for NGC4013 that uses the results from the PTS
-data reduction tutorial: http://www.skirt.ugent.be/pts/_fit_s_k_i_r_t_guide.html. If it is the first time you use
+The second section is a step-by-step tutorial for NGC4013 that uses the results from the 
+<a href="http://www.skirt.ugent.be/pts/_fit_s_k_i_r_t_guide.html">PTS data reduction tutorial</a>. If it is the first time you use
 FitSKIRT, it is recommended to first follow that PTS tutorial to make sure the data are reduced to the right format. At
 this step, you should also have determined the FWHM of the PSF in every frame, know the pixelscale of your frames and
 have an estimate on the distance of your object.
