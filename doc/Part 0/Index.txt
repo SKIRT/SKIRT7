@@ -1,6 +1,6 @@
 /**
 
-\page SKIRTmanualindex SKIRT manual
+\mainpage Index
 
 This manual is structured as follows:
 
