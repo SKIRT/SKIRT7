@@ -56,6 +56,14 @@ then
   # generate html documentation in a temporary folder next to the git folder
   doxygen doc/html_ubuntu.doxygen
     
+  # Add the MathJax script to the index.qhp file -> index_mathjax.qhp
+  python doc/enable_qch_mathjax.py
+
+  # Obtain the MathJax repository if it is not yet present
+  if [ ! -d $HOME/SKIRT/html/mathjax ]; then
+    git clone git://github.com/mathjax/MathJax.git $HOME/SKIRT/html/mathjax
+  fi
+    
   #####################################################
   ### Search for the most recent version of Qt first ##
   #####################################################
@@ -63,9 +71,8 @@ then
   if [ -f $HOME/Qt5.3.2/5.3/gcc_64/bin/qhelpgenerator ]
   then
 
-    # move Qt compressed help file
-    mkdir -p ../doc
-    mv -f ../html/skirt.qch ../doc/SKIRT.qch
+    # generate the Qt compressed help file
+    $HOME/Qt5.3.2/5.3/gcc_64/bin/qhelpgenerator ../html/index_mathjax.qhp -o ../doc/SKIRT.qch
 
   ############################################################
   ## Search for the older Qt version that is also supported ##
@@ -74,9 +81,8 @@ then
   elif [ -f $HOME/Qt5.2.1/5.2.1/gcc_64/bin/qhelpgenerator ]
   then
 
-    # move Qt compressed help file
-    mkdir -p ../doc
-    mv -f ../html/skirt.qch ../doc/SKIRT.qch
+    # generate the Qt compressed help file
+    $HOME/Qt5.2.1/5.2.1/gcc_64/bin/qhelpgenerator ../html/index_mathjax.qhp -o ../doc/SKIRT.qch
   
   else
     echo "Error: could not find the Qt help file generator. If Qt is installed in a custom location, change this file accordingly."	
