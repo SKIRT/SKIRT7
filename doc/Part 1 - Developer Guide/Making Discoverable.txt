@@ -1,0 +1,153 @@
+/**
+
+\page DevDiscoUsage Making simulation items discoverable
+
+\section DevDiscoIntro Overall requirements
+
+Performing a simulation happens in three distinct phases:
+ - Construction: the simulation runtime hierarchy is created and all properties are set according to
+   the simulation parameters. At the end of this phase, all simulation item instances have been constructed.
+   No actual calculations happen in this phase and so it is very fast (on the order of milliseconds).
+ - Setup: all simulation items get a chance to perform some initialization and store the results in data members.
+   This may involve reading large files or creating large data structures, so setup may take a long time.
+   Several simulation items also write statistics or other results to output files during setup.
+ - Run: the simulation is actually performed by launching a (usually large) number of photon packages and
+   recording the effects. At the end of this phase, the final results are written to output files.
+
+Before touching the code, read the documentation for the SimulationItem and Simulation classes and their functions.
+Make sure you understand how the setup and run mechanism works, and which functions to override (or not to override)
+in a SimulationItem subclass. There are many examples in the code, so use the chameleon rule and your common sense.
+
+A discoverable simulation item class must comply with the following requirements:
+ - the class must directly or indirectly inherit the SimulationItem class
+ - the class declaration must start with the Q_OBJECT macro (see the Qt documentation)
+ - the class declaration must contain the appropriate Q_CLASSINFO() macros as described in \ref DevDiscoInfo
+ - all setters and getters for properties specified in a Q_CLASSINFO() macro must be declared Q_INVOKABLE
+ - there must be a constructor with zero arguments; for a concrete class the constructor must be declared
+   Q_INVOKABLE, for an abstract class it should be declared protected
+ - the constructor should initialize all data members to simple, default values, and do nothing else
+ - if setup is required, the appropriate setupSelfXXXX() function must be overridden
+
+Finally, a line of code must be added to the RegisterSimulationItems::registerAll() function to register the class.
+
+\section DevDiscoInfo Class info specifications
+
+The class declaration for a simulation item must contain appropriate Q_CLASSINFO() macros to specify information
+used by the discovery mechanism. These macros are placed immediately after the Q_OBJECT macro. For example:
+
+\verbatim
+class Simulation : public SimulationItem
+{
+    Q_OBJECT
+    Q_CLASSINFO("Title", "the simulation")
+
+    Q_CLASSINFO("Property", "random")
+    Q_CLASSINFO("Title", "the random number generator")
+    Q_CLASSINFO("Default", "Random")
+
+    Q_CLASSINFO("Property", "units")
+    Q_CLASSINFO("Title", "the units system")
+    Q_CLASSINFO("Default", "ExtragalacticUnits")
+
+public:
+    Q_INVOKABLE void setRandom(Random* value);
+    Q_INVOKABLE Random* random() const;
+
+    Q_INVOKABLE void setUnits(Units* value);
+    Q_INVOKABLE Units* units() const;
+
+    ...
+};
+\endverbatim
+
+The Q_CLASSINFO() macro expects two string arguments which are interpreted as a key/value pair. Note that the ordering
+of the macros is important since there can be multiple key/value pairs with the same key (as shown in the example).
+
+The value corresponding to a "Title" key specifies a human-readable description for a simulation item or one of
+its properties. The title should not be capitalized; the first letter will automatically be converted
+to uppercase if the title is used at the beginning of a sentence.
+
+The first Q_CLASSINFO() macro after Q_OBJECT must specify a title for the simulation item implemented by the class.
+Subsequently there is a block of Q_CLASSINFO() macros for each property of the simulation item.
+
+The first macro in each block uses the "Property" key to specify the property name. The property name must match
+the names of getter and setter functions declared for the class, as shown in the example. The data member corresponding
+to this property usually has the same name prefixed with an underscore, although this is not a requirement: the
+discovery mechanism accesses the property solely through its getter and setter functions.
+All setters and getters for properties specified in a Q_CLASSINFO() macro must be declared Q_INVOKABLE.
+
+The data type of a property is automatically derived from the return value of the corresponding getter.
+The discovery mechanism currently supports the following data types:
+
+<TABLE>
+<TR><TD><B>C++ type</B></TD>    <TD><B>Interpretation</B></TD>
+                                <TD><B>PropertyHandler subclass</B></TD></TR>
+<TR><TD>bool</TD>               <TD>Boolean "true" or "false"</TD>
+                                <TD>BoolPropertyHandler</TD></TR>
+<TR><TD>int</TD>                <TD>Integer value, possibly signed</TD>
+                                <TD>IntPropertyHandler</TD></TR>
+<TR><TD><I>EnumType</I><SUP>1</SUP></TD>
+                                <TD>One of the enumeration values</TD>
+                                <TD>EnumPropertyHandler</TD></TR>
+<TR><TD>double</TD>             <TD>Real value, possibly with unit (see \ref UserSKIUnits)</TD>
+                                <TD>DoublePropertyHandler</TD></TR>
+<TR><TD>QList\<double*\></TD>   <TD>Comma separated list of real values, each possibly with unit</TD>
+                                <TD>DoubleListPropertyHandler</TD></TR>
+<TR><TD>QString</TD>            <TD>Arbitrary string value, such as a filename</TD>
+                                <TD>StringPropertyHandler</TD></TR>
+<TR><TD>ItemType</TD>           <TD>A simulation item of the specified type</TD>
+                                <TD>ItemPropertyHandler</TD></TR>
+<TR><TD>QList\<<I>ItemType</I>*\><SUP>2</SUP></TD>
+                                <TD>A list of simulation items of the specified type</TD>
+                                <TD>ItemListPropertyHandler</TD></TR>
+</TABLE>
+
+\note 1: replace "EnumType" by any enumeration type
+\note 2: replace "ItemType" by any simulation item type (i.e. name of a SimulationItem subclass)
+
+Any Q_CLASSINFO() macros following the "Property" macro in each block describe attributes for the property.
+The ordering of these macros within the block does not matter, as long as the "Property" macro comes first.
+Some attributes (such as "Title") are supported by all property types. Other attributes are specific for certain
+property types. The table below summarizes the currently supported properties. For more information refer to
+the documentation or source code for the relevant property handler (as listed in the previous table).
+
+<TABLE>
+<TR><TD><B>Key</B></TD> <TD><B>Value</B></TD>
+                        <TD><B>Applicability</B></TD></TR>
+<TR><TD>Property</TD>   <TD>Name of the property</TD><TD>Required for each property</TD></TR>
+<TR><TD>Title</TD>      <TD>Human-readable description for the property, not capitalized</TD>
+                        <TD>Required for a concrete class and for each property</TD></TR>
+<TR><TD>Quantity</TD>   <TD>Physical type of the property, e.g. length or mass (see source code of Units class)</TD>
+                        <TD>Allowed for properties of type Double and DoubleList;
+                            if missing, values are dimensionless (i.e. no units)</TD></TR>
+<TR><TD>Default</TD>    <TD>Default value for the property, in the same format as in a ski file</TD>
+                        <TD>Allowed for all property types except DoubleList</TD></TR>
+<TR><TD>MinValue</TD>   <TD>Minimum value for the property, in the same format as in a ski file</TD>
+                        <TD>Allowed for properties of type Int, Double, DoubleList</TD></TR>
+<TR><TD>MaxValue</TD>   <TD>Maximum value for the property, in the same format as in a ski file</TD>
+                        <TD>Allowed for properties of type Int, Double, and DoubleList</TD></TR>
+<TR><TD>Silent</TD>     <TD>If "true" the property value is silent, i.e. an interactive Q&A session should
+                            not ask for this property; a silent property must have a default value</TD>
+                        <TD>Allowed for all property types</TD></TR>
+<TR><TD>Optional</TD>   <TD>If "true" the property value is optional, i.e. it can be a zero pointer or an empty list;
+                            otherwise a value is required (the default)</TD>
+                        <TD>Allowed for properties of type Item and ItemList</TD></TR>
+<TR><TD><I>EnumItem</I><SUP>3</SUP></TD>
+                        <TD>Human-readable description for the enumeration item specified as the key</TD>
+                        <TD>Required for properties of type Enum; repeat for each enumeration item</TD></TR>
+<TR><TD>TrueIf</TD> <TD>The enum value for which this property is considered "true" in RelevantIf tests</TD>
+                        <TD>Allowed for properties of type Enum; if missing the property is never "true"</TD></TR>
+<TR><TD>RelevantIf</TD> <TD>The name of a property in the same class, the value of which must be true or nonzero
+                            for this property to be relevant</TD>
+                        <TD>Allowed for all property types</TD></TR>
+<TR><TD>AllowedIf</TD>  <TD>The name of a class that must be already present in the simulation for this class
+                            to be allowed, or an exclamation sign followed by the name of a class that must NOT
+                            be already present in the simulation for this class to be allowed, or a comma-separated
+                            list of such items</TD>
+                        <TD>May occur for any class and is inherited by subclasses; multiple items in a single
+                            attribute are OR-ed, multiple occurrences of this attribute are AND-ed</TD></TR>
+</TABLE>
+
+\note 3: replace "EnumItem" by one of the identifiers defined as part of the enumeration type
+
+*/

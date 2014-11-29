@@ -1,0 +1,288 @@
+/**
+
+\page DevTut Tutorial: Adding a new geometry
+
+\image html TutorialDevExpDisk.png
+\image latex TutorialDevExpDisk.png
+\image html TutorialDevIsoDisk.png
+\image latex TutorialDevIsoDisk.png
+
+\em Illustration: Top row: exponential disk; Bottom row: isothermal disk;
+Left column: cut through xz-plane; Right colummn: edge-on flux.
+
+In this tutorial, you will extend the SKIRT code with a new geometry that can be used for stellar and
+dust density distributions.
+Before starting this tutorial, you should have installed the development environment and built the SKIRT code
+as described in the \ref InstallationGuide. You should also know how to use SKIRT as described in the \ref UsersGuide.
+
+The new geometry is an isothermal disk with the axisymmetric density profile
+\f[ \rho({\bf{r}}) \equiv \rho(R,z)
+= \rho_0\,\exp\left(-\frac{R}{h_R}\right)\, {\text{sech}}^2\left(\frac{z}{h_z}\right) \f]
+with the scalelength \f$h_R\f$ and the scaleheight \f$h_z\f$ as two free parameters.
+
+\section DevTutSco Scoping out the work
+
+To add a new geometry, you need to create a new class and tie it into the simulation item class hierarchy.
+Rather than reinventing the wheel, browse the SKIRT documentation and look for an existing class with properties
+simular to your needs. It so happens that the ExpDiskGeometry class also defines an axisymmetric dust disk.
+To examine it more closely, open the \c ExpDiskGeometry.hpp header file in the code editor.
+
+It appears that ExpDiskGeometry inherits from SepAxGeometry, an abstract class representing axisymmetric
+dust geometries where the density is a separable function of \f$R\f$ and \f$z\f$.
+ExpDiskGeometry offers two properties \f$h_R\f$ and \f$h_z\f$ corresponding to the free parameters you need,
+plus two properties related to truncation of the disk which you don't need but can easily be removed.
+There is also a data member for the central density \f$\rho_0\f$.
+
+Looking in some more detail, ExpDiskGeometry offers the following functions:
+ - a default constructor
+ - the setupSelfBefore() function, which calculates the central density
+ - setters and getters for the model parameters
+ - the functions density(), randomR(), randomz(), SigmaR(), and SigmaZ() that define various aspects of
+   the geometry modeled by this class
+
+Clearly you should use the same structure for your new class. The main work will consist of adjusting
+the key functions for the new geometry.
+
+\section DevTutMat The mathematics
+
+\subsection DevTutMatDens Density
+
+The Geometry class documentation states that all geometries in SKIRT must be normalized so that the total mass
+is equal to one. Given this normalization, we can determine the central
+density for the new geometry as a function of \f$h_R\f$ and \f$h_z\f$. We find
+\f[ M = \iiint \rho({\bf{r}})\, {\text{d}}{\bf{r}}
+= 2\pi\,\rho_0 \int_0^\infty \exp\left(-\frac{R}{h_R}\right)\,R\,{\text{d}}R
+\int_{-\infty}^\infty {\text{sech}}^2\left(\frac{z}{h_z}\right)\,{\text{d}}z. \f]
+Using the equalities \f[ \int_0^\infty x\,{\text{e}}^{-x}\,{\text{d}}x
+= \int_0^\infty {\text{sech}}^2 x\,{\text{d}}x = 1 \f]
+we find that \f[ M = 4\pi\,h_R^2\,h_z \,\rho_0\f]
+and hence (using \f$M=1\f$) \f[ \rho_0 = \frac{1}{4\pi\,h_R^2\,h_z}. \f]
+The density \f$\rho(R,z)\f$ is then easily calculated using its original definition above.
+
+\subsection DevTutMatSurfDens Surface densities
+
+We also need to calculate the edge-on and face-on surface densities \f$\Sigma_R\f$ and \f$\Sigma_Z\f$.
+The documentation for the AxGeometry::SigmaR() function defines the edge-on or radial surface density
+as the integration of the density along a line in the equatorial plane starting at the centre of the coordinate
+system, \f[ \Sigma_R = \int_0^\infty \rho(R,0)\,{\text{d}}R. \f]
+The documentation for the Geometry::SigmaZ() function defines the face-on or Z-axis surface density
+as the integration of the density along the entire Z-axis,
+\f[ \Sigma_Z = \int_{-\infty}^\infty \rho(0,z)\,{\text{d}}z. \f]
+In our present case, we find
+\f[ \Sigma_R = \rho_0\int_0^\infty \exp\left(-\frac{R}{h_R}\right)\,{\text{d}}R = \rho_0\,h_R\f] and
+\f[ \Sigma_Z = \rho_0\int_{-\infty}^\infty {\text{sech}}^2\left(\frac{z}{h_z}\right)\,{\text{d}}z = 2\,\rho_0\,h_z.\f]
+
+\subsection DevTutMatRan Random position
+
+Finally a geometry must be able to draw a random position from its three-dimensional probability density
+distribution. For an axisymmetric geometry with separable density function, the problem is reduced to drawing
+two values, each from a one-dimensional probability distribution, in the radial and vertical directions.
+
+The documentation for the SepAxGeometry::randomR() function states that it returns
+a random \f$R\f$ from the one-dimensional probability
+distribution \f[ p(R)\, {\text{d}}R = 2\pi\, \rho_R(R)\, R\, {\text{d}}R. \f]
+In the present case we find
+\f[ p(R)\,{\text{d}}R = \frac{\rho(R,z)\,R\,{\text{d}}R}{\int_0^\infty \rho(R',z)\,R'\,{\text{d}}R'}
+= \frac{1}{h_R^2} \exp\left(-\frac{R}{h_R}\right) \,R\,{\text{d}}R \f]
+with cumulative distribution
+\f[ P(R) = \int_0^R p(R')\,{\text{d}}R' = 1 - \left( 1+\frac{R}{h_R}\right) \exp\left(-\frac{R}{h_R}\right). \f]
+Solving \f${\cal{X}}=P(R)\f$ for \f$R\f$, where \f$\cal{X}\f$ is a uniform random deviate, we obtain
+\f[ R = h_R \left[ -1-W_{-1} \left(\frac{ {\cal{X}}-1}{\text{e}}\right) \right] \f]
+where \f$W_{-1}\f$ is the Lambert function of order \f$-1\f$, which can be calculated in SKIRT using
+the function SpecialFunctions::LambertW1.
+
+The documentation for the SepAxGeometry::randomz() function states that it returns
+a random \f$z\f$ from the one-dimensional probability distribution
+\f[ p(z)\, {\text{d}}z = \rho_z(z)\, {\text{d}}z. \f]
+In the present case we find
+\f[ p(z)\,{\text{d}}z = \frac{\rho(R,z)\,{\text{d}}z}{\int_{-\infty}^\infty \rho(R,z')\,{\text{d}}z'}
+= \frac{1}{2\,h_z} {\text{sech}}^2\left(\frac{z}{h_z}\right) \,{\text{d}}z \f]
+with cumulative distribution
+\f[ P(z) = \int_{-\infty}^z p(z')\,{\text{d}}z' = \frac12\left[ 1+{\text{tanh}}\left(\frac{z}{h_z}\right) \right]. \f]
+Solving \f${\cal{X}}=P(z)\f$ for \f$z\f$, where \f$\cal{X}\f$ is a uniform random deviate, we obtain
+\f[ z = h_z\,{\text{artanh}}(2{\cal{X}}-1) = \frac12\,h_z\,\ln\frac{{\cal{X}}}{1-{\cal{X}}}, \f]
+where we used the identity
+\f[ {\text{artanh}}\,x=\frac12\ln\frac{1+x}{1-x}. \f]
+
+\section DevTutCre Creating the new source and header files
+
+It is quite possible to create a new class from within the Qt Creator development environment. However since your
+new class will so closely resemble an existing one, it is easier to copy the header and source files using
+a regular file browser (or if you prefer, command lines in a terminal window). Locate the files
+\c ExpDiskGeometry.hpp and \c ExpDiskGeometry.cpp in your local working copy of the SKIRT source code
+(in the src/SKIRTcore directory), and copy them to a set of new files named
+\c IsoThermalDiskGeometry.hpp and \c IsoThermalDiskGeometry.cpp (in the same directory).
+Do not remove the original files!
+
+Go back to Qt Creator (in "Edit" mode) and right-click on the SKIRT project icon in the "Projects" pane. In the
+popu-menu, choose "Add Existing Files..." (sometimes you need to right-click a second time to make this menu item
+appear). In the dialog, locate and select the two new source files and press the "Open" button.
+In the next (smaller) dialog, confirm that you want to add the new files to source control. Now locate the
+new files in Qt Creator's project browser and open them in the editor.
+
+In the new header file, replace the three occurrences of \c "EXPDISKGEOMETRY_HPP" by \c "ISOTHERMALDISKGEOMETRY_HPP".
+This is the standard header guard to avoid multiple includes of the same class definition.
+
+In both new files, replace all occurrences of \c "ExpDiskGeometry" by \c "IsoThermalDiskGeometry".
+
+Press the "Hammer" icon in the left margin to save your changes and perform a build. There should be no errors.
+
+\section DevTutDec The class declaration
+
+Since the class declaration for IsoThermalDiskGeometry is very similar to that of ExpDiskGeometry,
+the header file \c IsoThermalDiskGeometry.hpp for your new class does not need a lot of work.
+
+Most importantly, adjust the description of the class in the first occurrence of the Q_CLASSINFO() macro.
+For example, replace "an exponential disk geometry" by "an iso-thermal disk geometry".
+This text will be used for identifying your new geometry to a user, such as when constructing
+a new .ski file during an interactive Q&A session.
+
+You should also remove the getters and setters for the truncation parameters, the corresponding Q_CLASSINFO() macros,
+and the corresponding data members, since these parameters are not needed in the new class.
+
+While updating the documentation, take care to follow the rules for comments in "/ **"-style documentation blocks.
+These comments are processed by the <a href="http://www.doxygen.org">Doxygen</a> utility to produce
+the SKIRT manual in HTML and PDF formats. It is \em really important to write decent comments for every function.
+When in doubt about the syntax for formatting comments, look for examples elsewhere in the SKIRT source code or
+check the <a href="http://www.doxygen.org/manual.html">Doxygen manual</a> on the web.
+
+\section DevTutDef The class definition
+
+The source file \c IsoThermalDiskGeometry.cpp needs more extensive edits beyond replacing the class name.
+
+The constructor should initialize all data members to some default value, without performing extensive calculations.
+Often the constructor simply sets all data members to zero.
+Since you removed the truncation-related data members declared for the class, you need to remove their
+initialization from the constructor as well:
+
+\code
+IsoThermalDiskGeometry::IsoThermalDiskGeometry()
+    : _hR(0), _hz(0), _rho0(0)
+{
+}
+\endcode
+
+Note that there is no destructor. This is fine since the class does not allocate any resources that need deallocation.
+
+The implementation of the function setupSelfBefore() must always start with a call to the same function in the
+base class (SepAxGeometry in this case). This call can remain unchanged. Remove the code that deals with the
+truncation-related properties; other than that everything can stay unchanged. The allowed range for the
+scale height and scale length is the same as for the exponential disk, and the central density happens to be
+the same as for the untruncated exponential disk:
+
+\code
+void IsoThermalDiskGeometry::setupSelfBefore()
+{
+    SepAxGeometry::setupSelfBefore();
+
+    // verify property values
+    if (_hR <= 0) throw FATALERROR("Radial scale length hR should be positive");
+    if (_hz <= 0) throw FATALERROR("Axial scale height hz should be positive");
+
+    // calculate central density
+    _rho0 = 1.0/(4.0*M_PI*_hz*_hR*_hR);
+}
+\endcode
+
+Update the implementation of the functions density(), sigmaR(), and sigmaZ()
+to reflect the (surface) density formulas derived before:
+
+\code
+double IsoThermalDiskGeometry::density(double R, double z) const
+{
+    double sechz = 1.0 / cosh(z/_hz);
+    return _rho0 * exp(-R/_hR) * sechz*sechz;
+}
+
+double IsoThermalDiskGeometry::sigmaR() const
+{
+    return _rho0*_hR;
+}
+
+double IsoThermalDiskGeometry::sigmaZ() const
+{
+    return 2.0*_rho0*_hz;
+}
+\endcode
+
+Update the implementation of the functions randomR() and randomz() to reflect the formulas derived before
+for generating the appropriate random values:
+
+\code
+double IsoThermalDiskGeometry::randomR() const
+{
+    double X = _random->uniform();
+    return _hR * (-1.0-SpecialFunctions::LambertW1((X-1.0)/M_E));
+}
+
+double IsoThermalDiskGeometry::randomz() const
+{
+    double X = _random->uniform();
+    return 0.5 * _hz * log(X/(1.0-X));
+}
+\endcode
+
+Press the "Hammer" icon again to save your changes and perform a build. There should be no errors.
+
+\section DevTutReg Registering the new class
+
+Having declared and defined the new class, you must make its existence known to the SKIRT discovery mechanism
+so that it will be properly listed when constructing a new .ski file during an interactive Q&A session.
+See \ref DevSimDisco and \ref DevDiscoUsage.
+Note that this registration requirement applies only simulation item classes, i.e. classes that inherit directly
+or indirectly from the SimulationItem class, as is the case for your new IsoThermalDiskGeometry class.
+
+Locate the file \c RegisterSimulationItems.cpp in Qt Creator's project browser and open it in the editor. You need
+to add two lines in this file: an \c include directive for the new class header, and an \c add<> statement to
+register the new class.
+
+Add the \c include directive to the already long list of \c include directives, in alpahabetical order. For
+example:
+
+\code
+#include "InterstellarDustMix.hpp"
+#include "IsoThermalDiskGeometry.hpp"
+...
+\endcode
+
+Insert a new \c add<> statement to the existing list in the location you want it to appear in the corresponding
+choice list while creating a new .ski file in the interactive Q&A session. In this case, locate the
+list of \c add<> statements for geometry classes and insert a new statement (for example) right after
+the one for the ExpDiskGeometry class:
+
+\code
+    add<ExpDiskGeometry>();
+    add<IsoThermalDiskGeometry>();
+    ...
+\endcode
+
+Press the "Hammer" icon again to save your changes and perform a build. Assuming there are no errors,
+SKIRT is now ready for use with the new geometry.
+
+\section DevTutUse Using the new class
+
+Launch the newly built SKIRT version without any command line arguments. Provide appropriate responses to the
+interactive questions for a simulation with a stellar system or a dust distribution composed of various components.
+The list of choices will include a new item for the iso-thermal disk geometry:
+
+\verbatim
+  1. A point source geometry
+  2. A Plummer geometry
+     ...
+  9. An exponential disk geometry
+ 10. An iso-thermal disk geometry
+     ...
+\endverbatim
+
+Enter the appropriate choice (10 in the example) to select your new geometry.
+Complete the Q&A session to save the ski file.
+Alternatively, you can edit a copy of a ski file you made earlier to use your new geometry.
+
+To verify the results for a stellar distribution, run a simulation without dust and with appropriate
+frame instruments to generate an image of the flux received in a few relevant directions.
+
+To verify the results for a dust density distribution, set the writeDensity property of the dust system to “true”,
+so that SKIRT generates cuts through the dust along the coordinate axes (in the output files
+prefix_ds_trhoxy.fits and prefix_ds_trhoxz.fits).
+
+*/

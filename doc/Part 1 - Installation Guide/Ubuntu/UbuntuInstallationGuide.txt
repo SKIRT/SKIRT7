@@ -6,8 +6,7 @@
 \image latex ubuntulogo.png
 
 This section explains how to install and configure the development environment for <tt>SKIRT</tt> on Ubuntu Desktop 12.04 and 14.04,
-the LTS releases of the most popular Linux distribution. At this time there are no
-instructions for generating <tt>SKIRT</tt> documentation on Ubuntu, although this should be possible if the need arises.
+the LTS releases of the most popular Linux distribution.
 
 Some of the installation steps described below require you to enter Unix shell commands in a Terminal window.
 In most cases, you will need to be or become super-user (for example using \c sudo \c bash) for the commands
@@ -15,24 +14,25 @@ to run successfully.
 
 If you only want to install <tt>SKIRT</tt> for your radiative transfer problems without adding modifications to the source code, read through sections:
 
-- \ref InstallUbuntuPacks
-- \ref InstallUbuntuQt
-- \ref InstallMacGetPublic
-- \ref InstallMacBuildNoQtCreator
-- \ref InstallUbuntuVerify
+- \subpage InstallUbuntuPacks
+- \subpage InstallUbuntuQt
+- \subpage InstallUbuntuGetPublic
+- \subpage InstallUbuntuBuildNoQtCreator
+- \subpage InstallUbuntuVerify
 
 For setting <tt>SKIRT</tt> up for development and building, follow the instructions in:
 
-- \ref InstallUbuntuPacks 
-- \ref InstallUbuntuQt
-- \ref InstallMacGetDevelop
-- \ref InstallUbuntuConfigQt 
-- \ref InstallUbuntuBuildQtCreator
-- \ref InstallUbuntuVerify
-- \ref InstallMacDoxStyle
+- \subpage InstallUbuntuPacks 
+- \subpage InstallUbuntuQt
+- \subpage InstallUbuntuGetDevelop
+- \subpage InstallUbuntuConfigQt 
+- \subpage InstallUbuntuBuildQtCreator
+- \subpage InstallUbuntuVerify
+- \subpage InstallUbuntuDoxStyle
+- \subpage InstallUbuntuDoxygen
 
 If you want instructions to install <tt>OpenMPI</tt> on Ubuntu for use with <tt>SKIRT</tt>, you can also read the following guide:
 
-- \ref InstallMacMPI
+- \ref InstallUbuntuMPI
 
 */

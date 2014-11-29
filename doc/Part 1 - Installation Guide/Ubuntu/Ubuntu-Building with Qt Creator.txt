@@ -2,33 +2,46 @@
 
 \page InstallUbuntuBuildQtCreator Building SKIRT with Qt Creator
 
-To build <tt>SKIRT</tt> from within Qt Creator, you need to open the main Qt project included with the source code.
-In Qt Creator, choose the menu item "File->Open File or Project...", locate the Qt project
-file \c BuildSKIRT.pro inside your \c SKIRT/git directory, and press the "Open" button from within the dialog.
+<i>Step-by-step instructions:</i>
 
-Qt Creator now opens a configuration pane for the BuildSKIRT project in its main window. Simply press the
+<b>Open the SKIRT project file</b>
+
+- Open Qt Creator.
+- Choose the menu item "File->Open File or Project...".
+- Locate the Qt project file \c BuildSKIRT.pro inside your \c SKIRT/git directory.
+- Press the "Open" button from within the dialog.
+
+Qt Creator now opens a configuration pane for the BuildSKIRT project in its main window (see the screenshot below). Simply press the
 "Configure Project..." button without changing any of the values, which causes Qt Creator to switch to
 regular "Edit" mode. However you still need to adjust the project configuration.
 
 \image html configureprojectUbuntu.png
 \image latex configureprojectUbuntu.png
 
-Select "Projects" mode in the left margin and select the "Build & Run" tab. There should be two subtabs called
-"Build" and "Run", placed under a "Desktop" header stating your Qt and compiler version. First select the "Build" subtab. There are two build
-configurations called "Debug" and "Release", which can be selected through the "Edit build configuration" popup.
-For each configuration, change the "Build directory" to one of the directories you created earlier
-(\c SKIRT/debug for the debug configuration, \c SKIRT/release for the release configuration).
+<b>Configure the SKIRT project</b>
 
-Still in "Projects" mode, now select the "Run" subtab. In the "Run configuration" popup, select the
-"SKIRTmain" item. Now change the "Working directory" to the \c SKIRT/run directory
-you created earlier. Turn off the "Run in terminal" option;
-this causes SKIRT's log messages to appear inside Qt Creator rather than in a separate Terminal window.
+- Select "Projects" mode in the left margin of the Qt Creator window and select the "Build & Run" tab. 
+- There should be two subtabs called "Build" and "Run", placed under a "Desktop" header stating your Qt and compiler version. 
+- First, select the "Build" subtab. There are two build configurations called "Debug" and "Release", 
+  which can be selected through the "Edit build configuration" option list.
+- For the "Debug" configuration, change the "Build directory" to the \c SKIRT/debug directory you created earlier
+  (simply replace the capitcal 'D' by a lower-case 'd').
+- For the "Release" configuration, change the "Build directory" to the \c SKIRT/release directory you created earlier 
+  (simply replace the capital 'R' by a lower-case 'r'). 
+- Still in "Projects" mode, now select the "Run" subtab. 
+- Search for the option list called "Run configuration" and select the "SKIRTmain" item. 
+- Now change the "Working directory" to the \c SKIRT/run directory you created earlier. 
+- Turn off the "Run in terminal" option;
+  this causes <tt>SKIRT</tt>'s log messages to appear inside Qt Creator rather than in a separate Terminal window.
+- Finally go back to "Edit" mode (icon in left margin). Here you can browse, view and edit the source tree (see screenshot below).
 
-\image html sourcetreeUbuntu.png
-\image latex sourcetreeUbuntu.png
+  \image html sourcetreeUbuntu.png
+  \image latex sourcetreeUbuntu.png
 
-Finally go back to "Edit" mode (icon in left margin). Here you can browse, view and edit the source tree.
-To compile and build the complete <tt>SKIRT</tt> code (including <tt>FitSKIRT</tt>), click the hammer icon in the left margin.
+<b>Build SKIRT</b>
+
+To compile and build the complete <tt>SKIRT</tt> code (including <tt>FitSKIRT</tt>), click the hammer icon in the left margin, indicated
+in the screenshot below.
 
 \image html compileSKIRTQtUbuntu.jpeg
 \image latex compileSKIRTQtUbuntu.jpeg

@@ -1,0 +1,285 @@
+/**
+
+\page DevCodeStruct Structure of the code
+
+\section DevBlocks Blocks of code
+
+The various classes in the SKIRT source code are distributed over several subprojects, each residing
+in its own directory (see \ref DevDirs), as follows (in alphabetical order):
+  - \c Cfitsio -- This library provides input/output capabilities for FITS files.
+    It contains a subset of the source files offered in tarball
+    cfitsio3360.tar.gz downloaded from NASA's HEASARC software site
+    at http://heasarc.gsfc.nasa.gov/fitsio/fitsio.html .
+    No changes were made to any of the source files.
+  - \c Discover -- This library handles parameter files for SKIRT and FitSKIRT. More specifically, it
+    offers the functionality for automatically discovering relevant information on the simulation item classes
+    available in the code, and using this information for input/output purposes, such as the creation of a
+    simulation hierarchy from an interactive console Q&A session, or reading and writing a ski file.
+    For more information see \ref DevSimDisco.
+  - \c DoxStyle -- This console application can be invoked from the Qt Creator code
+    editor to help streamline Doxygen documentation blocks, as explained in \ref DevStyleFormat.
+    The DoxStyle code is completely independent from SKIRT and FitSKIRT; it is included here so that it
+    would be easily available to any SKIRT developer.
+  - \c FitSKIRTcore -- This library provides the core FitSKIRT functionality, connecting
+    the genetic algorithm mechanism with the SKIRT capabilities.
+  - \c FitSKIRTmain -- This is the FitSKIRT console application. It handles the command
+    line arguments and links in everything else from other libraries.
+  - \c Fundamentals -- This library offers generic functionality that is essentially
+    unrelated to SKIRT and FitSKIRT. Most items are fully defined
+    in their respective header files to optimize performance.
+  - \c GAlib -- This library provides support for genetic algorithm mechanisms.
+    The source code is adapted from Matthew Wall's GAlib (c) 1995 MIT
+    which can be downloaded at http://lancet.mit.edu/ga/GAlib.html .
+  - \c MPIsupport -- This library encapsulates any and all MPI-related functionality used
+    by SKIRT and FitSKIRT. Concentrating all MPI calls in this library
+    allows all other code to be compiled without the MPI extra's.
+  - \c SKIRTcore -- This library provides the core SKIRT functionality
+    for setting up and performing a simulation; this includes all simulation
+    item classes plus some SKIRT-specific support classes.
+    For more information see \ref DevSimItems.
+  - \c SKIRTmain -- This is the SKIRT console application. It handles the command
+    line arguments and links in everything else from other libraries.
+  - \c Voro -- This library provides support for building Voronoi meshes.
+    The source code is adapted from the Voro++ library written by Chris H. Rycroft (LBL / UC Berkeley)
+    which can be downloaded at http://math.lbl.gov/voro++/about.html .
+    For more information see \ref Voro.
+
+\dot
+digraph dependencies {
+    rankdir=TB;
+    nodesep=0.5;
+    node [shape=rect, fontname=Helvetica, fontsize=10];
+    edge [arrowhead=vee];
+    compound=true;
+    subgraph cluster1 {
+        SKIRTmain -> SKIRTcore;
+        SKIRTmain -> Discover;
+        Discover -> SKIRTcore;
+        SKIRTcore -> Voro;
+        SKIRTcore -> Cfitsio;
+        FitSKIRTmain -> FitSKIRTcore;
+        FitSKIRTmain -> SKIRTcore;
+        FitSKIRTmain -> Discover;
+        FitSKIRTcore -> SKIRTcore;
+        FitSKIRTcore -> Discover;
+        FitSKIRTcore -> GAlib;
+        DoxyStyle;
+    }
+    subgraph cluster2 {
+        MPIsupport -> Fundamentals;
+    }
+    Voro -> MPIsupport [lhead=cluster2, ltail=cluster1];
+}
+\enddot
+
+The above diagram shows the dependencies between the subprojects. A subproject in the upper box may directly
+depend on any of the subprojects in the lower box; these dependencies are represented by a single arrow to
+keep the diagram readable. Note that all arrows point down, which means that there are no circular dependencies.
+When adjusting or extending the code, be careful not to inadvertently create any new dependencies. In any case,
+circular dependencies between subprojects are not allowed.
+
+\section DevSimItems Simulation items
+
+A complete simulation is represented in SKIRT as run-time hierarchy of objects (instances of various C++ classes)
+called <em>simulation items</em>. The following diagram presents a simple run-time simulation hierarchy
+(a connection starting with a diamond loosely means "A owns B"):
+
+\dot
+digraph runtime {
+    rankdir=LR;
+    node [shape=rect, fontname=Helvetica, fontsize=10];
+    edge [dir=back arrowtail=ediamond];
+
+    OligoMonteCarloSimulation [label="OligoMonteCarloSimulation" URL="\ref OligoMonteCarloSimulation"];
+      Parallel [label="Parallel" URL="\ref Parallel"];
+      FilePaths [label="FilePaths" URL="\ref FilePaths"];
+      Console [label="Console" URL="\ref Console"];
+      Random [label="Random" URL="\ref Random"];
+      ExtragalacticUnits [label="ExtragalacticUnits" URL="\ref ExtragalacticUnits"];
+      OligoWavelengthGrid [label="OligoWavelengthGrid" URL="\ref OligoWavelengthGrid"];
+      StellarSystem [label="StellarSystem" URL="\ref StellarSystem"];
+        SPHStellarComp [label="SPHStellarComp" URL="\ref SPHStellarComp"];
+      OligoDustSystem [label="OligoDustSystem" URL="\ref OligoDustSystem"];
+        SPHDustDistribution [label="SPHDustDistribution" URL="\ref SPHDustDistribution"];
+          InterstellarDustMix [label="InterstellarDustMix" URL="\ref InterstellarDustMix"];
+        OctTreeDustGridStructure [label="OctTreeDustGridStructure" URL="\ref OctTreeDustGridStructure"];
+      InstrumentSystem [label="InstrumentSystem" URL="\ref InstrumentSystem"];
+        SimpleInstrument_1 [label="SimpleInstrument_1" URL="\ref SimpleInstrument"];
+        SimpleInstrument_2 [label="SimpleInstrument_2" URL="\ref SimpleInstrument"];
+        SimpleInstrument_3 [label="SimpleInstrument_3" URL="\ref SimpleInstrument"];
+
+      OligoMonteCarloSimulation -> Parallel;
+      OligoMonteCarloSimulation -> FilePaths;
+      OligoMonteCarloSimulation -> Console;
+      OligoMonteCarloSimulation -> Random;
+      OligoMonteCarloSimulation -> ExtragalacticUnits;
+      OligoMonteCarloSimulation -> OligoWavelengthGrid;
+      OligoMonteCarloSimulation -> StellarSystem;
+        StellarSystem -> SPHStellarComp;
+      OligoMonteCarloSimulation -> OligoDustSystem;
+        OligoDustSystem -> SPHDustDistribution;
+          SPHDustDistribution -> InterstellarDustMix;
+        OligoDustSystem -> OctTreeDustGridStructure;
+      OligoMonteCarloSimulation -> InstrumentSystem;
+        InstrumentSystem -> SimpleInstrument_1;
+        InstrumentSystem -> SimpleInstrument_2;
+        InstrumentSystem -> SimpleInstrument_3;
+}
+\enddot
+
+A run-time simulation hierarchy includes the following information:
+  - the configuration of the simulation, including all parameters, represented by a combination of:
+      - the structural makeup of the hierarchy
+      - the selection of the type of simulation items actually included (e.g. OctTreeDustGridStructure rather than
+        another type of dust grid)
+      - the properties of the various simulation items (not shown in the diagram)
+  - the functionality needed to perform the simulation and output the results, embodied in the code associated with
+    each specific simulation item class
+  - the run-time data needed and/or generated while performing the simulation, represented by data members in
+    each of the simulation items.
+
+Multiple run-time simulation hierarchies can co-exist and are independent of each other. There is no shared or
+global data, except when accessing truly global resources (such as the console) which are protected by
+appropriate locking mechanisms. Also see \ref DevStyleFiles.
+
+The contents of a ski file mimics the corresponding run-time simulation hierarchy (see \ref UserSKIStruct) with
+the exception of the Parallel, FilePaths and Log (Console) objects, which are configured in the \c SKIRTmain code
+as determined by the command line arguments.
+
+\section DevSimClasses Simulation item classes
+
+A simulation item is an instance of a C++ class that inherits the SimulationItem class. The following diagram
+presents a small part of the inheritance tree:
+
+\dot
+digraph inheritance {
+    rankdir=BT;
+    node [shape=rect, fontname=Helvetica, fontsize=10];
+    edge [arrowhead=empty];
+
+    SimulationItem [label="SimulationItem" URL="\ref SimulationItem"];
+      StellarComp [label="StellarComp" URL="\ref StellarComp"];
+        SPHStellarComp [label="SPHStellarComp" URL="\ref SPHStellarComp"];
+        OtherStellarComp [label="..."];
+      Simulation [label="Simulation" URL="\ref Simulation"];
+        MonteCarloSimulation [label="MonteCarloSimulation" URL="\ref MonteCarloSimulation"];
+          OligoMonteCarloSimulation [label="OligoMonteCarloSimulation" URL="\ref OligoMonteCarloSimulation"];
+          OtherMonteCarloSimulation [label="..."];
+      Log [label="Log" URL="\ref Log"];
+        Console [label="Console" URL="\ref Console"];
+        FileLog [label="FileLog" URL="\ref FileLog"];
+
+      StellarComp -> SimulationItem;
+        SPHStellarComp -> StellarComp;
+        OtherStellarComp -> StellarComp;
+      Simulation -> SimulationItem;
+        MonteCarloSimulation -> Simulation;
+          OligoMonteCarloSimulation -> MonteCarloSimulation;
+          OtherMonteCarloSimulation -> MonteCarloSimulation;
+      Log -> SimulationItem;
+        Console -> Log;
+        FileLog -> Log;
+}
+\enddot
+
+The leaf nodes represent concrete simulation item classes. Instances of these classes can be part of a run-time
+simulation hierarchy. The non-leaf nodes represent abstract simulation item classes that can't be instantiated.
+
+Thus simulation items form a compile-time class hierarchy through inheritance (with the SimulationItem class
+at the top), and a run-time object hierarchy through pointers (with an instance of a Simulation subclass at the top).
+
+The basic interface inherited from SimulationItem facilitates common functionality for working with simulation items.
+For example, the SimulationItem::find() function allows locating a simulation item in a run-time simulation hierarchy
+simply providing its class name. Also, the Simulation class cooperates with the SimulationItem interface to
+setup and run a complete simulation.
+
+\section DevSimDisco Discovery of simulation items
+
+The code residing in the \c Discover directory provides automatic discovery of compile-time information on the
+available simulation item classes and their properties. Based on this functionality, the code offers various
+interfaces to the outside world. These interfaces automatically adjust when new simulation item classes
+or properties are added to the code. Currently the code supports:
+ - creating a simulation hierarchy based on user responses during an interactive console Q&A session,
+ - saving or loading a simulation hierarchy to and from a ski file (in XML format),
+ - generating a human-readable report summarizing the simulation parameters for a simulation hierarchy.
+
+The discovery mechanism allows all information about a simulation item class to be defined in a single place,
+i.e. in the simulation item class declaration and implementation. The interfaces described above have no built-in
+knowledge about specific simulation item classes, which means that they self-adjust to changes in the code.
+
+Specifically this means that:
+ - When adding a new simulation item class, there is no need to add code in each of the interfaces separately;
+   the same basic information (included in the simulation item class declaration) is used by all interfaces.
+ - New interfaces (such as perhaps a graphical user interface) can be added later, without changing any of the
+   existing code, and without duplicating information about specific simulation item classes.
+
+The following diagram presents the relationships between some important classes implementing the Discovery
+mechanism and the interfaces using it. A dashed line ending in a V-shaped arrow means "A references B";
+A solid line ending in an empty triangular arrow means "A inherits B":
+
+\dot
+digraph relations {
+    rankdir=BT;
+    nodesep=0.5;
+    node [shape=rect, fontname=Helvetica, fontsize=10];
+    edge [arrowhead=empty];  // A inherits B
+
+    RegisterSimulationItems [label="RegisterSimulationItems" URL="\ref RegisterSimulationItems"];
+    SimulationItemRegistry [label="SimulationItemRegistry" URL="\ref SimulationItemRegistry"];
+    MetaObject [label="Qt MetaObject"];
+    SimulationItemDiscovery [label="SimulationItemDiscovery" URL="\ref SimulationItemDiscovery"];
+    main [label="SKIRTmain" style=bold];
+
+    subgraph {
+        PropertyHandlerVisitor [label="PropertyHandlerVisitor" URL="\ref PropertyHandlerVisitor"];
+        ConsoleHierarchyCreator [label="ConsoleHierarchyCreator" URL="\ref ConsoleHierarchyCreator"];
+        XmlHierarchyWriter [label="XmlHierarchyWriter" URL="\ref XmlHierarchyWriter"];
+        ConsoleHierarchyCreator -> PropertyHandlerVisitor;
+        XmlHierarchyWriter -> PropertyHandlerVisitor;
+    }
+    subgraph {
+        PropertyHandler [label="PropertyHandler" URL="\ref PropertyHandler"];
+        IntPropertyHandler [label="IntPropertyHandler" URL="\ref IntPropertyHandler"];
+        ItemPropertyHandler [label="ItemPropertyHandler" URL="\ref ItemPropertyHandler"];
+        IntPropertyHandler -> PropertyHandler;
+        ItemPropertyHandler -> PropertyHandler;
+    }
+    edge [arrowhead=vee style=dashed];  // A references B
+
+    RegisterSimulationItems -> SimulationItemRegistry;
+    SimulationItemRegistry -> MetaObject [constraint=false];
+    SimulationItemDiscovery -> SimulationItemRegistry;
+    SimulationItemDiscovery -> MetaObject;
+    main -> RegisterSimulationItems;
+    main -> PropertyHandlerVisitor [constraint=false];
+    PropertyHandlerVisitor -> SimulationItemDiscovery;
+    PropertyHandler -> PropertyHandlerVisitor [dir=both arrowtail=vee constraint=false];
+    PropertyHandler -> MetaObject;
+    PropertyHandler -> SimulationItemDiscovery;
+}
+\enddot
+
+The discovery mechanism heavily uses the Qt meta object mechanism, which is centered around the QObject and
+QMetaObject classes (refer to the Qt documentation). It includes the following components:
+ - SimulationItemRegistry keeps track of all available simulation items, including the abstract
+   classes in the inheritance tree.
+ - RegisterSimulationItems has a single function that adds the available classes to the registry. It is provided as
+   a seperate file so that it would be easy to locate and edit when a new simulation item class is added to the code.
+ - SimulationItemDiscovery does the ground work of extracting the relevant information from the compile-time
+   data structures provided by the Qt meta object mechanism.
+ - PropertyHandler subclasses handle simulation item properties, i.e. the values of the simulation parameters.
+   There is a subclass for each property type, including value types such as integer or string, and
+   pointer types that reference another simulation item or a list of items.
+ - PropertyHandlerVisitor subclasses implement the interfaces described above.
+
+The abstract classes PropertyHandler and PropertyHandlerVisitor, and their subclasses, cooperate according to the
+<em>visitor design pattern</em> (see the literature or the web for more information on this pattern). This enables
+each of the interfaces to visit (i.e. iterate over) the properties of all simulation items in a runtime simulation
+hierarchy in a type-safe way, based on the discovered compile-time information.
+
+The code in the \c SKIRTmain block first adds all known simulation items to the SimulationItemRegistry.
+It then uses one of the PropertyHandlerVisitor subclasses, for example ConsoleHierarchyCreator, to create a
+runtime simulation hierarchy which it then asks to actually perform the simulation. The \c SKIRTmain code can use
+XmlHierarchyWriter, another PropertyHandlerVisitor subclass, to store the simulation parameters in a ski file.
+
+*/

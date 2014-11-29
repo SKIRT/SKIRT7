@@ -1,0 +1,140 @@
+/**
+
+\page DevStyle Coding style
+
+To improve readability and maintainablity, it is important to use a consistent style across the code.
+Use the <em> chameleon rule </em> as a general guiding principle: adopt the style of the code already present.
+
+\section DevStyleFiles Files, classes and globals
+
+Each C++ class (or namespace) is contained in its own .hpp and .cpp files, both named for the class.
+Each of these files starts with the standard license template provided as part of the SKIRT documentation.
+
+Combining additional classes in the same header or source file is permissible only in extraordinary circumstances.
+For example, a small private utility class, used only from within a single class, may sometimes meaningfully be
+placed inside the implementation of the client class.
+
+SKIRT is extremely parallelized (multiple threads working on the same and/or different simulations at the same time).
+Do not use global (static) variables unless the information is clearly tied into some resource that is
+by definition unique to the application. Examples of such a resource include the console (in and out),
+the list of available C++ classes, and the path to the directory containing run-time resources for the application.
+Even then, protect the use of these variables against race conditions with an appropriate locking mechanism.
+
+Private variables, functions and classes that are not declared inside a class declaration in the header file,
+are placed inside an anonymous namespace in the .cpp file, rather than declaring them static outside a namespace.
+
+\section DevStyleLibs Language facilities and libraries
+
+Historically SKIRT was written in C++98, the C++ standard that has been well-established for many years.
+At the time of writing (May 2014), the new standard defined in 2011 and called C++11 is properly supported by recent
+versions of all major compilers. So from now on, any SKIRT code can freely use all C++11 language features
+and any facilities of the standard C++11 libraries, including the standard template library (STL).
+In fact, we already started using some selected C++11 features, such as lambda functions, and more will follow.
+
+Futhermore, SKIRT is based on the Qt development framework. Any SKIRT code can freely use all the facilities of
+the QtCore module, taking into account the guidelines provided in this document.
+Other Qt modules are not and should not be included in the build.
+
+The new C++11 language standard includes many capabilities that were previously offered by Qt (in a different way).
+Considering that SKIRT doesn't have a graphical user interface, and thus uses only a small subset of Qt's features,
+it is conceivable that the SKIRT code migrates away from Qt in the future. SKIRT uses Qt specifically
+in the following areas:
+  - Strings and files: C++11 properly supports UTF-8 (needed for special characters), and since SKIRT runs only on
+    Unix systems, we don't really need support for Microsoft Windows-style file paths. To move away from Qt,
+    we still would need to replace several string and file handling functions.
+  - Shared memory parallelization (threads): C++11 offers these capabilities as part of the language.
+    To move away from Qt, we would need to re-implement the two or three classes involved in parallelization.
+  - Reading and writing XML: to move away from Qt, we would need to include (standard) third-party code for
+    handling XML and re-implement the two or three classes involved with XML.
+  - Containers: the key benefits of Qt containers (light-weight copy to and from functions; easy looping construct)
+    have been incorporated in the C++11 language. While the syntax for using STL containers is still a bit more
+    involved, there is no longer a fundamental reason for hanging on to Qt containers.
+  - Run-time class introspection (QMetaObject) to handle simulation item discovery: Qt implements this capability
+    through the Qt meta-object-compiler that parses the source code and makes extra data available at run time.
+    This is very powerful but also slightly scary, since it represents in fact a Qt-specific language extension.
+    There is no obvious replacement in C++11.
+
+For all but the last item, moving away from Qt seems feasible with a reasonable effort. Implementing an alternative
+for the instrospection capability from within the C++11 language may prove a lot harder. For the time being,
+we continue to rely on Qt in all areas indicated above.
+
+The code in the MPIsupport subproject conditionally relies on the Message Passing Interface (MPI) library
+to provide distributed memory parallelization capabilities. If the system on which the code is being built
+does not offer MPI, the code should still compile and run (although without MPI support).
+Concentrating all MPI calls in this subproject allows all other code to be compiled without the MPI extra's.
+
+\note You may need to adjust the \c MPIsupport.pro file to properly detect MPI on a new system. If so,
+you will also need to adjust the top-level \c *main.pro files for all executables that link in MPI support.
+
+\section DevStyleCon Containers
+
+SKIRT uses three types of container classes:
+  - The SKIRT-specific container classes Array, Table and ArrayTable, defined in the Fundamentals subproject.
+    These represent sequences of floating point values (of type \em double) that can't grow dynamically; i.e.
+    the size of the sequence must be known when it is (re-)initialized. Instances of the Array class
+    support element-by-element arithmetic operations, similar to the \c std::valarray class template.
+  - Standard template libary (STL) containers offered by the C++ language.
+  - Qt containers offered by the Qt core library.
+
+For numerical work, use the SKIRT-specific container classes whenever possible. Use \c std::vector<double> only
+when the sequence must be able to grow dynamically. Never use the \c std::valarray class template; use Array instead.
+Other than this, you can use both the STL and Qt containers. In practice, the code that actually performs the
+simulations mostly uses STL containers. The code dealing with the user interface and other non-core tasks often
+uses Qt containers such as \c QList and \c QHash. Fortunately there is virtually no need for conversion between
+the two types of containers. When adding new code, select the appropriate containers according to the chameleon rule.
+
+\section DevStyleStr Strings
+
+The intention is to make SKIRT fully Unicode compatible for text input/output, filenames, etc. This is easily
+accomplished with the facilities of the Qt library. Thus always use the Qt class \c QString to represent strings,
+rather than the STL \c std::string class.
+You can use the Qt facilities for file I/O, as well the STL facilities for file I/O,
+although the latter are not fully Unicode compatible on all platforms.
+Use <tt>.toLocal8Bit().constData()</tt> to convert a \c QString to a filename that can be passed to an STL
+file I/O function.
+Use <tt>.toStdString()</tt> only if you know for sure that the string contains just 7-bit ASCII characters.
+
+\section DevStyleNames Naming conventions
+
+Recent code honors the following conventions:
+  - all names are in camel case, i.e. each new word starts with a capital, as in \c localVariable or \c MyDerivedClass
+  - class names start with an uppercase letter; function and variable names start with a lowercase letter
+  - the names of class data members (variables declared as part of a class) have an underscore prefix, as in \c _x
+  - getters and setters are named for the property: \c _property leads to \c property() and \c setProperty()
+  - function names (other than getters) usually start with a verb, as in \c createPackage() or \c run()
+  - constants and enumeration values have all-uppercase names, as in \c LEFT and \c RIGHT
+
+In older code, functions and variables sometimes have all-lowercase names, as in \c setproperty(). New code
+should honor the new conventions described above, unless when making small adjustments to existing code that
+uses the older conventions (the chameleon rule again).
+
+\section DevStyleFormat Formatting the code
+
+Before editing any SKIRT code, configure the Qt Creator development environment as described in \ref InstallMacConfigQt
+or \ref InstallUbuntuConfigQt. All SKIRT code must:
+- use indentation and alignment as configured by the file <tt>~/SKIRT/git/doc/SkirtCodeStyle.xml</tt>.
+- keep all lines within the 120 character limit (as indicated by the right margin in the Qt Creator editor).
+
+Examples of correct indentation and alignment can of course be found in the existing code. It may also be
+instructive to review the code examples in the "C++ -> Code Style" tab of the Qt Creator preferences panel (press the
+"Edit..." button and play with the settings but don't forget to cancel your changes).
+
+Most importantly, you can apply correct indentation and alignment to a piece of code as follows:
+ - select one or more lines of code (possibly the whole file) in the Qt Creator editor
+ - choose the "Edit->Advanced->Auto-indent Selection" menu item \em or press Command-I (on Mac) or Ctrl-I (on Ubuntu).
+
+In .cpp files regular //-style comments are used for annotating the implementation. In .hpp files "/ **"-style
+Doxygen documentation blocks are used to document the code. These structured comments are used to
+generate HTML and PDF formatted documentation for SKIRT.
+
+Assuming you installed the DoxStyle tool as described in \ref InstallMacDoxStyle,
+you can automatically reformat documentation blocks in the Qt Creator editor as follows:
+ - select a section of code that contains one or more "/ **"-style documentation blocks (you may select regular code
+   as well, possibly even the whole file)
+ - choose the "Tools->External->DoxStyle->Streamline Selection" menu item \em or
+   press Alt-Command-I (on Mac) or Alt-Ctrl-I (on Ubuntu).
+
+Finally, keep \#include statements and forward class declarations together in the beginning of the file,
+sorted within each group, with the groups in the following order: C/C++, Qt, SKIRT .hpp files, class declarations.
+
+*/

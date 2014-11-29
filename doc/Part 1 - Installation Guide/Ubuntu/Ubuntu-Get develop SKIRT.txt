@@ -1,6 +1,6 @@
 /**
 
-\page InstallMacGetDevelop Getting the SKIRT source code (for developers)
+\page InstallUbuntuGetDevelop Getting the SKIRT source code (for developers)
 
 If you plan to make code contributions, there are two possibilities:
 

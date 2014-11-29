@@ -16,22 +16,22 @@ to run successfully.
 
 If you only want to install <tt>SKIRT</tt> for your radiative transfer problems without adding modifications to the source code, read through sections:
 
-- \ref InstallMacComp
-- \ref InstallMacQt
-- \ref InstallMacGetPublic
-- \ref InstallMacBuildNoQtCreator
-- \ref InstallMacVerify
+- \subpage InstallMacComp
+- \subpage InstallMacQt
+- \subpage InstallMacGetPublic
+- \subpage InstallMacBuildNoQtCreator
+- \subpage InstallMacVerify
 
 For setting <tt>SKIRT</tt> up for development and building, follow the instructions in:
 
-- \ref InstallMacComp 
-- \ref InstallMacQt
-- \ref InstallMacGetDevelop
-- \ref InstallMacConfigQt 
-- \ref InstallMacBuildQtCreator
-- \ref InstallMacVerify
-- \ref InstallMacDoxStyle
-- \ref InstallMacDoxygen
+- \subpage InstallMacComp 
+- \subpage InstallMacQt
+- \subpage InstallMacGetDevelop
+- \subpage InstallMacConfigQt 
+- \subpage InstallMacBuildQtCreator
+- \subpage InstallMacVerify
+- \subpage InstallMacDoxStyle
+- \subpage InstallMacDoxygen
 
 If you want instructions to install <tt>OpenMPI</tt> on Mac OS X for use with <tt>SKIRT</tt>, you can also read the following guide:
 
