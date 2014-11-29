@@ -18,8 +18,8 @@ then
   python doc/enable_qch_mathjax.py
 
   # Obtain the MathJax repository if it is not yet present
-  if [ ! -d $HOME/SKIRT/html/mathjax ]; then
-    git clone git://github.com/mathjax/MathJax.git $HOME/SKIRT/html/mathjax
+  if [ ! -d ../html/mathjax ]; then
+    git clone git://github.com/mathjax/MathJax.git ../html/mathjax
   fi
 
   #####################################################
@@ -60,8 +60,8 @@ then
   python doc/enable_qch_mathjax.py
 
   # Obtain the MathJax repository if it is not yet present
-  if [ ! -d $HOME/SKIRT/html/mathjax ]; then
-    git clone git://github.com/mathjax/MathJax.git $HOME/SKIRT/html/mathjax
+  if [ ! -d ../html/mathjax ]; then
+    git clone git://github.com/mathjax/MathJax.git ../html/mathjax
   fi
     
   #####################################################
