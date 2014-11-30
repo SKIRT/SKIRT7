@@ -135,5 +135,9 @@ for child in root:
         st = ET.Element("file")
         st.text = "mathjax/jax/output/HTML-CSS/fonts/STIX/General/Regular/*.js"
         grandchild.append(st)
+        
+        st = ET.Element("file")
+        st.text = "mathjax/jax/output/HTML-CSS/fonts/STIX/IntegralsD/Regular/*.js"
+        grandchild.append(st)
                 
 tree.write('../html/index_mathjax.qhp')
