@@ -1,0 +1,6 @@
+../html/mathjax/docs
+../html/mathjax/test
+../html/mathjax/unpacked
+../html/mathjax/README-branch.txt
+../html/mathjax/README.md
+../html/mathjax/bower.json
