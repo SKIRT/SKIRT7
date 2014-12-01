@@ -14,6 +14,9 @@ then
   # generate html documentation in a temporary folder next to the git folder
   /Applications/Doxygen.app/Contents/Resources/doxygen doc/html.doxygen
 
+  # Copy the 'mouse over' SKIRT logo
+  cp doc/images/SkirtLogoSmall-home.png ../html/SkirtLogoSmall-home.png
+
   # Add the MathJax script to the index.qhp file -> index_mathjax.qhp
   python doc/enable_qch_mathjax.py
 
@@ -56,6 +59,9 @@ then
     
   # generate html documentation in a temporary folder next to the git folder
   doxygen doc/html_ubuntu.doxygen
+    
+  # Copy the 'mouse over' SKIRT logo
+  cp doc/images/SkirtLogoSmall-home.png ../html/SkirtLogoSmall-home.png
     
   # Add the MathJax script to the index.qhp file -> index_mathjax.qhp
   python doc/enable_qch_mathjax.py
