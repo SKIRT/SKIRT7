@@ -69,6 +69,7 @@ then
   # Obtain the MathJax repository if it is not yet present
   if [ ! -d ../html/mathjax ]; then
     git clone git://github.com/mathjax/MathJax.git ../html/mathjax
+    git -C ../html/mathjax checkout -b v2.4-latest origin/v2.4-latest
   fi
     
   #####################################################
