@@ -1,0 +1,16 @@
+/**
+
+\page Concepts Concepts
+
+The topics below explain different aspect or features of the <tt>SKIRT</tt> code in detail. If you need to fully grasp the mechanisms 
+behind <tt>SKIRT</tt>, or you want to contribute to the development of some part of the <tt>SKIRT</tt> code, then reading through one
+or more of these topics will certainly provide a useful foundation.
+
+  - \subpage Parallelization explains in detail how <tt>SKIRT</tt> is adapted for parallel computing.
+  - \subpage DustProp describes how <tt>SKIRT</tt> deals with optical and calorimetric dust properties.
+  - \subpage PerInstr provides details on <tt>SKIRT</tt>'s perspective instrument, used mostly for making movies.
+  - \subpage Cfitsio introduces the library included with <tt>SKIRT</tt> to read and write FITS files.
+  - \subpage voro introduces the library included with <tt>SKIRT</tt> to construct Voronoi tesselations.
+  - \subpage GAlib introduces the library included with <tt>FitSKIRT</tt> to search the model parameter space.
+   
+*/
