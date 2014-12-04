@@ -293,7 +293,7 @@ public:
         parameters. Then, scattering angles \f$\theta\f$ and \f$\phi\f$ are sampled, and the Stokes
         vector is rotated into the scattering plane and transformed by applying the Mueller matrix.
         Finally, the new direction is computed from the previously sampled \f$\theta\f$ and
-        \f$\phi\f$ angles. See Appendix of Bianchi et al. ApJ v.465, p.127 for details. */
+        \f$\phi\f$ angles. See Appendix of Bianchi et al. 1996, ApJ v.465, p.127 for details. */
     Direction scatteringDirectionAndPolarization(StokesVector* out, const PhotonPackage* pp) const;
 
     /** This function calculates the polarization state appropriate for a peel off photon package
@@ -303,7 +303,7 @@ public:
         unpolarized state). For a dustmix that does support polarization, the function rotates the
         Stokes vector into the scattering plane, applies the Mueller matrix on the Stokes vector,
         and the adjusts Stokes parameters to the reference direction. See the Appendix of Bianchi
-        et al. ApJ v.465, p.127 for details. */
+        et al. 1996, ApJ v.465, p.127 for details. */
     void scatteringPeelOffPolarization(StokesVector* out, const PhotonPackage* pp, Direction bfknew);
 
     /** This function returns the Planck-integrated absorption cross section per hydrogen atom

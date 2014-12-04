@@ -483,7 +483,6 @@ double DustMix::phaseFunctionValue(const PhotonPackage* pp, Direction bfknew) co
         }
 
         int ell = pp->ell();
-        double polDegree = pp->linearPolarizationDegree();
         double N = 0.0;
         double dt = M_PI/(_Ntheta-1);
         for (int t=0; t<_Ntheta; t++)
@@ -492,6 +491,7 @@ double DustMix::phaseFunctionValue(const PhotonPackage* pp, Direction bfknew) co
         }
 
         int t = indexForTheta(theta, _Ntheta);
+        double polDegree = pp->linearPolarizationDegree();
         return N*(_S11vv(ell,t)-_S12vv(ell,t)*polDegree*cos(2.0*phi));
     }
     else
@@ -599,7 +599,6 @@ void DustMix::scatteringPeelOffPolarization(StokesVector* out, const PhotonPacka
 
         // because a peel-off photon is to be detected on the instrument,
         // we need to adjust its Stokes parameters to the reference direction
-
         double kx, ky, kz;
         pp->direction().cartesian(kx,ky,kz);
         double kxnew, kynew, kznew;
@@ -607,13 +606,10 @@ void DustMix::scatteringPeelOffPolarization(StokesVector* out, const PhotonPacka
         double dot = kx*kxnew+ky*kynew+kz*kznew;
         double rootkznew = sqrt(fabs((1.0-kznew)*(1.0+kznew)));
         double rootdot = sqrt(fabs(1.0-dot*dot));
-        double cosgamma = kznew*dot-kz/rootkznew/rootdot;
-        double singamma = ky*kxnew-kx*kynew/rootkznew/rootdot;
-        double cosdoublegamma =  1.0-2.0*singamma*singamma;
-        double sindoublegamma = 2.0*singamma*cosgamma;
-
-        double doublegamma = 0; // TO DO
-        out->rotateStokes(doublegamma);
+        double cosgamma = (kznew*dot-kz)/rootkznew/rootdot;
+        double singamma = (ky*kxnew-kx*kynew)/rootkznew/rootdot;
+        double gamma = atan2(cosgamma,singamma);
+        out->rotateStokes(gamma);
     }
 }
 
