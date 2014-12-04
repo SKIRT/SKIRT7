@@ -10,11 +10,12 @@
 
 /** An object of the StokesVector class describes the polarization state of a photon (package), and
     offers functions to apply certain transformations to it. Specifically, a Stokes vector contains
-    the four Stokes parameters \f$I\f$, \f$Q\f$, \f$U\f$, and \f$V\f$. The first parameter (\f$I\f$) indicates the
-    total intensity, and the remaining parameters (\f$Q\f$, \f$U\f$, and \f$V\f$) represent various degrees of
-    linear and circular polarization. Stokes parameters have a dimension of intensity. However, in
-    our implementation, the parameters are normalized to dimensionless values through division by
-    \f$I\f$. Consequently \f$I=1\f$ at all times, so that this parameter does not need to be stored. */
+    the four Stokes parameters \f$I\f$, \f$Q\f$, \f$U\f$, and \f$V\f$. The first parameter
+    (\f$I\f$) indicates the total intensity, and the remaining parameters (\f$Q\f$, \f$U\f$, and
+    \f$V\f$) represent various degrees of linear and circular polarization. Stokes parameters have
+    a dimension of intensity. However, in our implementation, the parameters are normalized to
+    dimensionless values through division by \f$I\f$. Consequently \f$I=1\f$ at all times, so that
+    this parameter does not need to be stored. */
 class StokesVector
 {
 public:
@@ -28,8 +29,8 @@ public:
     void clearStokes() { _Q = 0; _U = 0; _V = 0; }
 
     /** This function sets the Stokes vector to the specified parameter values, after normalizing
-        them through division by \f$I\f$. If \f$I=0\f$, the Stokes vector is set to an unpolarized state.
-        */
+        them through division by \f$I\f$. If \f$I=0\f$, the Stokes vector is set to an unpolarized
+        state. */
     void setStokes(double I, double Q, double U, double V);
 
     // ------------ getters --------------
