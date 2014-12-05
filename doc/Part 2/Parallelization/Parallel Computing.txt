@@ -1,0 +1,202 @@
+/**
+
+\page ParallelComputing Parallel Computing
+
+\section ParallelComputing_Introduction Introduction
+
+For the first 30 years that computers were used, programs were sequential or serial in nature. This means that the instructions given to the computer were 
+executed one after the other, on a single processor. This principle is illustrated in the figure below. A set of instructions is called an \em algorithm.
+
+\image html serial.png "A serial algorithm consists of a set of instructions which are sequentially executed on a processor."
+
+In the 1980’s, when multiprocessor computers began to arise, people realized the benefits of executing computer programs in parallel. 
+Parallel computing means that multiple instructions are executed at the same time, by different processors. 
+This is done by first breaking up the problem into smaller ones, which can be solved independently of each other. 
+These smaller problems are then given to different processors, who carry out the instructions sequentially. This is illustrated in the following figure.
+
+\image html parallel.png "If an algorithm can be broken up in multiple independent pieces, these pieces can be executed in parallel on multiple processors."
+
+It is the task of the programmer to find a way to break up the problem into pieces that can be run independently of each other. 
+It is generally not possible to parallelize an entire program: some part can not be broken up in independent pieces. 
+This part is called the \em serial part of the program. The other part is called the parallel part. Minimizing the serial part is very important, 
+certainly in the context of scaling. This is however not straightforward. On top of that, most parallel programs require 
+communication between processors. It is often the case that between the execution of two pieces of work on a processor, information is needed from the other processors. 
+Problems which require none or a very small amount of communication between processors are called <em>embarrassingly parallel</em>. 
+For these problems, only little effort is needed to break up the problem in independent, parallel pieces. 
+The opposite of an embarrassingly parallel problem is an <em>inherently serial problem</em>, which can not be split in parallel pieces.
+
+\section ParallelComputing_TaskData Task parallelization and data parallelization 
+
+Problems can be split up in independent pieces in two different ways. These are called \em decomposition or \em partitioning methods. 
+The first kind of decomposition is called <em>domain decomposition</em>. A synonym is <em>data parallelization</em>. Suppose that we want to apply some set of operations on a 
+two-dimensional matrix of data, as illustrated in the figure below.
+
+\image html data.png "A set of operations is applied on a two-dimensional matrix of data."
+
+If we have multiple processors available, we can partition this two-dimensional domain so that each processor can execute the same instructions on a 
+subset of the data. The algorithm would now require only a fraction of the time to complete. Additionally, each processor has to store less information 
+in its memory, which could lead to bigger problems being able to be solved. The principle of data parallelization with 3 parallel processors is illustrated below.
+
+\image html dataparallel.png "Domain decomposition or data parallelization."
+
+An other form of decomposition is called <em>functional decomposition</em> or <em>task parallelization</em>. It can be thought of as the opposite of data parallelization. 
+Instead of executing the same operations on different parts of the data, the processors perform different operations. This is illustrated in the next figure. 
+Generally, these processes use the same data, but sometimes they require different parts of the data because the instructions dictate so.
+
+\image html taskparallel.png "Functional decomposition or task parallelization."
+
+With each process only executing a part of the algorithm, it is obvious that also task parallelization can lead to significant speedups. 
+As opposed to data parallelization, pure task parallelization does not necessary lead to fewer memory consumption per processor. 
+An advantage of task parallelization is however that it is generally easier to implement than data parallelization.
+It is important to understand that most parallel programs use both data parallelization and task parallelization: the one does not exclude the other. 
+The opposite is true: both parallelizations can often be efficiently combined.
+
+\section ParallelComputing_Infrastructure Infrastructure
+
+Almost all modern computers and even smartphones contain two or more central processing units (CPUs) and can therefore be called multiprocessing systems. 
+The definitions of processor and CPU vary from source to source. In this text, we simply define a processor (as well as a CPU) 
+as the smallest unit of hardware that executes operations. Nowadays, most processors come in the form of so-called \em cores embedded on a single chip. 
+This definition of a processor significantly simplifies our discussion of parallel computing. When we talk about running a program on multiple parallel processors, 
+those processors can be on the same chip or they can be on distinct hardware units connected through a network.
+
+\subsection ParallelComputing_Infrastructure_Shared Shared memory systems
+
+In a multiprocessing system, processors and memory can be arranged in different ways. On the one hand, one can have a system where multiple processors are connected 
+to the same unit of memory. Systems designed in such a way are called <em>shared memory systems</em>. The processors can be arranged on one single chip or distributed over multiple chips. 
+Processors on a single chip, connected to a unit of memory is usually found in personal computers and laptops. 
+An arrangement of multiple chips of processors, connected to a shared unit of memory is found in <em>high performance computers</em>. In this context, such an arrangement of 
+processor chips is often called a \em node. A representation of a shared memory system is given in the following figure.
+
+\image html sharedmemory.png "In a shared memory system, processors are directly linked to a shared unit of memory."
+
+The advantage of a shared-memory system is that all processors can access and change the same memory locations. If a parallel program is run on such a system, 
+changes in the memory made by one processor are immediately visible to all other processors, without the need of explicit communication. A disadvantage of shared memory 
+systems is their lack of scalability. The number of processors in a single shared memory node is usually limited to a few tens. 
+Very large shared memory systems do not exist because when the number of processors increases, the connection between the shared memory and the processors becomes a 
+bottleneck to the performance. While many different processes try to access the same memory, the traffic on the interconnection becomes saturated. 
+A partial solution to this problem is so called <em>cache memory</em>. This is very fast memory local to a certain processor that temporarily holds data on which this processor 
+is currently working (see the figure above). Since this means that processors need much fewer attempts to access the shared memory, the access time of the shared memory 
+is significantly reduced, leading to much better performance. However, if a processor accesses its own copy of a shared variable stored in its cache, 
+it is possible that one of the other processors will have already modified its copy of the same variable. The variable that is then used or modified by the first 
+processor would then have a noncurrent and thus invalid value. This problem is called <em>cache coherence</em> or <em>cache consistency</em>. This problem is solved by 
+mechanisms that monitor changes in shared variables on different processors. Despite these techniques, shared memory systems are limited in the number of 
+processors because of the traffic associated with the cache/memory management.
+
+\subsection ParallelComputing_Infrastructure_Shared Distributed memory systems
+
+As opposed to shared memory systems, the performance of so-called <em>distributed memory systems</em> for parallel programs scales much better with the number of processors. 
+In a distributed memory system, each processor has its own local memory. There is no global address space across processors, so they are not able to change the memory 
+of other processors. Distributed memory systems require a communication network to connect the memory of the different processes, as illustrated in the figure below.
+
+\image html distributedmemory.png "In a distributed memory system, each processor has its own memory."
+
+The advantage of distributed memory systems is that each processor can rapidly access its own memory without interference and without the overhead caused by 
+maintaining global cache coherency. Distributed memory systems can be composed of a virtually unlimited amount of processors, 
+making them very useful for solving very large computational problems. A disadvantage of distributed memory systems is that the programmer is responsible 
+for many of the details associated with the communication between processors. Another disadvantage is that this communication is slower than accessing data from a shared memory.
+
+\subsection ParallelComputing_Infrastructure_Shared Computing clusters
+
+Nowadays, the most powerful high performance computers or supercomputers in the world use a combination of shared and distributed memory architectures.
+These systems are so-called <em>computing clusters</em>. Such a system consists of a distributed arrangement of nodes which are 
+connected trough a high-speed interconnection network. Each such node consists of multiple processors organized as a shared memory system. 
+This principle is illustrated in the figure below.
+
+\image html cluster.png "A cluster is a combination of a shared memory and distributed memory system."
+
+\section ParallelComputing_Programming Parallel programming
+
+To run programs on parallel computers, different programming models can be used. These models fall in 3 groups, 
+just as the different forms of multiprocessor systems discussed above. Just as we classified these systems as shared memory systems, 
+distributed memory systems or clusters, programming models can be classified as either \em multithreading, <em>message passing</em> or \em hybrid. 
+Although these programming models are related to the respective system architectures, they are not specific or exclusive to a particular type of 
+system. Any of the programming models can theoretically be used on any underlying architecture.
+
+\subsection ParallelComputing_Programming_Thread Multithreading
+
+A first model for parallel programming is multithreading. In this model, the algorithm is split up in parts that can be executed independently of each other 
+(task parallelization). These pieces of instructions are called \em threads. If a process is defined as an instance of a program with a specific private address space, 
+threads exist within this process. This means that the threads share the same process state, the same memory space and other resources. 
+They can however be executed independently of each other, either on the same processor or on a different one. 
+If a process is run with multiple threads on a single processor, this is done with a method called <em>time-division multiplexing</em>. 
+This means that the processor constantly switches between different threads to be executed (this is called a <em>context switch</em>). The threads are thus not executed one after
+the other, but neither are different threads executed at exactly the same time instant. The same technique allows you to run multiple processes or programs to run 
+on your computer simultaneously (multitasking). If a process with multiple threads is run on a multiprocessor system, 
+threads can be executed by different processors, which they possibly share with other threads or other programs. 
+The scheduling of threads and their assignment to processors is handled by the operating system.
+
+It is clear that the multithreading programming model is best adapted for use on multiprocessor shared memory systems, 
+since threads must share the same address space. However, there exist techniques to run a program with threads on distributed memory machines. 
+In this case, the distributed memory is mapped onto a global address space, so that it appears to be shared memory for the threads. This technique is called 
+<em>virtual shared memory</em>.
+
+Different implementations used for thread parallelization exist. The most common are POSIX and OpenMP.
+
+\subsection ParallelComputing_Programming_MessagePassing Message Passing
+
+Another approach to parallel programming is called the message passing model. In this model, a program is actually run as multiple processes, each with its own address space. 
+Because separate processes cannot access each other’s memory, these processes exchange information by sending and receiving messages. In order to execute the program 
+in parallel, the work is divided into pieces by either using task or data parallelization. These pieces of work are distributed amongst different processes. 
+Some part of the program that cannot be parallelized, will be executed by all process.
+
+Message passing programs can be run on shared memory systems, distributed memory systems or on computing clusters. 
+On shared memory systems, the different processes are executed simultaneously on the different processors. 
+Although these processors share the same physical memory, in the message passing model, each process has its own private memory space. 
+Thus, the processes do not directly utilize the available shared memory. If process A needs information of process B, 
+this information has to be copied from the memory space of process A to the memory space of process B, even though the physical memory is shared. 
+Consequently, in terms of memory consump- tion, the multithreading model performs better on shared memory systems than the message passing model. 
+The latter however, provides often a greater speed. Note that using the message passing model with different processes on a single processor is possible, 
+but not really useful. On a distributed memory system, ideally each process is run on one of the available processors. The address space of each process maps to the
+private physical memory of the processor. The communication between the processes happens over the network between the processors.
+
+The industry standard for message passing parallelization is MPI. MPI implementations exist for almost every popular computer platform; 
+including networks of workstations, clusters of personal computers, distributed memory systems and shared memory systems. 
+MPI implementations come in the form of libraries for different programming languages. Message passing parallelization typically involves more adaptations 
+to a serial code than thread parallelization (mainly for communications).
+
+\subsection ParallelComputing_Programming_Hybrid Hybrid
+
+A hybrid model is a model that combines the multithreading and message passing pro- gramming models. In this model, a program is run by 
+multiple parallel processes that each contain multiple threads. This means that threads within a process share the same data, 
+but in order to obtain data from a different process, communication is necessary. The most common hybrid model consists of combining the OpenMP and MPI implementations. 
+A newer approach is the combination of the MPI message passing features with the shared memory programming features of the MPI 3.0 standard.
+
+Ideally, a hybrid programming model is used with a computing cluster that combines shared and distributed memory architectures. In this case, each node of the cluster runs 
+one MPI process. The threads of that process are distributed amongst the processors of that node. The shared memory of each node is fully exploited by the OpenMP threads. 
+To exchange data between processes, explicit communications have to be implemented by the programmer. The information is transferred from the shared memory of one node, 
+trough the network, to the shared memory of the other node. Depending on the MPI library that is used, communications can be performed between any two threads 
+or only between the master threads. Some MPI implementations don’t support threads at all and therefore can’t be used for hybrid programming.
+
+Computing clusters do not necessarily require a hybrid programming model. Computing clusters can be used to run pure MPI programs as well, 
+with one MPI process running on each single processor. One advantage of using pure MPI is that the MPI library does not need to support multithreading. 
+A second advantage is that no changes have to made to existing MPI codes in order to let them run on computing clusters. Another important advantage 
+of using pure MPI parallelization over hybrid parallelization on computing clusters is speed. For a not too small number of processors per node, 
+running separate processes on each processor is usually faster than using multiple threads. There are a few reasons for this.
+A first reason is that some MPI implementations require that all threads that are not involved in a communication remain idle during that communication. 
+A second reason is that if multiple threads try to access or change the same variables this can cause delays. Another overhead is caused by the creation of threads.
+
+A drawback of using multiple MPI processes within the nodes of a computing cluster is the ‘unnecessary’ communication that happens inside these nodes. 
+Additionally, more memory will be required to run separate processes on a model instead of multiple threads of one process. This problem can only be minimized if the 
+MPI parallelization includes a very effective form of data parallelization.
+
+\section ParallelComputing_Memory Memory considerations
+
+A process always resides on a single node, but a node can host multiple processes. So does a processor. 
+Processes can (and have to) communicate through MPI whether they reside on the same processor, the same node or on a different node in the cluster.
+Assuming that running more than one thread on a single processor at a particular moment is pointless, 
+a node with \f$N\f$ processors can host at most \f$P\f$ processes with \f$N⁄P\f$ threads each. 
+On the other hand, a node with physical memory size \f$M\f$ can host no more than \f$P\f$ processes with a memory requirement of \f$M/P\f$ each.
+
+Assume each process needs a logical memory of size \f$D\f$ to fit the model. The node has a memory capacity of \f$M\f$. 
+If \f$M/D<2\f$, only one model can fit on the node. Thus, irrespective of the number of processors, only one process can be run at a time. 
+To make use of the multiple processors of the node, we must apply multithreading.
+If \f$M/D \geq 2\f$, more than one process can be run on the node. The number of processes \f$P\f$ can actually be any number between 1 and \f$M/D\f$, 
+with multiprocessing used to make sure that each processor executes threads.
+It is however more efficient to always use the maximal number of processes \f$P=M/D\f$ (rounded down) in this case. 
+This is because multi-processing scales better than multi-threading. Using multi-processing (MPI) will probably lead to the shortest execution time.
+From the other perspective, where we want to maximize the size of our model, we can benefit from using multithreading. 
+If there are \f$P\f$ processes, each with \f$T=N/P\f$ threads, the model size is limited to \f$D=M/P=T \times M/N \f$. 
+Therefore, the maximum model size is reached for \f$T=N\f$ or \f$P=1\f$. In other words, using only one process on the node and a number of threads equal 
+to the number of processors on that node permits the largest model size.
+
+*/

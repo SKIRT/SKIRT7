@@ -21,7 +21,11 @@
     wavelength. An efficient parallelization of the simulation over the wavelengths therefore
     requires an object of the StaggeredAssigner class, in order to obtain a good load balancing
     amongst the parallel processes. After performing the work in parallel, communication is
-    typically needed to accumulate the results stored at different processes. */
+    typically needed to accumulate the results stored at different processes.
+
+    The assignment mechanism explained above is represented graphically in the following figure.
+
+    \image html staggeredassigner.png "The StaggeredAssigner class distributes the work amongst the processes in a staggered way." */
 class StaggeredAssigner : public ProcessAssigner
 {
     Q_OBJECT

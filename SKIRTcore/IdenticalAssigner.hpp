@@ -17,7 +17,11 @@
     then all processes will execute all these parts. The execution of these parts is thus not
     parallelized with regard to the different processes, although each process can still execute
     these parts in parallel threads. Since each process executes the same algorithm, no
-    communication is needed afterwards to accumulate the results. */
+    communication is needed afterwards to accumulate the results.
+
+    The assignment mechanism explained above is represented graphically in the following figure.
+
+    \image html identicalassigner.png "The IdenticalAssigner class assigns each process to the same work." */
 class IdenticalAssigner : public ProcessAssigner
 {
     Q_OBJECT

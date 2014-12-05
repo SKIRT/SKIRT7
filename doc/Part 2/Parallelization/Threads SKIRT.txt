@@ -1,6 +1,6 @@
 /**
 
-\page ParallelizationThreads Thread parallelization
+\page ParallelizationThreads_skirt Thread parallelization in SKIRT
 
 In SKIRT, oligochromatic as well as panchromatic simulations are parallelized by means of multithreading. 
 The parallelization of both kinds of simulations is designed in the same way. 

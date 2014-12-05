@@ -2,10 +2,13 @@
 
 \page Parallelization Parallelization
 
-This topic consists of three parts:
+\note The topics below require an understanding of parallel computing in general, and the different forms of parallelization. Readers who are not familiar with
+these concepts, can first read the section about \subpage ParallelComputing. Readers who want to fully understand the MPI parallelization of <tt>SKIRT</tt> are
+also referred to the section about \subpage ParallelizationMPI first. 
 
- - \subpage ParallelizationIntroduction
- - \subpage ParallelizationThreads
- - \subpage ParallelizationMPI
+The following sections go into detail about how the different kinds of parallelization are implemented in the <tt>SKIRT</tt> code. 
+
+- \subpage ParallelizationThreads_skirt
+- \subpage ParallelizationMPI_skirt
 
 */

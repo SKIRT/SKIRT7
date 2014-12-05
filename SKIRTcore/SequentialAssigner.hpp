@@ -17,7 +17,11 @@
     rank. If a certain method in another class incorporates an object of the SequentialAssigner
     class for performing a set of tasks (or parts of work), each process will execute a different
     subset of these tasks. After performing this work in parallel, communication is typically
-    needed to accumulate the results stored at different processes. */
+    needed to accumulate the results stored at different processes.
+
+    The assignment mechanism explained above is represented graphically in the following figure.
+
+    \image html sequentialassigner.png "The SequentialAssigner class assigns processes to a subset of the work." */
 class SequentialAssigner : public ProcessAssigner
 {
     Q_OBJECT
@@ -44,7 +48,9 @@ public:
         rankForIndex function. Next, based on \f$q\f$ and \f$r\f$, the number of values assigned to the
         process is determined. This is done based on the following simple principle: <ol> <li> First,
         hand out \f$q\f$ values to each process. <li> Then, give the first \f$r\f$ process one value
-        extra. </ol> With the above method, all \f$n\f$ values get assigned to a process, and the work
+        extra. </ol> This principle is illustrated in the following figure.
+        \image html sequentialassigner_tasks.png "An illustration of how the number of tasks assigned to each process is determined."
+        With the above method, all \f$n\f$ values get assigned to a process, and the work
         load is maximally balanced (the difference in number of tasks between two arbitrary processes
         is no more than one). The number of values (or tasks) as calculated based on the method
         described above, is stored in the _nvalues member. The last thing the assign function

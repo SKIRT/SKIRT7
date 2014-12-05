@@ -1,454 +1,409 @@
 /**
 
-\page ParallelizationMPI MPI parallelization
-
-\section MPIscheme Parallelization scheme
-
-The design of the MPI parallelization follows that of the thread parallelization. 
-In this way, we have one well-defined way in which <tt>SKIRT</tt>  handles parallelization, which is clear for every user. 
-This means that we let the processes work together on simulating the \f$N_{\lambda}\f$ photon packages of a particular wavelength, 
-while they work on different wavelengths at the same time.
-
-Because each process basically performs an independent <tt>SKIRT</tt>  simulation, the same rules must apply for the number of chunks within each 
-process for a good load balancing between its threads. The work is already well balanced between the processes, 
-since they execute the same algorithm, for the same wavelengths. For that reason, only one process logs the simulation progress (see further). 
-The number and amount of chunks is determined in the same way as explained above, with the difference that a reduced number of packages is 
-used in each process. The total number of packages desired by the user is first divided by the number of parallel processes \f$P\f$ to obtain 
-this reduced number. 
-
-Note that if the simulation of the \f$N\f$ photon packages across the different processes would still be seen as one entire simulation 
-during the calculation of the number of chunks and the chunksize, one could get unwanted behaviour. 
-Suppose that we want to impose the same conditions on the number of chunks as in the non-MPI case, 
-from the perspective that we may then change the number of threads \f$T\f$ by \f$P \times T\f$, denoting the total number of threads in the simulation, 
-running in different processes. The number of photon packages is unchanged. This leads then to the following conditions on \f$N_C\f$:
-
-\f[ \frac{N}{10^7} < N_C < \frac{N}{2 \times 10^4} \f]
-\f[ N_C > 10 \times \frac{P \times T}{N_{\lambda}} \f]
-
-The difference with the non-MPI case is the factor \f$P\f$ in the last statement, denoting the <em>number of parallel processes</em>. 
-The number of chunks obtained by the reasoning above must be divided by \f$P\f$ to obtain the number of chunks that each process 
-should simulate per wavelength. Now imagine that we start a <tt>SKIRT</tt>  simulation with a relatively small number of threads (take 1) 
-and processes (take 3), but with a large number of wavelengths (let’s say 150). 
-The number of photon packages is not relevant for this reasoning. 
-We have a simulation with a total of 3 threads, albeit running in different processes. 
-By the above equations, this case is treated in the same way as a non-MPI situation with 3 parallel threads. 
-The load balancing condition requires a minimum of 10 chunks per thread, irrespective of wavelengths. 
-Because the number of wavelengths is fairly high, this condition is certainly met when only using one single chunk for each wavelength 
-(which is of course the minimum – chunks can never represent multiple wavelengths). 
-The right hand side of the second equation will evaluate to a value smaller than one, 
-but will be rounded to exactly one in the <tt>SKIRT</tt>  code. In a single-process <tt>SKIRT</tt> , this is ideal behaviour: 
-the number of chunks per wavelength is minimal (reducing overhead) but still more than 10 chunks are simulated by each thread 
-(providing good load balance). With MPI however, disaster follows: the number of chunks per wavelength (equal to one) 
-is divided by the number of processes (3) and we obtain a value of 0.333. Clearly, the logic is failing: by imposing the above equations, 
-one assumes that a good load-balancing is obtained, since there are so many wavelengths and only little threads. 
-The MPI parallelization however differs in the sense that <em>all processes</em> always simulate <em>all wavelengths</em>. 
-Consequently, the chunks (of different wavelengths) do not get distributed amongst the threads (residing at different processes) as assumed.
-
-From the moment the number of chunks and chunksize have been calculated, each process can carry out an independent 
-radiative transfer simulation of stellar photon packages. For an oligochromatic simulation, 
-this must be followed by a single communication phase where the fluxes received in the instruments are collected by a single process, 
-after which this process writes the results to file. A panchromatic simulation involves some more communication, 
-due to the fact that thermal emission spectra have to be calculated based on the absorption of the stellar photons. 
-Since these photons are simulated by different processes, their absorbed luminosities have to be sent from their corresponding process 
-to all other processes. Subsequently, the thermal emission spectrum calculation can be initiated on each process simultaneously, 
-yielding the same outcome. This procedure of launching photons, recording their absorption and communicating between processes is 
-iterated for a couple of times during the panchromatic simulation. Eventually, the same communication is needed for the instruments 
-as with the oligochromatic simulations.
-
-\section MPIimplementation Implementation
-
-\subsection MPIimplementation_processmanager The ProcessManager class
-
-To provide a convenient interface to the MPI library, a class called ProcessManager is added to the <tt>SKIRT</tt>  code. 
-Its source and header files are placed under a directory called MPIsupport. 
-The ProcessManager class is the only place in the <tt>SKIRT</tt>  code here explicit calls to the MPI library are allowed. 
-The ProcessManager source file can be compiled with our without MPI, depending on whether the MPI compiler can be detected on the system. 
-If it is compiled with MPI, the MPI header is included and the appropriate calls to the MPI library are inserted. 
-Otherwise, these calls are ignored and the ProcessManager class always returns default values to the rest of the code 
-(number of processes = 1, rank of the process = 0). <tt>SKIRT</tt>  can then be run as usual, without the MPI functionality. 
-
-No instances of the ProcessManager can be created. Its members include only static functions and variables. 
-The constructor is deleted so that the compiler ensures that it can never be called. 
-The reason is that the ProcessManager reflects a \em resource, being the MPI environment. 
-Within the runtime of a program, this resource is available <em>once and only once</em> (this is defined in the MPI standard). 
-As soon as the MPI environment is initiated, the rest of the code can call certain operations that perform communications between the \f$n\f$ processes. 
-The number of processes \f$n\f$ is \em always specified at the very moment the program launches, and can \em never be changed during runtime. 
-Hence, it is meaningless to create multiple objects during the course of the program, all with the purpose of representing the 
-same collection of processes. The ability to communicate between the processes and to inquire the n and the process’ rank can thus indeed 
-be seen as a solitary resource. 
-
-A solitary resource can be handed out once and further requests for it must be answered with a negative response. 
-Only if the resource is released again, a next request results in a positive reply. 
-Let’s translate that in case the resource is MPI and the way to obtain it is through the ProcessManager class. 
-The first time ProcessManager is asked whether an MPI environment is present, it can happily reply by stating the number of 
-processes \f$n\f$ and the rank of the process that requested the information. If the number \f$n\f$ is greater than one, 
-that process knows that it is part of a parallel program and executes the code accordingly. 
-If \f$n=1\f$, MPI is either absent or the MPI environment trivially consists of one process.
-Consequently, the entire simulation is run by this process. When a first request has been performed, a next request to 
-the ProcessManager will always result in a ‘non-MPI’ answer: \f$n=1\f$ and a rank of zero. 
-Any request thereafter results in the very same answer. The number of performed request can be conveniently stored in a static 
-variable of the ProcessManager class. This variable is increased with one after every request, 
-and decreased with one whenever such a request is release again. With every request, the value of the counter is checked. 
-Only if it is zero, the correct number of n processes is returned to the caller. 
-
-As we already mentioned, the MPI environment must always be initialized (once) and subsequently finalized (once) again. 
-Both operations can be performed by a call to resp. the initialize and finalize functions of the ProcessManager class. 
-The request to acquire MPI is managed by a function called acquireMPI and releasing the MPI resource is done by the releaseMPI function. 
-The private variable that stores the number of requests is called requests, and is of type std::atomic<int>. 
-Objects of the atomic type are free from data races, meaning that if one thread writes to an atomic variable while another thread reads from it, 
-the behaviour is well defined. In other words, making requests an atomic int instead of a regular int avoids situations where two different threads 
-try to increase (calling acquireMPI) or decrease (calling releaseMPI) its value at the same time, leaving the requests counter in an incorrect state. 
-
-\subsection MPIimplementation_processcommunicators The Process Communicators
-
-When either a Simulation or FitScheme object calls acquireMPI, it obtains a number of processes and a rank, which it is supposed to 
-remember for the rest of the object’s lifetime. Instead of creating new data members in the Simulation and FitScheme class, 
-this information is stored in an object we call a \em communicator. We added a new abstract class, ProcessCommunicator, 
-which acts as a base class for the classes PeerToPeerCommunicator and MasterSlaveCommunicator. 
-The base class provides two data members: _rank and _Nprocs. Their values are defined during the ProcessCommunicator constructor, 
-which calls the acquireMPI function of ProcessManager. ProcessManager also defines a (virtual) destructor (calling releaseMPI) and a 
-few functions such as getRank, getSize and isMultiProc. 
-
-<tt>SKIRT</tt> and <tt>FitSKIRT</tt> use a different MPI parallelization strategy. Whereas in <tt>SKIRT</tt> , we try to obtain as much independence as possible 
-between processes (despite the occasional gathering of data), FitSKIRT lets one process give directions to what other processes should work on. 
-That is why we have two separate classes, PeerToPeerCommunicator and MasterSlaveCommunicator, for <tt>SKIRT</tt>  and <tt>FitSKIRT</tt> respectively. 
-<em>Their purpose is to implement communication functions</em>, specific for the needs of the <tt>SKIRT</tt> and <tt>FitSKIRT</tt> design. 
-These functions, in turn, can use a shared set of lower-level communication functions in the ProcessManager class. 
-The latter are supposed to call the MPI library directly and deal with data buffers of fundamental types only. 
-
-Both the Simulation and the FitScheme class create their communicator, denoted by the member variable _communicator, in their constructor. 
-They do this by calling new PeerToPeerCommunicator() and new MasterSlaveCommunicator() respectively. 
-The base class ProcessCommunicator inherits from SimulationItem so that a pointer to the PeerToPeerCommunicator or MasterSlaveCommunicator 
-can be obtained at runtime with the find command from other classes in the <tt>SKIRT/FitSKIRT</tt> hierarchy.  
-
-\subsection MPIimplementation_skirtsimulation A SKIRT simulation
-
-A <tt>SKIRT</tt> simulation is represented by an object of either the class OligoMonteCarloSimulation or the class PanMonteCarloSimulation, 
-depending on the type of simulation. Both classes inherit from the MonteCarloSimulation class, which in turn inherits from the Simulation class. 
-The simulation is started by invoking the setupAndRun function, implemented in Simulation. This function calls two other functions of Simulation, 
-setup and run. The setup function iterates over all objects in the simulation hierarchy, creating and initializing their data structures. 
-It is in this phase that for example the dust system (class DustSystem) calculates the volumes and densities of the dust cells, 
-the random generator (class Random) generates the random sequences for the different threads, the wavelength grid 
-(class OligoWavelengthGrid and PanWavelengthGrid) calculates the wavelength bin widths, etc. 
-
-After the setup, the run function of Simulation is invoked. This function executes the runSelf function of either OligoMonteCarloSimulation 
-or PanMonteCarloSimulation. In the former, this function invokes the <em>stellar emission phase</em> and the <em>writing phase</em>. 
-In the latter, this function invokes the <em>stellar emission</em>, <em>dust selfabsorption</em>, <em>dust emission</em> and <em>writing</em> phases. 
-The runstellaremission function, implemented by MonteCarloSimulation, calculates the number and the size of the chunks and then 
-calls the dostellaremissionchunk function for each chunk (with or without parallel threads). 
-The chunk number and size calculation is done by a separate function, setChunkParams. 
-As explained in \ref MPIscheme, the implementation of this calculation is slightly changed to accommodate the MPI parallelization. 
-As indicated below, the number of processes \f$P\f$ (Nprocs) has been included in the calculation. 
-This number is obtained from the new ProcessCommunicator class. 
-
-\code
-int Nthreads = _parfac->maxThreadCount();
-int Nprocs = _comm->size();
-
-if (Nprocs * Nthreads == 1)
-{
-    _Nchunks = 1;
-    _chunksize = packages;
-    _Npp = packages;
-}
-else
-{
-    int myPackages = packages/Nprocs;
-    _Nchunks = ceil( qMin(myPackages/2e4, qMax(myPackages/1e7, 10.*Nthreads/_Nlambda)) );
-    _chunksize = ceil(myPackages/_Nchunks);
-    _Npp = Nprocs*_Nchunks*_chunksize;
-}
-\endcode
-
-A distinction is made between two cases: the \em serial and \em parallel case. If the number of processes and threads per process are both equal to one, 
-it is best to set the number of chunks per wavelength to one to minimize the overhead. In the other case, we first divide the total number of 
-packages per wavelength by P, to obtain a good load balancing between the processes. After that, the number of the chunks is calculated as usual 
-and stored in the variable _Nchunks. The chunksize is also calculated and stored in _chunksize. Note that the _Npp variable stores the <em>total 
-number of photon packages per wavelength</em>, combining the chunks of the different processes. Its value is for example used when the 
-luminosity of the photon packages is determined from the total luminosity to be emitted at a certain wavelength. 
-
-For the oligochromatic simulations, no other noteworthy changes were made to the <tt>SKIRT</tt> algorithm, 
-except for the communication in the writing phase (see subsection 3.2.5: The instruments) and a minor change in the Random class explained 
-in the next subsection. For the panchromatic simulations, more changes were necessary, related to the calculation of the dust emission. 
-This is explained in \ref MPIimplementation_emissioncalculation.
-
-\subsection MPIimplementation_randomness Randomness
-
-The construction of some types of dust grids (e.g. an octree grid), during the setup of the simulation, depends on random numbers. 
-Because of the dynamical way in which threads assign themselves to available work, this leads to the fact that two consecutive runs of a 
-<tt>SKIRT</tt> simulation with the same number of threads will almost never have an identical dust grid (for those types). 
-Since the processes in a MPI parallelized <tt>SKIRT</tt> simulation are essentially independent <tt>SKIRT</tt> simulations, this would result in inconsistent grids 
-across the processes and the program would most likely crash during some communication operation. 
-Remember, in panchromatic simulations, we require the processes to send the absorbed luminosities in each dust cell to the other processes. 
-If the dust grids are organized in a different way across processes, with differing number of cells, this communication is doomed to fail. 
-Even in oligochromatic simulations, we want the different processes to simulate exactly the same system. 
-Therefore, we need two conditions for the MPI parallelization regarding the setup of the <tt>SKIRT</tt> simulations. 
-Firstly, the setup can only be single threaded and secondly, these single threads must have the same random sequence on all processes. 
-The second condition is fulfilled anyway since the random seed is read in from the ski file or otherwise given a default, hardcoded value. 
-
-For the actual simulation of photon packages, however, we need to give each thread, <em>across all processes, a different</em> random seed. 
-This is to prevent of course that the thread with the same index (and seed) is assigned to the first wavelength on two different processes, 
-after which the two threads will essentially simulate identical photons. This procedure is implemented by the randomize function in the Random class. 
-This function is called from Simulation, between the execution of setup and run. The name is obvious because without this function, 
-the threads with the same index would have exactly the same sequence on all processes. 
-
-Schematically, the algorithm of the randomize function goes as follows:
-
--# Find the PeerToPeerCommunicator within the simulation hierarchy.
--# Obtain the number of parallel threads in each process from the ParallelFactory object. 
-   A pointer to the parallel factory is stored in a member called _parfac.
--# Give the first thread of each process a different seed, shift these seeds by exactly the number of threads. 
-   Store the seed in the member _seed at each process.
--# Execute the algorithm that is also used in the setup of the Random class, to create a random sequence for all the threads. 
-   The random sequence of thread zero is created from the _seed variable, the random sequence of thread 1 is created from incrementing 
-   _seed by 1, and so on. Thus for \f$T\f$ threads, a set of \f$T\f$ consecutive seeds are used. Since the value of _seed is shifted by \f$T\f$ 
-   on each subsequent process, the \f$P \times T\f$ different threads of the program have \f$P \times T\f$ different seeds. 
-
-The implementation of the randomize function is listed below.
-
-\code
-void Random::randomize()
-{
-    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
-
-    int Nthreads = _parfac->maxThreadCount();
-    _mtv.resize(Nthreads);      // Because the number of threads can be different during
-    _mtiv.resize(Nthreads);     // and after the setup of the simulation.
-
-    _seed = _seed + Nthreads * comm->rank();
-
-    initialize(Nthreads);
-}
-\endcode
-
-Because in the last procedure, we need to reuse code of the setupSelfBefore function of Random, 
-we have moved this piece of code to a separate (<em>protected</em>) function, which is called initialize. 
-As an argument, this function needs the number of threads, obtained from the parallel factory. 
-Internally, it uses the _seed member to initialize the random sequences. 
-
-\subsection MPIimplementation_instruments The instruments
-
-For an \em oligochromatic simulation, the stellar emission phase is immediately followed by the writing phase, 
-where instruments and dust system write out their information. The instruments of the different processes must add their values together 
-and store the result at one single process, which then writes out the information. There are different instruments, 
-all inheriting from the Instrument class. They all have their own private data members, which are arrays that represent the acquired fluxes. 
-The number of such arrays differs from one instrument subclass to the other. They also differ in name and size.
-
-We have implemented a function, called sumResults, in the Instrument base class that is responsible for summing the values in a 
-certain list of flux arrays across the different processes. Some subclasses have only one such list, other instruments have more. 
-Therefore, each subclass calls the sumResults function a different number of times. The choice of implementing the summing procedure in the 
-shared Instrument base class over implementing that procedure in each derived class separately provides clarity, 
-improves modularity (adding new instrument classes) and prevents needless duplication of code.
-
-The Instrument subclasses (SimpleInstrument, SEDInstrument, FullInstrument, FrameInstrument) contain a function write, 
-which is called from the InstrumentSystem class for each instrument in the simulation. In this function, 
-each instrument places pointers to its flux arrays (type Array) into a list of type QList. 
-This is typically a list called farrays for their (potential) pixel data arrays and a list called Farrays for their (potential) SED data arrays. 
-These two lists (if present) are then respectively passed to the functions calibrateAndWriteDataCubes and calibrateAndWriteSEDs. 
-These functions are implemented in the SingleFrameInstrument and DistantInstrument classes, from which the concrete instrument classes inherit. 
-Before these functions are called, first the communication between the processes must be performed. 
-This is done by calling the sumResults function for each list of flux arrays. In other words, sumResults is either called once with an farrays 
-list as an argument, once with an Farrays list as an argument, or twice for both lists.
-
-The implementation of the sumResults function in Instrument is as follows:
-
-\code
-void Instrument::sumResults(QList< Array*> arrays)
-{
-    PeerToPeerCommunicator * comm = find<PeerToPeerCommunicator>();
-    foreach (Array* arr, arrays) comm->sum(*arr);
-}
-\endcode
-
-A pointer to the PeerToPeerCommunicator instance of the simulation hierarchy is obtained by using the find operation. 
-For each (flux) array in the list passed to sumResults, the sum function of the PeerToPeerCommunicator class is called. 
-An additional argument of false is passed, indicating that not every process should receive the result of the summation, 
-but only the root process.
-
-The sum function makes sure that the values in the array pointed to by arr are summed element wise across the processes, 
-and that the results are stored in the <em>original array in the memory of the process with rank zero</em>. 
-The sum function can also be used to apply a summing procedure where each process obtains the results afterwards, 
-if its second argument is set to true. In the end, the difference in this argument leads to different MPI operations to be called. 
-This distinction is made as follows:
-
-- If the argument is true, the sum_all function of the ProcessManager class is called. 
-  The arguments passed to this function are: the address of the <em>original array</em>, the address of a <em>newly created array</em> of the same size, 
-  and the size of the arrays. After the sum_all function returns, the results are stored in the new array <em>at each process</em>. 
-  Each process then copies the values of that array into its original array.
-- If the argument is false, the sum function of the ProcessManager class is called. 
-  The arguments passed to this function are: the address of the original array, the address of a newly created array of the same size, 
-  the size of the arrays and the rank of the receiving process. <em>Only this process</em> will obtain the results of the summation procedure, 
-  stored in the new array. This process then copies these results back into its original array.
-
-The sum and sum_all functions of the ProcessManager class are just simple wrappers around the MPI_Reduce and MPI_Allreduce functions respectively. 
-After the calls to the sumResults function have returned, the calibrateAndWriteDataCubes and calibrateAndWriteSEDs are called. 
-These functions convert the flux data into appropriate units and subsequently write this data to file. 
-Before it does so, however, it first checks whether the process has rank zero. 
-This is done by calling the isRoot function of the PeerToPeerCommunicator. If it does, it executes the rest of the algorithm. 
-If not, the function returns. 
-
-\subsection MPIimplementation_emissioncalculation The dust emission calculation
-
-For a \em panchromatic simulation, extra phases are involved before the writing phase. These phases involve a repeated simulation 
-of (stellar or thermal) photon packages during which the absorbed luminosities in the dust cells should be stored. 
-This absorption information is used when the calculatedustemission function of the PanDustSystem class is called. 
-Similar as with the instruments where the fluxes are summed <em>wavelength/pixel-wise</em>, the luminosities should be summed <em>dustcell-wise</em>
-across the processes. The difference is that now each process should store the results afterwards, as each process still has to 
-continue with the simulation. 
-
-The summing of the absorbed luminosities is implemented in the calculatedustemission function of the PanDustSystem, 
-before the actual calculation starts. It is implemented at this level since it is the PanDustSystem class that stores the 
-absorption information, in the form of two container variables: _Labsstelvv and _Labsdustvv. 
-These containers are of the type Table<2>, i.e. a two-dimensional instance of the template class Table. 
-It can be constructed by specifying its dimensions \f$n_0\f$ and \f$n_1\f$  and its elements can be accessed by specifying two indices (i,j). 
-Internally, it consists of an Array of size \f$n_0 \times n_1\f$. 
-
-There are two different circumstances in which we want to calculate the dust emission. 
-The first is when we have just launched stellar photon packages, and we want to calculate the emission based on the absorption 
-of these photon packages to initiate the first dust selfabsorption cycle. 
-The other situation happens after each dust selfabsorption cycle, where the absorption luminosities of thermal photon packages get updated. 
-In this case, we want to recalculate the dust emission because on these updated thermal absorptions (stored in _Labsdustvv), 
-whereas the absorption luminosities of stellar photon packages (stored in _Labsstelvv) have not been altered. 
-Thus, in the first situation we want to sum the values of the _Labsdustvv across the processes, 
-whereas in the second situation we need to sum the values of _Labsdustvv across the processes. 
-Therefore, the calculatedustemission function takes a boolean argument ynstellar to determine whether it is called after a 
-stellar emission phase or after a dust selfabsorption phase.  
-
-The dust selfabsorption phase consists of 3 stages. During each such stage, a simulation of thermal photon packages is performed 
-repeatedly (in so-called cycles), until a certain convergence is reached on the total absorbed luminosity of thermal photon packages. 
-The first stage, second stage and third stage respectively launch 1/10, 1/3 and 1 times the number of photon packages used for 
-the stellar emission phase. A stage is finished when the total absorbed thermal luminosity convergence or the maximum number of 
-cycles (which is 100) is reached. Only in the <em>first cycle of the first stage</em>, the absorbed stellar luminosities have to be 
-communicated between the different processes. Once the summed stellar luminosities are stored in each processor’s memory, 
-these values are not changed anymore during the simulation. The argument ynstellar passed to calculatedustemission 
-should thus only be true when the stage variable is zero (because the stage index starts from zero) and the 
-cycle variable is one (because this index starts with one). Therefore, the following statement is implemented in the body 
-of the rundustselfabsorption loop:
-
-\code
-_pds->calculatedustemission(!(stage+cycle-1));
-\endcode
-
-The variable _pds is a pointer to the dust system used for panchromatic simulations. The calculatedustemission function does the following:
-
-- First, it checks whether dust emission is turned on or off. If it is turned of (one can choose to do so in the ski file), 
-  then the function immediately returns (it does nothing).
-- If dust emission is enabled, the sumResults function of the same class is called, which performs the communication. 
-  The argument ynstellar is passed on to this function.
-- After sumResults, the actual calculation is executed. This is done by calling the calculate function of the _dustlib object, 
-  an instance of one of the DustLib subclasses.
-
-The algorithm of the sumResults function of PanDustSystem is listed below. Note that it is somewhat similar to the sumResults function 
-in Instrument, and therefore bearing the same name.
-
-\code
-void PanDustSystem::sumResults(bool ynstellar)
-{
-    PeerToPeerCommunicator * comm = find<PeerToPeerCommunicator>();
-
-    Array* arr;
-    arr = ynstellar ? _Labsstelvv.getArray() : _Labsdustvv.getArray();
-
-    comm->sum_all(*arr);
-}
-\endcode
-
-First, a pointer to the PeerToPeerCommunicator is obtained with the find function. 
-Then, an empty pointer to an object of type Array is constructed. The ynstellar flag determines which Array the pointer will point to. 
-If ynstellar is true, a pointer to the internal array of _Labsstelvv is obtained and assigned to arr. Otherwise, 
-the same is done with the _Labsdustvv object. Finally, the sum function of the PeerToPeerCommunicator is called, 
-passing the array pointed to by arr and a flag of true as its arguments. By setting the second argument to true, 
-we impose that the results of the summation are stored at \em each individual process.
-
-After the summing of the luminosities, each process applies the <em>same procedure</em> (calculating the dust emissivity) on the <em>same data</em>. 
-This procedure can be parallelized too; but this has not been done yet. Because the calculation on each process will in principle 
-yield the same results, no communication is needed before simulating the next round of photon packages.
-
-After the dust selfabsorption and dust emission phases, the instruments add their flux values together just as in the oligochromatic simulations, 
-after which the root process writes out the results. 
-
-\subsection MPIimplementation_logging Logging
-
-SKIRT uses an advanced logging mechanism that clearly marks the beginning and end of the different simulation phases, 
-provides timestamps to the log messages, and allows for two (or possibly more) Log objects to be linked, so that the parent 
-(in case of SKIRT, the <em>console logger</em>) passes the messages to the child (the <em>file logger</em>). 
-
-The console logger, an instance of the Console class – inheriting from Log – is created by its default constructor during 
-the construction of the SkirtCommandLineHandler object. After its construction, the console logger prints a welcome message.
-
-When the perform function of the SkirtCommandLineHandler class is called, <tt>SKIRT</tt> determines whether to start a (series of) simulation(s) 
-or execute its <em>interactive mode</em> where the user can create a \em ski file. 
-Because the interactive mode is very basic and depends on sequential user input, it is not parallelized in any way. 
-Therefore, we have taken care that if <tt>SKIRT</tt> is somehow started in interactive mode (for example by not providing any command line arguments) 
-<em>with MPI</em>, the program is shut down with an error message. This is done by calling the isMultiProc function of the ProcessManager 
-class at the beginning of the doInteractive function, and throwing a FATALERROR when the former returns true. 
-
-In <em>simulation mode</em>, the console prints out that it is constructing a simulation for the specified <em>ski</em>-file(s). 
-After that, an object of the Simulation class is constructed. Using its default constructer, 
-a new object of the Console class is created as a data member. This object will be solely responsible for all further logging 
-during the simulation. Another logger, of the class FileLog, is linked to the Console logger and writes out the exact same 
-messages to a file during the simulation. 
-
-The actual simulation is executed by calling the setupAndRun function of the Simulation class. 
-This function calls two other functions, setup and run. All of this is not important without MPI, but if we do use multiple processes, 
-we want the logging mechanism to adapt to the situation. Imagine that we don’t change anything in the logging algorithm. 
-Then we would have a whole bunch of processes, all thinking they are executing an independent simulation, 
-logging messages to the terminal and to a file. This would result in a mess of redundant information. 
-On the other hand, it could be useful for some types of messages to always reach the user, 
-irrespective of which process wants to log them. Error messages, for example, are not necessarily expected to occur in each process at the same time. 
-It is therefore certainly desired to always output these messages; otherwise the program could crash without apparent reason. 
-
-It is obvious that different kinds of messages require a different treatment. There are, in SKIRT, four kinds of messages: 
-info, warning, success and error. Info messages are used for showing the progress of the simulation(s) and providing 
-general info about the simulation name, <tt>SKIRT</tt> version etc. Warnings are used when unexpected behaviour occurs somewhere during the simulation, 
-but it can be solved or handled without affecting the results or performance of the program. 
-Still, the user may want to be informed by the unexpected event. 
-Errors are similar, however, the program should usually be terminated after an error is encountered. 
-A success message is not very different from an info message, but it is used to inform the user of the successful ending of a 
-particular simulation phase. Since the different processes execute the same algorithm, the info and success messages 
-they intend to show are identical. Subsequently, it is sufficient to let only one process, the root process, 
-output these messages to the console and to file. Thus, the following line is implemented at the beginning of the 
-info and success function of the Log class:
-
-\code
-if (!ProcessManager::isRoot()) return;
-\endcode
-
-Therefore, the info and success function do nothing for a process that is not the root, and otherwise it performs as usual. 
-In the warning and error function, the above line is not added. In these functions, an additional variable _procName is used. 
-This is object of type QString, and a data member of the Log class. In the initialization list of Log, 
-its value is defaulted to the empty string. Its value can be changed afterwards by calling the setProcessName function. 
-This function takes the rank i of the process (an int) as a parameter, and sets the process name to [Process i]. 
-The Log::setProcessName function is called in the setup of the Log baseclass, after a pointer to the ProcessCommunicator object is obtained
-and it is verified that this object has been set up itsself:
-
-\code
-void Log::setupSelfBefore()
-{
-    ProcessCommunicator* comm;
-
-    try
-    {
-        // get a pointer to the ProcessCommunicator without performing setup
-        // to avoid catching (and hiding) fatal errors during such setup
-        comm = find<ProcessCommunicator>(false);
-    }
-    catch (FatalError)
-    {
-        return;
-    }
-
-    // Do the find operation again, now to perform the setup of the
-    // PeerToPeerCommunicator so that the correct rank is initialized
-    comm = find<ProcessCommunicator>();
-
-    if (comm->isMultiProc()) setProcessName(comm->rank());
-}
-\endcode
-
-The Log::setProcessName function automatically calls itself also for the linked log. When Log::warning or Log::error is called afterwards, 
-the process name is shown after the timestamp and before the actual message. We have also added the process name to the 
-info and success log messages, when <tt>SKIRT</tt> is compiled in debug mode. Obviously, these messages are then also always output, 
-irrespective of the process. This allows for the user to find out which process causes the program to hang, for example. 
+\page ParallelizationMPI The Message Passing Interface
+
+\section MessagePassing_intro Introduction
+
+To benefit from the advancements in supercomputer architecture, specialized software had to be developed. 
+Not only specific operating systems were developed for the su- percomputers, but methods were invented to organize the communication between processors 
+so that large computational problems could be solved by many processors simultaneously. In the beginning of multiprocessor computing, 
+several of these meth- ods were developed, but none of them was standardized. Around 1991, a small group of researchers realized that a 
+standardized method would benefit the future of com- puting and the next year Jack Dongarra, Rolf Hempel, Tony Hey, and David W. Walker 
+proposed a first draft of a possible message-passing standard. In the next two years, the working group further refined the details of the standard. 
+They were helped by an expanding base of people involved with high performance computing, which gathered in the MPI forum. 
+In 1994, a standard was presented and was called version 1.0 of the Message Passing Interface. It was designed to be highly efficient and portable, 
+meaning it could be used on every multiprocessor system: not only distributed memory systems but also shared-memory systems and even on networks of computers. 
+Once the standard was set, implementations were being developed and soon libraries for C and Fortran became available.
+
+\section MessagePassing_standard The MPI standard
+
+It is important to note that the MPI standard set in MPI 1.0 was only a \em specification for the developers and users of message passing libraries. 
+By itself, it is not a library or implementation, but it is the specification of how such an implementation should look like. 
+In other words, it defined the rules implementers of MPI libraries had to follow. 
+Concretely, it specified the names and syntaxes of the functions in the library as well as the results of these functions. 
+In the MPI 1.0 standard, these specifications were only made for the C and Fortran programming language. 
+Specifications for other languages followed in later versions of the standard. Thanks to the MPI standard, one could be sure that all 
+MPI implementations were highly portable between different computer systems and different parallel programs using MPI. 
+The individual implementers how- ever, retained the responsibility to determine the details of their MPI implementation 
+themselves so that they were optimally adjusted to a specific computer system but again, not exclusive to them. 
+The MPI standard acquired a great deal of success and is now the absolute <em>industry standard</em> for writing parallel programs on distributed memory systems.
+
+In 1996, the MPI standard 2.0 was presented, as an extension to MPI 1.0. It provided the specification for additional features such as parallel I/O, 
+C++ and Fortran 90 libraries and one-sided communications. Another revision to the MPI standard, MPI 3.0, was finished in 2012. 
+New features included for example non-blocking collective operations and Fortran 2008 bindings. 
+The C++ bindings were removed because it was felt they provided not much more than the C bindings and were actually not much used. 
+Version 3.1 of the MPI standard is currently under development.
+
+As of today, different versions of MPI are preferred by different users and implementers. The most popular versions are version 1.3 (called MPI-1 for short) 
+and version 2.2 (or MPI-2). Since MPI-2 is an extension of MPI-1, MPI-2 implementations are backwards compatible with programs written around older MPI implementations.
+
+\section MessagePassing_openmpi OpenMPI
+
+OpenMPI is an open source implementation of the MPI-2 standard. It originated in 2003 as an initiative to combine the best ideas of different existing MPI implementations. 
+OpenMPI is the result of the union of 4 implementations: LAM/MPI, LA/MPI, FT-MPI and PACX-MPI. New and better version of OpenMPI are continuously under development by a 
+large base of people. OpenMPI is used by many supercomputers in the TOP500 list. A version of OpenMPI conform with the MPI-3 standard is expected soon. 
+Because of its success, OpenMPI was the implementation that is used for the parallelization of the <tt>SKIRT</tt> code.
+
+\section MessagePassing_basics MPI basics
+
+An MPI program consists of multiple processes that each execute their own instructions. In this sense, these processes can be thought of as individual programs. 
+The difference with actual, autonomous programs is however that these processes work together on the same problem and that they have the ability to communicate with each other. 
+Launching an MPI program is done by invoking the mpirun script (or any equivalent). This script effectively launches \f$N\f$ processes, which are all instances of the same executable. 
+The number \f$N\f$ is chosen by the user. The executable can be any kind of program, it does not necessarily have to involve any MPI calls. 
+Using mpirun with an ordinary program would result in \f$N\f$ processes executing exactly the same instructions, which is in most cases not very useful. 
+The difference with an MPI program is that such a program can differentiate amongst these processes so that each of them solves one part of a larger problem. 
+This differentiation is done by calling functions of the MPI library. The first MPI function that must be called in an MPI program is an initializaion 
+routine. It may be called only once by every process. The most used initialization routine is called MPI_Init. The syntax of this function is shown in the box below.
+
+| MPI_Init                 |
+| -------------------------|
+| <b>Type:</b> <tt>int</tt> |
+| <b>Arguments:</b> <tt>int *argc, char ***argv</tt> |
+| <b>Description:</b> This function initializes the MPI execution environment. It requires a pointer to the number of arguments and a pointer to the argument vector. |
+
+As soon as a process calls the <tt>MPI_Init</tt> function, it enters the so-called MPI environment. From that moment on, this process can call any other function in the 
+MPI library and in- teract with other processes. When no further calls to MPI routines are necessary, the MPI environment should be terminated before the program finishes. 
+To achieve this, every process calls the <tt>MPI_Finalize</tt> function, of which the syntax is shown below.
+
+| MPI_Finalize                 |
+| -------------------------|
+| <b>Type:</b> <tt>int</tt> |
+| <b>Arguments:</b> \em none |
+| <b>Description:</b> This function terminates the MPI execution environment. |
+
+All other calls to the MPI library must of course happen between the initiation and termination. The basic principles listed here, are illustrated in the figure below.
+
+\image html initfinal.png "The outline of the execution of an MPI program. The program is started as N identical processes. Upon calling the initiation function, they get assigned a rank within the MPI environment. They can then call other MPI functions, e.g. for communication with other processes. All calls must be done before the call to the finalization function."
+
+As soon as a process calls the <tt>MPI_Init</tt> function, it is assigned a rank. This rank is just a number that is used to identify the process within the 
+environment. With \f$N\f$ processes, the rank of each process is an integer value between zero and \f$N − 1\f$.
+
+Regarding communications between processes, it can be useful to define smaller groups of processes that are able to communicate with each other. 
+Such groups are called \em communicators. MPI automatically provides a communicator called <tt>MPI_COMM_WORLD</tt>, which includes all processes in the environment. 
+Additional communicators can be created by the programmer by calling specific functions of the MPI library. 
+This involves setting a name for the communicator and choosing the processes that should be included in it. 
+Within a communicator, each process is given a unique rank. Note that the rank of a process in one communicator is generally not the same as its rank in 
+an other communicator. This is illustrated in the next figure.
+
+\image html communicators.png "Processes can have different ranks within different communicators."
+
+A process can determine its rank within a certain communicator with a call to the MPI_Comm_rank function of the MPI library. 
+The process specifies the name of the communicator and the memory address where the rank should be stored. 
+The syntax of the <tt>MPI_Comm_rank</tt> function is shown in the box below.
+
+| MPI_Comm_rank                 |
+| -------------------------|
+| <b>Type:</b> <tt>int</tt> |
+| <b>Arguments:</b> <tt>MPI_Comm comm, int *rank</tt> |
+| <b>Description:</b> This function determines the rank of the calling process in the specified communicator. |
+
+A process can also determine the size, or the number of processes, of a communicator it belongs to. 
+This done by calling the <tt>MPI_Comm_size</tt> function, of which the syntax is shown below. The second argument is the address where the integer size should be stored.
+
+| MPI_Comm_size                 |
+| -------------------------|
+| <b>Type:</b> <tt>int</tt> |
+| <b>Arguments:</b> <tt>MPI_Comm comm, int *size</tt> |
+| <b>Description:</b> This function determines the number of processes in the specified communicator. |
+
+If the communicator is <tt>MPI_COMM_WORLD</tt>, the size that is returned from this function is of course the total number of processes \f$N\f$, specified when the program is launched.
+
+\section MessagePassing_communications Communications
+
+The most fundamental role of the Message Passing Interface is of course providing a mechanism for communication between processes. 
+There are two major groups of communications that are defined in the MPI standards: <em>point-to-point communications</em> and <em>collective communications</em>. 
+The difference between these two is straightforward: point-to-point communications are defined between two processes and collective communications involve a group of processes. 
+The messages that are communicated be- tween processes can vary in length and type. It is important to note that messages must consist of a continuous block of information 
+in the process’s memory. In other words, a single communication can send an indefinite amount of information, but only if this data can be accessed by 
+reading the memory of the process from a certain starting location up to an other location determined by the length of the message.
+
+\subsection Communications_ptp Point-to-point communications
+
+Point-to-point communications allow one process to send a certain message to an other process. They require the calling of two types of MPI functions: 
+a send function and a receive function. The send function is to be called from the process that has the information, called the source, 
+and the receive function should be called from the pro- cess that needs this information, called the destination. 
+The message in a point-to-point communication consists of two parts. The first part, called the envelope, defines the rank of the source, 
+the rank of the destination, the communicator and a tag. The com- municator must be a group of processors to which both the source and the destination belong. 
+The tag is just an integer used to identify the message. The second part of the message, called the message body, describes the data itself. 
+It includes the data buffer, the datatype and the count. The buffer is the region of the physical memory where the data that is to be sent, is stored. 
+The buffer can be thought of as an continuous array of elements of a the same type. This datatype (e.g. an integer, a double) is thus also
+specified in the message body. The count variable is thus the number of elements of this datatype in the buffer.
+
+The following figure shows how a point-to-point communication between two processes, process A and process B, happens. If for example process A calls the MPI_Send function and process B calls the MPI_Recv function and the envelopes passed on to both functions match, the communication is initiated. It is then up to the programmer to ensure that the buffer specified by process A indeed contains data of the specified datatype and that this data is readable.
+
+\image html sendreceive.png "In a point-to-point communication, a piece of data (a message) is copied from the memory of one process to the memory of another process."
+
+It is important to note that there are blocking and non-blocking send and receive functions. A blocking send or receive function only returns when the communication 
+operation is completed. The MPI_Send and MPI_Recv are both blocking functions. The syntax of both functions is shown in the boxes below. 
+Note that both functions return an integer. This represents an error code: it is zero if the operation finished successfully and is greater than zero if any error occurred.
+
+| MPI_Send                 |
+| -------------------------|
+| <b>Type:</b> <tt>int</tt> |
+| <b>Arguments:</b> <tt>const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm</tt> |
+| <b>Description:</b> This function performs a blocking send. |
+
+If process A calls the <tt>MPI_Send</tt> function, this process executes no further instructions until process B calls a receive function (not necessarily MPI_Recv) 
+with a matching envelope. Analogously, if process B calls the <tt>MPI_Recv</tt> function before process A calls a send function, process B will wait for process A before 
+doing any other business. This principle is illustrated in the following figure, in the case process A reaches the communication point first.
+
+\image html sendtimeblocking.png "With a blocking send, no other operations can be executed until the communication has completed."
+
+This figure clearly shows that process A does no work (remains idle) as long as pro- cess B has not called the receive function. 
+When B reaches the communication point, the communication is initiated and B receives the data stored in the buffer of process A. 
+After this communication has completed, both functions can continue doing other work. If the MPI_Send function returns, 
+process A can be sure that the buffer can be overwritten. Analogously, when a process calls a blocking receive function such as MPI_Recv, 
+the process is sure that it can begin using the received data as soon as this function returns.
+
+Non-blocking send and receive functions behave differently. If a process calls a non- blocking send function (or receive function), 
+this function returns immediately. This process is then said to have ‘posted a send’ (or ‘posted a receive’). 
+After posting a send or receive, the process is able to perform any further instructions. The actual communication will be initiated from the 
+moment a matching call is performed on another process. Essentially, calling a non-blocking send or receive function and the actual transfer 
+of the data is separated. To initiate a non-blocking send or receive operation, a process can call the <tt>MPI_Isend</tt> or the <tt>MPI_Irecv</tt> function respectively. 
+The syntax of these MPI functions is shown in the boxes below.
+
+| MPI_Isend                 |
+| -------------------------|
+| <b>Type:</b> <tt>int</tt> |
+| <b>Arguments:</b> <tt>void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm, MPI_Request *request</tt> |
+| <b>Description:</b> This function begins a nonblocking send. |
+
+
+| MPI_IRecv                 |
+| -------------------------|
+| <b>Type:</b> <tt>int</tt> |
+| <b>Arguments:</b> <tt>void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Request *request</tt> |
+| <b>Description:</b> This function begins a nonblocking receive. |
+
+Note that the syntax of the <tt>MPI_Isend</tt> and <tt>MPI_Irecv</tt> functions is very alike the syntax of the <tt>MPI_Send</tt> and <tt>MPI_Recv</tt> functions. 
+The difference is that the nonblocking operations use so-called <em>request handles</em>. When a send or receive has been posted by a certain process, 
+the request handle can be used by this process to refer to the posted operation at a later point in time. 
+Since the <tt>MPI_Isend</tt> and <tt>MPI_Irecv</tt> functions return immediately after being called, a process has no direct information on when 
+the actual communication is performed. At some point however, it is very likely that the process that posted the send or receive wants to know whether 
+the communication has already finished or not. If this process is the destination, this is crucial if the received data is supposed to be used. 
+If the process is the source, the send buffer can only be overwrit- ten if the message has successfully been sent. For these purposes, the <tt>MPI_Wait</tt> and 
+<tt>MPI_Test</tt> can be used. When the first function is called, it waits for the communication to finish before returning. 
+The second function provides the process with the current status of the communication. The <tt>MPI_Wait</tt> and <tt>MPI_Test</tt> functions use the request handle 
+to identify the preceding <tt>MPI_Isend</tt> or <tt>MPI_Irecv</tt> call.
+
+There are advantages and disadvantages to both blocking and non-blocking functions. When a blocking send or receive function returns, 
+the programmer is sure that the information is properly copied to the destination’s memory so that process can be- gin using this information. 
+Additionally, the sending process can safely overwrite the memory locations where the sent information was stored. 
+With non-blocking send and receive functions, there are less certainties.
+
+If a process calls a non-blocking send function, the programmer has to make sure that the information it is about to send is not overwritten 
+(and not even read) while the process executes further instructions. Posting receives is analogous to posting sends, here the programmer must 
+make sure that the memory where the information will be delivered is not already used (read or written) before the communication is completed. 
+The advantage of non-blocking operations is that one process can proceed doing other useful work while the communication is put on hold until the 
+other process reaches the communication point. This can save valuable CPU time. Two processes can for example execute a similar set of routines, 
+but they will never do this perfectly synchronous. Imagine we have 2 processes A and B working on some set of tasks. At a certain point, 
+the programmer can choose to send some information from process A to process B because B needs some result of process A. 
+Assume that process A reaches the communication point before process B does. Process A posts a send with the results as a message, 
+and subsequently moves to working on some other data. The moment process B is ready with its work, its time to bring the results of A and B together. 
+Thus, process B posts a receive, after which the communication is immediately initiated and the information of A is written to the memory of B. 
+Process B can than proceed its work, using the newly received data. This principle is illustrated in the next figure.
+
+\image html sendtime.png "With a nonblocking send, other operations can be executed until the other process responds with a call to a receive function."
+
+In this example we see that it is very useful for process A to use a non-blocking oper- ation, since it will have already performed useful work when 
+B reaches the commu- nication point. In the other case, where B reaches this point first, it is useful if B uses a non-blocking receive, 
+at least if it doesn’t require the data from A immediately and if there are other tasks it can perform in the meantime. 
+At some point further in the execution of the program, process B will require the data acquired from A for other operations. 
+Before these operations are started, process B should call a function which checks whether the communication has succeeded and blocks 
+the process as long as this is not the case (the MPI_wait function). Process A should use the same block- ing function before it intends 
+to overwrite the memory where the message for B was stored.
+
+\subsection Communications_collective Collective communications
+
+Collective communications are communications that involve a group of processors, rather than just two. 
+In principle, all possible movements of data across multiple processors can be accomplished using a sequence of point-to-point communications. 
+There are however a lot of common forms of collective communications for which MPI provides a a set of pre-defined functions.
+
+An important distinction with point-to-point communications is that collective communications do not use the tag mechanism for identifying matching 
+calls from different processes. Instead, all processes involved in the collective communication call the same MPI function and the communication 
+is initiated as soon as each process in the group has done so. The association of the calls of each process is thus made based simply on the order 
+of execution of the program. The figure below this paragraph illustrates this principle. If process A reaches the communication point first, it will wait for other processes 
+and not execute other instructions. It is only when the last process involved in the communication calls the same function, that the actual communication starts. 
+When the communication has completed, each process can proceed executing their instructions.
+
+\image html collectivetime.png "In a collective operation, processes must reach the same point in the program code in order for the communication to begin. The call to the collective function is blocking."
+
+Many different collective communications are defined in the MPI standard. They all provide certain benefits over using point-to-point communications, such as simplicity
+and speed. Below, we will discuss the most important collective operations.
+
+\subsubsection Communications_collective_broadcasts Broadcasts
+
+A first example of a collective communication is a broadcast. In a broadcast operation, a single process sends a copy of the exact same data to all 
+the other processes in a group. In terms of its result, this operation is equivalent with one process calling a separate send function for every 
+other participating process and each of these processes calling a receive function. For the broadcast to take place, each process in the group 
+(the sender and the receivers) should call the MPI_Bcast function in the MPI library. The syntax of this function is shown below.
+
+| MPI_Bcast                 |
+| -------------------------|
+| <b>Type:</b> <tt>int</tt> |
+| <b>Arguments:</b> <tt>void *buffer, int count, MPI_Datatype datatype, int root, MPI_Comm comm</tt> |
+| <b>Description:</b> This function broadcasts a message from the process with rank ‘root’ to all other pro- cesses of the specified communicator. |
+
+As soon as each process in the specified communicator calls this function, the broadcast operation is initiated. 
+All processes must agree on the rank of the root process, i.e. the process which sends the information. 
+The figure below illustrates the result of a broadcast operation.
+
+\image html broadcast.png "The result of a broadcast operation is that some data is copied from the memory of one process to the same memory location of all other processes in the communicator."
+
+It is important to note that all participating processes pass the same buffer (or memory location) to the broadcast function. 
+Before calling the MPI_Bcast function, the root process must ensure that this buffer is filled with the appropriate data. Equivalently,
+the other process must ensure that their buffer is empty or may at least be overwritten. When the broadcast operation is finished, 
+the data in the memory of the root process is copied to the same memory locations of the other processes in the communicator. This principle is illustrated in the next figure.
+
+\image html broadcast2.png "Every process calling the MPI_Bcast function passes the address of a buffer. The information in this buffer of the root process is copied to the buffers of the other processes."
+
+It is obvious that calling the broadcast function from each process is much easier than using multiple sends and receives. 
+Still, the broadcast function is built around these simple point-to-point operations. While the specific algorithm depends on the imple- mentation, 
+most implementations are designed to make very efficient use of the hard- ware on which the MPI program is run. More specifically, 
+the topology of the network that connects the processors determines how the broadcast operation is performed. 
+In a bus topology, for example, where all processors are connected to a single cable, the data sent by the root process can be read simultaneously 
+by the receiving processes. If the network is fully connected (each processor is connected to any other processor), 
+a tree-based mechanism will be the most efficient communication algorithm. Instead of letting the root process send its data successively to every other process, 
+this algorithm will use the connection between different pairs of processes at the same time. In the first stage, the root process sends the data to some other 
+process X in the communica- tor. In the next stage, the root process and process X each send a copy of the data to an other process. 
+This mechanism repeats itself until the message has arrived on each participating process. This tree mechanism is illustrated below.
+
+\image html treemechanism.png "Instead of sending the data from the root process to every other process successively, in the tree mechanism the data is distributed with the help of other processes."
+
+Due to these efficient implementations, using the broadcast function is generally much faster than using successive point-to-point communications. 
+The specification of the root process as the mechanism of differentiating amongst the participating processes will be used in many other collective operations.
+
+\subsubsection Communications_collective_reductions Reductions
+
+A second kind of collective communication is the reduction operation. It is applied to collect data from each processor in a 
+given group and reduce these different sets of data back to one set of data by applying some operation on them. 
+This resulting set of data is then either stored at one particular process or sent back to each individual process. 
+In the case the result should only be used by one process, we use the <tt>MPI_Reduce</tt> function. The syntax of this function is shown below.
+
+| MPI_Reduce                 |
+| -------------------------|
+| <b>Type:</b> <tt>int</tt> |
+| <b>Arguments:</b> <tt>const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op operation, int root, MPI_Comm comm</tt> |
+| <b>Description:</b> This function combines values from all processes and distributes the result back to the process with rank <tt>root</tt>. |
+
+An notable difference with the MPI_Bcast function is that the MPI_Reduce function requires two buffers: a send buffer and a receive buffer. 
+In the send buffer, each process in the communicator stores an array of length count with values of datatype datatype. 
+The receive buffer is used to store the results of the operation that is applied on the values of the different processes. 
+The desired operation is passed as an argument to the MPI_Reduce function by each participating process. There are many different MPI operations available. 
+The MPI_MAX and MPI_MIN operations are used to calculate the maximum and minimum value across all processes for each element of the data buffer. 
+The MPI_SUM and MPI_PROD can be used to determine the sum and product of these values across the processes. Logical operations are denoted by MPI_LAND and MPI_LOR. 
+Note that these operations are always performed count times, the amount of values in the data buffers. The result is of course a buffer with again count values.
+When the operations are complete, the resulting array of values is copied to the memory of the root process. Note that because each process calls the same function, 
+each process should provide a receive buffer. When the reduction operation is finished, the reduced values are copied to the receive buffer of the root 
+process while the receive buffer of the other processes is left untouched. The root process can then begin using the received information and the other processes can 
+overwrite the reserved memory. The send buffer of each process can also be overwritten. The above principles are illustrated in the figure below.
+
+\image html reduce.png "The MPI_Reduce operation."
+
+A variant of the MPI_Reduce function is the MPI_Allreduce function. The syntax of this function is shown below. 
+If this function is used, the result of the operation is not only copied to the memory of one process, but to the memory of each process in the communicator.
+
+| MPI_Allreduce                 |
+| -------------------------|
+| <b>Type:</b> <tt>int</tt> |
+| <b>Arguments:</b> <tt>const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op operation, MPI_Comm comm</tt> |
+| <b>Description:</b> This function combines values from all processes and distributes the result back to all processes. |
+
+An <tt>MPI_Allreduce</tt> operation is similar to a reduce operation followed by a broadcast. The actual implementations may however not use these steps but provide a faster algorithm. 
+The effect of the <tt>MPI_Allreduce</tt> function is shown in the next figure.
+
+\image html allreduce.png "The MPI_Allreduce operation."
+
+\subsubsection Communications_collective_gather The gather operation
+
+Another example of a collective operation is provided by the <tt>MPI_Gather</tt> function. It is called an all-to-one operation because it is used to 
+send information from all processes in the group to a single process, the root process. The syntax of the <tt>MPI_Gather</tt> function is shown below.
+
+| MPI_Gather                 |
+| -------------------------|
+| <b>Type:</b> <tt>int</tt> |
+| <b>Arguments:</b> <tt>const void *sendbuf, int sendcount, MPI_datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm</tt> |
+| <b>Description:</b> This function gathers data from different processes and sends it to the memory of the process with rank <tt>root</tt>. |
+
+Each process in the communicator must call the <tt>MPI_Gather</tt> function and specify the memory location where its information can be found. 
+Each process also specifies a receive buffer, but this is only meaningful to the process with rank root. 
+The number of elements in the send buffer (given by the sendcount variable) must be the same on all processes. 
+The size of the receive buffer is given by the product of the size of the send buffer and the number of processors in the communicator. 
+The result of the <tt>MPI_Gather</tt> operation is then that the send buffers are copied to the receive buffer at the root process, one after the other, 
+in order of increasing rank. This is illustrated below.
+
+\image html gather.png "The MPI_Gather operation."
+
+If each process should send a different number of elements to the root process, the <tt>MPI_Gatherv</tt> function must be used.
+
+| MPI_Gatherv                 |
+| -------------------------|
+| <b>Type:</b> <tt>int</tt> |
+| <b>Arguments:</b> <tt>const void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, const int *recvcounts, const int *displs, MPI_Datatype recvtype, int root, MPI_Comm comm</tt> |
+| <b>Description:</b> This function gathers data of different sizes from all processes in a group into specified locations on the process with rank <tt>root</tt>. |
+
+Each process now has a send buffer with size sendcount, which can differ from process to process. The size of the receive buffer does not need to be specified. 
+Instead, each process passes the address of two arrays: the displacements array (displs) and an array defining the number of elements that is to be 
+received from either process (recv- counts). According to this information, the information in the send buffers is copied to the receive buffer of the root process. 
+This principle is illustrated in the following figure.
+
+\image html gatherv.png "The MPI_Gatherv operation."
+
+Another variation on the <tt>MPI_Gather</tt> function is the <tt>MPI_Allgather</tt> function, of which the syntax is shown below. Similar to the <tt>MPI_Allreduce</tt> 
+operation, this function copies the information to each process in the communicator instead of to one root process.
+
+| MPI_Allgather                 |
+| -------------------------|
+| <b>Type:</b> <tt>int</tt> |
+| <b>Arguments:</b> <tt>const void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm</tt> |
+| <b>Description:</b> This function gathers data from all processes and distribute the combined data to all processes in the communicator. |
+
+By calling this function, the receive buffer of each process in the communicator is filled with the combined information of the send buffers of all processes. 
+This is illustrated in the next figure.
+
+\image html allgather.png "The MPI_Allgather operation."
+
+There also exists a <tt>MPI_Allgatherv</tt> function, which combines the characteristics of the <tt>MPI_Gatherv</tt> and <tt>MPI_Allgather</tt> functions.
+
+\subsubsection Communications_collective_scatter The scatter operation
+
+The opposite of the <tt>MPI_Gather</tt> operation is the <tt>MPI_Scatter</tt> operation. In this operation, a block of information on one process, 
+the root process, is divided into pieces which are sent to different processes. This kind of communication is called a one-to- all communication. 
+The syntax of the <tt>MPI_Scatter</tt> function is shown in the box below.
+
+| MPI_Scatter                 |
+| -------------------------|
+| <b>Type:</b> <tt>int</tt> |
+| <b>Arguments:</b> <tt>const void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm</tt> |
+| <b>Description:</b> This function sends data from one process to all processes in a communicator. |
+
+Each process calls the MPI_Scatter function, specifying the address of the send buffer and the receive buffer. 
+Only the process with rank root should fill in the send buffer. The length of the send buffer must be a multiple of the number of processes in the communicator. 
+This send buffer is then broken up in pieces of equal length, which are copied to the receive buffers of all processes. 
+The order in which processes receive successive pieces is determined by their rank. The send buffer is only meaningful for the root process, 
+as illustrated in the figure below.
+
+\image html scatter.png "The MPI_Scatter operation."
+
+After the scatter operation, all processes can use the information contained in their
+receive buffer. The send buffers can be overwritten.
+
+If the information that has to be sent to different processes differs in length, the <tt>MPI_Scatterv</tt> function can be used. The syntax of this function is shown below.
+
+| MPI_Scatterv                 |
+| -------------------------|
+| <b>Type:</b> <tt>int</tt> |
+| <b>Arguments:</b> <tt>const void *sendbuf, const int *sendcounts, const int *displs, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm</tt> |
+| <b>Description:</b> This function scatters the information in a buffer of the process with rank root in parts to all processes in a communicator. |
+
+Each process passes a send and receive buffer to this function. The size of the send buffer is not specified. 
+The root process fills this send buffer with information, which does not have to be contigious: gaps are allowed between different pieces. 
+Each piece is sent to the receive buffer of a different process. The arrays sendcounts and displs specify the position and length of the pieces, 
+in the order of the rank of the receiving processes. This is illustrated in the following figure.
+
+\image html scatterv.png "The MPI_Scatterv operation."
+
+Note that although the figure may suggest so, the pieces in the send buffer do not have
+to be positioned in the same order as the processes are ranked.
 
 */
