@@ -71,6 +71,6 @@
    \image html skirthelp.jpeg
    \image latex skirthelp.jpeg
 
-  - You can also proceed with the \ref UsersGuide or \ref FSUsersGuide.
+  - You can also proceed with the \ref UsersGuide.
   
 */
