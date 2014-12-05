@@ -14,8 +14,7 @@ The <tt>SKIRT</tt> manual is structured as follows:
 <b> Part I: Guides -- provides overall guidance and tutorials. </b>
 
   - The \ref InstallationGuide describes how to install <tt>SKIRT</tt> and its dependencies on your computer.
-  - The \ref UsersGuide explains how to run a <tt>SKIRT</tt> simulation and what output to expect.
-  - The \ref FSUsersGuide explains how to prepare for and run a <tt>FitSKIRT</tt> simulation and what output to expect.
+  - The \ref UsersGuide explains how to prepare and run a <tt>SKIRT</tt> or <tt>FitSKIRT</tt> simulation and what output to expect.
   - The \ref DevelopersGuide offers guidelines on how to extend or adjust the <tt>SKIRT</tt> code.
 
 <b> Part II: Concepts -- offers extra information on selected topics. </b>
