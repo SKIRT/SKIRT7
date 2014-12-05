@@ -6,7 +6,7 @@ If you plan on writing or updating <tt>SKIRT</tt> code documentation, you may wi
 a tool to assist with formatting "/ **"-style documentation blocks in .hpp files.
 DoxStyle is automatically included and built as part of the buildSKIRT project.
 
-To configure Qt Creator so that you can easily use DoxStyle, choose the "Qt Creator->Preferences..." menu item to open
+To configure Qt Creator so that you can easily use DoxStyle, choose the "Tools->Options..." menu item to open
 the preferences panel, and make the adjustments on the various tabs as listed below, pressing the OK button at the end.
 
  - "Environment -> External Tools" tab
