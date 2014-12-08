@@ -278,7 +278,9 @@ HEADERS += \
     IdenticalAssigner.hpp \
     StaggeredAssigner.hpp \
     SequentialAssigner.hpp \
-    StokesVector.hpp
+    StokesVector.hpp \
+    PolarizedSilicateGrainComposition.hpp \
+    PolarizedGraphiteGrainComposition.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -515,4 +517,6 @@ SOURCES += \
     IdenticalAssigner.cpp \
     StaggeredAssigner.cpp \
     SequentialAssigner.cpp \
-    StokesVector.cpp
+    StokesVector.cpp \
+    PolarizedSilicateGrainComposition.cpp \
+    PolarizedGraphiteGrainComposition.cpp

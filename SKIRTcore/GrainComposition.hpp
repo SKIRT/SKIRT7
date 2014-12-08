@@ -89,6 +89,18 @@ public:
     /** This function returns the bulk mass density \f$\rho_\text{bulk}\f$ of the dust grains. */
     double bulkdensity() const;
 
+    /** This function returns true if this grain composition supports polarization (i.e. it
+        provides meaningful Mueller matrix coefficients); false if not. */
+    bool polarization() const;
+
+    /** This function returns the four Mueller matrix coefficients \f$S_{11}(\lambda,a,\theta),
+        S_{12}(\lambda,a,\theta), S_{33}(\lambda,a,\theta), S_{34}(\lambda,a,\theta)\f$ of dust
+        grains with size \f$a\f$ at wavelength \f$\lambda\f$ and for a scattering angle
+        \f$\theta\f$. It uses log-linear interpolation on the internally stored values. If either
+        of the specified values lie outside of the internally defined grid, the value at the
+        nearest border is used instead. */
+    void Sxx(double lambda, double a, double theta, double& S11, double& S12, double& S33, double& S34) const;
+
     //========= Setup Functions for Use in Subclasses ========
 
 protected:
@@ -199,6 +211,11 @@ protected:
     /** This function sets the bulk mass density \f$\rho_\text{bulk}\f$ of the dust grains. */
     void setBulkDensity(double value);
 
+    /** This function should be used by a subclass to read the complete grid with optical and
+        polarization properties from a resource or input data file with the specified name. The
+        file should have the text format as used by the STOKES code version 2.06. */
+    void loadPolarizedOpticalGrid(bool resource, QString name);
+
     //================= Private Helper Functions ================
 
 private:
@@ -212,17 +229,27 @@ private:
 
 private:
     // data members to be initialized by calling our service functions in setupSelfBefore() of subclass
-    int _Nlambda;
-    int _Na;
+    int _Nlambda;           // index k
+    int _Na;                // index i
     Array _lambdav;         // indexed on k
     Array _av;              // indexed on i
     Table<2> _Qabsvv;       // indexed on k and i
     Table<2> _Qscavv;       // indexed on k and i
     Table<2> _asymmparvv;   // indexed on k and i
-    int _NT;
+    int _NT;                // index t
     Array _Tv;              // indexed on t
     Array _hv;              // indexed on t
     double _rhobulk;
+
+    // optional data members related to polarization properties; to be initialized in setupSelfBefore() of subclasses
+    // that support polarization by calling the appropriate service function:
+    // - if _Ntheta==0 (the default), there is no support for polarization and these tables remain empty
+    // - if _Ntheta>0, these tables contain the Mueller matrix coefficients i.f.o. scattering angle theta
+    int _Ntheta;            // index d
+    Table<3> _S11vvv;       // indexed on k, i and d
+    Table<3> _S12vvv;       // indexed on k, i and d
+    Table<3> _S33vvv;       // indexed on k, i and d
+    Table<3> _S34vvv;       // indexed on k, i and d
 };
 
 ////////////////////////////////////////////////////////////////////
