@@ -1,8 +1,8 @@
 /**
 
-\page FS_Tutorial Tutorial: NGC4013
+\page FS_Tutorial Tutorial: fitting the NGC4013 galaxy
 
-In this section we show a step-by-step setup for a FitSKIRT fit using a flattened Sersic profile for the central bulge
+In this section we show a step-by-step setup for a <tt>FitSKIRT</tt> fit using a flattened Sersic profile for the central bulge
 and double exponential for the stellar disk and dust disk will be constructed. The data used in this tutorial is
 available from the <a href="http://www.skirt.ugent.be/downloads.html">downloads page</a>. The first step consists of starting a <tt>SKIRT</tt> Q&A session,
 creating the \em ski file and adjusting it afterwards. The second step is to create a suitable \em fksi file. The final steps
@@ -51,9 +51,9 @@ and replace them by this
 <DustMassDustCompNormalization dustMass="[dust_mass:4e7 Msun]"/>
 \endverbatim
 
-Notice that the luminosities, although also fitted by FitSKIRT should not be put in brackets. Instead the value that is
+Notice that the luminosities, although also fitted by <tt>FitSKIRT</tt> should not be put in brackets. Instead the value that is
 put in is a dummy value used to create the simulations before determining the best fitting luminosity. Once all free
-parameters have been put in brackets and labelled, start a FitSKIRT Q&A session.
+parameters have been put in brackets and labelled, start a <tt>FitSKIRT</tt> Q&A session.
 
 \section FitSKIRT
 
@@ -292,7 +292,7 @@ Finished fitting in 842 s (14m 2s).
 Finished fit scheme tutorial in 847 s (14m 7s).
 \endverbatim
 
-Notice that the output directory now contains 22 files. Because FitSKIRT can create a huge amount of output, it only
+Notice that the output directory now contains 22 files. Because <tt>FitSKIRT</tt> can create a huge amount of output, it only
 keeps the best fitting frames and deletes any additional files. However, the tutorial_allsimulations.dat files keeps all
 relevant information about all the performed radiative transfer models. The first digit of the line is the generation
 number. The following number are the parameter values for that model in the same order as they are given in the .fski

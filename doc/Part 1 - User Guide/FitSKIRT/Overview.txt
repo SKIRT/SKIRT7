@@ -1,17 +1,17 @@
 /**
 
-\page FS_Overview
+\page FS_Overview Overview
 
 \section Outline
 
 After your data has been properly reduced and prepared, the first step consists of creating a template file of the model
-you will be constraining using FitSKIRT. This is done by starting a SKIRT Q&A session and selecting the appropriate
-options. FitSKIRT is essentially capable of handling any SKIRT simulation as long as it meets the two requirements.
+you will be constraining using <tt>FitSKIRT</tt>. This is done by starting a <tt>SKIRT</tt> Q&A session and selecting the appropriate
+options. <tt>FitSKIRT</tt> is essentially capable of handling any <tt>SKIRT</tt> simulation as long as it meets the two requirements.
 First, the simulation should be an OligoMonteCarloSimulation as panchromatic fitting is (at this point) not supported.
 The second requirements is the usage of a MultiFrameInstrument where the contribution of each stellar component is
 written out separately. As the total frame is not used, it is recommended to set this flag to false.
 
-Once the Q&A session has been ended and the ski files has been created, the file has to be adjusted to make the
+Once the Q&A session has been ended and the \em ski files has been created, the file has to be adjusted to make the
 difference between the fixed and variable parameters in the simulation. For example suppose the radial scale is one of
 the free parameter we have to replace the following.
 
@@ -24,19 +24,19 @@ radialScale="[stellar_length:4400 pc]"
 \endverbatim
 
 The square brackets mark the position of a variable parameter while
-the string before the colon is the parameter's label. The square brackets will be ignored if you run SKIRT on this
-adjusted .ski file and the default value behind the colon will be used. Make sure that there is no unintentional
+the string before the colon is the parameter's label. The square brackets will be ignored if you run <tt>SKIRT</tt> on this
+adjusted \em ski file and the default value behind the colon will be used. Make sure that there is no unintentional
 ambiguity in the labels of your free parameters as all parameters will be replaced by the same value if they have the
 same label. In some case this might be intentional, for example an offset will probably be the same for every component
 in your simulation.
 
-After setting all free parameters a .fski file has to be created by starting a FitSKIRT Q&A session. Make sure you are
-using the same units FitSKIRT and SKIRT to avoid strange results and give the relative path to the template .ski file
-you have just created. Unless you will be testing FitSKIRT you should never use a fixed seed to run your FitSKIRT
+After setting all free parameters a \em fski file has to be created by starting a <tt>FitSKIRT</tt> Q&A session. Make sure you are
+using the same units <tt>FitSKIRT</tt> and <tt>SKIRT</tt> to avoid strange results and give the relative path to the template \em ski file
+you have just created. Unless you will be testing <tt>FitSKIRT</tt> you should never use a fixed seed to run your <tt>FitSKIRT</tt>
 simulations. Once the Q&A session ask the label of your free parameter you should give in the exact label you have put
-in the .ski file. For the example listed above this is "stellar_lenght" (without the quotation marks). The best option
+in the \em ski file. For the example listed above this is "stellar_length" (without the quotation marks). The best option
 is to copy/paste them as you want to avoid any typos (for example inlination instead inclination) at this stage.
-FitSKIRT suports five quantities for free parameters at this point.
+<tt>FitSKIRT</tt> suports five quantities for free parameters at this point.
 
 \verbatim
 1. Dimensionless
@@ -72,10 +72,10 @@ can then be used to write out your results.
 
 \section Fine-tuning
 
-The most obvious start to speed up the code is to adjust the .ski file. As this is the most time consuming part of
-FitSKIRT, it is important to make fast, yet reliable simulations. An important trade-off that has to be made is handled
+The most obvious start to speed up the code is to adjust the \em ski file. As this is the most time consuming part of
+<tt>FitSKIRT</tt>, it is important to make fast, yet reliable simulations. An important trade-off that has to be made is handled
 by adjusting the number of photon packages. A lower amount of photon packages will result in less accurate and noisier
-frames but run faster. You should visually test which number gives an appropriate results, keeping in mind that
+frames but the simulation will run faster. You should visually test which number gives an appropriate results, keeping in mind that
 convolution also helps to smoothen the noise.
 
 Additionally, it is important to carefully choose any dust related parameters. Fits including a dust component run
@@ -99,48 +99,5 @@ parameter partially controls how well you have explored your optimum locally in 
 The crossover rate determines the percentage of indivuals that is kept every generation. The standard value, 0.65,
 therefore eliminates about the third worst individuals every generation. This value should not be set to low, to avoid
 narrowing down to one region to fast and ending up in a local optimum.
-
-\section HPC-FitSKIRT
-
-This part will briefly explain how to setup a FitSKIRT run on the VSC HPC cluster (https://vscentrum.be/). Below you can
-find an example of script used to run FitSKIRT. We will first discuss the actual content of the script (the lines not
-starting with a hashtag). Before you can run the code, make sure SKIRT is compiled using the correct modules, also
-listed in the script below. make sure to set the absolute path to your directories and run the code using mympirun
-instead of the regular mpirun command. it is important to add the -s 1 and -t 1 flags in order to run every parallel
-proces on one processor. This proved to be the fastest options as a lot of simulation overhead is also parallelised in
-this way.
-
-The choice of the HPC settings depends heavily on your simulation. Notice you should ask what you need but preferably
-not much more. The walltime for this run is set to 40 hours but can be set up to 48 hours. In case you know your job
-will only run about 10 hours it is safer to lower your walltime accordingly.
-
-Another important choice to be made is the number of requested nodes. As FitSKIRT can create a parallel process for each
-individual in the population, the number of request processors should not exceed that number. Try to request an amount
-of nodes that suits your simulation. For example, in the case below, a populationsize of 200 individuals was used.
-Therefore the ideal number of nodes in this case is 200 divided by the number of processors per node (in this case 16)
-rounded up giving us 13 nodes. As a result every processor will handle 1 individual every generation. However, as
-requesting a lot of nodes is often more difficult, another approach is to let every processor handle 2 or 3 4 or ... A
-bad choice in this case would be to take 12 nodes as one interation of all processor would only evaluate 192 while the
-remaining 8 would have to be handled in a second iteration. This means that there is hardly any increase in speed going
-from 9 to 12 nodes. (Please notice that in your script the last two lines should be 1 line. They were only split here to
-match in the documentation guideline)
-
-\verbatim
-#!/bin/sh
-#
-#PBS -N Fitskirt7_1
-#PBS -o output_1.txt
-#PBS -e error_1.txt
-#PBS -l walltime=40:00:00
-#PBS -l nodes=13:ppn=16
-#PBS -m be
-
-module load jobs
-module load GCC/4.8.3
-module load ictce/7.1.2
-cd /user/home/gent/vsc405/vsc40553/SKIRT7/run_fitskirt/test1/
-mympirun /user/home/gent/vsc405/vsc40553/SKIRT7/release/FitSKIRTmain/fitskirt -s 1 -t 1 
--o /user/home/gent/vsc405/vsc40553/SKIRT7/run_fitskirt/test1/fit1 ranges.fski
-\endverbatim
 
 */
