@@ -1,6 +1,6 @@
 /**
 
-\page FS_HPC Use FitSKIRT on the VSC infrastructure
+\page FS_HPC Running FitSKIRT on the VSC infrastructure
 
 This section will briefly explain how to setup a <tt>FitSKIRT</tt> run on the infrastructure of <a href="https://vscentrum.be/en">VSC</a>, 
 short for "Vlaams Supercomputer centrum" (Flemish Supercomputer Center). Below you can
