@@ -179,24 +179,4 @@ A drawback of using multiple MPI processes within the nodes of a computing clust
 Additionally, more memory will be required to run separate processes on a model instead of multiple threads of one process. This problem can only be minimized if the 
 MPI parallelization includes a very effective form of data parallelization.
 
-\section ParallelComputing_Memory Memory considerations
-
-A process always resides on a single node, but a node can host multiple processes. So does a processor. 
-Processes can (and have to) communicate through MPI whether they reside on the same processor, the same node or on a different node in the cluster.
-Assuming that running more than one thread on a single processor at a particular moment is pointless, 
-a node with \f$N\f$ processors can host at most \f$P\f$ processes with \f$N⁄P\f$ threads each. 
-On the other hand, a node with physical memory size \f$M\f$ can host no more than \f$P\f$ processes with a memory requirement of \f$M/P\f$ each.
-
-Assume each process needs a logical memory of size \f$D\f$ to fit the model. The node has a memory capacity of \f$M\f$. 
-If \f$M/D<2\f$, only one model can fit on the node. Thus, irrespective of the number of processors, only one process can be run at a time. 
-To make use of the multiple processors of the node, we must apply multithreading.
-If \f$M/D \geq 2\f$, more than one process can be run on the node. The number of processes \f$P\f$ can actually be any number between 1 and \f$M/D\f$, 
-with multiprocessing used to make sure that each processor executes threads.
-It is however more efficient to always use the maximal number of processes \f$P=M/D\f$ (rounded down) in this case. 
-This is because multi-processing scales better than multi-threading. Using multi-processing (MPI) will probably lead to the shortest execution time.
-From the other perspective, where we want to maximize the size of our model, we can benefit from using multithreading. 
-If there are \f$P\f$ processes, each with \f$T=N/P\f$ threads, the model size is limited to \f$D=M/P=T \times M/N \f$. 
-Therefore, the maximum model size is reached for \f$T=N\f$ or \f$P=1\f$. In other words, using only one process on the node and a number of threads equal 
-to the number of processors on that node permits the largest model size.
-
 */
