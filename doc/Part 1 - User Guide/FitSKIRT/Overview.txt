@@ -1,0 +1,103 @@
+/**
+
+\page FS_Overview Overview
+
+\section Outline
+
+After your data has been properly reduced and prepared, the first step consists of creating a template file of the model
+you will be constraining using <tt>FitSKIRT</tt>. This is done by starting a <tt>SKIRT</tt> Q&A session and selecting the appropriate
+options. <tt>FitSKIRT</tt> is essentially capable of handling any <tt>SKIRT</tt> simulation as long as it meets the two requirements.
+First, the simulation should be an OligoMonteCarloSimulation as panchromatic fitting is (at this point) not supported.
+The second requirements is the usage of a MultiFrameInstrument where the contribution of each stellar component is
+written out separately. As the total frame is not used, it is recommended to set this flag to false.
+
+Once the Q&A session has been ended and the \em ski files has been created, the file has to be adjusted to make the
+difference between the fixed and variable parameters in the simulation. For example suppose the radial scale is one of
+the free parameter we have to replace the following.
+
+\verbatim
+radialScale="4400 pc"
+\endverbatim
+by
+\verbatim
+radialScale="[stellar_length:4400 pc]"
+\endverbatim
+
+The square brackets mark the position of a variable parameter while
+the string before the colon is the parameter's label. The square brackets will be ignored if you run <tt>SKIRT</tt> on this
+adjusted \em ski file and the default value behind the colon will be used. Make sure that there is no unintentional
+ambiguity in the labels of your free parameters as all parameters will be replaced by the same value if they have the
+same label. In some case this might be intentional, for example an offset will probably be the same for every component
+in your simulation.
+
+After setting all free parameters a \em fski file has to be created by starting a <tt>FitSKIRT</tt> Q&A session. Make sure you are
+using the same units <tt>FitSKIRT</tt> and <tt>SKIRT</tt> to avoid strange results and give the relative path to the template \em ski file
+you have just created. Unless you will be testing <tt>FitSKIRT</tt> you should never use a fixed seed to run your <tt>FitSKIRT</tt>
+simulations. Once the Q&A session ask the label of your free parameter you should give in the exact label you have put
+in the \em ski file. For the example listed above this is "stellar_length" (without the quotation marks). The best option
+is to copy/paste them as you want to avoid any typos (for example inlination instead inclination) at this stage.
+<tt>FitSKIRT</tt> suports five quantities for free parameters at this point.
+
+\verbatim
+1. Dimensionless
+2. Length
+3. Distance
+4. Mass
+5. Position angle
+\endverbatim
+
+Choose the appropriate option and enter the lower and upper boundary. You then have the option to add any number of free
+parameters (the minimum obviously being one).
+
+Next, enter the relative path to the reference image, for example "./reference/V.fits" and enter the FWHM of the PSF
+corresponding to that specific frame. The size of the convolution frame can be set but should usually be around 6 sigma
+in width. Making it much larger could significantly slow down the code. The next step consists of giving a vector of the
+lower and upper boundaries for the luminosities. It is important to not set this range to wide as, again, this could
+slow down the fitting procedure. Repeat this step for every reference frame or, alternatively, alter the .fski file
+afterwards directly.
+
+The final step consists of setting the genetic algorithm parameters (see the Fine-tuning section for more information).
+
+The process can then be started with any number of threads (default is set to the maximum number available) and the
+output can be written to a different folder.
+
+\verbatim
+fitskirt -t 1 -o ./fit1 ranges.fski
+\endverbatim
+
+This starts fitskirt using only 1 core and writing out the resutls to the "fit1" folder. In order to get an estimate on
+the accuracy of the fit on the final parameters, you can rerun the code a number of times (for example, five) and using
+a variable random seed. The PTS routine "fitskirt_results" (see http://www.skirt.ugent.be/pts/_fit_s_k_i_r_t_guide.html)
+can then be used to write out your results.
+
+\section Fine-tuning
+
+The most obvious start to speed up the code is to adjust the \em ski file. As this is the most time consuming part of
+<tt>FitSKIRT</tt>, it is important to make fast, yet reliable simulations. An important trade-off that has to be made is handled
+by adjusting the number of photon packages. A lower amount of photon packages will result in less accurate and noisier
+frames but the simulation will run faster. You should visually test which number gives an appropriate results, keeping in mind that
+convolution also helps to smoothen the noise.
+
+Additionally, it is important to carefully choose any dust related parameters. Fits including a dust component run
+significantly longer so first of all consider how relevant this is for your case. If, including the dust component is
+necessary, the choice of your dust grid and the resolution should be a balance between precision and speed. There is no
+clear general rule so it is best to first run some smaller test cases (maybe some extreme case) in order to avoid
+unnecessary oversampling of your dust grid.
+
+While there is no straightforward rule to find the ideal parameter values a general rule of thumb is something on the
+order of 20*(number of free parameters) as the number of individuals and about half that as number of generations.
+Notice that the individuals will always be spread uniformly over your parameter space in the first generation (so not
+gaussian around the center of your boundaries).
+
+The mutation probability can be set a bit higher (up to 10%) if there are only a few free parameters. As it is defined
+for a single parameter, the number of new values per generations is simply the mutation probability
+parameters of the individuals. For 8 or more free parameters it is advised not to set it to high as you would
+mutate almost every individual and, consequently, hindering your global optimisation process. In case of a mutation, the
+new value is determined randomly out of a gaussian distribution centered around the original value. As a result this
+parameter partially controls how well you have explored your optimum locally in the end.
+
+The crossover rate determines the percentage of indivuals that is kept every generation. The standard value, 0.65,
+therefore eliminates about the third worst individuals every generation. This value should not be set to low, to avoid
+narrowing down to one region to fast and ending up in a local optimum.
+
+*/

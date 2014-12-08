@@ -1,0 +1,104 @@
+/**
+
+\page UserParamFile SKIRT parameter file format (ski file)
+
+\section UserSKIStruct Structure of a ski file
+
+A <tt>SKIRT</tt> parameter file is an XML document stored using UTF-8 encoding. The structure of the XML elements and attributes
+closely mimics the run-time object hierarchy representing a simulation in the <tt>SKIRT</tt> code. For example:
+
+\verbatim
+<?xml version="1.0" encoding="UTF-8"?>
+<!--SKIRT radiative transfer simulations-->
+<skirt-simulation-hierarchy type="MonteCarloSimulation" format="6.1">
+    <OligoMonteCarloSimulation packages="1e6">
+        <units type="Units">
+            <ExtragalacticUnits/>
+        </units>
+        <wavelengthGrid type="OligoWavelengthGrid">
+            <OligoWavelengthGrid wavelengths="0.5 micron, 0.75 micron"/>
+        </wavelengthGrid>
+
+    ... more ...
+
+    </OligoMonteCarloSimulation>
+</skirt-simulation-hierarchy>
+\endverbatim
+
+An XML element called \c sample starts with a \c \<sample\> tag and ends with a
+\c \</sample\> tag. An empty element \c \<sample\>\</sample\> can also be expressed with a single \c \<sample/\> tag.
+XML elements can be nested inside other elements. An XML element can carry zero or more attributes. Attributes
+are specified inside the start tag in the format \c key="value".
+In ski files there is no text outside of the element tags, except for spaces and line breaks. This
+white space is not meaningful except for presentation to a human. By convention the lines are indented so as
+to reflect the nesting level of the XML elements.
+
+After the standard XML declaration (and an optional comment line), a ski file always defines the XML element
+\c skirt-simulation-hierarchy as the top-level or \em root element. The \c format attribute specifies the file format
+version number, which allows future version of <tt>SKIRT</tt> to detect and adjust for ski files in older formats.
+To represent a complete simulation hierarchy, further XML elements are nested recursively within the root element,
+and some of these elements carry attributes.
+
+An element with a capitalized name (i.e. the first letter is uppercase) represents an object, i.e. an instance
+of a C++ class with the same name as the element. Such an element can carry attributes reflecting the scalar properties
+of the object, and can contain nested elements reflecting compound properties of the object. The value of a
+scalar property can be represented as a string (Boolean, integer number, floating point number with unit abbreviation,
+comma-separated list of such numbers, ...), while the value of a compound property is another object or a list
+of objects.
+
+An element with a non-capitalized name (i.e. the first letter is lowercase) represents a compound property of the
+object represented by its parent element. Such an element always has a single attribute called \c type, which
+indirectly specifies the names of the XML element or elements that can be immediately contained inside the element.
+The type corresponds to the name of an abstract C++ class, and the names of the immediately contained
+element(s) must correspond to a C++ class that inherits the specified abstract class.
+
+The root element always has type \c MonteCarloSimulation.
+
+\section UserSKIEdit Editing a ski file
+
+You can edit a \em ski file with any text editor. Many text editors offer syntax coloring for xml files (although you will
+have to setup the editor so that it recognizes the ".ski" filename extension in addition to .xml). Syntax coloring is
+nice but not really needed for working with ski files.
+
+It is not a good idea to manually create a \em ski file from scratch, since the <tt>SKIRT</tt> simulation object hierarchy has many
+complexities that are easy to miss. Instead use <tt>SKIRT</tt>'s interactive mode to create a \em ski file that approximates your
+requirements. Then use a text editor to make small changes, such as updating the number of photon packages
+or adding an instrument.
+
+Based on the naming conventions explained in \ref UserSKIStruct, it is fairly easy to locate the information
+about a particular parameter in the <tt>SKIRT</tt> reference documentation, even if you are not a developer:
+ - A capitalized element name (i.e. the first letter is uppercase) corresponds to a C++ class name.
+ - A non-capitalized element name (i.e. the first letter is lowercase) corresponds to a function name in the C++ class
+   corresponding to the name of the element containing the non-capitalized element under consideration.
+ - An XML attribute name (except \c type) corresponds to a function name in the C++ class corresponding to the name
+   of the element carrying the attribute.
+
+\section UserSKIUnits Supported units
+
+When <tt>SKIRT</tt> outputs a parameter file, it always uses the defaults of the units system selected by the \em ski file.
+However when reading parameters in ski files and in interactive mode, <tt>SKIRT</tt> recognizes the folowing unit abbreviations
+for physical quantities (don't forget the space between the number and the unit abbreviation):
+
+ - length or distance: <tt>m, cm, km, AU, pc, kpc, Mpc</tt>
+ - wavelength or grainsize: <tt>m, cm, mm, micron, nm, A</tt>
+ - cross section: <tt>m2</tt>
+ - volume: <tt>m3, AU3, pc3</tt>
+ - velocity: <tt>m/s, km/s</tt>
+ - mass: <tt>kg, g, Msun</tt>
+ - mass surface density: <tt>kg/m2, Msun/AU2, Msun/pc2</tt>
+ - mass volume density: <tt>kg/m3, g/cm3, Msun/AU3, Msun/pc3</tt>
+ - opacity: <tt>m2/kg</tt>
+ - energy: <tt>J</tt>
+ - bolometric luminosity: <tt>W, Lsun</tt>
+ - monochromatic luminosity: <tt>W/m, W/micron, Lsun/micron</tt>
+ - bolometric flux: <tt>W/m2</tt>
+ - monochromatic flux: <tt>W/m3, W/m2/micron</tt>
+ - bolometric surface brightness: <tt>W/m2/sr, W/m2/arcsec2</tt>
+ - monochromatic surface brightness: <tt>W/m3/sr, W/m2/micron/arcsec2</tt>
+ - temperature: <tt>K</tt>
+ - angular size: <tt>rad, deg, arcsec</tt>
+ - positioning angle: <tt>rad, deg</tt>
+ - solid angle: <tt>sr, arcsec2</tt>
+ 
+ */
+ 

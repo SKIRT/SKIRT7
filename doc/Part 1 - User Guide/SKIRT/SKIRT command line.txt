@@ -1,0 +1,165 @@
+/**
+
+\page UserCmdLine SKIRT Command line user interface
+
+\section UserCLIOver Overview
+
+The <tt>SKIRT</tt> code is exposed to the user as a command line application to be executed in a Terminal window.
+At this time, there exists no graphical user interface (GUI) for <tt>SKIRT</tt> .
+
+The options defining a single, complete <tt>SKIRT</tt> simulation are stored in a <tt>SKIRT</tt> parameter file with the
+filename extension ".ski". Such a parameter file is customary called "a \em ski file".
+The data format of \em ski files allows efficient manipulation by computers, while being sufficiently transparent
+for viewing and editing by humans. The \em ski file format is further discussed in \ref UserParamFile.
+
+The <tt>SKIRT</tt> command line application can be invoked in one of two modes (depending on the command line arguments):
+ - In interactive mode, <tt>SKIRT</tt> asks the user a series of questions (via console input/output in the Terminal window)
+   and, based on the user's responses, constructs and saves a corresponding \em ski file for later use -- without actually
+   performing a simulation.
+ - In non-interactive mode, <tt>SKIRT</tt> performs one or more simulations as specified in preconfigured \em ski files and
+   produces the corresponding output. In this mode <tt>SKIRT</tt> expects no user input (other than the command line arguments)
+   so it is ideal for batch processing.
+
+\section UserCLIInter Interactive mode
+
+When invoked without any command line arguments, <tt>SKIRT</tt> enters interactive mode. For example:
+\verbatim
+$ skirt
+   Welcome to SKIRT v___
+   Interactively constructing a simulation...
+ ? Enter the name of the ski file to be created: example
+
+   ___more questions and answers___
+
+   Successfully created ski file 'example.ski'.
+   To run the simulation use the command: skirt example
+$
+\endverbatim
+
+The time stamp preceding each line, the version information on the welcome line, and the list of questions to configure
+the simulation parameters are omitted here for brevity. After all questions have been answered, <tt>SKIRT</tt> saves a new
+ski file (here called \c example.ski) and exits.
+
+So that they would stand out, questions are marked with a question mark at the front and error messages are marked
+with an asterisk. For example:
+\verbatim
+ ? Enter the name for this instrument:
+ * *** Error: Enter a nonempty string
+ ? Enter the name for this instrument: XY
+\endverbatim
+
+Where appropriate, the question lists the range of acceptable values between square brackets, as in \c
+[minValue,maxValue]. Often there is a default value, listed between round brackets at the end of the question.
+To select the default value, enter the empty string.
+For example, here the user is asked to select an item from a list, with extragalactic units as the default:
+\verbatim
+   Possible choices for the units system:
+      1. SI units
+      2. Stellar units (length in AU, distance in pc)
+      3. Extragalactic units (length in pc, distance in Mpc)
+ ? Enter one of these numbers [1,3] (3):
+\endverbatim
+
+For physical quantities, the default units are listed in the question as part of the minimum, maximum and/or default
+values. To use the default units, simply enter a number. To explicitly specify units, enter a number followed by
+a space and a unit abbreviation (see \ref UserSKIUnits). For example, the following two inputs are equivalent:
+\verbatim
+ ? Enter the outer radius [0 pc, .. pc]: 8000
+ ? Enter the outer radius [0 pc, .. pc]: 8 kpc
+\endverbatim
+
+Boolean questions can be answered with the strings "yes" or "no", or just the first letter "y" or "n",
+in lower- or uppercase. For example:
+\verbatim
+ ? Do you want to use barycentric subdivision? [yes/no] (no): yes
+\endverbatim
+
+\section UserCLINonInter Non-interactive mode
+
+When invoked with the name of a ski file as the sole command line argument, <tt>SKIRT</tt> performs the simulation
+configured in the ski file, reading any required input files (specified in the ski file) from the current directory,
+and placing any output files in the current directory as well. For example:
+\verbatim
+$ skirt example
+   Welcome to SKIRT v___
+   Constructing a simulation from ski file 'example.ski'...
+   Starting simulation example...
+
+   ___more progress messages___
+
+ - Finished simulation example in __ s.
+$
+\endverbatim
+
+<tt>SKIRT</tt> can perform multiple simulations in one go, and also supports a number of command line options
+according to the following syntax:
+\verbatim
+ skirt [-b] [-s <simulations>] [-t <threads>]
+       [-k] [-i <dirpath>] [-o <dirpath>]
+       [-r] {<filepath>}*
+\endverbatim
+
+- The -b option forces brief console logging, i.e. only success and error messages are shown rather than all progress
+messages. If there are multiple parallel simulations (see the -s option), the -b option is turned on automatically
+to avoid a plethora of randomly intermixing messages. If there is only one simulation at a time, the console shows
+all messages unless the -b option is present. In any case, the complete log output for each simulation is always
+written to a file in the output directory.
+
+- The -s option specifies the number of simulations to be executed in parallel. The default value is one.
+
+- The -t option specifies the number of parallel threads for each simulation. The default value is the number
+of logical cores on the computer running <tt>SKIRT</tt>. Note that <tt>SKIRT</tt> is not always able to correctly determine this number,
+so it is good to keep an eye on it.
+
+- The -k option causes the simulation input/output paths to be relative to the ski file being processed, rather than
+to the current directory. This is useful, for example, when processing multiple ski files organized in a nested
+directory hierarchy (see the -r option).
+
+- The -i option specifies the absolute or relative path for simulation input files.
+
+- The -o option specifies the absolute or relative path for simulation output files.
+
+- The -r option causes recursive directory descent for all specified \<filepath\> arguments, in other words
+all directories inside the specified base paths are searched for the specified filename (or filename pattern).
+
+In the simplest case, a \<filepath\> argument specifies the relative or absolute file path for a
+single ski file, with or without the ".ski" filename extension. However the filename (\em not the base path)
+may also contain ? and * wildcards forming a pattern to match multiple files. If the -r option
+is present, all directories recursively nested within the base path are searched as well, using
+the same filename pattern. If the filename contains wildcards or the -r option is present (in
+other words, if the filepath may match multiple files) the ".ski" filename extension is not automatically added.
+
+\note Filepaths containing wildcards should be enclosed in quotes on the command
+line to avoid expansion of the wildcard pattern by the shell.
+
+For example, to process all "test" \em ski files inside the "geometry" directory hierarchy, one
+could specify:
+
+    skirt -s 4 -t 1 -r "/root-test-file-path/geometry/test*.ski"
+
+When invoked with invalid command line arguments, <tt>SKIRT</tt> prints a brief help message.
+
+\section UserCLIOutput Output files
+
+A typical simulation run produces quite a few output files. The precise list depends on the contents of the \em ski file.
+However all output filenames for a particular simulation start with the name of the ski file (plus an underscore).
+
+Three "standard" files are always generated for every simulation (assuming a ski file named \c example.ski):
+
+ - \c example_log.txt contains the complete progress log for the simulation, including all messages
+   even if the -b option is turned on. It is a plain text file using UTF-8 encoding (i.e. essentially
+   a plain ASCII text file).
+ - \c example_parameters.xml contains a version of the <tt>SKIRT</tt> parameter file corresponding to the simulation,
+   in the format described in \ref UserParamFile.
+   The parameter file is regenerated after the incoming \em ski file has been interpreted by <tt>SKIRT</tt>, eliminating any
+   ambiguities. For example, any parameters that were omitted from the incoming \em ski file will be added to the
+   generated parameter file with the default value used for the simulation. To avoid confusion, the generated
+   parameter file does not have the ".ski" filename extension. However the file can be renamed (possibly after
+   manual editing) to serve as a regular ski file.
+ - \c example_parameters.tex contains a TeX "printout" of the contents of the <tt>SKIRT</tt> parameter file
+   corresponding to the simulation. Using a regular TeX installation, this file can be easily processed into
+   a nicely formatted document.
+
+Many of the other output files are described in the tutorials later in this chapter.
+
+*/

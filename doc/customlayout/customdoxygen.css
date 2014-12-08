@@ -85,10 +85,10 @@ h2, h2.groupheader {
 	padding: 0px;
 	width: 100%;
 }
-h3.groupheader {
+h3, h3.groupheader {
 	font-weight: 200;
-	font-size: 1.2rem;
-	line-height: 1.2rem;
+	font-size: 1.3rem;
+	line-height: 1.3rem;
 	color: #000;
 }
 h1, h2, h3, h4, h5, h6 {
@@ -684,7 +684,7 @@ table.doxtable td, table.doxtable th {
 table.doxtable th {
 	background-color: #374F7F;
 	color: #FFFFFF;
-	font-size: 110%;
+	font-size: 90%;
 	padding-bottom: 4px;
 	padding-top: 5px;
 }
@@ -956,7 +956,9 @@ dl.section dd {
 }
 .caption
 {
+    font-style: italic;
 	font-weight: bold;
+    font-size: 0.8rem;
 }
 div.zoom
 {

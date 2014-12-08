@@ -11,9 +11,9 @@ a single installer.
 
 <b> Download the binaries for OS X </b>
 
-  - Go to the <a href="http://qt-project.org/downloads">Qt download page</a>.
-  - At the bottom of the page, click on 'show downloads'.
-  - Find 'Qt 5.3.2 for Mac (456 MB)' and download it.
+  - Go to the <a href="http://www.qt.io/download-open-source/">Qt download page</a>.
+  - Click on "Qt Offline Installers" on the middle of the page.
+  - Find "Qt 5.3.2 for Mac (456 MB)" under "OS X Host" and download it.
 
 <b> Open the installer </b>
 

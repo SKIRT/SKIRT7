@@ -1,0 +1,36 @@
+/**
+
+\page UserMakeUp SKIRT MakeUp
+
+Besides the command line interface, the <tt>SKIRT</tt> package also includes a graphical component designed to ease the creation and modification of both \em ski and \em fski files.
+This graphical tool is called <tt>SKIRT MakeUp</tt>, and is automatically built when you build <tt>SKIRT</tt> with Qt Creator or with the makeSKIRT.sh script. The executable for
+<tt>SKIRT MakeUp</tt> can be found in a folder called SkirtMakeUp in the <tt>SKIRT</tt> release directory. When the application is opened, the following window appears:
+
+\image html makeupmain.png
+
+As can be seen in this window, <tt>SKIRT MakeUp</tt> gives you the possibility of creating new parameters files for both <tt>SKIRT</tt> and <tt>FitSKIRT</tt> and allows you to edit
+existing ones. Selecting one of the different options and pressing "Continue" will bring you into a Q&A session similar as the command line interface invoked by typing <tt>skirt</tt> or
+<tt>fitskirt</tt> in a Terminal window. The graphical interface, however, provides the following advantages:
+
+- You have the possibility of modifying existing \em ski or \em fski files, without having to open them in a text editor and manually changing values. Sometimes changing a certain
+  parameter requires other additional parameters to be set or others to be deleted from the parameter file, which is not easily done by hand. The <tt>SKIRT MakeUp</tt> interface will
+  automatically adapt its questions after you change such a parameter. 
+- With <tt>SKIRT MakeUp</tt>, you can go back in the Q&A session. When you typed an error during the command line Q&A, you would either have to abort the session and start over or you
+  you would have to remember to change the parameter once the parameter file had been created. When at some point, you selected a parameter that influences the course of the session 
+  (e.g. you added a wrong type of geometry or forgot to add one at all) and you have no clue how to add the correct geometry with all its proper parameters to the \em ski file, you had
+  no other choice than to start over. 
+- When adding components to a list (instruments, geometries, stellar or dust components), you get a visualization of which components you have already added. You also have the option
+  to edit any component in the list, or to remove one. 
+ 
+When you are in the configuration pane for a particular setting, the left bottom corner of the <tt>SKIRT MakeUp</tt> window shows the corresponding name of the property in the \em ski file.
+It also shows the class of which that property is an attribute. In an oligochromatic simulation, for example, the list that contains the different wavelengths
+for the simulation corresponds with the property called "wavelengths", an attribute of the OligoWavelengthGrid class. The instance of OligoWavelengthGrid in the simulation, in turn,
+is an attribute of the OligoMonteCarloSimulation class. The resulting indication on the <tt>SKIRT MakeUp</tt> window looks as follows:
+
+\image html makeupclasses.png
+
+By looking at these indications during the creation of a \em ski or \em fski file, one can already get a good understanding of the hierarchy of all the properties in a 
+<tt>SKIRT</tt> or <tt>FitSKIRT</tt> simulation.
+
+ */
+ 

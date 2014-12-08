@@ -1,0 +1,601 @@
+/**
+
+\page UserTut1 Tutorial 1: Monochromatic simulation of a dusty disk galaxy
+
+\image html TutorialMonoDisc.png
+\image latex TutorialMonoDisc.png
+
+In this tutorial you will use <tt>SKIRT</tt> to produce a nearly edge-on V-band image of a dusty disk galaxy model
+(see illustration).
+You will create a \em ski file containing the appropriate simulation parameters, and then you will actually perform the
+simulation. Finally you will adjust the \em ski file and perform a second simulation with slightly different parameters.
+
+\section UserTut1Pre Getting ready
+
+Before starting this tutorial, you should have installed and/or built the <tt>SKIRT</tt> code as described in the
+\ref InstallationGuide. You should also have at least glanced through the earlier sections in the \ref UsersGuide.
+
+Since <tt>SKIRT</tt> is a command line tool, you need to open a Terminal window so that you can enter commands at the prompt.
+
+For brevity the examples in this tutorial omit portions of the <tt>SKIRT</tt> output, such as the time stamp
+preceding each line and the version information on the welcome line.
+
+\section UserTut1Ski Creating the ski file
+
+<tt>SKIRT</tt> stores all parameter values describing a particular simulation in a file with the ".ski" filename extension.
+To create a new \em ski file, you need to start <tt>SKIRT</tt> without any command line arguments. The ski file will be created
+in the current directory; for this tutorial you should use the \c run directory you created during <tt>SKIRT</tt> installation.
+Enter the following commands in a Terminal window:
+
+    cd ~/SKIRT/run [ENTER]
+    skirt [ENTER]
+
+If \c skirt is not in your system path, you must replace the last line by the absolute or relative path
+of the \c skirt executable; for example:
+
+    cd ~/SKIRT/run [ENTER]
+    ../release/skirt [ENTER]
+
+<tt>SKIRT</tt> responds with a welcome message and starts an interactive session in the terminal window, during which it
+will prompt you for all the information describing a particular simulation:
+
+\verbatim
+  Welcome to SKIRT v___
+  Interactively constructing a simulation...
+? Enter the name of the ski file to be created: MonoDisk
+\endverbatim
+
+The first question is for the filename of the \em ski file. For this tutorial, enter "MonoDisk".
+
+\section UserTut1Sim Type of simulation
+
+\verbatim
+  Possible choices for the simulation:
+     1. An oligochromatic Monte Carlo simulation
+     2. A panchromatic Monte Carlo simulation
+? Enter one of these numbers [1,2] (1): 1
+\endverbatim
+
+<tt>SKIRT</tt> offers two types of Monte Carlo simulation:
+
+- An <em>oligochromatic</em> simulation operates at one or more distinct wavelengths rather than a discretized range.
+  In such a simulation there can be absorption and scattering by dust grains, but by definition there is no
+  thermal dust emission (calculating the dust temperature requires integrating over a range of wavelengths).
+- A <em>panchromatic</em> simulation operates at a range of wavelengths (discretized on a grid) usually spanning UV,
+  optical and infrared bands. In such a simulation there can be absorption, scattering and thermal emission
+  by dust grains. This is the most powerful simulation type.
+
+Your simulation will run at a single wavelength in the V-band, where thermal dust emission has no effect.
+An oligochromatic simulation is sufficient and most performance-effective for these purposes.
+
+\section UserTut1Ran Random generator
+
+\verbatim
+   Possible choices for the random number generator:
+      1. The default random generator
+   Automatically selected the only choice: 1
+ ? Enter the seed for the random generator [1,2000000000] (4357):
+\endverbatim
+
+<tt>SKIRT</tt> currently offers only a single random generator, so the default choice is automatically selected. If desired
+you can enter a custom seed for the random generator, but the default value is almost always fine.
+One reason to specify a custom seed is to repeat a simulation with a different realization of random model attributes,
+such as the clumps in a clumpy medium.
+
+\section UserTut1Uni Units
+
+\verbatim
+   Possible choices for the units system:
+      1. SI units
+      2. Stellar units (length in AU, distance in pc)
+      3. Extragalactic units (length in pc, distance in Mpc)
+ ? Enter one of these numbers [1,3] (3):
+\endverbatim
+
+<tt>SKIRT</tt> offers three sets of input/output units:
+
+ - SI units: standard international units. <tt>SKIRT</tt> always uses SI units for internal computations; the other
+   unit systems are provided for user convenience: all values are converted to SI units during input and
+   from SI units during output.
+ - Stellar units: use AU as the unit of length, parsec as the unit of distance, micron as the unit of wavelength,
+   and \f$M_\odot\f$ as the unit of mass.
+ - Extragalactic units: use parsec as the unit of length, Mpc as the unit of distance, micron as the unit of wavelength,
+   and \f$M_\odot\f$ as the unit of mass.
+
+Since you will be simulating a galaxy, select extragalactic units (the default choice).
+
+\section UserTut1Inst Instrument system
+
+Running a radiative transfer simulation is not particularly useful unless the results are registered by one or more
+instruments, which collect the photon packages that leave the system, in a process similar to the operation of
+real instruments at a telescope.
+
+The <tt>SKIRT</tt> instruments essentially simulate imaging spectrometers, i.e. 3D spectrographs with one
+wavelength dimension (determined by the simulation's wavelength grid) and
+two spatial directions on the plane of the sky. Each instrument is
+characterized by its own instrumental characteristics (pixel size and
+field of view in the horizontal and vertical directions) and by its
+position with respect to the system (for axisymmetric systems, this
+means the inclination and distance).
+
+It should be noted that the number of instruments, and the pixel size of these instruments, strongly influence
+both memory consumption (for storing the data cubes) and simulation run time (for peeling off photon packages
+in the direction of each instrument).
+
+\verbatim
+   Possible choices for the instrument system:
+      1. An instrument system
+   Automatically selected the only choice: 1
+\endverbatim
+
+There is only one type of instrument system (simply a list of instruments) so the default choice is automatically
+selected.
+
+\verbatim
+   Possible choices for item #1 in the instruments list:
+      1. A basic instrument that outputs the total integrated flux as an SED
+      2. A basic instrument that outputs the total flux in every pixel as a data cube
+      3. A basic instrument that outputs the total flux as data cube and as SED
+      4. An advanced instrument that records individual contributions to the flux
+         ...
+ ? Enter one of these numbers or zero to terminate the list [0,6] (3): 2
+ ? Enter the name for this instrument: i88
+ ? Enter the distance to the system [0 Mpc,.. Mpc]: 10
+ ? Enter the inclination angle of the detector [0 deg,180 deg] (0 deg): 88
+ ? Enter the azimuth angle of the detector [-360 deg,360 deg] (0 deg):
+ ? Enter the position angle of the detector [-360 deg,360 deg] (0 deg):
+ ? Enter the number of pixels in the horizontal direction [25,10000] (250): 800
+ ? Enter the maximal horizontal extent [0 pc,.. pc]: 20000
+ ? Enter the number of pixels in the vertical direction [25,10000] (250): 200
+ ? Enter the maximal vertical extent [0 pc,.. pc]: 5000
+\endverbatim
+
+For the first (and only) instrument in this tutorial simulation, select a basic instrument that outputs the total
+flux in every pixel. Since you will be shooting photon packages at a single wavelength only, the "data cube" will
+have only one frame. Also it doesn't make any sense to produce an SED.
+
+Specify an appropriate name for the instrument. This name is used to identify the output files for the instrument.
+This is not so relevant here, but it becomes important when there are multiple instruments. Further specify
+a size of 800 times 200 pixels with a scale of 50 pc, a distance of 10 Mpc from the galaxy, and
+an inclination of 88 degrees. The remaining two position angles can be left to their default values of zero.
+
+\verbatim
+   Possible choices for item #2 in the instruments list:
+      1. A basic instrument that outputs the total integrated flux as an SED
+      2. A basic instrument that outputs the total flux in every pixel as a data cube
+         ...
+ ? Enter one of these numbers or zero to terminate the list [0,6] (3): 0
+\endverbatim
+
+When asked for the second instrument, enter a zero to terminate the list, since the tutorial simulation
+has only one instrument.
+
+\section UserTut1Phot Photon packages
+
+The number of photon packages launched for each wavelength is a very important parameter, since it
+determines the accuracy of your simulation. On the other hand, the simulation run time essentially scales with
+the number of photon packages (multiplied by the number of wavelengths).
+Typical values range from \f$10^5\f$ to \f$10^9\f$. An appropriate number is usually determined experimentally:
+first run your simulation with a modest number of photon packages, look at the
+results and then run the simulation again with more photon packages if needed.
+
+\verbatim
+ ? Enter the number of photon packages per wavelength [1e4,2e13] (1e6):
+\endverbatim
+
+For your first simulation, leave the number of photon packages at the default value of \f$10^6\f$.
+
+\section UserTut1Wave Wavelength grid
+
+<tt>SKIRT</tt> works with a fixed wavelength grid, i.e. a vector of \f$N_\lambda\f$ wavelengths, on which the entire simulation
+is run. For an oligochromatic simulation, the grid simply consists of one or more distinct wavelengths.
+
+\verbatim
+   Possible choices for the wavelength grid:
+      1. A list of one or more distinct wavelengths
+   Automatically selected the only choice: 1
+ ? Enter the wavelengths [0.0001 micron,1e6 micron]: 0.55
+\endverbatim
+
+For an oligochromatic simulation, the single applicable "wavelength grid" is automatically selected.
+To obtain a V-band image, enter a wavelength "list" containing the single value \f$\lambda=0.55~\mu{\text{m}}\f$.
+
+\section UserTut1Stel Stellar system
+
+Each simulation must contain some luminous sources which emit radiation. In <tt>SKIRT</tt> terminology, these sources
+form a stellar system. A stellar system can be composed of a number of stellar components, each with
+specific geometric and emission properties which can be configured using built-in features or may be imported from
+the output of a hydrodynamical simulation in various formats.
+
+\verbatim
+   Possible choices for the stellar system:
+      1. A stellar system
+   Automatically selected the only choice: 1
+\endverbatim
+
+Since there is only one type of stellar system, it is automatically selected.
+
+\verbatim
+   Possible choices for item #1 in the stellar components list:
+      1. A stellar component with a built-in geometry (in an oligochromatic simulation)
+      2. A stellar component derived from an SPH output file
+      3. A stellar component imported from an adaptive mesh data file
+      4. A stellar component imported from a Voronoi mesh data file
+ ? Enter one of these numbers [1,4] (1): 1
+\endverbatim
+
+The stellar system in this tutorial simulation is composed of two components, a disk and a bulge, which are
+configured using built-in features. So you need to select the "built-in geometry" stellar component type.
+
+\verbatim
+   Possible choices for the geometry of the stellar distribution:
+      1. A point source geometry
+      2. A Plummer geometry
+      3. A gamma geometry
+         ...
+      9. An exponential disk geometry
+         ...
+     22. A spheroidal variant of any spherical geometry
+     23. A triaxial variant of any spherical geometry
+ ? Enter one of these numbers [1,23] (1): 9
+ ? Enter the radial scale length [0 pc,.. pc]: 4000
+ ? Enter the axial scale height [0 pc,.. pc]: 350
+ ? Enter the radial truncation length [0 pc,.. pc] (0 pc):
+ ? Enter the axial truncation height [0 pc,.. pc] (0 pc):
+ ? Enter the luminosities, one per wavelength, in solar units [0,..]: 5e9
+\endverbatim
+
+In an oligochromatic simulation, each stellar component is characterized by a particular geometry and by the
+total component luminosity at each wavelength in the simulation's wavelength grid. For the geometry,
+select an exponential disk with a scale length of 4 kpc and a scale height of 350 pc, without truncation.
+Further specify a V-band luminosity of \f$L_{\text{V}} = 5\times10^9~L_{\odot,{\text{V}}}\f$.
+
+\verbatim
+   Possible choices for item #2 in the stellar components list:
+      1. A stellar component with a built-in geometry (in an oligochromatic simulation)
+      2. A stellar component derived from an SPH output file
+      3. A stellar component imported from an adaptive mesh data file
+      4. A stellar component imported from a Voronoi mesh data file
+ ? Enter one of these numbers [0,4] (0): 1
+   Possible choices for the geometry of the stellar distribution:
+      1. A point source geometry
+      2. A Plummer geometry
+      3. A gamma geometry
+         ...
+     20. A geometry that adds an offset to any geometry
+     21. A geometry that adds clumpiness to any geometry
+     22. A spheroidal variant of any spherical geometry
+     23. A triaxial variant of any spherical geometry
+ ? Enter one of these numbers [1,23] (1): 22
+   Possible choices for the original spherical geometry:
+      1. A Plummer geometry
+      2. A gamma geometry
+      3. A Sersic model geometry
+      4. A pseudo-Sersic geometry
+      5. An Einasto geometry
+      6. A shell geometry
+ ? Enter one of these numbers [1,6] (1): 3
+ ? Enter the Sersic index n [0.5,10] (1): 2
+ ? Enter the effective radius [0 pc,.. pc]: 1600
+ ? Enter the flattening parameter q [0,1] (1): 0.7
+ ? Enter the luminosities, one per wavelength, in solar units [0,..]: 3e9
+\endverbatim
+
+For the second stellar component, again
+select the "built-in geometry" stellar component type. For the geometry, select a spheroidal variant of
+the Sersic model with Sersic index \f$n=2\f$, effective radius \f$R_{\text{e}} = 1.6\f$ kpc, and
+flattening parameter \f$q=0.7\f$. Further specify a V-band luminosity of \f$L_{\text{V}}
+= 3\times10^9~L_{\odot,{\text{V}}}\f$.
+
+<tt>SKIRT</tt> offers a number of decorator geometries to modify other geometries in various ways, including
+off-center translation, adding clumpiness, and flattening (spheroidal or triaxial). You must select
+the decorator geometry \em before the geometry being decorated. Decorator geometries can be nested,
+for example to form a clumpy triaxial Einasto geometry.
+
+\verbatim
+   Possible choices for item #3 in the stellar components list:
+      1. A stellar component with a built-in geometry (in an oligochromatic simulation)
+         ...
+ ? Enter one of these numbers or zero to terminate the list [0,1] (1): 0
+\endverbatim
+
+When asked for the third stellar component, terminate the list by entering a zero.
+
+\section UserTut1Dust Dust system
+
+The dust system contains all the information on the dust in a <tt>SKIRT</tt> Monte Carlo simulation. Broadly speaking,
+a dust system consists of two pieces of information. On the one hand, it includes a complete description of
+the spatial distribution and optical properties of the dust (the <em>dust distribution</em>).
+On the other hand, it contains all information on the grid structure on which this distribution is discretized
+(the <em>dust grid</em>).
+
+\verbatim
+   Possible choices for the dust system:
+      1. A dust system for use with oligochromatic simulations
+ ? Enter one of these numbers or zero to select none [0,1] (1): 1
+\endverbatim
+
+For an oligochromatic simulation, the only applicable type of dust system is the oligochromatic dust system,
+which implements dust absorption and scattering but does not support thermal emission by the dust.
+However the dust system is optional: if you enter a zero in response to the above question, the simulated system
+will contain no dust (and hence there will be no dust absorption and scattering). For this tutorial simulation,
+do select a dust system (or the results would not be extremely interesting).
+
+\verbatim
+   Possible choices for the dust distribution:
+      1. A dust distribution composed of various dust components
+      2. A dust distribution derived from an SPH output file
+      3. A dust distribution imported from an adaptive mesh data file
+      4. A dust distribution imported from a Voronoi mesh data file
+ ? Enter one of these numbers [1,4] (1): 1
+\endverbatim
+
+Similar as for the stellar system, the dust distribution can be composed of a number of dust components,
+each with specific geometry and dust properties, or it can be created from the output of a
+hydrodynamical simulation.
+
+The dust distribution in this tutorial simulation is composed of a single disk component. So you need
+to select the "component" dust distribution type.
+
+\verbatim
+   Possible choices for item #1 in the dust components list:
+      1. A dust component
+   Automatically selected the only choice: 1
+   Possible choices for the geometry of the dust component:
+      1. A point source geometry
+      2. A Plummer geometry
+      3. A gamma geometry
+         ...
+      9. An exponential disk geometry
+         ...
+ ? Enter one of these numbers [1,23] (9): 9
+ ? Enter the radial scale length [0 pc,.. pc]: 4000
+ ? Enter the axial scale height [0 pc,.. pc]: 140
+ ? Enter the radial truncation length [0 pc,.. pc] (0 pc):
+ ? Enter the axial truncation height [0 pc,.. pc] (0 pc):
+   Possible choices for the dust mixture of the dust component:
+      1. A Draine & Li (2007) dust mix
+      2. A dust mix with average interstellar properties
+      3. A dust mix with mean Zubko properties
+         ...
+ ? Enter one of these numbers [1,9] (2): 2
+ ? Output the optical properties of the dust mix? [yes/no] (yes):
+ ? Output the mean optical properties of the dust mix? [yes/no] (yes):
+   Possible choices for the type of normalization for the dust component:
+      1. Normalization by defining the total dust mass
+      2. Normalization by defining the radial optical depth
+      3. Normalization by defining the face-on optical depth
+      4. Normalization by defining the edge-on optical depth
+         ...
+ ? Enter one of these numbers [1,7] (1): 3
+ ? Enter the wavelength for the optical depth [0.0001 micron,1e6 micron]: 0.55
+ ? Enter the face-on optical depth at this wavelength [0,..]: 1
+\endverbatim
+
+Each dust component is characterized by a particular geometry (determining the dust density distribution),
+a dust mix (determining the optical properties of the dust grains), and normalization parameters
+(determining the total amount of dust in the component).
+The amount of dust is often determined by specifying the face-on or edge-on optical
+depth at a given wavelength.
+
+There is only one type of dust component, so the first dust component is automatically selected. For the geometry,
+select an exponential disk with a scale length of 4 kpc and a scale height of 140 pc, without truncation.
+Select a dust mixture based on the average properties of the diffuse dust in the Milky Way.
+Further specify normalization based on a face-on optical depth of 1 at wavelength \f$\lambda=0.55~\mu{\text{m}}\f$.
+
+Note that the dust scale height is much smaller than the stellar scale height, which should produce a nice dust lane
+when viewing the galaxy edge-on.
+
+\verbatim
+  Possible choices for item #2 in the dust components list:
+     1. A dust component
+? Enter one of these numbers or zero to terminate the list [0,1] (1): 0
+\endverbatim
+
+When asked for the second dust component, terminate the list by entering a zero.
+
+\verbatim
+   Possible choices for the dust grid structure:
+      1. A cylindrical grid structure with a linear distribution
+      2. A cylindrical grid structure with a power-law distribution
+         ...
+      9. An octtree dust grid structure
+     10. A k-d tree (binary tree) dust grid structure
+         ...
+ ? Enter one of these numbers [1,12] (8): 2
+ ? Output data files for plotting the structure of the grid? [yes/no] (yes):
+ ? Enter the outer radius in the radial direction [0 pc,.. pc]: 25000
+ ? Enter the ratio of the bin widths in the radial direction [0,1e4] (50): 30
+ ? Enter the number of radial grid points [5,100000] (250): 100
+ ? Enter the outer radius in the axial direction [0 pc,.. pc]: 5000
+ ? Enter the ratio of bin widths in the axial direction [0,1e4] (50): 50
+ ? Enter the number of axial grid points [5,100000] (250): 100
+\endverbatim
+
+As mentioned above, <tt>SKIRT</tt> discretizes the dust on a grid structure, i.e. a collection of small dust cells covering
+three-dimensional space. Within each cell, the density and temperature of the dust are considered to be uniform.
+<tt>SKIRT</tt> offers several types of dust grids, which can be selected depending on the requirements of the simulation.
+
+Depending on the symmetries in the stellar and dust geometries,
+<tt>SKIRT</tt> supports 1D spherical grids (the grid cells are thin concentric shells), 2D axisymmetric grids (the grid cells
+have the form of a torus) and 3D cartesian grids (the grid cells are little cuboids). Naturally simulations in
+a 1D or 2D grid (when allowed by the system's geometry) are much more efficient than simulations in a full 3D grid.
+
+Each grid type features parameters to set the detailed grid cell distribution in each direction.
+This is one of the most difficult tasks during model setup. The grid must be
+chosen in such a way that the entire configuration space is covered
+and with the resolution highest in those parts where the radiation
+field or the dust density changes most. In many cases, a linear
+distribution is not the best choice. A logarithmic grid is denser in
+the centre than in the outer regions, which is often required. A
+logarithmic grid however, has the drawback that it does not go all the
+way down to zero. A useful alternative is the power-law grid,
+in which the dust cells are also gradually bigger when they are farther
+away from the centre.
+
+For this tutorial simulation, select a 2D cylindrical grid structure with a power-law distribution in both directions.
+Specify a radius of 25 kpc and height of 5 kpc, which should be sufficient to contain the vast majority of the dust,
+and 100 cells in each direction (so that there are 10000 cylindrical cells in total).
+Further specify a ratio of the width of the innermost and outermost bins of 30 in the radial and 50 in the
+vertical direction; the ratio is larger in the vertical direction because we want a higher resolution there
+in the inner regions.
+
+\verbatim
+ ? Enter the number of samples for determining cell mass [10,1000] (100):
+ ? Output convergence checks on the dust system? [yes/no] (yes):
+ ? Output the dust density distribution? [yes/no] (yes):
+ ? Output quality metrics for the dust grid? [yes/no] (no):
+ ? Output relevant properties for all dust cells? [yes/no] (no):
+ ? Output the number of cells crossed per path? [yes/no] (no):
+\endverbatim
+
+Finally the dust system takes a few additional parameters which can be left to their default value.
+
+\section UserTut1Writ Writing the ski file
+
+\verbatim
+   Successfully created ski file 'MonoDisk.ski'.
+   To run the simulation use the command: skirt MonoDisk
+\endverbatim
+
+After all questions have been answered, <tt>SKIRT</tt> writes out the resulting ski file and terminates.
+
+\section UserTut1Run Running the simulation
+
+To actually run the simulation, enter the following command (with the same current directory):
+
+\verbatim
+skirt MonoDisk
+\endverbatim
+
+Or if \c skirt is not in your system path, include the absolute or relative path of the \c skirt executable;
+for example:
+
+\verbatim
+../release/skirt MonoDisk
+\endverbatim
+
+<tt>SKIRT</tt> responds with a welcome message and immediately starts performing the simulation. In this mode <tt>SKIRT</tt> never
+asks a question so it can be left to run unattended:
+
+\verbatim
+   Welcome to SKIRT v___
+   Constructing a simulation from ski file 'MonoDisk.ski'...
+   Starting simulation MonoDisk...
+   Starting setup...
+   ...
+ - Finished setup in 1.4 s.
+   Starting the simulation run...
+   Starting the stellar emission phase...
+   ...
+ - Finished the stellar emission phase in 14.3 s.
+   Starting writing results...
+   ...
+ - Finished writing results in 0.0 s.
+ - Finished the simulation run in 14.4 s.
+ - Finished simulation MonoDisk in 15.8 s.
+\endverbatim
+
+<tt>SKIRT</tt> produces various log messages to report on specific activities and overall progress.
+The execution of a simulation progresses in three distinct stages:
+  - During \em construction, an internal data structure is created representing the simulation, based on the
+    contents of the specified ski file. In addition to remembering all ski file parameters, the data structure
+    provides room for all data used and/or produced during the simulation. Since the data is not yet initialized,
+    construction completes in a fraction of a second (or fails if there is a problem with the ski file).
+  - During \em setup, all simulation data structures are initialized. For example, dust properties are
+    read from data files, and the dust density is computed for all cells in the dust grid. Depending on the simulation
+    model and parameters, setup may take seconds, minutes or even hours.
+  - During the \em simulation \em run, photon packages are launched through the dust grid and detected by instruments;
+    at the end the simulation results are written to disk. For an oligochromatic simulation, there is just a stellar
+    emission phase (for each wavelength). In panchromatic simulations, there can also be dust self-absorption
+    and dust emission phases.
+
+\section UserTut1Output Output files
+
+The output files for this tutorial simulation are written in the current directory. All filenames start with
+"MonoDisk", i.e. the name of the ski file. Three files are always generated for every simulation:
+ - \c MonoDisk_log.txt contains the progress log as it was written to the console.
+ - \c MonoDisk_parameters.xml contains a copy of the ski file, with a time stamp of when the simulation was run.
+ - \c MonoDisk_parameters.tex contains a TeX "printout" of the contents of the ski file.
+   Using a regular TeX installation, this file can be easily processed into a nicely formatted document.
+
+During setup <tt>SKIRT</tt> outputs several files describing the dust system (you can turn this off by answering "no" to
+the respective questions during the interactive session). The following files are written for this tutorial simulation
+(where "ds" stands for "dust system"):
+ - \c MonoDisk_ds_convergence.dat is a short text file providing a consistency check on the distribution of the
+   grid cells. It contains the face-on and edge-on central surface density of the dust distribution
+   as well as the total equivalent dust mass (1) obtained by integrating over the cells and (2) as expected
+   without discretization. If these numbers match within a few percent, your dust grid samples the dust
+   density well. If there are large deviations, it might be useful to consider a different grid cell
+   distribution (e.g. with a larger extent, with more resolution, or with more or less contrast between
+   inner and outer cells).
+ - \c MonoDisk_ds_mix_0_mass.dat & \c MonoDisk_ds_0_mean.dat & \c MonoDisk_ds_0_opti.dat list various properties
+   of the dust used in the simulation. The number in the filename indicates the dust component index; each file
+   lists information on the various dust populations contained in the indicated dust component. In this tutorial
+   simulation, there is only a single dust component that contains only a single dust population.
+   The first file provides information on the dust mass fraction contained in each dust population.
+   The second file provides average extinction, absorption and scattering coefficients and the asymmetry parameter.
+   The third file contains detailed optical properties for each dust population used in the simulation.
+ - \c MonoDisk_ds_gridxy.dat & \c MonoDisk_ds_gridxz.dat are data files in a text format that can be easily plotted.
+   Each file describes the intersection of the dust grid structure with one of the coordinate planes.
+ - \c MonoDisk_ds_trhoxy.fits & \c MonoDisk_ds_trhoxz.fits ("theorical rho") are single-frame FITS data files,
+   each providing a 1024 x 1024 pixel map of the theoretical dust density in a coordinate plane, across
+   the total extension of the dust grid. These density values are determined from the dust distribution as if
+   there is an infinitely fine dust grid.
+ - \c MonoDisk_ds_grhoxy.fits & \c MonoDisk_ds_grhoxz.fits ("gridded rho") are single-frame FITS data files,
+   each providing a 1024 x 1024 pixel map of the grid-discretized dust density in a coordinate plane, across
+   the total extension of the grid. These density values are read from the finite-resolution dust grid structure
+   constructed for the simulation.
+
+Finally the instrument specified for this tutorial simulation also produces an output file:
+ - \c MonoDisk_i88_total.fits (where "i88" is the specified instrument name) is a FITS file containing the data cube
+   with the total flux as detected by the instrument. Since the simulation has only one wavelength, there is only
+   a single frame in the output file.
+
+\section UserTut1Edit Adjusting the ski file
+
+There is no need to go through the lengthy interactive Q&A process again if you just want to re-run a simulation
+with slightly adjusted parameters. You can manually edit the ski file instead.
+
+Duplicate the file \c MonoDisk.ski to a new file named MonoDisk2.ski and open this new file in Qt Creator (or in
+any decent text editor). It should look similar to the following snippet, where "..." indicates omitted information:
+
+\verbatim
+...
+<skirt-simulation-hierarchy type="MonteCarloSimulation" ...">
+    <OligoMonteCarloSimulation packages="1e6">
+        ...
+        <instrumentSystem type="InstrumentSystem">
+            ...
+            <FrameInstrument instrumentName="i88" distance="10 Mpc"
+                pixelsX="800" extentX="2e4 pc" pixelsY="200" extentY="5000 pc"
+                inclination="88 deg" azimuth="0 deg" positionAngle="0 deg"/>
+            ...
+        </instrumentSystem>
+        <wavelengthGrid type="OligoWavelengthGrid">
+            <OligoWavelengthGrid wavelengths="0.55 micron"/>
+        </wavelengthGrid>
+        <stellarSystem type="StellarSystem">
+            ...
+        </stellarSystem>
+        <dustSystem type="OligoDustSystem">
+            ...
+        </dustSystem>
+    </OligoMonteCarloSimulation>
+</skirt-simulation-hierarchy>
+\endverbatim
+
+Make the following changes:
+ - increase the number of photon packages by a factor of five (replace "1e6" by "5e6");
+ - add a second instrument by duplicating the <FrameInstrument ... /> element;
+ - change the new instrument's name to i84 and adjust its inclination to 84 degrees.
+
+Save your changes and execute the adjusted simulation using the command "skirt MonoDisk2". The simulation will run
+substantially slower because you launch more photons and because there are more instruments.
+
+Look at the differences between output files:
+ - \c MonoDisk_i88_total.fits and \c MonoDisk2_i88_total.fits (more photon packages)
+ - \c MonoDisk2_i84_total.fits and \c MonoDisk2_i88_total.fits (different inclination)
+ 
+*/
+ 

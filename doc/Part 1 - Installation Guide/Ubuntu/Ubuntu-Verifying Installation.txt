@@ -44,6 +44,6 @@
    \image html skirthelpUbuntu.jpeg
    \image latex skirthelpUbuntu.jpeg
 
-  - You can also proceed with the \ref UsersGuide or \ref FSUsersGuide.
+  - You can also proceed with the \ref UsersGuide.
   
 */

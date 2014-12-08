@@ -1,0 +1,330 @@
+/**
+
+\page UserTut2 Tutorial 2: Producing an SED for the results of an SPH simulation
+
+\image html TutorialPanSPH.png
+\image latex TutorialPanSPH.png
+
+In this tutorial you will use <tt>SKIRT</tt> to produce a spectral energy distribution (%SED) spanning multiple wavelength bands
+for a model imported from the output of a Smoothed Particle Hydrodynamic (SPH) simulation.
+
+\section UserTut2Pre Getting ready
+
+Before starting this tutorial, you should have installed and/or built the <tt>SKIRT</tt> code as described in the
+\ref InstallationGuide, \em and you should have completed the previous tutorial \ref UserTut1.
+A lot of information provided in the previous tutorial is not repeated here!
+
+To complete this tutorial, you need SPH output data that is converted to a format appropriate for importing in SKIRT.
+You need a file with stellar particle data and one with gas particle data. The required file formats are described
+in the documentation for the functions SPHStellarComp::setFilename() and SPHDustDistribution::setFilename().
+
+Download the files \c eagle_stars.dat and \c eagle_gas.dat from the <tt>SKIRT</tt> downloads page
+<a href="http://www.skirt.ugent.be/downloads">www.skirt.ugent.be/downloads</a>
+and put them into your \c ~/SKIRT/run directory.
+
+\section UserTut2Ski Creating the ski file
+
+In a Terminal window, with an appropriate current directory, start <tt>SKIRT</tt> without any command line arguments.
+SKIRT responds with a welcome message and starts an interactive session in the terminal window, during which it
+will prompt you for all the information describing a particular simulation:
+
+\verbatim
+   Welcome to SKIRT v___
+   Interactively constructing a simulation...
+ ? Enter the name of the ski file to be created: PanSPH
+\endverbatim
+
+The first question is for the filename of the ski file. For this tutorial, enter "PanSPH".
+
+\section UserTut2Sim Type of simulation
+
+\verbatim
+   Possible choices for the simulation:
+      1. An oligochromatic Monte Carlo simulation
+      2. A panchromatic Monte Carlo simulation
+ ? Enter one of these numbers [1,2] (1): 2
+\endverbatim
+
+In this tutorial the goal is to produce a spectral energy distribution (%SED) including infrared wavelengths
+and thus the effects of thermal emission by the dust. By definition this requires a panchromatic simulation.
+
+Leave the parameters related to the random generator and the units system to their default values (not shown).
+
+\section UserTut2Inst Instrument system
+
+\verbatim
+   Possible choices for the instrument system:
+      1. An instrument system
+   Automatically selected the only choice: 1
+   Possible choices for item #1 in the instruments list:
+      1. A basic instrument that outputs the total integrated flux as an SED
+      2. A basic instrument that outputs the total flux in every pixel as a data cube
+      3. A basic instrument that outputs the total flux as data cube and as SED
+         ...
+ ? Enter one of these numbers or zero to terminate the list [0,6] (3): 1
+ ? Enter the name for this instrument: i90
+ ? Enter the distance to the system [0 Mpc,.. Mpc]: 10
+ ? Enter the inclination angle of the detector [0 deg,180 deg] (0 deg): 90
+ ? Enter the azimuth angle of the detector [-360 deg,360 deg] (0 deg): 0
+ ? Enter the position angle of the detector [-360 deg,360 deg] (0 deg): 0
+   Possible choices for item #2 in the instruments list:
+      1. A basic instrument that outputs the total integrated flux as an SED
+         ...
+ ? Enter one of these numbers or zero to terminate the list [0,6] (3): 0
+\endverbatim
+
+For this tutorial, configure at least one instrument of the type that outputs the total integrated flux as an SED.
+Specify an inclination and a distance to the system of your liking. You may configure additional instruments,
+of the same or of a different type, as you wish.
+
+\verbatim
+ ? Enter the number of photon packages per wavelength [1e4,2e13] (1e6): 1e5
+\endverbatim
+
+To limit the run time (while at the same time reducing the quality of the results),
+set the number of photon packages to \f$10^5\f$.
+
+\section UserTut2Wave Wavelength grid
+
+\verbatim
+   Possible choices for the wavelength grid:
+      1. A logarithmic wavelength grid
+      2. A nested logarithmic wavelength grid
+      3. A wavelength grid read from a file
+ ? Enter one of these numbers [1,3] (1): 1
+ ? Output a data file listing the wavelength grid points? [yes/no] (no):
+ ? Enter the shortest wavelength [0.0001 micron,1e6 micron]: 0.1
+ ? Enter the longest wavelength [0.0001 micron,1e6 micron]: 1000
+ ? Enter the number of wavelength grid points [2,2000000000] (25): 30
+\endverbatim
+
+SKIRT currently offers three possibilities: a simple logarithmic grid, a logarithmic grid with a built-in
+logarithmic subgrid and a wavelength grid read from a file. Here are some guidelines for an
+appropriate choice of the wavelength grid:
+ - The coverage of your wavelength grid should be appropriate to the radiative transfer problem.
+   Typically radiation is absorbed at UV and optical wavelengths and re-emitted at far-infrared and submillimetre
+   wavelengths. So your wavelength grid should typically range from the
+   UV to the submm range, i.e. from about 0.1 to 1000 \f$\mu\f$m.
+ - On the other hand, don't make your wavelength coverage too large. In order to make a meaningul simulation,
+   <tt>SKIRT</tt> must know the spectral properties of the emitters (the stars) and the optical properties of the dust
+   at all wavelengths considered. Typically, you should not consider wavelengths shorter than 0.01 \f$\mu\f$m or
+   longer than a few mm. If you choose a dust species (see later on) for which the optical properties are not
+   defined over the entire specified wavelength range, <tt>SKIRT</tt> will not be able to perform the simulation.
+ - You should consider enough grid points to ensure that you have sufficient resolution and precision.
+   On the other hand, don't choose a grid that is too fine: the simulation run time is approximately proportional
+   to the number of grid points in the wavelength grid. A typical setup uses about 20 grid points for every
+   order in wavelength. If you want much more resolution in a certain wavelength range, for example because
+   you are studying a spectral region in detail, you can use the nested logarithmic grid.
+ - Whatever you decide to do, always make sure that the wavelength grid includes the V band, since the central
+   wavelength of the V band is where the optical properties of the dust are normalized. If 550 nm
+   is not covered by your wavelength grid, <tt>SKIRT</tt> will terminate.
+
+For this tutorial, select a wavelength grid with 30 grid points distributed logarithmically between 0.1 and 1000
+\f$\mu\f$m.
+
+\section UserTut2Stel Stellar system
+
+\verbatim
+   Possible choices for the stellar system:
+      1. A stellar system
+   Automatically selected the only choice: 1
+   Possible choices for item #1 in the stellar components list:
+      1. A stellar component with a built-in geometry (in an panchromatic simulation)
+      2. A stellar component derived from an SPH output file
+      3. A stellar component imported from an adaptive mesh data file
+      4. A stellar component imported from a Voronoi mesh data file
+ ? Enter one of these numbers [1,4] (1): 2
+ ? Enter the name of the file with the SPH star particles: eagle_stars.dat
+ ? Output the luminosities per wavelength bin? [yes/no] (no):
+\endverbatim
+
+In this tutorial, the stellar information is imported from the output of an SPH simulation. You need SPH stellar
+particle data in a format appropriate for importing in SKIRT, as described in the documentation for the function
+SPHStellarComp::setFilename(). Select the appropriate stellar component type and enter the name of your stellar
+particle data file.
+
+\section UserTut2Dust Dust system
+
+\verbatim
+   Possible choices for the dust system:
+      1. A dust system for use with panchromatic simulations
+ ? Enter one of these numbers or zero to select none [0,1] (1):
+   Possible choices for the dust distribution:
+      1. A dust distribution composed of various dust components
+      2. A dust distribution derived from an SPH output file
+      3. A dust distribution imported from an adaptive mesh data file
+      4. A dust distribution imported from a Voronoi mesh data file
+ ? Enter one of these numbers [1,4] (1): 2
+ ? Enter the name of the file with the SPH gas particles: eagle_gas.dat
+ ? Enter the fraction of the metal content locked up in dust grains [0,1] (0.3): 0.3
+ ? Enter the maximum temperature for a gas particle to contain dust [0 K,1e6 K] (75000 K):
+\endverbatim
+
+For a panchromatic simulation, the only applicable type of dust system is the panchromatic dust system,
+which supports thermal dust emission in addition to absorption and scattering.
+The dust system is optional, so you need to explicitly select it.
+
+In this tutorial, the dust distribution is imported from the output of an SPH simulation. You need SPH gas particle
+data in a format appropriate for importing in SKIRT, as described in the documentation for the function
+SPHDustDistribution::setFilename().
+Select the appropriate dust distribution type and enter the name of your gas particle data file.
+
+SKIRT estimates the dust density distribution from the gas particle data through a simple scheme:
+the dust density is assumed to be proportional to the density of the metallic gas. The proportionality factor
+must be provided as a factor. A typical value is 0.3.
+
+\verbatim
+   Possible choices for the dust mix describing the attributes of the dust:
+      1. A Draine & Li (2007) dust mix
+      2. A dust mix with average interstellar properties
+      3. A dust mix with mean Zubko properties
+      4. A dust mix from the 1D benchmark model (Ivezic et al. 1997)
+      5. A dust mix from the 2D benchmark model (Pascucci et al. 2004)
+      6. An MRN multi-component dust mix
+      7. A Weingartner & Draine multi-component dust mix
+      8. A Zubko et al. multi-component dust mix
+      9. A configurable multi-component dust mix
+ ? Enter one of these numbers [1,9] (2): 1
+ ? Do you want to output a data file with the optical properties of the dust mix? [yes/no] (yes):
+ ? Do you want to output a data file with the mean optical properties of the dust mix? [yes/no] (yes):
+\endverbatim
+
+SKIRT supports a set of built-in dust mixtures describing the optical properties of the dust.
+Several dust populations, each with their own chemical composition and size distribution, can live together in the
+model. All dust populations have the same spatial distribution, but they may have different optical
+properties and therefore they will reach different equilibrium temperatures.
+
+For this tutorial, select the default Draine & Li dust mix.
+This dust mixture formally consists of a single dust grain population, but effectively
+represents a mixture of graphite, silicate and PAH dust grains that reproduces the extinction curve of the Milky Way.
+
+\verbatim
+   Possible choices for the dust grid structure:
+      1. A 3D cartesian grid structure with a linear distribution
+      2. A 3D cartesian grid structure with a power-law distribution
+      3. A 3D dust grid structure with a two-phase medium
+      4. An octtree dust grid structure
+      5. A k-d tree (binary tree) dust grid structure
+      6. A tree dust grid structure derived from a set of particles
+      7. A Voronoi dust grid structure
+ ? Enter one of these numbers [1,7] (4): 4
+ ? Do you want to output data files for plotting the structure of the grid? [yes/no] (yes):
+ ? Enter the outer radius of the root cell in the x direction [0 pc,.. pc]: 20 kpc
+ ? Enter the outer radius of the root cell in the y direction [0 pc,.. pc]: 20 kpc
+ ? Enter the outer radius of the root cell in the z direction [0 pc,.. pc]: 20 kpc
+ ? Enter the minimum level of grid refinement (typically 2 to 3) [0,50] (2): 2
+ ? Enter the maximum level of grid refinement (typically 6 to 10) [2,50] (6): 7
+   Possible choices for the search method used for traversing the tree grid:
+      1. Top-down (start at root and recursively find appropriate child node)
+      2. Neighbor (construct and use neighbor list for each node wall)
+      3. Bookkeeping (derive appropriate neighbor through node indices)
+ ? Enter one of these numbers [1,3] (2):
+ ? Enter the number of random density samples for determining cell subdivision [10,1000] (100):
+ ? Enter the maximum mean optical depth for each dust cell [0,100] (0):
+ ? Enter the maximum fraction of dust mass contained in each dust cell [0,0.01] (1e-6): 5e-5
+ ? Enter the maximum density dispersion fraction in each dust cell [0,0.01] (0):
+ ? Do you want to use barycentric subdivision? [yes/no] (no):
+\endverbatim
+
+Usually you have little a priori knowledge about a dust distribution imported from SPH simulation results.
+Due to the lack of spatial symmetries, the grid structure that discretizes the dust must be a full 3D grid.
+Moreover, since we have no a priori information on where the denser regions are located, it is best to choose
+an adaptive grid that automatically forms smaller cells in denser regions. The grid will take longer to construct,
+but the simulation run will be faster and more accurate than if you would use a more uniform grid.
+
+For this tutorial simulation, select an octtree grid. The grid must enclose most of the dust
+in the system so its size must be adjusted to the configuration space of the input data.
+For the \c eagle_xxx.dat particle data files, you should specify an extent of 20 kpc in each direction.
+
+For a first simulation, typical values for the grid refinement level are a minimum of 2 and a maximum of 7.
+For high-quality simulations, you will need to raise the maximum level to 10 or more, so that
+the resulting octtree contains more and smaller cells. Of course this strongly raises execution time.
+
+For this tutorial simulation, the maximum fraction of dust mass in each cell may be set to a value of
+\f$5\times 10^{-5}\f$. For high-quality simulations, this parameter is usually left to the default value
+of \f$10^{-6}\f$. Larger (and thus less stringent) values for this parameter result in an octtree with less cells,
+which lowers accuracy as well as execution time.
+
+Leave the other parameters to their default values.
+
+\verbatim
+ ? Enter the number of random density samples for determining cell mass [10,1000] (100):
+ ? Do you want to output a data file with convergence checks on the dust system? [yes/no] (yes):
+ ? Do you want to output FITS files displaying the dust density distribution? [yes/no] (yes):
+ ? Do you want to calculate and output quality metrics for the dust grid? [yes/no] (no):
+ ? Do you want to output a data file with relevant properties for all dust cells? [yes/no] (no):
+ ? Do you want to output statistics on the number of cells crossed per path? [yes/no] (no):
+   Possible choices for the dust emissivity type:
+      1. Modified blackbody dust emissivity (assumes LTE conditions)
+      2. Transient heating dust emissivity (with full non-LTE treatment)
+      3. Transient heating dust emissivity using the external DustEM code
+ ? Enter one of these numbers or zero to select none [0,3] (1):
+   Possible choices for the dust library mechanism:
+      1. A dust library that calculates the emissivity for every dust cell
+      2. A dust library with a one-dimensional grid of emissivity entries
+      3. A dust library with a two-dimensional grid of emissivity entries
+ ? Enter one of these numbers [1,3] (1):
+ ? Do you want to include dust self-absorption? [yes/no] (yes): no
+ ? Do you want to output a file with the dust mix emissivities in the local ISRF? [yes/no] (no):
+ ? Do you want to output FITS files displaying the dust temperature distribution? [yes/no] (yes):
+ ? Do you want to output a data file describing the interstellar radiation field? [yes/no] (yes):
+\endverbatim
+
+As soon as a simulation includes a dust system, dust absorption and scattering are automatically enabled.
+For a panchromatic simulation you can also enable thermal emission by the dust. To enable thermal emission,
+select one of the dust emissivity options (see next paragraph). To disable thermal emission, enter zero to
+select "no dust emissivity".
+If the simulation's wavelength range includes MIR or FIR bands, dust emission is most likely relevant.
+If the simulation covers UV and optical bands only, dust emission is most likely irrelevant.
+
+With the default "modified blackbody" dust emissivity option, thermal emission is calculated under the assumption
+of local thermal equilibrium (LTE). Alternatively you can select "transient heating" dust emissivity, which supports
+non-LTE (NLTE) dust emission by transiently heated small grains.
+This is a lot more resource-intensive but produces more realistic results for the NIR and MIR wavelengths.
+When a dust grid contains many cells, it may not be feasible to calculate the NLTE dust emission for the exact
+radiation field in each and every dust cell (since the calculation is so resource-intensive). To help address
+this issue, <tt>SKIRT</tt> offers a library mechanism that selects a small set of radiation fields relevant to the range
+detected in the dust grid, performs the thermal emission calculation for each of these library entries, and then
+maps each dust grid cell to one of these entries. There are versions of the library mechanism with a 1D and a 2D grid.
+The default mechanism simply calculates the thermal emission for every cell, so it is not really a library.
+
+Finally, if dust emission is enabled, you can also enable dust self-absorption, implying a self-consistent calculation
+of the dust temperature through an iterative (and time-consuming) procedure.
+The relevance of dust self-absorption depends on the optical depth of the modeled system: if there is a
+modest amount of dust, the system is transparent to long-wavelength radiation, so self-absorption by dust is
+negligible. If the system is rather opaque, it will absorb also mid- and far-infrared
+radiation, so self-absorption might be important.
+
+For this tutorial simulation, use the default "modified blackbody" dust emissivity and the default "for every dust
+cell" library mechanism (since the LTE calculation is very fast, you can just as well do it for every cell).
+However it is best to disable dust self-absorption since it has no effect for this optically-thin model.
+Leave the other parameters to their default values.
+
+\section UserTut2Run Running the simulation
+
+After all questions have been answered, <tt>SKIRT</tt> writes out the resulting ski file and terminates.
+Start <tt>SKIRT</tt> again, this time specifying the name of new ski file on the command line, to actually perform
+the simulation.
+
+\section UserTut2Output Output files
+
+Most of the output files for this tutorial simulation have already been described for the previous tutorial.
+A notable exception is the file written by the SED instrument:
+ - \c PanSPH_i90_sed.dat is a short text data file representing the spectral energy distribution of the photon
+    packages detected by the instrument; there are two columns (wavelength, flux) that can easily be plotted.
+
+The output files describing sections of the dust with the coordinate planes now come in triples
+(\c xy, \c xz and \c yz) because there are no symmetries (i.e. the dust grid is fully 3D).
+There are also some additional files describing aspects of the dust system that make sense only for
+panchromatic simulations:
+ - \c PanSPH_ds_tempxy.fits, \c xz & \c yz ("temperature") are single-frame FITS data files,
+   each providing a 1024 x 1024 pixel map of the mean dust temperature in a coordinate plane, across
+   the total extension of the dust grid.
+ - \c PanSPH_ds_isrf.dat ("interstellar radiation field") is a text format data file describing the
+   radiation field (flux for every wavelength) for each dust cell in the dust grid.
+
+If you enable NLTE dust emission, there will be one or more files with names of the form
+\c PanSPH_*_EXT.RES and \c PanSPH_*_ISRF.DAT, where * stands for a decimal number. These are temporary files
+and can be discarded.
+
+*/
