@@ -87,7 +87,19 @@ on the system you use for compiling and running <tt>SKIRT</tt>. If you have not 
 use the MPI parallelization (or hybrid parallelization) on the VSC infrastructure (the UGent supercomputers), follow the
 instructions in \ref UserHPC.
 
-If you have an MPI implementation installed, you have to make sure you compile the <tt>SKIRT</tt> with MPI before you can use the MPI parallelization. 
+If you have an MPI implementation installed, you have to make sure you compile the <tt>SKIRT</tt> with MPI before you can use the MPI parallelization. By default,
+<tt>SKIRT</tt> will be automatically compiled with MPI if MPI is installed on the system. Therefore, recompiling <tt>SKIRT</tt> once after installing the MPI 
+distribution should provide you with an MPI enabled <tt>SKIRT</tt> on your system. You can check whether the MPI compiler is indeed found during compilation
+(either by running makeSKIRT.sh or using the hammer icon in Qt Creator) by looking at the compilation output. On a system where an MPI compiler is present, the following
+output will appear when compiling <tt>SKIRT</tt> from within Qt Creator:
+
+\image html compilempicxx.jpeg
+
+The lines stating "Project MESSAGE: using MPI compiler ... " inform you that the MPI compiler is found and will be used for the compilation of <tt>SKIRT</tt>. 
+You will get a seperate message for each subproject of <tt>SKIRT</tt> that depends on MPI (\c FitSKIRTmain, \c MPIsupport, \c SKIRTmain and \c SkirtMakeUp), 
+revealing the location of your MPI installation. When compiling <tt>SKIRT</tt> with the makeSKIRT.sh script, you can find the same messages, but they are harder
+to find between the other terminal output. If you want to check the MPI compilation in this case, copy your terminal output to a text editor and search for
+the corresponding sentence.
 
 \section UserMPI_launching Launching SKIRT with MPI
 
