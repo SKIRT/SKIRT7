@@ -171,6 +171,35 @@ void MultiGrainDustMix::addpopulations(const GrainComposition *gc, const GrainSi
         // remember the additional multi-grain properties needed for enthalpy calculations
         _gcv.push_back(gc);
         _meanmassv.push_back(mu/norm);
+
+        // if the grain composition supports polarization, then calculate and add the polarization properties
+        if (gc->polarization())
+        {
+            int Ntheta = 181;
+            Table<2> S11vv(Nlambda,Ntheta);
+            Table<2> S12vv(Nlambda,Ntheta);
+            Table<2> S33vv(Nlambda,Ntheta);
+            Table<2> S34vv(Nlambda,Ntheta);
+            for (int ell=0; ell<Nlambda; ell++)
+            {
+                double lambda = lambdav[ell];
+                for (int t=0; t<Ntheta; t++)
+                {
+                    double theta = t * M_PI/(Ntheta-1);
+                    for (int i=0; i<Na; i++)
+                    {
+                        double w = weightv[i] * dndav[i] * dav[i];
+                        double S11, S12, S33, S34;
+                        gc->Sxx(lambda, av[i], theta, S11, S12, S33, S34);
+                        S11vv(ell,t) += w * S11;
+                        S12vv(ell,t) += w * S12;
+                        S33vv(ell,t) += w * S33;
+                        S34vv(ell,t) += w * S34;
+                    }
+                }
+            }
+            addpolarization(S11vv, S12vv, S33vv, S34vv);
+        }
     }
 }
 

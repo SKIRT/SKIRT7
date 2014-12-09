@@ -168,6 +168,18 @@ protected:
     void addpopulation(double mu, const Array& lambdav,
                        const Array& sigmaabsv, const Array& sigmascav, const Array& asymmparv);
 
+    /** This function, for use in a subclass, adds polarization properties for a single dust
+        population to the dust mix. The arguments provide the four Mueller matrix coefficients
+        \f$S_{11}(\lambda,\theta), S_{12}(\lambda,\theta), S_{33}(\lambda,\theta),
+        S_{34}(\lambda,\theta)\f$ of dust grains in the population, sampled at the simulation's
+        wavelength grid f$\lambda_\ell\f$ and for a set of scattering angles
+        \f$\theta_\mathrm{t}\f$. The four tables must have the same size. The size of the first
+        dimension (\f$\lambda\f$) must match the number of wavelengths in the simulation's
+        wavelength grid. The size of the second dimension (\f$\theta\f$) can be chosen by the
+        caller but must be the same for all invocations of this function on a particular dust mix
+        instance. */
+    void addpolarization(const Table<2>& S11vv, const Table<2>& S12vv, const Table<2>& S33vv, const Table<2>& S34vv);
+
     //======== Setters & Getters for Discoverable Attributes =======
 
 public:
@@ -365,7 +377,7 @@ private:
     Random* _random;
 
     // fundamental properties setup in subclass setupSelfBefore() through protected functions offered by this class
-    int _Npop;
+    int _Npop;                          // index c
     std::vector<double> _muv;           // indexed on c
     std::vector<Array> _sigmaabsvv;     // indexed on c and ell
     std::vector<Array> _sigmascavv;     // indexed on c and ell
@@ -384,15 +396,15 @@ private:
     Array _Tv;                          // indexed on p
     ArrayTable<2> _planckabsvv;         // indexed on c and p
 
-    // polarization-related data members -- to be completed
+    // polarization-related data members
     bool _polarization;
-    int _Ntheta;
+    int _Ntheta;                   // index t
     Table<2> _S11vv;               // indexed on ell and t
     Table<2> _S12vv;               // indexed on ell and t
     Table<2> _S33vv;               // indexed on ell and t
     Table<2> _S34vv;               // indexed on ell and t
 
-    int _Nsamples;
+    int _Nsamples;                 // index r
     Table<2> _thetavv;             // indexed on ell and r
 };
 

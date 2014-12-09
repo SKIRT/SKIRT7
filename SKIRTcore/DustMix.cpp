@@ -24,7 +24,7 @@ using namespace std;
 
 DustMix::DustMix()
     : _writeMix(true), _writeMeanMix(true), _lambdagrid(0), _Nlambda(0), _random(0), _Npop(0), _mu(0),
-      _polarization(false)
+      _polarization(false), _Ntheta(0), _Nsamples(0)
 {
 }
 
@@ -88,6 +88,59 @@ void DustMix::setupSelfAfter()
     _kappaabsv = _sigmaabsv / _mu;
     _kappascav = _sigmascav / _mu;
     _kappaextv = _sigmaextv / _mu;
+
+    // -------------------------------------------------------------
+    // Precompute theta table and normalize polarization properties
+    // -------------------------------------------------------------
+
+    if (_polarization)
+    {
+        // Create a table to find a scattering angle theta for a given random number.
+        // First the normalization constant N is computed, then for each random number
+        // the corresponding theta is derived (bisection method).
+        // Adapted from the STOKES code (Goosmann & Gaskell 2007).
+        // !!! --> compute this table before normalizing the Sxx elements <-- !!!
+        _Nsamples = 1800;
+        _thetavv.resize(_Nlambda,_Nsamples);
+
+        for (int ell=0; ell<_Nlambda; ell++)
+        {
+            double N = 0;
+            double dt = M_PI/(_Ntheta-1);
+            for (int t=0; t<_Ntheta; t++)
+            {
+                N += 2.0*_S11vv(ell,t)*sin(t*dt)*dt;
+            }
+            for (int r=0; r<_Nsamples; r++)
+            {
+                double rand = static_cast<double>(r+1) / _Nsamples;
+                double d = 1.0;
+                double Int = 0.0;
+                int t;
+                for (t=0; t<_Ntheta; t++)
+                {
+                    Int += 1.0/N*2.0*_S11vv(ell,t)*sin(t*dt)*dt;
+                    if(fabs(rand-Int)<d)
+                        d = fabs(rand-Int);
+                    else
+                        break;
+                }
+                _thetavv(ell,r) = (t-1)*dt;
+            }
+        }
+
+        // normalize all Sxx elements to S11
+        for (int ell=0; ell<_Nlambda; ell++)
+        {
+            for (int t=0; t<_Ntheta; t++)
+            {
+                _S12vv(ell,t) /= _S11vv(ell,t);
+                _S33vv(ell,t) /= _S11vv(ell,t);
+                _S34vv(ell,t) /= _S11vv(ell,t);
+                _S11vv(ell,t) = 1.;
+            }
+        }
+    }
 
     // -------------------------------------------------------------
     // Calculate and log the extinction in the V-band
@@ -270,7 +323,45 @@ void DustMix::addpopulation(double mu, const Array& lambdav,
     // add the population using resampled properties
     addpopulation(mu, NR::resample<NR::interpolate_loglog>(lambdagridv,lambdav,sigmaabsv),
                       NR::resample<NR::interpolate_loglog>(lambdagridv,lambdav,sigmascav),
-                      NR::resample<NR::interpolate_loglin>(lambdagridv,lambdav,asymmparv) );
+                  NR::resample<NR::interpolate_loglin>(lambdagridv,lambdav,asymmparv) );
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void DustMix::addpolarization(const Table<2>& S11vv, const Table<2>& S12vv,
+                              const Table<2>& S33vv, const Table<2>& S34vv)
+{
+    // in the first invocation of this function, remember the number of theta samples, and resize our tables
+    if (!_polarization)
+    {
+        _polarization = true;
+        _Ntheta = S11vv.size(1);
+        _S11vv.resize(_Nlambda,_Ntheta);
+        _S12vv.resize(_Nlambda,_Ntheta);
+        _S33vv.resize(_Nlambda,_Ntheta);
+        _S34vv.resize(_Nlambda,_Ntheta);
+    }
+
+    // verify the incoming table sizes
+    if (S11vv.size(0)!=(unsigned)_Nlambda || S12vv.size(0)!=(unsigned)_Nlambda ||
+        S33vv.size(0)!=(unsigned)_Nlambda || S34vv.size(0)!=(unsigned)_Nlambda ||
+        S11vv.size(1)!=(unsigned)_Ntheta || S12vv.size(1)!=(unsigned)_Ntheta ||
+        S33vv.size(1)!=(unsigned)_Ntheta || S34vv.size(1)!=(unsigned)_Ntheta)
+    {
+        throw FATALERROR("Mueller tables must have same size as simulation's lambda grid");
+    }
+
+    // accumulate the incoming Mueller coefficients into our tables
+    for (int ell=0; ell<_Nlambda; ell++)
+    {
+        for (int t=0; t<_Ntheta; t++)
+        {
+            _S11vv(ell,t) += S11vv(ell,t);
+            _S12vv(ell,t) += S12vv(ell,t);
+            _S33vv(ell,t) += S33vv(ell,t);
+            _S34vv(ell,t) += S34vv(ell,t);
+        }
+    }
 }
 
 //////////////////////////////////////////////////////////////////////
