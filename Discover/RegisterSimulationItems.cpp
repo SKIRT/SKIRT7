@@ -117,6 +117,7 @@
 #include "SIUnits.hpp"
 #include "SolarPatchGeometry.hpp"
 #include "SPHDustDistribution.hpp"
+#include "SPHGeometry.hpp"
 #include "SPHStellarComp.hpp"
 #include "SersicGeometry.hpp"
 #include "ShellGeometry.hpp"
@@ -240,6 +241,7 @@ void RegisterSimulationItems::registerAll()
     add<Trust6Geometry>();
     add<Trust7aGeometry>();
     add<Trust7bGeometry>();
+    add<SPHGeometry>();
     add<AdaptiveMeshGeometry>();
     add<VoronoiGeometry>();
     add<OffsetGeometry>();
