@@ -7,7 +7,7 @@ If you plan to make code contributions, there are two possibilities:
 - You can \ref InstallMacGetDevelopPublic (if you don't have a UGent account)
 - You can \ref InstallMacGetDevelopPrivate (if you have a UGent account)
 
-\section InstallMacGetDevelopPublic Use the public SKIRT code
+\section InstallUbuntuGetDevelopPublic Use the public SKIRT code
 
 The public <tt>SKIRT</tt> code is hosted at <a href="https://github.com">GitHub.com</a> and always represents the most stable and thoroughly tested version of <tt>SKIRT</tt>. 
 Despite not being the latest development version, developers without a UGent account are greatly encouraged to use this version as a starting point for their own contributions.
@@ -65,7 +65,7 @@ To setup a local repository and start developing (and using) <tt>SKIRT</tt> with
        cd SKIRT [ENTER]
        git clone [PASTE] git [ENTER]
 
-   where <tt>[PASTE]</tt> is to be replaced with <tt>[CMD] + [V]</tt> on Mac and <tt>[CTRL] + [SHIFT] + [V]</tt> on Ubuntu. The last command thus looks as follows:
+   where <tt>[PASTE]</tt> is to be replaced with <tt>[CTRL] + [SHIFT] + [V]</tt>. The last command thus looks as follows:
    
        git clone https://github.com/username/SKIRT.git git
 
@@ -73,7 +73,7 @@ To setup a local repository and start developing (and using) <tt>SKIRT</tt> with
    
  - You now have your forked repository cloned to your computer, where you can begin modifying it (see the \ref DevelopersGuide).
 
-\section InstallMacGetDevelopPrivate Use the private SKIRT code
+\section InstallUbuntuGetDevelopPrivate Use the private SKIRT code
 
 The current development version of the <tt>SKIRT</tt> source code is stored in a \em private GitHub repository hosted
 on the Ghent University's web servers. You can access this repository only if you have a UGent account \em and
