@@ -278,6 +278,7 @@ HEADERS += \
     IdenticalAssigner.hpp \
     StaggeredAssigner.hpp \
     SequentialAssigner.hpp \
+    SPHGeometry.hpp \
     StokesVector.hpp
 
 SOURCES += \
@@ -515,4 +516,5 @@ SOURCES += \
     IdenticalAssigner.cpp \
     StaggeredAssigner.cpp \
     SequentialAssigner.cpp \
+    SPHGeometry.cpp \
     StokesVector.cpp
