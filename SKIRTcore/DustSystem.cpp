@@ -86,7 +86,7 @@ void DustSystem::setupSelfAfter()
     // Perform a convergence check on the grid.
     if (_writeConvergence && comm->isRoot()) writeconvergence();
 
-    // Write the density in the xy plane and the xz plane to a file.
+    // Write the density in the xy plane, xz plane and yz plane to a file.
     if (_writeDensity && comm->isRoot()) writedensity();
 
     // Output optical depth map as seen from the center

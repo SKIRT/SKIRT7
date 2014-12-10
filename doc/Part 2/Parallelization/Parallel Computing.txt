@@ -82,7 +82,7 @@ processor would then have a noncurrent and thus invalid value. This problem is c
 mechanisms that monitor changes in shared variables on different processors. Despite these techniques, shared memory systems are limited in the number of 
 processors because of the traffic associated with the cache/memory management.
 
-\subsection ParallelComputing_Infrastructure_Shared Distributed memory systems
+\subsection ParallelComputing_Infrastructure_Distributed Distributed memory systems
 
 As opposed to shared memory systems, the performance of so-called <em>distributed memory systems</em> for parallel programs scales much better with the number of processors. 
 In a distributed memory system, each processor has its own local memory. There is no global address space across processors, so they are not able to change the memory 
@@ -95,7 +95,7 @@ maintaining global cache coherency. Distributed memory systems can be composed o
 making them very useful for solving very large computational problems. A disadvantage of distributed memory systems is that the programmer is responsible 
 for many of the details associated with the communication between processors. Another disadvantage is that this communication is slower than accessing data from a shared memory.
 
-\subsection ParallelComputing_Infrastructure_Shared Computing clusters
+\subsection ParallelComputing_Infrastructure_Clusters Computing clusters
 
 Nowadays, the most powerful high performance computers or supercomputers in the world use a combination of shared and distributed memory architectures.
 These systems are so-called <em>computing clusters</em>. Such a system consists of a distributed arrangement of nodes which are 
