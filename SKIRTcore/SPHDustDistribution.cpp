@@ -52,6 +52,7 @@ void SPHDustDistribution::setupSelfBefore()
     find<Log>()->info("Reading SPH gas particles from file " + filepath + "...");
     int Nignored = 0;
     double Mtot = 0;
+    double Mmetal = 0;
     while (!infile.atEnd())
     {
         // read a line, split it in columns, and skip empty and comment lines
@@ -76,6 +77,7 @@ void SPHDustDistribution::setupSelfBefore()
                                              columns.value(4).toDouble()*Msun,
                                              columns.value(5).toDouble()));
                 Mtot += columns.value(4).toDouble();
+                Mmetal += columns.value(4).toDouble() * columns.value(5).toDouble();
             }
        }
     }
@@ -83,6 +85,7 @@ void SPHDustDistribution::setupSelfBefore()
     find<Log>()->info("  Number of high-temperature particles ignored: " + QString::number(Nignored));
     find<Log>()->info("  Number of SPH gas particles containing dust: " + QString::number(_pv.size()));
     find<Log>()->info("  Total gas mass: " + QString::number(Mtot) + " Msun");
+    find<Log>()->info("  Total metal mass: " + QString::number(Mmetal) + " Msun");
 
     // construct a 3D-grid over the particle space, and create a list of particles that overlap each grid cell
     const int GRIDSIZE = 20;
