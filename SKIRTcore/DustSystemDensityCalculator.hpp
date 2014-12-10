@@ -35,9 +35,9 @@ public:
     DustSystemDensityCalculator(const DustSystem* ds, int numBodies, int numSamplesPerBody);
 
     /** This function calculates and stores information on \em numSamplesPerBody density samples in
-        the output slot with index n, which must be in range 0 thru \em numBodies-1. The function
+        the output slot with index n, which must be in range 0 through \em numBodies-1. The function
         is designed for use as the body in a parallel loop; see the Parallel class. You must invoke
-        this function for all indices in the range 0 thru \em numBodies-1 before calling the other
+        this function for all indices in the range 0 through \em numBodies-1 before calling the other
         functions in this class. */
     void body(size_t n);
 
