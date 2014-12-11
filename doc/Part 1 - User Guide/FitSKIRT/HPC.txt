@@ -4,11 +4,11 @@
 
 This section will briefly explain how to setup a <tt>FitSKIRT</tt> run on the infrastructure of <a href="https://vscentrum.be/en">VSC</a>, 
 short for "Vlaams Supercomputer centrum" (Flemish Supercomputer Center). Below you can
-find an example of script used to run <tt>FitSKIRT</tt>. We will first discuss the actual content of the script (the lines not
+find an example of a script used to run <tt>FitSKIRT</tt>. We will first discuss the actual content of the script (the lines not
 starting with a hashtag). Before you can run the code, make sure <tt>SKIRT</tt> is compiled using the correct modules, also
-listed in the script below. make sure to set the absolute path to your directories and run the code using mympirun
-instead of the regular mpirun command. it is important to add the -s 1 and -t 1 flags in order to run every parallel
-proces on one processor. This proved to be the fastest options as a lot of simulation overhead is also parallelised in
+listed in the script below. Make sure to set the absolute path to your directories and run the code using mympirun
+instead of the regular mpirun command. It is important to add the -s 1 and -t 1 flags in order to run every parallel
+process on one processor. This proved to be the fastest option as a lot of simulation overhead is also parallelised in
 this way.
 
 The choice of the HPC settings depends heavily on your simulation. Notice you should ask what you need but preferably
@@ -16,15 +16,15 @@ not much more. The walltime for this run is set to 40 hours but can be set up to
 will only run about 10 hours it is safer to lower your walltime accordingly.
 
 Another important choice to be made is the number of requested nodes. As <tt>FitSKIRT</tt> can create a parallel process for each
-individual in the population, the number of request processors should not exceed that number. Try to request an amount
-of nodes that suits your simulation. For example, in the case below, a populationsize of 200 individuals was used.
+individual in the population, the number of requested processors should not exceed that number. Try to request an amount
+of nodes that suits your simulation. For example, in the case below, a population size of 200 individuals was used.
 Therefore the ideal number of nodes in this case is 200 divided by the number of processors per node (in this case 16)
 rounded up giving us 13 nodes. As a result every processor will handle 1 individual every generation. However, as
-requesting a lot of nodes is often more difficult, another approach is to let every processor handle 2 or 3 4 or ... A
-bad choice in this case would be to take 12 nodes as one interation of all processor would only evaluate 192 while the
+requesting a lot of nodes is often more difficult, another approach is to let every processor handle 2 or 3 or ... A
+bad choice in this case would be to take 12 nodes as one iteration of all processor would only evaluate 192 while the
 remaining 8 would have to be handled in a second iteration. This means that there is hardly any increase in speed going
 from 9 to 12 nodes. (Please notice that in your script the last two lines should be 1 line. They were only split here to
-match in the documentation guideline)
+match in the documentation guideline.)
 
 \verbatim
 #!/bin/sh
