@@ -76,7 +76,7 @@ All other calls to the MPI library must of course happen between the initiation 
 \image html initfinal.png "The outline of the execution of an MPI program. The program is started as N identical processes. Upon calling the initiation function, they get assigned a rank within the MPI environment. They can then call other MPI functions, e.g. for communication with other processes. All calls must be done before the call to the finalization function."
 
 As soon as a process calls the <tt>MPI_Init</tt> function, it is assigned a rank. This rank is just a number that is used to identify the process within the 
-environment. With \f$N\f$ processes, the rank of each process is an integer value between zero and \f$N − 1\f$.
+environment. With \f$N\f$ processes, the rank of each process is an integer value between zero and \f$N-1\f$.
 
 Regarding communications between processes, it can be useful to define smaller groups of processes that are able to communicate with each other. 
 Such groups are called \em communicators. MPI automatically provides a communicator called <tt>MPI_COMM_WORLD</tt>, which includes all processes in the environment. 
