@@ -38,11 +38,11 @@ void Instrument::setupSelfBefore()
 
 ////////////////////////////////////////////////////////////////////
 
-void Instrument::sumResults(QList< Array*> arrays)
+void Instrument::sumResults(QList<Array*> arrays)
 {
-    PeerToPeerCommunicator * comm = find<PeerToPeerCommunicator>();
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
 
-    foreach (Array* arr, arrays) comm->sum(*arr);
+    foreach (Array* arr, arrays) if (arr->size()) comm->sum(*arr);
 }
 
 ////////////////////////////////////////////////////////////////////

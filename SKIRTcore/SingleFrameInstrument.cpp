@@ -138,7 +138,7 @@ void SingleFrameInstrument::calibrateAndWriteDataCubes(QList< Array*> farrays, Q
                 int m = i + _Nxp*j + _Nxp*_Nyp*ell;
                 foreach (Array* farr, farrays)
                 {
-                    (*farr)[m] /= dlambda;
+                    if (farr->size()) (*farr)[m] /= dlambda;
                 }
             }
         }
@@ -177,7 +177,7 @@ void SingleFrameInstrument::calibrateAndWriteDataCubes(QList< Array*> farrays, Q
                 int m = i + _Nxp*j + _Nxp*_Nyp*ell;
                 foreach (Array* farr, farrays)
                 {
-                    (*farr)[m] = units->osurfacebrightness(lambda, (*farr)[m]);
+                    if (farr->size()) (*farr)[m] = units->osurfacebrightness(lambda, (*farr)[m]);
                 }
             }
         }
@@ -188,11 +188,14 @@ void SingleFrameInstrument::calibrateAndWriteDataCubes(QList< Array*> farrays, Q
     QString filename = find<FilePaths>()->output(_instrumentname);
     for (int q = 0; q < farrays.size(); q++)
     {
-        QString fitsfilename = filename + "_" + fnames[q] + ".fits";
-        find<Log>()->info("Writing " + fnames[q] + " flux to FITS file " + fitsfilename + "...");
-        FITSInOut::write(fitsfilename, *(farrays[q]), _Nxp, _Nyp, Nlambda,
-                       units->olength(_xpres), units->olength(_ypres),
-                       units->usurfacebrightness(), units->ulength());
+        if (farrays[q]->size())
+        {
+            QString fitsfilename = filename + "_" + fnames[q] + ".fits";
+            find<Log>()->info("Writing " + fnames[q] + " flux to FITS file " + fitsfilename + "...");
+            FITSInOut::write(fitsfilename, *(farrays[q]), _Nxp, _Nyp, Nlambda,
+                           units->olength(_xpres), units->olength(_ypres),
+                           units->usurfacebrightness(), units->ulength());
+        }
     }
 }
 
