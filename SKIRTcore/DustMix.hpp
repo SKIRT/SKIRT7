@@ -172,7 +172,7 @@ protected:
         population to the dust mix. The arguments provide the four Mueller matrix coefficients
         \f$S_{11}(\lambda,\theta), S_{12}(\lambda,\theta), S_{33}(\lambda,\theta),
         S_{34}(\lambda,\theta)\f$ of dust grains in the population, sampled at the simulation's
-        wavelength grid f$\lambda_\ell\f$ and for a set of scattering angles
+        wavelength grid \f$\lambda_\ell\f$ and for a set of scattering angles
         \f$\theta_\mathrm{t}\f$. The four tables must have the same size. The size of the first
         dimension (\f$\lambda\f$) must match the number of wavelengths in the simulation's
         wavelength grid. The size of the second dimension (\f$\theta\f$) can be chosen by the
