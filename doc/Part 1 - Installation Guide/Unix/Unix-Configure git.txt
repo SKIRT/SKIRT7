@@ -1,0 +1,12 @@
+/**
+
+\page InstallSrcGit Configuring the source control client
+
+Before using the \c git client, you should configure it with your user name and email address. This is
+especially important if you plan to contribute code to the <tt>SKIRT</tt> repository. Perform the following commands,
+replacing the placeholders with your own name and email address:
+
+    git config --global user.name "Your Name"
+    git config --global user.email yourname@organization.org
+
+*/

@@ -1,0 +1,170 @@
+/**
+
+\page InstallUbuntuGet Getting the SKIRT source code
+
+To work with <tt>SKIRT</TT>, you need to copy the source code to your local file system. First create a directory hierarchy that
+will hold the <tt>SKIRT</tt>source code, binaries and runtime information. The top-level directory can have any name (for
+example \c SKIRT) and can be located anywhere, but the subdirectories should be named as indicated below. Execute the following commands in a Terminal 
+window to create the <tt>SKIRT</tt> directory in your \em home folder.
+
+    cd [ENTER]
+    mkdir SKIRT [ENTER]
+    cd SKIRT [ENTER]
+    mkdir debug doc release run git [ENTER]
+
+As to whether which version of <tt>SKIRT</tt> you want to use, you have two choices:
+
+- \ref InstallUbuntuGet__public, which contains the most recent <b>stable version</b>. This is the most easy way to obtain <tt>SKIRT</tt>, and if you 
+  don't have a UGent account, the only one.
+- \ref InstallUbuntuGet__private, which contains the latest <b>development version</b> of the code. This means that this repository is ahead of the public
+  repository and contains all the latest features. However, some of these features may still be experimental. Use only if you have a UGent account
+  and you need a feature not yet present in the public version. 
+
+\section InstallUbuntuGet__public Use the public SKIRT code
+
+The most recent stable version of the <tt>SKIRT</tt> source code is available from the
+<a href="https://github.com/SKIRT/SKIRT">public SKIRT GitHub repository</a> at <a href="https://github.com">GitHub.com</a>.
+While any user can freely retrieve the code from this repository (even anonymously), only the core <tt>SKIRT</tt> team
+has write access to it. To obtain the code, simply type the following commands in a Terminal window:
+
+    cd ~/SKIRT [ENTER]
+    git clone https://github.com/SKIRT/SKIRT.git git [ENTER]
+
+This command will produce different kinds of output. To \em update your local copy of the source code after changes were made to the repository from which you cloned it, use:
+
+    cd ~/SKIRT/git [ENTER]
+    git pull [ENTER]
+
+\section InstallUbuntuGet__private Use the private SKIRT code
+
+\note Some features in the private <tt>SKIRT</tt> code may still be experimental!
+
+The current development version of the <tt>SKIRT</tt> source code is stored in a \em private GitHub repository hosted
+on the Ghent University's web servers. You can access this repository only if you have a UGent account \em and
+the core <tt>SKIRT</tt> team has specifically granted you read access to the repository. To obtain this access, first go to the
+<a href="https://github.ugent.be">github.ugent.be</a> webpage and log in with your UGent account name and password. This will create
+your account on the UGent github website. Then ask the <tt>SKIRT</tt> team to grant you the access to the private repository, providing
+them with your account name. If your request has been accepted, follow the instructions below.
+
+<i> Step-by-step instructions: </i>
+
+<b> Check for existing keys </b>
+
+- Type the following in a Terminal window:
+
+      ls -al ~/.ssh [ENTER]
+
+- If there is a key with extension '.pub' present, skip the next step.
+
+<b> Generate a SSH key </b>
+
+- Again in the Terminal window, type:
+
+      cd [ENTER]
+      ssh-keygen -t rsa -C "yourname@organization.org" [ENTER]
+      [ENTER]
+
+- Type a new password and press <tt>[ENTER]</tt>
+- Type this password again and press <tt>[ENTER]</tt>
+- You should see the following output:
+
+      Your identification has been saved in /Users/yourname/.ssh/id_rsa.
+      Your public key has been saved in /Users/yourname/.ssh/id_rsa.pub.
+      The key fingerprint is:
+      XX:XX:XX:XX:XX ... yourname@organization.org
+      The key's randomart image is:
+      +--[ RSA 2048]----+
+      |                 |
+      |          XX     |
+      |       X XX   X  |
+      |         X   XX  |
+      |       X XX   X  |
+      |         XX XX   |
+      |                 |
+      |           X     |
+      |                 |
+      +-----------------+
+
+<b> Add your new key to the ssh-agent </b>
+
+- Type the following in Terminal:
+
+      eval "$(ssh-agent -s)" [ENTER]
+
+- You should see the following output:
+
+      Agent pid XXXXX
+
+- Type:
+
+      ssh-add ~/.ssh/id_rsa [ENTER]
+
+- You wil see the following output:
+
+      Enter passphrase for /Users/yourname/.ssh/id_rsa:
+	
+- Enter your password and press [ENTER].
+- You will see the following output:
+
+      Identity added: /Users/yourname/.ssh/id_rsa (/Users/yourname/.ssh/id_rsa)
+
+<b> Add the SSH key to your github.ugent account </b>
+
+- Navigate to <a href="https://github.ugent.be">github.ugent.be</a> and log in.
+- Click on your username (top right).
+- Click on 'Edit profile' (top right).
+- Go to 'SSH keys'.
+- Press 'Add SSH key'.
+- As the Title, enter something that identifies your computer (for example: Personal MacBook).
+- Next, go back to the terminal and copy your SSH key by typing:
+
+      sudo apt-get install xclip [ENTER]
+      xclip -sel clip < ~/.ssh/id_rsa.pub [ENTER]
+
+- Back on the website, paste (<tt>[CTRL] + [V]</tt>) in the 'Key' text field.
+- Click 'Add key'.
+- After adding your key, you should wait about 10 minutes before continuing with the next step.
+
+<b> Clone the private repository </b>
+
+- Go back to the <a href="https://github.ugent.be">github.ugent.be</a> webpage and log in. 
+- In the search bar on top of the page, type <tt>SKIRT [ENTER]</tt> to find the <tt>SKIRT</tt> repository.
+- Click on the repository that is listed as "SKIRT/SKIRT".
+- On the "SKIRT/SKIRT" page, find the "Copy to clipboard" option on the right of the page (see the screenshot below). 
+- Make sure it states "SSH" above the text box, before copying the link to the clipboard.
+ 
+\image html githubsshlink.png
+\image latex githubsshlink.png
+
+- Go back to Terminal and type the following commands:
+ 
+      cd [ENTER]
+      cd SKIRT [ENTER]
+      git clone [PASTE] git [ENTER]
+
+  where <tt>[PASTE]</tt> is to be replaced with <tt>[CTRL] + [SHIFT] + [V]</tt>. The last command thus looks as follows:
+   
+      git clone git@github.ugent.be:SKIRT/SKIRT.git git
+
+  \note Don't forget to add the extra "git" at the end of the last line!
+
+- You will see the following output:
+
+      The authenticity of host 'github.ugent.be (XXX.XXX.XXX.XX)' can't be established. 
+      RSA key fingerprint is XX:XX:XX:XX:XX ... .
+      Are you sure you want to continue connecting (yes/no)? 
+
+- Type:
+
+      yes [ENTER]
+
+- You will see different kinds of output.
+- To \em update your local copy of the source code after changes were made to the repository from which you cloned it, use:
+
+      cd ~/SKIRT/git [ENTER]
+      git pull [ENTER]
+
+- You now have a local repository (\em local meaning 'on your own computer') which is a clone of the remote repository
+  (\em remote meaning that it is located on the web). 
+
+*/
