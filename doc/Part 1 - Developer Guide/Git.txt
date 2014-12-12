@@ -22,6 +22,8 @@ To facilitate finding the right command, the list below provides a quick access 
 - \ref DevGitCreateBranch
 - \ref DevGitSwitchBranch
 - \ref DevGitLogNice
+- \ref DevGitUndo
+- \ref DevGitBack
 - \ref DevGitStash
 - \ref DevGitPushPrivate
 - \ref DevGitPullRequest
@@ -70,7 +72,7 @@ the repository to a certain directory:
     mkdir git [ENTER]
     git clone [PASTE] git [ENTER]
 
-where <tt>[PASTE]</tt> should be replaced with the ssh link of the repository; found on its GitHub webpage:
+where <tt>[PASTE]</tt> should be replaced with the SSH link of the repository; found on its GitHub webpage:
 
 \image html githubsshlink.png
 \image latex githubsshlink.png  
@@ -197,6 +199,35 @@ This will result in a graph like the following:
 
 Pressing [ENTER] will bring you further back in the history of your repository.
 
+\section DevGitUndo Undoing all unstaged changes in your working directory
+
+If you want to undo everything that you modified since the last commit, you can use the following command:
+
+    git reset --hard HEAD [ENTER]
+    
+\note Keep in mind that this command completely throws away all uncommited changes!
+
+\section DevGitBack Removing the last commit from your local repository
+
+If you are not happy with the last commit, or you performed a pull request but it got rejected, you can undo the last commit with the
+following command:
+
+    git reset --hard HEAD~1
+    
+You can apply this operation several times, to remove more than just the last commit.
+
+\note This command completely erases commits from the history of your local repository. ONLY perform this operation
+if you are sure that you will never need the changes of these commits again AND that you only pushed your local repository
+to a \em personal remote (so that you are sure no one else cloned from it).  
+
+If you have a personal remote repository where you already pushed the commits to that you removed with the <tt>git reset</tt> command,
+git will not allow you to push your changes as in \ref DevGitPushPrivate. After all, your local repository is now behind of the remote
+repository (which still contains the removed commits). In order to force the push operation, use the following slightly modified command:
+
+    git push --force remotename branchname [ENTER]
+    
+Where "remotename" is the alias of your remote repository and "branchname" is the current development branch of your local repository.
+
 \section DevGitStash Stashing changes and re-applying them (after a pull)
 
     git stash [ENTER]
@@ -205,8 +236,30 @@ Pressing [ENTER] will bring you further back in the history of your repository.
 
 \section DevGitPushPrivate Pushing to your private repository
 
-    git push 
+To push the changes in the branch "branchname" to the remote repository with the alias "remotename", use the following command:
+
+    git push remotename branchname [ENTER]
+    
+For example, to push the master branch of your local <tt>SKIRT</tt> repository to a forked <tt>SKIRT</tt> repository named "personal", the
+command looks as follows:
+
+    git push personal master
 
 \section DevGitPullRequest Performing a pull request
+
+- Depending on which type of account you use for development, navigate to either the <a href="http://www.github.com">the GitHub website</a> or
+  the <a href="http://github.ugent.be">UGent Github page</a> and log in.
+- On your account page, click on "repositories" to see a list of your personal remote repositories.
+- Click on the name of the forked repository where you pushed your changes to.
+- On the page of this repository, click on the green button left of the branch name:
+
+  \image html pullrequest.jpeg
+  \image latex pullrequest.jpeg
+
+  You will get an overview over all the commits that will be included in the pull request, i.e. all the commits that are not yet in the repository that you forked from.
+  
+- Next, click on the green button stating "Create pull request".
+- You will be asked to write a title for your pull request (briefly explain what changes that it includes) and optionally write some additional remarks.
+  If you press "Create pull request" once again, your request will be sent to administrator of the original repository.
 
 */
