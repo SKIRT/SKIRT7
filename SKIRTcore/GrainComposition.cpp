@@ -17,7 +17,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////
 
 GrainComposition::GrainComposition()
-    : _Nlambda(0), _Na(0), _NT(0), _rhobulk(0)
+    : _Nlambda(0), _Na(0), _NT(0), _rhobulk(0), _Ntheta(0)
 {
 }
 
@@ -155,6 +155,49 @@ double GrainComposition::specificenthalpy(double T) const
 double GrainComposition::bulkdensity() const
 {
     return _rhobulk;
+}
+
+////////////////////////////////////////////////////////////////////
+
+bool GrainComposition::polarization() const
+{
+    return _Ntheta > 0;
+}
+
+////////////////////////////////////////////////////////////////////
+
+namespace
+{
+    // this helper function returns the appropriate index for the specified value of theta,
+    // given the specified number of theta values in the arrays
+    int indexForTheta(double theta, int Ntheta)
+    {
+        double delta = M_PI/(Ntheta-1);
+        int d = static_cast<int>(theta/delta+0.5);
+        if (d<0) d = 0;
+        else if (d>=Ntheta) d = Ntheta-1;
+        return d;
+    }
+}
+
+////////////////////////////////////////////////////////////////////
+
+void GrainComposition::Sxx(double lambda, double a, double theta,
+                           double& S11, double& S12, double& S33, double& S34) const
+{
+    int k, i;
+    indices(lambda, a, k, i);
+    int d = indexForTheta(theta, _Ntheta);
+
+    // perform the 2D log-linear interpolation
+    S11 = interpolate(lambda, _lambdav[k], _lambdav[k+1],  a, _av[i], _av[i+1],
+                       _S11vvv(k,i,d), _S11vvv(k+1,i,d), _S11vvv(k,i+1,d), _S11vvv(k+1,i+1,d),  false);
+    S12 = interpolate(lambda, _lambdav[k], _lambdav[k+1],  a, _av[i], _av[i+1],
+                       _S12vvv(k,i,d), _S12vvv(k+1,i,d), _S12vvv(k,i+1,d), _S12vvv(k+1,i+1,d),  false);
+    S33 = interpolate(lambda, _lambdav[k], _lambdav[k+1],  a, _av[i], _av[i+1],
+                       _S33vvv(k,i,d), _S33vvv(k+1,i,d), _S33vvv(k,i+1,d), _S33vvv(k+1,i+1,d),  false);
+    S34 = interpolate(lambda, _lambdav[k], _lambdav[k+1],  a, _av[i], _av[i+1],
+                       _S34vvv(k,i,d), _S34vvv(k+1,i,d), _S34vvv(k,i+1,d), _S34vvv(k+1,i+1,d),  false);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -451,6 +494,75 @@ void GrainComposition::calculateEnthalpyGrid(EnthalpyFunction efun)
 void GrainComposition::setBulkDensity(double value)
 {
     _rhobulk = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void GrainComposition::loadPolarizedOpticalGrid(bool resource, QString name)
+{
+    // open the file
+    QString filename = resource ? FilePaths::resource(name) : find<FilePaths>()->input(name);
+    ifstream file(filename.toLocal8Bit().constData());
+    if (!file.is_open()) throw FATALERROR("Could not open the data file " + filename);
+    find<Log>()->info("Reading polarized grain composition from file " + filename + "...");
+
+    // skip header lines and read the grid size
+    string line;
+    int N;
+    file >> N;  // N is the number of header lines
+    for (int n=0; n<N; n++) getline(file,line);  // skip the header lines
+    file >> _Na;
+    getline(file,line);
+    file >> _Nlambda;
+    getline(file,line);
+    file >> _Ntheta;
+    getline(file,line);
+    _Na++; _Nlambda++; _Ntheta++; // these values are given as n-1 in input file
+    getline(file,line);
+    getline(file,line);
+    getline(file,line);
+    getline(file,line);
+
+    // resize our arrays
+    _lambdav.resize(_Nlambda);
+    _av.resize(_Na);
+    _Qabsvv.resize(_Nlambda,_Na);
+    _Qscavv.resize(_Nlambda,_Na);
+    _asymmparvv.resize(_Nlambda,_Na);  // g array is resized but left to zero values
+    _S11vvv.resize(_Nlambda,_Na,_Ntheta);
+    _S12vvv.resize(_Nlambda,_Na,_Ntheta);
+    _S33vvv.resize(_Nlambda,_Na,_Ntheta);
+    _S34vvv.resize(_Nlambda,_Na,_Ntheta);
+
+    // read the data
+    for (int i=0; i<_Na; i++)
+    {
+        getline(file,line);
+        file >> _av[i];
+        _av[i] *= 1e-6;  // conversion from micron to m
+        getline(file,line);
+        getline(file,line);
+        for (int k=_Nlambda-1; k>=0; k--)
+        {
+            getline(file,line);
+            getline(file,line);  // skip the line with the column titles
+            file >> _lambdav[k] >> _Qabsvv(k,i) >> _Qscavv(k,i);
+            _lambdav[k] *= 1e-6;  // conversion from micron to m
+            getline(file,line);
+            getline(file,line);
+            getline(file,line);  // skip the line with the column titles
+            for (int d=0; d<=_Ntheta-1; d++)
+            {
+                double theta;
+                file >> theta >> _S11vvv(k,i,d) >> _S12vvv(k,i,d) >> _S33vvv(k,i,d) >> _S34vvv(k,i,d);
+                getline(file,line);
+            }
+        }
+    }
+
+    // close the file
+    file.close();
+    find<Log>()->info("File " + filename + " closed.");
 }
 
 ////////////////////////////////////////////////////////////////////

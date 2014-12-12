@@ -102,6 +102,8 @@
 #include "PerspectiveInstrument.hpp"
 #include "PlummerGeometry.hpp"
 #include "PointGeometry.hpp"
+#include "PolarizedGraphiteGrainComposition.hpp"
+#include "PolarizedSilicateGrainComposition.hpp"
 #include "PowAxDustGridStructure.hpp"
 #include "PowCubDustGridStructure.hpp"
 #include "PowSpheDustGridStructure.hpp"
@@ -326,6 +328,8 @@ void RegisterSimulationItems::registerAll()
     add<MinSilicateGrainComposition>();
     add<EnstatiteGrainComposition>();
     add<ForsteriteGrainComposition>();
+    add<PolarizedGraphiteGrainComposition>();
+    add<PolarizedSilicateGrainComposition>();
     add<TrustGraphiteGrainComposition>();
     add<TrustSilicateGrainComposition>();
     add<TrustNeutralPAHGrainComposition>();

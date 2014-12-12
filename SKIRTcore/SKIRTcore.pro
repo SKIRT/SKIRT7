@@ -279,7 +279,9 @@ HEADERS += \
     StaggeredAssigner.hpp \
     SequentialAssigner.hpp \
     SPHGeometry.hpp \
-    StokesVector.hpp
+    StokesVector.hpp \
+    PolarizedSilicateGrainComposition.hpp \
+    PolarizedGraphiteGrainComposition.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -517,4 +519,6 @@ SOURCES += \
     StaggeredAssigner.cpp \
     SequentialAssigner.cpp \
     SPHGeometry.cpp \
-    StokesVector.cpp
+    StokesVector.cpp \
+    PolarizedSilicateGrainComposition.cpp \
+    PolarizedGraphiteGrainComposition.cpp
