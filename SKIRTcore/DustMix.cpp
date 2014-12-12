@@ -699,7 +699,7 @@ void DustMix::scatteringPeelOffPolarization(StokesVector* out, const PhotonPacka
         double rootdot = sqrt(fabs(1.0-dot*dot));
         double cosgamma = (kznew*dot-kz)/rootkznew/rootdot;
         double singamma = (ky*kxnew-kx*kynew)/rootkznew/rootdot;
-        double gamma = atan2(cosgamma,singamma);
+        double gamma = atan2(singamma,cosgamma);
         out->rotateStokes(gamma);
     }
 }
