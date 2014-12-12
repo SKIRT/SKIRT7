@@ -1,6 +1,6 @@
 /**
 
-\page InstallMacGetPublic Getting the public SKIRT source code
+\page InstallMacGetPublic Getting the SKIRT source code
 
 To work with SKIRT, you need to copy the source code to your local file system. First create a directory hierarchy that
 will hold the <tt>SKIRT</tt>source code, binaries and run-time information. The top-level directory can have any name (for

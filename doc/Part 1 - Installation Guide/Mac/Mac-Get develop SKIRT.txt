@@ -65,7 +65,7 @@ To setup a local repository and start developing (and using) <tt>SKIRT</tt> with
        cd SKIRT [ENTER]
        git clone [PASTE] git [ENTER]
 
-   where <tt>[PASTE]</tt> is to be replaced with <tt>[CMD] + [V]</tt> on Mac and <tt>[CTRL] + [SHIFT] + [V]</tt> on Ubuntu. The last command thus looks as follows:
+   where <tt>[PASTE]</tt> is to be replaced with <tt>[CMD] + [V]</tt>. The last command thus looks as follows:
    
        git clone https://github.com/username/SKIRT.git git
 
@@ -153,32 +153,49 @@ If you have a UGent account and the core <tt>SKIRT</tt> team has granted you acc
 
 <b> Add the SSH key to your github.ugent account </b>
 
-- Navigate to github.ugent.be and log in.
+- Navigate to <a href="https://github.ugent.be">github.ugent.be</a> and log in.
 - Click on your username (top right).
 - Click on 'Edit profile' (top right).
 - Go to 'SSH keys'.
 - Press 'Add SSH key'.
 - As the Title, enter something that identifies your computer (for example: Personal MacBook).
-- If your are on <b>Mac</b>, go back to the terminal and copy your SSH key by typing:
+- Next, go back to the terminal and copy your SSH key by typing:
 
       pbcopy < ~/.ssh/id_rsa.pub [ENTER]
-      
-- On <b>Ubuntu</b>, do the same with the following commands:
 
-      sudo apt-get install xclip [ENTER]
-      xclip -sel clip < ~/.ssh/id_rsa.pub [ENTER]
-
-- Back on the website, paste (<tt>[CMD] + [V]</tt> on Mac or <tt>[CTRL] + [V]</tt> on Ubuntu) in the 'Key' text field.
+- Back on the website, paste (<tt>[CMD] + [V]</tt>) in the 'Key' text field.
 - Click 'Add key'.
 - After adding your key, you should wait about 10 minutes before continuing with the next step.
 
 <b> Clone the private repository </b>
 
-- In Terminal, type:
+- In a Terminal window, type the following:
+ 
+      cd [ENTER]
+      mkdir SKIRT [ENTER]
+      cd SKIRT [ENTER]
+      mkdir debug doc release run git [ENTER]
 
+- Go to the <a href="https://github.ugent.be">github.ugent.be</a> webpage and log in. 
+- In the search bar on top of the page, type <tt>SKIRT [ENTER]</tt> to find the <tt>SKIRT</tt> repository.
+- Click on the repository that is listed as "SKIRT/SKIRT".
+- On the "SKIRT/SKIRT" page, find the "Copy to clipboard" option on the right of the page (see the screenshot below). 
+- Make sure it states "SSH" above the text box, before copying the link to the clipboard.
+ 
+\image html githubsshlink.png
+\image latex githubsshlink.png
+
+- Go back to Terminal and type the following commands:
+ 
       cd [ENTER]
       cd SKIRT [ENTER]
-      git clone ...
+      git clone [PASTE] git [ENTER]
+
+  where <tt>[PASTE]</tt> is to be replaced with <tt>[CMD] + [V]</tt>. The last command thus looks as follows:
+   
+      git clone git@github.ugent.be:SKIRT/SKIRT.git git
+
+  \note Don't forget to add the extra "git" at the end of the last line!
 
 - You will see the following output:
 
@@ -195,5 +212,54 @@ If you have a UGent account and the core <tt>SKIRT</tt> team has granted you acc
 
       cd ~/SKIRT/git [ENTER]
       git pull [ENTER]
+
+- You now have a local repository (\em local meaning 'on your own computer') which is a clone of the remote repository
+  (\em remote meaning that it is located on the web). 
+- You can begin modifying the <tt>SKIRT</tt> code as explained in the \ref DevelopersGuide,
+  and make commits as explained on the \ref DevGit page. However, to actually get your changes in the remote repository, you will need to fork
+  the private repository on the github.ugent.be website. This is explained in the next step.
+
+<b> Create your own fork the private <tt>SKIRT</tt> repository </b>
+
+- Go back to the "SKIRT/SKIRT" page on github.ugent.be.
+- In the top right corner of the page, press "Fork" (see the screenshot below).
+- Your are immediately brought to a new repository "username/SKIRT", which is - at that moment - an exact clone of the original "SKIRT/SKIRT" repository.
+ 
+\image html SKIRTpublicrepository.png
+\image latex SKIRTpublicrepository.png
+
+- The new (forked) remote repository, which is personal to your account, allows you to store the changes that you made locally on the github.ugent.be website. 
+  Since the remote is personal, only you can write to it. Still, you can request for the <tt>SKIRT</tt> team to incorporate the changes in your personal remote into
+  the original <tt>SKIRT</tt> remote. This is called a "pull request". How to perform such a request is explained below.
+
+- To be able to push to your forked remote, you first need to tell git where it is. To do this, go to the "username/SKIRT" repository 
+  on the github.ugent.be website and copy the SSH link to your clipboard. 
+  
+  \image html githubsshlink.png
+  \image latex githubsshlink.png
+  
+- Next, type the following commands in a Terminal window:
+
+      cd ~/SKIRT/git [ENTER]
+      git remote add personal [PASTE] [ENTER]
+
+  where <tt>[PASTE]</tt> is to be replaced with <tt>[CMD] + [V]</tt>. The last command thus looks as follows:
+  
+      git remote add personal git@github.ugent.be:username/SKIRT.git
+      
+  This command adds your personal remote to the list of remotes related to your local repository. It gives this remote the alias "personal", which is how
+  how you will refer to this remote when you are pushing changes. The original private <tt>SKIRT</tt> remote that you cloned from is automatically given the 
+  alias "origin". A list of the remotes linked to your local repository is obtained with the following command:
+  
+      git remote [ENTER]
+
+  The output of this command should state the names of the two remote repositories.
+  
+- Your <tt>SKIRT</tt> repository is all set up! You can now also push your changes to the remote "personal". To do this, use the following command:
+
+      git push personal master [ENTER]
+      
+  Where "master" is the name of the main branch of your local repository. You don't need to add any more branches, but if you would like to do this you can 
+  read \ref DevGitCreateBranch.
 
 */
