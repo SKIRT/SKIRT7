@@ -101,7 +101,14 @@ protected:
     //======================== Data Members ========================
 
 private:
+    // discoverable attribute
     int _Nscatt;
+
+    // info about the simulation's configuration, determined during setup
+    bool _dustsystem;
+    bool _dustemission;
+
+    // detector arrays
     Array _fdirv;
     Array _fscav;
     Array _ftrav;
