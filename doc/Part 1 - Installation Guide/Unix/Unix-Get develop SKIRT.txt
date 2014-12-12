@@ -1,0 +1,7 @@
+/**
+
+\page InstallSrcGetDevelop Getting the SKIRT source code (for developers)
+
+Proceed as described in \ref InstallUbuntuGetDevelop on Ubuntu Desktop.
+
+*/

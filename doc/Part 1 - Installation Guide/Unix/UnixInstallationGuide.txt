@@ -1,91 +1,26 @@
 /**
 
-\page InstallSource Installing SKIRT on a Unix server
+\page InstallSource Installing SKIRT on a Unix server 
 
-This section explains how to install SKIRT on any Unix system.
-After you've followed the guidelines in this section, the SKIRT source code will reside on your computer and so you
-can obviously tweak it using your preferred text editor. However if you expect to modify or extend the SKIRT code
-in any but the most trivial ways, it is highly recommended to install the full-featured Qt development environment
-as described in section \ref InstallMac or \ref InstallUbuntu rather than using the guidelines in this section.
+\image html unixlogo.png
+\image latex unixlogo.png
 
-\section InstallSrcPacks Installing development tools
+This section explains how to install <tt>SKIRT</tt> on any Unix system, for example a server where you are given a personal account.
+After you've followed the guidelines on this page, the <tt>SKIRT</tt> source code will reside locally on the system and so you
+can obviously tweak it using your preferred text editor. For the easiest installation, all you have to do is follow the steps below:
 
-SKIRT is written in C++11, the C++ flavor that was standardized in 2011, extending the language with new features.
-The SKIRT source code resides in an online GitHub repository, which you can access from your computer
-through the \c git client. Hence you need to install a recent C++ compiler and the \c git client.
+- \subpage InstallSrcPacks
+- \subpage InstallSrcGet
+- \subpage InstallSrcQt
+- \subpage InstallSrcBuild
 
-Depending on the particular Unix flavor under consideration, you may accomplish this by any of the following
-means:
- - use a standard package manager for your system;
- - download and run an installer that was downloaded manually;
- - ask your system manager to install the required tools.
+However if you expect to modify or extend the <tt>SKIRT</tt> code on the Unix sytem in any but the most trivial ways and possibly want to 
+share your changes with others, you should follow the instructions listed here:
 
-\section InstallSrcGit Configuring the source control client
-
-Before using the \c git client, you should configure it with your user name and email address. This is
-especially important if you plan to contribute code to the SKIRT repository. Perform the following commands,
-replacing the placeholders with your own name and email address:
-
-\verbatim
-git config --global user.name "John Smith"
-git config --global user.email john.smith@smithsonian.org
-\endverbatim
-
-\section InstallSrcGet Getting the SKIRT source code
-
-Proceed as described in \ref InstallMac.
-
-\section InstallSrcQt Installing the Qt tools and libraries
-
-SKIRT uses the Qt application framework, so the Qt libraries and build tools should be installed on your computer
-before attempting to compile or build SKIRT (even if you don't use the full Qt development environment).
-Go to the <a href="http://qt-project.org/downloads">Qt download page</a> and download the Qt libraries source code
-version 5.2.1 intended for your system.
-SKIRT has been tested with \c qt-everywhere-opensource-src-5.2.1.tar.gz on Ubuntu.
-
-The SKIRT source code includes a shell script \c makeQt_everywhere.sh to assist with building Qt from source.
-To minimize dependencies on external libraries, the provided script builds only a limited Qt subset that is sufficient
-for the current version of SKIRT. You can use the script as is, but more likely you will need to modify it
-to suit your needs in the following ways:
- - adjust the value of the \c -prefix option to specify the directory where the Qt libraries will be installed;
- - add a \c -platform option with a value that specifies the appropriate compiler and operating system,
-   unless you know that the default will work for your environment; the value of the platform option must be
-   the name of one of the subdirectories in the \c mkspecs directory inside the Qt source distribution.
-
-\note On the servers used by the Ghent University SKIRT team, the default platform works fine so you can omit the
-\c -platform option.
-
-\note On the Ghent University High Performance Computing (HPC) system, it is highly recommended that you use
-the Intel C++ compiler. To accomplish this, add the option "-platform linux-icc-64" in the \c makeQt_everywhere.sh
-script, and \em before you execute the script, load the both the \c ictce/7.1.2 and \c GCC/4.8.3 modules
-in addition to the \c jobs module (the Intel C++ compiler needs some headers provided by GCC for full C++11 support).
-You will need to (re)load these modules before (re)building SKIRT as well.
-
-After editing the script as needed, enter the following shell commands to build Qt from source (it takes a while!):
-
-\verbatim
-cd <directory-containing-qt-source-distribution>
-tar xvfz qt-everywhere-opensource-src-5.2.1.tar.gz
-cd qt-everywhere-opensource-src-5.2.1
-cp ~/SKIRT/git/makeQt_everywhere.sh .
-chmod +rx makeQt_everywhere.sh
-./makeQt_everywhere.sh
-\endverbatim
-
-\section InstallSrcBuild Building SKIRT
-
-The SKIRT source code includes a shell script \c makeSKIRT.sh to assist in building SKIRT
-from the source code in the git directory.
-If the Qt tools and libraries were not installed in one of the default places, you will need to adjust
-the path to \c qmake in the script. Also, before you use the script for the first time, you may need
-to make it executable.
-
-To build SKIRT use:
-
-\verbatim
-cd ~/SKIRT/git
-chmod +rx makeSKIRT.sh
-./makeSKIRT.sh
-\endverbatim
+- \subpage InstallSrcPacks
+- \subpage InstallSrcGit
+- \subpage InstallSrcGetDevelop
+- \subpage InstallSrcQt
+- \subpage InstallSrcBuild
 
 */

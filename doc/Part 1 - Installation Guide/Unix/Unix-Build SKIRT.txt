@@ -1,0 +1,16 @@
+/**
+
+\page InstallSrcBuild Building SKIRT
+
+The <tt>SKIRT</tt> source code includes a shell script \c makeSKIRT.sh to assist in building <tt>SKIRT</tt>
+from the source code in the git directory. If the Qt tools and libraries were not installed in one of the default places, 
+you will need to adjust the path to \c qmake in the script. Also, before you use the script for the first time, you may need
+to make it executable.
+
+To build <tt>SKIRT</tt>, type the following commands:
+
+    cd ~/SKIRT/git [ENTER]
+    chmod +rx makeSKIRT.sh [ENTER]
+    ./makeSKIRT.sh [ENTER]
+
+*/

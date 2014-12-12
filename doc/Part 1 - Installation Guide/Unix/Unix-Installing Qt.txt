@@ -1,0 +1,56 @@
+/**
+
+\page InstallSrcQt Installing the Qt tools and libraries
+
+<tt>SKIRT</tt> uses the Qt application framework, so the Qt libraries and build tools should be installed on your computer
+before attempting to compile or build <tt>SKIRT</tt> (even if you don't use the full Qt development environment). To do this,
+follow the instructions below.
+
+<i>Step-by-step instructions:</i>
+
+<b>Download the Qt source code</b>
+
+- Go to the <a href="http://download.qt-project.org/archive/qt/">Qt download page</a>. You see different folders corresponding with
+  different Qt releases. <tt>SKIRT</tt> has been tested with version 5.2.1 and 5.3.2 (on Ubuntu). 
+- On the webpage, navigate to either the "5.2.1" or "5.3.2" subdirectory. Then, open the directory called "single".
+- At least, download the package called "qt-everywhere-opensource-src-5.X.X.tar.gz", corresponding with the appropriate version number. If you are working
+  on a server, you can copy the link to this package and type the following command in a Terminal window:
+  
+      wget [PASTE] [ENTER]
+
+  Where <tt>[PASTE]</tt> is to be replaced with the link you copied to your clipboard. This command will download the package to whatever directory you had currently open
+  in Terminal.
+
+<b>Modify the build script</b>
+
+The <tt>SKIRT</tt> source code includes a shell script \c makeQt_everywhere.sh (located in the \c SKIRT/git directory) to assist 
+with building Qt from source. To minimize dependencies on external libraries, the provided script builds only a limited Qt 
+subset that is sufficient for the current version of <tt>SKIRT</tt>. You can use the script as is, but more likely you will need to 
+modify it to suit your needs in the following ways:
+
+ - Adjust the value of the \c -prefix option to specify the directory where the Qt libraries will be installed;
+ - Add a \c -platform option with a value that specifies the appropriate compiler and operating system,
+   unless you know that the default will work for your environment; the value of the platform option must be
+   the name of one of the subdirectories in the \c mkspecs directory inside the Qt source distribution.
+
+\note On the servers used by the Ghent University <tt>SKIRT</tt> team, the default platform works fine so you can omit the
+\c -platform option.
+
+\note On the Ghent University High Performance Computing (HPC) system, it is highly recommended that you use
+the Intel C++ compiler. To accomplish this, add the option "-platform linux-icc-64" in the \c makeQt_everywhere.sh
+script, and \em before you execute the script, load the both the \c ictce/7.1.2 and \c GCC/4.8.3 modules
+in addition to the \c jobs module (the Intel C++ compiler needs some headers provided by GCC for full C++11 support).
+You will need to (re)load these modules before (re)building <tt>SKIRT</tt> as well.
+
+<b>Run the script</b>
+
+After editing the script as needed, enter the following shell commands to build Qt from source (it takes a while!):
+
+    cd <directory-containing-qt-source-distribution>
+    tar xvfz qt-everywhere-opensource-src-5.2.1.tar.gz
+    cd qt-everywhere-opensource-src-5.2.1
+    cp ~/SKIRT/git/makeQt_everywhere.sh .
+    chmod +rx makeQt_everywhere.sh
+    ./makeQt_everywhere.sh
+
+*/

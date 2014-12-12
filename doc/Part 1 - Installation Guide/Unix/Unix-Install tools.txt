@@ -1,0 +1,17 @@
+/**
+
+\page InstallSrcPacks Installing development tools
+
+<tt>SKIRT</tt> is written in C++11, the C++ flavor that was standardized in 2011, extending the language with new features.
+The <tt>SKIRT</tt> source code resides in an online GitHub repository, which you can access from your computer
+through the \c git client. Hence you need to install a recent C++ compiler and the \c git client. If you plan to use the MPI
+capabilities of <tt>SKIRT</tt> and/or <tt>FitSKIRT</tt>, you also need an MPI implementation installed on the system (<tt>SKIRT</tt> is
+tested with OpenMPI).
+
+Depending on the particular Unix flavor under consideration, you may accomplish this by any of the following means:
+
+ - Use a standard package manager for your system;
+ - Download and run an installer that was downloaded manually;
+ - If you don't have the rights to install the tools yourself, ask your system manager to do it.
+ 
+*/
