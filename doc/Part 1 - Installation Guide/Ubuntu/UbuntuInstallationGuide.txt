@@ -16,7 +16,7 @@ If you only want to install <tt>SKIRT</tt> for your radiative transfer problems 
 
 - \subpage InstallUbuntuPacks
 - \subpage InstallUbuntuQt
-- \subpage InstallUbuntuGetPublic
+- \subpage InstallUbuntuGet
 - \subpage InstallUbuntuBuildNoQtCreator
 - \subpage InstallUbuntuVerify
 
