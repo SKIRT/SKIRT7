@@ -38,15 +38,6 @@ void Instrument::setupSelfBefore()
 
 ////////////////////////////////////////////////////////////////////
 
-void Instrument::sumResults(QList<Array*> arrays)
-{
-    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
-
-    foreach (Array* arr, arrays) if (arr->size()) comm->sum(*arr);
-}
-
-////////////////////////////////////////////////////////////////////
-
 void Instrument::setInstrumentName(QString value)
 {
     _instrumentname = value;
@@ -64,6 +55,15 @@ QString Instrument::instrumentName() const
 double Instrument::opticalDepth(PhotonPackage* pp, double distance) const
 {
     return _ds ? _ds->opticaldepth(pp,distance) : 0;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void Instrument::sumResults(QList<Array*> arrays)
+{
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+
+    foreach (Array* arr, arrays) if (arr->size()) comm->sum(*arr);
 }
 
 ////////////////////////////////////////////////////////////////////

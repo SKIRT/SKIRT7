@@ -41,13 +41,6 @@ protected:
     /** This function performs setup for the instrument. */
     void setupSelfBefore();
 
-    /** This function is used to sum a list of flux arrays element-wise across the different
-        processes. The resulting arrays with the total fluxes are stored in the memory of the root
-        process, replacing the original fluxes. This function can be called a different number of
-        times from different instrument leaf classes, depending on which information they have
-        gathered. */
-    void sumResults(QList< Array*> arrays);
-
     //======== Setters & Getters for Discoverable Attributes =======
 
 public:
@@ -80,6 +73,13 @@ public:
         at the photon package's wavelength. If the distance is not specified, the complete path is
         taken into account. */
     double opticalDepth(PhotonPackage* pp, double distance=DBL_MAX) const;
+
+    /** This function is used to sum a list of flux arrays element-wise across the different
+        processes. The resulting arrays with the total fluxes are stored in the memory of the root
+        process, replacing the original fluxes. This function can be called a different number of
+        times from different instrument leaf classes, depending on which information they have
+        gathered. */
+    void sumResults(QList< Array*> arrays);
 
     //======================== Data Members ========================
 
