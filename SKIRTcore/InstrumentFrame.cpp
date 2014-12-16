@@ -180,7 +180,6 @@ void InstrumentFrame::calibrateAndWriteData(int ell)
 
     // Sum the flux arrays element-wise across the different processes
     _instrument->sumResults(farrays);
-    _instrument->sumResults(farrays);
 
     // calibrate and output the arrays
     calibrateAndWriteDataFrames(ell, farrays, fnames);
