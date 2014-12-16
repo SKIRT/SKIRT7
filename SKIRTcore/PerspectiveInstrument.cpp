@@ -10,6 +10,7 @@
 #include "FITSInOut.hpp"
 #include "LockFree.hpp"
 #include "Log.hpp"
+#include "PeerToPeerCommunicator.hpp"
 #include "PhotonPackage.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
@@ -340,6 +341,17 @@ void PerspectiveInstrument::write()
     Units* units = find<Units>();
     WavelengthGrid* lambdagrid = find<WavelengthGrid>();
     int Nlambda = find<WavelengthGrid>()->Nlambda();
+
+    // Put the data cube in a list of f-array pointers, as the sumResults function requires
+    QList< Array* > farrays;
+    farrays << &_ftotv;
+
+    // Sum the flux arrays element-wise across the different processes
+    sumResults(farrays);
+
+    // From here on, only the root process should continue
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+    if (comm->rank()) return;
 
     // multiply each sample by lambda/dlamdba and by the constant factor 1/(4 pi s^2)
     // to obtain the surface brightness and convert to output units (such as W/m2/arcsec2)
