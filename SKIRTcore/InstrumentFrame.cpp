@@ -9,6 +9,7 @@
 #include "InstrumentFrame.hpp"
 #include "Log.hpp"
 #include "LockFree.hpp"
+#include "PeerToPeerCommunicator.hpp"
 #include "PhotonPackage.hpp"
 #include "MultiFrameInstrument.hpp"
 #include "StellarSystem.hpp"
@@ -177,6 +178,9 @@ void InstrumentFrame::calibrateAndWriteData(int ell)
         }
     }
 
+    // Sum the flux arrays element-wise across the different processes
+    _instrument->sumResults(farrays);
+
     // calibrate and output the arrays
     calibrateAndWriteDataFrames(ell, farrays, fnames);
 }
@@ -185,6 +189,9 @@ void InstrumentFrame::calibrateAndWriteData(int ell)
 
 void InstrumentFrame::calibrateAndWriteDataFrames(int ell, QList<Array*> farrays, QStringList fnames)
 {
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+    if (!comm->isRoot()) return;
+
     Units* units = find<Units>();
     WavelengthGrid* lambdagrid = find<WavelengthGrid>();
 

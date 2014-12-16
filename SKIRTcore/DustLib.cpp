@@ -90,11 +90,9 @@ namespace
                                        " out of " + QString::number(Nlib) + ".");
 
             // resize result vectors appropriately (for every cell or for every library entry)
+            // If there are multiple dust components, the _Lvv vector is indexed on m (the dust cells)
             int Nout = _Ncomp>1 ? Ncells : Nlib;
             _Lvv.resize(Nout,_Nlambda);  // also sets all values to zero
-
-            // if there are multiple components, rewire the mapping so that n==m for luminosity()
-            if (_Ncomp > 1) for (int m=0; m<Ncells; m++) nv[m] = m;
         }
 
         // the parallized loop body; calculates the emission for a single library entry
@@ -181,8 +179,16 @@ void DustLib::calculate()
 
 double DustLib::luminosity(int m, int ell) const
 {
-    int n = _nv[m];
-    return n>=0 ? _Lvv[n][ell] : 0.;
+    size_t Ncells = _nv.size();
+    if (_Lvv.size(0) == Ncells)     // _Lvv is indexed on m, the index of the dust cells
+    {
+        return _Lvv[m][ell];
+    }
+    else    // _Lvv is indexed on n, the library entry index
+    {
+        int n = _nv[m];
+        return n>=0 ? _Lvv[n][ell] : 0.;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////

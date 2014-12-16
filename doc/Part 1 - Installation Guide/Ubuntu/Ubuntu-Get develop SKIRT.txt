@@ -15,71 +15,104 @@ This process is effortless due to the strength of the git tool and the GitHub we
 
 To setup a local repository and start developing (and using) <tt>SKIRT</tt> without a UGent account, follow the instructions below.
 
-<i> Step-by-step instructions: </i>
+<i>Step-by-step instructions:</i>
 
-<b> Make a GitHub account </b>
-
- - If you already have an account on the <a href="https://github.com">GitHub website</a>, log yourself in and skip the rest of this step.
- - Visit the <a href="https://github.com">GitHub website</a> and fill in your e-mail adress and a newly chosen username and password. 
- - Press "Sign up for GitHub". 
- - On the next page, press "Finish sign up".
- - You will receive an e-mail with a confirmation link. Go to the corresponding webpage and press "Confirm".
- - Stay logged in for the next step.
-
-<b> Fork the <tt>SKIRT</tt> repository </b>
-
- - In the search bar on top of the page, type <tt>SKIRT [ENTER]</tt> to find the <tt>SKIRT</tt> repository.
- - Click on the repository that is listed as "SKIRT/SKIRT".
- - In the top right corner of the page, press "Fork" (see the screenshot below).
- - Your are immediately brought to a new repository "username/SKIRT", which is - at that moment - an exact clone of the original "SKIRT/SKIRT" repository.
- 
-   \image html SKIRTpublicrepository.png
-   \image latex SKIRTpublicrepository.png
- 
-<b> Configure git </b>
+<b>Configure git</b>
 
 - Before using the git client, you should configure it with your user name and email address. This is especially important if you plan to contribute code to the <tt>SKIRT</tt>repository. 
   Perform the following commands in a Terminal window, replacing the placeholders with your own name and email address:
 
       git config --global user.name "Your Name" [ENTER]
       git config --global user.email "yourname@organization.org" [ENTER]
-	  
-<b> Clone your <tt>SKIRT</tt> fork to your computer </b>
 
- - In a Terminal window, type the following:
+<b>Clone the <tt>SKIRT</tt> repository to your computer</b>
+
+- In a Terminal window, type the following commands to create the <tt>SKIRT</tt> folder structure:
  
-       cd [ENTER]
-       mkdir SKIRT [ENTER]
-       cd SKIRT [ENTER]
-       mkdir debug doc release run git [ENTER]
+      cd [ENTER]
+      mkdir SKIRT [ENTER]
+      cd SKIRT [ENTER]
+      mkdir debug doc release run git [ENTER]
+       
+- To download the repository to the new git folder, perform the following command:
+        
+      git clone https://github.com/SKIRT/SKIRT.git git
+ 
+  \note Don't forget to add the extra "git" at the end of the last line!
 
- - Back on your "username/SKIRT" repository, find the "Copy to clipboard" option on the right of the page (see the screenshot below). 
- - Make sure it states "HTTPS" above the text box, before copying the link to the clipboard.
+- You will see different kinds of output.
+- To update your local copy of the source code after changes were made to the repository from which you cloned it, use:
+
+      cd ~/SKIRT/git [ENTER]
+      git pull [ENTER]
+
+- You now have a local repository (\em local meaning 'on your own computer') which is a clone of the remote repository
+  (\em remote meaning that it is located on the web). 
+- You can begin modifying the <tt>SKIRT</tt> code as explained in the \ref DevelopersGuide,
+  and make commits as explained on the \ref DevGit page. However, to actually get your changes in the remote repository, you will need to fork
+  the public repository on the <a href="http://www.github.com">GitHub website</a>. This is explained in the next steps.
+
+<b>Make a GitHub account</b>
+
+ - If you already have an account on the <a href="https://github.com">GitHub website</a>, log yourself in and <em>skip the rest of this step</em>.
+ - Visit the <a href="https://github.com">GitHub website</a> and fill in your e-mail adress and a newly chosen username and password. 
+ - Press "Sign up for GitHub". 
+ - On the next page, press "Finish sign up".
+ - You will receive an e-mail with a confirmation link. Go to the corresponding webpage and press "Confirm".
+ - Stay logged in for the next step.
+
+<b>Fork the <tt>SKIRT</tt> repository</b>
+
+ - In the search bar on top of the page, type <tt>SKIRT [ENTER]</tt> to find the <tt>SKIRT</tt> repository.
+ - Click on the repository that is listed as "SKIRT/SKIRT".
+ - In the top right corner of the page, press "Fork", as indicated in the screenshot below.
+ 
+\image html SKIRTpublicrepository.png
+\image latex SKIRTpublicrepository.png
+ 
+ - Your are immediately brought to a new repository "username/SKIRT", which is - at that moment - an exact clone of the original "SKIRT/SKIRT" repository.
+
+<b>Link the forked repository to your local one</b>
+
+- On the webpage of your forked "username/SKIRT" repository, find the "Copy to clipboard" option on the right of the page (see the screenshot below). 
+- Make sure it states "HTTPS" above the text box, before copying the link to the clipboard.
  
  \image html githubcopytoclipboard.png
  \image latex githubcopytoclipboard.png
 
- - Go back to Terminal and type the following commands:
+- Go back to Terminal and type the following commands:
  
-       cd [ENTER]
-       cd SKIRT [ENTER]
-       git clone [PASTE] git [ENTER]
+      cd [ENTER]
+      cd SKIRT/git [ENTER]
+      git remote add forked [PASTE] [ENTER]
 
-   where <tt>[PASTE]</tt> is to be replaced with <tt>[CTRL] + [SHIFT] + [V]</tt>. The last command thus looks as follows:
+  where <tt>[PASTE]</tt> is to be replaced with <tt>[CTRL] + [SHIFT] + [V]</tt>. The last command thus looks as follows:
    
-       git clone https://github.com/username/SKIRT.git git
+      git remote add forked https://github.com/username/SKIRT.git
+   
+   This command adds your forked remote to the list of remotes related to your local repository. It gives this remote the alias "forked", which is how
+   how you will refer to this remote when you are pushing changes. The original public <tt>SKIRT</tt> remote that you cloned from is automatically given the 
+   alias "origin". A list of the remotes linked to your local repository is obtained with the following command:
+  
+       git remote [ENTER]
 
-   \note Don't forget to add the extra "git" at the end of the last line!
-   
- - You now have your forked repository cloned to your computer, where you can begin modifying it (see the \ref DevelopersGuide).
+   The output of this command should state the names of the two remote repositories.
+
+- Your <tt>SKIRT</tt> repository is all set up! You can now also push your changes to the remote "forked". To do this, use the following command:
+
+      git push forked master [ENTER]
+      
+  Where "master" is the name of the main branch of your local repository. You don't need to add any more branches, but if you would like to do this you can 
+  read \ref DevGitCreateBranch.
 
 \section InstallUbuntuGetDevelopPrivate Use the private SKIRT code
 
 The current development version of the <tt>SKIRT</tt> source code is stored in a \em private GitHub repository hosted
 on the Ghent University's web servers. You can access this repository only if you have a UGent account \em and
-the core <tt>SKIRT</tt> team has specifically granted you read-only or read/write access rights to the repository.
-
-If you have a UGent account and the core <tt>SKIRT</tt> team has granted you access rights to the <tt>SKIRT</tt> repository, use the instructions below to obtain the <tt>SKIRT</tt> source code. 
+the core <tt>SKIRT</tt> team has specifically granted you read-only or read/write access rights to the repository. To obtain this access, first go to the
+<a href="https://github.ugent.be">github.ugent.be</a> webpage and log in with your UGent account name and password. This will create
+your account on the UGent github website. Then ask the <tt>SKIRT</tt> team to grant you the access to the private repository, providing
+them with your account name. If your request has been accepted, follow the instructions below.
 
 <i> Step-by-step instructions: </i>
 
@@ -97,7 +130,7 @@ If you have a UGent account and the core <tt>SKIRT</tt> team has granted you acc
 
       ls -al ~/.ssh [ENTER]
 
-- If there is a key with extension '.pub' present, skip the next step.
+- If there is a key with extension '.pub' present, <em>skip the next step</em>.
 
 <b> Generate a SSH key </b>
 
@@ -232,6 +265,8 @@ If you have a UGent account and the core <tt>SKIRT</tt> team has granted you acc
 - The new (forked) remote repository, which is personal to your account, allows you to store the changes that you made locally on the github.ugent.be website. 
   Since the remote is personal, only you can write to it. Still, you can request for the <tt>SKIRT</tt> team to incorporate the changes in your personal remote into
   the original <tt>SKIRT</tt> remote. This is called a "pull request". How to perform such a request is explained below.
+
+<b>Link the forked repository to your local one</b>
 
 - To be able to push to your forked remote, you first need to tell git where it is. To do this, go to the "username/SKIRT" repository 
   on the github.ugent.be website and copy the SSH link to your clipboard. 

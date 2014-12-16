@@ -38,15 +38,6 @@ void Instrument::setupSelfBefore()
 
 ////////////////////////////////////////////////////////////////////
 
-void Instrument::sumResults(QList<Array*> arrays)
-{
-    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
-
-    foreach (Array* arr, arrays) if (arr->size()) comm->sum(*arr);
-}
-
-////////////////////////////////////////////////////////////////////
-
 void Instrument::setInstrumentName(QString value)
 {
     _instrumentname = value;
@@ -57,6 +48,15 @@ void Instrument::setInstrumentName(QString value)
 QString Instrument::instrumentName() const
 {
     return _instrumentname;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void Instrument::sumResults(QList<Array*> arrays)
+{
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+
+    foreach (Array* arr, arrays) if (arr->size()) comm->sum(*arr);
 }
 
 ////////////////////////////////////////////////////////////////////
