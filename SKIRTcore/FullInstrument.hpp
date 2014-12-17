@@ -107,18 +107,27 @@ private:
     // info about the simulation's configuration, determined during setup
     bool _dustsystem;
     bool _dustemission;
+    bool _polarization;
 
-    // detector arrays
+    // detector arrays (frames)
     Array _fdirv;
     Array _fscav;
     Array _ftrav;
     Array _fdusv;
     ArrayTable<2> _fscavv;
+    Array _ftotQv;
+    Array _ftotUv;
+    Array _ftotVv;
+
+    // detector arrays (SEDs)
     Array _Fdirv;
     Array _Fscav;
     Array _Ftrav;
     Array _Fdusv;
     ArrayTable<2> _Fscavv;
+    Array _FtotQv;
+    Array _FtotUv;
+    Array _FtotVv;
 };
 
 ////////////////////////////////////////////////////////////////////

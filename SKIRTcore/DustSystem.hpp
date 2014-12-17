@@ -349,6 +349,10 @@ public:
         only for panchromatic simulations). */
     virtual void absorb(int m, int ell, double DeltaL, bool ynstellar) = 0;
 
+    /** This function returns true if at least one dust mix in this dust system supports
+        polarization; false otherwise. */
+    bool polarization() const;
+
     //======================== Data Members ========================
 
 protected:

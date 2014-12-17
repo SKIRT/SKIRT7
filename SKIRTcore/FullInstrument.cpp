@@ -16,7 +16,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////
 
 FullInstrument::FullInstrument()
-    : _Nscatt(0), _dustsystem(false), _dustemission(false)
+    : _Nscatt(0), _dustsystem(false), _dustemission(false), _polarization(false)
 {
 }
 
@@ -36,9 +36,9 @@ void FullInstrument::setupSelfBefore()
     }
     catch (FatalError) { }
 
-    // determine whether the simulation includes dust emission
     if (_dustsystem)
     {
+        // determine whether the simulation includes dust emission
         try
         {
             // attempt to locate a panchromatic dust system without performing setup
@@ -47,6 +47,11 @@ void FullInstrument::setupSelfBefore()
             _dustemission = find<PanDustSystem>(false)->dustemission();
         }
         catch (FatalError) { }
+
+        // determine whether the simulation includes polarization;
+        // a dust mix knows whether it supports polarization only after it has been setup,
+        // so here we need to fully setup the dust system before querying it
+        _polarization = find<DustSystem>()->polarization();
     }
 
     // resize the detector arrays only when meaningful
@@ -68,6 +73,15 @@ void FullInstrument::setupSelfBefore()
         {
             _fdusv.resize(Nlambda*_Nframep);
             _Fdusv.resize(Nlambda);
+        }
+        if (_polarization)
+        {
+            _ftotQv.resize(Nlambda*_Nframep);
+            _FtotQv.resize(Nlambda);
+            _ftotUv.resize(Nlambda*_Nframep);
+            _FtotUv.resize(Nlambda);
+            _ftotVv.resize(Nlambda*_Nframep);
+            _FtotVv.resize(Nlambda);
         }
     }
 }
@@ -97,6 +111,7 @@ void FullInstrument::detect(PhotonPackage* pp)
     double extf = exp(-taupath);
     double Lextf = L*extf;
 
+    // SEDs
     if (pp->isStellar())
     {
         int nscatt = pp->nScatt();
@@ -115,7 +130,14 @@ void FullInstrument::detect(PhotonPackage* pp)
     {
         LockFree::add(_Fdusv[ell], Lextf);
     }
+    if (_polarization)
+    {
+        LockFree::add(_FtotQv[ell], Lextf*pp->stokesQ());
+        LockFree::add(_FtotUv[ell], Lextf*pp->stokesU());
+        LockFree::add(_FtotVv[ell], Lextf*pp->stokesV());
+    }
 
+    // frames
     if (l>=0)
     {
         size_t m = l + ell*_Nframep;
@@ -136,6 +158,12 @@ void FullInstrument::detect(PhotonPackage* pp)
         else
         {
             LockFree::add(_fdusv[m], Lextf);
+        }
+        if (_polarization)
+        {
+            LockFree::add(_ftotQv[m], Lextf*pp->stokesQ());
+            LockFree::add(_ftotUv[m], Lextf*pp->stokesU());
+            LockFree::add(_ftotVv[m], Lextf*pp->stokesV());
         }
     }
 }
@@ -174,6 +202,13 @@ void FullInstrument::write()
     Farrays << &Ftotv << &_Fdirv << &_Fscav << &_Fdusv << &_Ftrav;
     fnames << "total" << "direct" << "scattered" << "dust" << "transparent";
     Fnames << "total flux" << "direct stellar flux" << "scattered stellar flux" << "dust flux" << "transparent flux";
+    if (_polarization)
+    {
+        farrays << &_ftotQv << &_ftotUv << &_ftotVv;
+        Farrays << &_FtotQv << &_FtotUv << &_FtotVv;
+        fnames << "stokesQ" << "stokesU" << "stokesV";
+        Fnames << "total Stokes Q" << "total Stokes U" << "total Stokes V";
+    }
     for (int nscatt=1; nscatt<=_Nscatt; nscatt++)
     {
         farrays << &(_fscavv[nscatt]);

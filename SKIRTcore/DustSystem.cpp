@@ -925,4 +925,15 @@ void DustSystem::write() const
     }
 }
 
+////////////////////////////////////////////////////////////////////
+
+bool DustSystem::polarization() const
+{
+    for (int h=0; h<_Ncomp; h++)
+    {
+        if (_dd->mix(h)->polarization()) return true;
+    }
+    return false;
+}
+
 //////////////////////////////////////////////////////////////////////

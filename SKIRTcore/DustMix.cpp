@@ -537,6 +537,13 @@ double DustMix::albedo(int ell) const
 
 ////////////////////////////////////////////////////////////////////
 
+bool DustMix::polarization() const
+{
+    return _polarization;
+}
+
+////////////////////////////////////////////////////////////////////
+
 namespace
 {
     // this helper function returns the appropriate t index for the specified value of theta,

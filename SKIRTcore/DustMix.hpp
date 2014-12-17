@@ -273,6 +273,9 @@ public:
         index \f$\ell\f$. */
     double albedo(int ell) const;
 
+    /** This function returns true if this dust mix supports polarization; false otherwise. */
+    bool polarization() const;
+
     /** This function returns the value of the scattering phase function in case the specified
         photon package is scattered to the specified new direction. For a dustmix that doesn't
         support polarization, the function returns \f$\Phi_\ell({\bf{k}}_{\text{pp}},
