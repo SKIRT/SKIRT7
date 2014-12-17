@@ -24,7 +24,7 @@ void FrameInstrument::setupSelfBefore()
     SingleFrameInstrument::setupSelfBefore();
 
     int Nlambda = find<WavelengthGrid>()->Nlambda();
-    _ftotv.resize(Nlambda*_Nxp*_Nyp);
+    _ftotv.resize(Nlambda*_Nframep);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -36,7 +36,7 @@ FrameInstrument::detect(PhotonPackage* pp)
     if (l >= 0)
     {
         int ell = pp->ell();
-        int m = l + ell*_Nxp*_Nyp;
+        size_t m = l + ell*_Nframep;
         double L = pp->luminosity();
         double taupath = opticalDepth(pp);
         double extf = exp(-taupath);

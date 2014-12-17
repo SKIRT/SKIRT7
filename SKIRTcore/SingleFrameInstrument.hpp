@@ -156,6 +156,7 @@ protected:
     double _ypmax;
 
     // data members derived from the published attributes during setup
+    size_t _Nframep; // number of pixels in a frame; size_t so that array size and index calculations happen in 64 bit
     double _xpres;
     double _ypres;
     double _xpmin;

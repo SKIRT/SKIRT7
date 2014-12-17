@@ -33,6 +33,7 @@ void SingleFrameInstrument::setupSelfBefore()
     if (_xpmax <= 0 || _ypmax <= 0) throw FATALERROR("Maximum extent was not set");
 
     // calculate derived values
+    _Nframep = _Nxp * _Nyp;
     _xpres = 2.0*_xpmax/(_Nxp-1);
     _ypres = 2.0*_ypmax/(_Nyp-1);
     _xpmin = -_xpmax;
@@ -135,7 +136,7 @@ void SingleFrameInstrument::calibrateAndWriteDataCubes(QList< Array*> farrays, Q
         {
             for (int j=0; j<_Nyp; j++)
             {
-                int m = i + _Nxp*j + _Nxp*_Nyp*ell;
+                size_t m = i + _Nxp*j + _Nframep*ell;
                 foreach (Array* farr, farrays)
                 {
                     if (farr->size()) (*farr)[m] /= dlambda;
@@ -174,7 +175,7 @@ void SingleFrameInstrument::calibrateAndWriteDataCubes(QList< Array*> farrays, Q
         {
             for (int j=0; j<_Nyp; j++)
             {
-                int m = i + _Nxp*j + _Nxp*_Nyp*ell;
+                size_t m = i + _Nxp*j + _Nframep*ell;
                 foreach (Array* farr, farrays)
                 {
                     if (farr->size()) (*farr)[m] = units->osurfacebrightness(lambda, (*farr)[m]);

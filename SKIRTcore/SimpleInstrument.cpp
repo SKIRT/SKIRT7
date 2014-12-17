@@ -24,7 +24,7 @@ void SimpleInstrument::setupSelfBefore()
     SingleFrameInstrument::setupSelfBefore();
 
     int Nlambda = find<WavelengthGrid>()->Nlambda();
-    _ftotv.resize(Nlambda*_Nxp*_Nyp);
+    _ftotv.resize(Nlambda*_Nframep);
     _Ftotv.resize(Nlambda);
 }
 
@@ -35,14 +35,17 @@ SimpleInstrument::detect(PhotonPackage* pp)
 {
     int l = pixelondetector(pp);
     int ell = pp->ell();
-    int m = l + ell*_Nxp*_Nyp;
     double L = pp->luminosity();
     double taupath = opticalDepth(pp);
     double extf = exp(-taupath);
     double Lextf = L*extf;
 
     LockFree::add(_Ftotv[ell], Lextf);
-    if (l>=0) LockFree::add(_ftotv[m], Lextf);
+    if (l>=0)
+    {
+        size_t m = l + ell*_Nframep;
+        LockFree::add(_ftotv[m], Lextf);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////

@@ -51,22 +51,22 @@ void FullInstrument::setupSelfBefore()
 
     // resize the detector arrays only when meaningful
     int Nlambda = find<WavelengthGrid>()->Nlambda();
-    _fdirv.resize(Nlambda*_Nxp*_Nyp);
+    _fdirv.resize(Nlambda*_Nframep);
     _Fdirv.resize(Nlambda);
     if (_dustsystem)
     {
-        _ftrav.resize(Nlambda*_Nxp*_Nyp);
+        _ftrav.resize(Nlambda*_Nframep);
         _Ftrav.resize(Nlambda);
-        _fscav.resize(Nlambda*_Nxp*_Nyp);
+        _fscav.resize(Nlambda*_Nframep);
         _Fscav.resize(Nlambda);
         if (_Nscatt > 0)
         {
-            _fscavv.resize(_Nscatt+1, Nlambda*_Nxp*_Nyp);
+            _fscavv.resize(_Nscatt+1, Nlambda*_Nframep);
             _Fscavv.resize(_Nscatt+1, Nlambda);
         }
         if (_dustemission)
         {
-            _fdusv.resize(Nlambda*_Nxp*_Nyp);
+            _fdusv.resize(Nlambda*_Nframep);
             _Fdusv.resize(Nlambda);
         }
     }
@@ -92,7 +92,6 @@ void FullInstrument::detect(PhotonPackage* pp)
 {
     int l = pixelondetector(pp);
     int ell = pp->ell();
-    int m = l + ell*_Nxp*_Nyp;
     double L = pp->luminosity();
     double taupath = opticalDepth(pp);
     double extf = exp(-taupath);
@@ -119,6 +118,7 @@ void FullInstrument::detect(PhotonPackage* pp)
 
     if (l>=0)
     {
+        size_t m = l + ell*_Nframep;
         if (pp->isStellar())
         {
             int nscatt = pp->nScatt();
