@@ -10,6 +10,7 @@
 #include "RegisterFitSchemeItems.hpp"
 #include "RegisterSimulationItems.hpp"
 #include "SignalHandler.hpp"
+#include <clocale>
 
 #include "git_version.h"
 
@@ -17,6 +18,9 @@
 
 int main(int argc, char** argv)
 {
+    // force standard locale so that sprintf (used e.g. in cfitsio) always produces the same result
+    setlocale(LC_ALL, "C");
+
     // initialize remote communication capability, if present
     ProcessManager::initialize(&argc, &argv);
 
