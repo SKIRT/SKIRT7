@@ -33,8 +33,8 @@ void FITSInOut::write(QString filepath, const Array& data, int nx, int ny, int n
                     double incx, double incy, QString dataUnits, QString xyUnits)
 {
     // verify the data size
-    int nelements = data.size();
-    if (nelements != nx*ny*nz)
+    size_t nelements = data.size();
+    if (nelements != static_cast<size_t>(nx)*static_cast<size_t>(ny)*static_cast<size_t>(nz))
         throw FATALERROR("Inconsistent data size when creating FITS file " + filepath);
     long naxes[3] = {nx, ny, nz};
 
@@ -114,7 +114,7 @@ void FITSInOut::read(QString filepath, Array& data, int& nx, int& ny, int& nz)
     nz = naxis > 2 ? naxes[2] : 1;
 
     // resize the data container
-    int nelements = nx*ny*nz;
+    size_t nelements = static_cast<size_t>(nx)*static_cast<size_t>(ny)*static_cast<size_t>(nz);
     data.resize(nelements);
 
     // read the array of pixels from the image
