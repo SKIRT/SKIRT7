@@ -401,14 +401,13 @@ private:
 
     // polarization-related data members
     bool _polarization;
-    int _Ntheta;                   // index t
-    Table<2> _S11vv;               // indexed on ell and t
-    Table<2> _S12vv;               // indexed on ell and t
-    Table<2> _S33vv;               // indexed on ell and t
-    Table<2> _S34vv;               // indexed on ell and t
-
-    int _Nsamples;                 // index r
-    Table<2> _thetavv;             // indexed on ell and r
+    int _Ntheta;                    // index t
+    Table<2> _S11vv;                // indexed on ell and t
+    Table<2> _S12vv;                // indexed on ell and t
+    Table<2> _S33vv;                // indexed on ell and t
+    Table<2> _S34vv;                // indexed on ell and t
+    Array _thetav;                  // indexed on t
+    ArrayTable<2> _thetaXvv;        // indexed on ell and t
 };
 
 ////////////////////////////////////////////////////////////////////

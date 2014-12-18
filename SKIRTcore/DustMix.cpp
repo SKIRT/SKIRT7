@@ -24,7 +24,7 @@ using namespace std;
 
 DustMix::DustMix()
     : _writeMix(true), _writeMeanMix(true), _lambdagrid(0), _Nlambda(0), _random(0), _Npop(0), _mu(0),
-      _polarization(false), _Ntheta(0), _Nsamples(0)
+      _polarization(false), _Ntheta(0)
 {
 }
 
@@ -90,55 +90,24 @@ void DustMix::setupSelfAfter()
     _kappaextv = _sigmaextv / _mu;
 
     // -------------------------------------------------------------
-    // Precompute theta table and normalize polarization properties
+    // Calculate the cumulative distribution of theta
     // -------------------------------------------------------------
 
     if (_polarization)
     {
-        // Create a table to find a scattering angle theta for a given random number.
-        // First the normalization constant N is computed, then for each random number
-        // the corresponding theta is derived (bisection method).
-        // Adapted from the STOKES code (Goosmann & Gaskell 2007).
-        // !!! --> compute this table before normalizing the Sxx elements <-- !!!
-        _Nsamples = 1800;
-        _thetavv.resize(_Nlambda,_Nsamples);
-
-        for (int ell=0; ell<_Nlambda; ell++)
+        // create a table containing the theta value corresponding to each index
+        _thetav.resize(_Ntheta);
+        double dt = M_PI/(_Ntheta-1);
+        for (int t=0; t<_Ntheta; t++)
         {
-            double N = 0;
-            double dt = M_PI/(_Ntheta-1);
-            for (int t=0; t<_Ntheta; t++)
-            {
-                N += 2.0*_S11vv(ell,t)*sin(t*dt)*dt;
-            }
-            for (int r=0; r<_Nsamples; r++)
-            {
-                double rand = static_cast<double>(r+1) / _Nsamples;
-                double d = 1.0;
-                double Int = 0.0;
-                int t;
-                for (t=0; t<_Ntheta; t++)
-                {
-                    Int += 1.0/N*2.0*_S11vv(ell,t)*sin(t*dt)*dt;
-                    if(fabs(rand-Int)<d)
-                        d = fabs(rand-Int);
-                    else
-                        break;
-                }
-                _thetavv(ell,r) = (t-1)*dt;
-            }
+            _thetav[t] = t * dt;
         }
 
-        // normalize all Sxx elements to S11
+        // create a table with the cumulative distribution of theta for each wavelength
+        _thetaXvv.resize(_Nlambda,0);
         for (int ell=0; ell<_Nlambda; ell++)
         {
-            for (int t=0; t<_Ntheta; t++)
-            {
-                _S12vv(ell,t) /= _S11vv(ell,t);
-                _S33vv(ell,t) /= _S11vv(ell,t);
-                _S34vv(ell,t) /= _S11vv(ell,t);
-                _S11vv(ell,t) = 1.;
-            }
+            NR::cdf(_thetaXvv[ell], _Ntheta-1, [this,ell,dt](int t){ return _S11vv(ell,t)*sin(t*dt)*dt; });
         }
     }
 
@@ -590,7 +559,7 @@ double DustMix::phaseFunctionValue(const PhotonPackage* pp, Direction bfknew) co
 
         int t = indexForTheta(theta, _Ntheta);
         double polDegree = pp->linearPolarizationDegree();
-        return N*(_S11vv(ell,t)-_S12vv(ell,t)*polDegree*cos(2.0*phi));
+        return 1./N*(_S11vv(ell,t)-_S12vv(ell,t)*polDegree*cos(2.0*phi));
     }
     else
     {
@@ -757,10 +726,7 @@ double DustMix::equilibrium(const Array& Jv, int c) const
 
 double DustMix::sampleTheta(int ell) const
 {
-    int r = static_cast<int>(_random->uniform()*_Nsamples);
-    if (r<0) r = 0;
-    else if (r>=_Nsamples) r = _Nsamples-1;
-    return _thetavv(ell,r);
+    return _random->cdf(_thetav, _thetaXvv[ell]);
 }
 
 ////////////////////////////////////////////////////////////////////
