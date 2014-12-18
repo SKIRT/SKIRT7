@@ -52,6 +52,8 @@ double DraineGraphiteGrainComposition::enthalpyfunction(double T)
 
 void DraineGraphiteGrainComposition::setupSelfBefore()
 {
+    GrainComposition::setupSelfBefore();
+
     loadOpticalGrid(true, "GrainComposition/Draine/Gra_81.dat", true, false, false, false);
     calculateEnthalpyGrid(enthalpyfunction);
     setBulkDensity(2.24e3);

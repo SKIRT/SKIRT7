@@ -24,6 +24,8 @@ DraineIonizedPAHGrainComposition::DraineIonizedPAHGrainComposition(SimulationIte
 
 void DraineIonizedPAHGrainComposition::setupSelfBefore()
 {
+    GrainComposition::setupSelfBefore();
+
     loadOpticalGrid(true, "GrainComposition/Draine/PAHion_30.dat", true, false, true, false);
     calculateEnthalpyGrid(DraineGraphiteGrainComposition::enthalpyfunction);
     setBulkDensity(2.24e3);

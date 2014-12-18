@@ -23,6 +23,8 @@ TrustNeutralPAHGrainComposition::TrustNeutralPAHGrainComposition(SimulationItem 
 
 void TrustNeutralPAHGrainComposition::setupSelfBefore()
 {
+    GrainComposition::setupSelfBefore();
+
     loadOpticalGrid(true, "GrainComposition/Trust/PAH_28_1201_neu.dat", false, true, false, true);
     loadEnthalpyGrid(true, "GrainComposition/Trust/Graphitic_Calorimetry_1000.dat");
     setBulkDensity(2.24e3);

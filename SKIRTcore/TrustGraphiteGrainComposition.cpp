@@ -23,6 +23,8 @@ TrustGraphiteGrainComposition::TrustGraphiteGrainComposition(SimulationItem *par
 
 void TrustGraphiteGrainComposition::setupSelfBefore()
 {
+    GrainComposition::setupSelfBefore();
+
     loadOpticalGrid(true, "GrainComposition/Trust/Gra_121_1201.dat", false, true, false, true);
     loadEnthalpyGrid(true, "GrainComposition/Trust/Graphitic_Calorimetry_1000.dat");
     setBulkDensity(2.24e3);

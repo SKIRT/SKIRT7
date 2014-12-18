@@ -26,6 +26,8 @@ DustEmGrainComposition::DustEmGrainComposition(SimulationItem *parent, QString g
 
 void DustEmGrainComposition::setupSelfBefore()
 {
+    GrainComposition::setupSelfBefore();
+
     setBulkDensity(_bulkmassdensity);
     loadLogHeatCapacityGrid("GrainComposition/DustEM/hcap/C_" + _graintype + ".DAT");
     loadOpticalGrid("GrainComposition/DustEM/oprop/LAMBDA.DAT",

@@ -17,6 +17,8 @@ FileGrainComposition::FileGrainComposition()
 
 void FileGrainComposition::setupSelfBefore()
 {
+    GrainComposition::setupSelfBefore();
+
     setBulkDensity(_bulkmassdensity);
     loadOpticalGrid(false, _opticalFilename, false, false, false, false);
     loadEnthalpyGrid(false, _calorimetricFilename);
