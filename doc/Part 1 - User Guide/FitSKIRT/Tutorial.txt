@@ -4,7 +4,7 @@
 
 In this section we show a step-by-step setup for a <tt>FitSKIRT</tt> fit using a flattened Sersic profile for the central bulge
 and a double exponential for the stellar disk and dust disk. The data used in this tutorial is
-available from the <a href="http://www.skirt.ugent.be/downloads.html">downloads page</a>. The first step consists of starting a <tt>SKIRT</tt> Q&A session,
+available from the <a href="http://www.skirt.ugent.be/downloads">downloads page</a>. The first step consists of starting a <tt>SKIRT</tt> Q&A session,
 creating the \em ski file and adjusting it afterwards. The second step is to create a suitable \em fksi file. The final step
 shows how to run the code and what output to expect. Remember that you need the FWHM determined before (if you have followed the PTS data reduction tutorial).
 We will use 18.6 Mpc as distance to this galaxy.
@@ -84,7 +84,7 @@ Automatically selected the only choice: 1
 \endverbatim
 
 Notice that the only available option at this point is to construct a fit using an adjustable SKIRT simulation. Next
-fill in the name (or path) of the ski file you have created and adjusted in the previous step, in this case 
+fill in the name (or path) of the ski file you have created and adjusted in the previous step, in this case
 "2comp.ski".
 
 \verbatim
@@ -119,7 +119,7 @@ parameter is not used in this case, it is simply there for completeness. It is a
 a logical order as the same order will be used to create the output files.
 
 Next insert the relative paths to the reference images, PSF FWHM and luminosity boundaries. The luminosity boundaries
-should be set relative to the dummy value you have entered. So the actual luminosity of the best fitting frame will be the 
+should be set relative to the dummy value you have entered. So the actual luminosity of the best fitting frame will be the
 dummy value multiplied by the best fitting value within the given boundaries.
 
 \verbatim
@@ -181,7 +181,7 @@ should need more of everything (photon packages, individuals ,...). In the fski 
 the populationsize to 10 and the number of generations to 5 and set the same boundaries for your free parameters. Below
 you can find the complete adjusted ski and fski file.
 
-The ski file 
+The ski file
 \verbatim
 <?xml version="1.0" encoding="UTF-8"?>
 <!--SKIRT radiative transfer simulations - © 2012-2014 Astronomical Observatory, Ghent University-->
@@ -384,11 +384,11 @@ As a final comparison open the tutorial_BESTsimulations.dat file. If you have us
 you should get the following content:
 
 \verbatim
-0 91.1797 7145.96 558.521 0.95842 5.9267 863.562 3933.79 657.367 2.96175e+07 1.8694 3.48103e+06 7.74921e+06 1.13446e+06 2.93517e+06 1.21588 0.653512 
-1 91.4654 5219.54 640.2 0.681499 1.47608 3173.66 9080.32 53.0504 4.267e+07 1.81769 2.45057e+06 2.57014e+06 859873 1.06447e+06 1.16867 0.649028 
-2 91.6289 3250.48 306.137 0.897166 6.1312 1986.91 6925.8 627.842 3.80441e+07 1.74867 8.74859e+06 4.92384e+06 2.60331e+06 1.83968e+06 1.15344 0.595226 
-3 91.3737 3009.58 625.44 0.562385 2.12825 2689.87 2355.36 182.31 8.86875e+06 1.6673 2.91159e+06 2.80387e+06 1.10677e+06 1.13411e+06 1.10956 0.557746 
-4 91.3737 3009.58 625.44 0.562385 2.12825 2689.87 1883.33 182.31 8.86875e+06 1.65936 2.80175e+06 2.88786e+06 1.07164e+06 1.1432e+06 1.10263 0.556727 
+0 91.1797 7145.96 558.521 0.95842 5.9267 863.562 3933.79 657.367 2.96175e+07 1.8694 3.48103e+06 7.74921e+06 1.13446e+06 2.93517e+06 1.21588 0.653512
+1 91.4654 5219.54 640.2 0.681499 1.47608 3173.66 9080.32 53.0504 4.267e+07 1.81769 2.45057e+06 2.57014e+06 859873 1.06447e+06 1.16867 0.649028
+2 91.6289 3250.48 306.137 0.897166 6.1312 1986.91 6925.8 627.842 3.80441e+07 1.74867 8.74859e+06 4.92384e+06 2.60331e+06 1.83968e+06 1.15344 0.595226
+3 91.3737 3009.58 625.44 0.562385 2.12825 2689.87 2355.36 182.31 8.86875e+06 1.6673 2.91159e+06 2.80387e+06 1.10677e+06 1.13411e+06 1.10956 0.557746
+4 91.3737 3009.58 625.44 0.562385 2.12825 2689.87 1883.33 182.31 8.86875e+06 1.65936 2.80175e+06 2.88786e+06 1.07164e+06 1.1432e+06 1.10263 0.556727
 \endverbatim
 
 So in this case your best fitting model is on the fifth line and can be seen in tutorial_Best_4_0.fits and

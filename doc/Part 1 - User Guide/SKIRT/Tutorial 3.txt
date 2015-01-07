@@ -21,7 +21,7 @@ Before starting this tutorial, you should have installed and/or built the <tt>SK
 A lot of information provided in the first tutorial is not repeated here!
 
 To complete this tutorial, you need the output file produced by the MPI-AMRVAC simulation.
-Download the file \c kh_amr.dat from the <a href="http://www.skirt.ugent.be/_downloads.html">SKIRT downloads page</a>
+Download the file \c kh_amr.dat from the <a href="http://www.skirt.ugent.be/downloads">SKIRT downloads page</a>
 and put it into your \c ~/SKIRT/run directory.
 
 \section UserTut3Ski Creating the ski file

@@ -18,7 +18,7 @@ To complete this tutorial, you need SPH output data that is converted to a forma
 You need a file with stellar particle data and one with gas particle data. The required file formats are described
 in the documentation for the functions SPHStellarComp::setFilename() and SPHDustDistribution::setFilename().
 
-Download the files \c eagle_stars.dat and \c eagle_gas.dat from the <a href="http://www.skirt.ugent.be/_downloads.html">SKIRT downloads page</a>
+Download the files \c eagle_stars.dat and \c eagle_gas.dat from the <a href="http://www.skirt.ugent.be/downloads">SKIRT downloads page</a>
 and put them into your \c ~/SKIRT/run directory.
 
 \section UserTut2Ski Creating the ski file
