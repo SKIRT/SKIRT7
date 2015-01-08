@@ -51,6 +51,7 @@
 #include "FilePaths.hpp"
 #include "FileSED.hpp"
 #include "FileWavelengthGrid.hpp"
+#include "FoamDecoGeometry.hpp"
 #include "ForsteriteGrainComposition.hpp"
 #include "FrameInstrument.hpp"
 #include "FullInstrument.hpp"
@@ -252,6 +253,7 @@ void RegisterSimulationItems::registerAll()
     add<TriaxialGeometry>();
     add<SphericalHoleGeometry>();
     add<SpiralStructureGeometry>();
+    add<FoamDecoGeometry>();
 
     add<SmoothingKernel>(false);
     add<UniformSmoothingKernel>();
