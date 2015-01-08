@@ -168,7 +168,7 @@ const
 {
     double R, phi, z;
     bfr.cylindrical(R,phi,z);
-    return _geometry->density(R,z) * perturbation(R,z);
+    return _geometry->density(R,z) * perturbation(R,phi);
 }
 
 ////////////////////////////////////////////////////////////////////
