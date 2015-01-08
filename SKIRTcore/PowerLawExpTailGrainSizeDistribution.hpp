@@ -15,7 +15,7 @@
     n_\text{H} = C \,a^{\alpha} \,f_\text{ed}(a) \qquad\text{for}\quad a_\text{min} \leq a \leq
     a_\text{max}, \f] with an exponential decay term \f[ f_\text{ed}(a) = \begin{cases} 1 & \quad
     a\leq a_\text{t} \\ \exp\left(-[(a-a_\text{t})/a_\text{c}]^\gamma \right) & \quad a>a_\text{t}
-    \end{cases} \f]. \f]
+    \end{cases} \f].
 
     The size range and the proportionality factor \f$C\f$ of the function can be configured in the
     GrainSizeDistribution base class. The remaining four parameters \f$\alpha\f$, \f$a_\text{t}\f$,
