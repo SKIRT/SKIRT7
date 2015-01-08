@@ -31,7 +31,7 @@ void ReadFitsGeometry::setupSelfBefore()
 {
     GenGeometry::setupSelfBefore();
 
-    // verify property values
+    // Verify property values
     if (_pix <= 0) throw FATALERROR("Pixel scale should be positive");
     if (_incl < 0) throw FATALERROR("Inclination should be between 0 and 90 degrees");
     if (_incl > 180) throw FATALERROR("Inclination should be between 0 and 90 degrees");
@@ -42,10 +42,11 @@ void ReadFitsGeometry::setupSelfBefore()
     if (_hz <= 0) throw FATALERROR("Axial scale height hz should be positive");
 
     QString filename = FilePaths::resource(_filename);
-    find<Log>()->info("Reading FITS file");
-
     Array fitsImage;
     int _nz = 1;
+
+    // Read the input file
+    find<Log>()->info("Reading FITS file");
     FITSInOut::read(_filename,fitsImage,_nx,_ny,_nz);
 
     _xpmax = ((_nx-_xc)*_pix);

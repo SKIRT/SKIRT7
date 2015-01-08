@@ -13,19 +13,19 @@
 ////////////////////////////////////////////////////////////////////
 
 /** The ReadFitsGeometry class is a subclass of the GenGeometry class, and describes a geometry
-    characterized by observations. A 2D observed image fits file is read into SKIRT, and
+    characterized by observations. A 2D observed image FITS file is read into <tt>SKIRT</tt>, and
     deprojected assuming a certain position angle, inclination and azimuth. The density is assumed
     to follow a exponential profile in the vertical directions, \f[ \rho(z) = \rho_0\,
-    \exp\left(-\frac{|z|}{h_z}\right). \f] By running a SKIRT simulation with inclination of 0
-    degrees and position angle of the simulated galaxy, the SKIRT model images can be compared with
-    the observations. The model geometry is set by nine parameters: the input filename, the pixel
-    scale \f$pix\f$, the position angle \f$pa\f$, the inclination \f$incl\f$, the number of pixels
-    in x and y direction \f$n_x\f$ and \f$n_y\f$, the center of galaxy in (x,y) image coordinates
-    \f$x_c\f$ and \f$y_c\f$ and the vertical scale height \f$h_z\f$. */
+    \exp\left(-\frac{|z|}{h_z}\right). \f] By running a <tt>SKIRT</tt> simulation with inclination
+    of 0 degrees and position angle of the simulated galaxy, the <tt>SKIRT</tt> model images can be
+    compared with the observations. The model geometry is set by nine parameters: the input
+    filename, the pixel scale \f$pix\f$, the position angle \f$pa\f$, the inclination \f$incl\f$,
+    the number of pixels in x and y direction \f$n_x\f$ and \f$n_y\f$, the center of galaxy in
+    (x,y) image coordinates \f$x_c\f$ and \f$y_c\f$ and the vertical scale height \f$h_z\f$. */
 class ReadFitsGeometry : public GenGeometry
 {
     Q_OBJECT
-    Q_CLASSINFO("Title", "a read from image geometry")
+    Q_CLASSINFO("Title", "a geometry interpreted from a FITS file")
 
     Q_CLASSINFO("Property", "filename")
     Q_CLASSINFO("Title", "the name of the file with the image parameters")
