@@ -154,7 +154,7 @@ public:
         along the entire Z-axis, \f[ \Sigma_Z = \int_{-\infty}^\infty \rho(0,0,z)\,{\text{d}}z. \f]
         It is impossible to calculate this value for a random value of the rotation angles. We simply
         return the Z-axis surface density of the original geometry. */
-        double SigmaZ() const;
+    double SigmaZ() const;
 
     /** This function implements part of the AngularDistribution interface. It returns the
         probability \f$P(\Omega)\f$ for a given direction \f$(\theta,\phi)\f$ at the specified
