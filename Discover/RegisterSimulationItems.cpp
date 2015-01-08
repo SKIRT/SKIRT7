@@ -8,6 +8,7 @@
 
 // add new items in alphabetical order
 
+#include "aCHcoremanGrainComposition.hpp"
 #include "AdaptiveMeshAmrvacFile.hpp"
 #include "AdaptiveMeshAsciiFile.hpp"
 #include "AdaptiveMeshDustDistribution.hpp"
@@ -342,6 +343,7 @@ void RegisterSimulationItems::registerAll()
     add<FileGrainComposition>();
     add<CMamEnstatiteGrainComposition>();
     add<CMamForsteriteGrainComposition>();
+    add<aCHcoremanGrainComposition>();
 
     add<GrainSizeDistribution>(false);
     add<PowerLawGrainSizeDistribution>();
