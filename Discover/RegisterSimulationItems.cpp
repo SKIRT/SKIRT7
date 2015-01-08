@@ -109,6 +109,7 @@
 #include "PowAxDustGridStructure.hpp"
 #include "PowCubDustGridStructure.hpp"
 #include "PowSpheDustGridStructure.hpp"
+#include "PowerLawExpTailGrainSizeDistribution.hpp"
 #include "PowerLawGrainSizeDistribution.hpp"
 #include "PseudoSersicGeometry.hpp"
 #include "QuasarSED.hpp"
@@ -351,6 +352,7 @@ void RegisterSimulationItems::registerAll()
     add<ZubkoGraphiteGrainSizeDistribution>();
     add<ZubkoSilicateGrainSizeDistribution>();
     add<ZubkoPAHGrainSizeDistribution>();
+    add<PowerLawExpTailGrainSizeDistribution>();
 
     add<DustMixPopulation>();
 

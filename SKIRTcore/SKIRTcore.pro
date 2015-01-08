@@ -284,7 +284,8 @@ HEADERS += \
     PolarizedGraphiteGrainComposition.hpp \
     ReadFitsGeometry.hpp \
     CMamEnstatiteGrainComposition.hpp \
-    CMamForsteriteGrainComposition.hpp
+    CMamForsteriteGrainComposition.hpp \
+    PowerLawExpTailGrainSizeDistribution.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -527,4 +528,5 @@ SOURCES += \
     PolarizedGraphiteGrainComposition.cpp \
     ReadFitsGeometry.cpp \
     CMamEnstatiteGrainComposition.cpp \
-    CMamForsteriteGrainComposition.cpp
+    CMamForsteriteGrainComposition.cpp \
+    PowerLawExpTailGrainSizeDistribution.cpp
