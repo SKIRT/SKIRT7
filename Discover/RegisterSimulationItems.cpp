@@ -112,6 +112,7 @@
 #include "QuasarSED.hpp"
 #include "RadialDustCompNormalization.hpp"
 #include "Random.hpp"
+#include "ReadFitsGeometry.hpp"
 #include "RingGeometry.hpp"
 #include "RotateGeometry.hpp"
 #include "SEDInstrument.hpp"
@@ -252,6 +253,7 @@ void RegisterSimulationItems::registerAll()
     add<TriaxialGeometry>();
     add<SphericalHoleGeometry>();
     add<SpiralStructureGeometry>();
+    add<ReadFitsGeometry>();
 
     add<SmoothingKernel>(false);
     add<UniformSmoothingKernel>();
