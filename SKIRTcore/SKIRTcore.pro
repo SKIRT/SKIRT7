@@ -283,6 +283,7 @@ HEADERS += \
     PolarizedSilicateGrainComposition.hpp \
     PolarizedGraphiteGrainComposition.hpp \
     ReadFitsGeometry.hpp \
+    CMamEnstatiteGrainComposition.hpp \
     CMamForsteriteGrainComposition.hpp
 
 SOURCES += \
@@ -525,4 +526,5 @@ SOURCES += \
     PolarizedSilicateGrainComposition.cpp \
     PolarizedGraphiteGrainComposition.cpp \
     ReadFitsGeometry.cpp \
+    CMamEnstatiteGrainComposition.cpp \
     CMamForsteriteGrainComposition.cpp
