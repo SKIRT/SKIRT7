@@ -282,7 +282,8 @@ HEADERS += \
     StokesVector.hpp \
     PolarizedSilicateGrainComposition.hpp \
     PolarizedGraphiteGrainComposition.hpp \
-    ReadFitsGeometry.hpp
+    ReadFitsGeometry.hpp \
+    CMamForsteriteGrainComposition.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -523,4 +524,5 @@ SOURCES += \
     StokesVector.cpp \
     PolarizedSilicateGrainComposition.cpp \
     PolarizedGraphiteGrainComposition.cpp \
-    ReadFitsGeometry.cpp
+    ReadFitsGeometry.cpp \
+    CMamForsteriteGrainComposition.cpp

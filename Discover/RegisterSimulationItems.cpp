@@ -24,6 +24,7 @@
 #include "BolLuminosityStellarCompNormalization.hpp"
 #include "BruzualCharlotSED.hpp"
 #include "ClumpyGeometry.hpp"
+#include "CMamForsteriteGrainComposition.hpp"
 #include "CompDustDistribution.hpp"
 #include "ConfigurableDustMix.hpp"
 #include "CubicSplineSmoothingKernel.hpp"
@@ -337,6 +338,7 @@ void RegisterSimulationItems::registerAll()
     add<TrustNeutralPAHGrainComposition>();
     add<DustEmGrainComposition>();
     add<FileGrainComposition>();
+    add<CMamForsteriteGrainComposition>();
 
     add<GrainSizeDistribution>(false);
     add<PowerLawGrainSizeDistribution>();
