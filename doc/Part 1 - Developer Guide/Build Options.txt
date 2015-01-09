@@ -1,0 +1,24 @@
+/**
+
+\page ChangingBuildOptions Changing the build options
+
+The <tt>SKIRT</tt> build procedure can be configured by modifying a single text file included in the <tt>SKIRT</tt> source tree. 
+This file is called "BuildOptions.pri" and can be found in two different ways:
+
+- Either by navigating to the directory "BuildUtils" inside \c SKIRT/git (in a Terminal window or in your file browser);
+- or by opening the file in Qt Creator by clicking on "BuildOptions" in the tree structure on the left of the screen (see screenshot).
+
+\image html sourcetree-buildoptions.png
+\image latex sourcetree-buildoptions.png
+
+The "BuildOptions.pri" file contains two configurable lines:
+
+- The first line determines whether the graphical component of <tt>SKIRT</tt>, <tt>SKIRT MakeUp</tt>, should be built or not. On Mac,
+  this option is enabled by default, wheras on Unix systems <tt>SKIRT MakeUp</tt> will not be compiled by default. To enable it on these systems,
+  remove the "macx:" prefix from the line. To disable buildling <tt>SKIRT MakeUp</tt> on Mac, precede the entire line by the "#" character. 
+- On the second line, you can specify whether <tt>SKIRT</tt> (and <tt>FitSKIRT</tt>) should be built with MPI or not. By default, MPI is enabled,
+  allowing you to start simulations or fit schemes with the \c mpirun command. If MPI is not installed on the system, this option will be ignored.
+  To disable building with MPI, in the case an MPI distribution is indeed installed on your system, precede the second configuration line with a 
+  "#" character.
+
+*/
