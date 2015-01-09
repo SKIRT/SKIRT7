@@ -3,45 +3,46 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
-#ifndef SPHERICALHOLEGEOMETRY_HPP
-#define SPHERICALHOLEGEOMETRY_HPP
+#ifndef SPHERICALCAVITYGEOMETRYDECORATOR_HPP
+#define SPHERICALCAVITYGEOMETRYDECORATOR_HPP
 
 #include "Geometry.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
-/** The SphericalHoleGeometry class is a Geometry decorator that forces the density to zero in a
-    spherical volume with given position and radius. The properties of a SphericalHoleGeometry
-    object include (1) a reference to the Geometry object being decorated, (2) the radius of the
-    hole, and (3) the position of the hole's center. The dimension of the geometry implemented by a
-    SphericalHoleGeometry object depends on the symmetries of the geometry being decorated and on
-    the position of the hole. The current implementation assumes that the hole is sufficiently
-    small so that the effect on the total mass of the geometry is negligible. */
-class SphericalHoleGeometry : public Geometry
+/** The SphericalCavityGeometryDecorator class is a geometry decorator that forces the density to
+    zero in a spherical volume with given position and radius. The properties of a
+    SphericalCavityGeometryDecorator object include (1) a reference to the Geometry object being
+    decorated, (2) the radius of the spherical cavity, and (3) the position of the cavity's center.
+    The dimension of the geometry implemented by a SphericalHoleGeometry object depends on the
+    symmetries of the geometry being decorated and on the position of the hole. The current
+    implementation assumes that the hole is sufficiently small so that the effect on the total mass
+    of the geometry is negligible, and doesn't support anisotropic geometries. */
+class SphericalCavityGeometryDecorator : public Geometry
 {
     Q_OBJECT
-    Q_CLASSINFO("Title", "a geometry that forces a spherical hole in any geometry")
+    Q_CLASSINFO("Title", "a decorator that forces a spherical cavity in any geometry")
 
     Q_CLASSINFO("Property", "geometry")
-    Q_CLASSINFO("Title", "the geometry to be adjusted")
+    Q_CLASSINFO("Title", "the geometry to be decorated which a spherical cavity")
 
     Q_CLASSINFO("Property", "radius")
-    Q_CLASSINFO("Title", "the radius of the hole")
+    Q_CLASSINFO("Title", "the radius of the spherical cavity")
     Q_CLASSINFO("Quantity", "length")
     Q_CLASSINFO("MinValue", "0")
 
     Q_CLASSINFO("Property", "centerX")
-    Q_CLASSINFO("Title", "the x coordinate of the hole's center")
+    Q_CLASSINFO("Title", "the x coordinate of the cavity's center")
     Q_CLASSINFO("Quantity", "length")
     Q_CLASSINFO("Default", "0")
 
     Q_CLASSINFO("Property", "centerY")
-    Q_CLASSINFO("Title", "the y coordinate of the hole's center")
+    Q_CLASSINFO("Title", "the y coordinate of the cavity's center")
     Q_CLASSINFO("Quantity", "length")
     Q_CLASSINFO("Default", "0")
 
     Q_CLASSINFO("Property", "centerZ")
-    Q_CLASSINFO("Title", "the z coordinate of the hole's center")
+    Q_CLASSINFO("Title", "the z coordinate of the cavity's center")
     Q_CLASSINFO("Quantity", "length")
     Q_CLASSINFO("Default", "0")
 
@@ -49,7 +50,7 @@ class SphericalHoleGeometry : public Geometry
 
 public:
     /** The default constructor. */
-    Q_INVOKABLE SphericalHoleGeometry();
+    Q_INVOKABLE SphericalCavityGeometryDecorator();
 
 protected:
     /** This function calculates some frequently used values. */
@@ -138,4 +139,4 @@ private:
 
 ////////////////////////////////////////////////////////////////////
 
-#endif // SPHERICALHOLEGEOMETRY_HPP
+#endif // SPHERICALCAVITYGEOMETRYDECORATOR_HPP

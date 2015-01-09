@@ -3,16 +3,17 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
-#ifndef SPIRALSTRUCTUREGEOMETRY_HPP
-#define SPIRALSTRUCTUREGEOMETRY_HPP
+#ifndef SPIRALSTRUCTUREGEOMETRYDECORATOR_HPP
+#define SPIRALSTRUCTUREGEOMETRYDECORATOR_HPP
 
 #include "AxGeometry.hpp"
 #include "GenGeometry.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
-/** The SpiralStructureGeometry class is a Geometry decorator that adds spiral
-    structure to any axisymmetric geometry. The spiral arm perturbation (with an
+/** The SpiralStructureGeometryDecorator class is a geometry decorator that adds spiral
+    structure to any isotropic axisymmetric geometry (any anisotropic aspect of the original
+    geometry is lost). The spiral arm perturbation (with an
     arbitrary weight factor) is a logarithmic spiral arm pattern, based on the
     formulation of Schechtman-Rook et al. (2012, ApJ, 746, 70). The decorator
     basically alters the uniform distribution in azimuth (by definition, the
@@ -37,13 +38,13 @@
     the parameters \f$R_0\f$ and \f$\phi_0\f$ in fact have the same effect (both of
     them add an offset to the spiral structure). In principle one of them could be
     suppressed, but it is confortable to include both of them. */
-class SpiralStructureGeometry : public GenGeometry
+class SpiralStructureGeometryDecorator : public GenGeometry
 {
     Q_OBJECT
-    Q_CLASSINFO("Title", "a decorator that adds spiral structure to an axisymmetric geometry")
+    Q_CLASSINFO("Title", "a decorator that adds spiral structure to any axisymmetric geometry")
 
     Q_CLASSINFO("Property", "geometry")
-    Q_CLASSINFO("Title", "the original axisymmetric geometry")
+    Q_CLASSINFO("Title", "the axisymmetric geometry to be decorated with spiral structure")
 
     Q_CLASSINFO("Property", "arms")
     Q_CLASSINFO("Title", "the number of spiral arms")
@@ -85,7 +86,7 @@ class SpiralStructureGeometry : public GenGeometry
 
 public:
     /** The default constructor. */
-    Q_INVOKABLE SpiralStructureGeometry();
+    Q_INVOKABLE SpiralStructureGeometryDecorator();
 
     /** This function verifies the validity of the different parameters, and caches some
         frequently used combinations of them. */
@@ -196,4 +197,4 @@ private:
 
 ////////////////////////////////////////////////////////////////////
 
-#endif // SPIRALSTRUCTUREGEOMETRY_HPP
+#endif // SPIRALSTRUCTUREGEOMETRYDECORATOR_HPP

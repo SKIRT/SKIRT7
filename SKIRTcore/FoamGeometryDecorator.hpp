@@ -3,8 +3,8 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
-#ifndef FOAMDECOGEOMETRY_HPP
-#define FOAMDECOGEOMETRY_HPP
+#ifndef FOAMGEOMETRYDECORATOR_HPP
+#define FOAMGEOMETRYDECORATOR_HPP
 
 #include "GenGeometry.hpp"
 #include "FoamDensity.hpp"
@@ -12,8 +12,8 @@ class Foam;
 
 ////////////////////////////////////////////////////////////////////
 
-/** The FoamDecoGeometry class is a decorator for the Geometry class that is designed to
-    provide an alternative method to generate random positions. The FoamDecoGeometry class
+/** The FoamGeometryDecorator class is a decorator for the Geometry class that
+    provides an alternative method to generate random positions. The FoamDecoGeometry class
     uses a three-dimensional cell structure, called the foam. A foam is based on the
     three-dimensional unit cube \f$[0,1]^3\f$, subdivided into a large number of small
     cuboidal cells. The distribution of the grid cells is performed completely
@@ -23,15 +23,15 @@ class Foam;
     unit cube. One problem is that the stellar density \f$\rho({\bf{r}})\f$ is typically
     defined on the entire 3D space, whereas the foam requires a density distribution on
     the unit cube. We solve this problem using a simple linear transformation, where we
-    map the volume from which we sample (assumed to be a box) to the unit cube. \f] */
+    map the volume from which we sample (assumed to be a box) to the unit cube. */
 
-class FoamDecoGeometry : public GenGeometry, FoamDensity
+class FoamGeometryDecorator : public GenGeometry, FoamDensity
 {
     Q_OBJECT
-    Q_CLASSINFO("Title", "a foam decorator that provides an alternative random position generator")
+    Q_CLASSINFO("Title", "a decorator that provides an alternative random position generator")
 
     Q_CLASSINFO("Property", "geometry")
-    Q_CLASSINFO("Title", "the geometry to be sampled alternatively")
+    Q_CLASSINFO("Title", "the geometry to be alternatively sampled")
 
     Q_CLASSINFO("Property", "extentX")
     Q_CLASSINFO("Title", "the outer radius of the bounding box in the x direction")
@@ -58,19 +58,15 @@ class FoamDecoGeometry : public GenGeometry, FoamDensity
 
 public:
     /** The default constructor. */
-    Q_INVOKABLE FoamDecoGeometry();
+    Q_INVOKABLE FoamGeometryDecorator();
 
     /** The destructor; it deallocates the foam object created during setup. */
-    ~FoamDecoGeometry();
+    ~FoamGeometryDecorator();
 
 protected:
-
-    /** This function verifies the validity of the parameters.*/
-    void setupSelfBefore();
-
-    /** This function sets up the foam. The Foam constructor needs a pointer to an
-        object of the FoamDensity class, but since the FoamDecoGeometry class inherits
-        from the FoamDensity class, this is easily done. */
+    /** This function sets up the foam. The Foam constructor needs a pointer to an instance of the
+        FoamDensity interface, which is implemented for this purpose by the FoamGeometryDecorator
+        class. */
     void setupSelfAfter();
 
     //======== Setters & Getters for Discoverable Attributes =======
@@ -170,9 +166,8 @@ private:
 
     // data member initialized during setup
     Foam* _foam;
-
 };
 
 ////////////////////////////////////////////////////////////////////
 
-#endif // FOAMDECOGEOMETRY_HPP
+#endif // FOAMGEOMETRYDECORATOR_HPP

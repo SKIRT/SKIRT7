@@ -3,18 +3,18 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
-#include "OffsetGeometry.hpp"
+#include "OffsetGeometryDecorator.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
-OffsetGeometry::OffsetGeometry()
+OffsetGeometryDecorator::OffsetGeometryDecorator()
     : _geometry(0), _offsetX(0), _offsetY(0), _offsetZ(0)
 {
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void OffsetGeometry::setGeometry(Geometry* value)
+void OffsetGeometryDecorator::setGeometry(Geometry* value)
 {
     if (_geometry) delete _geometry;
     _geometry = value;
@@ -23,56 +23,56 @@ void OffsetGeometry::setGeometry(Geometry* value)
 
 ////////////////////////////////////////////////////////////////////
 
-Geometry* OffsetGeometry::geometry() const
+Geometry* OffsetGeometryDecorator::geometry() const
 {
     return _geometry;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void OffsetGeometry::setOffsetX(double value)
+void OffsetGeometryDecorator::setOffsetX(double value)
 {
     _offsetX = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double OffsetGeometry::offsetX() const
+double OffsetGeometryDecorator::offsetX() const
 {
     return _offsetX;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void OffsetGeometry::setOffsetY(double value)
+void OffsetGeometryDecorator::setOffsetY(double value)
 {
     _offsetY = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double OffsetGeometry::offsetY() const
+double OffsetGeometryDecorator::offsetY() const
 {
     return _offsetY;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void OffsetGeometry::setOffsetZ(double value)
+void OffsetGeometryDecorator::setOffsetZ(double value)
 {
     _offsetZ = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double OffsetGeometry::offsetZ() const
+double OffsetGeometryDecorator::offsetZ() const
 {
     return _offsetZ;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-int OffsetGeometry::dimension() const
+int OffsetGeometryDecorator::dimension() const
 {
     return (_offsetX || _offsetY || _geometry->dimension()==3) ? 3 : 2;
 }
@@ -80,7 +80,7 @@ int OffsetGeometry::dimension() const
 ////////////////////////////////////////////////////////////////////
 
 double
-OffsetGeometry::density(Position bfr)
+OffsetGeometryDecorator::density(Position bfr)
 const
 {
     double x,y,z;
@@ -91,7 +91,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 Position
-OffsetGeometry::generatePosition()
+OffsetGeometryDecorator::generatePosition()
 const
 {
     Position bfr = _geometry->generatePosition();
@@ -103,7 +103,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 double
-OffsetGeometry::SigmaX()
+OffsetGeometryDecorator::SigmaX()
 const
 {
     return _geometry->SigmaX();
@@ -112,7 +112,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 double
-OffsetGeometry::SigmaY()
+OffsetGeometryDecorator::SigmaY()
 const
 {
     return _geometry->SigmaY();
@@ -121,7 +121,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 double
-OffsetGeometry::SigmaZ()
+OffsetGeometryDecorator::SigmaZ()
 const
 {
     return _geometry->SigmaZ();
@@ -130,7 +130,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 double
-OffsetGeometry::probabilityForDirection(Position bfr, Direction bfk)
+OffsetGeometryDecorator::probabilityForDirection(Position bfr, Direction bfk)
 const
 {
     double x,y,z;
@@ -141,7 +141,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 Direction
-OffsetGeometry::generateDirection(Position bfr)
+OffsetGeometryDecorator::generateDirection(Position bfr)
 const
 {
     double x,y,z;

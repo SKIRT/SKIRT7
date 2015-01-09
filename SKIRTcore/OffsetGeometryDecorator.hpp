@@ -3,27 +3,27 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
-#ifndef OFFSETGEOMETRY_HPP
-#define OFFSETGEOMETRY_HPP
+#ifndef OFFSETGEOMETRYDECORATOR_HPP
+#define OFFSETGEOMETRYDECORATOR_HPP
 
 #include "Geometry.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
-/** The OffsetGeometry class is a Geometry decorator that adds an arbitrary offset to
-    any geometry. The properties of an OffsetGeometry object include (1) a reference
-    to the Geometry object being decorated and (2) three offsets in the x, y, and z
-    directions. The resulting geometry is identical to the geometry being decorated, except
-    that the density distribution is shifted over the specified offset. The geometry
-    implemented by an OffsetGeometry object is 2D (axial symmetry) or 3D (no symmetries)
-    depending on the symmetries of the geometry being decorated and on the specified offset.
-    Specifically, it is 2D if the geometry being decorated is 1D or 2D and the offsets in
-    the x and y directions are both zero. It is 3D if the geometry being decorated is 3D, or
-    if at least one of the offsets in the x and y directions is nonzero. */
-class OffsetGeometry : public Geometry
+/** The OffsetGeometryDecorator class is a decorator that adds an arbitrary offset to any geometry,
+    including anisotripic geometries. The properties of an OffsetGeometryDecorator object include
+    (1) a reference to the Geometry object being decorated and (2) three offsets in the x, y, and z
+    directions. The resulting geometry is identical to the geometry being decorated, except that
+    the density distribution is shifted over the specified offset. The geometry implemented by an
+    OffsetGeometryDecorator object is 2D (axial symmetry) or 3D (no symmetries) depending on the
+    symmetries of the geometry being decorated and on the specified offset. Specifically, it is 2D
+    if the geometry being decorated is 1D or 2D and the offsets in the x and y directions are both
+    zero. It is 3D if the geometry being decorated is 3D, or if at least one of the offsets in the
+    x and y directions is nonzero. */
+class OffsetGeometryDecorator : public Geometry
 {
     Q_OBJECT
-    Q_CLASSINFO("Title", "a geometry that adds an offset to any geometry")
+    Q_CLASSINFO("Title", "a decorator that adds an offset to any geometry")
 
     Q_CLASSINFO("Property", "geometry")
     Q_CLASSINFO("Title", "the geometry to be offset")
@@ -47,7 +47,7 @@ class OffsetGeometry : public Geometry
 
 public:
     /** The default constructor. */
-    Q_INVOKABLE OffsetGeometry();
+    Q_INVOKABLE OffsetGeometryDecorator();
 
     //======== Setters & Getters for Discoverable Attributes =======
 
@@ -142,4 +142,4 @@ private:
 
 ////////////////////////////////////////////////////////////////////
 
-#endif // OFFSETGEOMETRY_HPP
+#endif // OFFSETGEOMETRYDECORATOR_HPP

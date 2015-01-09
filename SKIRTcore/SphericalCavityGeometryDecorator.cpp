@@ -3,18 +3,18 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
-#include "SphericalHoleGeometry.hpp"
+#include "SphericalCavityGeometryDecorator.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
-SphericalHoleGeometry::SphericalHoleGeometry()
+SphericalCavityGeometryDecorator::SphericalCavityGeometryDecorator()
     : _geometry(0), _radius(0), _centerX(0), _centerY(0), _centerZ(0)
 {
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void SphericalHoleGeometry::setupSelfBefore()
+void SphericalCavityGeometryDecorator::setupSelfBefore()
 {
     Geometry::setupSelfBefore();
 
@@ -24,7 +24,7 @@ void SphericalHoleGeometry::setupSelfBefore()
 
 ////////////////////////////////////////////////////////////////////
 
-void SphericalHoleGeometry::setGeometry(Geometry* value)
+void SphericalCavityGeometryDecorator::setGeometry(Geometry* value)
 {
     if (_geometry) delete _geometry;
     _geometry = value;
@@ -33,70 +33,70 @@ void SphericalHoleGeometry::setGeometry(Geometry* value)
 
 ////////////////////////////////////////////////////////////////////
 
-Geometry* SphericalHoleGeometry::geometry() const
+Geometry* SphericalCavityGeometryDecorator::geometry() const
 {
     return _geometry;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void SphericalHoleGeometry::setRadius(double value)
+void SphericalCavityGeometryDecorator::setRadius(double value)
 {
     _radius = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double SphericalHoleGeometry::radius() const
+double SphericalCavityGeometryDecorator::radius() const
 {
     return _radius;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void SphericalHoleGeometry::setCenterX(double value)
+void SphericalCavityGeometryDecorator::setCenterX(double value)
 {
     _centerX = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double SphericalHoleGeometry::centerX() const
+double SphericalCavityGeometryDecorator::centerX() const
 {
     return _centerX;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void SphericalHoleGeometry::setCenterY(double value)
+void SphericalCavityGeometryDecorator::setCenterY(double value)
 {
     _centerY = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double SphericalHoleGeometry::centerY() const
+double SphericalCavityGeometryDecorator::centerY() const
 {
     return _centerY;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void SphericalHoleGeometry::setCenterZ(double value)
+void SphericalCavityGeometryDecorator::setCenterZ(double value)
 {
     _centerZ = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double SphericalHoleGeometry::centerZ() const
+double SphericalCavityGeometryDecorator::centerZ() const
 {
     return _centerZ;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-int SphericalHoleGeometry::dimension() const
+int SphericalCavityGeometryDecorator::dimension() const
 {
     int holeDimension = 1;
     if (_centerZ) holeDimension = 2;
@@ -106,7 +106,7 @@ int SphericalHoleGeometry::dimension() const
 
 ////////////////////////////////////////////////////////////////////
 
-double SphericalHoleGeometry::density(Position bfr) const
+double SphericalCavityGeometryDecorator::density(Position bfr) const
 {
     if ( (bfr-_center).norm2() <= _radius2 ) return 0;
     return _geometry->density(bfr);
@@ -114,7 +114,7 @@ double SphericalHoleGeometry::density(Position bfr) const
 
 ////////////////////////////////////////////////////////////////////
 
-Position SphericalHoleGeometry::generatePosition() const
+Position SphericalCavityGeometryDecorator::generatePosition() const
 {
     while (true)
     {
@@ -125,21 +125,21 @@ Position SphericalHoleGeometry::generatePosition() const
 
 ////////////////////////////////////////////////////////////////////
 
-double SphericalHoleGeometry::SigmaX() const
+double SphericalCavityGeometryDecorator::SigmaX() const
 {
     return _geometry->SigmaX();
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double SphericalHoleGeometry::SigmaY() const
+double SphericalCavityGeometryDecorator::SigmaY() const
 {
     return _geometry->SigmaY();
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double SphericalHoleGeometry::SigmaZ() const
+double SphericalCavityGeometryDecorator::SigmaZ() const
 {
     return _geometry->SigmaZ();
 }

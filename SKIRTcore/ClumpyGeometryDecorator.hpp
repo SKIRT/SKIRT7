@@ -3,8 +3,8 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
-#ifndef CLUMPYGEOMETRY_HPP
-#define CLUMPYGEOMETRY_HPP
+#ifndef CLUMPYGEOMETRYDECORATOR_HPP
+#define CLUMPYGEOMETRYDECORATOR_HPP
 
 #include <vector>
 #include "GenGeometry.hpp"
@@ -13,10 +13,11 @@
 
 ////////////////////////////////////////////////////////////////////
 
-/** The ClumpyGeometry class is a Geometry decorator that adds clumpiness to
-    any geometry. It basically assigns a fraction \f$f\f$ of the mass of the original
+/** The ClumpyGeometryDecorator class is a geometry decorator that adds clumpiness to
+    any isotropic geometry (any anisotropic aspect of the original
+    geometry is lost). It basically assigns a fraction \f$f\f$ of the mass of the original
     geometry to compact clumps, which are distributed statistically according to the same
-    distribution. The properties of a ClumpyGeometry object are a reference
+    distribution. The properties of a ClumpyGeometryDecorator object are a reference
     to the original Geometry object being decorated, and the characteristics that
     describe the clumpiness, i.e. the fraction \f$f\f$ of the mass locked in clumps, the total
     number \f$N\f$ of clumps, the scale radius \f$h\f$ of a single clump, and the kernel
@@ -27,13 +28,13 @@
     the location of the centre of the \f$i\f$'th clump, each of them drawn stochastically from the
     three-dimensional probability density \f$p({\bf{r}})\, {\text{d}}{\bf{r}} =
     \rho_{\text{orig}}({\bf{r}})\, {\text{d}}{\bf{r}}\f$.*/
-class ClumpyGeometry : public GenGeometry
+class ClumpyGeometryDecorator : public GenGeometry
 {
     Q_OBJECT
-    Q_CLASSINFO("Title", "a geometry that adds clumpiness to any geometry")
+    Q_CLASSINFO("Title", "a decorator that adds clumpiness to any geometry")
 
     Q_CLASSINFO("Property", "geometry")
-    Q_CLASSINFO("Title", "the geometry to which clumpiness is added")
+    Q_CLASSINFO("Title", "the geometry to be made clumpy")
 
     Q_CLASSINFO("Property", "clumpFraction")
     Q_CLASSINFO("Title", "the fraction of the mass locked up in clumps")
@@ -60,7 +61,7 @@ class ClumpyGeometry : public GenGeometry
 
 public:
     /** The default constructor. */
-    Q_INVOKABLE ClumpyGeometry();
+    Q_INVOKABLE ClumpyGeometryDecorator();
 
 protected:
     /** This function verifies the validity of the property values. */
@@ -155,4 +156,4 @@ private:
 
 ////////////////////////////////////////////////////////////////////
 
-#endif // CLUMPYGEOMETRY_HPP
+#endif // CLUMPYGEOMETRYDECORATOR_HPP

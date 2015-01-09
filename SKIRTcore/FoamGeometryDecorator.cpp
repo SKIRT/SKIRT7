@@ -6,7 +6,7 @@
 #include <cmath>
 #include "FatalError.hpp"
 #include "Foam.hpp"
-#include "FoamDecoGeometry.hpp"
+#include "FoamGeometryDecorator.hpp"
 #include "Log.hpp"
 #include "Random.hpp"
 
@@ -14,14 +14,14 @@ using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-FoamDecoGeometry::FoamDecoGeometry()
+FoamGeometryDecorator::FoamGeometryDecorator()
     : _geometry(0), _xmax(0), _ymax(0), _zmax(0), _Ncells(0), _foam(0)
 {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-FoamDecoGeometry::~FoamDecoGeometry()
+FoamGeometryDecorator::~FoamGeometryDecorator()
 {
     delete _foam;
 }
@@ -29,15 +29,7 @@ FoamDecoGeometry::~FoamDecoGeometry()
 //////////////////////////////////////////////////////////////////////
 
 void
-FoamDecoGeometry::setupSelfBefore()
-{
-    GenGeometry::setupSelfBefore();
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void
-FoamDecoGeometry::setupSelfAfter()
+FoamGeometryDecorator::setupSelfAfter()
 {
     GenGeometry::setupSelfAfter();
     _foam = Foam::createFoam(find<Log>(), _random, this, 3, _Ncells);
@@ -46,7 +38,7 @@ FoamDecoGeometry::setupSelfAfter()
 ////////////////////////////////////////////////////////////////////
 
 void
-FoamDecoGeometry::setGeometry(Geometry* value)
+FoamGeometryDecorator::setGeometry(Geometry* value)
 {
     if (_geometry) delete _geometry;
     _geometry = value;
@@ -56,7 +48,7 @@ FoamDecoGeometry::setGeometry(Geometry* value)
 ////////////////////////////////////////////////////////////////////
 
 Geometry*
-FoamDecoGeometry::geometry()
+FoamGeometryDecorator::geometry()
 const
 {
     return _geometry;
@@ -65,7 +57,7 @@ const
 //////////////////////////////////////////////////////////////////////
 
 void
-FoamDecoGeometry::setExtentX(double value)
+FoamGeometryDecorator::setExtentX(double value)
 {
     if (value <= 0.0) throw FATALERROR("The maximum extent (in the X direction) should be positive");
     _xmax = value;
@@ -74,7 +66,7 @@ FoamDecoGeometry::setExtentX(double value)
 //////////////////////////////////////////////////////////////////////
 
 double
-FoamDecoGeometry::extentX()
+FoamGeometryDecorator::extentX()
 const
 {
     return _xmax;
@@ -83,16 +75,16 @@ const
 //////////////////////////////////////////////////////////////////////
 
 void
-FoamDecoGeometry::setExtentY(double value)
+FoamGeometryDecorator::setExtentY(double value)
 {
-    if (value <= 0.0) throw FATALERROR("The maximum extent (in the X direction) should be positive");
+    if (value <= 0.0) throw FATALERROR("The maximum extent (in the Y direction) should be positive");
     _ymax = value;
 }
 
 //////////////////////////////////////////////////////////////////////
 
 double
-FoamDecoGeometry::extentY()
+FoamGeometryDecorator::extentY()
 const
 {
     return _ymax;
@@ -101,16 +93,16 @@ const
 //////////////////////////////////////////////////////////////////////
 
 void
-FoamDecoGeometry::setExtentZ(double value)
+FoamGeometryDecorator::setExtentZ(double value)
 {
-    if (value <= 0.0) throw FATALERROR("The maximum extent (in the X direction) should be positive");
+    if (value <= 0.0) throw FATALERROR("The maximum extent (in the Z direction) should be positive");
     _zmax = value;
 }
 
 //////////////////////////////////////////////////////////////////////
 
 double
-FoamDecoGeometry::extentZ()
+FoamGeometryDecorator::extentZ()
 const
 {
     return _zmax;
@@ -119,17 +111,17 @@ const
 //////////////////////////////////////////////////////////////////////
 
 void
-FoamDecoGeometry::setNumCells(int value)
+FoamGeometryDecorator::setNumCells(int value)
 {
-    if (value < 100) throw FATALERROR("The minimum tree level should be at least 100");
-    if (value > 100000) throw FATALERROR("The minimum tree level should be at most 100000");
+    if (value < 100) throw FATALERROR("The number of foam cells should be at least 100");
+    if (value > 100000) throw FATALERROR("The number of foam cells should be at most 100000");
     _Ncells = value;
 }
 
 //////////////////////////////////////////////////////////////////////
 
 int
-FoamDecoGeometry::numCells()
+FoamGeometryDecorator::numCells()
 const
 {
     return _Ncells;
@@ -138,7 +130,7 @@ const
 ///////////////////////////////////////////////////////////////////////////////
 
 double
-FoamDecoGeometry::density(Position bfr)
+FoamGeometryDecorator::density(Position bfr)
 const
 {
     return _geometry->density(bfr);
@@ -147,7 +139,7 @@ const
 ///////////////////////////////////////////////////////////////////////////////
 
 double
-FoamDecoGeometry::SigmaX()
+FoamGeometryDecorator::SigmaX()
 const
 {
     return _geometry->SigmaX();
@@ -156,7 +148,7 @@ const
 ///////////////////////////////////////////////////////////////////////////////
 
 double
-FoamDecoGeometry::SigmaY()
+FoamGeometryDecorator::SigmaY()
 const
 {
     return _geometry->SigmaY();
@@ -165,7 +157,7 @@ const
 ///////////////////////////////////////////////////////////////////////////////
 
 double
-FoamDecoGeometry::SigmaZ()
+FoamGeometryDecorator::SigmaZ()
 const
 {
     return _geometry->SigmaZ();
@@ -174,7 +166,7 @@ const
 ///////////////////////////////////////////////////////////////////////////////
 
 Position
-FoamDecoGeometry::generatePosition()
+FoamGeometryDecorator::generatePosition()
 const
 {
     double par[3];
@@ -191,7 +183,7 @@ const
 /////////////////////////////////////////////////////////////////////
 
 double
-FoamDecoGeometry::foamdensity(int ndim, double* par)
+FoamGeometryDecorator::foamdensity(int ndim, double* par)
 const
 {
     if (ndim != 3)
