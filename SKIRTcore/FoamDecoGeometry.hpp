@@ -23,8 +23,7 @@ class Foam;
     unit cube. One problem is that the stellar density \f$\rho({\bf{r}})\f$ is typically
     defined on the entire 3D space, whereas the foam requires a density distribution on
     the unit cube. We solve this problem using a simple linear transformation, where we
-    map the volume from which we sample (assumed to be a box) to the unit cube. \f] */
-
+    map the volume from which we sample (assumed to be a box) to the unit cube. */
 class FoamDecoGeometry : public GenGeometry, FoamDensity
 {
     Q_OBJECT
