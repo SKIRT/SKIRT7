@@ -10,14 +10,14 @@
 
 ////////////////////////////////////////////////////////////////////
 
-/** The SphericalCavityGeometryDecorator class is a geometry decorator that forces the density to
-    zero in a spherical volume with given position and radius. The properties of a
+/** The SphericalCavityGeometryDecorator class is a decorator that forces the density of any
+    geometry to zero in a spherical volume with given position and radius. The properties of a
     SphericalCavityGeometryDecorator object include (1) a reference to the Geometry object being
     decorated, (2) the radius of the spherical cavity, and (3) the position of the cavity's center.
     The dimension of the geometry implemented by a SphericalHoleGeometry object depends on the
     symmetries of the geometry being decorated and on the position of the hole. The current
-    implementation assumes that the hole is sufficiently small so that the effect on the total mass
-    of the geometry is negligible, and doesn't support anisotropic geometries. */
+    implementation does not properly adjust the surface densities along the coordinate axes for the
+    mass taken away by the cavity. */
 class SphericalCavityGeometryDecorator : public Geometry
 {
     Q_OBJECT
@@ -55,6 +55,11 @@ public:
 protected:
     /** This function calculates some frequently used values. */
     void setupSelfBefore();
+
+    /** This function estimates the fraction of the mass taken away by the spherical cavity by
+        sampling the density of the geometry being decorated. This value is used to renormalize the
+        decorated density distribution to unity. */
+    void setupSelfAfter();
 
     //======== Setters & Getters for Discoverable Attributes =======
 
@@ -125,6 +130,18 @@ public:
         simply calls the corresponding function of the geometry being decorated. */
     double SigmaZ() const;
 
+    /** This function implements part of the AngularDistribution interface. It returns the
+        probability \f$P(\Omega)\f$ for a given direction \f$(\theta,\phi)\f$ at the specified
+        position. For the cavity decorator, this function simply calls the corresponding function
+        for the geometry being decorated. */
+    double probabilityForDirection(Position bfr, Direction bfk) const;
+
+    /** This function implements part of the AngularDistribution interface. It generates a random
+        direction \f$(\theta,\phi)\f$ drawn from the probability distribution \f$P(\Omega)
+        \,{\mathrm{d}}\Omega\f$ at the specified position. For the cavity decorator, this function
+        simply calls the corresponding function for the geometry being decorated. */
+    Direction generateDirection(Position bfr) const;
+
     //======================== Data Members ========================
 
 private:
@@ -135,6 +152,7 @@ private:
     // values initialized during setup
     Position _center;
     double _radius2;
+    double _norm;
 };
 
 ////////////////////////////////////////////////////////////////////
