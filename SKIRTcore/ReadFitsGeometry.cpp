@@ -47,7 +47,8 @@ void ReadFitsGeometry::setupSelfBefore()
 
     // Read the input file
     find<Log>()->info("Reading FITS file");
-    FITSInOut::read(_filename,fitsImage,_nx,_ny,_nz);
+    QString filepath = find<FilePaths>()->input(_filename);
+    FITSInOut::read(filepath,fitsImage,_nx,_ny,_nz);
 
     _xpmax = ((_nx-_xc)*_pix);
     _xpmin = -_xc*_pix;
