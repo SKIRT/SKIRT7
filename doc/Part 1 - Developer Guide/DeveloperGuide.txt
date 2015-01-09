@@ -18,5 +18,6 @@ This guide consists of multiple topics:
 - \ref DevCodeStruct
 - \ref DevTut
 - \ref DevGit
+- \ref ChangingBuildOptions
 
 */
