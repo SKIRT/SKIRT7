@@ -21,7 +21,7 @@ void PowerLawExpTailGrainSizeDistribution::setupSelfBefore()
     RangeGrainSizeDistribution::setupSelfBefore();
 
     // Verify the attributes
-    if (_alpha >= 0) throw FATALERROR("The index of the power-law must be negative");
+    if (_alpha <= 0) throw FATALERROR("The exponent of the power-law must be positive");
     if (_ac <= 0) throw FATALERROR("The scale in the exponential decay term must be positive");
 }
 
@@ -41,28 +41,28 @@ double PowerLawExpTailGrainSizeDistribution::alpha() const
 
 ////////////////////////////////////////////////////////////////////
 
-void PowerLawExpTailGrainSizeDistribution::setAt(double value)
+void PowerLawExpTailGrainSizeDistribution::setTurnoff(double value)
 {
     _at = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double PowerLawExpTailGrainSizeDistribution::at() const
+double PowerLawExpTailGrainSizeDistribution::turnoff() const
 {
     return _at;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void PowerLawExpTailGrainSizeDistribution::setAc(double value)
+void PowerLawExpTailGrainSizeDistribution::setScalefactor(double value)
 {
     _ac = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double PowerLawExpTailGrainSizeDistribution::ac() const
+double PowerLawExpTailGrainSizeDistribution::scalefactor() const
 {
     return _ac;
 }
@@ -86,7 +86,7 @@ double PowerLawExpTailGrainSizeDistribution::gamma() const
 double PowerLawExpTailGrainSizeDistribution::dnda(double a) const
 {
     return _C
-            * pow(a,_alpha)
+            * pow(a,-_alpha)
             * ( a<=_at ? 1. : exp(-pow((a-_at)/_ac,_gamma)) );  // exponential decay
 }
 
