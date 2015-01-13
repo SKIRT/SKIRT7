@@ -283,7 +283,6 @@ HEADERS += \
     PolarizedSilicateGrainComposition.hpp \
     PolarizedGraphiteGrainComposition.hpp \
     ReadFitsGeometry.hpp \
-    CMamForsteriteGrainComposition.hpp \
     PowerLawExpTailGrainSizeDistribution.hpp \
     AmHydrocarbonGrainComposition.hpp
 
@@ -527,6 +526,5 @@ SOURCES += \
     PolarizedSilicateGrainComposition.cpp \
     PolarizedGraphiteGrainComposition.cpp \
     ReadFitsGeometry.cpp \
-    CMamForsteriteGrainComposition.cpp \
     PowerLawExpTailGrainSizeDistribution.cpp \
     AmHydrocarbonGrainComposition.cpp

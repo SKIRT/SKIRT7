@@ -8,6 +8,7 @@
 //////////////////////////////////////////////////////////////////////
 
 ForsteriteGrainComposition::ForsteriteGrainComposition()
+    : _type(Crystalline)
 {
 }
 
@@ -17,9 +18,25 @@ void ForsteriteGrainComposition::setupSelfBefore()
 {
     GrainComposition::setupSelfBefore();
 
-    setBulkDensity(3.33e3);
-    loadLogHeatCapacityGrid("GrainComposition/DustEM/hcap/C_aSil.DAT");
-    loadOpticalGrid(true, "GrainComposition/Min/Forsterite_Suto2006.dat", false, false, false, false);
+    // determine the bulk density and resource filenames based on the grain type
+    double density; QString heatfile; QString opticalfile;
+    switch (_type)
+    {
+    case Crystalline:
+        density = 3.33e3;
+        heatfile = "C_aSil.DAT";
+        opticalfile = "Forsterite_Suto2006";
+        break;
+    case Amorphous:
+        density = 3.33e3;
+        heatfile = "C_CM_amFo10Fe30FeS";
+        opticalfile = "CM_amFo10Fe30FeS_Jones2013_SKIRT";
+        break;
+    }
+
+    setBulkDensity(density);
+    loadLogHeatCapacityGrid("GrainComposition/DustEM/hcap/" + heatfile + ".DAT");
+    loadOpticalGrid(true, "GrainComposition/Min/" + opticalfile + ".dat", false, false, false, false);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -27,6 +44,20 @@ void ForsteriteGrainComposition::setupSelfBefore()
 QString ForsteriteGrainComposition::name() const
 {
     return "Forsterite";
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void ForsteriteGrainComposition::setType(ForsteriteGrainComposition::GrainType value)
+{
+    _type = value;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+ForsteriteGrainComposition::GrainType ForsteriteGrainComposition::type() const
+{
+    return _type;
 }
 
 //////////////////////////////////////////////////////////////////////
