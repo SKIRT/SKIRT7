@@ -3,26 +3,26 @@
 ////       © Astronomical Observatory, Ghent University         ////
 //////////////////////////////////////////////////////////////////*/
 
-#ifndef ACHCOREMANGRAINCOMPOSITION_HPP
-#define ACHCOREMANGRAINCOMPOSITION_HPP
+#ifndef AMHYDROCARBONGRAINCOMPOSITION_HPP
+#define AMHYDROCARBONGRAINCOMPOSITION_HPP
 
 #include "GrainComposition.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
-/** The aCHcoremanGrainComposition class represents the optical properties of a-C(:H) dust grains
+/** The AmHydrocarbonGrainComposition class represents the optical properties of a-C(:H) dust grains
     (carbonaceous grains) from Jones et al. 2013 (A&A, 558, A62). The calorimetric properties are
     calculated in DustEM. */
-class aCHcoremanGrainComposition: public GrainComposition
+class AmHydrocarbonGrainComposition: public GrainComposition
 {
     Q_OBJECT
-    Q_CLASSINFO("Title", "Jones+2013 aCH dust grain composition")
+    Q_CLASSINFO("Title", "Jones+2013 amorphous hydrocarbon dust grain composition")
 
     //============= Construction - Setup - Destruction =============
 
 public:
     /** The default constructor. */
-    Q_INVOKABLE aCHcoremanGrainComposition();
+    Q_INVOKABLE AmHydrocarbonGrainComposition();
 
 protected:
     /** This function reads the raw optical and calorimetric data from resource files, and sets the
@@ -39,4 +39,4 @@ public:
 
 ////////////////////////////////////////////////////////////////////
 
-#endif // ACHCOREMANGRAINCOMPOSITION_HPP
+#endif // AMHYDROCARBONGRAINCOMPOSITION_HPP

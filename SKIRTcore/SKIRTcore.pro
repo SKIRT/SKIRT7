@@ -286,7 +286,7 @@ HEADERS += \
     CMamEnstatiteGrainComposition.hpp \
     CMamForsteriteGrainComposition.hpp \
     PowerLawExpTailGrainSizeDistribution.hpp \
-    aCHcoremanGrainComposition.hpp
+    AmHydrocarbonGrainComposition.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -531,4 +531,4 @@ SOURCES += \
     CMamEnstatiteGrainComposition.cpp \
     CMamForsteriteGrainComposition.cpp \
     PowerLawExpTailGrainSizeDistribution.cpp \
-    aCHcoremanGrainComposition.cpp
+    AmHydrocarbonGrainComposition.cpp

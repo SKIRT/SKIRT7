@@ -3,17 +3,17 @@
 ////       © Astronomical Observatory, Ghent University         ////
 //////////////////////////////////////////////////////////////////*/
 
-#include "aCHcoremanGrainComposition.hpp"
+#include "AmHydrocarbonGrainComposition.hpp"
 
 //////////////////////////////////////////////////////////////////////
 
-aCHcoremanGrainComposition::aCHcoremanGrainComposition()
+AmHydrocarbonGrainComposition::AmHydrocarbonGrainComposition()
 {
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void aCHcoremanGrainComposition::setupSelfBefore()
+void AmHydrocarbonGrainComposition::setupSelfBefore()
 {
     GrainComposition::setupSelfBefore();
 
@@ -24,7 +24,7 @@ void aCHcoremanGrainComposition::setupSelfBefore()
 
 //////////////////////////////////////////////////////////////////////
 
-QString aCHcoremanGrainComposition::name() const
+QString AmHydrocarbonGrainComposition::name() const
 {
     return "aCHcoreman";
 }
