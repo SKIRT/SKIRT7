@@ -15,7 +15,7 @@
     together with the amorphous silicates with enstative-normative composition replace the silicate
     grains of Jones et al. 2013 (A&A, 558, A62). The calorimetric properties are calculated in
     DustEM. */
-class CMamForsteriteGrainComposition : public GrainComposition
+class CMamForsteriteGrainComposition: public GrainComposition
 {
     Q_OBJECT
     Q_CLASSINFO("Title", "Koehler+2014 CMamForsterite dust grain composition")
