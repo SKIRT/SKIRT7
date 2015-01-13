@@ -21,7 +21,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////
 
 ReadFitsGeometry::ReadFitsGeometry()
-    : _pix(0), _pa(0), _incl(0), _nx(0), _ny(0), _xc(0), _yc(0), _hz(0)
+    : _pix(0), _positionangle(0), _inclination(0), _nx(0), _ny(0), _xc(0), _yc(0), _hz(0)
 {
 }
 
@@ -31,53 +31,39 @@ void ReadFitsGeometry::setupSelfBefore()
 {
     GenGeometry::setupSelfBefore();
 
-    // Verify property values
-    if (_pix <= 0) throw FATALERROR("Pixel scale should be positive");
-    if (_incl < 0) throw FATALERROR("Inclination should be between 0 and 90 degrees");
-    if (_incl > 180) throw FATALERROR("Inclination should be between 0 and 90 degrees");
-    if (_nx < 0) throw FATALERROR("Number of x pixels should be positive");
-    if (_ny < 0) throw FATALERROR("Number of y pixels should be positive");
-    if (_xc < 0) throw FATALERROR("Central x position should be positive");
-    if (_yc < 0) throw FATALERROR("Central y position should be positive");
-    if (_hz <= 0) throw FATALERROR("Axial scale height hz should be positive");
-
-    QString filename = FilePaths::resource(_filename);
-    Array fitsImage;
-    int _nz = 1;
-
     // Read the input file
     find<Log>()->info("Reading FITS file");
+    int nx = 0, ny = 0, nz = 0;
     QString filepath = find<FilePaths>()->input(_filename);
-    FITSInOut::read(filepath,fitsImage,_nx,_ny,_nz);
+    FITSInOut::read(filepath, _Lv, nx, ny, nz);
 
+    // Verify property values
+    if (_pix <= 0) throw FATALERROR("Pixel scale should be positive");
+    if (_inclination < 0 || _inclination > 180) throw FATALERROR("Inclination should be between 0 and 180 degrees");
+    if (_nx <= 0) throw FATALERROR("Number of x pixels should be positive");
+    if (_ny <= 0) throw FATALERROR("Number of y pixels should be positive");
+    if (_xc <= 0) throw FATALERROR("Central x position should be positive");
+    if (_yc <= 0) throw FATALERROR("Central y position should be positive");
+    if (_hz <= 0) throw FATALERROR("Axial scale height hz should be positive");
+    if (_nx != nx) throw FATALERROR("Number of x pixels does not correspond with the number of x pixels of the image");
+    if (_ny != ny) throw FATALERROR("Number of y pixels does not correspond with the number of y pixels of the image");
+    if (nz != 1) throw FATALERROR("FITS image contains multiple frames");
+
+    // Normalize the luminosities
+    _Lv /= _Lv.sum();
+
+    // Construct a vector with the normalized cumulative luminosities
+    NR::cdf(_Xv, _Lv);
+
+    // Calculate useful quantities
     _xpmax = ((_nx-_xc)*_pix);
     _xpmin = -_xc*_pix;
     _ypmax = ((_ny-_yc)*_pix);
     _ypmin = -_yc*_pix;
-
-    find<Log>()->info("Reading FITS file:OK");
-
-    // Construct a vector with the normalized cumulative luminosities
-    _Lv.resize(_nx*_ny);
-
-    for (int k=0; k<_nx*_ny; k++)
-        _Lv[k] = fitsImage[k];
-
-    _Xv.resize(_nx*_ny+1);
-
-    double sum = 0.0;
-
-    for (int k=0; k<=_nx*_ny; ++k)
-        _Xv[k] = (k==0) ? 0.0 : _Xv[k-1]+_Lv[k-1];
-
-    for (int k=0; k<_nx*_ny; k++)
-        sum += _Lv[k];
-
-    for (int k=0; k<_nx*_ny; k++)
-        _Lv[k] /= sum;
-
-    for (int k=0; k<=_nx*_ny; k++)
-        _Xv[k] /= sum;
+    _cospa = cos(_positionangle);
+    _sinpa = sin(_positionangle);
+    _cosi = cos(_inclination);
+    _sini = sin(_inclination);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -112,28 +98,28 @@ double ReadFitsGeometry::pixelScale() const
 
 void ReadFitsGeometry::setPositionAngle(double value)
 {
-    _pa = value;
+    _positionangle = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
 double ReadFitsGeometry::positionAngle() const
 {
-    return _pa;
+    return _positionangle;
 }
 
 ////////////////////////////////////////////////////////////////////
 
 void ReadFitsGeometry::setInclination(double value)
 {
-    _incl = value;
+    _inclination = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
 double ReadFitsGeometry::inclination() const
 {
-    return _incl;
+    return _inclination;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -211,16 +197,13 @@ const
     double x,y,z;
     bfr.cartesian(x,y,z);
 
-    // Calculate xp and yp based on x, y, _pa, _inclination and _pixelscale
-    double cospa = cos(_pa);
-    double sinpa = sin(_pa);
-    double cosi = cos(_incl);
-    double sini = sin(_incl);
-    double xp = (sinpa*cosi*x) + (cospa*y) - (sinpa*sini*z);
-    double yp =  - (cospa*cosi*x) + (sinpa*y) + (cospa*sini*z);
+    // Calculate xp and yp based on x, y, _positionangle and _inclination
+    double xp = (_sinpa * _cosi * x) + (_cospa * y) - (_sinpa * _sini * z);
+    double yp =  - (_cospa * _cosi * x) + (_sinpa * y) + (_cospa * _sini * z);
 
-    if ( (xp<_xpmin) || (xp>_xpmax)
-        || (yp<_ypmin) || (yp>_ypmax) ) return 0.0;
+    if ( (xp<_xpmin) || (xp>_xpmax) || (yp<_ypmin) || (yp>_ypmax) ) return 0.0;
+
+    // Find the corresponding pixel in the image
     int i = static_cast<int>(floor(xp-_xpmin)/_pix);
     int j = static_cast<int>(floor(yp-_ypmin)/_pix);
     int k = j*_nx + i;
@@ -240,11 +223,9 @@ const
     int j = (k-i)/_nx;
     double xp = _xpmin + (i+_random->uniform())*_pix;
     double yp = _ypmin + (j+_random->uniform())*_pix;
-    double cospa = cos(_pa);
-    double sinpa = sin(_pa);
 
-    double x = (sinpa*xp) - (cospa*yp);
-    double y = (cospa*xp) + (sinpa*yp);
+    double x = (_sinpa * xp) - (_cospa * yp);
+    double y = (_cospa * xp) + (_sinpa * yp);
     X = _random->uniform();
     double z = 0.0;
     if (X<=0.5)
@@ -309,12 +290,8 @@ double
 ReadFitsGeometry::SigmaZ()
 const
 {
-    double cospa = cos(_pa);
-    double sinpa = sin(_pa);
-    double cosi = cos(_incl);
-
-    double xp = (cospa*0) - (sinpa*0*cosi);
-    double yp = (sinpa*0) + (cospa*0*cosi);
+    double xp = 0.0;
+    double yp = 0.0;
 
     int i = static_cast<int>(floor((xp-_xpmin)/_pix));
     int j = static_cast<int>(floor((yp-_ypmin)/_pix));

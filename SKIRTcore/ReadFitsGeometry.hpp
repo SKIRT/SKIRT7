@@ -6,8 +6,7 @@
 #ifndef READFITSGEOMETRY_HPP
 #define READFITSGEOMETRY_HPP
 
-#include <valarray>
-#include <vector>
+#include "Array.hpp"
 #include "GenGeometry.hpp"
 
 ////////////////////////////////////////////////////////////////////
@@ -25,42 +24,44 @@
 class ReadFitsGeometry : public GenGeometry
 {
     Q_OBJECT
-    Q_CLASSINFO("Title", "a geometry interpreted from a FITS file")
+    Q_CLASSINFO("Title", "a geometry read from a FITS file")
 
     Q_CLASSINFO("Property", "filename")
-    Q_CLASSINFO("Title", "the name of the file with the image parameters")
+    Q_CLASSINFO("Title", "the name of the input image file")
 
     Q_CLASSINFO("Property", "pixelScale")
-    Q_CLASSINFO("Title", "the physical pixel scale")
+    Q_CLASSINFO("Title", "the physical scale of the image (length per pixel)")
     Q_CLASSINFO("Quantity", "length")
     Q_CLASSINFO("MinValue", "0")
 
     Q_CLASSINFO("Property", "positionAngle")
-    Q_CLASSINFO("Title", "the position angle")
-    Q_CLASSINFO("Quantity", "angle")
+    Q_CLASSINFO("Title", "the position angle ω of the system")
+    Q_CLASSINFO("Quantity", "posangle")
     Q_CLASSINFO("MinValue", "-360")
-    Q_CLASSINFO("MinValue", "360")
+    Q_CLASSINFO("MaxValue", "360")
+    Q_CLASSINFO("Default", "0")
 
     Q_CLASSINFO("Property", "inclination")
-    Q_CLASSINFO("Title", "the inclination of the system")
-    Q_CLASSINFO("Quantity", "angle")
+    Q_CLASSINFO("Title", "the inclination angle θ of the system")
+    Q_CLASSINFO("Quantity", "posangle")
     Q_CLASSINFO("MinValue", "0")
     Q_CLASSINFO("MaxValue", "180")
+    Q_CLASSINFO("Default", "0")
 
     Q_CLASSINFO("Property", "xelements")
-    Q_CLASSINFO("Title", "number of elements in X")
-    Q_CLASSINFO("MinValue", "0")
+    Q_CLASSINFO("Title", "number of pixels in the x direction")
+    Q_CLASSINFO("MinValue", "1")
 
     Q_CLASSINFO("Property", "yelements")
-    Q_CLASSINFO("Title", "number of elements in Y")
-    Q_CLASSINFO("MinValue", "0")
+    Q_CLASSINFO("Title", "number of pixels in the y direction")
+    Q_CLASSINFO("MinValue", "1")
 
     Q_CLASSINFO("Property", "xcenter")
-    Q_CLASSINFO("Title", "center in X coordinates")
+    Q_CLASSINFO("Title", "x coordinate of the center (in pixels)")
     Q_CLASSINFO("MinValue", "0")
 
     Q_CLASSINFO("Property", "ycenter")
-    Q_CLASSINFO("Title", "center in Y coordinates")
+    Q_CLASSINFO("Title", "y coordinate of the center (in pixels)")
     Q_CLASSINFO("MinValue", "0")
 
     Q_CLASSINFO("Property", "axialScale")
@@ -90,10 +91,10 @@ public:
     /** Returns the name of the file with the image parameters. */
     Q_INVOKABLE QString filename() const;
 
-    /** Sets the pixel scale. */
+    /** Sets the physical scale of the image (length per pixel). */
     Q_INVOKABLE void setPixelScale(double value);
 
-    /** Returns the pixel scale. */
+    /** Returns the physical scale of the image (length per pixel). */
     Q_INVOKABLE double pixelScale() const;
 
     /** Sets the position angle. */
@@ -108,28 +109,28 @@ public:
     /** Returns the inclination. */
     Q_INVOKABLE double inclination() const;
 
-    /** Sets the number of elements in X. */
+    /** Sets the number of pixels in the x direction. */
     Q_INVOKABLE void setXelements(int value);
 
-    /** Returns the number of elements in X. */
+    /** Returns the number of pixels in the x direction. */
     Q_INVOKABLE int xelements() const;
 
-    /** Sets the number of elements in Y. */
+    /** Sets the number of pixels in the y direction. */
     Q_INVOKABLE void setYelements(int value);
 
-    /** Returns the number of elements in Y. */
+    /** Returns the number of pixels in the y direction. */
     Q_INVOKABLE int yelements() const;
 
-    /** Sets the center in X coordinates. */
+    /** Sets the x coordinate of the center. */
     Q_INVOKABLE void setXcenter(double value);
 
-    /** Returns the center in X coordinates. */
+    /** Returns the x coordinate of the center. */
     Q_INVOKABLE double xcenter() const;
 
-    /** Sets the center in Y coordinates. */
+    /** Sets the y coordinate of the center. */
     Q_INVOKABLE void setYcenter(double value);
 
-    /** Returns the center in Y coordinates. */
+    /** Returns the y coordinate of the center. */
     Q_INVOKABLE double ycenter() const;
 
     /** Sets the axial scale height. */
@@ -168,8 +169,8 @@ private:
     // discoverable attributes
     QString _filename;
     double _pix;
-    double _pa;
-    double _incl;
+    double _positionangle;
+    double _inclination;
     int _nx;
     int _ny;
     double _xc;
@@ -178,8 +179,8 @@ private:
 
     // data members initialized during setup
     double _xpmax, _ypmax, _xpmin, _ypmin;
-    std::vector<double> _Lv;
-    std::vector<double> _Xv;
+    double _cospa, _sinpa, _cosi, _sini;
+    Array _Lv, _Xv;
 };
 
 ////////////////////////////////////////////////////////////////////
