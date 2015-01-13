@@ -65,7 +65,7 @@ public:
     /** This function returns the complete path for a resource with the specified name (or relative
         path) residing in the "dat" directory. The function looks for the "dat" directory next to the
         SKIRT executable (a typical deployment situation), in the executable's parent folder and in
-        the svn subfolder of the executable's parent folder (a typical development situation). */
+        the git subfolder of the executable's parent folder (a typical development situation). */
     static QString resource(QString name);
 
     //======================== Data Members ========================
