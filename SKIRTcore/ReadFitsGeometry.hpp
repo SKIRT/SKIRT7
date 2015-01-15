@@ -171,8 +171,8 @@ private:
     double _pix;
     double _positionangle;
     double _inclination;
-    int _nx;
-    int _ny;
+    int _Nx;
+    int _Ny;
     double _xc;
     double _yc;
     double _hz;

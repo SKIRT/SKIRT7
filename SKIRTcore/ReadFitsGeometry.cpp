@@ -21,7 +21,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////
 
 ReadFitsGeometry::ReadFitsGeometry()
-    : _pix(0), _positionangle(0), _inclination(0), _nx(0), _ny(0), _xc(0), _yc(0), _hz(0)
+    : _pix(0), _positionangle(0), _inclination(0), _Nx(0), _Ny(0), _xc(0), _yc(0), _hz(0)
 {
 }
 
@@ -33,21 +33,21 @@ void ReadFitsGeometry::setupSelfBefore()
 
     // Read the input file
     find<Log>()->info("Reading FITS file");
-    int nx = 0, ny = 0, nz = 0;
+    int Nx = 0, Ny = 0, Nz = 0;
     QString filepath = find<FilePaths>()->input(_filename);
-    FITSInOut::read(filepath, _Lv, nx, ny, nz);
+    FITSInOut::read(filepath, _Lv, Nx, Ny, Nz);
 
     // Verify property values
     if (_pix <= 0) throw FATALERROR("Pixel scale should be positive");
     if (_inclination < 0 || _inclination > 180) throw FATALERROR("Inclination should be between 0 and 180 degrees");
-    if (_nx <= 0) throw FATALERROR("Number of x pixels should be positive");
-    if (_ny <= 0) throw FATALERROR("Number of y pixels should be positive");
+    if (_Nx <= 0) throw FATALERROR("Number of x pixels should be positive");
+    if (_Ny <= 0) throw FATALERROR("Number of y pixels should be positive");
     if (_xc <= 0) throw FATALERROR("Central x position should be positive");
     if (_yc <= 0) throw FATALERROR("Central y position should be positive");
     if (_hz <= 0) throw FATALERROR("Axial scale height hz should be positive");
-    if (_nx != nx) throw FATALERROR("Number of x pixels does not correspond with the number of x pixels of the image");
-    if (_ny != ny) throw FATALERROR("Number of y pixels does not correspond with the number of y pixels of the image");
-    if (nz != 1) throw FATALERROR("FITS image contains multiple frames");
+    if (_Nx != Nx) throw FATALERROR("Number of x pixels does not correspond with the number of x pixels of the image");
+    if (_Ny != Ny) throw FATALERROR("Number of y pixels does not correspond with the number of y pixels of the image");
+    if (Nz != 1) throw FATALERROR("FITS image contains multiple frames");
 
     // Normalize the luminosities
     _Lv /= _Lv.sum();
@@ -56,9 +56,9 @@ void ReadFitsGeometry::setupSelfBefore()
     NR::cdf(_Xv, _Lv);
 
     // Calculate useful quantities
-    _xpmax = ((_nx-_xc)*_pix);
+    _xpmax = ((_Nx-_xc)*_pix);
     _xpmin = -_xc*_pix;
-    _ypmax = ((_ny-_yc)*_pix);
+    _ypmax = ((_Ny-_yc)*_pix);
     _ypmin = -_yc*_pix;
     _cospa = cos(_positionangle);
     _sinpa = sin(_positionangle);
@@ -135,32 +135,35 @@ double ReadFitsGeometry::axialScale() const
 {
     return _hz;
 }
+
 ////////////////////////////////////////////////////////////////////
 
 void ReadFitsGeometry::setXelements(int value)
 {
-    _nx = value;
+    _Nx = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
 int ReadFitsGeometry::xelements() const
 {
-    return _nx;
+    return _Nx;
 }
+
 ////////////////////////////////////////////////////////////////////
 
 void ReadFitsGeometry::setYelements(int value)
 {
-    _ny = value;
+    _Ny = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
 int ReadFitsGeometry::yelements() const
 {
-    return _ny;
+    return _Ny;
 }
+
 ////////////////////////////////////////////////////////////////////
 
 void ReadFitsGeometry::setXcenter(double value)
@@ -174,6 +177,7 @@ double ReadFitsGeometry::xcenter() const
 {
     return _xc;
 }
+
 ////////////////////////////////////////////////////////////////////
 
 void ReadFitsGeometry::setYcenter(double value)
@@ -197,16 +201,15 @@ const
     double x,y,z;
     bfr.cartesian(x,y,z);
 
-    // Calculate xp and yp based on x, y, _positionangle and _inclination
+    // Calculate the x and y coordinate in the plane of the image
     double xp = (_sinpa * _cosi * x) + (_cospa * y) - (_sinpa * _sini * z);
     double yp =  - (_cospa * _cosi * x) + (_sinpa * y) + (_cospa * _sini * z);
-
-    if ( (xp<_xpmin) || (xp>_xpmax) || (yp<_ypmin) || (yp>_ypmax) ) return 0.0;
 
     // Find the corresponding pixel in the image
     int i = static_cast<int>(floor(xp-_xpmin)/_pix);
     int j = static_cast<int>(floor(yp-_ypmin)/_pix);
-    int k = j*_nx + i;
+    if (i<0 || i>=_Nx || j<0 || j>=_Ny) return 0.0;
+    int k = i + _Nx*j;
 
     return _Lv[k] * exp(-fabs(z)/_hz) /(2*_hz)/(_pix*_pix);
 }
@@ -217,29 +220,22 @@ Position
 ReadFitsGeometry::generatePosition()
 const
 {
-    double X = _random->uniform();
-    int k = NR::locate(_Xv,X);
-    int i = k%_nx;
-    int j = (k-i)/_nx;
+    // Draw a random position in the plane of the galaxy based on the
+    // cumulative luminosities per pixel
+    double X1 = _random->uniform();
+    int k = NR::locate(_Xv,X1);
+    int i = k%_Nx;
+    int j = (k-i)/_Nx;
     double xp = _xpmin + (i+_random->uniform())*_pix;
     double yp = _ypmin + (j+_random->uniform())*_pix;
-
     double x = (_sinpa * xp) - (_cospa * yp);
     double y = (_cospa * xp) + (_sinpa * yp);
-    X = _random->uniform();
-    double z = 0.0;
-    if (X<=0.5)
-    {
-        z = _hz*log(2.0*X);
-        return Position(x,y,z);
-    }
-    else
-    {
-        z = - _hz*log(2.0*(1.0-X));
-        return Position(x,y,z);
-    }
 
-    return Position();
+    // Draw a random position along the minor axis
+    double X2 = _random->uniform();
+    double z = (X2<=0.5) ? _hz*log(2.0*X2) : -_hz*log(2.0*(1.0-X2));
+
+    return Position(x,y,z);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -250,13 +246,13 @@ const
 {
     double sum = 0.0;
 
-    for (int l=0; l<_nx; l++)
+    for (int l=0; l<_Nx; l++)
     {
         double xp = _xpmin + (l*_pix);
         double yp = 0.0;
         int i = static_cast<int>(floor((xp-_xpmin)/_pix));
         int j = static_cast<int>(floor((yp-_ypmin)/_pix));
-        int k = j*_nx + i;
+        int k = j*_Nx + i;
         sum += _Lv[k];
     }
 
@@ -271,13 +267,13 @@ const
 {
     double sum = 0.0;
 
-    for (int l=0; l<_ny; l++)
+    for (int l=0; l<_Ny; l++)
     {
         double xp = 0.0;
         double yp =_ypmin + (l*_pix);
         int i = static_cast<int>(floor((xp-_xpmin)/_pix));
         int j = static_cast<int>(floor((yp-_ypmin)/_pix));
-        int k = j*_nx + i;
+        int k = j*_Nx + i;
         sum += _Lv[k];
     }
 
@@ -295,7 +291,7 @@ const
 
     int i = static_cast<int>(floor((xp-_xpmin)/_pix));
     int j = static_cast<int>(floor((yp-_ypmin)/_pix));
-    int k = j*_nx + i;
+    int k = j*_Nx + i;
 
     return _Lv[k]/(_pix*_pix);
 }
