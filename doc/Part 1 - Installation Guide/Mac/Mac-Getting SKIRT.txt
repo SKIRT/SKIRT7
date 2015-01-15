@@ -126,23 +126,10 @@ them with your account name. If your request has been accepted, follow the instr
 
 <b> Clone the private repository </b>
 
-- Go back to the <a href="https://github.ugent.be">github.ugent.be</a> webpage and log in. 
-- In the search bar on top of the page, type <tt>SKIRT [ENTER]</tt> to find the <tt>SKIRT</tt> repository.
-- Click on the repository that is listed as "SKIRT/SKIRT".
-- On the "SKIRT/SKIRT" page, find the "Copy to clipboard" option on the right of the page (see the screenshot below). 
-- Make sure it states "SSH" above the text box, before copying the link to the clipboard.
- 
-\image html githubsshlink.png
-\image latex githubsshlink.png
-
-- Go back to Terminal and type the following commands:
+- Open a Terminal window and type the following commands:
  
       cd [ENTER]
       cd SKIRT [ENTER]
-      git clone [PASTE] git [ENTER]
-
-  where <tt>[PASTE]</tt> is to be replaced with <tt>[CMD] + [V]</tt>. The last command thus looks as follows:
-   
       git clone git@github.ugent.be:SKIRT/SKIRT.git git
 
   \note Don't forget to add the extra "git" at the end of the last line!
@@ -163,7 +150,7 @@ them with your account name. If your request has been accepted, follow the instr
       cd ~/SKIRT/git [ENTER]
       git pull [ENTER]
 
-- You now have a local repository (\em local meaning 'on your own computer') which is a clone of the remote repository
+- You now have a local repository (\em local meaning "on your own computer") which is a clone of the remote repository
   (\em remote meaning that it is located on the web). 
 
 */
