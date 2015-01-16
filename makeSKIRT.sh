@@ -17,6 +17,38 @@
 ### Search for the most recent version of Qt first ##
 #####################################################
 
+# VERSION 5.4.0
+
+# try the path targeted by the one-click Qt installer
+if [ -e "$HOME/Qt5.4.0/5.4/clang_64/bin/qmake" ]
+then
+    QMAKEPATH=$HOME/Qt5.4.0/5.4/clang_64/bin/qmake
+fi
+
+# try the path targeted by the one-click Qt installer on Ubuntu
+if [ -e "$HOME/Qt5.4.0/5.4/gcc_64/bin/qmake" ]
+then
+    QMAKEPATH=$HOME/Qt5.4.0/5.4/gcc_64/bin/qmake
+fi
+
+# try the path targeted by ./makeQt_everywhere.sh
+if [ -e "$HOME/Qt/Desktop/5.4.0/bin/qmake" ]
+then
+    QMAKEPATH=$HOME/Qt/Desktop/5.4.0/bin/qmake
+fi
+
+# try the path in /usr/local used on Ghent research team computers
+if [ -e "/usr/local/Qt/5.4.0/bin/qmake" ]
+then
+    QMAKEPATH=/usr/local/Qt/5.4.0/bin/qmake
+fi
+
+#############################################################################################
+## Search for other supported versions of Qt  ##
+#############################################################################################
+
+# VERSION 5.3.2
+
 # try the path targeted by the one-click Qt installer
 if [ -e "$HOME/Qt5.3.2/5.3/clang_64/bin/qmake" ]
 then
@@ -41,9 +73,7 @@ then
     QMAKEPATH=/usr/local/Qt/5.3.2/bin/qmake
 fi
 
-#############################################################################################
-## Search for the older Qt version that is also supported (and a lot of SKIRT users have)  ##
-#############################################################################################
+# VERSION 5.2.1
 
 # try the path targeted by the one-click Qt installer on Mac
 if [ -e "$HOME/Qt5.2.1/5.2.1/clang_64/bin/qmake" ]
