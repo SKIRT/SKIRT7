@@ -9,47 +9,20 @@
   - In Terminal, type:
 
         cd [ENTER]
-        open ~/.bash_profile [ENTER]
+        open ~/.profile [ENTER]
 
-  - If you get the following warning:
-
-        The file /Users/yourname/.bash_profile does not exist.
-
-    go to the next step. If a file opens in your text editor, skip the next step.
-
-<b> Create a .bash_profile </b>
-
-  - Open the default text editor (TextEdit) in OS X and create a new blank text document.
-  - Under the 'Format' menu, select 'Make Plain Text'.
-
-  - Type the following line:
+    The corresponding file will open in your default text editor.
+    
+  - Add the following line to your .profile file:
 
         export PATH=~/SKIRT/release/SKIRTmain:~/SKIRT/release/FitSKIRTmain:$PATH
 
-  - Next, save the file. In the popup window, do as follows:
+  - Next, save the file.
 
-    - As name, type: .bash_profile
-    - As the location, select your home folder (yourname)
-    - UNCHECK the box before 'Use '.txt' if no extension is used.
-
-    \image html makebashprofile.jpeg
-	\image latex makebashprofile.jpeg
-
-  - If you press 'Save', you will get a warning similar to:
-
-        Only the system can use names starting with a dot (.).
-
-    Press "Use ." anyway.
-
-  - Skip the next step.
-
-<b> Modify the .bash_profile file. </b>
-
-  - Add the following line to your .bash_profile:
-
-        export PATH=~/SKIRT/release/SKIRTmain:~/SKIRT/release/FitSKIRTmain:$PATH
-
-  - Next, save the file and go to the final step.
+\note On Mac, the .profile script is not loaded when you also have a .bash_profile file in your home directory. In that case, the procedure described
+above will not work. To resolve this, you have two options: either you place the above line also in your .bash_profile file (which will still cause other
+commands in .profile to be ignored), or you add the following line to your .bash_profile: <tt>source ~/.profile</tt>. By doing this, when the system
+loads .bash_profile, the .profile is automatically loaded too.
 
 <b> Testing everything out. </b>
 

@@ -40,17 +40,19 @@ which pick the next chunk in row whenever they become available. This procedure 
 \subsection ParallelizationThreads_classes The ParallelFactory and Parallel class
 
 The methods necessary for the multithreading capabilities of <tt>SKIRT</tt> are provided by two classes: ParallelFactory and Parallel. Another (small abstract) class, ParallelTarget, 
-is also present which serves as an interface for objects which can be used as the body of a parallelized loop. The Parallel class can be seen as an abstraction of such a parallel loop,
-in other words the main purpose of Parallel is implementing a method for distributing the execution of different iterations of a loop between different parallel threads. A ParallelFactory object
-is used for creating instances of Parallel so that the methods of the latter can be used. In each situation where some procedure in <tt>SKIRT</tt> could be executed in parallel, the "request" for this
-feature is thus (in programming code) written as a call to ParallelFactory::parallel(), which returns an instance of Parallel. This instance is characterized by a certain number of threads. This number
-depends on whether the \c parallel function is called with or without an argument. If a value of \f$n\f$ is passed to this function, a Parallel object with \f$n\f$ threads is returned. If called without
-arguments, the Parallel object obtains the maximum number of threads. 
+is also present which serves as an interface for objects that can be used as the body of a parallelized loop. The Parallel class can be seen as an abstraction of such a parallel loop.
+In other words, the main purpose of Parallel is implementing a method for distributing the multiple iterations of a loop across different parallel threads. A ParallelFactory object
+is used for creating instances of Parallel so that the methods of the latter can be applied. In each situation where some procedure in <tt>SKIRT</tt> is parallelizable, the "request" for this
+feature is thus (in programming code) written as a call to ParallelFactory::parallel(), which returns an instance of the Parallel class. This instance is characterized by a certain number of threads. 
+The number of threads depends on whether the \c parallel function is called with or without an argument. If a value of \f$n\f$ is passed to this function, a Parallel object with \f$n\f$ threads is returned. 
+If called without arguments, the Parallel object obtains the maximum number of threads.
 
 The maximum number of threads is typically specified when launching <tt>SKIRT</tt> from the command line. The syntax is "-t n", where \f$n\f$ is the desired number of threads for the simulation. If the
-"-t n" command is omitted, <tt>SKIRT</tt> automatically detects the number of logical cores on the system and uses that value as the maximum thread count. 
+"-t n" command is omitted, <tt>SKIRT</tt> automatically detects the number of logical cores on the system and uses that value as the maximum thread count. Thus, when <tt>SKIRT</tt> is started on a system 
+with 16 logical cores, without specifying a number of threads, the execution will automatically be parallelized between 16 threads in those places in the code where the ParallelFactory::parallel() is invoked
+without arguments (see \ref ParallelizationThreads_parts).
 
-\subsection ParallelizationThreads_asimulation Parallelized parts in the code
+\subsection ParallelizationThreads_parts Parallelized parts in the code
 
 At runtime, a simulation in <tt>SKIRT</tt> is represented by a hierarchy of different objects, which correspond to classes in the <tt>SKIRT</tt> code. This simulation hierarchy is
 created when the \c skirt command is invoked, with the name of a valid \em ski file as a parameter. Based on the information in the \em ski file, the SkirtCommandLineHandler class
