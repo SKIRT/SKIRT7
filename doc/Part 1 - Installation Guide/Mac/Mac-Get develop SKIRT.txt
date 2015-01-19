@@ -74,8 +74,8 @@ To setup a local repository and start developing (and using) <tt>SKIRT</tt> with
 
 <b>Link the forked repository to your local one</b>
 
-- On the webpage of your forked "username/SKIRT" repository, find the "Copy to clipboard" option on the right of the page (see the screenshot below). 
-- Make sure it states "HTTPS" above the text box, before copying the link to the clipboard.
+- On the webpage of your forked "username/SKIRT" repository, find the "clone URL" on the right of the page (see the screenshot below). 
+- Make sure it states "HTTPS" above the text box, click on the link and copy it to the clipboard (<tt>[CMD] + [V]</tt>).
  
  \image html githubcopytoclipboard.png
  \image latex githubcopytoclipboard.png
@@ -253,10 +253,12 @@ them with your account name. If your request has been accepted, follow the instr
 <b>Link the forked repository to your local one</b>
 
 - To be able to push to your forked remote, you first need to tell git where it is. To do this, go to the "username/SKIRT" repository 
-  on the github.ugent.be website and copy the SSH link to your clipboard. 
+  on the github.ugent.be website and copy the SSH link to your clipboard. You can find this link on the right of the page (see screenshot below).
   
   \image html githubsshlink.png
   \image latex githubsshlink.png
+  
+  To copy the URL, click on it and press <tt>[CMD] + [V]</tt>.
   
 - Next, type the following commands in a Terminal window:
 
