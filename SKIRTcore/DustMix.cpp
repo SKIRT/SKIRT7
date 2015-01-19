@@ -107,7 +107,7 @@ void DustMix::setupSelfAfter()
         _thetaXvv.resize(_Nlambda,0);
         for (int ell=0; ell<_Nlambda; ell++)
         {
-            NR::cdf(_thetaXvv[ell], _Ntheta-1, [this,ell,dt](int t){ return _S11vv(ell,t)*sin(t*dt)*dt; });
+            NR::cdf(_thetaXvv[ell], _Ntheta-1, [this,ell,dt](int t){ return _S11vv(ell,t+1)*sin(_thetav[t+1])*dt; });
         }
     }
 
@@ -554,7 +554,7 @@ double DustMix::phaseFunctionValue(const PhotonPackage* pp, Direction bfknew) co
         double dt = M_PI/(_Ntheta-1);
         for (int t=0; t<_Ntheta; t++)
         {
-            N += 2.0*_S11vv(ell,t)*sin(t*dt)*dt;
+            N += 2.0*_S11vv(ell,t)*sin(_thetav[t])*dt;
         }
 
         int t = indexForTheta(theta, _Ntheta);
