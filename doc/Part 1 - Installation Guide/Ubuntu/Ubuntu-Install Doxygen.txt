@@ -11,15 +11,15 @@ It requires the Dots tool in the Graphviz graph visualization software to genera
 <b> Installing Doxygen </b>
 
 - Go to the <a href="http://www.stack.nl/~dimitri/doxygen/download.html">Doxygen download page</a>.
-- Scroll down and download the binary distribution for Linux x86-64 (doxygen-1.8.8.linux.bin.tar.gz) to your Downloads folder.
+- Scroll down and download the binary distribution for Linux x86-64 (doxygen-1.8.9.1.linux.bin.tar.gz) to your Downloads folder.
 - If the download is complete, open Terminal and enter the following commands to uncompress the file:
 
       cd [ENTER]
       cd Downloads [ENTER]
-      tar xvfz doxygen-1.8.8.linux.bin.tar.gz [ENTER]
+      tar xvfz doxygen-1.8.9.1.linux.bin.tar.gz [ENTER]
 
-- Before doing the installation, we (strangely) have to change a configuration setting that would otherwise cause it to crash. To do this,
-  navigate to the new directory "doxygen-1.8.8" in Downloads containing the uncompressed binaries in your file browser.
+- Before doing the installation, we (strangely) have to change a configuration setting that would otherwise cause the installation to crash. 
+  In your file browser, navigate to the new "doxygen-1.8.9.1" directory inside your Downloads folder.
 - Locate the file "Makefile.in" and open it in a text editor.
 - In this file, <b>remove</b> the line that reads:
 
@@ -27,7 +27,11 @@ It requires the Dots tool in the Graphviz graph visualization software to genera
       
   Alternatively, precede it with a hashtag.
 - Save the file and go back to Terminal.
-- In your Terminal window, navigate to the "doxygen-1.8.8" directory (<tt>cd Downloads/doxygen-1.8.8</tt>) and then execute the following commands:
+- In your Terminal window, navigate to the "doxygen-1.8.9.1" directory:
+
+      cd ~/Downloads/doxygen-1.8.9.1
+
+  and then execute the following commands:
 
       ./configure [ENTER]
       sudo make install [ENTER]
@@ -45,6 +49,8 @@ It requires the Dots tool in the Graphviz graph visualization software to genera
 - Installing Graphviz on Ubuntu is straightforward. Simply open a Terminal window and type:
 
       sudo apt-get install graphviz [ENTER]
+      
+  Type <tt>Y [ENTER]</tt> if asked to proceed.
       
 - You can check the installation by typing the following command:
 
