@@ -2,7 +2,7 @@
 
 \page InstallMacQt Installing the Qt development environment
 
-<tt>SKIRT</tt> is based on the Qt 5.3 development environment (but also works with Qt 5.2). 
+<tt>SKIRT</tt> is based on the Qt 5.4 development environment (but also works with Qt 5.3 and 5.2). 
 In addition to run-time libraries and build tools, Qt offers
 a convenient integrated code editor called Qt Creator. All of these components can be installed on Mac OS X with
 a single installer.
@@ -13,7 +13,7 @@ a single installer.
 
   - Go to the <a href="http://www.qt.io/download-open-source/">Qt download page</a>.
   - Click on "Qt Offline Installers" on the middle of the page.
-  - Find "Qt 5.3.2 for Mac (456 MB)" under "OS X Host" and download it.
+  - Find "Qt 5.4.0 for Mac (599 MB)" under "OS X Host" and download it.
 
 <b> Open the installer </b>
 
@@ -21,30 +21,15 @@ a single installer.
   - When the mounting has finished, the following Finder window will appear:
   
     \image html qtinstaller.png
-	\image latex qtinstaller.png
-
-  - Double-click on the installer and follow the instructions. Leave the default settings.
-  - At the end of the installation, you can choose to open Qt Creator (see: \ref InstallMacBuildQtCreator), but you don't need to.
-
-<b> Configure the installation for Mac OS X 10.9 and 10.10 </b>
-
-  - Navigate to the installation folder: "yourname > Qt5.3.2 > 5.3 > clang_64 > mkspecs"
+    \image latex qtinstaller.png
+    
+  - Double-click on the installer. After the file is verified, you will get the following warning:
   
-	\image html qtmkspecspath.jpeg
-	\image latex qtmkspecspath.jpeg
-
-  - Open the file 'qdevice.pri' with the default text editor (right click -> Open with.. -> Other.. and find TextEdit) or any other preferred editor.
-  - Change the following line:
-
-        !host_build:QMAKE_MAC_SDK = macosx10.8
-		
-	so that it states the version number for your system (10.9 for Mavericks and 10.10 for Yosemite). The screenshot below shows the modified file for OS X Yosemite:
-	
-	\image html pribestand.png
-	\image latex pribestand.png
-
-  - Save the file.
-  - If Qt Creator is open, restart it.
+    \image html qtinstaller_warning.png
+    \image latex qtinstaller_warning.png
+  
+  - Press "open" and follow the instructions. Leave the default settings.
+  - At the end of the installation, you can choose to open Qt Creator (see: \ref InstallMacBuildQtCreator), but you don't need to.
 
 <b> Make a shortcut to Qt Creator </b> 
 
