@@ -3,45 +3,46 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
-#ifndef SPHERICALHOLEGEOMETRY_HPP
-#define SPHERICALHOLEGEOMETRY_HPP
+#ifndef SPHERICALCAVITYGEOMETRYDECORATOR_HPP
+#define SPHERICALCAVITYGEOMETRYDECORATOR_HPP
 
 #include "Geometry.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
-/** The SphericalHoleGeometry class is a Geometry decorator that forces the density to zero in a
-    spherical volume with given position and radius. The properties of a SphericalHoleGeometry
-    object include (1) a reference to the Geometry object being decorated, (2) the radius of the
-    hole, and (3) the position of the hole's center. The dimension of the geometry implemented by a
-    SphericalHoleGeometry object depends on the symmetries of the geometry being decorated and on
-    the position of the hole. The current implementation assumes that the hole is sufficiently
-    small so that the effect on the total mass of the geometry is negligible. */
-class SphericalHoleGeometry : public Geometry
+/** The SphericalCavityGeometryDecorator class is a decorator that forces the density of any
+    geometry to zero in a spherical volume with given position and radius. The properties of a
+    SphericalCavityGeometryDecorator object include (1) a reference to the Geometry object being
+    decorated, (2) the radius of the spherical cavity, and (3) the position of the cavity's center.
+    The dimension of the geometry implemented by a SphericalHoleGeometry object depends on the
+    symmetries of the geometry being decorated and on the position of the hole. The current
+    implementation does not properly adjust the surface densities along the coordinate axes for the
+    mass taken away by the cavity. */
+class SphericalCavityGeometryDecorator : public Geometry
 {
     Q_OBJECT
-    Q_CLASSINFO("Title", "a geometry that forces a spherical hole in any geometry")
+    Q_CLASSINFO("Title", "a decorator that forces a spherical cavity in any geometry")
 
     Q_CLASSINFO("Property", "geometry")
-    Q_CLASSINFO("Title", "the geometry to be adjusted")
+    Q_CLASSINFO("Title", "the geometry to be decorated which a spherical cavity")
 
     Q_CLASSINFO("Property", "radius")
-    Q_CLASSINFO("Title", "the radius of the hole")
+    Q_CLASSINFO("Title", "the radius of the spherical cavity")
     Q_CLASSINFO("Quantity", "length")
     Q_CLASSINFO("MinValue", "0")
 
     Q_CLASSINFO("Property", "centerX")
-    Q_CLASSINFO("Title", "the x coordinate of the hole's center")
+    Q_CLASSINFO("Title", "the x coordinate of the cavity's center")
     Q_CLASSINFO("Quantity", "length")
     Q_CLASSINFO("Default", "0")
 
     Q_CLASSINFO("Property", "centerY")
-    Q_CLASSINFO("Title", "the y coordinate of the hole's center")
+    Q_CLASSINFO("Title", "the y coordinate of the cavity's center")
     Q_CLASSINFO("Quantity", "length")
     Q_CLASSINFO("Default", "0")
 
     Q_CLASSINFO("Property", "centerZ")
-    Q_CLASSINFO("Title", "the z coordinate of the hole's center")
+    Q_CLASSINFO("Title", "the z coordinate of the cavity's center")
     Q_CLASSINFO("Quantity", "length")
     Q_CLASSINFO("Default", "0")
 
@@ -49,11 +50,16 @@ class SphericalHoleGeometry : public Geometry
 
 public:
     /** The default constructor. */
-    Q_INVOKABLE SphericalHoleGeometry();
+    Q_INVOKABLE SphericalCavityGeometryDecorator();
 
 protected:
     /** This function calculates some frequently used values. */
     void setupSelfBefore();
+
+    /** This function estimates the fraction of the mass taken away by the spherical cavity by
+        sampling the density of the geometry being decorated. This value is used to renormalize the
+        decorated density distribution to unity. */
+    void setupSelfAfter();
 
     //======== Setters & Getters for Discoverable Attributes =======
 
@@ -124,6 +130,18 @@ public:
         simply calls the corresponding function of the geometry being decorated. */
     double SigmaZ() const;
 
+    /** This function implements part of the AngularDistribution interface. It returns the
+        probability \f$P(\Omega)\f$ for a given direction \f$(\theta,\phi)\f$ at the specified
+        position. For the cavity decorator, this function simply calls the corresponding function
+        for the geometry being decorated. */
+    double probabilityForDirection(Position bfr, Direction bfk) const;
+
+    /** This function implements part of the AngularDistribution interface. It generates a random
+        direction \f$(\theta,\phi)\f$ drawn from the probability distribution \f$P(\Omega)
+        \,{\mathrm{d}}\Omega\f$ at the specified position. For the cavity decorator, this function
+        simply calls the corresponding function for the geometry being decorated. */
+    Direction generateDirection(Position bfr) const;
+
     //======================== Data Members ========================
 
 private:
@@ -134,8 +152,9 @@ private:
     // values initialized during setup
     Position _center;
     double _radius2;
+    double _norm;
 };
 
 ////////////////////////////////////////////////////////////////////
 
-#endif // SPHERICALHOLEGEOMETRY_HPP
+#endif // SPHERICALCAVITYGEOMETRYDECORATOR_HPP

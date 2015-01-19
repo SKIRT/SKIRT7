@@ -4,12 +4,12 @@
 ///////////////////////////////////////////////////////////////// */
 
 #include "FatalError.hpp"
-#include "SpheroidalGeometry.hpp"
+#include "SpheroidalGeometryDecorator.hpp"
 #include "Random.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
-SpheroidalGeometry::SpheroidalGeometry()
+SpheroidalGeometryDecorator::SpheroidalGeometryDecorator()
     : AxGeometry(),
       _geometry(0), _q(0)
 {
@@ -18,7 +18,7 @@ SpheroidalGeometry::SpheroidalGeometry()
 //////////////////////////////////////////////////////////////////////
 
 void
-SpheroidalGeometry::setupSelfBefore()
+SpheroidalGeometryDecorator::setupSelfBefore()
 {
     AxGeometry::setupSelfBefore();
 
@@ -29,7 +29,7 @@ SpheroidalGeometry::setupSelfBefore()
 ////////////////////////////////////////////////////////////////////
 
 void
-SpheroidalGeometry::setGeometry(SpheGeometry* value)
+SpheroidalGeometryDecorator::setGeometry(SpheGeometry* value)
 {
     if (_geometry) delete _geometry;
     _geometry = value;
@@ -39,7 +39,7 @@ SpheroidalGeometry::setGeometry(SpheGeometry* value)
 ////////////////////////////////////////////////////////////////////
 
 SpheGeometry*
-SpheroidalGeometry::geometry()
+SpheroidalGeometryDecorator::geometry()
 const
 {
     return _geometry;
@@ -48,7 +48,7 @@ const
 //////////////////////////////////////////////////////////////////////
 
 void
-SpheroidalGeometry::setFlattening(double value)
+SpheroidalGeometryDecorator::setFlattening(double value)
 {
     _q = value;
 }
@@ -56,7 +56,7 @@ SpheroidalGeometry::setFlattening(double value)
 ////////////////////////////////////////////////////////////////////
 
 double
-SpheroidalGeometry::flattening()
+SpheroidalGeometryDecorator::flattening()
 const
 {
     return _q;
@@ -65,7 +65,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 double
-SpheroidalGeometry::density(double R, double z)
+SpheroidalGeometryDecorator::density(double R, double z)
 const
 {
     double m = sqrt(R*R + z*z/(_q*_q));
@@ -75,7 +75,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 Position
-SpheroidalGeometry::generatePosition()
+SpheroidalGeometryDecorator::generatePosition()
 const
 {
     Position bfrs = _geometry->generatePosition();
@@ -87,7 +87,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 double
-SpheroidalGeometry::SigmaR()
+SpheroidalGeometryDecorator::SigmaR()
 const
 {
     return 1.0/_q * _geometry->Sigmar();
@@ -96,7 +96,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 double
-SpheroidalGeometry::SigmaZ()
+SpheroidalGeometryDecorator::SigmaZ()
 const
 {
     return 2.0 * _geometry->Sigmar();

@@ -72,7 +72,7 @@ int SkirtCommandLineHandler::perform()
 
 int SkirtCommandLineHandler::doInteractive()
 {
-    if (ProcessManager::isMultiProc()) throw FATALERROR("Interactive mode cannot be run with multiple processes!");
+    if (ProcessManager::isMultiProc()) throw FATALERROR("Interactive mode cannot be run with multiple processes");
 
     _console.info("Interactively constructing a simulation...");
 
@@ -136,6 +136,11 @@ int SkirtCommandLineHandler::doBatch()
     {
         // determine the number of parallel simulations
         _parallelSims = std::max(_args.intValue("-s"), 1);
+
+        // prevent different simulations to be launched at once while MPI parallelization is used
+        if (ProcessManager::isMultiProc() && _parallelSims > 1)
+            throw FATALERROR("You cannot run different simulations in parallel whilst parallelizing them with MPI. "
+                             "Retry with -s set to 1 or consider launching different SKIRT instances.");
 
         // perform a simulation for each ski file
         TimeLogger logger(&_console, "a set of " + QString::number(_skifiles.size()) + " simulations"

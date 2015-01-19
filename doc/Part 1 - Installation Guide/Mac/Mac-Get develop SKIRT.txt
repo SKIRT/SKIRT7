@@ -74,8 +74,8 @@ To setup a local repository and start developing (and using) <tt>SKIRT</tt> with
 
 <b>Link the forked repository to your local one</b>
 
-- On the webpage of your forked "username/SKIRT" repository, find the "Copy to clipboard" option on the right of the page (see the screenshot below). 
-- Make sure it states "HTTPS" above the text box, before copying the link to the clipboard.
+- On the webpage of your forked "username/SKIRT" repository, find the "clone URL" on the right of the page (see the screenshot below). 
+- Make sure it states "HTTPS" above the text box, click on the link and copy it to the clipboard (<tt>[CMD] + [V]</tt>).
  
  \image html githubcopytoclipboard.png
  \image latex githubcopytoclipboard.png
@@ -209,23 +209,8 @@ them with your account name. If your request has been accepted, follow the instr
       cd SKIRT [ENTER]
       mkdir debug doc release run git [ENTER]
 
-- Go to the <a href="https://github.ugent.be">github.ugent.be</a> webpage and log in. 
-- In the search bar on top of the page, type <tt>SKIRT [ENTER]</tt> to find the <tt>SKIRT</tt> repository.
-- Click on the repository that is listed as "SKIRT/SKIRT".
-- On the "SKIRT/SKIRT" page, find the "Copy to clipboard" option on the right of the page (see the screenshot below). 
-- Make sure it states "SSH" above the text box, before copying the link to the clipboard.
+- To download the repository to the new git folder, perform the following command: 
  
-\image html githubsshlink.png
-\image latex githubsshlink.png
-
-- Go back to Terminal and type the following commands:
- 
-      cd [ENTER]
-      cd SKIRT [ENTER]
-      git clone [PASTE] git [ENTER]
-
-  where <tt>[PASTE]</tt> is to be replaced with <tt>[CMD] + [V]</tt>. The last command thus looks as follows:
-   
       git clone git@github.ugent.be:SKIRT/SKIRT.git git
 
   \note Don't forget to add the extra "git" at the end of the last line!
@@ -246,7 +231,7 @@ them with your account name. If your request has been accepted, follow the instr
       cd ~/SKIRT/git [ENTER]
       git pull [ENTER]
 
-- You now have a local repository (\em local meaning 'on your own computer') which is a clone of the remote repository
+- You now have a local repository (\em local meaning "on your own computer") which is a clone of the remote repository
   (\em remote meaning that it is located on the web). 
 - You can begin modifying the <tt>SKIRT</tt> code as explained in the \ref DevelopersGuide,
   and make commits as explained on the \ref DevGit page. However, to actually get your changes in the remote repository, you will need to fork
@@ -268,10 +253,12 @@ them with your account name. If your request has been accepted, follow the instr
 <b>Link the forked repository to your local one</b>
 
 - To be able to push to your forked remote, you first need to tell git where it is. To do this, go to the "username/SKIRT" repository 
-  on the github.ugent.be website and copy the SSH link to your clipboard. 
+  on the github.ugent.be website and copy the SSH link to your clipboard. You can find this link on the right of the page (see screenshot below).
   
   \image html githubsshlink.png
   \image latex githubsshlink.png
+  
+  To copy the URL, click on it and press <tt>[CMD] + [V]</tt>.
   
 - Next, type the following commands in a Terminal window:
 

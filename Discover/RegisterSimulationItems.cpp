@@ -24,7 +24,7 @@
 #include "BlackBodySED.hpp"
 #include "BolLuminosityStellarCompNormalization.hpp"
 #include "BruzualCharlotSED.hpp"
-#include "ClumpyGeometry.hpp"
+#include "ClumpyGeometryDecorator.hpp"
 #include "CompDustDistribution.hpp"
 #include "ConfigurableDustMix.hpp"
 #include "CubicSplineSmoothingKernel.hpp"
@@ -52,6 +52,7 @@
 #include "FilePaths.hpp"
 #include "FileSED.hpp"
 #include "FileWavelengthGrid.hpp"
+#include "FoamGeometryDecorator.hpp"
 #include "ForsteriteGrainComposition.hpp"
 #include "FrameInstrument.hpp"
 #include "FullInstrument.hpp"
@@ -89,7 +90,7 @@
 #include "NestedLogWavelengthGrid.hpp"
 #include "NetzerAccretionDiskGeometry.hpp"
 #include "OctTreeDustGridStructure.hpp"
-#include "OffsetGeometry.hpp"
+#include "OffsetGeometryDecorator.hpp"
 #include "OligoDustSystem.hpp"
 #include "OligoMonteCarloSimulation.hpp"
 #include "OligoStellarComp.hpp"
@@ -116,7 +117,7 @@
 #include "Random.hpp"
 #include "ReadFitsGeometry.hpp"
 #include "RingGeometry.hpp"
-#include "RotateGeometry.hpp"
+#include "RotateGeometryDecorator.hpp"
 #include "SEDInstrument.hpp"
 #include "SequentialAssigner.hpp"
 #include "SIUnits.hpp"
@@ -130,9 +131,9 @@
 #include "SingleGrainSizeDistribution.hpp"
 #include "SmoothingKernel.hpp"
 #include "SpheGeometry.hpp"
-#include "SphericalHoleGeometry.hpp"
-#include "SpheroidalGeometry.hpp"
-#include "SpiralStructureGeometry.hpp"
+#include "SphericalCavityGeometryDecorator.hpp"
+#include "SpheroidalGeometryDecorator.hpp"
+#include "SpiralStructureGeometryDecorator.hpp"
 #include "StaggeredAssigner.hpp"
 #include "StarburstSED.hpp"
 #include "StellarSurfaceGeometry.hpp"
@@ -142,7 +143,7 @@
 #include "TTauriDiskGeometry.hpp"
 #include "TorusGeometry.hpp"
 #include "TransientDustEmissivity.hpp"
-#include "TriaxialGeometry.hpp"
+#include "TriaxialGeometryDecorator.hpp"
 #include "Trust1Geometry.hpp"
 #include "Trust2Geometry.hpp"
 #include "Trust6Geometry.hpp"
@@ -179,6 +180,7 @@ void RegisterSimulationItems::registerAll()
     // add new items in the order you want them to appear in choice lists for the user
     // !! provide an argument of "false" for abstract classes that shouldn't be instantiated
 
+    // basic building blocks
     add<Simulation>(false);
     add<Random>();
     add<Units>(false);
@@ -186,10 +188,12 @@ void RegisterSimulationItems::registerAll()
     add<StellarUnits>();
     add<ExtragalacticUnits>();
 
+    // Monte Carlo simulations
     add<MonteCarloSimulation>(false);
     add<OligoMonteCarloSimulation>();
     add<PanMonteCarloSimulation>();
 
+    // instruments
     add<InstrumentSystem>();
     add<Instrument>(false);
     add<SEDInstrument>();
@@ -200,6 +204,7 @@ void RegisterSimulationItems::registerAll()
     add<MultiFrameInstrument>();
     add<InstrumentFrame>();
 
+    // wavelength grids
     add<WavelengthGrid>(false);
     add<OligoWavelengthGrid>();
     add<PanWavelengthGrid>(false);
@@ -207,6 +212,7 @@ void RegisterSimulationItems::registerAll()
     add<NestedLogWavelengthGrid>();
     add<FileWavelengthGrid>();
 
+    // stellar systems
     add<StellarSystem>();
     add<StellarComp>(false);
     add<GeometricStellarComp>(false);
@@ -219,6 +225,7 @@ void RegisterSimulationItems::registerAll()
     add<AdaptiveMeshStellarComp>();
     add<VoronoiStellarComp>();
 
+    // isotropic geometries
     add<Geometry>(false);
     add<PointGeometry>();
     add<SpheGeometry>(false);
@@ -235,12 +242,18 @@ void RegisterSimulationItems::registerAll()
     add<TTauriDiskGeometry>();
     add<RingGeometry>();
     add<TorusGeometry>();
-    add<SpheroidalGeometry>();
     add<GenGeometry>(false);
+    add<UniformCuboidGeometry>();
+    add<SPHGeometry>();
+    add<AdaptiveMeshGeometry>();
+    add<VoronoiGeometry>();
+
+    // anistropic geometries
     add<NetzerAccretionDiskGeometry>();
     add<StellarSurfaceGeometry>();
     add<SolarPatchGeometry>();
-    add<UniformCuboidGeometry>();
+
+    // TRUST benchmark geometries
     add<Trust1Geometry>();
     add<Trust2Geometry>();
     add<Trust6Geometry>();
@@ -249,24 +262,33 @@ void RegisterSimulationItems::registerAll()
     add<SPHGeometry>();
     add<AdaptiveMeshGeometry>();
     add<VoronoiGeometry>();
-    add<OffsetGeometry>();
-    add<RotateGeometry>();
-    add<ClumpyGeometry>();
-    add<TriaxialGeometry>();
-    add<SphericalHoleGeometry>();
-    add<SpiralStructureGeometry>();
     add<ReadFitsGeometry>();
 
+    // geometry decorators
+    add<OffsetGeometryDecorator>();
+    add<RotateGeometryDecorator>();
+    add<SpheroidalGeometryDecorator>();
+    add<TriaxialGeometryDecorator>();
+    add<SphericalCavityGeometryDecorator>();
+    add<SpiralStructureGeometryDecorator>();
+    add<ClumpyGeometryDecorator>();
+    add<FoamGeometryDecorator>();
+
+    // smoothing kernels
     add<SmoothingKernel>(false);
     add<UniformSmoothingKernel>();
     add<CubicSplineSmoothingKernel>();
 
+    // dust systems
     add<DustSystem>(false);
     add<OligoDustSystem>();
     add<PanDustSystem>();
 
+    // dust components and corresponding normalizations
     add<DustComp>();
+    add<MeshDustComponent>();
 
+    // dust component normalizations
     add<DustCompNormalization>(false);
     add<DustMassDustCompNormalization>();
     add<RadialDustCompNormalization>();
@@ -276,21 +298,21 @@ void RegisterSimulationItems::registerAll()
     add<YDustCompNormalization>();
     add<ZDustCompNormalization>();
 
-    add<MeshDustComponent>();
-
+    // dust distributions
     add<DustDistribution>(false);
     add<CompDustDistribution>();
     add<SPHDustDistribution>();
     add<AdaptiveMeshDustDistribution>();
     add<VoronoiDustDistribution>();
 
+    // mesh file representations
     add<AdaptiveMeshFile>(false);
     add<AdaptiveMeshAsciiFile>();
     add<AdaptiveMeshAmrvacFile>();
-
     add<VoronoiMeshFile>(false);
     add<VoronoiMeshAsciiFile>();
 
+    // dust grid structures
     add<DustGridStructure>(false);
     add<LinSpheDustGridStructure>();
     add<PowSpheDustGridStructure>();
@@ -310,6 +332,7 @@ void RegisterSimulationItems::registerAll()
     add<VoronoiDustGridStructure>();
     add<AdaptiveMeshDustGridStructure>();
 
+    // dust mixtures
     add<DustMix>(false);
     add<DraineLiDustMix>();
     add<InterstellarDustMix>();
@@ -323,6 +346,7 @@ void RegisterSimulationItems::registerAll()
     add<TrustDustMix>();
     add<ConfigurableDustMix>();
 
+    // grain compositions
     add<GrainComposition>(false);
     add<DraineGraphiteGrainComposition>();
     add<DraineSilicateGrainComposition>();
@@ -341,6 +365,7 @@ void RegisterSimulationItems::registerAll()
     add<FileGrainComposition>();
     add<AmHydrocarbonGrainComposition>();
 
+    // grain size distributions
     add<GrainSizeDistribution>(false);
     add<PowerLawGrainSizeDistribution>();
     add<ModifiedPowerLawGrainSizeDistribution>();
@@ -352,17 +377,21 @@ void RegisterSimulationItems::registerAll()
     add<ZubkoPAHGrainSizeDistribution>();
     add<PowerLawExpTailGrainSizeDistribution>();
 
+    // dust mix population
     add<DustMixPopulation>();
 
+    // dust emissivity calculators
     add<DustEmissivity>(false);
     add<GreyBodyDustEmissivity>();
     add<TransientDustEmissivity>();
 
+    // dust libraries
     add<DustLib>(false);
     add<AllCellsDustLib>();
     add<Dim1DustLib>();
     add<Dim2DustLib>();
 
+    // stellar SEDs
     add<StellarSED>(false);
     add<BlackBodySED>();
     add<SunSED>();
@@ -375,9 +404,7 @@ void RegisterSimulationItems::registerAll()
     add<QuasarSED>();
     add<FileSED>();
 
-    add<ProcessCommunicator>(false);
-    add<PeerToPeerCommunicator>();
-
+    // process assigners
     add<ProcessAssigner>(false);
     add<IdenticalAssigner>();
     add<StaggeredAssigner>();

@@ -38,6 +38,9 @@ regular "Edit" mode. However you still need to adjust the project configuration.
   \image html sourcetree.png
   \image latex sourcetree.png
 
+\note By default, <tt>SKIRT</tt> will be built together with its graphical component <tt>SKIRT MakeUp</tt> and with MPI enabled (if present on the system). To change
+these settings, see \ref ChangingBuildOptions.
+
 <b>Build SKIRT</b>
 
 To compile and build the complete <tt>SKIRT</tt> code (including <tt>FitSKIRT</tt>), click the hammer icon in the left margin, indicated

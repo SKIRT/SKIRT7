@@ -3,28 +3,28 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
-#ifndef TRIAXIALGEOMETRY_HPP
-#define TRIAXIALGEOMETRY_HPP
+#ifndef TRIAXIALGEOMETRYDECORATOR_HPP
+#define TRIAXIALGEOMETRYDECORATOR_HPP
 
 #include "SpheGeometry.hpp"
 #include "GenGeometry.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
-/** The TriaxialGeometry class is a Geometry decorator that constructs a triaxial geometry
-    based on a spherical geometry. The properties of an TriaxialGeometry object are a reference
+/** The TriaxialGeometryDecorator class is a geometry decorator that constructs a triaxial geometry
+    based on a spherical (isotropic) geometry. The properties of an TriaxialGeometryDecorator object are a reference
     to the SpheGeometry object being decorated and the flattening parameters \f$p\f$ and \f$q\f$.
     If the original spherical geometry is characterized by the density profile \f$
     \rho_{\text{s}}(r) \f$, the new geometry has as density \f[ \rho(x,y,z) = \frac{1}{p\,q}\,
     \rho_{\text{s}}\left(\sqrt{x^2 + \frac{y^2}{p^2} + \frac{z^2}{q^2}}\right). \f] This new geometry
     is also normalized to one. */
-class TriaxialGeometry : public GenGeometry
+class TriaxialGeometryDecorator : public GenGeometry
 {
     Q_OBJECT
-    Q_CLASSINFO("Title", "a triaxial variant of any spherical geometry")
+    Q_CLASSINFO("Title", "a decorator that constructs a triaxial variant of any spherical geometry")
 
     Q_CLASSINFO("Property", "geometry")
-    Q_CLASSINFO("Title", "the original spherical geometry")
+    Q_CLASSINFO("Title", "the spherical geometry to be made triaxial")
 
     Q_CLASSINFO("Property", "yFlattening")
     Q_CLASSINFO("Title", "the flattening parameter p (along the y-axis)")
@@ -42,7 +42,7 @@ class TriaxialGeometry : public GenGeometry
 
 public:
     /** The default constructor. */
-    Q_INVOKABLE TriaxialGeometry();
+    Q_INVOKABLE TriaxialGeometryDecorator();
 
     /** This function caches some values for use by subclasses. */
     void setupSelfBefore();
@@ -112,4 +112,4 @@ private:
 
 ////////////////////////////////////////////////////////////////////
 
-#endif // TRIAXIALGEOMETRY_HPP
+#endif // TRIAXIALGEOMETRYDECORATOR_HPP

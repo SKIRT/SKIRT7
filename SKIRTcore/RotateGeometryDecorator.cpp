@@ -3,12 +3,12 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
-#include "RotateGeometry.hpp"
+#include "RotateGeometryDecorator.hpp"
 #include "FatalError.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
-RotateGeometry::RotateGeometry()
+RotateGeometryDecorator::RotateGeometryDecorator()
     : _geometry(0),
       _alpha(0), _beta(0), _gamma(0),
       _sinalpha(0), _cosalpha(0),
@@ -23,7 +23,7 @@ RotateGeometry::RotateGeometry()
 //////////////////////////////////////////////////////////////////////
 
 void
-RotateGeometry::setupSelfBefore()
+RotateGeometryDecorator::setupSelfBefore()
 {
     GenGeometry::setupSelfBefore();
 
@@ -52,7 +52,7 @@ RotateGeometry::setupSelfBefore()
 
 ////////////////////////////////////////////////////////////////////
 
-void RotateGeometry::setGeometry(Geometry* value)
+void RotateGeometryDecorator::setGeometry(Geometry* value)
 {
     if (_geometry) delete _geometry;
     _geometry = value;
@@ -61,49 +61,49 @@ void RotateGeometry::setGeometry(Geometry* value)
 
 ////////////////////////////////////////////////////////////////////
 
-Geometry* RotateGeometry::geometry() const
+Geometry* RotateGeometryDecorator::geometry() const
 {
     return _geometry;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void RotateGeometry::setEuleralpha(double value)
+void RotateGeometryDecorator::setEuleralpha(double value)
 {
     _alpha = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double RotateGeometry::euleralpha() const
+double RotateGeometryDecorator::euleralpha() const
 {
     return _alpha;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void RotateGeometry::setEulerbeta(double value)
+void RotateGeometryDecorator::setEulerbeta(double value)
 {
     _beta = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double RotateGeometry::eulerbeta() const
+double RotateGeometryDecorator::eulerbeta() const
 {
     return _beta;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void RotateGeometry::setEulergamma(double value)
+void RotateGeometryDecorator::setEulergamma(double value)
 {
     _gamma = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double RotateGeometry::eulergamma() const
+double RotateGeometryDecorator::eulergamma() const
 {
     return _gamma;
 }
@@ -111,7 +111,7 @@ double RotateGeometry::eulergamma() const
 ////////////////////////////////////////////////////////////////////
 
 double
-RotateGeometry::density(Position bfr)
+RotateGeometryDecorator::density(Position bfr)
 const
 {
     Position bfrorig = derotate(bfr);
@@ -121,7 +121,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 Position
-RotateGeometry::generatePosition()
+RotateGeometryDecorator::generatePosition()
 const
 {
     Position bfrorig = _geometry->generatePosition();
@@ -132,7 +132,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 double
-RotateGeometry::SigmaX()
+RotateGeometryDecorator::SigmaX()
 const
 {
     return _geometry->SigmaX();
@@ -141,7 +141,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 double
-RotateGeometry::SigmaY()
+RotateGeometryDecorator::SigmaY()
 const
 {
     return _geometry->SigmaY();
@@ -150,7 +150,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 double
-RotateGeometry::SigmaZ()
+RotateGeometryDecorator::SigmaZ()
 const
 {
     return _geometry->SigmaZ();
@@ -159,7 +159,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 double
-RotateGeometry::probabilityForDirection(Position bfr, Direction bfk)
+RotateGeometryDecorator::probabilityForDirection(Position bfr, Direction bfk)
 const
 {
     Position bfrorig = derotate(bfr);
@@ -170,7 +170,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 Direction
-RotateGeometry::generateDirection(Position bfr)
+RotateGeometryDecorator::generateDirection(Position bfr)
 const
 {
     Position bfrorig = derotate(bfr);
@@ -182,7 +182,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 Position
-RotateGeometry::rotate(Position bfrorig)
+RotateGeometryDecorator::rotate(Position bfrorig)
 const
 {
     double xorig = bfrorig.x();
@@ -197,7 +197,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 Position
-RotateGeometry::derotate(Position bfr)
+RotateGeometryDecorator::derotate(Position bfr)
 const
 {
     double x = bfr.x();
@@ -212,7 +212,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 Direction
-RotateGeometry::rotate(Direction bfkorig)
+RotateGeometryDecorator::rotate(Direction bfkorig)
 const
 {
     double kxorig = bfkorig.x();
@@ -227,7 +227,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 Direction
-RotateGeometry::derotate(Direction bfk)
+RotateGeometryDecorator::derotate(Direction bfk)
 const
 {
     double kx = bfk.x();

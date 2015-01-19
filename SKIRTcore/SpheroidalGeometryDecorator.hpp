@@ -3,28 +3,28 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
-#ifndef SPHEROIDALGEOMETRY_HPP
-#define SPHEROIDALGEOMETRY_HPP
+#ifndef SPHEROIDALGEOMETRYDECORATOR_HPP
+#define SPHEROIDALGEOMETRYDECORATOR_HPP
 
 #include "SpheGeometry.hpp"
 #include "AxGeometry.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
-/** The SpheroidalGeometry class is a Geometry decorator that constructs a spheroidal geometry
-    based on a spherical geometry. The properties of an SpheroidalGeometry object are a reference
-    to the SpheGeometry object being decorated and the flattening parameter \f$q\f$.
-    If the original spherical geometry is characterized by the density profile \f$
-    \rho_{\text{s}}(r) \f$, the new geometry has as density \f[ \rho(R,z) = \frac{1}{q}\,
-    \rho_{\text{s}}\left(\sqrt{R^2 + \frac{z^2}{q^2}}\right). \f] This new geometry is also
-    normalized to one. */
-class SpheroidalGeometry : public AxGeometry
+/** The SpheroidalGeometryDecorator class is a geometry decorator that constructs a spheroidal
+    geometry based on a spherical (isotropic) geometry. The properties of a
+    SpheroidalGeometryDecorator object are a reference to the SpheGeometry object being decorated
+    and the flattening parameter \f$q\f$. If the original spherical geometry is characterized by
+    the density profile \f$ \rho_{\text{s}}(r) \f$, the new geometry has as density \f[ \rho(R,z) =
+    \frac{1}{q}\, \rho_{\text{s}}\left(\sqrt{R^2 + \frac{z^2}{q^2}}\right). \f] This new geometry
+    is also normalized to one. */
+class SpheroidalGeometryDecorator : public AxGeometry
 {
     Q_OBJECT
-    Q_CLASSINFO("Title", "a spheroidal variant of any spherical geometry")
+    Q_CLASSINFO("Title", "a decorator that constructs a spheroidal variant of any spherical geometry")
 
     Q_CLASSINFO("Property", "geometry")
-    Q_CLASSINFO("Title", "the original spherical geometry")
+    Q_CLASSINFO("Title", "the spherical geometry to be made spheroidal")
 
     Q_CLASSINFO("Property", "flattening")
     Q_CLASSINFO("Title", "the flattening parameter q")
@@ -36,7 +36,7 @@ class SpheroidalGeometry : public AxGeometry
 
 public:
     /** The default constructor. */
-    Q_INVOKABLE SpheroidalGeometry();
+    Q_INVOKABLE SpheroidalGeometryDecorator();
 
     /** This function caches some values for use by subclasses. */
     void setupSelfBefore();
@@ -95,4 +95,4 @@ private:
 
 ////////////////////////////////////////////////////////////////////
 
-#endif // SPHEROIDALGEOMETRY_HPP
+#endif // SPHEROIDALGEOMETRYDECORATOR_HPP

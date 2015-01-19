@@ -7,11 +7,11 @@
 #include "NR.hpp"
 #include "Random.hpp"
 #include "SpecialFunctions.hpp"
-#include "SpiralStructureGeometry.hpp"
+#include "SpiralStructureGeometryDecorator.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
-SpiralStructureGeometry::SpiralStructureGeometry()
+SpiralStructureGeometryDecorator::SpiralStructureGeometryDecorator()
     : GenGeometry(),
       _geometry(0),
       _m(0), _p(0), _R0(0), _phi0(0), _w(0), _N(0), _tanp(0), _CN(0), _c(0)
@@ -21,7 +21,7 @@ SpiralStructureGeometry::SpiralStructureGeometry()
 //////////////////////////////////////////////////////////////////////
 
 void
-SpiralStructureGeometry::setupSelfBefore()
+SpiralStructureGeometryDecorator::setupSelfBefore()
 {
     GenGeometry::setupSelfBefore();
 
@@ -42,7 +42,7 @@ SpiralStructureGeometry::setupSelfBefore()
 ////////////////////////////////////////////////////////////////////
 
 void
-SpiralStructureGeometry::setGeometry(AxGeometry* value)
+SpiralStructureGeometryDecorator::setGeometry(AxGeometry* value)
 {
     if (_geometry) delete _geometry;
     _geometry = value;
@@ -52,7 +52,7 @@ SpiralStructureGeometry::setGeometry(AxGeometry* value)
 ////////////////////////////////////////////////////////////////////
 
 AxGeometry*
-SpiralStructureGeometry::geometry()
+SpiralStructureGeometryDecorator::geometry()
 const
 {
     return _geometry;
@@ -61,7 +61,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 void
-SpiralStructureGeometry::setArms(int value)
+SpiralStructureGeometryDecorator::setArms(int value)
 {
     _m = value;
 }
@@ -69,7 +69,7 @@ SpiralStructureGeometry::setArms(int value)
 ////////////////////////////////////////////////////////////////////
 
 int
-SpiralStructureGeometry::arms()
+SpiralStructureGeometryDecorator::arms()
 const
 {
     return _m;
@@ -78,7 +78,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 void
-SpiralStructureGeometry::setPitch(double value)
+SpiralStructureGeometryDecorator::setPitch(double value)
 {
     _p = value;
 }
@@ -86,7 +86,7 @@ SpiralStructureGeometry::setPitch(double value)
 ////////////////////////////////////////////////////////////////////
 
 double
-SpiralStructureGeometry::pitch()
+SpiralStructureGeometryDecorator::pitch()
 const
 {
     return _p;
@@ -95,7 +95,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 void
-SpiralStructureGeometry::setRadius(double value)
+SpiralStructureGeometryDecorator::setRadius(double value)
 {
     _R0 = value;
 }
@@ -103,7 +103,7 @@ SpiralStructureGeometry::setRadius(double value)
 ////////////////////////////////////////////////////////////////////
 
 double
-SpiralStructureGeometry::radius()
+SpiralStructureGeometryDecorator::radius()
 const
 {
     return _R0;
@@ -112,7 +112,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 void
-SpiralStructureGeometry::setPhase(double value)
+SpiralStructureGeometryDecorator::setPhase(double value)
 {
     _phi0 = value;
 }
@@ -120,7 +120,7 @@ SpiralStructureGeometry::setPhase(double value)
 ////////////////////////////////////////////////////////////////////
 
 double
-SpiralStructureGeometry::phase()
+SpiralStructureGeometryDecorator::phase()
 const
 {
     return _phi0;
@@ -129,7 +129,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 void
-SpiralStructureGeometry::setPerturbWeight(double value)
+SpiralStructureGeometryDecorator::setPerturbWeight(double value)
 {
     _w = value;
 }
@@ -137,7 +137,7 @@ SpiralStructureGeometry::setPerturbWeight(double value)
 ////////////////////////////////////////////////////////////////////
 
 double
-SpiralStructureGeometry::perturbWeight()
+SpiralStructureGeometryDecorator::perturbWeight()
 const
 {
     return _w;
@@ -146,7 +146,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 void
-SpiralStructureGeometry::setIndex(int value)
+SpiralStructureGeometryDecorator::setIndex(int value)
 {
     _N = value;
 }
@@ -154,7 +154,7 @@ SpiralStructureGeometry::setIndex(int value)
 ////////////////////////////////////////////////////////////////////
 
 int
-SpiralStructureGeometry::index()
+SpiralStructureGeometryDecorator::index()
 const
 {
     return _N;
@@ -163,18 +163,18 @@ const
 ////////////////////////////////////////////////////////////////////
 
 double
-SpiralStructureGeometry::density(Position bfr)
+SpiralStructureGeometryDecorator::density(Position bfr)
 const
 {
     double R, phi, z;
     bfr.cylindrical(R,phi,z);
-    return _geometry->density(R,z) * perturbation(R,z);
+    return _geometry->density(R,z) * perturbation(R,phi);
 }
 
 ////////////////////////////////////////////////////////////////////
 
 Position
-SpiralStructureGeometry::generatePosition()
+SpiralStructureGeometryDecorator::generatePosition()
 const
 {
     Position bfr = _geometry->generatePosition();
@@ -194,7 +194,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 double
-SpiralStructureGeometry::SigmaX()
+SpiralStructureGeometryDecorator::SigmaX()
 const
 {
     return _geometry->SigmaX();
@@ -203,7 +203,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 double
-SpiralStructureGeometry::SigmaY()
+SpiralStructureGeometryDecorator::SigmaY()
 const
 {
     return _geometry->SigmaY();
@@ -212,7 +212,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 double
-SpiralStructureGeometry::SigmaZ()
+SpiralStructureGeometryDecorator::SigmaZ()
 const
 {
     return _geometry->SigmaZ();
@@ -221,7 +221,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 double
-SpiralStructureGeometry::perturbation(double R, double phi)
+SpiralStructureGeometryDecorator::perturbation(double R, double phi)
 const
 {
     double gamma = log(R/_R0)/_tanp + _phi0 + 0.5*M_PI/_m;

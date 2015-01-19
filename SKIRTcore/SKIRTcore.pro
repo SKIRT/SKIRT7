@@ -59,7 +59,6 @@ HEADERS += \
     BolLuminosityStellarCompNormalization.hpp \
     BruzualCharlotSED.hpp \
     BruzualCharlotSEDFamily.hpp \
-    ClumpyGeometry.hpp \
     CompDustDistribution.hpp \
     ConfigurableDustMix.hpp \
     Console.hpp \
@@ -159,7 +158,6 @@ HEADERS += \
     NetzerAccretionDiskGeometry.hpp \
     OctTreeDustGridStructure.hpp \
     OctTreeNode.hpp \
-    OffsetGeometry.hpp \
     OligoDustSystem.hpp \
     OligoMonteCarloSimulation.hpp \
     OligoStellarComp.hpp \
@@ -207,7 +205,6 @@ HEADERS += \
     SpecialFunctions.hpp \
     SpheDustGridStructure.hpp \
     SpheGeometry.hpp \
-    SpheroidalGeometry.hpp \
     StarburstSED.hpp \
     StellarComp.hpp \
     StellarCompNormalization.hpp \
@@ -225,7 +222,6 @@ HEADERS += \
     TreeNodeBoxDensityCalculator.hpp \
     TreeNodeDensityCalculator.hpp \
     TreeNodeSampleDensityCalculator.hpp \
-    TriaxialGeometry.hpp \
     Trust1Geometry.hpp \
     Trust6Geometry.hpp \
     Trust7aGeometry.hpp \
@@ -268,12 +264,9 @@ HEADERS += \
     SingleGrainSizeDistribution.hpp \
     Trust2Geometry.hpp \
     SolarPatchGeometry.hpp \
-    SphericalHoleGeometry.hpp \
-    SpiralStructureGeometry.hpp \
     ProcessCommunicator.hpp \
     PeerToPeerCommunicator.hpp \
     MasterSlaveCommunicator.hpp \
-    RotateGeometry.hpp \
     ProcessAssigner.hpp \
     IdenticalAssigner.hpp \
     StaggeredAssigner.hpp \
@@ -284,7 +277,15 @@ HEADERS += \
     PolarizedGraphiteGrainComposition.hpp \
     ReadFitsGeometry.hpp \
     PowerLawExpTailGrainSizeDistribution.hpp \
-    AmHydrocarbonGrainComposition.hpp
+    AmHydrocarbonGrainComposition.hpp \
+    OffsetGeometryDecorator.hpp \
+    RotateGeometryDecorator.hpp \
+    SpheroidalGeometryDecorator.hpp \
+    TriaxialGeometryDecorator.hpp \
+    SphericalCavityGeometryDecorator.hpp \
+    SpiralStructureGeometryDecorator.hpp \
+    ClumpyGeometryDecorator.hpp \
+    FoamGeometryDecorator.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -309,7 +310,6 @@ SOURCES += \
     BolLuminosityStellarCompNormalization.cpp \
     BruzualCharlotSED.cpp \
     BruzualCharlotSEDFamily.cpp \
-    ClumpyGeometry.cpp \
     CompDustDistribution.cpp \
     ConfigurableDustMix.cpp \
     Console.cpp \
@@ -404,7 +404,6 @@ SOURCES += \
     NetzerAccretionDiskGeometry.cpp \
     OctTreeDustGridStructure.cpp \
     OctTreeNode.cpp \
-    OffsetGeometry.cpp \
     OligoDustSystem.cpp \
     OligoMonteCarloSimulation.cpp \
     OligoStellarComp.cpp \
@@ -452,7 +451,6 @@ SOURCES += \
     SpecialFunctions.cpp \
     SpheDustGridStructure.cpp \
     SpheGeometry.cpp \
-    SpheroidalGeometry.cpp \
     StarburstSED.cpp \
     StellarComp.cpp \
     StellarCompNormalization.cpp \
@@ -469,7 +467,6 @@ SOURCES += \
     TreeNode.cpp \
     TreeNodeBoxDensityCalculator.cpp \
     TreeNodeSampleDensityCalculator.cpp \
-    TriaxialGeometry.cpp \
     Trust1Geometry.cpp \
     Trust6Geometry.cpp \
     Trust7aGeometry.cpp \
@@ -511,12 +508,9 @@ SOURCES += \
     SingleGrainSizeDistribution.cpp \
     Trust2Geometry.cpp \
     SolarPatchGeometry.cpp \
-    SphericalHoleGeometry.cpp \
-    SpiralStructureGeometry.cpp \
     ProcessCommunicator.cpp \
     PeerToPeerCommunicator.cpp \
     MasterSlaveCommunicator.cpp \
-    RotateGeometry.cpp \
     ProcessAssigner.cpp \
     IdenticalAssigner.cpp \
     StaggeredAssigner.cpp \
@@ -527,4 +521,12 @@ SOURCES += \
     PolarizedGraphiteGrainComposition.cpp \
     ReadFitsGeometry.cpp \
     PowerLawExpTailGrainSizeDistribution.cpp \
-    AmHydrocarbonGrainComposition.cpp
+    AmHydrocarbonGrainComposition.cpp \
+    OffsetGeometryDecorator.cpp \
+    RotateGeometryDecorator.cpp \
+    SpheroidalGeometryDecorator.cpp \
+    TriaxialGeometryDecorator.cpp \
+    SphericalCavityGeometryDecorator.cpp \
+    SpiralStructureGeometryDecorator.cpp \
+    ClumpyGeometryDecorator.cpp \
+    FoamGeometryDecorator.cpp

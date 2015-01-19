@@ -3,18 +3,18 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
-#ifndef ROTATEGEOMETRY_HPP
-#define ROTATEGEOMETRY_HPP
+#ifndef ROTATEGEOMETRYDECORATOR_HPP
+#define ROTATEGEOMETRYDECORATOR_HPP
 
 #include "GenGeometry.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
-/** The RotateGeometry class is a Geometry decorator that applies an arbitrary rotation to
-    any geometry. For the rotation, we use the general framework of the three Euler angles
-    that can be used to decompose any rotation into a sequence of three individual rotations
-    over the principle axes. We apply the following set of rotations (the so-called
-    X-convention):
+/** The RotateGeometryDecorator class is a decorator that applies an arbitrary rotation to any
+    geometry, including anisotropic geometries. For the rotation, we use the general framework of
+    the three Euler angles that can be used to decompose any rotation into a sequence of three
+    individual rotations over the principle axes. We apply the following set of rotations (the
+    so-called X-convention):
     <ul>
     <li> the first rotation is by an angle \f$\alpha\f$ about the Z axis.
     <li> the second rotation is by an angle \f$\beta\f$ about the new X' axis.
@@ -52,15 +52,15 @@
     \cos\beta
     \end{pmatrix}
     \f]
-    The properties of a RotateGeometry object are a reference to the Geometry object being
-    decorated, and the three Euler angles \f$(\alpha,\beta,\gamma)\f$ that describe the
+    The properties of a RotateGeometryDecorator object are a reference to the Geometry object
+    being decorated, and the three Euler angles \f$(\alpha,\beta,\gamma)\f$ that describe the
     rotation. The resulting geometry is identical to the geometry being decorated, except that
-    the density distribution is rotated over the three Euler angles. */
-
-class RotateGeometry : public GenGeometry
+    the density distribution is rotated over the three Euler angles.
+*/
+class RotateGeometryDecorator : public GenGeometry
 {
     Q_OBJECT
-    Q_CLASSINFO("Title", "a geometry that adds a rotation to any geometry")
+    Q_CLASSINFO("Title", "a decorator that adds a rotation to any geometry")
 
     Q_CLASSINFO("Property", "geometry")
     Q_CLASSINFO("Title", "the geometry to be rotated")
@@ -90,7 +90,7 @@ class RotateGeometry : public GenGeometry
 
 public:
     /** The default constructor. */
-    Q_INVOKABLE RotateGeometry();
+    Q_INVOKABLE RotateGeometryDecorator();
 
     /** This function verifies the validity of the different parameters and
         calculates some auxiliary parameters. */
@@ -203,4 +203,4 @@ private:
 
 ////////////////////////////////////////////////////////////////////
 
-#endif // ROTATEGEOMETRY_HPP
+#endif // ROTATEGEOMETRYDECORATOR_HPP

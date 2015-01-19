@@ -4,12 +4,12 @@
 ///////////////////////////////////////////////////////////////// */
 
 #include "FatalError.hpp"
-#include "TriaxialGeometry.hpp"
+#include "TriaxialGeometryDecorator.hpp"
 #include "Random.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
-TriaxialGeometry::TriaxialGeometry()
+TriaxialGeometryDecorator::TriaxialGeometryDecorator()
     : GenGeometry(),
       _geometry(0), _p(0), _q(0)
 {
@@ -18,7 +18,7 @@ TriaxialGeometry::TriaxialGeometry()
 //////////////////////////////////////////////////////////////////////
 
 void
-TriaxialGeometry::setupSelfBefore()
+TriaxialGeometryDecorator::setupSelfBefore()
 {
     GenGeometry::setupSelfBefore();
 
@@ -30,7 +30,7 @@ TriaxialGeometry::setupSelfBefore()
 ////////////////////////////////////////////////////////////////////
 
 void
-TriaxialGeometry::setGeometry(SpheGeometry* value)
+TriaxialGeometryDecorator::setGeometry(SpheGeometry* value)
 {
     if (_geometry) delete _geometry;
     _geometry = value;
@@ -40,7 +40,7 @@ TriaxialGeometry::setGeometry(SpheGeometry* value)
 ////////////////////////////////////////////////////////////////////
 
 SpheGeometry*
-TriaxialGeometry::geometry()
+TriaxialGeometryDecorator::geometry()
 const
 {
     return _geometry;
@@ -49,7 +49,7 @@ const
 //////////////////////////////////////////////////////////////////////
 
 void
-TriaxialGeometry::setYFlattening(double value)
+TriaxialGeometryDecorator::setYFlattening(double value)
 {
     _p = value;
 }
@@ -57,7 +57,7 @@ TriaxialGeometry::setYFlattening(double value)
 ////////////////////////////////////////////////////////////////////
 
 double
-TriaxialGeometry::yFlattening()
+TriaxialGeometryDecorator::yFlattening()
 const
 {
     return _p;
@@ -66,7 +66,7 @@ const
 //////////////////////////////////////////////////////////////////////
 
 void
-TriaxialGeometry::setZFlattening(double value)
+TriaxialGeometryDecorator::setZFlattening(double value)
 {
     _q = value;
 }
@@ -74,7 +74,7 @@ TriaxialGeometry::setZFlattening(double value)
 ////////////////////////////////////////////////////////////////////
 
 double
-TriaxialGeometry::zFlattening()
+TriaxialGeometryDecorator::zFlattening()
 const
 {
     return _q;
@@ -83,7 +83,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 double
-TriaxialGeometry::density(Position bfr)
+TriaxialGeometryDecorator::density(Position bfr)
 const
 {
     double x, y, z;
@@ -95,7 +95,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 Position
-TriaxialGeometry::generatePosition()
+TriaxialGeometryDecorator::generatePosition()
 const
 {
     Position bfrs = _geometry->generatePosition();
@@ -107,7 +107,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 double
-TriaxialGeometry::SigmaX()
+TriaxialGeometryDecorator::SigmaX()
 const
 {
     return 2.0/(_p*_q) * _geometry->Sigmar();
@@ -116,7 +116,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 double
-TriaxialGeometry::SigmaY()
+TriaxialGeometryDecorator::SigmaY()
 const
 {
     return 2.0/_q * _geometry->Sigmar();
@@ -125,7 +125,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 double
-TriaxialGeometry::SigmaZ()
+TriaxialGeometryDecorator::SigmaZ()
 const
 {
     return 2.0/_p * _geometry->Sigmar();

@@ -21,7 +21,7 @@
     filename, the pixel scale \f$pix\f$, the position angle \f$pa\f$, the inclination \f$incl\f$,
     the number of pixels in x and y direction \f$n_x\f$ and \f$n_y\f$, the center of galaxy in
     (x,y) image coordinates \f$x_c\f$ and \f$y_c\f$ and the vertical scale height \f$h_z\f$. */
-class ReadFitsGeometry : public GenGeometry
+class ReadFitsGeometry: public GenGeometry
 {
     Q_OBJECT
     Q_CLASSINFO("Title", "a geometry read from a FITS file")

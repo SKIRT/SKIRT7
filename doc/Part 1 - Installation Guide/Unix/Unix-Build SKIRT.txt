@@ -13,4 +13,7 @@ To build <tt>SKIRT</tt>, type the following commands:
     chmod +rx makeSKIRT.sh [ENTER]
     ./makeSKIRT.sh [ENTER]
 
+\note By default, <tt>SKIRT</tt> will be built together without its graphical component <tt>SKIRT MakeUp</tt> and with MPI enabled (if present on the system). To change
+these settings, see \ref ChangingBuildOptions
+
 */

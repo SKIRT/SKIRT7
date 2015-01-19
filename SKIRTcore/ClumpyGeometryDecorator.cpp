@@ -3,7 +3,7 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
-#include "ClumpyGeometry.hpp"
+#include "ClumpyGeometryDecorator.hpp"
 #include "FatalError.hpp"
 #include "NR.hpp"
 #include "Random.hpp"
@@ -12,14 +12,14 @@ using namespace std;
 
 ////////////////////////////////////////////////////////////////////
 
-ClumpyGeometry::ClumpyGeometry()
+ClumpyGeometryDecorator::ClumpyGeometryDecorator()
     : _geometry(0), _f(0), _N(0), _h(0), _cutoff(false), _kernel(0)
 {
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void ClumpyGeometry::setupSelfBefore()
+void ClumpyGeometryDecorator::setupSelfBefore()
 {
     GenGeometry::setupSelfBefore();
 
@@ -32,7 +32,7 @@ void ClumpyGeometry::setupSelfBefore()
 
 //////////////////////////////////////////////////////////////////////
 
-void ClumpyGeometry::setupSelfAfter()
+void ClumpyGeometryDecorator::setupSelfAfter()
 {
     GenGeometry::setupSelfAfter();
 
@@ -47,7 +47,7 @@ void ClumpyGeometry::setupSelfAfter()
 
 ////////////////////////////////////////////////////////////////////
 
-void ClumpyGeometry::setGeometry(Geometry* value)
+void ClumpyGeometryDecorator::setGeometry(Geometry* value)
 {
     if (_geometry) delete _geometry;
     _geometry = value;
@@ -56,70 +56,70 @@ void ClumpyGeometry::setGeometry(Geometry* value)
 
 ////////////////////////////////////////////////////////////////////
 
-Geometry* ClumpyGeometry::geometry() const
+Geometry* ClumpyGeometryDecorator::geometry() const
 {
     return _geometry;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void ClumpyGeometry::setClumpFraction(double value)
+void ClumpyGeometryDecorator::setClumpFraction(double value)
 {
     _f = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double ClumpyGeometry::clumpFraction() const
+double ClumpyGeometryDecorator::clumpFraction() const
 {
     return _f;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void ClumpyGeometry::setClumpCount(int value)
+void ClumpyGeometryDecorator::setClumpCount(int value)
 {
     _N = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-int ClumpyGeometry::clumpCount() const
+int ClumpyGeometryDecorator::clumpCount() const
 {
     return _N;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void ClumpyGeometry::setClumpRadius(double value)
+void ClumpyGeometryDecorator::setClumpRadius(double value)
 {
     _h = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double ClumpyGeometry::clumpRadius() const
+double ClumpyGeometryDecorator::clumpRadius() const
 {
     return _h;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void ClumpyGeometry::setCutoff(bool value)
+void ClumpyGeometryDecorator::setCutoff(bool value)
 {
     _cutoff = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-bool ClumpyGeometry::cutoff() const
+bool ClumpyGeometryDecorator::cutoff() const
 {
     return _cutoff;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void ClumpyGeometry::setKernel(SmoothingKernel* value)
+void ClumpyGeometryDecorator::setKernel(SmoothingKernel* value)
 {
     if (_kernel) delete _kernel;
     _kernel = value;
@@ -128,14 +128,14 @@ void ClumpyGeometry::setKernel(SmoothingKernel* value)
 
 ////////////////////////////////////////////////////////////////////
 
-SmoothingKernel* ClumpyGeometry::kernel() const
+SmoothingKernel* ClumpyGeometryDecorator::kernel() const
 {
     return _kernel;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double ClumpyGeometry::density(Position bfr) const
+double ClumpyGeometryDecorator::density(Position bfr) const
 {
     double rhosmooth = (1.0-_f) * _geometry->density(bfr);
     if (_cutoff && !rhosmooth) return 0.0;  // don't allow clumps outside of smooth distribution
@@ -155,7 +155,7 @@ double ClumpyGeometry::density(Position bfr) const
 
 ////////////////////////////////////////////////////////////////////
 
-Position ClumpyGeometry::generatePosition() const
+Position ClumpyGeometryDecorator::generatePosition() const
 {
     // loop until an appropriate position has been found
     while (true)
@@ -178,21 +178,21 @@ Position ClumpyGeometry::generatePosition() const
 
 ////////////////////////////////////////////////////////////////////
 
-double ClumpyGeometry::SigmaX() const
+double ClumpyGeometryDecorator::SigmaX() const
 {
     return _geometry->SigmaX();
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double ClumpyGeometry::SigmaY() const
+double ClumpyGeometryDecorator::SigmaY() const
 {
     return _geometry->SigmaY();
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double ClumpyGeometry::SigmaZ() const
+double ClumpyGeometryDecorator::SigmaZ() const
 {
     return _geometry->SigmaZ();
 }
