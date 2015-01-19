@@ -11,12 +11,12 @@ It requires the Dots tool in the Graphviz graph visualization software to genera
 <b> Installing Doxygen </b>
 
 - Go to the <a href="http://www.stack.nl/~dimitri/doxygen/download.html">Doxygen download page</a>.
-- Scroll down and download the binary distribution for Mac OS X 10.5 and later (Doxygen-1.8.8.dmg).
+- Scroll down and download the binary distribution for Mac OS X 10.5 and later (Doxygen-1.8.9.1.dmg).
 - If the download is complete, open the '.dmg' file. This will mount the Doxygen installation disk.
-- In the Finder window that appears, drag the DoxyGen application to your applications folder (in the left menu).
+- In the Finder window that appears, drag the DoxyGen application to your applications folder (in the menu on the left).
 
-  \image html doxygen_mounted.jpeg
-  \image latex doxygen_mounted.jpeg
+  \image html doxygen_mounted.png
+  \image latex doxygen_mounted.png
 
 <b> Installing the Graphviz Graph Visualization Software </b>
 
