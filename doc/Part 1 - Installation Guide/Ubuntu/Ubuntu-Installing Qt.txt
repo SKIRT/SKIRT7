@@ -22,8 +22,12 @@ a single installer.
        chmod +rx qt-opensource-linux-x64-5.4.0.run [ENTER]
        ./qt-opensource-linux-x64-5.4.0.run [ENTER]
 
- - Follow the instructions in the installer wizard for a standard install. Qt will be installed to your home directory (/home/yourname).
- - When the download is finished, don't launch Qt Creator just yet (uncheck the box at the end).
+ - Follow the instructions in the installer wizard. If you enter the "Select Components" screen, uncheck the "Qt WebEngine" and "Qt Extras" components (see screenshot).
+  
+    \image html qtinstaller_components_ubuntu.png
+    \image latex qtinstaller_components_ubuntu.png
+ 
+ - When the installation is finished, don't launch Qt Creator just yet (uncheck the box at the end).
  
 <b>Add Qt Creator to the launcher</b>
 

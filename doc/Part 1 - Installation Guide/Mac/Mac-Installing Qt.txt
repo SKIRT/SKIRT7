@@ -28,7 +28,11 @@ a single installer.
     \image html qtinstaller_warning.png
     \image latex qtinstaller_warning.png
   
-  - Press "open" and follow the instructions. Leave the default settings.
+  - Press "open" and follow the instructions. If you enter the "Select Components" screen, uncheck the "Qt WebEngine" and "Qt Extras" components (see screenshot).
+  
+    \image html qtinstaller_components.png
+    \image latex qtinstaller_components.png
+  
   - At the end of the installation, you can choose to open Qt Creator (see: \ref InstallMacBuildQtCreator), but you don't need to.
 
 <b> Make a shortcut to Qt Creator </b> 
