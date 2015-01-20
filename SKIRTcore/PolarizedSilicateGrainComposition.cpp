@@ -20,7 +20,7 @@ void PolarizedSilicateGrainComposition::setupSelfBefore()
 
     setBulkDensity(3.0e3);
     calculateEnthalpyGrid(DraineSilicateGrainComposition::enthalpyfunction);
-    loadPolarizedOpticalGrid(true, "GrainComposition/Polarized/Silicate_STOKES_Sxx.DAT");
+    loadPolarizedOpticalGrid(true, "Silicate_STOKES_Sxx.DAT");
 }
 
 //////////////////////////////////////////////////////////////////////

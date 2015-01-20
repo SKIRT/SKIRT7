@@ -4,6 +4,7 @@
 ///////////////////////////////////////////////////////////////// */
 
 #include <QCoreApplication>
+#include <QDirIterator>
 #include <QFileInfo>
 #include <QMutex>
 #include "FatalError.hpp"
@@ -23,9 +24,13 @@ namespace
     QString _applicationPath;
     QString _resourcePath;
 
-    // relative paths to check for presence of dat folder
-    const char* _datpaths[] = { "dat", "../dat", "../../git/dat", "../svn/dat", "../Resources" };
+    // relative paths to check for presence of dat folder (built-in resources)
+    const char* _datpaths[] = { "dat", "../../git/dat", "../Resources" };
     const int _Ndatpaths = sizeof(_datpaths) / sizeof(const char*);
+
+    // relative paths to check for presence of extdat folder (external resources)
+    const char* _extdatpaths[] = { "extdat", "../../extdat" };
+    const int _Nextdatpaths = sizeof(_extdatpaths) / sizeof(const char*);
 
     // sets the static application and resource paths, or throws an error if there is a problem
     void setStaticPaths()
@@ -153,6 +158,28 @@ QString FilePaths::resource(QString name)
     // set the static paths if needed
     if (!_initialized) setStaticPaths();
     return _resourcePath + name;
+}
+
+////////////////////////////////////////////////////////////////////
+
+QString FilePaths::externalResource(QString name)
+{
+    // iterate over the relative paths
+    for (int i=0; i<_Nextdatpaths; i++)
+    {
+        // recursively iterate over subdirectories looking for a file with the specified name
+        QDirIterator it(_applicationPath + _extdatpaths[i],
+                        QStringList(name), QDir::Files, QDirIterator::Subdirectories);
+        if (it.hasNext())
+        {
+            it.next();
+            return it.fileInfo().canonicalFilePath();
+        }
+    }
+
+    // if we reach here, the resource wasn't found
+    throw FATALERROR("Could not locate external resource '" + name + "'"
+                     "\nDownload external resources from www.skirt.ugent.be using downloadextdat.sh");
 }
 
 ////////////////////////////////////////////////////////////////////

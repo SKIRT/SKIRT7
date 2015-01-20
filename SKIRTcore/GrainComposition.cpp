@@ -501,7 +501,7 @@ void GrainComposition::setBulkDensity(double value)
 void GrainComposition::loadPolarizedOpticalGrid(bool resource, QString name)
 {
     // open the file
-    QString filename = resource ? FilePaths::resource(name) : find<FilePaths>()->input(name);
+    QString filename = resource ? FilePaths::externalResource(name) : find<FilePaths>()->input(name);
     ifstream file(filename.toLocal8Bit().constData());
     if (!file.is_open()) throw FATALERROR("Could not open the data file " + filename);
     find<Log>()->info("Reading polarized grain composition from file " + filename + "...");

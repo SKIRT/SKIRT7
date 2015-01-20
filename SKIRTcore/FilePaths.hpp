@@ -62,11 +62,27 @@ public:
         in the same directory as the SKIRT executable. */
     static QString application(QString name);
 
-    /** This function returns the complete path for a resource with the specified name (or relative
-        path) residing in the "dat" directory. The function looks for the "dat" directory next to the
-        SKIRT executable (a typical deployment situation), in the executable's parent folder and in
-        the svn subfolder of the executable's parent folder (a typical development situation). */
+    /** This function returns the complete path for a built-in resource with the specified relative
+        path and filename. All built-in resources are expected to reside in one of the standard
+        places, e.g. the \c dat directory next to the SKIRT executable (a typical deployment
+        situation) or in the \c dat directory of the SKIRT build tree (a typical development
+        situation). The function does not verify that the specified resource actually exists, so it
+        is permissible to pass a partial filename and append the remaining part to the returned
+        result later on. */
     static QString resource(QString name);
+
+    /** This function returns the complete path for an external resource with the specified
+        filename (without file path). The function looks for the specified file in the \c extdat
+        directory (see below) and in all its subdirectories, recursively. If the file can't be
+        located, the function throws a fatal error.
+
+        Overly large resource files are not provided as part of the
+        SKIRT build tree to keep the source code repository down to a reasonable size. Instead,
+        these resources can be downloaded seperately from the SKIRT web site using the
+        "downloadextdat.sh" shell script, which places the files in the \c extdat directory next
+        to the \c git directory (for development situations). Alternatively, the extdat directory
+        can be placed next to the SKIRT executable (for deployment situations). */
+    static QString externalResource(QString name);
 
     //======================== Data Members ========================
 
