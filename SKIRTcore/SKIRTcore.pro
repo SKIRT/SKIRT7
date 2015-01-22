@@ -276,7 +276,6 @@ HEADERS += \
     PolarizedSilicateGrainComposition.hpp \
     PolarizedGraphiteGrainComposition.hpp \
     ReadFitsGeometry.hpp \
-    PowerLawExpTailGrainSizeDistribution.hpp \
     AmHydrocarbonGrainComposition.hpp \
     OffsetGeometryDecorator.hpp \
     RotateGeometryDecorator.hpp \
@@ -520,7 +519,6 @@ SOURCES += \
     PolarizedSilicateGrainComposition.cpp \
     PolarizedGraphiteGrainComposition.cpp \
     ReadFitsGeometry.cpp \
-    PowerLawExpTailGrainSizeDistribution.cpp \
     AmHydrocarbonGrainComposition.cpp \
     OffsetGeometryDecorator.cpp \
     RotateGeometryDecorator.cpp \
