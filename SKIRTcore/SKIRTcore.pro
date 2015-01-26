@@ -282,7 +282,8 @@ HEADERS += \
     SphericalCavityGeometryDecorator.hpp \
     SpiralStructureGeometryDecorator.hpp \
     ClumpyGeometryDecorator.hpp \
-    FoamGeometryDecorator.hpp
+    FoamGeometryDecorator.hpp \
+    SPHStarburstComp.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -523,4 +524,5 @@ SOURCES += \
     SphericalCavityGeometryDecorator.cpp \
     SpiralStructureGeometryDecorator.cpp \
     ClumpyGeometryDecorator.cpp \
-    FoamGeometryDecorator.cpp
+    FoamGeometryDecorator.cpp \
+    SPHStarburstComp.cpp
