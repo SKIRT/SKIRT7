@@ -21,6 +21,9 @@ BUILDING_WITH_MPI {
         MPI_COMPILER = $$system(bash -lc "'which mpicxx'")
     }
     isEmpty(MPI_COMPILER) {
+        MPI_COMPILER = $$system(bash -lc "'which mpiCC'")
+    }
+    isEmpty(MPI_COMPILER) {
         CONFIG -= BUILDING_WITH_MPI
     }
 }

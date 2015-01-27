@@ -13,9 +13,7 @@
 
 # determine the qmake install path
 
-#####################################################
-### Search for the most recent version of Qt first ##
-#####################################################
+# --------------------------------------------------------------------
 
 # VERSION 5.4.0
 
@@ -42,10 +40,6 @@ if [ -e "/usr/local/Qt/5.4.0/bin/qmake" ]
 then
     QMAKEPATH=/usr/local/Qt/5.4.0/bin/qmake
 fi
-
-#############################################################################################
-## Search for other supported versions of Qt  ##
-#############################################################################################
 
 # VERSION 5.3.2
 
@@ -98,6 +92,15 @@ if [ -e "/usr/local/Qt/5.2.1/bin/qmake" ]
 then
     QMAKEPATH=/usr/local/Qt/5.2.1/bin/qmake
 fi
+
+# try qmake installed in the standard system path
+
+if which qmake >/dev/null
+then
+    QMAKEPATH=qmake
+fi
+
+# --------------------------------------------------------------------
 
 # exit with an error if we don't find qmake
 if [ "$QMAKEPATH" == "" ]
