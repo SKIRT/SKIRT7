@@ -132,7 +132,10 @@ public:
     /** This function generates a random position from the dust distribution. It randomly chooses a
         particle using the normalized cumulative density distribution constructed during the setup
         phase. Then a position is determined randomly from the smoothed distribution around the
-        particle center. */
+        particle center. The function assumes the scaled Gaussian smoothing kernel \f[ W(h,r) =
+        \frac{a^3}{\pi^{3/2}\,h^3} \,\exp({-\frac{a^2 r^2}{h^2}}) \f] with the empirically
+        determined value of \f$a=2.42\f$, which approximates the standard cubic spline kernel to
+        within two percent accuracy. */
     Position generatePosition() const;
 
     /** This function returns the portion of the dust mass inside a given box (i.e. a cuboid lined

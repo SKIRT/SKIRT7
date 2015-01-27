@@ -168,9 +168,11 @@ double SPHStellarComp::luminosity(int ell) const
 void SPHStellarComp::launch(PhotonPackage* pp, int ell, double L) const
 {
     int i = NR::locate_clip(_Xvv[ell], _random->uniform());
-    double h = _random->gauss()*_hv[i];
-    Position bfr = Position(_rv[i] + h*_random->direction());
-    Direction bfk = _random->direction();
+    double x = _random->gauss();
+    double y = _random->gauss();
+    double z = _random->gauss();
+    Position bfr( _rv[i] + Vec(x,y,z) * (_hv[i] / 2.42 / M_SQRT2) );
+    Direction bfk( _random->direction() );
     pp->launch(L,ell,bfr,bfk);
 }
 

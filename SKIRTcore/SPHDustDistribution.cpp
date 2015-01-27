@@ -210,8 +210,10 @@ Position SPHDustDistribution::generatePosition() const
 {
     Random* random = find<Random>();
     int i = NR::locate_clip(_cumrhov, random->uniform());
-    double r = random->gauss()*_pv[i].radius();
-    return Position(_pv[i].center() + r*random->direction());
+    double x = random->gauss();
+    double y = random->gauss();
+    double z = random->gauss();
+    return Position( _pv[i].center() + Vec(x,y,z) * (_pv[i].radius() / 2.42 / M_SQRT2) );
 }
 
 //////////////////////////////////////////////////////////////////////

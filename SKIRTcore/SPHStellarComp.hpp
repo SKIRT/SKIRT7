@@ -93,7 +93,10 @@ public:
         luminosity matrix defined in the setup phase and stored internally. Once the SPH particle
         has been determined, a position is determined randomly from the smoothed distribution
         around the particle centre, a random propagation direction is determined, and a photon
-        package with these properties is constructed and returned. */
+        package with these properties is constructed and returned. The function assumes the scaled
+        Gaussian smoothing kernel \f[ W(h,r) = \frac{a^3}{\pi^{3/2}\,h^3} \,\exp({-\frac{a^2
+        r^2}{h^2}}) \f] with the empirically determined value of \f$a=2.42\f$, which approximates
+        the standard cubic spline kernel to within two percent accuracy. */
     void launch(PhotonPackage* pp, int ell, double L) const;
 
     //======================== Data Members ========================
