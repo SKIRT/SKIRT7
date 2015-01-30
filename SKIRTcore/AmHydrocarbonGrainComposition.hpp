@@ -16,7 +16,7 @@
 class AmHydrocarbonGrainComposition: public GrainComposition
 {
     Q_OBJECT
-    Q_CLASSINFO("Title", "Jones+2013 amorphous hydrocarbon dust grain composition")
+    Q_CLASSINFO("Title", "Jones et al. 2013 amorphous hydrocarbon dust grain composition")
 
     //============= Construction - Setup - Destruction =============
 
