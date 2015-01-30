@@ -56,10 +56,10 @@ void ReadFitsGeometry::setupSelfBefore()
     NR::cdf(_Xv, _Lv);
 
     // Calculate useful quantities
-    _xpmax = ((_Nx-_xc)*_pix);
-    _xpmin = -_xc*_pix;
-    _ypmax = ((_Ny-_yc)*_pix);
-    _ypmin = -_yc*_pix;
+    _xmax = ((_Nx-_xc)*_pix);
+    _xmin = -_xc*_pix;
+    _ymax = ((_Ny-_yc)*_pix);
+    _ymin = -_yc*_pix;
     _cospa = cos(_positionangle);
     _sinpa = sin(_positionangle);
     _cosi = cos(_inclination);
@@ -201,13 +201,13 @@ const
     double x,y,z;
     bfr.cartesian(x,y,z);
 
-    // Calculate the x and y coordinate in the plane of the image
-    double xp = (_sinpa * _cosi * x) + (_cospa * y) - (_sinpa * _sini * z);
-    double yp =  - (_cospa * _cosi * x) + (_sinpa * y) + (_cospa * _sini * z);
+    // Project and rotate the x and y coordinates
+    project(x);
+    rotate(x,y);
 
     // Find the corresponding pixel in the image
-    int i = static_cast<int>(floor(xp-_xpmin)/_pix);
-    int j = static_cast<int>(floor(yp-_ypmin)/_pix);
+    int i = static_cast<int>(floor(x-_xmin)/_pix);
+    int j = static_cast<int>(floor(y-_ymin)/_pix);
     if (i<0 || i>=_Nx || j<0 || j>=_Ny) return 0.0;
     int k = i + _Nx*j;
 
@@ -226,10 +226,14 @@ const
     int k = NR::locate(_Xv,X1);
     int i = k%_Nx;
     int j = (k-i)/_Nx;
-    double xp = _xpmin + (i+_random->uniform())*_pix;
-    double yp = _ypmin + (j+_random->uniform())*_pix;
-    double x = (_sinpa * xp) - (_cospa * yp);
-    double y = (_cospa * xp) + (_sinpa * yp);
+
+    // Determine the x and y coordinate in the plane of the image
+    double x = _xmin + (i+_random->uniform())*_pix;
+    double y = _ymin + (j+_random->uniform())*_pix;
+
+    // Derotate and deproject the x and y coordinates
+    derotate(x,y);
+    deproject(x);
 
     // Draw a random position along the minor axis
     double X2 = _random->uniform();
@@ -244,19 +248,20 @@ double
 ReadFitsGeometry::SigmaX()
 const
 {
-    double sum = 0.0;
+    const int NSAMPLES = 10000;
+    double sum = 0;
 
-    for (int l=0; l<_Nx; l++)
+    // Find the maximum and minimum possible x value
+    double xmax = max(max(_xmax, -_xmin), max(_ymax, -_ymin));
+    deproject(xmax);
+    double xmin = -xmax;
+
+    // For each position, get the density and add it to the total
+    for (int k = 0; k < NSAMPLES; k++)
     {
-        double xp = _xpmin + (l*_pix);
-        double yp = 0.0;
-        int i = static_cast<int>(floor((xp-_xpmin)/_pix));
-        int j = static_cast<int>(floor((yp-_ypmin)/_pix));
-        int k = j*_Nx + i;
-        sum += _Lv[k];
+        sum += density(Position(xmin + k*(xmax-xmin)/NSAMPLES, 0, 0));
     }
-
-    return sum / (2.0*_hz)/_pix;
+    return (sum/NSAMPLES)*(xmax-xmin);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -265,19 +270,19 @@ double
 ReadFitsGeometry::SigmaY()
 const
 {
-    double sum = 0.0;
+    const int NSAMPLES = 10000;
+    double sum = 0;
 
-    for (int l=0; l<_Ny; l++)
+    // Find the maximum and minimum possible y value
+    double ymax = max(max(_xmax, -_xmin), max(_ymax, -_ymin));
+    double ymin = -ymax;
+
+    // For each position, get the density and add it to the total
+    for (int k = 0; k < NSAMPLES; k++)
     {
-        double xp = 0.0;
-        double yp =_ypmin + (l*_pix);
-        int i = static_cast<int>(floor((xp-_xpmin)/_pix));
-        int j = static_cast<int>(floor((yp-_ypmin)/_pix));
-        int k = j*_Nx + i;
-        sum += _Lv[k];
+        sum += density(Position(0, ymin + k*(ymax-ymin)/NSAMPLES, 0));
     }
-
-    return sum / (2.0*_hz)/_pix;
+    return (sum/NSAMPLES)*(ymax-ymin);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -286,14 +291,60 @@ double
 ReadFitsGeometry::SigmaZ()
 const
 {
-    double xp = 0.0;
-    double yp = 0.0;
+    // Get the index of the luminosity vector for the center of the galaxy (-_xpmin,-_ypmin)
+    int i = static_cast<int>(floor((-_xmin)/_pix));
+    int j = static_cast<int>(floor((-_ymin)/_pix));
+    int k = i + _Nx*j;
 
-    int i = static_cast<int>(floor((xp-_xpmin)/_pix));
-    int j = static_cast<int>(floor((yp-_ypmin)/_pix));
-    int k = j*_Nx + i;
+    return _Lv[k] / (_pix*_pix);
+}
 
-    return _Lv[k]/(_pix*_pix);
+////////////////////////////////////////////////////////////////////
+
+void
+ReadFitsGeometry::rotate(double &x, double &y)
+const
+{
+    // Cache the original values of x and y
+    double xorig = x;
+    double yorig = y;
+
+    // Calculate the coordinates in the plane of the image
+    x = (_sinpa * xorig)  + (_cospa * yorig);
+    y = (-_cospa * xorig) + (_sinpa * yorig);
+}
+
+////////////////////////////////////////////////////////////////////
+
+void
+ReadFitsGeometry::derotate(double &x, double &y)
+const
+{
+    // Cache the original values of x and y
+    double xorig = x;
+    double yorig = y;
+
+    // Calculate the coordinates in the rotated plane
+    x = (_sinpa * xorig) - (_cospa * yorig);
+    y = (_cospa * xorig) + (_sinpa * yorig);
+}
+
+////////////////////////////////////////////////////////////////////
+
+void
+ReadFitsGeometry::project(double &x)
+const
+{
+    x = _cosi*x;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void
+ReadFitsGeometry::deproject(double &x)
+const
+{
+    x = x/_cosi;
 }
 
 ////////////////////////////////////////////////////////////////////

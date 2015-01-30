@@ -37,15 +37,15 @@ class ReadFitsGeometry: public GenGeometry
     Q_CLASSINFO("Property", "positionAngle")
     Q_CLASSINFO("Title", "the position angle ω of the system")
     Q_CLASSINFO("Quantity", "posangle")
-    Q_CLASSINFO("MinValue", "-360")
-    Q_CLASSINFO("MaxValue", "360")
+    Q_CLASSINFO("MinValue", "-360 deg")
+    Q_CLASSINFO("MaxValue", "360 deg")
     Q_CLASSINFO("Default", "0")
 
     Q_CLASSINFO("Property", "inclination")
     Q_CLASSINFO("Title", "the inclination angle θ of the system")
     Q_CLASSINFO("Quantity", "posangle")
-    Q_CLASSINFO("MinValue", "0")
-    Q_CLASSINFO("MaxValue", "180")
+    Q_CLASSINFO("MinValue", "0 deg")
+    Q_CLASSINFO("MaxValue", "180 deg")
     Q_CLASSINFO("Default", "0")
 
     Q_CLASSINFO("Property", "xelements")
@@ -163,6 +163,19 @@ public:
         the entire Z-axis, \f[ \Sigma_Z = \int_{-\infty}^\infty \rho(0,0,z)\, {\text{d}}z. \f] */
     double SigmaZ() const;
 
+private:
+    /** This function ... */
+    void rotate(double &x, double &y) const;
+
+    /** This function ... */
+    void derotate(double &x, double &y) const;
+
+    /** This function ... */
+    void project(double &x) const;
+
+    /** This function ... */
+    void deproject(double &x) const;
+
     //======================== Data Members ========================
 
 private:
@@ -178,7 +191,7 @@ private:
     double _hz;
 
     // data members initialized during setup
-    double _xpmax, _ypmax, _xpmin, _ypmin;
+    double _xmax, _ymax, _xmin, _ymin;
     double _cospa, _sinpa, _cosi, _sini;
     Array _Lv, _Xv;
 };
