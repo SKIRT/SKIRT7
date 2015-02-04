@@ -4,6 +4,7 @@
 ///////////////////////////////////////////////////////////////// */
 
 #include <QMultiHash>
+#include <QTime>
 #include "DustLib.hpp"
 #include "DustEmissivity.hpp"
 #include "Log.hpp"
@@ -65,6 +66,7 @@ namespace
         WavelengthGrid* _lambdagrid;
         int _Nlambda;
         int _Ncomp;
+        QTime _timer;           // measures the time elapsed since the most recent log message
 
     public:
         // constructor
@@ -93,6 +95,9 @@ namespace
             // If there are multiple dust components, the _Lvv vector is indexed on m (the dust cells)
             int Nout = _Ncomp>1 ? Ncells : Nlib;
             _Lvv.resize(Nout,_Nlambda);  // also sets all values to zero
+
+            // start the logging timer
+            _timer.start();
         }
 
         // the parallized loop body; calculates the emission for a single library entry
@@ -106,7 +111,15 @@ namespace
             if (Nmapped > 0)
             {
                 if (_de->logfrequency())
-                    _log->info("Calculating emission for library entry " + QString::number(n+1) + "...");
+                {
+                    // space the messages at least 5 seconds apart; in the interest of speed,
+                    // we do this without locking, so once in a while two consecutive messages may slip through
+                    if (_timer.elapsed() > 5000)
+                    {
+                        _timer.restart();
+                        _log->info("Calculating emission for library entry " + QString::number(n+1) + "...");
+                    }
+                }
 
                 // calculate the average ISRF for this library entry from the ISRF of all dust cells that map to it
                 Array Jv(_Nlambda);
