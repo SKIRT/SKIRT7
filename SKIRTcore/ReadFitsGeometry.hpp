@@ -193,6 +193,7 @@ private:
     // data members initialized during setup
     double _xmax, _ymax, _xmin, _ymin;
     double _cospa, _sinpa, _cosi, _sini;
+    double _C1x, _C1y, _C2x, _C2y, _C3x, _C3y, _C4x, _C4y;
     Array _Lv, _Xv;
 };
 

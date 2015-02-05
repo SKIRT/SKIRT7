@@ -55,15 +55,31 @@ void ReadFitsGeometry::setupSelfBefore()
     // Construct a vector with the normalized cumulative luminosities
     NR::cdf(_Xv, _Lv);
 
-    // Calculate useful quantities
+    // Calculate the boundaries of the image in physical coordinates
     _xmax = ((_Nx-_xc)*_pix);
     _xmin = -_xc*_pix;
     _ymax = ((_Ny-_yc)*_pix);
     _ymin = -_yc*_pix;
+
+    // Calculate the sines and cosines of the position angle and inclination
     _cospa = cos(_positionangle);
     _sinpa = sin(_positionangle);
     _cosi = cos(_inclination);
     _sini = sin(_inclination);
+
+    // Calculate the coordinates of the 4 corners of the image in the rotated plane
+    _C1x = _xmax;
+    _C1y = _ymax;
+    _C2x = _xmin;
+    _C2y = _ymax;
+    _C3x = _xmin;
+    _C3y = _ymin;
+    _C4x = _xmax;
+    _C4y = _ymin;
+    derotate(_C1x, _C1y);
+    derotate(_C2x, _C2y);
+    derotate(_C3x, _C3y);
+    derotate(_C4x, _C4y);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -252,9 +268,10 @@ const
     double sum = 0;
 
     // Find the maximum and minimum possible x value
-    double xmax = max(max(_xmax, -_xmin), max(_ymax, -_ymin));
+    double xmax = max(max(_C1x, _C2x), max(_C3x, _C4x));
+    double xmin = min(min(_C1x, _C2x), min(_C3x, _C4x));
     deproject(xmax);
-    double xmin = -xmax;
+    deproject(xmin);
 
     // For each position, get the density and add it to the total
     for (int k = 0; k < NSAMPLES; k++)
@@ -274,8 +291,8 @@ const
     double sum = 0;
 
     // Find the maximum and minimum possible y value
-    double ymax = max(max(_xmax, -_xmin), max(_ymax, -_ymin));
-    double ymin = -ymax;
+    double ymax = max(max(_C1y, _C2y), max(_C3y, _C4y));
+    double ymin = min(min(_C1y, _C2y), min(_C3y, _C4y));
 
     // For each position, get the density and add it to the total
     for (int k = 0; k < NSAMPLES; k++)
@@ -335,7 +352,7 @@ void
 ReadFitsGeometry::project(double &x)
 const
 {
-    x = _cosi*x;
+    x = x*_cosi;
 }
 
 ////////////////////////////////////////////////////////////////////
