@@ -24,8 +24,10 @@
 #include "BolLuminosityStellarCompNormalization.hpp"
 #include "BruzualCharlotSED.hpp"
 #include "ClumpyGeometryDecorator.hpp"
+#include "CombineGeometryDecorator.hpp"
 #include "CompDustDistribution.hpp"
 #include "ConfigurableDustMix.hpp"
+#include "CropGeometryDecorator.hpp"
 #include "CubicSplineSmoothingKernel.hpp"
 #include "Dim1DustLib.hpp"
 #include "Dim2DustLib.hpp"
@@ -265,8 +267,10 @@ void RegisterSimulationItems::registerAll()
     add<SpheroidalGeometryDecorator>();
     add<TriaxialGeometryDecorator>();
     add<SphericalCavityGeometryDecorator>();
+    add<CropGeometryDecorator>();
     add<SpiralStructureGeometryDecorator>();
     add<ClumpyGeometryDecorator>();
+    add<CombineGeometryDecorator>();
     add<FoamGeometryDecorator>();
 
     // smoothing kernels

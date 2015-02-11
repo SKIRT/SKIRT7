@@ -35,12 +35,12 @@ void SphericalCavityGeometryDecorator::setupSelfAfter()
 
     // estimate the original geometry's average density inside the cavity
     double rho = 0;
-    int Nsamples = 25;
+    int Nsamples = 100;
     int k = Nsamples;
     while (k--)
     {
-        double r = _random->uniform();
-        Position bfr(_center + pow(r,1./3.)*_radius*_random->direction());
+        double X = _random->uniform();
+        Position bfr(_center + pow(X,1./3.)*_radius*_random->direction());
         rho += _geometry->density(bfr);
     }
     rho /= Nsamples;
