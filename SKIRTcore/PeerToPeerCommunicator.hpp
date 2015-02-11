@@ -48,6 +48,9 @@ public:
     /** This function returns whether the process is assigned as the root within this communicator
         or not. */
     bool isRoot();
+
+    /** This function does not return before all processes within the communicator have called it. */
+    void wait();
 };
 
 ////////////////////////////////////////////////////////////////////
