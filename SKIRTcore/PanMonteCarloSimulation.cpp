@@ -141,6 +141,10 @@ void PanMonteCarloSimulation::rundustselfabsorption()
             Parallel* parallel = find<ParallelFactory>()->parallel();
             parallel->call(this, &PanMonteCarloSimulation::dodustselfabsorptionchunk, _Nchunks*_Nlambda);
 
+            // Wait for the other processes to reach this point
+            if (_comm->isMultiProc()) _log->info("Waiting for other processes...");
+            _comm->wait();
+
             // Determine and log the total absorbed luminosity in the vector Labstotv.
             double Labsdusttot = _pds->Labsdusttot();
             _log->info("The total absorbed stellar luminosity is "
@@ -251,6 +255,10 @@ void PanMonteCarloSimulation::rundustemission()
     initprogress("dust emission");
     Parallel* parallel = find<ParallelFactory>()->parallel();
     parallel->call(this, &PanMonteCarloSimulation::dodustemissionchunk, _Nchunks*_Nlambda);
+
+    // Wait for the other processes to reach this point
+    if (_comm->isMultiProc()) _log->info("Waiting for other processes...");
+    _comm->wait();
 }
 
 ////////////////////////////////////////////////////////////////////

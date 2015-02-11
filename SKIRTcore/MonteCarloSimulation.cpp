@@ -179,6 +179,10 @@ void MonteCarloSimulation::runstellaremission()
     initprogress("stellar emission");
     Parallel* parallel = find<ParallelFactory>()->parallel();
     parallel->call(this, &MonteCarloSimulation::dostellaremissionchunk, _Nchunks*_Nlambda);
+
+    // Wait for the other processes to reach this point
+    if (_comm->isMultiProc()) _log->info("Waiting for other processes...");
+    _comm->wait();
 }
 
 ////////////////////////////////////////////////////////////////////
