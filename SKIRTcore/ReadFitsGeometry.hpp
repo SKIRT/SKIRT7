@@ -1,7 +1,7 @@
 /*//////////////////////////////////////////////////////////////////
 ////       SKIRT -- an advanced radiative transfer code         ////
 ////       © Astronomical Observatory, Ghent University         ////
-//////////////////////////////////////////////////////////////////*/
+///////////////////////////////////////////////////////////////// */
 
 #ifndef READFITSGEOMETRY_HPP
 #define READFITSGEOMETRY_HPP
@@ -145,35 +145,57 @@ public:
     /** This function returns the density \f$\rho(x,y,z)\f$ at the position (x,y,z). */
     double density(Position bfr) const;
 
-    /** This function generates a random position (x,y,z) from the geometry, by drawing a random point
-        from the appropriate probability density distribution function. The (x,y) coordinates are
+    /** This function generates a random position \f$(x,y,z)\f$ from the geometry, by drawing a random point
+        from the appropriate probability density distribution function. The \f$(x,y)\f$ coordinates are
         derived from the normalized cumulative luminosity vector of the observed 2D projection. The z
         coordinate is derived from the vertical exponential probability distribution function. */
     Position generatePosition() const;
 
     /** This function returns the X-axis surface density, i.e. the integration of the density along the
-        entire X-axis, \f[ \Sigma_X = \int_{-\infty}^\infty \rho(x,0,0)\, {\text{d}}x. \f] */
+        entire X-axis, \f[ \Sigma_X = \int_{-\infty}^\infty \rho(x,0,0) \, \text{d} x \f] */
     double SigmaX() const;
 
     /** This function returns the Y-axis surface density, i.e. the integration of the density along the
-        entire Y-axis, \f[ \Sigma_Y = \int_{-\infty}^\infty \rho(0,y,0)\, {\text{d}}y. \f] */
+        entire Y-axis, \f[ \Sigma_Y = \int_{-\infty}^\infty \rho(0,y,0) \, \text{d} y \f] */
     double SigmaY() const;
 
     /** This function returns the Z-axis surface density, i.e. the integration of the density along
-        the entire Z-axis, \f[ \Sigma_Z = \int_{-\infty}^\infty \rho(0,0,z)\, {\text{d}}z. \f] */
+        the entire Z-axis, \f[ \Sigma_Z = \int_{-\infty}^\infty \rho(0,0,z) \, \text{d} z \f] */
     double SigmaZ() const;
 
 private:
-    /** This function ... */
+    /** This function transform a set of x and y coordinates in the inclined plane into the x and y
+        coordinates in the (rotated) plane of the image. The transformation matrix \f$\bf{T}\f$ is
+        given by:
+        \f[
+        {\bf{T}}
+        =
+        \begin{pmatrix}
+        \cos\omega & -\sin\omega & 0 \\ \sin\omega & \cos\omega & 0 \\ 0 & 0 & 1
+        \end{pmatrix}
+        \begin{pmatrix}
+        0 & 1 & 0 \\ -1 & 0 & 0 \\ 0 & 0 & 1
+        \end{pmatrix}
+        \f]
+        where \f$\omega\f$ is the position angle.
+    */
     void rotate(double &x, double &y) const;
 
-    /** This function ... */
+    /** This function transforms a set of x and y coordinates in the plane of the image into the x and
+        y coordinates in the (derotated) inclined plane. The transformation matrix is the inverse of
+        the matrix used for the rotate function. */
     void derotate(double &x, double &y) const;
 
-    /** This function ... */
+    /** This function projects the x coordinate of a point in the world coordinate system into the x
+        coordinate of that point in the inclined plane. The following operation is applied:
+        \f[x'=x\cdot \cos{\theta}\f]
+        where \f$\theta\f$ is the inclination. */
     void project(double &x) const;
 
-    /** This function ... */
+    /** This function deprojects the x coordinate of a point in the inclined plane into the x
+        coordinate of that point in the world coordinate system. The following operation is applied:
+        \f[x=\frac{x'}{\cos{\theta}}\f]
+        where \f$\theta\f$ is the inclination. */
     void deproject(double &x) const;
 
     //======================== Data Members ========================
