@@ -48,7 +48,7 @@ protected:
         away by the cropping. It samples the density of the geometry being decorated, and counts
         the number of generated positions that fall outside the bounding box. This value is used to
         renormalize the decorated density distribution to unity: the factor by which the original
-        density has to be multiplied is simply \f$1/(1-\chi)\$f. */
+        density has to be multiplied is simply \f$1/(1-\chi)\f$. */
     void setupSelfAfter();
 
     //======== Setters & Getters for Discoverable Attributes =======
