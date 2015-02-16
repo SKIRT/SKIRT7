@@ -275,6 +275,8 @@ HEADERS += \
     StokesVector.hpp \
     PolarizedSilicateGrainComposition.hpp \
     PolarizedGraphiteGrainComposition.hpp \
+    ReadFitsGeometry.hpp \
+    AmHydrocarbonGrainComposition.hpp \
     OffsetGeometryDecorator.hpp \
     RotateGeometryDecorator.hpp \
     SpheroidalGeometryDecorator.hpp \
@@ -519,6 +521,8 @@ SOURCES += \
     StokesVector.cpp \
     PolarizedSilicateGrainComposition.cpp \
     PolarizedGraphiteGrainComposition.cpp \
+    ReadFitsGeometry.cpp \
+    AmHydrocarbonGrainComposition.cpp \
     OffsetGeometryDecorator.cpp \
     RotateGeometryDecorator.cpp \
     SpheroidalGeometryDecorator.cpp \
