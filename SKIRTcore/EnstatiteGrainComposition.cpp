@@ -8,6 +8,7 @@
 //////////////////////////////////////////////////////////////////////
 
 EnstatiteGrainComposition::EnstatiteGrainComposition()
+    : _type(Crystalline)
 {
 }
 
@@ -17,16 +18,52 @@ void EnstatiteGrainComposition::setupSelfBefore()
 {
     GrainComposition::setupSelfBefore();
 
-    setBulkDensity(2.80e3);
-    loadLogHeatCapacityGrid("GrainComposition/DustEM/hcap/C_aSil.DAT");
-    loadOpticalGrid(true, "GrainComposition/Min/Enstatite_Jaeger1998.dat", false, false, false, false);
+    // determine the bulk density and resource filenames based on the grain type
+    double density; QString heatfile; QString opticalfile;
+    switch (_type)
+    {
+    case Crystalline:
+        density = 2.80e3;
+        heatfile = "C_aSil";
+        opticalfile = "Enstatite_Jaeger1998";
+        break;
+    case Amorphous:
+        density = 3.33e3;
+        heatfile = "C_CM_amEnst10Fe30FeS";
+        opticalfile = "CM_amEnst10Fe30FeS_Jones2013_SKIRT";
+        break;
+    }
+
+    setBulkDensity(density);
+    loadLogHeatCapacityGrid("GrainComposition/DustEM/hcap/" + heatfile + ".DAT");
+    loadOpticalGrid(true, "GrainComposition/Min/" + opticalfile + ".dat", false, false, false, false);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void EnstatiteGrainComposition::setType(EnstatiteGrainComposition::GrainType value)
+{
+    _type = value;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+EnstatiteGrainComposition::GrainType EnstatiteGrainComposition::type() const
+{
+    return _type;
 }
 
 //////////////////////////////////////////////////////////////////////
 
 QString EnstatiteGrainComposition::name() const
 {
-    return "Enstatite";
+    switch (_type)
+    {
+    case Crystalline:
+        return "Crystalline_Enstatite";
+    case Amorphous:
+        return "Amorphous_Enstatite";
+    }
 }
 
 //////////////////////////////////////////////////////////////////////
