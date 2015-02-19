@@ -45,7 +45,7 @@ class ReadFitsGeometry: public GenGeometry
     Q_CLASSINFO("Title", "the inclination angle θ of the system")
     Q_CLASSINFO("Quantity", "posangle")
     Q_CLASSINFO("MinValue", "0 deg")
-    Q_CLASSINFO("MaxValue", "45 deg")
+    Q_CLASSINFO("MaxValue", "90 deg")
     Q_CLASSINFO("Default", "0")
 
     Q_CLASSINFO("Property", "xelements")
