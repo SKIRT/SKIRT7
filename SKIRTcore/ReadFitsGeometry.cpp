@@ -35,7 +35,7 @@ void ReadFitsGeometry::setupSelfBefore()
 
     // Verify property values
     if (_pix <= 0) throw FATALERROR("Pixel scale should be positive");
-    if (_inclination < 0 || _inclination > M_PI/4.0) throw FATALERROR("Inclination should be between 0 and 45 degrees");
+    if (_inclination < 0 || _inclination > M_PI/2.0) throw FATALERROR("Inclination should be between 0 and 90 degrees");
     if (_Nx <= 0) throw FATALERROR("Number of x pixels should be positive");
     if (_Ny <= 0) throw FATALERROR("Number of y pixels should be positive");
     if (_xc <= 0) throw FATALERROR("Central x position should be positive");
