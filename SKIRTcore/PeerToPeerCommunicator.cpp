@@ -55,6 +55,8 @@ bool PeerToPeerCommunicator::isRoot()
 
 void PeerToPeerCommunicator::wait()
 {
+    if (!isMultiProc()) return;
+
     ProcessManager::barrier();
 }
 
