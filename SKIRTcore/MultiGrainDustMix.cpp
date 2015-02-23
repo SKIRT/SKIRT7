@@ -12,6 +12,7 @@
 #include "GrainSizeDistributionInterface.hpp"
 #include "Log.hpp"
 #include "MultiGrainDustMix.hpp"
+#include "PeerToPeerCommunicator.hpp"
 #include "Units.hpp"
 
 using namespace std;
@@ -63,6 +64,8 @@ void MultiGrainDustMix::addpopulations(const GrainComposition *gc, const GrainSi
         }
     }
 
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+
     // for each dust population (i.e. for each grain size bin)
     QString gcname = gc->name(); // name of the grain composition class
     for (int c=0; c<Nbins; c++)
@@ -79,7 +82,7 @@ void MultiGrainDustMix::addpopulations(const GrainComposition *gc, const GrainSi
                   + units->ugrainsize());
 
         // add the grain size information to an output text file, if so requested
-        if (_writeSize)
+        if (_writeSize && comm->isRoot())
         {
             int h = find<DustDistribution>()->indexformix(this);
             QString filename = find<FilePaths>()->output("ds_mix_" + QString::number(h) + "_size.dat");

@@ -245,27 +245,31 @@ void SkirtCommandLineHandler::doSimulation(size_t index)
                                                " of " + QString::number(_skifiles.size()));
     _console.info("Constructing a simulation from ski file '" + filename + "'...");
 
-    // construct the simulation from the ski file; use shared pointer for automatic clean-up
+    // Construct the simulation from the ski file; use shared pointer for automatic clean-up
     XmlHierarchyCreator creator;
     QSharedPointer<Simulation> simulation( creator.createHierarchy<Simulation>(filename) );
 
-    // setup any simulation attributes that are not loaded from the ski file
-    // file paths
+    // Set up any simulation attributes that are not loaded from the ski file:
+    //  - the paths for input and output files
     QFileInfo skiinfo(filename);
     simulation->filePaths()->setOutputPrefix(skiinfo.completeBaseName());
     QString base = _args.isPresent("-k") ? skiinfo.absolutePath() : QDir::currentPath();
     simulation->filePaths()->setInputPath((_args.value("-i").startsWith('/') ? "" : base + "/") + _args.value("-i"));
     simulation->filePaths()->setOutputPath((_args.value("-o").startsWith('/') ? "" : base + "/") + _args.value("-o"));
-    // threads
-    if (_args.intValue("-t") > 0) simulation->parallelFactory()->setMaxThreadCount(_args.intValue("-t"));
-    // console
-    FileLog* log = new FileLog();
-    simulation->log()->setLinkedLog(log);
-    if (_parallelSims > 1 || _args.isPresent("-b")) simulation->log()->setLowestLevel(Log::Success);
 
-    // output a ski file and a latex file reflecting this simulation for later reference
+    //  - the number of parallel threads
+    if (_args.intValue("-t") > 0) simulation->parallelFactory()->setMaxThreadCount(_args.intValue("-t"));
+
+    //  - the multiprocessing environment
     PeerToPeerCommunicator* comm = simulation->communicator();
     comm->setup();
+
+    //  - the console and the file log
+    FileLog* log = new FileLog();
+    if (comm->isRoot()) simulation->log()->setLinkedLog(log);  // only the root process creates a FileLog
+    if (_parallelSims > 1 || _args.isPresent("-b")) simulation->log()->setLowestLevel(Log::Success);
+
+    // Output a ski file and a latex file reflecting this simulation for later reference
     if (comm->isRoot())
     {
         XmlHierarchyWriter writer1;
@@ -274,7 +278,7 @@ void SkirtCommandLineHandler::doSimulation(size_t index)
         writer2.writeHierarchy(simulation.data(), simulation->filePaths()->output("parameters.tex"));
     }
 
-    // run the simulation; catch and rethrow exceptions so they are also logged to file
+    // Run the simulation; catch and rethrow exceptions so they are also logged to file
     try
     {
         log->setup();
