@@ -59,6 +59,12 @@ public:
         messages. */
     Log* linkedLog() const;
 
+    /** Sets or unsets the verbose mode for this Log instance. */
+    void setVerbose(bool value);
+
+    /** Returns whether the Log is set in verbose mode or not. */
+    bool verbose() const;
+
 private:
     /** This private function sets the _procName attribute to a QString of the form "[Process X]",
         where X is the rank of the process. This rank is passed as an argument to this function.
@@ -96,12 +102,17 @@ protected:
     /** This static function returns a formatted timestamp string. */
     static QString timestamp();
 
+    /** This function returns a string identifying this process of the form "[Process X]",
+        where X is the rank of the process. In singleprocessing mode, this string is empty. */
+    QString processName();
+
     //======================== Data Members ========================
 
 private:
     Level _lowestLevel;
     Log* _link;
     QString _procName;
+    bool _verbose;
 };
 
 ////////////////////////////////////////////////////////////////////

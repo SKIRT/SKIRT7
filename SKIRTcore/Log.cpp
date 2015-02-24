@@ -12,7 +12,7 @@
 ////////////////////////////////////////////////////////////////////
 
 Log::Log()
-    : _lowestLevel(Info), _link(0), _procName(QString(""))
+    : _lowestLevel(Info), _link(0), _procName(QString("")), _verbose(false)
 {
 }
 
@@ -72,6 +72,21 @@ Log* Log::linkedLog() const
 
 ////////////////////////////////////////////////////////////////////
 
+void Log::setVerbose(bool value)
+{
+    _verbose = value;
+    if (_link) _link->setVerbose(value);
+}
+
+////////////////////////////////////////////////////////////////////
+
+bool Log::verbose() const
+{
+    return _verbose;
+}
+
+////////////////////////////////////////////////////////////////////
+
 void Log::setProcessName(int rank)
 {
     if (_link) _link->setProcessName(rank);
@@ -82,17 +97,16 @@ void Log::setProcessName(int rank)
 
 void Log::info(QString message)
 {
-#ifndef DEBUG
-    if (!ProcessManager::isRoot()) return;
-#endif
-
     if (_link) _link->info(message);
 
-#ifdef DEBUG
-    if (Info >= _lowestLevel) output(timestamp() + "   " + _procName + message, Info);
-#else
-    if (Info >= _lowestLevel) output(timestamp() + "   " + message, Info);
-#endif
+    if (verbose())
+    {
+        if (Info >= _lowestLevel) output(timestamp() + "   " + _procName + message, Info);
+    }
+    else if (ProcessManager::isRoot())
+    {
+        if (Info >= _lowestLevel) output(timestamp() + "   " + message, Info);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -107,17 +121,16 @@ void Log::warning(QString message)
 
 void Log::success(QString message)
 {
-#ifndef DEBUG
-    if (!ProcessManager::isRoot()) return;
-#endif
-
     if (_link) _link->success(message);
 
-#ifdef DEBUG
-    if (Success >= _lowestLevel) output(timestamp() + " - " + _procName + message, Success);
-#else
-    if (Success >= _lowestLevel) output(timestamp() + " - " + message, Success);
-#endif
+    if (verbose())
+    {
+        if (Success >= _lowestLevel) output(timestamp() + " - " + _procName + message, Success);
+    }
+    else if (ProcessManager::isRoot())
+    {
+        if (Success >= _lowestLevel) output(timestamp() + " - " + message, Success);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -125,7 +138,7 @@ void Log::success(QString message)
 void Log::error(QString message)
 {
     if (_link) _link->error(message);
-    if (Error >= _lowestLevel) output(timestamp() + " * *** Error: " + _procName + message, Error);
+    if (Error >= _lowestLevel) output(timestamp() + " * " + _procName + "*** Error: " + message, Error);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -133,6 +146,15 @@ void Log::error(QString message)
 QString Log::timestamp()
 {
     return QDateTime::currentDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz");
+}
+
+////////////////////////////////////////////////////////////////////
+
+QString Log::processName()
+{
+    QString name = _procName;
+    name.chop(1);
+    return name;
 }
 
 ////////////////////////////////////////////////////////////////////

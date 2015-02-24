@@ -33,7 +33,7 @@
 namespace
 {
     // the allowed options list, in the format consumed by the CommandLineArguments constructor
-    static const char* allowedOptions = "-t* -s* -b -i* -o* -k -r -x";
+    static const char* allowedOptions = "-t* -s* -b -v -i* -o* -k -r -x";
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -266,7 +266,8 @@ void SkirtCommandLineHandler::doSimulation(size_t index)
 
     //  - the console and the file log
     FileLog* log = new FileLog();
-    if (comm->isRoot()) simulation->log()->setLinkedLog(log);  // only the root process creates a FileLog
+    simulation->log()->setLinkedLog(log);
+    simulation->log()->setVerbose(_args.isPresent("-v"));
     if (_parallelSims > 1 || _args.isPresent("-b")) simulation->log()->setLowestLevel(Log::Success);
 
     // Output a ski file and a latex file reflecting this simulation for later reference
@@ -304,11 +305,12 @@ void SkirtCommandLineHandler::printHelp()
     _console.warning("To create a new ski file interactively:    skirt");
     _console.warning("To run a simulation with default options:  skirt <ski-filename>");
     _console.warning("");
-    _console.warning("  skirt [-b] [-s <simulations>] [-t <threads>]");
+    _console.warning("  skirt [-b] [-v] [-s <simulations>] [-t <threads>]");
     _console.warning("        [-k] [-i <dirpath>] [-o <dirpath>]");
     _console.warning("        [-r] {<filepath>}*");
     _console.warning("");
     _console.warning("  -b : forces brief console logging");
+    _console.warning("  -v : forces verbose logging");
     _console.warning("  -s <simulations> : the number of parallel simulations per process");
     _console.warning("  -t <threads> : the number of parallel threads for each simulation");
     _console.warning("  -k : makes the input/output paths relative to the ski file being processed");
