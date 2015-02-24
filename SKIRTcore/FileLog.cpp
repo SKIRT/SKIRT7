@@ -55,7 +55,7 @@ void FileLog::open()
     }
     else
     {
-        filepath = find<FilePaths>()->output(processName() + "_log.txt");
+        filepath = find<FilePaths>()->output( "log" + processName() + ".txt");
     }
     _file.setFileName(filepath);
     if (!_file.open(QIODevice::WriteOnly | QIODevice::Text))

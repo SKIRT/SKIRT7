@@ -12,7 +12,7 @@
 ////////////////////////////////////////////////////////////////////
 
 Log::Log()
-    : _lowestLevel(Info), _link(0), _procName(QString("")), _verbose(false)
+    : _lowestLevel(Info), _link(0), _verbose(false)
 {
 }
 
@@ -37,7 +37,16 @@ void Log::setupSelfBefore()
     // PeerToPeerCommunicator so that the correct rank is initialized
     comm = find<ProcessCommunicator>();
 
-    if (comm->isMultiProc()) setProcessName(comm->rank());
+    if (comm->isMultiProc()) setRank(comm->rank());
+}
+
+////////////////////////////////////////////////////////////////////
+
+void Log::setRank(int rank)
+{
+    if (_link) _link->setRank(rank);
+    _procNameShort = QString("P%1").arg(rank, 3, 10, QChar('0'));
+    _procNameLong = "[" + _procNameShort + "] ";
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -87,21 +96,13 @@ bool Log::verbose() const
 
 ////////////////////////////////////////////////////////////////////
 
-void Log::setProcessName(int rank)
-{
-    if (_link) _link->setProcessName(rank);
-    _procName = "[Process " + QString::number(rank) + "] ";
-}
-
-////////////////////////////////////////////////////////////////////
-
 void Log::info(QString message)
 {
     if (_link) _link->info(message);
 
     if (verbose())
     {
-        if (Info >= _lowestLevel) output(timestamp() + "   " + _procName + message, Info);
+        if (Info >= _lowestLevel) output(timestamp() + "   " + _procNameLong + message, Info);
     }
     else if (ProcessManager::isRoot())
     {
@@ -114,7 +115,7 @@ void Log::info(QString message)
 void Log::warning(QString message)
 {
     if (_link) _link->warning(message);
-    if (Warning >= _lowestLevel) output(timestamp() + " ! " + _procName + message, Warning);
+    if (Warning >= _lowestLevel) output(timestamp() + " ! " + _procNameLong + message, Warning);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -125,7 +126,7 @@ void Log::success(QString message)
 
     if (verbose())
     {
-        if (Success >= _lowestLevel) output(timestamp() + " - " + _procName + message, Success);
+        if (Success >= _lowestLevel) output(timestamp() + " - " + _procNameLong + message, Success);
     }
     else if (ProcessManager::isRoot())
     {
@@ -138,7 +139,7 @@ void Log::success(QString message)
 void Log::error(QString message)
 {
     if (_link) _link->error(message);
-    if (Error >= _lowestLevel) output(timestamp() + " * " + _procName + "*** Error: " + message, Error);
+    if (Error >= _lowestLevel) output(timestamp() + " * " + _procNameLong + "*** Error: " + message, Error);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -152,9 +153,7 @@ QString Log::timestamp()
 
 QString Log::processName()
 {
-    QString name = _procName;
-    name.chop(1);
-    return name;
+    return _procNameShort;
 }
 
 ////////////////////////////////////////////////////////////////////

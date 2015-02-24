@@ -35,6 +35,12 @@ protected:
         function. */
     void setupSelfBefore();
 
+private:
+    /** This private function sets the process name used for logging based on the process rank
+        passed as an argument to this function. This function makes sure that the same procedure is
+        also applied for the linked Log instance, if present. */
+    void setRank(int rank);
+
     //======== Setters & Getters for Discoverable Attributes =======
 
 public:
@@ -64,13 +70,6 @@ public:
 
     /** Returns whether the Log is set in verbose mode or not. */
     bool verbose() const;
-
-private:
-    /** This private function sets the _procName attribute to a QString of the form "[Process X]",
-        where X is the rank of the process. This rank is passed as an argument to this function.
-        This function makes sure that the same procedure is also applied for the linked Log
-        instance, if present. */
-    void setProcessName(int rank);
 
     //======================== Other Functions =======================
 
@@ -102,8 +101,8 @@ protected:
     /** This static function returns a formatted timestamp string. */
     static QString timestamp();
 
-    /** This function returns a string identifying this process of the form "[Process X]",
-        where X is the rank of the process. In singleprocessing mode, this string is empty. */
+    /** This function returns a string identifying this process of the form "Pnnn",
+        where nnn is the rank of the process. In singleprocessing mode, this string is empty. */
     QString processName();
 
     //======================== Data Members ========================
@@ -111,8 +110,9 @@ protected:
 private:
     Level _lowestLevel;
     Log* _link;
-    QString _procName;
     bool _verbose;
+    QString _procNameShort;
+    QString _procNameLong;
 };
 
 ////////////////////////////////////////////////////////////////////
