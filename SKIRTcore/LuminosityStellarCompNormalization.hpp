@@ -29,6 +29,11 @@ class LuminosityStellarCompNormalization : public StellarCompNormalization
     Q_CLASSINFO("J", "the J-band")
     Q_CLASSINFO("H", "the H-band")
     Q_CLASSINFO("K", "the K-band")
+    Q_CLASSINFO("SDSSu", "the u-band")
+    Q_CLASSINFO("SDSSg", "the g-band")
+    Q_CLASSINFO("SDSSr", "the r-band")
+    Q_CLASSINFO("SDSSi", "the i-band")
+    Q_CLASSINFO("SDSSz", "the z-band")
     Q_CLASSINFO("Default", "V")
 
     Q_CLASSINFO("Property", "luminosity")
@@ -51,7 +56,7 @@ protected:
 public:
     /** The enumeration type indicating a wavelength band. */
     Q_ENUMS(Band)
-    enum Band { FUV, NUV, U, B, V, R, I, J, H, K };
+    enum Band { FUV, NUV, U, B, V, R, I, J, H, K, SDSSu, SDSSg, SDSSr, SDSSi, SDSSz };
 
     /** Sets the band in which to set this component's luminosity. */
     Q_INVOKABLE void setBand(Band value);
