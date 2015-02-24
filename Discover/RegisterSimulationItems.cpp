@@ -15,6 +15,7 @@
 #include "AdaptiveMeshGeometry.hpp"
 #include "AdaptiveMeshStellarComp.hpp"
 #include "AllCellsDustLib.hpp"
+#include "AmHydrocarbonGrainComposition.hpp"
 #include "AxGeometry.hpp"
 #include "AxSpheDustGridStructure.hpp"
 #include "Benchmark1DDustMix.hpp"
@@ -24,8 +25,10 @@
 #include "BolLuminosityStellarCompNormalization.hpp"
 #include "BruzualCharlotSED.hpp"
 #include "ClumpyGeometryDecorator.hpp"
+#include "CombineGeometryDecorator.hpp"
 #include "CompDustDistribution.hpp"
 #include "ConfigurableDustMix.hpp"
+#include "CropGeometryDecorator.hpp"
 #include "CubicSplineSmoothingKernel.hpp"
 #include "Dim1DustLib.hpp"
 #include "Dim2DustLib.hpp"
@@ -113,6 +116,7 @@
 #include "QuasarSED.hpp"
 #include "RadialDustCompNormalization.hpp"
 #include "Random.hpp"
+#include "ReadFitsGeometry.hpp"
 #include "RingGeometry.hpp"
 #include "RotateGeometryDecorator.hpp"
 #include "SEDInstrument.hpp"
@@ -246,6 +250,7 @@ void RegisterSimulationItems::registerAll()
     add<SPHGeometry>();
     add<AdaptiveMeshGeometry>();
     add<VoronoiGeometry>();
+    add<ReadFitsGeometry>();
 
     // anistropic geometries
     add<NetzerAccretionDiskGeometry>();
@@ -265,8 +270,10 @@ void RegisterSimulationItems::registerAll()
     add<SpheroidalGeometryDecorator>();
     add<TriaxialGeometryDecorator>();
     add<SphericalCavityGeometryDecorator>();
+    add<CropGeometryDecorator>();
     add<SpiralStructureGeometryDecorator>();
     add<ClumpyGeometryDecorator>();
+    add<CombineGeometryDecorator>();
     add<FoamGeometryDecorator>();
 
     // smoothing kernels
@@ -349,6 +356,7 @@ void RegisterSimulationItems::registerAll()
     add<DraineIonizedPAHGrainComposition>();
     add<MieSilicateGrainComposition>();
     add<MinSilicateGrainComposition>();
+    add<AmHydrocarbonGrainComposition>();
     add<EnstatiteGrainComposition>();
     add<ForsteriteGrainComposition>();
     add<PolarizedGraphiteGrainComposition>();

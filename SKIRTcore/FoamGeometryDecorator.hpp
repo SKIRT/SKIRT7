@@ -49,8 +49,8 @@ class FoamGeometryDecorator : public GenGeometry, FoamDensity
 
     Q_CLASSINFO("Property", "numCells")
     Q_CLASSINFO("Title", "the number of cells in the foam")
-    Q_CLASSINFO("MinValue", "100")
-    Q_CLASSINFO("MaxValue", "100000")
+    Q_CLASSINFO("MinValue", "1000")
+    Q_CLASSINFO("MaxValue", "1000000")
     Q_CLASSINFO("Default", "10000")
 
     //============= Construction - Setup - Destruction =============

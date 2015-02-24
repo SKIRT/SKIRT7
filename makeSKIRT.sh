@@ -11,104 +11,41 @@
 # specify another number as the first command line argument
 #
 
-# determine the qmake install path
-
 # --------------------------------------------------------------------
 
-# VERSION 5.4.0
+# List of possible paths of qmake (separate paths with a space)
+PATHLIST=( $HOME/Qt5.4.0/5.4/clang_64/bin/qmake $HOME/Qt5.4.0/5.4/gcc_64/bin/qmake $HOME/Qt/Desktop/5.4.0/bin/qmake /usr/local/Qt/5.4.0/bin/qmake
+           $HOME/Qt5.3.2/5.3/clang_64/bin/qmake $HOME/Qt5.3.2/5.3/gcc_64/bin/qmake $HOME/Qt/Desktop/5.3.2/bin/qmake /usr/local/Qt/5.3.2/bin/qmake
+           $HOME/Qt5.2.1/5.2.1/clang_64/bin/qmake $HOME/Qt5.2.1/5.2.1/gcc_64/bin/qmake $HOME/Qt/Desktop/5.2.1/bin/qmake /usr/local/Qt/5.2.1/bin/qmake )
 
-# try the path targeted by the one-click Qt installer
-if [ -e "$HOME/Qt5.4.0/5.4/clang_64/bin/qmake" ]
-then
-    QMAKEPATH=$HOME/Qt5.4.0/5.4/clang_64/bin/qmake
-fi
+QMAKEPATH=""
 
-# try the path targeted by the one-click Qt installer on Ubuntu
-if [ -e "$HOME/Qt5.4.0/5.4/gcc_64/bin/qmake" ]
-then
-    QMAKEPATH=$HOME/Qt5.4.0/5.4/gcc_64/bin/qmake
-fi
+# Determine the qmake install path on this system
+count=$((${#PATHLIST[@]} - 1))
+for i in $(eval echo {0..$count})
+do
+    POSSIBLEPATH=${PATHLIST[$i]}
+    if [ -e "$POSSIBLEPATH" ]
+    then
+        QMAKEPATH=$POSSIBLEPATH
+        echo "Found qmake in $QMAKEPATH"
+        break  # Break the for loop
+    fi
+done
 
-# try the path targeted by ./makeQt_everywhere.sh
-if [ -e "$HOME/Qt/Desktop/5.4.0/bin/qmake" ]
-then
-    QMAKEPATH=$HOME/Qt/Desktop/5.4.0/bin/qmake
-fi
-
-# try the path in /usr/local used on Ghent research team computers
-if [ -e "/usr/local/Qt/5.4.0/bin/qmake" ]
-then
-    QMAKEPATH=/usr/local/Qt/5.4.0/bin/qmake
-fi
-
-# VERSION 5.3.2
-
-# try the path targeted by the one-click Qt installer
-if [ -e "$HOME/Qt5.3.2/5.3/clang_64/bin/qmake" ]
-then
-    QMAKEPATH=$HOME/Qt5.3.2/5.3/clang_64/bin/qmake
-fi
-
-# try the path targeted by the one-click Qt installer on Ubuntu
-if [ -e "$HOME/Qt5.3.2/5.3/gcc_64/bin/qmake" ]
-then
-    QMAKEPATH=$HOME/Qt5.3.2/5.3/gcc_64/bin/qmake
-fi
-
-# try the path targeted by ./makeQt_everywhere.sh
-if [ -e "$HOME/Qt/Desktop/5.3.2/bin/qmake" ]
-then
-    QMAKEPATH=$HOME/Qt/Desktop/5.3.2/bin/qmake
-fi
-
-# try the path in /usr/local used on Ghent research team computers
-if [ -e "/usr/local/Qt/5.3.2/bin/qmake" ]
-then
-    QMAKEPATH=/usr/local/Qt/5.3.2/bin/qmake
-fi
-
-# VERSION 5.2.1
-
-# try the path targeted by the one-click Qt installer on Mac
-if [ -e "$HOME/Qt5.2.1/5.2.1/clang_64/bin/qmake" ]
-then
-    QMAKEPATH=$HOME/Qt5.2.1/5.2.1/clang_64/bin/qmake
-fi
-
-# try the path targeted by the one-click Qt installer on Ubuntu
-if [ -e "$HOME/Qt5.2.1/5.2.1/gcc_64/bin/qmake" ]
-then
-    QMAKEPATH=$HOME/Qt5.2.1/5.2.1/gcc_64/bin/qmake
-fi
-
-# try the path targeted by ./makeQt_everywhere.sh
-if [ -e "$HOME/Qt/Desktop/5.2.1/bin/qmake" ]
-then
-    QMAKEPATH=$HOME/Qt/Desktop/5.2.1/bin/qmake
-fi
-
-# try the path in /usr/local used on Ghent research team computers
-if [ -e "/usr/local/Qt/5.2.1/bin/qmake" ]
-then
-    QMAKEPATH=/usr/local/Qt/5.2.1/bin/qmake
-fi
-
-# try qmake installed in the standard system path
-
-if which qmake >/dev/null
+# If qmake is not found above, try qmake installed in the standard system path
+if [ "$QMAKEPATH" == "" ] && which qmake >/dev/null
 then
     QMAKEPATH=qmake
 fi
 
-# --------------------------------------------------------------------
-
-# exit with an error if we don't find qmake
+# Exit with an error if we don't find qmake
 if [ "$QMAKEPATH" == "" ]
 then
     echo error: qmake not found
     exit
 fi
 
-# create the make file and perform the build
+# Create the make file and perform the build
 $QMAKEPATH BuildSKIRT.pro -o ../release/Makefile CONFIG+=release
 make -j ${1:-5} -w -C ../release

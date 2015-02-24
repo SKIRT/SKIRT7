@@ -275,6 +275,8 @@ HEADERS += \
     StokesVector.hpp \
     PolarizedSilicateGrainComposition.hpp \
     PolarizedGraphiteGrainComposition.hpp \
+    ReadFitsGeometry.hpp \
+    AmHydrocarbonGrainComposition.hpp \
     OffsetGeometryDecorator.hpp \
     RotateGeometryDecorator.hpp \
     SpheroidalGeometryDecorator.hpp \
@@ -283,7 +285,9 @@ HEADERS += \
     SpiralStructureGeometryDecorator.hpp \
     ClumpyGeometryDecorator.hpp \
     FoamGeometryDecorator.hpp \
-    SPHStarburstComp.hpp
+    SPHStarburstComp.hpp \
+    CombineGeometryDecorator.hpp \
+    CropGeometryDecorator.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -517,6 +521,8 @@ SOURCES += \
     StokesVector.cpp \
     PolarizedSilicateGrainComposition.cpp \
     PolarizedGraphiteGrainComposition.cpp \
+    ReadFitsGeometry.cpp \
+    AmHydrocarbonGrainComposition.cpp \
     OffsetGeometryDecorator.cpp \
     RotateGeometryDecorator.cpp \
     SpheroidalGeometryDecorator.cpp \
@@ -525,4 +531,6 @@ SOURCES += \
     SpiralStructureGeometryDecorator.cpp \
     ClumpyGeometryDecorator.cpp \
     FoamGeometryDecorator.cpp \
-    SPHStarburstComp.cpp
+    SPHStarburstComp.cpp \
+    CombineGeometryDecorator.cpp \
+    CropGeometryDecorator.cpp

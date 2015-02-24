@@ -113,8 +113,8 @@ const
 void
 FoamGeometryDecorator::setNumCells(int value)
 {
-    if (value < 100) throw FATALERROR("The number of foam cells should be at least 100");
-    if (value > 100000) throw FATALERROR("The number of foam cells should be at most 100000");
+    if (value < 1000) throw FATALERROR("The number of foam cells should be at least 1000");
+    if (value > 1000000) throw FATALERROR("The number of foam cells should be at most 1000000");
     _Ncells = value;
 }
 

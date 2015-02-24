@@ -10,6 +10,7 @@
 #include "FilePaths.hpp"
 #include "Log.hpp"
 #include "PanWavelengthGrid.hpp"
+#include "PeerToPeerCommunicator.hpp"
 #include "Units.hpp"
 
 using namespace std;
@@ -37,8 +38,10 @@ void PanWavelengthGrid::setupSelfAfter()
         _dlambdav[ell] = lambdamax(ell)-lambdamin(ell);
     }
 
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+
     // if requested, write a data file with the wavelengths and bin widths
-    if (_writeWavelengths)
+    if (_writeWavelengths && comm->isRoot())
     {
         Units* units = find<Units>();
 

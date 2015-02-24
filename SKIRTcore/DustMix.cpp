@@ -14,6 +14,7 @@
 #include "NR.hpp"
 #include "PhotonPackage.hpp"
 #include "PlanckFunction.hpp"
+#include "PeerToPeerCommunicator.hpp"
 #include "Random.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
@@ -131,8 +132,10 @@ void DustMix::setupSelfAfter()
     // Output the optical properties to a text file
     // -------------------------------------------------------------
 
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+
     // output the optical properties for all dust populations
-    if (_writeMix)
+    if (_writeMix && comm->isRoot())
     {
         QString filename = find<FilePaths>()->output("ds_mix_" + QString::number(h) + "_opti.dat");
         log->info("Writing optical dust population properties to " + filename + "...");
@@ -159,7 +162,7 @@ void DustMix::setupSelfAfter()
     }
 
     // output the mass properties for all dust populations
-    if (_writeMix)
+    if (_writeMix && comm->isRoot())
     {
         QString filename = find<FilePaths>()->output("ds_mix_" + QString::number(h) + "_mass.dat");
         log->info("Writing dust population masses to " + filename + "...");
@@ -182,7 +185,7 @@ void DustMix::setupSelfAfter()
     }
 
     // output the combined optical properties for the dust mixture
-    if (_writeMeanMix)
+    if (_writeMeanMix && comm->isRoot())
     {
         QString filename = find<FilePaths>()->output("ds_mix_" + QString::number(h) + "_mean.dat");
         log->info("Writing combined dust mix properties to " + filename + "...");

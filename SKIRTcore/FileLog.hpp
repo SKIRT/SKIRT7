@@ -35,6 +35,11 @@ protected:
         with the same name. */
     virtual void setupSelfBefore();
 
+    /** This function provides the implementation of opening the file, called by setupSelfBefore().
+        With multiple processes and when not in verbose mode, this function can be called later on
+        when a warning or error is encountered on one of the processes. */
+    void open();
+
     //======================== Other Functions =======================
 
 protected:

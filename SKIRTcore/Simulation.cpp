@@ -42,6 +42,10 @@ void Simulation::setup()
 
     TimeLogger logger(_log, "setup");
     SimulationItem::setup();
+
+    // Wait for the other processes to reach this point
+    if (_comm->isMultiProc()) _log->info("Waiting for other processes...");
+    _comm->wait();
 }
 
 ////////////////////////////////////////////////////////////////////
