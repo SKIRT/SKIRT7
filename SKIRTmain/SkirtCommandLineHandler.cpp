@@ -8,6 +8,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QSharedPointer>
+#include <QHostInfo>
 #include "CommandLineArguments.hpp"
 #include "Console.hpp"
 #include "ConsoleHierarchyCreator.hpp"
@@ -41,7 +42,18 @@ namespace
 SkirtCommandLineHandler::SkirtCommandLineHandler(QStringList cmdlineargs)
     : _args(cmdlineargs, allowedOptions), _hasError(false), _parallelSims(0)
 {
+    // get the host name
+    _hostname = QHostInfo::localHostName();
+    if (_hostname.isEmpty()) _username = "unknown host";
+
+    // get the user name
+    _username = qgetenv("USER");
+    if (_username.isEmpty()) _username = qgetenv("USERNAME");
+    if (_username.isEmpty()) _username = "unknown user";
+
+    // issue welcome message
     _console.info("Welcome to " + QCoreApplication::applicationName() + " " + QCoreApplication::applicationVersion());
+    _console.info("Running on " + _hostname + " for " + _username);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -284,6 +296,7 @@ void SkirtCommandLineHandler::doSimulation(size_t index)
     {
         log->setup();
         log->info(QCoreApplication::applicationName() + " " + QCoreApplication::applicationVersion());
+        log->info("Running on " + _hostname + " for " + _username);
         simulation->setupAndRun();
 
         // if this is the only or first simulation in the run, report memory statistics in the simulation's log file

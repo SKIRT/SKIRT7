@@ -107,6 +107,8 @@ private:
     QStringList _skifiles;
     bool _hasError;
     int _parallelSims;
+    QString _hostname;
+    QString _username;
 };
 
 ////////////////////////////////////////////////////////////////////

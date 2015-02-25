@@ -12,6 +12,7 @@
 TEMPLATE = app
 TARGET   = skirt
 QT      -= gui
+QT      *= network
 CONFIG  -= app_bundle
 CONFIG  *= link_prl thread console c++11
 
