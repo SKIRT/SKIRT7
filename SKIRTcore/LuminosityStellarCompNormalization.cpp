@@ -90,6 +90,10 @@ double LuminosityStellarCompNormalization::effectivewavelength(LuminosityStellar
     case SDSSr: return 623e-9;
     case SDSSi: return 763e-9;
     case SDSSz: return 913e-9;
+    case IRAC1: return 3.56e-6;
+    case IRAC2: return 4.51e-6;
+    case WISE1: return 3.35e-9;
+    case WISE2: return 4.60e-6;
     default:
         throw FATALERROR("Unknown broadband");
     }
