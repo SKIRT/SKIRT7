@@ -39,7 +39,7 @@ void AdaptiveMeshGeometry::setupSelfBefore()
 
     // import the adaptive mesh
     _mesh = new AdaptiveMesh(_meshfile, QList<int>() << _densityIndex << _multiplierIndex,
-                             Box(-_xmax,-_ymax,-_zmax, _xmax,_ymax,_zmax));
+                             Box(-_xmax,-_ymax,-_zmax, _xmax,_ymax,_zmax), find<Log>());
     _mesh->addDensityDistribution(_densityIndex, _multiplierIndex);
     find<Log>()->info("Adaptive mesh data was successfully imported: " + QString::number(_mesh->Ncells()) + " cells.");
 

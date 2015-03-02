@@ -480,7 +480,7 @@ void TreeDustGridStructure::path(DustGridPath* path) const
             {
                 // try to escape by advancing the position to the next representable coordinates
                 find<Log>()->warning("Photon package seems stuck in dust cell "
-                                     + QString::number(node->id()) + " -- trying to escape");
+                                     + QString::number(node->id()) + " -- escaping");
                 x = nextafter(x, (kx<0.0) ? -DBL_MAX : DBL_MAX);
                 y = nextafter(y, (ky<0.0) ? -DBL_MAX : DBL_MAX);
                 z = nextafter(z, (kz<0.0) ? -DBL_MAX : DBL_MAX);
@@ -545,7 +545,7 @@ void TreeDustGridStructure::path(DustGridPath* path) const
             {
                 // try to escape by advancing the position to the next representable coordinates
                 find<Log>()->warning("Photon package seems stuck in dust cell "
-                                     + QString::number(node->id()) + " -- trying to escape");
+                                     + QString::number(node->id()) + " -- escaping");
                 x = nextafter(x, (kx<0.0) ? -DBL_MAX : DBL_MAX);
                 y = nextafter(y, (ky<0.0) ? -DBL_MAX : DBL_MAX);
                 z = nextafter(z, (kz<0.0) ? -DBL_MAX : DBL_MAX);

@@ -363,7 +363,28 @@ void ParticleTreeDustGridStructure::path(DustGridPath* path) const
         z += (ds+_eps)*kz;
 
         // always search from the root node down
+        const TreeNode* oldnode = node;
         node = root()->whichnode(Vec(x,y,z));
+
+        // if we're stuck in the same node...
+        if (node==oldnode)
+        {
+            // try to escape by advancing the position to the next representable coordinates
+            find<Log>()->warning("Photon package seems stuck in dust cell "
+                                 + QString::number(node->id()) + " -- escaping");
+            x = nextafter(x, (kx<0.0) ? -DBL_MAX : DBL_MAX);
+            y = nextafter(y, (ky<0.0) ? -DBL_MAX : DBL_MAX);
+            z = nextafter(z, (kz<0.0) ? -DBL_MAX : DBL_MAX);
+            node = root()->whichnode(Vec(x,y,z));
+
+            // if that didn't work, terminate the path
+            if (node==oldnode)
+            {
+                find<Log>()->warning("Photon package is stuck in dust cell "
+                                     + QString::number(node->id()) + " -- terminating this path");
+                break;
+            }
+        }
     }
 }
 

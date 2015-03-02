@@ -11,13 +11,15 @@
 #include "AdaptiveMeshNode.hpp"
 #include "DustGridPath.hpp"
 #include "FatalError.hpp"
+#include "Log.hpp"
 #include "Random.hpp"
 
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////
 
-AdaptiveMesh::AdaptiveMesh(AdaptiveMeshFile* meshfile, QList<int> fieldIndices, const Box& extent)
+AdaptiveMesh::AdaptiveMesh(AdaptiveMeshFile* meshfile, QList<int> fieldIndices, const Box& extent, Log* log)
+    : _log(log)
 {
     // open the data file
     meshfile->open();
@@ -327,8 +329,29 @@ void AdaptiveMesh::path(DustGridPath* path) const
         r += (ds+_eps)*(path->direction());
 
         // try the most likely neighbor of the current node, and use top-down search as a fall-back
+        const AdaptiveMeshNode* oldnode = node;
         node = node->whichnode(wall,r);
         if (!node) node = _root->whichnode(r);
+
+        // if we're stuck in the same node...
+        if (node==oldnode)
+        {
+            // try to escape by advancing the position to the next representable coordinates
+            if (_log) _log->warning("Photon package seems stuck in dust cell "
+                                    + QString::number(node->cellIndex()) + " -- escaping");
+            r.set( nextafter(r.x(), (kx<0.0) ? -DBL_MAX : DBL_MAX),
+                   nextafter(r.y(), (ky<0.0) ? -DBL_MAX : DBL_MAX),
+                   nextafter(r.z(), (kz<0.0) ? -DBL_MAX : DBL_MAX) );
+            node = _root->whichnode(r);
+
+            // if that didn't work, terminate the path
+            if (node==oldnode)
+            {
+                if (_log) _log->warning("Photon package is stuck in dust cell "
+                                        + QString::number(node->cellIndex()) + " -- terminating this path");
+                break;
+            }
+        }
     }
 }
 

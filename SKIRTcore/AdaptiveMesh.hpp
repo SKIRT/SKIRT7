@@ -15,6 +15,7 @@
 class AdaptiveMeshFile;
 class AdaptiveMeshNode;
 class DustGridPath;
+class Log;
 class Random;
 
 ////////////////////////////////////////////////////////////////////
@@ -61,9 +62,13 @@ public:
         to zero-based column or variable indices. The data file must contain a sufficient number of
         columns or variables to accommodate the highest index in the list; additional columns or
         variables in the file are ignored. The indices may be specified in any order, and the same
-        index may be specified more than once. Negative value are ignored. The last argument \em
-        extent specifies the extent of the domain as a box lined up with the coordinate axes. */
-    AdaptiveMesh(AdaptiveMeshFile* meshfile, QList<int> fieldIndices, const Box& extent);
+        index may be specified more than once. Negative value are ignored. The argument \em
+        extent specifies the extent of the domain as a box lined up with the coordinate axes.
+        Finally, the optional \em log argument specifies a logger appropriate for the simulation.
+        The logger is used only for issuing warnings about stuck photons in the path() function;
+        it can be omitted if the path() function is never called, or if no warnings should be
+        issued. */
+    AdaptiveMesh(AdaptiveMeshFile* meshfile, QList<int> fieldIndices, const Box& extent, Log* log=0);
 
     /** This function adds a density distribution accessed by functions such as density() and
         integratedDensity(). The first argument \em densityField specifies the index \f$g_d\f$ of
@@ -194,6 +199,10 @@ public:
     //========================= Data members =======================
 
 private:
+    // logger appropriate for the simulation; used only for issuing warnings about stuck photons in path();
+    // can be left at zero if the path() function is never called, or if no warnings should be issued
+    Log* _log;
+
     // small fraction of domain extent
     double _eps;
 

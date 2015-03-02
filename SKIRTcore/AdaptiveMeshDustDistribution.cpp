@@ -55,7 +55,7 @@ void AdaptiveMeshDustDistribution::setupSelfAfter()
     }
 
     // import the adaptive mesh
-    _mesh = new AdaptiveMesh(_meshfile, fieldIndices, Box(-_xmax,-_ymax,-_zmax, _xmax,_ymax,_zmax));
+    _mesh = new AdaptiveMesh(_meshfile, fieldIndices, Box(-_xmax,-_ymax,-_zmax, _xmax,_ymax,_zmax), find<Log>());
     find<Log>()->info("Adaptive mesh data was successfully imported: " + QString::number(_mesh->Ncells()) + " cells.");
 
     // add a density field for each of our components, so that the mesh holds the total density
