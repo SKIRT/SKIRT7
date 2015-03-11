@@ -17,7 +17,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////
 
 ReadFitsGeometry::ReadFitsGeometry()
-    : _pix(0), _positionangle(0), _inclination(0), _Nx(0), _Ny(0), _xc(0), _yc(0), _hz(0)
+    : _deltay(0), _positionangle(0), _inclination(0), _Nx(0), _Ny(0), _xc(0), _yc(0), _hz(0)
 {
 }
 
@@ -34,7 +34,7 @@ void ReadFitsGeometry::setupSelfBefore()
     FITSInOut::read(filepath, _Lv, Nx, Ny, Nz);
 
     // Verify property values
-    if (_pix <= 0) throw FATALERROR("Pixel scale should be positive");
+    if (_deltay <= 0) throw FATALERROR("Pixel scale should be positive");
     if (_inclination < 0 || _inclination > M_PI/2.0) throw FATALERROR("Inclination should be between 0 and 90 degrees");
     if (_Nx <= 0) throw FATALERROR("Number of x pixels should be positive");
     if (_Ny <= 0) throw FATALERROR("Number of y pixels should be positive");
@@ -52,16 +52,19 @@ void ReadFitsGeometry::setupSelfBefore()
     NR::cdf(_Xv, _Lv);
 
     // Calculate the boundaries of the image in physical coordinates
-    _xmax = ((_Nx-_xc)*_pix);
-    _xmin = -_xc*_pix;
-    _ymax = ((_Ny-_yc)*_pix);
-    _ymin = -_yc*_pix;
+    _xmax = ((_Nx-_xc)*_deltay);
+    _xmin = -_xc*_deltay;
+    _ymax = ((_Ny-_yc)*_deltay);
+    _ymin = -_yc*_deltay;
 
     // Calculate the sines and cosines of the position angle and inclination
     _cospa = cos(_positionangle);
     _sinpa = sin(_positionangle);
     _cosi = cos(_inclination);
     _sini = sin(_inclination);
+
+    // Calculate the physical pixel size in the x direction of the galactic plane
+    _deltax = _deltay / _cosi;
 
     // Calculate the coordinates of the 4 corners of the image in the rotated plane
     _C1x = _xmax;
@@ -96,14 +99,14 @@ QString ReadFitsGeometry::filename() const
 
 void ReadFitsGeometry::setPixelScale(double value)
 {
-    _pix = value;
+    _deltay = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
 double ReadFitsGeometry::pixelScale() const
 {
-    return _pix;
+    return _deltay;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -218,12 +221,12 @@ const
     rotate(x,y);
 
     // Find the corresponding pixel in the image
-    int i = static_cast<int>(floor(x-_xmin)/_pix);
-    int j = static_cast<int>(floor(y-_ymin)/_pix);
+    int i = static_cast<int>(floor(x-_xmin)/_deltay);
+    int j = static_cast<int>(floor(y-_ymin)/_deltay);
     if (i<0 || i>=_Nx || j<0 || j>=_Ny) return 0.0;
     int k = i + _Nx*j;
 
-    return _Lv[k] * exp(-fabs(z)/_hz) /(2*_hz)/(_pix*_pix);
+    return _Lv[k] * exp(-fabs(z)/_hz) /(2*_hz)/(_deltax*_deltay);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -240,8 +243,8 @@ const
     int j = (k-i)/_Nx;
 
     // Determine the x and y coordinate in the plane of the image
-    double x = _xmin + (i+_random->uniform())*_pix;
-    double y = _ymin + (j+_random->uniform())*_pix;
+    double x = _xmin + (i+_random->uniform())*_deltay;
+    double y = _ymin + (j+_random->uniform())*_deltay;
 
     // Derotate and deproject the x and y coordinates
     derotate(x,y);
@@ -305,11 +308,11 @@ ReadFitsGeometry::SigmaZ()
 const
 {
     // Get the index of the luminosity vector for the center of the galaxy (-_xpmin,-_ypmin)
-    int i = static_cast<int>(floor((-_xmin)/_pix));
-    int j = static_cast<int>(floor((-_ymin)/_pix));
+    int i = static_cast<int>(floor((-_xmin)/_deltay));
+    int j = static_cast<int>(floor((-_ymin)/_deltay));
     int k = i + _Nx*j;
 
-    return _Lv[k] / (_pix*_pix);
+    return _Lv[k] / (_deltay*_deltay);
 }
 
 ////////////////////////////////////////////////////////////////////
