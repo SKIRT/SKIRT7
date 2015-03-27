@@ -54,10 +54,10 @@ double StokesVector::polarizationAngle() const
 
 void StokesVector::rotateStokes(double alpha)
 {
-    double cosalpha = cos(2.0*alpha);
-    double sinalpha = sin(2.0*alpha);
-    double Q = cosalpha*_Q - sinalpha*_U;
-    double U = sinalpha*_Q + cosalpha*_U;
+    double cos2alpha = cos(2.0*alpha);
+    double sin2alpha = sin(2.0*alpha);
+    double Q =  cos2alpha*_Q + sin2alpha*_U;
+    double U = -sin2alpha*_Q + cos2alpha*_U;
     _Q = Q;
     _U = U;
 }

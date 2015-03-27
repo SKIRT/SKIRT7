@@ -63,7 +63,8 @@ public:
 
     // ------------ transformations -----------
 
-    /** This function rotates the Stokes vector by the specified angle around the current flight
+    /** This function adjusts the Stokes vector for a rotation of the reference axis about the
+        current flight direction over the specified angle, clockwise when looking along the flight
         direction. */
     void rotateStokes(double alpha);
 

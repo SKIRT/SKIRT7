@@ -188,6 +188,14 @@ public:
         For more information see \ref PerInstr. */
     Direction bfkobs(const Position& bfr) const;
 
+    /** Returns the direction along the positive x-axis of the instrument frame, expressed in model
+        coordinates. */
+    Direction bfkx() const;
+
+    /** Returns the direction along the positive y-axis of the instrument frame, expressed in model
+        coordinates. */
+    Direction bfky() const;
+
 protected:
     /** This function simulates the detection of a photon package by the instrument.
         For more information see \ref PerInstr. */
@@ -211,6 +219,8 @@ private:
     // data members derived from the published attributes during setup
     double _s;              // width and height of a pixel
     double _Ex, _Ey, _Ez;   // eye position
+    Direction _bfkx;        // unit vector along the viewport's x-axis
+    Direction _bfky;        // unit vector along the viewport's y-axis
     HomogeneousTransform _transform;    // transform from world to pixel coordinates
 
     // data cube

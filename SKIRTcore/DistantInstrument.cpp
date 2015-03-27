@@ -32,14 +32,22 @@ void DistantInstrument::setupSelfBefore()
     // verify attribute values
     if (_distance <= 0) throw FATALERROR("Distance was not set");
 
-    // calculate derived values
-    _bfkobs = Direction(_inclination,_azimuth);
+    // calculate sine and cosine for our angles
     _costheta = cos(_inclination);
     _sintheta = sin(_inclination);
     _cosphi = cos(_azimuth);
     _sinphi = sin(_azimuth);
     _cospa = cos(_positionangle);
     _sinpa = sin(_positionangle);
+
+    // calculate relevant directions
+    _bfkobs = Direction(_inclination,_azimuth);
+    _bfkx = Direction( + _cosphi*_costheta*_sinpa - _sinphi*_cospa,
+                       + _sinphi*_costheta*_sinpa + _cosphi*_cospa,
+                       - _sintheta*_sinpa );
+    _bfky = Direction( - _cosphi*_costheta*_cospa - _sinphi*_sinpa,
+                       - _sinphi*_costheta*_cospa + _cosphi*_sinpa,
+                       + _sintheta*_cospa );
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -103,6 +111,20 @@ double DistantInstrument::positionAngle() const
 Direction DistantInstrument::bfkobs(const Position& /*bfr*/) const
 {
     return _bfkobs;
+}
+
+////////////////////////////////////////////////////////////////////
+
+Direction DistantInstrument::bfkx() const
+{
+    return _bfkx;
+}
+
+////////////////////////////////////////////////////////////////////
+
+Direction DistantInstrument::bfky() const
+{
+    return _bfky;
 }
 
 ////////////////////////////////////////////////////////////////////

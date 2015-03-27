@@ -276,21 +276,6 @@ public:
     /** This function returns true if this dust mix supports polarization; false otherwise. */
     bool polarization() const;
 
-    /** This function returns the value of the scattering phase function in case the specified
-        photon package is scattered to the specified new direction. For a dustmix that doesn't
-        support polarization, the function returns \f$\Phi_\ell({\bf{k}}_{\text{pp}},
-        {\bf{k}}_{\text{new}})\f$ for the current propagation direction of the photon package
-        \f${\bf{k}}_{\text{pp}}\f$ and the specified new direction \f${\bf{k}}_{\text{new}}\f$, at
-        wavelength index \f$\ell\f$ of the photon package. For a dustmix that does support
-        polarization, the function returns the phase function for polarized radiation given by
-        \f$\Phi_\ell(\Omega) = N ( S_{11,\ell}(\theta) - S_{12,\ell}(\theta) p \cos(2\phi) )\f$
-        where \f$\theta\f$ is the angle between the photon package's propagation direction and the
-        new scattering direction; \f$\phi\f$ is the angle between the current and previous
-        scattering plane of the photon package; \f$p\f$ is the linear polarization degree of the
-        photon package; and \f$N\f$ is a normalization factor to ensure that the integral over the
-        unit sphere is equal to 1. */
-    double phaseFunctionValue(const PhotonPackage* pp, Direction bfknew) const;
-
     /** This function generates a new direction \f${\bf{k}}_{\text{new}}\f$ in case the specified
         photon package scatters, and calculates the new polarization state of the scattered photon
         package. The function passes the new direction to the caller as its return value, and
@@ -305,10 +290,10 @@ public:
         \f${\bf{k}}_{\text{new}}\f$ after a scattering event, given that the original direction
         before the scattering event is \f${\bf{k}}\f$ and taking into account the polarization
         state of the photon. First, the polarization degree and angle are computed from the Stokes
-        parameters. Then, scattering angles \f$\theta\f$ and \f$\phi\f$ are sampled, and the Stokes
-        vector is rotated into the scattering plane and transformed by applying the Mueller matrix.
-        Finally, the new direction is computed from the previously sampled \f$\theta\f$ and
-        \f$\phi\f$ angles. See Appendix of Bianchi et al. 1996, ApJ v.465, p.127 for details. */
+        parameters. Then, scattering angles \f$\theta\f$ and \f$\phi\f$ are sampled from the phase
+        function, and the Stokes vector is rotated into the scattering plane and transformed by
+        applying the Mueller matrix. Finally, the new direction is computed from the previously
+        sampled \f$\theta\f$ and \f$\phi\f$ angles. */
     Direction scatteringDirectionAndPolarization(StokesVector* out, const PhotonPackage* pp) const;
 
     /** This function calculates the polarization state appropriate for a peel off photon package
@@ -316,10 +301,28 @@ public:
         the provided Stokes vector. For a dustmix that doesn't support polarization, the function
         does nothing (i.e. it is assumed that the provided Stokes vector has been initialized to an
         unpolarized state). For a dustmix that does support polarization, the function rotates the
-        Stokes vector into the scattering plane, applies the Mueller matrix on the Stokes vector,
-        and the adjusts Stokes parameters to the reference direction. See the Appendix of Bianchi
-        et al. 1996, ApJ v.465, p.127 for details. */
-    void scatteringPeelOffPolarization(StokesVector* out, const PhotonPackage* pp, Direction bfknew);
+        Stokes vector from the reference direction in the previous scattering plane into the
+        peel-off scattering plane, applies the Mueller matrix on the Stokes vector, and further
+        rotates the Stokes vector from the reference direction in the peel-off scattering plane
+        to the x-axis of the instrument to which the peel-off photon package is headed. */
+    void scatteringPeelOffPolarization(StokesVector* out, const PhotonPackage* pp, Direction bfknew,
+                                       Direction bfkx, Direction bfky);
+
+    /** This function returns the value of the scattering phase function in case the specified
+        photon package is scattered to the specified new direction. For a dustmix that doesn't
+        support polarization, the function returns \f$\Phi_\ell({\bf{k}}_{\text{pp}},
+        {\bf{k}}_{\text{new}})\f$ for the current propagation direction of the photon package
+        \f${\bf{k}}_{\text{pp}}\f$ and the specified new direction \f${\bf{k}}_{\text{new}}\f$, at
+        wavelength index \f$\ell\f$ of the photon package. For a dustmix that does support
+        polarization, the function returns the phase function for polarized radiation given by
+        \f[\Phi_\ell(\Omega) = \frac{1}{N} \left( S_{11,\ell}(\theta) + P_\text{L}
+        S_{12,\ell}(\theta) \cos 2(\varphi-\gamma) \right)\f] where \f$\theta\f$ is the angle
+        between the photon package's propagation direction and the new scattering direction;
+        \f$\phi\f$ is the angle between the previous and current scattering plane of the photon
+        package; \f$\gamma\f$ is the polarization angle of the photon package, \f$P_\text{L}\f$ is
+        the linear polarization degree of the photon package; and \f$N\f$ is a normalization factor
+        to ensure that the integral over the unit sphere is equal to 1. */
+    double phaseFunctionValue(const PhotonPackage* pp, Direction bfknew) const;
 
     /** This function returns the Planck-integrated absorption cross section per hydrogen atom
         \f$\varsigma_{\text{P},c}^{\text{abs}}(T)\f$ of the \f$c\f$'th dust population for the
@@ -355,16 +358,13 @@ public:
     double equilibrium(const Array& Jv, int c) const;
 
 private:
-    /** This function returns a random scattering angle \f$\theta\f$ for a given wavelength index
-        \f$\ell\f$, sampled from the distribution adapted from the STOKES code (Goosmann & Gaskell
-        2007). For performance reasons, the random values are retrieved from an array that was
-        pre-computed during setup. */
+    /** This function returns a random scattering angle \f$\theta\f$ sampled from the phase
+        function for a given wavelength index \f$\ell\f$. */
     double sampleTheta(int ell) const;
 
     /** This function returns a random scattering angle \f$\phi\f$ sampled from the phase function
-        according to the incident polarization degree and the scattering angle \f$\theta\f$, at
-        wavelength index \f$\ell\f$. The necessary trigonometric equation is solved by an iterative
-        method. Adapted from the STOKES code (Goosmann & Gaskell 2007). */
+        according to the incident linear polarization degree and the scattering angle \f$\theta\f$,
+        at wavelength index \f$\ell\f$. */
     double samplePhi(int ell, double theta, double polDegree) const;
 
     //======================== Data Members ========================
@@ -402,12 +402,18 @@ private:
     // polarization-related data members
     bool _polarization;
     int _Ntheta;                    // index t
+    const int _Nphi = 361;          // index f
     Table<2> _S11vv;                // indexed on ell and t
     Table<2> _S12vv;                // indexed on ell and t
     Table<2> _S33vv;                // indexed on ell and t
     Table<2> _S34vv;                // indexed on ell and t
     Array _thetav;                  // indexed on t
     ArrayTable<2> _thetaXvv;        // indexed on ell and t
+    Array _pfnormv;                 // indexed on ell
+    Array _phiv;                    // indexed on f
+    Array _phi1v;                   // indexed on f
+    Array _phi2v;                   // indexed on f
+    Array _phiXv;                   // indexed on f
 };
 
 ////////////////////////////////////////////////////////////////////

@@ -108,6 +108,16 @@ public:
         is sufficiently large. */
     Direction bfkobs(const Position& bfr) const;
 
+    /** Returns the direction along the positive x-axis of the instrument frame, expressed in model
+        coordinates. The function applies the inverse instrument transformation to the pixel
+        frame's x-axis. */
+    Direction bfkx() const;
+
+    /** Returns the direction along the positive y-axis of the instrument frame, expressed in model
+        coordinates. The function applies the inverse instrument transformation to the pixel
+        frame's y-axis. */
+    Direction bfky() const;
+
 protected:
     /** This convenience function calibrates one or more integrated luminosity data vectors
         gathered by a DistantInstrument subclass, and outputs them as columns in a single SED text
@@ -134,10 +144,12 @@ protected:
     double _positionangle;
 
     // data members derived from the published attributes during setup
-    Direction _bfkobs;
     double _cosphi, _sinphi;
     double _costheta, _sintheta;
     double _cospa, _sinpa;
+    Direction _bfkobs;
+    Direction _bfkx;
+    Direction _bfky;
 };
 
 ////////////////////////////////////////////////////////////////////

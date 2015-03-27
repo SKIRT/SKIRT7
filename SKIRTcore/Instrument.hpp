@@ -68,6 +68,14 @@ public:
         The implementation must be provided in a subclass. */
     virtual Direction bfkobs(const Position& bfr) const = 0;
 
+    /** Returns the direction along the positive x-axis of the instrument frame, expressed in model
+        coordinates. The implementation must be provided in a subclass. */
+    virtual Direction bfkx() const = 0;
+
+    /** Returns the direction along the positive y-axis of the instrument frame, expressed in model
+        coordinates. The implementation must be provided in a subclass. */
+    virtual Direction bfky() const = 0;
+
     /** This function simulates the detection of a photon package by the instrument. Its
         implementation must be provided in a subclass. The implementation must call the record()
         function to actually update the instrument's data structure, so that appropriate locking

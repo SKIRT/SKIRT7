@@ -263,20 +263,22 @@ void MonteCarloSimulation::peeloffscattering(PhotonPackage* pp, PhotonPackage* p
     // Now do the actual peel-off
     foreach (Instrument* instr, _is->instruments())
     {
-        Direction bfknew = instr->bfkobs(bfr);
+        Direction bfkobs = instr->bfkobs(bfr);
+        Direction bfkx = instr->bfkx();
+        Direction bfky = instr->bfky();
         double I = 0, Q = 0, U = 0, V = 0;
         for (int h=0; h<Ncomp; h++)
         {
             DustMix* mix = _ds->mix(h);
-            double w = wv[h] * mix->phaseFunctionValue(pp, bfknew);
+            double w = wv[h] * mix->phaseFunctionValue(pp, bfkobs);
             StokesVector sv;
-            mix->scatteringPeelOffPolarization(&sv, pp, bfknew);
+            mix->scatteringPeelOffPolarization(&sv, pp, bfkobs, bfkx, bfky);
             I += w * sv.stokesI();
             Q += w * sv.stokesQ();
             U += w * sv.stokesU();
             V += w * sv.stokesV();
         }
-        ppp->launchScatteringPeelOff(pp, bfknew, I);
+        ppp->launchScatteringPeelOff(pp, bfkobs, I);
         ppp->setStokes(I, Q, U, V);
         instr->detect(ppp);
     }
@@ -329,20 +331,22 @@ void MonteCarloSimulation::continuouspeeloffscattering(PhotonPackage *pp, Photon
                 Position bfrnew(bfr+s*bfk);
                 foreach (Instrument* instr, _is->instruments())
                 {
-                    Direction bfknew = instr->bfkobs(bfrnew);
+                    Direction bfkobs = instr->bfkobs(bfrnew);
+                    Direction bfkx = instr->bfkx();
+                    Direction bfky = instr->bfky();
                     double I = 0, Q = 0, U = 0, V = 0;
                     for (int h=0; h<Ncomp; h++)
                     {
                         DustMix* mix = _ds->mix(h);
-                        double w = wv[h] * mix->phaseFunctionValue(pp, bfknew);
+                        double w = wv[h] * mix->phaseFunctionValue(pp, bfkobs);
                         StokesVector sv;
-                        mix->scatteringPeelOffPolarization(&sv, pp, bfknew);
+                        mix->scatteringPeelOffPolarization(&sv, pp, bfkobs, bfkx, bfky);
                         I += w * sv.stokesI();
                         Q += w * sv.stokesQ();
                         U += w * sv.stokesU();
                         V += w * sv.stokesV();
                     }
-                    ppp->launchScatteringPeelOff(pp, bfrnew, bfknew, factorm*I);
+                    ppp->launchScatteringPeelOff(pp, bfrnew, bfkobs, factorm*I);
                     ppp->setStokes(I, Q, U, V);
                     instr->detect(ppp);
                 }
