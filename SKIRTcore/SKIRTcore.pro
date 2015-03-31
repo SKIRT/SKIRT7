@@ -287,7 +287,8 @@ HEADERS += \
     FoamGeometryDecorator.hpp \
     SPHStarburstComp.hpp \
     CombineGeometryDecorator.hpp \
-    CropGeometryDecorator.hpp
+    CropGeometryDecorator.hpp \
+    LaserGeometry.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -533,4 +534,5 @@ SOURCES += \
     FoamGeometryDecorator.cpp \
     SPHStarburstComp.cpp \
     CombineGeometryDecorator.cpp \
-    CropGeometryDecorator.cpp
+    CropGeometryDecorator.cpp \
+    LaserGeometry.cpp

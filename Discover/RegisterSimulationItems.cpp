@@ -68,6 +68,7 @@
 #include "InstrumentSystem.hpp"
 #include "InterstellarDustMix.hpp"
 #include "KuruczSED.hpp"
+#include "LaserGeometry.hpp"
 #include "LinAxDustGridStructure.hpp"
 #include "LinCubDustGridStructure.hpp"
 #include "LinSpheDustGridStructure.hpp"
@@ -253,6 +254,7 @@ void RegisterSimulationItems::registerAll()
     add<ReadFitsGeometry>();
 
     // anistropic geometries
+    add<LaserGeometry>();
     add<NetzerAccretionDiskGeometry>();
     add<StellarSurfaceGeometry>();
     add<SolarPatchGeometry>();

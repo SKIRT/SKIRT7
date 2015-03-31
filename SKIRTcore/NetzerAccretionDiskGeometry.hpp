@@ -44,7 +44,7 @@ public:
     /** This function returns the dimension of the geometry, which is 2 in this case. */
     int dimension() const;
 
-    /** This function returns the stellar density \f$\rho({\bf{r}})\f$ at the position
+    /** This function returns the density \f$\rho({\bf{r}})\f$ at the position
         \f${\bf{r}}\f$. For this geometry, the density takes the form of a
         Dirac delta function, \f$\rho({\bf{r}}) = \delta({\bf{r}})\f$. The function returns
         infinity if \f${\bf{r}} = {\bf{0}}\f$ and zero in all other cases. */
