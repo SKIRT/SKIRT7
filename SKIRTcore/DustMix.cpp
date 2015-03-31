@@ -544,8 +544,8 @@ bool DustMix::polarization() const
 
 namespace
 {
-    // this helper function returns the appropriate t index for the specified value of theta,
-    // given the specified number of theta values in the arrays
+    // This helper function returns the appropriate t index for the specified value of theta,
+    // given the specified number of theta values in the arrays.
     int indexForTheta(double theta, int Ntheta)
     {
         double dt = M_PI/(Ntheta-1);
@@ -555,63 +555,39 @@ namespace
         return t;
     }
 
-    // this helper function returns the angle phi between the previous and current scattering planes
-    // given the previous, current and new propagation directions of the photon package
+    // This helper function returns the angle phi between the previous and current scattering planes
+    // given the previous, current and new propagation directions of the photon package.
+    // It returns a zero angle when the previous and/or current scattering event is completely
+    // forward or backward, because then one or both of the scattering planes are ill-defined.
     double angleBetweenScatteringPlanes(Direction kp, Direction kc, Direction kn)
     {
-        // calculate unnormalized vectors perpendicular to previous and current scattering planes
         Vec np = Vec::cross(kp,kc);
         Vec nc = Vec::cross(kc,kn);
-
-        // return a zero angle:
-        //  - when the previous or current scattering event is almost completely forward or backward,
-        //    because then one or both of the scattering planes are not well defined;
-        //  - when the previous and current scattering planes are parallel, because then the rotation
-        //    does not change the Stokes vector (and we guard against rounding errors).
-        double npnorm = np.norm();
-        double ncnorm = nc.norm();
-        if (npnorm > 1e-6 && ncnorm > 1e-6)
-        {
-            double cosphi = Vec::dot(np,nc)/(npnorm*ncnorm);
-            if (cosphi > -1. && cosphi < 1.)
-            {
-                double phi = acos(cosphi);
-                if (Vec::dot(nc,kp) < 0) phi = - phi;
-                return phi;
-            }
-        }
+        np /= np.norm();
+        nc /= nc.norm();
+        double cosphi = Vec::dot(np,nc);
+        double sinphi = Vec::dot(Vec::cross(np,nc), kc);
+        double phi = atan2(sinphi,cosphi);
+        if (isfinite(phi)) return phi;
         return 0;
     }
 
-    // this helper function returns the angle alpha between the reference axis in the peel-off scattering plane
+    // This helper function returns the angle alpha between the reference axis in the peel-off scattering plane
     // and the x-axis of the instrument frame, given the current propagation direction of the photon package,
     // the new peel-off direction towards the instrument, and the direction of the instrument frame's x- and y-axes
-    // expressed in model coordinates
+    // expressed in model coordinates.
+    // It returns a zero angle when the peel-off scattering event is completely forward or backward,
+    // because then the scattering plane is ill-defined; and when the peel-off scattering plane is parallel to
+    // the instrument plane (which means there can't be any detection).
     double angleBetweenScatteringAndInstrumentReference(Direction kc, Direction kn, Direction kx, Direction ky)
     {
-        // calculate unnormalized vectors perpendicular to peel-off scattering plane and instrument plane,
-        // and unnormalized vector along intersection of those two planes
-        Vec nc = Vec::cross(kc,kn);
-        Vec ni = Vec::cross(kx,ky);
-        Vec s = Vec::cross(nc,ni);
-
-        // return a zero angle:
-        //  - when the peel-off scattering event is almost completely forward or backward,
-        //    because then the scattering plane is not well defined;
-        //  - when the intersection of the peel-off scattering plane with the instrument frame almost coincides
-        //    with the x-axis in the instrument frame, because then the rotation angle is zero anyway
-        //    (and we guard against rounding errors).
-        double snorm = s.norm();
-        if (snorm > 1e-6)
-        {
-            double cosalpha = Vec::dot(s,kx)/snorm;
-            if (cosalpha > -1. && cosalpha < 1.)
-            {
-                double alpha = acos(cosalpha);
-                if (Vec::dot(nc,kx) < 0) alpha = - alpha;
-                return alpha;
-            }
-        }
+        Vec nobs = Vec::cross(kx,ky);
+        Vec ks = Vec::cross(Vec::cross(kc,kn), nobs);
+        ks /= ks.norm();
+        double cosalpha = Vec::dot(ks,kx);
+        double sinalpha = Vec::dot(Vec::cross(ks,kx), nobs);
+        double alpha = atan2(sinalpha,cosalpha);
+        if (isfinite(alpha)) return alpha;
         return 0;
     }
 }
