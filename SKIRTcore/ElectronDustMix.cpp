@@ -54,11 +54,8 @@ void ElectronDustMix::setupSelfBefore()
         }
     }
 
-    // calculate the weight of an electron per hydrogen atom
-    double mu = Units::masselectron()/(Units::masselectron()+Units::massproton());
-
     // add a single dust population with these properties
-    addpopulation(mu, sigmaabsv, sigmascav, asymmparv);
+    addpopulation(Units::masselectron(), sigmaabsv, sigmascav, asymmparv);
     addpolarization(S11vv, S12vv, S33vv, S34vv);
 }
 
