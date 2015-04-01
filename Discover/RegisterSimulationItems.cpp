@@ -46,6 +46,7 @@
 #include "DustMixPopulation.hpp"
 #include "EdgeOnDustCompNormalization.hpp"
 #include "EinastoGeometry.hpp"
+#include "ElectronDustMix.hpp"
 #include "EnstatiteGrainComposition.hpp"
 #include "ExpDiskGeometry.hpp"
 #include "ExtragalacticUnits.hpp"
@@ -341,6 +342,7 @@ void RegisterSimulationItems::registerAll()
     add<DraineLiDustMix>();
     add<InterstellarDustMix>();
     add<MeanZubkoDustMix>();
+    add<ElectronDustMix>();
     add<Benchmark1DDustMix>();
     add<Benchmark2DDustMix>();
     add<TrustMeanDustMix>();

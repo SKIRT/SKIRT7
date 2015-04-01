@@ -288,7 +288,8 @@ HEADERS += \
     SPHStarburstComp.hpp \
     CombineGeometryDecorator.hpp \
     CropGeometryDecorator.hpp \
-    LaserGeometry.hpp
+    LaserGeometry.hpp \
+    ElectronDustMix.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -535,4 +536,5 @@ SOURCES += \
     SPHStarburstComp.cpp \
     CombineGeometryDecorator.cpp \
     CropGeometryDecorator.cpp \
-    LaserGeometry.cpp
+    LaserGeometry.cpp \
+    ElectronDustMix.cpp

@@ -23,10 +23,12 @@ namespace
     const double _AU = 1.49597871e11;
     const double _pc = 3.08567758e16;
     const double _Mproton = 1.67262178e-27;
+    const double _Melectron = 9.10938215e-31;
     const double _Msun = 1.9891e30;
-    const double _Lsun = 3.839e26;          // value without solar neutrino radiation
-    const double _lambdaV = 550e-9;         // V-band wavelength
-    const double _kappaV = 2600.;           // "standard" extinction coefficient in V-band
+    const double _Lsun = 3.839e26;              // solar luminosity without solar neutrino radiation
+    const double _lambdaV = 550e-9;             // V-band wavelength
+    const double _kappaV = 2600.;               // "standard" extinction coefficient in V-band
+    const double _sigmaThomson = 6.652458734e-29; // Thomson cross-section for an electron
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -398,6 +400,13 @@ double Units::massproton()
 
 ////////////////////////////////////////////////////////////////////
 
+double Units::masselectron()
+{
+    return _Melectron;
+}
+
+////////////////////////////////////////////////////////////////////
+
 double Units::Msun()
 {
     return _Msun;
@@ -422,6 +431,13 @@ double Units::lambdaV()
 double Units::kappaV()
 {
     return _kappaV;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double Units::sigmaThomson()
+{
+    return _sigmaThomson;
 }
 
 ////////////////////////////////////////////////////////////////////

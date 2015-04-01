@@ -97,8 +97,11 @@ public:
     /** This function returns the distance of one parsec. */
     static double pc();
 
-    /** This function returns the mass of the proton. */
+    /** This function returns the rest mass of the proton. */
     static double massproton();
+
+    /** This function returns the rest mass of the electron. */
+    static double masselectron();
 
     /** This function returns the solar mass. */
     static double Msun();
@@ -113,6 +116,9 @@ public:
         \f$\kappa_{\text{V}}\f$ in the V-band for a Draine & Li (2007) dust mix with
         characteristics corresponding to the InterstellarDistMix class. */
     static double kappaV();
+
+    /** This function returns the Thomson cross section for an electron. */
+    static double sigmaThomson();
 
     // - - - - - global predefined units - - - - -
 
