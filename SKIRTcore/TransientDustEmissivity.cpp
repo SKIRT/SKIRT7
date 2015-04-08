@@ -303,6 +303,7 @@ TransientDustEmissivity::~TransientDustEmissivity()
 {
     foreach (const TDE_Calculator* calculator, _calculatorsA.values()) delete calculator;
     foreach (const TDE_Calculator* calculator, _calculatorsB.values()) delete calculator;
+    foreach (const TDE_Calculator* calculator, _calculatorsC.values()) delete calculator;
     foreach (const TDE_Grid* grid, _grids) delete grid;
 }
 
