@@ -418,6 +418,7 @@ public:
     void resize(size_t _n);
 
 private:
+    void resize_noclear(size_t _n);
     template <class> friend class _my_val_expr;
     friend double* begin(Array& _v);
     friend const double* begin(const Array& _v);
@@ -605,7 +606,7 @@ Array::Array(const Array& _v)
 inline
 Array::~Array()
 {
-    resize(0);
+    resize_noclear(0);
 }
 
 inline
@@ -614,8 +615,7 @@ Array::operator=(const Array& _v)
 {
     if (this != &_v)
     {
-        if (size() != _v.size())
-            resize(_v.size());
+        resize_noclear(_v.size());
         std::copy(_v._begin_, _v._end_, _begin_);
     }
     return *this;
@@ -635,8 +635,7 @@ Array&
 Array::operator=(const _my_val_expr<_ValExpr>& _v)
 {
     size_t _n = _v.size();
-    if (size() != _n)
-        resize(_n);
+    resize_noclear(_n);
     double* _t = _begin_;
     for (size_t _i = 0; _i != _n; ++_t, ++_i)
         *_t = result_type(_v[_i]);
@@ -840,19 +839,30 @@ Array::apply(double _f(const double&)) const
 
 inline
 void
+Array::resize_noclear(size_t _n)
+{
+    if (size() != _n)
+    {
+        if (_begin_ != 0)
+        {
+            ::operator delete(_begin_);
+            _begin_ = _end_ = 0;
+        }
+        if (_n)
+        {
+            _begin_ = static_cast<double*>(::operator new(_n * sizeof(double)));
+            _end_ = _begin_ + _n;
+        }
+    }
+}
+
+inline
+void
 Array::resize(size_t _n)
 {
-    if (_begin_ != 0)
-    {
-        ::operator delete(_begin_);
-        _begin_ = _end_ = 0;
-    }
-    if (_n)
-    {
-        _begin_ = _end_ = static_cast<double*>(::operator new(_n * sizeof(double)));
-        for (; _n; --_n, ++_end_)
-            ::new (_end_) double();
-    }
+    resize_noclear(_n);
+    for (double* _p = _begin_; _p != _end_; ++_p)
+        ::new (_p) double();
 }
 
 inline

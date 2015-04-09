@@ -40,7 +40,7 @@ namespace NR
     template<class V> inline void assign(Array& targetv, const V& sourcev)
     {
         size_t n = sourcev.size();
-        if (targetv.size()!=n) targetv.resize(n);
+        targetv.resize(n);
         for (size_t i=0; i<n; i++) targetv[i] = sourcev[i];
     }
 
