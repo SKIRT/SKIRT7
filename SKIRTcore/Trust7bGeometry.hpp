@@ -21,7 +21,7 @@
     \f[ \begin{split} x_{\text{f}}(z) = a \sin\left(\frac{2\pi z}{b}\right), \\
     y_{\text{f}}(z) = -a \cos\left(\frac{2\pi z}{b}\right). \end{split} \f]
     The density distribution is set to zero if \f$R_{\text{f}}(x,y,z)>R_{\text{out}}\f$ or
-    \f$|z|>-b/2\f$.
+    \f$|z|>b/2\f$.
     For the geometrical parameters of the model, we adopt the following hardcoded values:
     \f$a = 1~{\text{pc}}\f$, \f$b = 10~{\text{pc}}\f$,
     \f$R_{\text{c}} = 0.1~{\text{pc}}\f$, and \f$R_{\text{out}} = 3~{\text{pc}}\f$. */
@@ -51,9 +51,17 @@ public:
         \f${\bf{r}}\f$. It just implements the analytical formula. */
     double density(Position bfr) const;
 
-    /** This function generates a random position from the geometry, by
-        drawing a random point from the three-dimensional probability density \f$p({\bf{r}})\,
-        {\text{d}}{\bf{r}} = \rho({\bf{r}})\, {\text{d}}{\bf{r}}\f$. */
+    /** This function generates a random position from the geometry, by drawing a random point from
+        the three-dimensional probability density \f$p({\bf{r}})\, {\text{d}}{\bf{r}} =
+        \rho({\bf{r}})\, {\text{d}}{\bf{r}}\f$. The \f$z\f$ coordinate is sampled uniformly between
+        \f$-b/2\f$ and \f$b/2\f$. An azimuth angle \f$\phi\f$ is sampled uniformly as well. Then
+        the function generates a random horizontal distance from the central helix
+        \f$R_{\text{f}}\f$ using the equation for the cylindrical coordinate in the
+        Trust7aGeometry, \f[ R_{\text{f}} = R_{\text{c}} \sqrt{
+        \left(1+\frac{R_{\text{out}}^2}{R_{\text{c}}^2}\right)^{\cal{X}}-1 }. \f] Finally the
+        function calculates the position in the \f$xy\f$-plane by offsetting the central helix
+        point by the random distance \f$R_{\text{f}}\f$ in the direction indicated by the random
+        angle \f$\phi\f$. */
     Position generatePosition() const;
 
     /** This function returns the X-axis surface density, i.e. the integration of
@@ -66,7 +74,7 @@ public:
         \sqrt{R_{\text{out}}^2-a^2}\f$ gives
         \f[ \Sigma_X = \frac{2\,\rho_{\text{c}}\,
         R_{\text{c}}^2}{\sqrt{R_{\text{c}}^2+a^2}} \arctan
-        \sqrt{\frac{R_{\text{out}}^2-a^2}{a^2+R_{\text{c}}^2}}. \f] */
+        \sqrt{\frac{R_{\text{out}}^2-a^2}{R_{\text{c}}^2+a^2}}. \f] */
     double SigmaX() const;
 
     /** This function returns the Y-axis surface density, i.e. the integration of

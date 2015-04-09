@@ -44,7 +44,7 @@ const
     if (fabs(z)>0.5*_b) return 0.0;
     double t = 2.0*M_PI*(z/_b);
     double xf = _a*sin(t);
-    double yf = _a*cos(t);
+    double yf = -_a*cos(t);
     double Rf2 = (x-xf)*(x-xf) + (y-yf)*(y-yf);
     if (Rf2<0.0 || Rf2>_Rout*_Rout) return 0.0;
     return _rhoc / (1.0+Rf2/_Rc/_Rc);
