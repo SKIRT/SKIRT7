@@ -8,104 +8,131 @@
 #include <iostream>
 #include "FatalError.hpp"
 #include "Random.hpp"
-#include "StellarSurfaceGeometry.hpp"
+#include "BackgroundGeometry.hpp"
 
 using namespace std;
 
 //////////////////////////////////////////////////////////////////////
 
-StellarSurfaceGeometry::StellarSurfaceGeometry()
+BackgroundGeometry::BackgroundGeometry()
 {
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void StellarSurfaceGeometry::setupSelfBefore()
+void
+BackgroundGeometry::setupSelfBefore()
 {
     Geometry::setupSelfBefore();
     // verify property values
-    if (_rstar <= 0) throw FATALERROR("the stellar radius rstar should be positive");
+    if (_rbg <= 0)
+        throw FATALERROR("the background sphere radius rbg should be positive");
 }
 
 //////////////////////////////////////////////////////////////////////
 
-int StellarSurfaceGeometry::dimension() const
+int
+BackgroundGeometry::dimension()
+const
 {
     return 1;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void StellarSurfaceGeometry::setRadius(double value)
+void
+BackgroundGeometry::setRadius(double value)
 {
-    _rstar = value;
+    _rbg = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double StellarSurfaceGeometry::radius() const
+double
+BackgroundGeometry::radius()
+const
 {
-    return _rstar;
+    return _rbg;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double StellarSurfaceGeometry::density(Position bfr) const
+double
+BackgroundGeometry::density(Position bfr)
+const
 {
-    return bfr.radius() == _rstar ? numeric_limits<double>::infinity() : 0.0;
+    return (bfr.radius() == _rbg) ?
+                numeric_limits<double>::infinity() : 0.0;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-Position StellarSurfaceGeometry::generatePosition() const
+Position
+BackgroundGeometry::generatePosition()
+const
 {
-    return Position(_rstar,_random->direction());
+    return Position(_rbg,_random->direction());
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double StellarSurfaceGeometry::SigmaX() const
+double
+BackgroundGeometry::SigmaX()
+const
 {
-    return 1.0/(2.0*M_PI*_rstar*_rstar);
+    return 1.0/(2.0*M_PI*_rbg*_rbg);
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double StellarSurfaceGeometry::SigmaY() const
+double
+BackgroundGeometry::SigmaY()
+const
 {
-    return 1.0/(2.0*M_PI*_rstar*_rstar);
+    return 1.0/(2.0*M_PI*_rbg*_rbg);
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double StellarSurfaceGeometry::SigmaZ() const
+double
+BackgroundGeometry::SigmaZ()
+const
 {
-    return 1.0/(2.0*M_PI*_rstar*_rstar);
+    return 1.0/(2.0*M_PI*_rbg*_rbg);
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double StellarSurfaceGeometry::probabilityForDirection(Position bfr, Direction bfk) const
+double
+BackgroundGeometry::probabilityForDirection(Position bfr, Direction bfk)
+const
 {
-    double costhetap = Vec::dot(bfr,bfk)/_rstar;
+    if (fabs(bfr.radius()/_rbg-1.0) > 1e-8)
+        throw FATALERROR("the directional probability function is not defined for positions not on the background sphere");
+    double costhetap = Vec::dot(bfr,bfk)/_rbg;
     if (costhetap > 0.0)
-        return 4.0*costhetap;
-    else
         return 0.0;
+    else
+        return -4.0*costhetap;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-Direction StellarSurfaceGeometry::generateDirection(Position bfr) const
+Direction
+BackgroundGeometry::generateDirection(Position bfr)
+const
 {
-    // picking a random (theta',phi')
-    double thetap = asin(sqrt(_random->uniform()));
-    double phip = 2.0*M_PI*_random->uniform();
+    if (fabs(bfr.radius()/_rbg-1.0) > 1e-8)
+        throw FATALERROR("cannot generate directions for positions not on the background sphere");
 
-    // conversion to the regular coordinate system
+    // picking a random (theta',phi')
+    double thetap = M_PI-acos(sqrt(_random->uniform()));
+    double phip = 2.0*M_PI*_random->uniform();
     Direction bfkp(thetap,phip);
     double kpx, kpy, kpz;
     bfkp.cartesian(kpx,kpy,kpz);
+
+    // conversion to the regular coordinate system
     double r, theta, phi;
     bfr.spherical(r,theta,phi);
     double costheta = cos(theta);

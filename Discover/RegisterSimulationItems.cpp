@@ -18,6 +18,7 @@
 #include "AmHydrocarbonGrainComposition.hpp"
 #include "AxGeometry.hpp"
 #include "AxSpheDustGridStructure.hpp"
+#include "BackgroundGeometry.hpp"
 #include "Benchmark1DDustMix.hpp"
 #include "Benchmark2DDustMix.hpp"
 #include "BinTreeDustGridStructure.hpp"
@@ -259,6 +260,7 @@ void RegisterSimulationItems::registerAll()
     add<NetzerAccretionDiskGeometry>();
     add<StellarSurfaceGeometry>();
     add<SolarPatchGeometry>();
+    add<BackgroundGeometry>();
 
     // TRUST benchmark geometries
     add<Trust1Geometry>();
