@@ -105,8 +105,8 @@ public:
         \f$\theta'\f$ and \f$\varphi'\f$ can be determined
         by taking two uniform deviates \f${\cal{X}}_1\f$ and \f${\cal{X}}_2\f$ and
         solving the two equations \f[ \begin{split} {\cal{X}}_1 &= \int_0^{\theta'}
-        2\sin\theta''\cos\theta''\,{\text{d}}\theta'' \\ {\cal{X}}_2 &= \int_0^{\varphi'}
-        \frac{{\text{d}}\varphi''}{2\pi}
+        2\sin\theta^*\cos\theta^*\,{\text{d}}\theta^* \\ {\cal{X}}_2 &= \int_0^{\varphi'}
+        \frac{{\text{d}}\varphi^*}{2\pi}
         \end{split} \f] for \f$\theta'\f$ and \f$\varphi'\f$. The solution is readily found, \f[
         \begin{split} \theta' &= \arcsin \sqrt{{\cal{X}}_1} \\ \varphi' &= 2\pi\,{\cal{X}}_2.
         \end{split} \f] Once these values have been determined, we need to determine the coordinates
