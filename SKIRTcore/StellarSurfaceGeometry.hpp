@@ -15,8 +15,8 @@
     surface of a sphere of radius \f$r_*\f$ from which radiation escapes in the outward direction.
     The density profile is spherically symmetric and is simply \f[ \rho(r) = \frac{1}{4\pi\,r_*^2}\,
     \delta(r-r_*). \f] The special aspect of this geometry is that the emissivity is anisotropic.
-    There is no radiation outwards and the intensity is proportional to \f$\cos\theta'\f$ in the
-    inward hemisphere, where \f$\theta'\f$ is the angle between the direction and the normal on the
+    There is no radiation inwards and the intensity is proportional to \f$\cos\theta'\f$ in the
+    outward hemisphere, where \f$\theta'\f$ is the angle between the direction and the normal on the
     surface. */
 
 class StellarSurfaceGeometry : public Geometry
@@ -93,7 +93,7 @@ public:
         {\text{d}}\Omega & 0 \leq \theta' < \frac{\pi}{2} \\ 0 & \frac{\pi}{2} \leq \theta' < \pi
         \end{cases} \f] Here \f$\theta'\f$ is the angle between the direction \f${\bf{k}}\f$ and
         the outward normal on the stellar surface, i.e. \f[ \cos\theta' = \frac{{\bf{k}} \cdot
-        {\bf{r}}}{r_{\text{bg}}}. \f] This distribution is correctly normalized in the sense that
+        {\bf{r}}}{r_*}. \f] This distribution is correctly normalized in the sense that
         \f[ \frac{1}{4\pi} \iint p({\bf{k}})\, {\text{d}}\Omega = 1. \f] */
     double probabilityForDirection(Position bfr, Direction bfk) const;
 
@@ -107,8 +107,9 @@ public:
         0 \leq \theta' < \frac{\pi}{2}. \f] Random angles \f$\theta'\f$ and \f$\varphi'\f$
         can be determined by taking two uniform deviates \f${\cal{X}}_1\f$ and \f${\cal{X}}_2\f$
         and solving the two equations \f[ \begin{split} {\cal{X}}_1 &= \int_0^{\theta'}
-        2\sin\theta^*\cos\theta^*\,{\text{d}}\theta^* \\ {\cal{X}}_2 &= \int_0^{\varphi'}
-        \frac{{\text{d}}\varphi^*}{2\pi} \end{split} \f] for \f$\theta'\f$ and \f$\varphi'\f$.
+        2\sin\theta^{\prime\prime}\cos\theta^{\prime\prime}\,{\text{d}}\theta^{\prime\prime}
+        \\ {\cal{X}}_2 &= \int_0^{\varphi'} \frac{{\text{d}}\varphi^{\prime\prime}}{2\pi}
+        \end{split} \f] for \f$\theta'\f$ and \f$\varphi'\f$.
         The solution is readily found, \f[ \begin{split} \theta' &= \arcsin
         \sqrt{{\cal{X}}_1} \\ \varphi' &= 2\pi\,{\cal{X}}_2. \end{split} \f] Once these values
         have been determined, we need to determine the coordinates of the vector \f${\bf{k}}\f$

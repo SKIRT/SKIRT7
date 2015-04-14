@@ -65,7 +65,7 @@ public:
         point from the three-dimensional probability density \f$p({\bf{r}})\,
         {\text{d}}{\bf{r}} = \rho({\bf{r}})\, {\text{d}}{\bf{r}}\f$. For this
         geometry, it generates a random position on the unit sphere and this is scaled by
-        the stellar radius \f$r_{\text{bg}}\f$. */
+        the background sphere radius \f$r_{\text{bg}}\f$. */
     Position generatePosition() const;
 
     /** This function returns the X-axis surface density, i.e. the integration of
@@ -108,8 +108,9 @@ public:
         \frac{\pi}{2} \leq \theta' < \pi. \f] Random angles \f$\theta'\f$ and \f$\varphi'\f$
         can be determined by taking two uniform deviates \f${\cal{X}}_1\f$ and \f${\cal{X}}_2\f$
         and solving the two equations \f[ \begin{split} {\cal{X}}_1 &= -\int_{\pi/2}^{\theta'}
-        2\sin\theta^*\cos\theta^*\,{\text{d}}\theta^* \\ {\cal{X}}_2 &= \int_0^{\varphi'}
-        \frac{{\text{d}}\varphi^*}{2\pi} \end{split} \f] for \f$\theta'\f$ and \f$\varphi'\f$.
+        2\sin\theta^{\prime\prime}\cos\theta^{\prime\prime}\,{\text{d}}\theta^{\prime\prime}
+        \\ {\cal{X}}_2 &= \int_0^{\varphi'} \frac{{\text{d}}\varphi^{\prime\prime}}{2\pi}
+        \end{split} \f] for \f$\theta'\f$ and \f$\varphi'\f$.
         The solution is readily found, \f[ \begin{split} \theta' &= \pi - \arccos
         \sqrt{{\cal{X}}_1} \\ \varphi' &= 2\pi\,{\cal{X}}_2. \end{split} \f] Once these values
         have been determined, we need to determine the coordinates of the vector \f${\bf{k}}\f$
