@@ -291,7 +291,8 @@ HEADERS += \
     LaserGeometry.hpp \
     ElectronDustMix.hpp \
     CubBackgroundGeometry.hpp \
-    SpheBackgroundGeometry.hpp
+    SpheBackgroundGeometry.hpp \
+    SpectralLuminosityStellarCompNormalization.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -541,4 +542,5 @@ SOURCES += \
     LaserGeometry.cpp \
     ElectronDustMix.cpp \
     CubBackgroundGeometry.cpp \
-    SpheBackgroundGeometry.cpp
+    SpheBackgroundGeometry.cpp \
+    SpectralLuminosityStellarCompNormalization.cpp

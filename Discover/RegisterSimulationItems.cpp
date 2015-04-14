@@ -135,6 +135,7 @@
 #include "SimpleInstrument.hpp"
 #include "SingleGrainSizeDistribution.hpp"
 #include "SmoothingKernel.hpp"
+#include "SpectralLuminosityStellarCompNormalization.hpp"
 #include "SpheBackgroundGeometry.hpp"
 #include "SpheGeometry.hpp"
 #include "SphericalCavityGeometryDecorator.hpp"
@@ -227,6 +228,7 @@ void RegisterSimulationItems::registerAll()
     add<StellarCompNormalization>(false);
     add<BolLuminosityStellarCompNormalization>();
     add<LuminosityStellarCompNormalization>();
+    add<SpectralLuminosityStellarCompNormalization>();
     add<SPHStellarComp>();
     add<SPHStarburstComp>();
     add<AdaptiveMeshStellarComp>();
