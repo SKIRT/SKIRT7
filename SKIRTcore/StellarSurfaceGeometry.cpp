@@ -20,7 +20,8 @@ StellarSurfaceGeometry::StellarSurfaceGeometry()
 
 //////////////////////////////////////////////////////////////////////
 
-void StellarSurfaceGeometry::setupSelfBefore()
+void
+StellarSurfaceGeometry::setupSelfBefore()
 {
     Geometry::setupSelfBefore();
     // verify property values
@@ -29,64 +30,83 @@ void StellarSurfaceGeometry::setupSelfBefore()
 
 //////////////////////////////////////////////////////////////////////
 
-int StellarSurfaceGeometry::dimension() const
+int
+StellarSurfaceGeometry::dimension()
+const
 {
     return 1;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void StellarSurfaceGeometry::setRadius(double value)
+void
+StellarSurfaceGeometry::setRadius(double value)
 {
     _rstar = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double StellarSurfaceGeometry::radius() const
+double
+StellarSurfaceGeometry::radius()
+const
 {
     return _rstar;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double StellarSurfaceGeometry::density(Position bfr) const
+double
+StellarSurfaceGeometry::density(Position bfr)
+const
 {
     return bfr.radius() == _rstar ? numeric_limits<double>::infinity() : 0.0;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-Position StellarSurfaceGeometry::generatePosition() const
+Position
+StellarSurfaceGeometry::generatePosition()
+const
 {
     return Position(_rstar,_random->direction());
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double StellarSurfaceGeometry::SigmaX() const
+double
+StellarSurfaceGeometry::SigmaX()
+const
 {
     return 1.0/(2.0*M_PI*_rstar*_rstar);
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double StellarSurfaceGeometry::SigmaY() const
+double
+StellarSurfaceGeometry::SigmaY()
+const
 {
     return 1.0/(2.0*M_PI*_rstar*_rstar);
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double StellarSurfaceGeometry::SigmaZ() const
+double
+StellarSurfaceGeometry::SigmaZ()
+const
 {
     return 1.0/(2.0*M_PI*_rstar*_rstar);
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double StellarSurfaceGeometry::probabilityForDirection(Position bfr, Direction bfk) const
+double
+StellarSurfaceGeometry::probabilityForDirection(Position bfr, Direction bfk)
+const
 {
+    if (fabs(bfr.radius()/_rstar-1.0) > 1e-8)
+        throw FATALERROR("the directional probability function is not defined for positions not on the stellar surface");
     double costhetap = Vec::dot(bfr,bfk)/_rstar;
     if (costhetap > 0.0)
         return 4.0*costhetap;
@@ -96,16 +116,21 @@ double StellarSurfaceGeometry::probabilityForDirection(Position bfr, Direction b
 
 //////////////////////////////////////////////////////////////////////
 
-Direction StellarSurfaceGeometry::generateDirection(Position bfr) const
+Direction
+StellarSurfaceGeometry::generateDirection(Position bfr)
+const
 {
+    if (fabs(bfr.radius()/_rstar-1.0) > 1e-8)
+        throw FATALERROR("cannot generate directions for positions not on the stellar surface");
+
     // picking a random (theta',phi')
     double thetap = asin(sqrt(_random->uniform()));
     double phip = 2.0*M_PI*_random->uniform();
-
-    // conversion to the regular coordinate system
     Direction bfkp(thetap,phip);
     double kpx, kpy, kpz;
     bfkp.cartesian(kpx,kpy,kpz);
+
+    // conversion to the regular coordinate system
     double r, theta, phi;
     bfr.spherical(r,theta,phi);
     double costheta = cos(theta);

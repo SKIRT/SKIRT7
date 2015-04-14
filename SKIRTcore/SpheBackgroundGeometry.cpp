@@ -8,20 +8,20 @@
 #include <iostream>
 #include "FatalError.hpp"
 #include "Random.hpp"
-#include "BackgroundGeometry.hpp"
+#include "SpheBackgroundGeometry.hpp"
 
 using namespace std;
 
 //////////////////////////////////////////////////////////////////////
 
-BackgroundGeometry::BackgroundGeometry()
+SpheBackgroundGeometry::SpheBackgroundGeometry()
 {
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void
-BackgroundGeometry::setupSelfBefore()
+SpheBackgroundGeometry::setupSelfBefore()
 {
     Geometry::setupSelfBefore();
     // verify property values
@@ -32,7 +32,7 @@ BackgroundGeometry::setupSelfBefore()
 //////////////////////////////////////////////////////////////////////
 
 int
-BackgroundGeometry::dimension()
+SpheBackgroundGeometry::dimension()
 const
 {
     return 1;
@@ -41,7 +41,7 @@ const
 ////////////////////////////////////////////////////////////////////
 
 void
-BackgroundGeometry::setRadius(double value)
+SpheBackgroundGeometry::setRadius(double value)
 {
     _rbg = value;
 }
@@ -49,7 +49,7 @@ BackgroundGeometry::setRadius(double value)
 ////////////////////////////////////////////////////////////////////
 
 double
-BackgroundGeometry::radius()
+SpheBackgroundGeometry::radius()
 const
 {
     return _rbg;
@@ -58,7 +58,7 @@ const
 //////////////////////////////////////////////////////////////////////
 
 double
-BackgroundGeometry::density(Position bfr)
+SpheBackgroundGeometry::density(Position bfr)
 const
 {
     return (bfr.radius() == _rbg) ?
@@ -68,7 +68,7 @@ const
 //////////////////////////////////////////////////////////////////////
 
 Position
-BackgroundGeometry::generatePosition()
+SpheBackgroundGeometry::generatePosition()
 const
 {
     return Position(_rbg,_random->direction());
@@ -77,7 +77,7 @@ const
 //////////////////////////////////////////////////////////////////////
 
 double
-BackgroundGeometry::SigmaX()
+SpheBackgroundGeometry::SigmaX()
 const
 {
     return 1.0/(2.0*M_PI*_rbg*_rbg);
@@ -86,7 +86,7 @@ const
 //////////////////////////////////////////////////////////////////////
 
 double
-BackgroundGeometry::SigmaY()
+SpheBackgroundGeometry::SigmaY()
 const
 {
     return 1.0/(2.0*M_PI*_rbg*_rbg);
@@ -95,7 +95,7 @@ const
 //////////////////////////////////////////////////////////////////////
 
 double
-BackgroundGeometry::SigmaZ()
+SpheBackgroundGeometry::SigmaZ()
 const
 {
     return 1.0/(2.0*M_PI*_rbg*_rbg);
@@ -104,7 +104,7 @@ const
 //////////////////////////////////////////////////////////////////////
 
 double
-BackgroundGeometry::probabilityForDirection(Position bfr, Direction bfk)
+SpheBackgroundGeometry::probabilityForDirection(Position bfr, Direction bfk)
 const
 {
     if (fabs(bfr.radius()/_rbg-1.0) > 1e-8)
@@ -119,11 +119,11 @@ const
 //////////////////////////////////////////////////////////////////////
 
 Direction
-BackgroundGeometry::generateDirection(Position bfr)
+SpheBackgroundGeometry::generateDirection(Position bfr)
 const
 {
     if (fabs(bfr.radius()/_rbg-1.0) > 1e-8)
-        throw FATALERROR("cannot generate directions for positions not on the background sphere");
+        throw FATALERROR("cannot generate directions for positions not on the SpheBackground sphere");
 
     // picking a random (theta',phi')
     double thetap = M_PI-acos(sqrt(_random->uniform()));

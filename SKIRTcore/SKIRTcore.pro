@@ -290,7 +290,8 @@ HEADERS += \
     CropGeometryDecorator.hpp \
     LaserGeometry.hpp \
     ElectronDustMix.hpp \
-    BackgroundGeometry.hpp
+    CubBackgroundGeometry.hpp \
+    SpheBackgroundGeometry.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -539,4 +540,5 @@ SOURCES += \
     CropGeometryDecorator.cpp \
     LaserGeometry.cpp \
     ElectronDustMix.cpp \
-    BackgroundGeometry.cpp
+    CubBackgroundGeometry.cpp \
+    SpheBackgroundGeometry.cpp

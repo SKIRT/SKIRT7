@@ -3,25 +3,25 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
-#ifndef BACKGROUNDGEOMETRY_HPP
-#define BACKGROUNDGEOMETRY_HPP
+#ifndef SPHEBACKGROUNDGEOMETRY_HPP
+#define SPHEBACKGROUNDGEOMETRY_HPP
 
 #include "Geometry.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
-/** The BackgroundGeometry class is a subclass of the Geometry class. It represents the
+/** The SpheBackgroundGeometry class is a subclass of the Geometry class. It represents the
     surface of a sphere of radius \f$r_{\text{bg}}\f$ from which radiation escapes in the
     inward direction. The density profile is spherically symmetric and is simply \f[
     \rho(r) = \frac{1}{4\pi\,r_{\text{bg}}^2}\, \delta(r-r_{\text{bg}}). \f] The special
-    aspect of this geometry is that the radiation is anisotropic. There is no radiation
+    aspect of this geometry is that the emissivity is anisotropic. There is no radiation
     outwards and the intensity is proportional to \f$\cos\theta'\f$ in the inward hemisphere,
     where \f$\theta'\f$ is the angle between the direction and the normal on the surface. */
 
-class BackgroundGeometry : public Geometry
+class SpheBackgroundGeometry : public Geometry
 {
     Q_OBJECT
-    Q_CLASSINFO("Title", "a background geometry with an anisotropic inward radiation field")
+    Q_CLASSINFO("Title", "a spherical background geometry with an anisotropic inward radiation field")
 
     Q_CLASSINFO("Property", "radius")
     Q_CLASSINFO("Title", "the radius of the background sphere")
@@ -32,7 +32,7 @@ class BackgroundGeometry : public Geometry
 
 public:
     /** The default constructor. */
-    Q_INVOKABLE BackgroundGeometry();
+    Q_INVOKABLE SpheBackgroundGeometry();
 
 protected:
     /** This function verifies the validity of the scale length \f$r_{\text{bg}}\f$. */
@@ -50,7 +50,8 @@ public:
     //======================== Other Functions =======================
 
 public:
-    /** This function returns the dimension of the geometry, which is 2 in this case. */
+    /** This function returns the dimension of the geometry, which is 1 in this case (the
+        geometry is spherically symmetric, even with the anisotropic emissivity). */
     int dimension() const;
 
     /** This function returns the density \f$\rho({\bf{r}})\f$ at the position
@@ -69,17 +70,17 @@ public:
 
     /** This function returns the X-axis surface density, i.e. the integration of
         the density along the entire X-axis, \f[ \Sigma_X = \int_{-\infty}^\infty \rho(x,0,0)\,
-        {\text{d}}x. \f] For this geometry, \f$ \Sigma_X = 1/2\pi\,r_{\text{bg}}^2 \f$. */
+        {\text{d}}x. \f] For this geometry, \f$ \Sigma_X = 1/(2\pi\,r_{\text{bg}}^2) \f$. */
     double SigmaX() const;
 
     /** This function returns the Y-axis surface density, i.e. the integration of
         the density along the entire Y-axis, \f[ \Sigma_Y = \int_{-\infty}^\infty \rho(0,y,0)\,
-        {\text{d}}y. \f] For this geometry, \f$ \Sigma_Y = 1/2\pi\,r_{\text{bg}}^2 \f$. */
+        {\text{d}}y. \f] For this geometry, \f$ \Sigma_Y = 1/(2\pi\,r_{\text{bg}}^2) \f$. */
     double SigmaY() const;
 
     /** This function returns the Z-axis surface density, i.e. the integration of
         the density along the entire Z-axis, \f[ \Sigma_Z = \int_{-\infty}^\infty \rho(0,0,z)\,
-        {\text{d}}z. \f] For this geometry, \f$ 1/2\pi\,r_{\text{bg}}^2 \f$. */
+        {\text{d}}z. \f] For this geometry, \f$ 1/(2\pi\,r_{\text{bg}}^2) \f$. */
     double SigmaZ() const;
 
     // - - - - - - AngularDistribution interface - - - - - -
@@ -117,8 +118,11 @@ public:
         over an angle \f$\varphi\f$ along the Z-axis, followed by a rotation over an angle
         \f$\theta\f$ over the Y'-axis, where \f$\theta\f$ and \f$\varphi\f$ are the
         polar angle and azimuth of the position vector \f${\bf{r}}\f$. The connection is hence
-        \f[ \begin{bmatrix} k'_x \\ k'_y \\ k'_z \end{bmatrix} = \begin{bmatrix} \cos\theta & 0
-        & -\sin\theta \\ 0 & 1 & 0 \\ \sin\theta & 0 & \cos\theta \end{bmatrix}
+        \f[ \begin{bmatrix} k'_x \\ k'_y \\ k'_z \end{bmatrix}
+        =
+        \begin{bmatrix}
+        \cos\theta & 0 & -\sin\theta \\ 0 & 1 & 0 \\ \sin\theta & 0 & \cos\theta
+        \end{bmatrix}
         \begin{bmatrix}
         \cos\phi & \sin\phi & 0 \\ -\sin\phi & \cos\phi & 0 \\ 0 & 0 & 1
         \end{bmatrix}
@@ -148,4 +152,4 @@ private:
 
 ////////////////////////////////////////////////////////////////////
 
-#endif // BACKGROUNDGEOMETRY_HPP
+#endif // SPHEBACKGROUNDGEOMETRY_HPP

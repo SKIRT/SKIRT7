@@ -18,7 +18,6 @@
 #include "AmHydrocarbonGrainComposition.hpp"
 #include "AxGeometry.hpp"
 #include "AxSpheDustGridStructure.hpp"
-#include "BackgroundGeometry.hpp"
 #include "Benchmark1DDustMix.hpp"
 #include "Benchmark2DDustMix.hpp"
 #include "BinTreeDustGridStructure.hpp"
@@ -30,6 +29,7 @@
 #include "CompDustDistribution.hpp"
 #include "ConfigurableDustMix.hpp"
 #include "CropGeometryDecorator.hpp"
+#include "CubBackgroundGeometry.hpp"
 #include "CubicSplineSmoothingKernel.hpp"
 #include "Dim1DustLib.hpp"
 #include "Dim2DustLib.hpp"
@@ -135,6 +135,7 @@
 #include "SimpleInstrument.hpp"
 #include "SingleGrainSizeDistribution.hpp"
 #include "SmoothingKernel.hpp"
+#include "SpheBackgroundGeometry.hpp"
 #include "SpheGeometry.hpp"
 #include "SphericalCavityGeometryDecorator.hpp"
 #include "SpheroidalGeometryDecorator.hpp"
@@ -260,7 +261,8 @@ void RegisterSimulationItems::registerAll()
     add<NetzerAccretionDiskGeometry>();
     add<StellarSurfaceGeometry>();
     add<SolarPatchGeometry>();
-    add<BackgroundGeometry>();
+    add<SpheBackgroundGeometry>();
+    add<CubBackgroundGeometry>();
 
     // TRUST benchmark geometries
     add<Trust1Geometry>();
