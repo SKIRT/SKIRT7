@@ -208,6 +208,7 @@ double DustLib::luminosity(int m, int ell) const
 
 void DustLib::assemble()
 {
+    // Get a pointer to the PeerToPeerCommunicator of this simulation
     PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
 
     size_t Ncells = _nv.size();

@@ -13,6 +13,7 @@
 #include "NR.hpp"
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
+#include "PeerToPeerCommunicator.hpp"
 #include "Random.hpp"
 #include "TreeDustGridStructure.hpp"
 #include "TreeNode.hpp"
@@ -55,9 +56,13 @@ void TreeDustGridStructure::setupSelfBefore()
     if (_maxlevel <= _minlevel)
         throw FATALERROR("Maximum tree level should be larger than minimum tree level");
 
-    // Cache some often used values
+    // Get a pointer to the PeerToPeerCommunicator of this simulation
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
 
-    _parallel = find<ParallelFactory>()->parallel(4);   // limit number of threads for performance reasons
+    // Cache some often used values
+    // A Parallel instance is created with a limited amount of threads (4) for performance reasons, and only 1 thread
+    // if multiprocessing is enabled (so that an identical tree is built on each process)
+    _parallel = find<ParallelFactory>()->parallel(comm->isMultiProc() ? 1 : 4);
     _dd = find<DustDistribution>();
     _dmib = _dd->interface<DustMassInBoxInterface>();
     _useDmibForSubdivide = _dmib && !_maxDensDispFraction;

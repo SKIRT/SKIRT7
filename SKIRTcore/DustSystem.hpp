@@ -18,6 +18,7 @@ class DustGridDensityInterface;
 class DustGridStructure;
 class DustMix;
 class PhotonPackage;
+class ProcessAssigner;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -71,6 +72,12 @@ class DustSystem : public SimulationItem
     Q_CLASSINFO("Property", "writeCellsCrossed")
     Q_CLASSINFO("Title", "output statistics on the number of cells crossed per path")
     Q_CLASSINFO("Default", "no")
+
+    Q_CLASSINFO("Property", "assigner")
+    Q_CLASSINFO("Title", "the parallel process assignment scheme")
+    Q_CLASSINFO("Default", "SequentialAssigner")
+    Q_CLASSINFO("Optional", "true")
+    Q_CLASSINFO("Silent", "true")
 
     //============= Construction - Setup - Destruction =============
 
@@ -236,6 +243,20 @@ public:
         number of dust grid cells crossed per path calculated through the grid. */
     Q_INVOKABLE bool writeCellsCrossed() const;
 
+    /** This function sets the process assigner for this dust system. The process assigner is the
+        object that assigns different dust cells to different processes, to parallelize the calculation
+        of the dust density in each cell. The ProcessAssigner class is the abstract class that
+        represents different types of assigners; different subclass implement the assignment in
+        different ways. While the most straightforward types of process assigners are used to assign
+        each dust cell to a different process to speed up the calculation, one ProcessAssigner subclass
+        lets all processes calculate the densities for all dust cells. This can be useful if the
+        calculation itsself, perhaps by using an efficient grid density interface, is not CPU expensive
+        but the subsequent communication between processes proves to be time consuming. */
+    Q_INVOKABLE void setAssigner(ProcessAssigner* value);
+
+    /** Returns the process assigner for this dust library. */
+    Q_INVOKABLE ProcessAssigner* assigner() const;
+
     //======================== Other Functions =======================
 
 public:
@@ -353,6 +374,22 @@ public:
         polarization; false otherwise. */
     bool polarization() const;
 
+private:
+    /** This function is used to assemble the container that stores the densities of all dust cells for
+        each dust component. If multiprocessing is enabled, the calculation of these densities can be
+        performed in parallel by the different processes, depending on the type of ProcessAssigner that
+        is used for this dust system. When a ProcessAssigner subclass is used which distributes the
+        calculation of the dust cell densities amongst the different parallel processes, each process
+        contains only the densities for a particular set of dust cells (but for each dust component).
+        Therefore, this function uses the PeerToPeerCommunicator object to broadcast the densities of
+        the dust cells assigned to a particular process to all other processes and storing them in the
+        appropriate place in the container. This is implemented as an element-wise summation of this
+        container across all processes, where the density for a particular dust cell and dust component
+        will be added to a series of zeros, coming from the processes that were not assigned to that
+        dust cell. The end result will be an assembly of the densities, where each process stores the
+        density over the entire dust grid. */
+    void assemble();
+
     //======================== Data Members ========================
 
 protected:
@@ -367,6 +404,9 @@ protected:
     bool _writeQuality;
     bool _writeCellProperties;
     bool _writeCellsCrossed;
+
+    // the process assigner; determines which dust cells are assigned to this process
+    ProcessAssigner* _assigner;
 
     // data members initialized during setup
     int _Ncomp;

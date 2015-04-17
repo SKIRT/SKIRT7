@@ -48,6 +48,22 @@ void DustSystem::setupSelfBefore()
     if (!_grid) throw FATALERROR("Dust grid structure was not set");
 }
 
+////////////////////////////////////////////////////////////////////
+
+void DustSystem::setAssigner(ProcessAssigner* value)
+{
+    if (_assigner) delete _assigner;
+    _assigner = value;
+    if (_assigner) _assigner->setParent(this);
+}
+
+////////////////////////////////////////////////////////////////////
+
+ProcessAssigner* DustSystem::assigner() const
+{
+    return _assigner;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void DustSystem::setupSelfAfter()
@@ -62,26 +78,33 @@ void DustSystem::setupSelfAfter()
     _volumev.resize(_Ncells);
     _rhovv.resize(_Ncells,_Ncomp);
 
-    // Set the volume of the cells
-    find<Log>()->info("Calculating the volume of the cells...");
-    find<ParallelFactory>()->parallel()->call(this, &DustSystem::setVolumeBody, _Ncells);
+    // Get a pointer to the PeerToPeerCommunicator of this simulation
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
 
-    // Set the density of the cells
+    // Set the volume of the cells (parallelized over different threads, except when multiprocessing is enabled)
+    find<Log>()->info("Calculating the volume of the cells...");
+    find<ParallelFactory>()->parallel(comm->isMultiProc())->call(this, &DustSystem::setVolumeBody, _Ncells);
+
+    // assign each process to a set of dust cells
+    _assigner->assign(_Ncells);
+
+    // Calculate and set the density of the cells that are assigned to this process
     _gdi = _grid->interface<DustGridDensityInterface>();
     if (_gdi)
     {
         // if the dust grid offers a special interface, use it
         find<Log>()->info("Setting the value of the density in the cells using grid interface...");
-        find<ParallelFactory>()->parallel()->call(this, &DustSystem::setGridDensityBody, _Ncells);
+        find<ParallelFactory>()->parallel()->call(this, &DustSystem::setGridDensityBody, _Ncells, _assigner);
     }
     else
     {
         // otherwise take an average of the density in 100 random positions in the cell (parallelized)
         find<Log>()->info("Setting the value of the density in the cells...");
-        find<ParallelFactory>()->parallel()->call(this, &DustSystem::setSampleDensityBody, _Ncells);
+        find<ParallelFactory>()->parallel()->call(this, &DustSystem::setSampleDensityBody, _Ncells, _assigner);
     }
 
-    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+    // obtain the densities in all dust cells, if the calculation has been performed by parallel processes
+    if (_assigner->parallel()) assemble();
 
     // Perform a convergence check on the grid.
     if (_writeConvergence && comm->isRoot()) writeconvergence();
@@ -143,6 +166,20 @@ void DustSystem::setSampleDensityBody(size_t m)
     {
         for (int h=0; h<_Ncomp; h++) _rhovv(m,h) = 0;
     }
+}
+
+////////////////////////////////////////////////////////////////////
+
+void DustSystem::assemble()
+{
+    // Get a pointer to the PeerToPeerCommunicator of this simulation
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+
+    Array* arr;
+    arr = _rhovv.getArray();
+
+    // Sum the array across all processes
+    comm->sum_all(*arr);
 }
 
 ////////////////////////////////////////////////////////////////////
