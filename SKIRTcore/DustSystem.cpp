@@ -96,13 +96,13 @@ void DustSystem::setupSelfAfter()
     {
         // if the dust grid offers a special interface, use it
         find<Log>()->info("Setting the value of the density in the cells using grid interface...");
-        find<ParallelFactory>()->parallel()->call(this, &DustSystem::setGridDensityBody, _Ncells, _assigner);
+        find<ParallelFactory>()->parallel()->call(this, &DustSystem::setGridDensityBody, _assigner->nvalues(), _assigner);
     }
     else
     {
         // otherwise take an average of the density in 100 random positions in the cell (parallelized)
         find<Log>()->info("Setting the value of the density in the cells...");
-        find<ParallelFactory>()->parallel()->call(this, &DustSystem::setSampleDensityBody, _Ncells, _assigner);
+        find<ParallelFactory>()->parallel()->call(this, &DustSystem::setSampleDensityBody, _assigner->nvalues(), _assigner);
     }
 
     // obtain the densities in all dust cells, if the calculation has been performed by parallel processes
