@@ -35,6 +35,14 @@ size_t StaggeredAssigner::absoluteIndex(size_t relativeIndex)
 
 ////////////////////////////////////////////////////////////////////
 
+size_t StaggeredAssigner::relativeIndex(size_t absoluteIndex)
+{
+    size_t relativeIndex = (absoluteIndex - _comm->rank()) / _comm->size();
+    return relativeIndex;
+}
+
+////////////////////////////////////////////////////////////////////
+
 int StaggeredAssigner::rankForIndex(size_t index) const
 {
     return (index % _comm->size());

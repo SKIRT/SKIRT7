@@ -47,6 +47,13 @@ size_t SequentialAssigner::absoluteIndex(size_t relativeIndex)
 
 ////////////////////////////////////////////////////////////////////
 
+size_t SequentialAssigner::relativeIndex(size_t absoluteIndex)
+{
+    return (absoluteIndex - _start);
+}
+
+////////////////////////////////////////////////////////////////////
+
 int SequentialAssigner::rankForIndex(size_t index) const
 {
     int rank;

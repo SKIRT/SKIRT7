@@ -59,6 +59,15 @@ public:
         defines this function in a different way. */
     virtual size_t absoluteIndex(size_t relativeIndex) = 0;
 
+    /** This purely virtual function must be implemented in each of the ProcessAssigner subclasses. As
+        an argument, it takes a value from zero to the number of parts of work that is used for the
+        assignment, minus one. This value is the absolute index of this part of work. This function
+        translates that absolute index to the relative index corresponding with that part of work for
+        this process, a value between zero and the number of values assigned to this process, _nvalues.
+        According to their assignment procedure, each ProcessAssigner subclass defines this function in
+        a different way. */
+    virtual size_t relativeIndex(size_t absoluteIndex) = 0;
+
     /** This purely virtual function can be called to determine which process is assigned to a certain
         part of work. The index argument passed to this function is the absolute index of that part,
         ranging from zero to the size argument passed to the assign function. The return value is the

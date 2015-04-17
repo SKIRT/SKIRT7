@@ -29,6 +29,13 @@ size_t IdenticalAssigner::absoluteIndex(size_t relativeIndex)
 
 ////////////////////////////////////////////////////////////////////
 
+size_t IdenticalAssigner::relativeIndex(size_t absoluteIndex)
+{
+    return absoluteIndex;
+}
+
+////////////////////////////////////////////////////////////////////
+
 int IdenticalAssigner::rankForIndex(size_t /*index*/) const
 {
     throw FATALERROR("This function should never be called");

@@ -68,6 +68,12 @@ public:
         index to the index of the starting value for this process, stored in the _start member. */
     size_t absoluteIndex(size_t relativeIndex);
 
+    /** This function takes the absolute index of a certain part of the work as an argument and returns
+        the relative index of that part, a value from zero to the number of parts that were assigned to
+        this process, _nvalues. This is done by subtracting the index of the starting value for this
+        process, _start, from the absolute index. */
+    size_t relativeIndex(size_t absoluteIndex);
+
     /** This function returns the rank of the process that is assigned to a certain part of the work.
         This part is identified by its absolute index, passed to this function as an argument. The
         algorithm of this function differentiates between two cases: <ol> <li> The index \f$t\f$ is

@@ -48,6 +48,12 @@ public:
         processes to all of the work, this function just returns the argument. */
     size_t absoluteIndex(size_t relativeIndex);
 
+    /** This function takes the absolute index of a certain part of the work as an argument and returns
+        the relative index of that part, a value from zero to the number of parts that were assigned to
+        this process, _nvalues. Since this class assigns all processes to all of the work, this
+        function just returns the argument. */
+    size_t relativeIndex(size_t absoluteIndex);
+
     /** This function which must be implemented in each subclass of ProcessAssigner, returns the rank
         assigned to a certain part of the work. In this class however, each process is assigned to each
         part of work, so this function has no purpose and even has no meaning. Therefore, the

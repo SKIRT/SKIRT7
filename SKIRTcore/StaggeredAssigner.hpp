@@ -59,6 +59,13 @@ public:
         the process, \f$u\f$ is the relative index and \f$N_P\f$ is the number of processes. */
     size_t absoluteIndex(size_t relativeIndex);
 
+    /** This function takes the absolute index of a certain part of the work as an argument and returns
+        the relative index of that part, a value from zero to the number of parts that were assigned to
+        this process, _nvalues. This relative index \f$u\f$ is determined by the following formula: \f[
+        u = \frac{t - i}{N_P} \f] where \f$i\f$ is the rank of the process, \f$t\f$ is the absolute
+        index and \f$N_P\f$ is the number of processes. */
+    size_t relativeIndex(size_t absoluteIndex);
+
     /** This function returns the rank of the process that is assigned to a certain part of the work.
         This part is identified by its absolute index, passed to this function as an argument. The rank
         \f$j\f$ is calculated as follows: \f[ j = t \bmod{N_P} \f] where \f$t\f$ is the absolute index
