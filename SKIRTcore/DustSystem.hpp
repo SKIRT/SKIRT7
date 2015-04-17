@@ -254,7 +254,7 @@ public:
         but the subsequent communication between processes proves to be time consuming. */
     Q_INVOKABLE void setAssigner(ProcessAssigner* value);
 
-    /** Returns the process assigner for this dust library. */
+    /** Returns the process assigner for this dust system. */
     Q_INVOKABLE ProcessAssigner* assigner() const;
 
     //======================== Other Functions =======================

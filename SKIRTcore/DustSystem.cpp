@@ -23,6 +23,7 @@
 #include "PeerToPeerCommunicator.hpp"
 #include "PhotonPackage.hpp"
 #include "Random.hpp"
+#include "SequentialAssigner.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
 #include <QVarLengthArray>
@@ -34,7 +35,7 @@ using namespace std;
 DustSystem::DustSystem()
     : _dd(0), _grid(0), _gdi(0), _Nrandom(100),
       _writeConvergence(true), _writeDensity(true), _writeDepthMap(false),
-      _writeQuality(false), _writeCellProperties(false), _writeCellsCrossed(false)
+      _writeQuality(false), _writeCellProperties(false), _writeCellsCrossed(false), _assigner(0)
 {
 }
 
@@ -46,6 +47,7 @@ void DustSystem::setupSelfBefore()
 
     if (!_dd) throw FATALERROR("Dust distribution was not set");
     if (!_grid) throw FATALERROR("Dust grid structure was not set");
+    if (!_assigner) setAssigner(new SequentialAssigner());
 }
 
 ////////////////////////////////////////////////////////////////////
