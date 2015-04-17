@@ -149,7 +149,7 @@ void DustSystem::setSampleDensityBody(size_t m)
     if (m%100000==0)
     {
         find<Log>()->info("  Computing density for cell " + QString::number(m)
-                          + " (" + QString::number(floor(100.*m/_Ncells)) + "%)");
+                          + " (" + QString::number(floor(100.*_assigner->relativeIndex(m)/_assigner->nvalues())) + "%)");
     }
     if (_grid->weight(m) > 0)
     {
