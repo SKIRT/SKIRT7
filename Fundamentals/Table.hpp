@@ -77,13 +77,12 @@ public:
     // Sets all values in the table to zero.
     void clear() { _v = 0; }
 
-    /** This function returns a pointer to the internal array of the Table object. Because this is
-        very dirty, using this function should be avoid in almost all cases. This function is only
-        used in the SKIRT code for the MPI communications, which require a set of contiguous data.
-        Calling the getArray() function avoids the need of copying the elements of Table objects
-        into arrays before passing them to MPI communication functions, which would cause a
-        significant overhead. */
-    Array* getArray() { return &_v; }
+    /** This function returns a reference to the internal array of the Table object. Because this is
+        very dirty, using this function should be avoid in almost all cases. This function is only used
+        in the SKIRT code for the MPI communications, which require a set of contiguous data. Calling
+        the getArray() function avoids the need of copying the elements of Table objects into arrays
+        before passing them to MPI communication functions, which would cause a significant overhead. */
+    Array& getArray() { return _v; }
 };
 
 ////////////////////////////////////////////////////////////////////

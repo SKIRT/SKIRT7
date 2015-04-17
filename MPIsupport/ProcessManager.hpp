@@ -77,11 +77,11 @@ public:
         function for the communication to proceed. */
     static void sum(double* my_array, double* result_array, int nvalues, int root);
 
-    /** The purpose of this function is to sum a particular array of double values element-wise
-        across the different processes. The resulting values are stored in the array passed as the
-        second argument 'result_array', on each individual process. All processes must call this
-        function for the communication to proceed. */
-    static void sum_all(double* my_array, double* result_array, int nvalues);
+    /** The purpose of this function is to sum a particular array of double values element-wise across
+        the different processes. The resulting values are stored in the original array passed to this
+        function, on each individual process. All processes must call this function for the
+        communication to proceed. */
+    static void sum_all(double* my_array, int nvalues);
 
     /** This function is used to broadcast an array of double values from one process to all other
         processes. A pointer to the first value is passed as the first argument, the number of

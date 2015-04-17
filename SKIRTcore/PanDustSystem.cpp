@@ -383,11 +383,8 @@ void PanDustSystem::sumResults(bool ynstellar)
     // Get a pointer to the PeerToPeerCommunicator of this simulation
     PeerToPeerCommunicator * comm = find<PeerToPeerCommunicator>();
 
-    Array* arr;
-    arr = ynstellar ? _Labsstelvv.getArray() : _Labsdustvv.getArray();
-
-    // Sum the array across all processes
-    comm->sum_all(*arr);
+    // Sum the array of luminosities across all processes
+    comm->sum_all(ynstellar ? _Labsstelvv.getArray() : _Labsdustvv.getArray());
 }
 
 ////////////////////////////////////////////////////////////////////

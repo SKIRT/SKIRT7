@@ -175,11 +175,8 @@ void DustSystem::assemble()
     // Get a pointer to the PeerToPeerCommunicator of this simulation
     PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
 
-    Array* arr;
-    arr = _rhovv.getArray();
-
-    // Sum the array across all processes
-    comm->sum_all(*arr);
+    // Sum the densities array across all processes
+    comm->sum_all(_rhovv.getArray());
 }
 
 ////////////////////////////////////////////////////////////////////
