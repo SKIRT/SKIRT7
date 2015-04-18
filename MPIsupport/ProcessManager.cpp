@@ -135,7 +135,7 @@ void ProcessManager::sum_all(double* my_array, int nvalues)
 #ifdef BUILDING_WITH_MPI
     MPI_Allreduce(MPI_IN_PLACE, my_array, nvalues, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 #else
-    Q_UNUSED(my_array) Q_UNUSED(result_array) Q_UNUSED(nvalues)
+    Q_UNUSED(my_array) Q_UNUSED(nvalues)
 #endif
 }
 
