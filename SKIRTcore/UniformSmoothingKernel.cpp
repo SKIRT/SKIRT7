@@ -29,7 +29,7 @@ UniformSmoothingKernel::density(double u)
 const
 {
     if (u<0.0 || u>1.0) return 0.0;
-    return 0.75*M_PI;
+    return 0.75/M_PI;
 }
 
 //////////////////////////////////////////////////////////////////////
