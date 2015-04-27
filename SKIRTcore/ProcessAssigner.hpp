@@ -32,7 +32,7 @@ class ProcessAssigner : public SimulationItem
 
 protected:
     /** The default constructor; it is protected since this is an abstract class. */
-    ProcessAssigner();
+    ProcessAssigner(PeerToPeerCommunicator* comm);
 
     //======================== Other Functions =======================
 
@@ -41,14 +41,19 @@ public:
         assigned to the calling process. This number is stored in the _nvalues data member. */
     size_t nvalues();
 
-    /** This function invokes the assignment procedure. As an argument, it takes the number of
-        parts of work that need to be performed. This function is declared purely virtual so it
-        must be defined in either of the subclasses. The algorithm of this function is therefore
-        implemented differently in each of the subclasses, and typically involves some calculations
-        to determine which process is assigned to which work. Each subclass must ensure that the
-        assign function determines the number of values that are assigned to the process, and
-        stores it in the _nvalues member. */
-    virtual void assign(size_t size) = 0;
+    /** This function invokes the assignment procedure. As a first argument, it takes the number of
+        parts of work that need to be performed. As a second optional argument, it takes the number of
+        blocks; which represents the number of times a set of \c size parts is encountered in the
+        entire collection that holds each and every distinguishable piece of work. This function is
+        declared purely virtual so it must be defined in either of the subclasses. The algorithm of
+        this function is therefore implemented differently in each of the subclasses, and typically
+        involves some calculations to determine which process is assigned to which parts of work. Each
+        subclass must ensure that the assign function determines the number of values that are assigned
+        to the process, and stores it in the _nvalues member. The typical behaviour of a subclass would
+        be to repeat its assignment scheme used for the first \c size values, for as many times as
+        there are blocks, if \c blocks > 1 (although the IdenticalAssigner subclass deviates from this
+        behaviour). */
+    virtual void assign(size_t size, size_t blocks = 1) = 0;
 
     /** This purely virtual function must be implemented in each of the ProcessAssigner subclasses. As
         an argument, it can take any value between zero and the number of values assigned to the
@@ -74,10 +79,11 @@ public:
         rank of the process corresponding with that part of work. */
     virtual int rankForIndex(size_t index) const = 0;
 
-    /** This function returns true if the different parts of work are distributed amongst the different
-        processes and returns false if each process is assigned to the same work. Since this is a
-        purely virtual function, subclasses must implement it appropriately. Except for the
-        IdenticalAssigner class, each subclass returns true. */
+    /** This function returns \c true if the different parts of work are distributed amongst the
+        different processes and returns \c false if each process is assigned to the same work. Thus, it
+        indicates whether multithreading can be safely used to parallelize the work even further or
+        not. Since this is a purely virtual function, subclasses must implement it appropriately.
+        Except for the IdenticalAssigner class, each subclass always returns true. */
     virtual bool parallel() const = 0;
 
     //======================== Data Members ========================

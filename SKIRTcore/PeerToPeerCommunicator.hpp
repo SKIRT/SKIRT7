@@ -45,6 +45,9 @@ public:
         second argument. */
     void broadcast(Array& arr, int sender);
 
+    /** This function returns the rank of the root process. */
+    int root();
+
     /** This function returns whether the process is assigned as the root within this communicator
         or not. */
     bool isRoot();

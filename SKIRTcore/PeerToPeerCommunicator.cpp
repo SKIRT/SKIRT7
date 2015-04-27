@@ -43,6 +43,13 @@ void PeerToPeerCommunicator::broadcast(Array& arr, int sender)
 
 ////////////////////////////////////////////////////////////////////
 
+int PeerToPeerCommunicator::root()
+{
+    return ROOT;
+}
+
+////////////////////////////////////////////////////////////////////
+
 bool PeerToPeerCommunicator::isRoot()
 {
     return (rank() == ROOT);

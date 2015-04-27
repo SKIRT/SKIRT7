@@ -25,7 +25,11 @@
 
     The assignment mechanism explained above is represented graphically in the following figure.
 
-    \image html staggeredassigner.png "The StaggeredAssigner class distributes the work amongst the processes in a staggered way." */
+    \image html staggeredassigner.png "The StaggeredAssigner class distributes the work amongst the processes in a staggered way."
+
+    When the assignment procedure of this class (the assign() function) is called with a number of
+    blocks that is greater than one, the assignment scheme described above is repeated \f$m\f$
+    times, where \f$m\f$ is the number of blocks. */
 class StaggeredAssigner : public ProcessAssigner
 {
     Q_OBJECT
@@ -34,8 +38,9 @@ class StaggeredAssigner : public ProcessAssigner
     //============= Construction - Setup - Destruction =============
 
 public:
-    /** The default constructor. */
-    Q_INVOKABLE StaggeredAssigner();
+    /** The default constructor. A pointer to the PeerToPeerCommunicator of the simulation must be
+        supplied as an argument. */
+    Q_INVOKABLE StaggeredAssigner(PeerToPeerCommunicator* comm);
 
     //======================== Other Functions =======================
 
@@ -46,24 +51,26 @@ public:
         process and stores it in the _nvalues member. This is done as follows. First, a pointer to the
         PeerToPeerCommunicator object is obtained by using the find operation. Then, in a loop over all
         indices \f$t\f$ from zero to \f$n-1\f$, it is checked whether the process, which has rank
-        \f$i\f$ is assigned to the value with index \f$t\f$. If this is so, the _nvalues member is
+        \f$i\f$ is assigned to the value with index \f$t\f$. If this is so, the \c _nvalues member is
         incremented. The condition that is checked for each index \f$t\f$ can be written mathematically
         as: \f[ t \bmod{N_P} = i \f] where \f$N_P\f$ is the number of processes and \f$i\f$ is the rank
-        of the process. */
-    void assign(size_t size);
+        of the process. If \c blocks > 1, the above assignment scheme is repeated \c blocks times. */
+    void assign(size_t size, size_t blocks = 1);
 
     /** This function takes the relative index of a certain part of the work assigned to this process
         as an argument and returns the absolute index of that part, a value from zero to the total
-        amount of parts that need to be executed in the simulation. This absolute index \f$t\f$ is
-        determined by the following formula: \f[ t = i + u \cdot N_P \f] where \f$i\f$ is the rank of
-        the process, \f$u\f$ is the relative index and \f$N_P\f$ is the number of processes. */
+        amount of parts that need to be executed in the simulation. In the case that \c blocks = 1,
+        this absolute index \f$t\f$ is determined by the following formula: \f[ t = i + u \cdot N_P \f]
+        where \f$i\f$ is the rank of the process, \f$u\f$ is the relative index and \f$N_P\f$ is the
+        number of processes. If \c blocks > 1, the calculation is more complicated. */
     size_t absoluteIndex(size_t relativeIndex);
 
     /** This function takes the absolute index of a certain part of the work as an argument and returns
         the relative index of that part, a value from zero to the number of parts that were assigned to
-        this process, _nvalues. This relative index \f$u\f$ is determined by the following formula: \f[
-        u = \frac{t - i}{N_P} \f] where \f$i\f$ is the rank of the process, \f$t\f$ is the absolute
-        index and \f$N_P\f$ is the number of processes. */
+        this process, _nvalues. In the case that \c blocks = 1, this relative index \f$u\f$ is
+        determined by the following formula: \f[ u = \frac{t - i}{N_P} \f] where \f$i\f$ is the rank of
+        the process, \f$t\f$ is the absolute index and \f$N_P\f$ is the number of processes. If \c
+        blocks > 1, the calculation is more complicated. */
     size_t relativeIndex(size_t absoluteIndex);
 
     /** This function returns the rank of the process that is assigned to a certain part of the work.
@@ -76,6 +83,12 @@ public:
         processes and returns false if each process is assigned to the same work. In this class, the
         processes are assigned to different work so this function returns true. */
     bool parallel() const;
+
+    //======================== Data Members ========================
+
+protected:
+    size_t _blocksize;      // the number of parts of work per block
+    size_t _valuesInBlock;  // the number of parts of work in a block assigned to this process
 };
 
 //////////////////////////////////////////////////////////////////////

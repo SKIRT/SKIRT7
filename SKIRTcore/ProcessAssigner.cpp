@@ -7,8 +7,8 @@
 
 ////////////////////////////////////////////////////////////////////
 
-ProcessAssigner::ProcessAssigner()
-    : _comm(0), _nvalues(0)
+ProcessAssigner::ProcessAssigner(PeerToPeerCommunicator* comm)
+    : _comm(comm), _nvalues(0)
 {
 }
 

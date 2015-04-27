@@ -9,6 +9,7 @@
 #include "DustGridPath.hpp"
 #include "DustGridPlotFile.hpp"
 #include "FatalError.hpp"
+#include "IdenticalAssigner.hpp"
 #include "Log.hpp"
 #include "NR.hpp"
 #include "Parallel.hpp"
@@ -29,7 +30,7 @@ TreeDustGridStructure::TreeDustGridStructure()
     : _minlevel(0), _maxlevel(0),
       _search(TopDown), _Nrandom(100),
       _maxOpticalDepth(0), _maxMassFraction(0), _maxDensDispFraction(0),
-      _parallel(0), _dd(0), _dmib(0),
+      _assigner(0), _parallel(0), _dd(0), _dmib(0),
       _totalmass(0), _eps(0),
       _Nnodes(0), _highestWriteLevel(0),
       _useDmibForSubdivide(false)
@@ -59,10 +60,12 @@ void TreeDustGridStructure::setupSelfBefore()
     // Get a pointer to the PeerToPeerCommunicator of this simulation
     PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
 
+    // If no assigner was set, use an IdenticalAssigner as default (each process builds the entire tree)
+    if (!_assigner) setAssigner(new IdenticalAssigner(comm));
+
     // Cache some often used values
-    // A Parallel instance is created with a limited amount of threads (4) for performance reasons, and only 1 thread
-    // if multiprocessing is enabled (so that an identical tree is built on each process)
-    _parallel = find<ParallelFactory>()->parallel(comm->isMultiProc() ? 1 : 4);
+    // A Parallel instance is created with a limited amount of threads (4) for performance reasons
+    _parallel = find<ParallelFactory>()->parallel(4);
     _dd = find<DustDistribution>();
     _dmib = _dd->interface<DustMassInBoxInterface>();
     _useDmibForSubdivide = _dmib && !_maxDensDispFraction;
@@ -184,7 +187,8 @@ void TreeDustGridStructure::subdivide(TreeNode* node)
             // sample the density in the cell
             TreeNodeSampleDensityCalculator* sampleCalc =
                     new TreeNodeSampleDensityCalculator(_random, _Nrandom, _dd, node);
-            _parallel->call(sampleCalc, _Nrandom);
+            _assigner->assign(_Nrandom);
+            _parallel->call(sampleCalc, _assigner);
             calc = sampleCalc;
         }
 
@@ -377,6 +381,22 @@ void TreeDustGridStructure::setMaxDensDispFraction(double value)
 double TreeDustGridStructure::maxDensDispFraction() const
 {
     return _maxDensDispFraction;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void TreeDustGridStructure::setAssigner(ProcessAssigner* value)
+{
+    if (_assigner) delete _assigner;
+    _assigner = value;
+    if (_assigner) _assigner->setParent(this);
+}
+
+////////////////////////////////////////////////////////////////////
+
+ProcessAssigner* TreeDustGridStructure::assigner() const
+{
+    return _assigner;
 }
 
 //////////////////////////////////////////////////////////////////////

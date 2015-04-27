@@ -12,8 +12,8 @@
 
 /** The SequentialAssigner class is a subclass of the ProcessAssigner class, representing objects
     that assign work to different processes. The SequentialAssigner does this by dividing the work
-    (consisting of many parts) in sequential blocks, where each block contains more or less the
-    same number of parts. Then, each process is assigned to a different block, according to their
+    (consisting of many parts) in sequential sections, where each section contains more or less the
+    same number of parts. Then, each process is assigned to a different section, according to their
     rank. If a certain method in another class incorporates an object of the SequentialAssigner
     class for performing a set of tasks (or parts of work), each process will execute a different
     subset of these tasks. After performing this work in parallel, communication is typically
@@ -21,7 +21,11 @@
 
     The assignment mechanism explained above is represented graphically in the following figure.
 
-    \image html sequentialassigner.png "The SequentialAssigner class assigns processes to a subset of the work." */
+    \image html sequentialassigner.png "The SequentialAssigner class assigns processes to a subset of the work."
+
+    When the assignment procedure of this class (the assign() function) is called with a number of
+    blocks that is greater than one, the assignment scheme described above is repeated \f$m\f$
+    times, where \f$m\f$ is the number of blocks. */
 class SequentialAssigner : public ProcessAssigner
 {
     Q_OBJECT
@@ -31,47 +35,55 @@ class SequentialAssigner : public ProcessAssigner
 
 public:
     /** Default constructor. */
-    Q_INVOKABLE SequentialAssigner();
+    Q_INVOKABLE SequentialAssigner(PeerToPeerCommunicator* comm);
 
     //======================== Other Functions =======================
 
 public:
-    /** This function invokes the assignment procedure. As an argument, it takes the number of parts of
-        work \f$n\f$ that need to be performed. Based on this number, the number of processes and the
-        rank of this process, this function determines the number of tasks that are assigned to this
-        process and stores it in the _nvalues member. The algorithm of this function goes as follows.
-        First, a pointer to the PeerToPeerCommunicator object is obtained and the rank \f$i\f$ and size
-        \f$N_{P}\f$ are acquired and stored in temporary variables. Then, the quotient and the
-        remainder of the integer division of \f$n\f$ and \f$N_{P}\f$ are calculated: \f[ q = \left
-        \lfloor{\frac{n}{N_{P}}}\right \rfloor \f] \f[ r = n \bmod{N_{P}} \f] These two values are
-        respectively stored in the private _quotient and _remainder members, for use of the
-        rankForIndex function. Next, based on \f$q\f$ and \f$r\f$, the number of values assigned to the
-        process is determined. This is done based on the following simple principle: <ol> <li> First,
-        hand out \f$q\f$ values to each process. <li> Then, give the first \f$r\f$ process one value
-        extra. </ol> This principle is illustrated in the following figure.
-        \image html sequentialassigner_tasks.png "An illustration of how the number of tasks assigned to each process is determined."
-        With the above method, all \f$n\f$ values get assigned to a process, and the work
-        load is maximally balanced (the difference in number of tasks between two arbitrary processes
-        is no more than one). The number of values (or tasks) as calculated based on the method
-        described above, is stored in the _nvalues member. The last thing the assign function
-        calculates is the starting value for the particular process. This is done by differentiating
-        between two seperate cases: <ul> <li> Either the rank \f$i\f$ of the process is smaller than
-        \f$r\f$, <li> or \f$i\f$ is greater than or equal to \f$r\f$. </ul> In the former case, the
-        starting index is given by: \f[ t_0 = i \cdot ( q + 1 ) \f] In the latter case, this index is
-        given by: \f[ t_0 = r \cdot ( q + 1) + (i - r) \cdot q \f] The resulting value is stored in
-        the private _start member of this class, for use in the absoluteIndex function. */
-    void assign(size_t size);
+    /** This function invokes the assignment procedure. As a first argument, it takes the number of
+        parts of work \f$n\f$ that need to be performed. Based on this number, the number of processes
+        and the rank of this process, this function determines the number of tasks that are assigned to
+        this process and stores it in the \c _nvalues member. As a second optional argument, it takes
+        the number of blocks; which represents the number of times a set of \c size parts is
+        encountered in the entire collection that holds each and every distinguishable piece of work.
+        If this number of blocks is greater than one, the total number of parts of work is \c size
+        \f$\times\f$ \c blocks, and accordingly the number of values assigned to each process will be
+        multiplied by \c blocks. The algorithm of this function goes as follows. First, from the
+        PeerToPeerCommunicator object, the rank \f$i\f$ and size \f$N_{P}\f$ are acquired and stored in
+        temporary variables. Then, the quotient and the remainder of the integer division of \f$n\f$
+        and \f$N_{P}\f$ are calculated: \f[ q = \left \lfloor{\frac{n}{N_{P}}}\right \rfloor \f] \f[ r
+        = n \bmod{N_{P}} \f] These two values are respectively stored in the private \c _quotient and
+        \c _remainder members, for use of the rankForIndex() function. Next, based on \f$q\f$ and
+        \f$r\f$, the number of values assigned to the process is determined. This is done based on the
+        following simple principle: <ol> <li> First, hand out \f$q\f$ values to each process. <li>
+        Then, give the first \f$r\f$ process one value extra. </ol> This principle is illustrated in
+        the following figure. \image html sequentialassigner_tasks.png "An illustration of how the
+        number of tasks assigned to each process is determined." With the above method, all \f$n\f$
+        values get assigned to a process, and the work load is maximally balanced (the difference in
+        number of tasks between two arbitrary processes is no more than one). The number of values (or
+        tasks) as calculated based on the method described above, is stored in the _nvalues member. The
+        last thing the assign function calculates is the starting value for the particular process.
+        This is done by differentiating between two seperate cases: <ul> <li> Either the rank \f$i\f$
+        of the process is smaller than \f$r\f$, <li> or \f$i\f$ is greater than or equal to \f$r\f$.
+        </ul> In the former case, the starting index is given by: \f[ t_0 = i \cdot ( q + 1 ) \f] In
+        the latter case, this index is given by: \f[ t_0 = r \cdot ( q + 1) + (i - r) \cdot q \f] The
+        resulting value is stored in the private \c _start member of this class, for use in the
+        absoluteIndex() function. If \c blocks > 1, the above assignment scheme is repeated \c blocks
+        times. */
+    void assign(size_t size, size_t blocks = 1);
 
     /** This function takes the relative index of a certain part of the work assigned to this process
         as an argument and returns the absolute index of that part, a value from zero to the total
-        amount of parts that need to be executed in the simulation. This is done by adding the relative
-        index to the index of the starting value for this process, stored in the _start member. */
+        amount of parts that need to be executed in the simulation. In the case that \c blocks = 1,
+        this is done by adding the relative index to the index of the starting value for this process,
+        stored in the \c _start member. If \c blocks > 1, the calculation is more complicated. */
     size_t absoluteIndex(size_t relativeIndex);
 
     /** This function takes the absolute index of a certain part of the work as an argument and returns
         the relative index of that part, a value from zero to the number of parts that were assigned to
-        this process, _nvalues. This is done by subtracting the index of the starting value for this
-        process, _start, from the absolute index. */
+        this process, \c _nvalues. In the case that \c blocks = 1, this is done by subtracting the
+        index of the starting value for this process, _start, from the absolute index. If \c blocks >
+        1, the calculation is more complicated. */
     size_t relativeIndex(size_t absoluteIndex);
 
     /** This function returns the rank of the process that is assigned to a certain part of the work.
@@ -80,7 +92,9 @@ public:
         smaller than \f$r \cdot (q + 1) \f$, <li> or \f$i\f$ is greater than or equal to \f$r \cdot (q
         + 1) \f$. </ol> In the former case, the rank \f$j\f$ is found by the following formula: \f[ j =
         \frac{t}{q + 1} \f] In the latter case, the rank is determined by: \f[ j = r + \frac{t^{*}}{q}
-        \f] where \f$ t^{*} = t - r \cdot (q + 1) \f$ */
+        \f] where \f$ t^{*} = t - r \cdot (q + 1) \f$
+        In the case that \c blocks > 1, the (absolute) index passed to this function is first converted
+        to the index within a certain block. */
     int rankForIndex(size_t index) const;
 
     /** This function returns true if the different parts of work are distributed amongst the different
@@ -94,6 +108,8 @@ protected:
     size_t _start;          // the index of the first value assigned to this process
     size_t _quotient;       // the quotient
     size_t _remainder;      // the remainder
+    size_t _blocksize;      // the number of parts of work per block
+    size_t _valuesInBlock;  // the number of parts of work in a block assigned to this process
 };
 
 ////////////////////////////////////////////////////////////////////

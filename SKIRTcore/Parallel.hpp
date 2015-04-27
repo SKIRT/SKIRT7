@@ -81,19 +81,19 @@ public:
     /** Returns the number of threads used by this instance. */
     int threadCount() const;
 
-    /** Calls the body() function of the specified specified target object \em limit times, with the
-        value of the \em index argument ranging from 0 to \em limit-1. The work is distributed over the
-        parallel threads in an unpredicable manner. As an optional argument, a pointer to a
-        ProcessAssigner can be passed. This object is then used to convert the indices ranging from 0
-        to \em limit-1 to absolute indices, spanning a greater value range. */
-    void call(ParallelTarget* target, size_t limit, ProcessAssigner* assigner = 0);
+    /** Calls the body() function of the specified specified target object a certain number of times,
+        with the \em index argument of that function taking values that are determined by the \em
+        assigner, which is also passed to this function. While the values assigned to a particular
+        process are fixed at the moment this function is called, the work will be distributed over the
+        parallel threads in an unpredicable manner. */
+    void call(ParallelTarget* target, ProcessAssigner* assigner);
 
-    /** Calls the specified member function for the specified target object \em limit times, with
-        the value of the \em index argument ranging from 0 to \em limit-1. The work is distributed
-        over the parallel threads in an unpredicable manner. As an optional argument, a pointer to a
-        ProcessAssigner can be passed. This object is then used to convert the indices ranging from 0
-        to \em limit-1 to absolute indices, spanning a greater value range. */
-    template<class T> void call(T* targetObject, void (T::*targetMember)(size_t index), size_t limit, ProcessAssigner* assigner = 0);
+    /** Calls the specified member function for the specified target object a certain number of times,
+        with the \em index argument of that function taking values that are determined by the \em
+        assigner, which is also passed to this function. While the values assigned to a particular
+        process are fixed at the moment this function is called, the work will be distributed over the
+        parallel threads in an unpredicable manner. */
+    template<class T> void call(T* targetObject, void (T::*targetMember)(size_t index), ProcessAssigner* assigner);
 
 private:
     /** The function that gets executed inside each of the parallel threads. */
@@ -179,10 +179,10 @@ private:
 ////////////////////////////////////////////////////////////////////
 
 // outermost portion of the call() template function implementation
-template<class T> void Parallel::call(T* targetObject, void (T::*targetMember)(size_t index), size_t limit, ProcessAssigner* assigner)
+template<class T> void Parallel::call(T* targetObject, void (T::*targetMember)(size_t index), ProcessAssigner* assigner)
 {
     Target<T> target(targetObject, targetMember);
-    call(&target, limit, assigner);
+    call(&target, assigner);
 }
 
 ////////////////////////////////////////////////////////////////////

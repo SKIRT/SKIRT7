@@ -7,6 +7,7 @@
 #include "DustMix.hpp"
 #include "DustSystem.hpp"
 #include "FatalError.hpp"
+#include "IdenticalAssigner.hpp"
 #include "Instrument.hpp"
 #include "InstrumentSystem.hpp"
 #include "Log.hpp"
@@ -26,7 +27,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////
 
 MonteCarloSimulation::MonteCarloSimulation()
-    : _is(0), _packages(0), _continuousScattering(false), _lambdagrid(0), _ss(0), _ds(0)
+    : _is(0), _packages(0), _continuousScattering(false), _lambdagrid(0), _ss(0), _ds(0), _assigner(0)
 {
 }
 
@@ -40,6 +41,9 @@ void MonteCarloSimulation::setupSelfBefore()
     if (!_ss) throw FATALERROR("Stellar system was not set");
     if (!_is) throw FATALERROR("Instrument system was not set");
     // dust system is optional; nr of packages has a valid default
+
+    // If no assigner was set, use an IdenticalAssigner as default
+    if (!_assigner) setAssigner(new IdenticalAssigner(_comm));
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -69,14 +73,18 @@ void MonteCarloSimulation::setChunkParams(double packages)
         else
         {
             int myPackages = packages/Nprocs;
-            _Nchunks = ceil( qMin(myPackages/2e4, qMax(myPackages/1e7, 10.*Nthreads/_Nlambda)) );
-            _chunksize = ceil(myPackages/_Nchunks);
-            _Npp = Nprocs*_Nchunks*_chunksize;
+            quint64 Nchunkspp = ceil( qMin(myPackages/2e4, qMax(myPackages/1e7, 10.*Nthreads/_Nlambda)) );
+            _chunksize = ceil(myPackages/Nchunkspp);
+            _Nchunks = Nchunkspp * Nprocs;
+            _Npp = _Nchunks * _chunksize;
         }
     }
 
     // determine the log frequency; continuous scattering is much slower!
     _logchunksize = _continuousScattering ? 5000 : 50000;
+
+    // Assign the _Nlambda x _Nchunks different chunks to the different parallel processes
+    _assigner->assign(_Nlambda, _Nchunks);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -124,6 +132,22 @@ void MonteCarloSimulation::setContinuousScattering(bool value)
 
 ////////////////////////////////////////////////////////////////////
 
+void MonteCarloSimulation::setAssigner(ProcessAssigner* value)
+{
+    if (_assigner) delete _assigner;
+    _assigner = value;
+    if (_assigner) _assigner->setParent(this);
+}
+
+////////////////////////////////////////////////////////////////////
+
+ProcessAssigner* MonteCarloSimulation::assigner() const
+{
+    return _assigner;
+}
+
+////////////////////////////////////////////////////////////////////
+
 bool MonteCarloSimulation::continuousScattering() const
 {
     return _continuousScattering;
@@ -147,8 +171,8 @@ void MonteCarloSimulation::initprogress(QString phase)
                + (_Nlambda==1 ? QString("a single wavelength") : QString("each of %1 wavelengths").arg(_Nlambda))
                + ")");
 
-    if (_comm->isMultiProc()) _log->info("(" + QString::number(_Nchunks*_chunksize) + " photon packages "
-                                         + "per wavelength per process)");
+    if (_comm->isMultiProc()) _log->info("(" + QString::number(_assigner->nvalues()*_chunksize/_Nlambda)
+                                         + " photon packages per wavelength per process)");
 
     _timer.start();
 }
@@ -178,7 +202,7 @@ void MonteCarloSimulation::runstellaremission()
     setChunkParams(_packages);
     initprogress("stellar emission");
     Parallel* parallel = find<ParallelFactory>()->parallel();
-    parallel->call(this, &MonteCarloSimulation::dostellaremissionchunk, _Nchunks*_Nlambda);
+    parallel->call(this, &MonteCarloSimulation::dostellaremissionchunk, _assigner);
 
     // Wait for the other processes to reach this point
     if (_comm->isMultiProc()) _log->info("Waiting for other processes...");

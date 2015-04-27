@@ -21,6 +21,7 @@
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
 #include "PeerToPeerCommunicator.hpp"
+#include "RootAssigner.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
 
@@ -511,7 +512,7 @@ namespace
 
 void PanDustSystem::write() const
 {
-    PeerToPeerCommunicator * comm = find<PeerToPeerCommunicator>();
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
     if (!comm->isRoot()) return;
 
     DustSystem::write();
@@ -562,10 +563,14 @@ void PanDustSystem::write() const
         // get the dimension of the dust grid
         int dimDust = _grid->dimension();
 
+        // Create an assigner that assigns all the work to the root process
+        RootAssigner assigner(comm);
+        assigner.assign(Np);
+
         // For the xy plane (always)
         {
             wt.setup(1,1,0);
-            parallel->call(&wt, Np);
+            parallel->call(&wt, &assigner);
             wt.write();
         }
 
@@ -573,7 +578,7 @@ void PanDustSystem::write() const
         if (dimDust >= 2)
         {
             wt.setup(1,0,1);
-            parallel->call(&wt, Np);
+            parallel->call(&wt, &assigner);
             wt.write();
         }
 
@@ -581,7 +586,7 @@ void PanDustSystem::write() const
         if (dimDust == 3)
         {
             wt.setup(0,1,1);
-            parallel->call(&wt, Np);
+            parallel->call(&wt, &assigner);
             wt.write();
         }
     }

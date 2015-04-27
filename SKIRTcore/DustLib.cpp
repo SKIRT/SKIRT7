@@ -31,7 +31,9 @@ void DustLib::setupSelfBefore()
 {
     SimulationItem::setupSelfBefore();
 
-    if (!_assigner) setAssigner(new SequentialAssigner());
+    // If no assigner was set, use a SequentialAssigner as default
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+    if (!_assigner) setAssigner(new SequentialAssigner(comm));
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -182,7 +184,7 @@ void DustLib::calculate()
     // calculate the emissivity for each library entry assigned to this process
     EmissionCalculator calc(_Lvv, _nv, Nlib, this);
     Parallel* parallel = find<ParallelFactory>()->parallel();
-    parallel->call(&calc, _assigner->nvalues(), _assigner);
+    parallel->call(&calc, _assigner);
 
     // assemble _Lvv from the information stored at different processes, if the work is done in parallel processes
     if (_assigner->parallel()) assemble();

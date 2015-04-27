@@ -18,11 +18,13 @@
 #include "FITSInOut.hpp"
 #include "Log.hpp"
 #include "NR.hpp"
+#include "IdenticalAssigner.hpp"
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
 #include "PeerToPeerCommunicator.hpp"
 #include "PhotonPackage.hpp"
 #include "Random.hpp"
+#include "RootAssigner.hpp"
 #include "SequentialAssigner.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
@@ -47,7 +49,10 @@ void DustSystem::setupSelfBefore()
 
     if (!_dd) throw FATALERROR("Dust distribution was not set");
     if (!_grid) throw FATALERROR("Dust grid structure was not set");
-    if (!_assigner) setAssigner(new SequentialAssigner());
+
+    // If no assigner was set, use a SequentialAssigner as default
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+    if (!_assigner) setAssigner(new SequentialAssigner(comm));
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -80,12 +85,12 @@ void DustSystem::setupSelfAfter()
     _volumev.resize(_Ncells);
     _rhovv.resize(_Ncells,_Ncomp);
 
-    // Get a pointer to the PeerToPeerCommunicator of this simulation
-    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
-
     // Set the volume of the cells (parallelized over different threads, except when multiprocessing is enabled)
     find<Log>()->info("Calculating the volume of the cells...");
-    find<ParallelFactory>()->parallel(comm->isMultiProc())->call(this, &DustSystem::setVolumeBody, _Ncells);
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+    IdenticalAssigner assigner(comm);
+    assigner.assign(_Ncells);
+    find<ParallelFactory>()->parallel()->call(this, &DustSystem::setVolumeBody, &assigner);
 
     // assign each process to a set of dust cells
     _assigner->assign(_Ncells);
@@ -96,32 +101,32 @@ void DustSystem::setupSelfAfter()
     {
         // if the dust grid offers a special interface, use it
         find<Log>()->info("Setting the value of the density in the cells using grid interface...");
-        find<ParallelFactory>()->parallel()->call(this, &DustSystem::setGridDensityBody, _assigner->nvalues(), _assigner);
+        find<ParallelFactory>()->parallel()->call(this, &DustSystem::setGridDensityBody, _assigner);
     }
     else
     {
         // otherwise take an average of the density in 100 random positions in the cell (parallelized)
         find<Log>()->info("Setting the value of the density in the cells...");
-        find<ParallelFactory>()->parallel()->call(this, &DustSystem::setSampleDensityBody, _assigner->nvalues(), _assigner);
+        find<ParallelFactory>()->parallel()->call(this, &DustSystem::setSampleDensityBody, _assigner);
     }
 
     // obtain the densities in all dust cells, if the calculation has been performed by parallel processes
     if (_assigner->parallel()) assemble();
 
     // Perform a convergence check on the grid.
-    if (_writeConvergence && comm->isRoot()) writeconvergence();
+    if (_writeConvergence) writeconvergence();
 
     // Write the density in the xy plane, xz plane and yz plane to a file.
-    if (_writeDensity && comm->isRoot()) writedensity();
+    if (_writeDensity) writedensity();
 
     // Output optical depth map as seen from the center
-    if (_writeDepthMap && comm->isRoot()) writedepthmap();
+    if (_writeDepthMap) writedepthmap();
 
     // Calculate and output some quality metrics for the dust grid
-    if (_writeQuality && comm->isRoot()) writequality();
+    if (_writeQuality) writequality();
 
     // Output properties for all cells in the dust grid
-    if (_writeCellProperties && comm->isRoot()) writecellproperties();
+    if (_writeCellProperties) writecellproperties();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -185,6 +190,9 @@ void DustSystem::assemble()
 
 void DustSystem::writeconvergence() const
 {
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+    if (!comm->isRoot()) return;
+
     // Perform a convergence check on the grid. First calculate the total
     // mass and the principle axes surface densities by integrating
     // over the grid.
@@ -415,27 +423,32 @@ void DustSystem::writedensity() const
     // get the dimension of the dust system
     int dimDust = dimension();
 
+    // Create an assigner that assigns all the work to the root process
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+    RootAssigner assigner(comm);
+    assigner.assign(Np);
+
     // For the xy plane (always)
     {
         wd.setup(1,1,0);
-        parallel->call(&wd, Np);
-        wd.write();
+        parallel->call(&wd, &assigner);
+        if (comm->isRoot()) wd.write();
     }
 
     // For the xz plane (only if dimension is at least 2)
     if (dimDust >= 2)
     {
         wd.setup(1,0,1);
-        parallel->call(&wd, Np);
-        wd.write();
+        parallel->call(&wd, &assigner);
+        if (comm->isRoot()) wd.write();
     }
 
     // For the yz plane (only if dimension is 3)
     if (dimDust == 3)
     {
         wd.setup(0,1,1);
-        parallel->call(&wd, Np);
-        wd.write();
+        parallel->call(&wd, &assigner);
+        if (comm->isRoot()) wd.write();
     }
 }
 
@@ -553,11 +566,15 @@ namespace
 
 void DustSystem::writedepthmap() const
 {
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+    RootAssigner assigner(comm);
+    assigner.assign(Npy);
+
     // construct a private class instance to do the work (parallelized)
     WriteDepthMap wdm(this);
     Parallel* parallel = find<ParallelFactory>()->parallel();
-    parallel->call(&wdm, Npy);
-    wdm.write();
+    parallel->call(&wdm, &assigner);
+    if (comm->isRoot()) wdm.write();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -568,11 +585,15 @@ void DustSystem::writequality() const
     Units* units = find<Units>();
     Parallel* parallel = find<ParallelFactory>()->parallel();
 
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+    RootAssigner assigner(comm);
+    assigner.assign(_Nrandom);
+
     // Density metric
 
     log->info("Calculating quality metric for the grid density...");
     DustSystemDensityCalculator calc1(this, _Nrandom, _Ncells/5);
-    parallel->call(&calc1, _Nrandom);
+    parallel->call(&calc1, &assigner);
 
     log->info("  Mean value of density delta: "
               + QString::number(units->omassvolumedensity(calc1.meanDelta()*1e9))
@@ -585,12 +606,14 @@ void DustSystem::writequality() const
 
     log->info("Calculating quality metric for the optical depth in the grid...");
     DustSystemDepthCalculator calc2(this, _Nrandom, _Ncells/50, _Nrandom*10);
-    parallel->call(&calc2, _Nrandom);
+    parallel->call(&calc2, &assigner);
 
     log->info("  Mean value of optical depth delta: " + QString::number(calc2.meanDelta()));
     log->info("  Standard deviation of optical depth delta: " + QString::number(calc2.stddevDelta()));
 
     // Output to file
+
+    if (!comm->isRoot()) return;
 
     QString filename = find<FilePaths>()->output("ds_quality.dat");
     log->info("Writing quality metrics for the grid to " + filename + "...");
@@ -613,6 +636,9 @@ void DustSystem::writequality() const
 
 void DustSystem::writecellproperties() const
 {
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+    if (!comm->isRoot()) return;
+
     Log* log = find<Log>();
     Units* units = find<Units>();
 
@@ -939,6 +965,9 @@ double DustSystem::opticaldepth(PhotonPackage* pp, double distance)
 
 void DustSystem::write() const
 {
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+    if (!comm->isRoot()) return;
+
     // If requested, output statistics on the number of cells crossed
     if (_writeCellsCrossed)
     {
