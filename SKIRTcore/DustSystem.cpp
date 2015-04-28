@@ -26,7 +26,7 @@
 #include "Random.hpp"
 #include "RootAssigner.hpp"
 #include "SequentialAssigner.hpp"
-#include "TexFile.hpp"
+#include "TextFile.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
 #include <QVarLengthArray>
@@ -665,8 +665,8 @@ void DustSystem::writecellproperties() const
         double V = volume(m);
         double delta = (rho*V)/totalmass;
         double tau = Units::kappaV()*rho*pow(V,1./3.);
-        file.writeLine(units->ovolume(V) + '\t' + QString::number(units->omassvolumedensity(rho))
-                                         + '\t' + QString::number(delta) + '\t' + QString::number(tau));
+        file.writeLine(QString::number(units->ovolume(V)) + '\t' + QString::number(units->omassvolumedensity(rho))
+                                                    + '\t' + QString::number(delta) + '\t' + QString::number(tau));
         tauV[m] = tau;
     }
 
