@@ -12,21 +12,36 @@
 
 ////////////////////////////////////////////////////////////////////
 
-/** This class... */
+/** This class represents a writable text file that can be initizialized by providing a filename to
+    its constructor. Text is written per line, by calling the writeLine() function. The file is
+    automatically closed when the object is destructed. In a multiprocessing environment, only the
+    root process will be allowed to write to the specified file; calls to writeLine() performed by
+    other processes will have no effect. */
 class TextFile
 {
-public:
-    /** Constructor. */
-    TextFile(QString filepath);
+    //=============== Construction - Destruction  ==================
 
-    /** Destructor */
+public:
+    /** The constructor of the TextFile class. As an argument, it takes the filename (a QString
+        instance). If the process that invokes it is the root, the output stream for the file is
+        initialized. On other processes, this output stream remains uninitialized (and is never used). */
+    TextFile(QString filename);
+
+    /** The destructor of the TextFile class. On the root process, the file will be automatically closed. */
     ~TextFile();
 
-    /** This function .. */
+    //====================== Other functions =======================
+
+public:
+    /** This function is used to write a certain string to the file as a new line. If the calling
+        process is not the root, this function will have no effect. */
     void writeLine(QString line);
 
+    //======================== Data Members ========================
+
 private:
-    std::ofstream _out;
+
+    std::ofstream _out;  // the output stream
 };
 
 ////////////////////////////////////////////////////////////////////
