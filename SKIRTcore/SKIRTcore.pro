@@ -293,7 +293,8 @@ HEADERS += \
     CubBackgroundGeometry.hpp \
     SpheBackgroundGeometry.hpp \
     SpectralLuminosityStellarCompNormalization.hpp \
-    RootAssigner.hpp
+    RootAssigner.hpp \
+    TextFile.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -545,4 +546,5 @@ SOURCES += \
     CubBackgroundGeometry.cpp \
     SpheBackgroundGeometry.cpp \
     SpectralLuminosityStellarCompNormalization.cpp \
-    RootAssigner.cpp
+    RootAssigner.cpp \
+    TextFile.cpp
