@@ -12,7 +12,7 @@
 #include "GrainSizeDistributionInterface.hpp"
 #include "Log.hpp"
 #include "MultiGrainDustMix.hpp"
-#include "PeerToPeerCommunicator.hpp"
+#include "TextFile.hpp"
 #include "Units.hpp"
 
 using namespace std;
@@ -64,8 +64,6 @@ void MultiGrainDustMix::addpopulations(const GrainComposition *gc, const GrainSi
         }
     }
 
-    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
-
     // for each dust population (i.e. for each grain size bin)
     QString gcname = gc->name(); // name of the grain composition class
     for (int c=0; c<Nbins; c++)
@@ -82,29 +80,31 @@ void MultiGrainDustMix::addpopulations(const GrainComposition *gc, const GrainSi
                   + units->ugrainsize());
 
         // add the grain size information to an output text file, if so requested
-        if (_writeSize && comm->isRoot())
+        if (_writeSize)
         {
             int h = find<DustDistribution>()->indexformix(this);
             QString filename = find<FilePaths>()->output("ds_mix_" + QString::number(h) + "_size.dat");
             log->info("  Writing grain size information to " + filename + "...");
-            ofstream file(filename.toLocal8Bit().constData(), popIndex ? ios_base::app : ios_base::out);
+
+            // Create a text file
+            TextFile file(filename, !popIndex);
+
             if (!popIndex)
             {
-                file << "# col 1: dust mix population index\n"
-                     << "# col 2: grain composition type\n"
-                     << "# col 3: minimum dust grain radius (" << units->ugrainsize().toStdString() << ")\n"
-                     << "# col 4: average dust grain radius (" << units->ugrainsize().toStdString() << ")\n"
-                     << "# col 5: maximum dust grain radius (" << units->ugrainsize().toStdString() << ")\n";
+                file.writeLine("# col 1: dust mix population index");
+                file.writeLine("# col 2: grain composition type");
+                file.writeLine("# col 3: minimum dust grain radius (" + units->ugrainsize() + ")");
+                file.writeLine("# col 4: average dust grain radius (" + units->ugrainsize() + ")");
+                file.writeLine("# col 5: maximum dust grain radius (" + units->ugrainsize() + ")");
             }
             double aminc = aminv[c];
             double amaxc = amaxv[c];
             double aavec = pow(10.0,(log10(aminc)+log10(amaxc))/2.0);
-            file << popIndex << '\t'
-                 << gcname.toStdString() << '\t'
-                 << units->ograinsize(aminc) << '\t'
-                 << units->ograinsize(aavec) << '\t'
-                 << units->ograinsize(amaxc) << '\n';
-            file.close();
+            file.writeLine(QString::number(popIndex) + '\t'
+                            + gcname + '\t'
+                            + QString::number(units->ograinsize(aminc)) + '\t'
+                            + QString::number(units->ograinsize(aavec)) + '\t'
+                            + QString::number(units->ograinsize(amaxc)));
         }
 
         // create an integration grid over grain size within this bin

@@ -25,7 +25,7 @@ public:
     /** The constructor of the TextFile class. As an argument, it takes the filename (a QString
         instance). If the process that invokes it is the root, the output stream for the file is
         initialized. On other processes, this output stream remains uninitialized (and is never used). */
-    TextFile(QString filename);
+    TextFile(QString filename, bool overwrite = true);
 
     /** The destructor of the TextFile class. On the root process, the file will be automatically closed. */
     ~TextFile();

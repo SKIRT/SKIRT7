@@ -4,7 +4,6 @@
 ///////////////////////////////////////////////////////////////// */
 
 #include <cmath>
-#include <fstream>
 #include "ArrayTable.hpp"
 #include "DustEmissivity.hpp"
 #include "DustGridStructure.hpp"
@@ -22,6 +21,7 @@
 #include "ParallelFactory.hpp"
 #include "PeerToPeerCommunicator.hpp"
 #include "RootAssigner.hpp"
+#include "TextFile.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
 
@@ -79,28 +79,29 @@ namespace
         QString filename = ds->find<FilePaths>()->output(filebody+".dat");
         log->info("Writing emissivities for " + title + " to " + filename + "...");
 
+        // Create a text file
+        TextFile file(filename);
+
         // get emissivity for each dust mix
         int Ncomp = ds->Ncomp();
         ArrayTable<2> evv(Ncomp,0);
         for (int h=0; h<Ncomp; h++) evv(h) = ds->dustEmissivity()->emissivity(ds->mix(h), Jv);
 
         // write the input field and the emissivity for each dust mix to file
-        ofstream file(filename.toLocal8Bit().constData());
-        file << "# Dust emissivities for " << title.toStdString() << "\n";
-        file << "# column 1: lambda (" << units->uwavelength().toStdString() << ")\n";
-        file << "# column 2: embedding field mean intensity -- J_lambda (W/m3/sr)\n";
+        file.writeLine("# Dust emissivities for " + title);
+        file.writeLine("# column 1: lambda (" + units->uwavelength() + ")");
+        file.writeLine("# column 2: embedding field mean intensity -- J_lambda (W/m3/sr)");
         for (int h=0; h<Ncomp; h++)
-            file << "# column " << h+3 << ": dust mix " << h << " -- lambda*j_lambda (W/sr/H)\n";
+            file.writeLine("# column " + QString::number(h+3) + ": dust mix " + QString::number(h) + " -- lambda*j_lambda (W/sr/H)");
         int Nlambda = lambdagrid->Nlambda();
         for (int ell=0; ell<Nlambda; ell++)
         {
             double lambda = lambdagrid->lambda(ell);
-            file << units->owavelength(lambda) << ' ' << Jv[ell];
+            QString line = QString::number(units->owavelength(lambda)) + ' ' + QString::number(Jv[ell]);
             for (int h=0; h<Ncomp; h++)
-                file << ' ' << ds->mix(h)->mu()*lambda*evv(h,ell);
-            file << '\n';
+                line += ' ' + QString::number(ds->mix(h)->mu()*lambda*evv(h,ell));
+            file.writeLine(line);
         }
-        file.close();
     }
 }
 
@@ -512,10 +513,10 @@ namespace
 
 void PanDustSystem::write() const
 {
-    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
-    if (!comm->isRoot()) return;
-
     DustSystem::write();
+
+    // Get a pointer to the PeerToPeerCommunicator of the simulation
+    PeerToPeerCommunicator * comm = find<PeerToPeerCommunicator>();
 
     // If requested, output the interstellar radiation field in every dust cell to a data file
     if (_writeISRF)
@@ -526,11 +527,17 @@ void PanDustSystem::write() const
 
         QString filename = find<FilePaths>()->output("ds_isrf.dat");
         log->info("Writing ISRF to " + filename + "...");
-        ofstream file(filename.toLocal8Bit().constData());
 
+        // Create a text file
+        TextFile file(filename);
+
+        QString line = "";
         for (int ell=0; ell<_Nlambda; ell++)
-            file << units->owavelength(lambdagrid->lambda(ell)) << '\t';
-        file << '\n' << '\n';
+            line += QString::number(units->owavelength(lambdagrid->lambda(ell))) + '\t';
+
+        file.writeLine(line);
+        file.writeLine("");
+
         for (int m=0; m<_Ncells; m++)
         {
             double Ltotm = Labs(m);
@@ -539,17 +546,16 @@ void PanDustSystem::write() const
                 Position bfr = _grid->centralPositionInCell(m);
                 double x, y, z;
                 bfr.cartesian(x,y,z);
-                file << m << '\t'
-                          << units->olength(x) << '\t'
-                          << units->olength(y) << '\t'
-                          << units->olength(z) << '\t';
+                QString line = QString::number(m) + '\t'
+                             + QString::number(units->olength(x)) + '\t'
+                             + QString::number(units->olength(y)) + '\t'
+                             + QString::number(units->olength(z)) + '\t';
                 const Array& Jv = meanintensityv(m);
                 for (int ell=0; ell<_Nlambda; ell++)
-                    file << Jv[ell] << '\t';
-                file << '\n';
+                    line += QString::number(Jv[ell]) + '\t';
+                file.writeLine(line);
             }
         }
-        file.close();
         log->info("File " + filename + " created.");
     }
 

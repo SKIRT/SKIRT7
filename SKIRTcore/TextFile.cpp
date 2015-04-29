@@ -11,12 +11,12 @@ using namespace std;
 
 ////////////////////////////////////////////////////////////////////
 
-TextFile::TextFile(QString filename)
+TextFile::TextFile(QString filename, bool overwrite)
 {
     // Initialize the output file, if this is the root process
     if (ProcessManager::isRoot())
     {
-        _out = ofstream(filename.toLocal8Bit().constData());
+        _out = ofstream(filename.toLocal8Bit().constData(), overwrite ? ios_base::out : ios_base::app);
     }
 }
 
