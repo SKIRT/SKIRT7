@@ -12,11 +12,12 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////
 
 TextFile::TextFile(QString filename, bool overwrite)
+    : _out(0)
 {
     // Initialize the output file, if this is the root process
     if (ProcessManager::isRoot())
     {
-        _out = ofstream(filename.toLocal8Bit().constData(), overwrite ? ios_base::out : ios_base::app);
+        _out = new ofstream(filename.toLocal8Bit().constData(), overwrite ? ios_base::out : ios_base::app);
     }
 }
 
@@ -25,9 +26,10 @@ TextFile::TextFile(QString filename, bool overwrite)
 TextFile::~TextFile()
 {
     // Close the output file, if it was opened by this process
-    if (ProcessManager::isRoot())
+    if (_out)
     {
-        _out.close();
+        _out->close();
+        delete _out;
     }
 }
 
@@ -38,7 +40,7 @@ void TextFile::writeLine(QString line)
     // Only the root process can write to file
     if (!ProcessManager::isRoot()) return;
 
-    _out << line.toStdString() << "\n";
+    (*_out) << line.toStdString() << endl;
 }
 
 ////////////////////////////////////////////////////////////////////
