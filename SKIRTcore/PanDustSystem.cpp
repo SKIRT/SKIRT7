@@ -22,6 +22,7 @@
 #include "PeerToPeerCommunicator.hpp"
 #include "RootAssigner.hpp"
 #include "TextFile.hpp"
+#include "TimeLogger.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
 
@@ -384,6 +385,9 @@ void PanDustSystem::sumResults(bool ynstellar)
 {
     // Get a pointer to the PeerToPeerCommunicator of this simulation
     PeerToPeerCommunicator * comm = find<PeerToPeerCommunicator>();
+
+    Log* log = find<Log>();
+    if (log->verbose()) TimeLogger logger(log, "communication of the dust emission spectra");
 
     // Sum the array of luminosities across all processes
     comm->sum_all(ynstellar ? _Labsstelvv.getArray() : _Labsdustvv.getArray());
