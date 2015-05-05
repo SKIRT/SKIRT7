@@ -387,7 +387,7 @@ void PanDustSystem::sumResults(bool ynstellar)
     PeerToPeerCommunicator * comm = find<PeerToPeerCommunicator>();
 
     Log* log = find<Log>();
-    if (log->verbose()) TimeLogger logger(log, "communication of the dust emission spectra");
+    TimeLogger logger(log->verbose() ? log : 0, "communication of the absorbed luminosities");
 
     // Sum the array of luminosities across all processes
     comm->sum_all(ynstellar ? _Labsstelvv.getArray() : _Labsdustvv.getArray());

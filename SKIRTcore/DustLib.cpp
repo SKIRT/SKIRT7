@@ -215,7 +215,7 @@ void DustLib::assemble()
     PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
 
     Log* log = find<Log>();
-    if (log->verbose()) TimeLogger logger(log, "communication of the dust emission spectra");
+    TimeLogger logger(log->verbose() ? log : 0, "communication of the dust emission spectra");
 
     size_t Ncells = _nv.size();
     if (_Lvv.size(0) == Ncells)     // _Lvv is indexed on m, the index of the dust cells

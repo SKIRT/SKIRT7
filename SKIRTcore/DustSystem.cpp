@@ -27,6 +27,7 @@
 #include "RootAssigner.hpp"
 #include "SequentialAssigner.hpp"
 #include "TextFile.hpp"
+#include "TimeLogger.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
 #include <QVarLengthArray>
@@ -182,6 +183,9 @@ void DustSystem::assemble()
 {
     // Get a pointer to the PeerToPeerCommunicator of this simulation
     PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+
+    Log* log = find<Log>();
+    TimeLogger logger(log->verbose() ? log : 0, "communication of the dust densities");
 
     // Sum the densities array across all processes
     comm->sum_all(_rhovv.getArray());
