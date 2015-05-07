@@ -14,7 +14,8 @@
 # --------------------------------------------------------------------
 
 # List of possible paths of qmake (separate paths with a space)
-PATHLIST=( $HOME/Qt5.4.0/5.4/clang_64/bin/qmake $HOME/Qt5.4.0/5.4/gcc_64/bin/qmake $HOME/Qt/Desktop/5.4.0/bin/qmake /usr/local/Qt/5.4.0/bin/qmake
+PATHLIST=( $HOME/Qt5.4.1/5.4/clang_64/bin/qmake $HOME/Qt5.4.1/5.4/gcc_64/bin/qmake $HOME/Qt/Desktop/5.4.1/bin/qmake /usr/local/Qt/5.4.1/bin/qmake
+           $HOME/Qt5.4.0/5.4/clang_64/bin/qmake $HOME/Qt5.4.0/5.4/gcc_64/bin/qmake $HOME/Qt/Desktop/5.4.0/bin/qmake /usr/local/Qt/5.4.0/bin/qmake
            $HOME/Qt5.3.2/5.3/clang_64/bin/qmake $HOME/Qt5.3.2/5.3/gcc_64/bin/qmake $HOME/Qt/Desktop/5.3.2/bin/qmake /usr/local/Qt/5.3.2/bin/qmake
            $HOME/Qt5.2.1/5.2.1/clang_64/bin/qmake $HOME/Qt5.2.1/5.2.1/gcc_64/bin/qmake $HOME/Qt/Desktop/5.2.1/bin/qmake /usr/local/Qt/5.2.1/bin/qmake )
 
