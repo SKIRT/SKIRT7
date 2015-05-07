@@ -44,8 +44,7 @@ void Simulation::setup()
     SimulationItem::setup();
 
     // Wait for the other processes to reach this point
-    if (_comm->isMultiProc()) _log->info("Waiting for other processes...");
-    _comm->wait();
+    _comm->wait("the setup");
 }
 
 ////////////////////////////////////////////////////////////////////

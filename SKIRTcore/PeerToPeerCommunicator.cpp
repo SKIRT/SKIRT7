@@ -4,6 +4,7 @@
 ///////////////////////////////////////////////////////////////// */
 
 #include "Array.hpp"
+#include "Log.hpp"
 #include "PeerToPeerCommunicator.hpp"
 #include "ProcessManager.hpp"
 
@@ -57,9 +58,11 @@ bool PeerToPeerCommunicator::isRoot()
 
 ////////////////////////////////////////////////////////////////////
 
-void PeerToPeerCommunicator::wait()
+void PeerToPeerCommunicator::wait(QString scope)
 {
     if (!isMultiProc()) return;
+
+    find<Log>()->info("Waiting for other processes to finish " + scope + "...");
 
     ProcessManager::barrier();
 }

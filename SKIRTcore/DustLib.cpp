@@ -187,6 +187,10 @@ void DustLib::calculate()
     Parallel* parallel = find<ParallelFactory>()->parallel();
     parallel->call(&calc, _assigner);
 
+    // Wait for the other processes to reach this point
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+    comm->wait("the emission spectra calculation");
+
     // assemble _Lvv from the information stored at different processes, if the work is done in parallel processes
     if (_assigner->parallel()) assemble();
 }

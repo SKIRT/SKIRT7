@@ -53,7 +53,7 @@ public:
     bool isRoot();
 
     /** This function does not return before all processes within the communicator have called it. */
-    void wait();
+    void wait(QString scope);
 };
 
 ////////////////////////////////////////////////////////////////////

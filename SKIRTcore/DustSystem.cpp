@@ -112,6 +112,9 @@ void DustSystem::setupSelfAfter()
         find<ParallelFactory>()->parallel()->call(this, &DustSystem::setSampleDensityBody, _assigner);
     }
 
+    // Wait for the other processes to reach this point
+    comm->wait("the calculation of the dust cell densities");
+
     // obtain the densities in all dust cells, if the calculation has been performed by parallel processes
     if (_assigner->parallel()) assemble();
 
