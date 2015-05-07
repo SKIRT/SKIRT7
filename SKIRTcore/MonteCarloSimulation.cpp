@@ -189,7 +189,7 @@ void MonteCarloSimulation::logprogress(quint64 extraDone)
     if (_timer.elapsed() > 3000)
     {
         _timer.restart();
-        double completed = _Ndone * 100. / (_Nchunks*_chunksize*_Nlambda);
+        double completed = _Ndone * 100. / (_assigner->nvalues()*_chunksize);
         _log->info("Launched " + _phase + " photon packages: " + QString::number(completed,'f',1) + "%");
     }
 }
