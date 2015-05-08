@@ -33,8 +33,7 @@ void DustLib::setupSelfBefore()
     SimulationItem::setupSelfBefore();
 
     // If no assigner was set, use a SequentialAssigner as default
-    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
-    if (!_assigner) setAssigner(new SequentialAssigner(comm));
+    if (!_assigner) setAssigner(new SequentialAssigner(this));
 }
 
 ////////////////////////////////////////////////////////////////////

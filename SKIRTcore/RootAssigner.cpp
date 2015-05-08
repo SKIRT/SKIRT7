@@ -9,9 +9,29 @@
 
 ////////////////////////////////////////////////////////////////////
 
-RootAssigner::RootAssigner(PeerToPeerCommunicator* comm)
-    : ProcessAssigner(comm)
+RootAssigner::RootAssigner()
 {
+}
+
+////////////////////////////////////////////////////////////////////
+
+RootAssigner::RootAssigner(SimulationItem *parent)
+{
+    setParent(parent);
+    try
+    {
+        // get a pointer to the PeerToPeerCommunicator without performing setup
+        // to avoid catching (and hiding) fatal errors during such setup
+        _comm = parent->find<PeerToPeerCommunicator>(false);
+    }
+    catch (FatalError)
+    {
+        return;
+    }
+
+    // Do the find operation again, now to perform the setup of the
+    // PeerToPeerCommunicator so that the correct rank is initialized
+    _comm = parent->find<PeerToPeerCommunicator>();
 }
 
 ////////////////////////////////////////////////////////////////////

@@ -160,9 +160,9 @@ int SkirtCommandLineHandler::doBatch()
                           + (_parallelSims > 1 ? ", " + QString::number(_parallelSims) + " in parallel" : ""));
         ParallelFactory factory;
         factory.setMaxThreadCount(_parallelSims);
-        RootAssigner assigner(0);
-        assigner.assign(_skifiles.size());
-        factory.parallel()->call(this, &SkirtCommandLineHandler::doSimulation, &assigner);
+        RootAssigner* assigner = new RootAssigner(0);
+        assigner->assign(_skifiles.size());
+        factory.parallel()->call(this, &SkirtCommandLineHandler::doSimulation, assigner);
     }
 
     // report memory statistics for the complete run

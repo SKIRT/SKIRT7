@@ -35,7 +35,15 @@ class SequentialAssigner : public ProcessAssigner
 
 public:
     /** Default constructor. */
-    Q_INVOKABLE SequentialAssigner(PeerToPeerCommunicator* comm);
+    Q_INVOKABLE SequentialAssigner();
+
+    /** This constructor can be invoked by SKIRT classes that wish to hard-code the creation of a new
+        ProcessAssigner object of this type (as opposed to creation through the ski file). Before the
+        constructor returns, the newly created object is hooked up as a child to the specified parent
+        in the simulation hierarchy (so it will automatically be deleted) and the setup of the
+        ProcessAssigner base class is invoked, which sets the _comm attribute that points to the object
+        of type PeerToPeerCommunicator that is found in the simulation hierarchy. */
+    explicit SequentialAssigner(SimulationItem* parent);
 
     //======================== Other Functions =======================
 

@@ -33,9 +33,17 @@ class RootAssigner : public ProcessAssigner
     //============= Construction - Setup - Destruction =============
 
 public:
-    /** The default constructor. A pointer to the PeerToPeerCommunicator of the simulation must be
-        supplied as an argument. */
-    Q_INVOKABLE RootAssigner(PeerToPeerCommunicator* comm);
+    /** The default constructor. */
+    Q_INVOKABLE RootAssigner();
+
+    /** This constructor can be invoked by SKIRT classes that wish to hard-code the creation of a new
+        ProcessAssigner object of this type (as opposed to creation through the ski file). Before the
+        constructor returns, the newly created object is hooked up as a child to the specified parent
+        in the simulation hierarchy (so it will automatically be deleted) and the communicator has been
+        set to point to the object of type PeerToPeerCommunicator that is found by traversing the
+        simulation hierarchy from this parent up, if any. If no such communicator could be found, the
+        _comm pointer stays NULL. */
+    explicit RootAssigner(SimulationItem* parent);
 
     //======================== Other Functions =======================
 

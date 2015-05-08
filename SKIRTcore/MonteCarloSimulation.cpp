@@ -43,7 +43,7 @@ void MonteCarloSimulation::setupSelfBefore()
     // dust system is optional; nr of packages has a valid default
 
     // If no assigner was set, use an IdenticalAssigner as default
-    if (!_assigner) setAssigner(new IdenticalAssigner(_comm));
+    if (!_assigner) setAssigner(new IdenticalAssigner(this));
 }
 
 ////////////////////////////////////////////////////////////////////

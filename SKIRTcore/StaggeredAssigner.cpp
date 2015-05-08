@@ -8,9 +8,18 @@
 
 ////////////////////////////////////////////////////////////////////
 
-StaggeredAssigner::StaggeredAssigner(PeerToPeerCommunicator* comm)
-    : ProcessAssigner(comm)
+StaggeredAssigner::StaggeredAssigner()
+    : _blocksize(0), _valuesInBlock(0)
 {
+}
+
+////////////////////////////////////////////////////////////////////
+
+StaggeredAssigner::StaggeredAssigner(SimulationItem *parent)
+    : _blocksize(0), _valuesInBlock(0)
+{
+    setParent(parent);
+    setup();
 }
 
 ////////////////////////////////////////////////////////////////////

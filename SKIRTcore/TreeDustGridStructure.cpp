@@ -57,11 +57,8 @@ void TreeDustGridStructure::setupSelfBefore()
     if (_maxlevel <= _minlevel)
         throw FATALERROR("Maximum tree level should be larger than minimum tree level");
 
-    // Get a pointer to the PeerToPeerCommunicator of this simulation
-    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
-
     // If no assigner was set, use an IdenticalAssigner as default (each process builds the entire tree)
-    if (!_assigner) setAssigner(new IdenticalAssigner(comm));
+    if (!_assigner) setAssigner(new IdenticalAssigner(this));
 
     // Cache some often used values
     // A Parallel instance is created with a limited amount of threads (4) for performance reasons

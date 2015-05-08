@@ -8,9 +8,18 @@
 
 ////////////////////////////////////////////////////////////////////
 
-SequentialAssigner::SequentialAssigner(PeerToPeerCommunicator* comm)
-    : ProcessAssigner(comm)
+SequentialAssigner::SequentialAssigner()
+    : _start(0), _quotient(0), _remainder(0), _blocksize(0), _valuesInBlock(0)
 {
+}
+
+////////////////////////////////////////////////////////////////////
+
+SequentialAssigner::SequentialAssigner(SimulationItem *parent)
+    : _start(0), _quotient(0), _remainder(0), _blocksize(0), _valuesInBlock(0)
+{
+    setParent(parent);
+    setup();
 }
 
 ////////////////////////////////////////////////////////////////////

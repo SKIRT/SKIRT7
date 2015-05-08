@@ -519,9 +519,6 @@ void PanDustSystem::write() const
 {
     DustSystem::write();
 
-    // Get a pointer to the PeerToPeerCommunicator of the simulation
-    PeerToPeerCommunicator * comm = find<PeerToPeerCommunicator>();
-
     // If requested, output the interstellar radiation field in every dust cell to a data file
     if (_writeISRF)
     {
@@ -574,13 +571,13 @@ void PanDustSystem::write() const
         int dimDust = _grid->dimension();
 
         // Create an assigner that assigns all the work to the root process
-        RootAssigner assigner(comm);
-        assigner.assign(Np);
+        RootAssigner* assigner = new RootAssigner(0);
+        assigner->assign(Np);
 
         // For the xy plane (always)
         {
             wt.setup(1,1,0);
-            parallel->call(&wt, &assigner);
+            parallel->call(&wt, assigner);
             wt.write();
         }
 
@@ -588,7 +585,7 @@ void PanDustSystem::write() const
         if (dimDust >= 2)
         {
             wt.setup(1,0,1);
-            parallel->call(&wt, &assigner);
+            parallel->call(&wt, assigner);
             wt.write();
         }
 
@@ -596,7 +593,7 @@ void PanDustSystem::write() const
         if (dimDust == 3)
         {
             wt.setup(0,1,1);
-            parallel->call(&wt, &assigner);
+            parallel->call(&wt, assigner);
             wt.write();
         }
     }

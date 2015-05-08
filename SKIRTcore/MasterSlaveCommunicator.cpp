@@ -35,7 +35,7 @@ MasterSlaveCommunicator::MasterSlaveCommunicator()
 
     // Create an assigner that utilizes no specific assignment scheme (assignment of tasks is performed
     // by this class), necessary when the multithreading features of this class are utilized.
-    _assigner = new RootAssigner(0);
+    _assigner = new RootAssigner(this);
 }
 
 ////////////////////////////////////////////////////////////////////

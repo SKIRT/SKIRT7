@@ -6,7 +6,6 @@
 #ifndef PROCESSASSIGNER_HPP
 #define PROCESSASSIGNER_HPP
 
-#include <cstddef>
 #include "PeerToPeerCommunicator.hpp"
 #include "SimulationItem.hpp"
 
@@ -32,7 +31,11 @@ class ProcessAssigner : public SimulationItem
 
 protected:
     /** The default constructor; it is protected since this is an abstract class. */
-    ProcessAssigner(PeerToPeerCommunicator* comm);
+    ProcessAssigner();
+
+    /** The purpose of this function is setting the _comm attribute, which points to the
+        PeerToPeerCommunicator object of the simulation hierarchy. */
+    void setupSelfBefore();
 
     //======================== Other Functions =======================
 
