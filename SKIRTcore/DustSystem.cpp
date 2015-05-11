@@ -25,7 +25,7 @@
 #include "PhotonPackage.hpp"
 #include "Random.hpp"
 #include "RootAssigner.hpp"
-#include "SequentialAssigner.hpp"
+#include "StaggeredAssigner.hpp"
 #include "TextFile.hpp"
 #include "TimeLogger.hpp"
 #include "Units.hpp"
@@ -52,8 +52,8 @@ void DustSystem::setupSelfBefore()
     if (!_dd) throw FATALERROR("Dust distribution was not set");
     if (!_grid) throw FATALERROR("Dust grid structure was not set");
 
-    // If no assigner was set, use a SequentialAssigner as default
-    if (!_assigner) setAssigner(new SequentialAssigner(this));
+    // If no assigner was set, use a StaggeredAssigner as default
+    if (!_assigner) setAssigner(new StaggeredAssigner(this));
 }
 
 ////////////////////////////////////////////////////////////////////

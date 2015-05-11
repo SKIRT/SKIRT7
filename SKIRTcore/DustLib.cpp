@@ -13,7 +13,7 @@
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
 #include "PeerToPeerCommunicator.hpp"
-#include "SequentialAssigner.hpp"
+#include "StaggeredAssigner.hpp"
 #include "TimeLogger.hpp"
 #include "WavelengthGrid.hpp"
 
@@ -32,8 +32,8 @@ void DustLib::setupSelfBefore()
 {
     SimulationItem::setupSelfBefore();
 
-    // If no assigner was set, use a SequentialAssigner as default
-    if (!_assigner) setAssigner(new SequentialAssigner(this));
+    // If no assigner was set, use a StaggeredAssigner as default
+    if (!_assigner) setAssigner(new StaggeredAssigner(this));
 }
 
 ////////////////////////////////////////////////////////////////////
