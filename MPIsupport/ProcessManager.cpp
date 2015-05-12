@@ -152,6 +152,17 @@ void ProcessManager::broadcast(double* my_array, int nvalues, int root)
 
 //////////////////////////////////////////////////////////////////////
 
+void ProcessManager::broadcast(int* value, int root)
+{
+#ifdef BUILDING_WITH_MPI
+    MPI_Bcast(value, 1, MPI_INT, root, MPI_COMM_WORLD);
+#else
+    Q_UNUSED(value) Q_UNUSED(root)
+#endif
+}
+
+//////////////////////////////////////////////////////////////////////
+
 bool ProcessManager::isRoot()
 {
 #ifdef BUILDING_WITH_MPI

@@ -159,7 +159,6 @@ void PanDustSystem::setupSelfAfter()
 
 void PanDustSystem::setDustEmissivity(DustEmissivity* value)
 {
-
     if (_dustemissivity) delete _dustemissivity;
     _dustemissivity = value;
     if (_dustemissivity) _dustemissivity->setParent(this);
@@ -176,7 +175,6 @@ DustEmissivity* PanDustSystem::dustEmissivity() const
 
 void PanDustSystem::setDustLib(DustLib* value)
 {
-
     if (_dustlib) delete _dustlib;
     _dustlib = value;
     if (_dustlib) _dustlib->setParent(this);

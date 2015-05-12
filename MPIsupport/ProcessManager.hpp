@@ -91,6 +91,14 @@ public:
         values stored in the array passed by the root. */
     static void broadcast(double* my_array, int nvalues, int root);
 
+    /** This function is used to broadcast a single integer value from one process to all other
+        processes. A pointer to the value is passed as the first argument and the rank of the sending
+        process as the second. All processes must call this function for the communication to proceed.
+        The memory where the integer value that is passed to this function by the receiving processes
+        is stored, will be overwritten by the value stored in the memory of the process with rank \c
+        root during the communication. */
+    static void broadcast(int* value, int root);
+
     /** This function returns a boolean indicating whether the process is assigned as root or not.
         The rank of the process is always the 'true' rank, irrespective of whether the object that
         calls this function has acquired the MPI resource or not. */

@@ -294,7 +294,8 @@ HEADERS += \
     SpheBackgroundGeometry.hpp \
     SpectralLuminosityStellarCompNormalization.hpp \
     RootAssigner.hpp \
-    TextFile.hpp
+    TextFile.hpp \
+    RandomAssigner.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -547,4 +548,5 @@ SOURCES += \
     SpheBackgroundGeometry.cpp \
     SpectralLuminosityStellarCompNormalization.cpp \
     RootAssigner.cpp \
-    TextFile.cpp
+    TextFile.cpp \
+    RandomAssigner.cpp

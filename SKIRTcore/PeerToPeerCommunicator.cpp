@@ -44,6 +44,15 @@ void PeerToPeerCommunicator::broadcast(Array& arr, int sender)
 
 ////////////////////////////////////////////////////////////////////
 
+void PeerToPeerCommunicator::broadcast(int& value, int sender)
+{
+    if (!isMultiProc()) return;
+
+    ProcessManager::broadcast(&value,sender);
+}
+
+////////////////////////////////////////////////////////////////////
+
 int PeerToPeerCommunicator::root()
 {
     return ROOT;

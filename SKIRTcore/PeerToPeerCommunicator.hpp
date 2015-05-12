@@ -45,6 +45,11 @@ public:
         second argument. */
     void broadcast(Array& arr, int sender);
 
+    /** This function is used for broadcasting an integer value from one particular process to all
+        other processes in this communicator. The rank of the sending process is indicated with the
+        second argument. */
+    void broadcast(int& value, int sender);
+
     /** This function returns the rank of the root process. */
     int root();
 

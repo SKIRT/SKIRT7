@@ -119,6 +119,7 @@
 #include "QuasarSED.hpp"
 #include "RadialDustCompNormalization.hpp"
 #include "Random.hpp"
+#include "RandomAssigner.hpp"
 #include "ReadFitsGeometry.hpp"
 #include "RingGeometry.hpp"
 #include "RootAssigner.hpp"
@@ -422,6 +423,7 @@ void RegisterSimulationItems::registerAll()
     add<StaggeredAssigner>();
     add<SequentialAssigner>();
     add<RootAssigner>();
+    add<RandomAssigner>();
 }
 
 ////////////////////////////////////////////////////////////////////
