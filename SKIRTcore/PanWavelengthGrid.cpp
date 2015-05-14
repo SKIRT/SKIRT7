@@ -8,7 +8,7 @@
 #include "FilePaths.hpp"
 #include "Log.hpp"
 #include "PanWavelengthGrid.hpp"
-#include "TextFile.hpp"
+#include "TextOutFile.hpp"
 #include "Units.hpp"
 
 using namespace std;
@@ -45,7 +45,7 @@ void PanWavelengthGrid::setupSelfAfter()
         find<Log>()->info("Writing wavelengths to " + filename + "...");
 
         // Create a text file
-        TextFile file(filename);
+        TextOutFile file(filename);
 
         file.writeLine("# column 1: lambda;  column 2: delta lambda  (" + units->uwavelength() + ")");
         for (int ell=0; ell<_Nlambda; ell++)

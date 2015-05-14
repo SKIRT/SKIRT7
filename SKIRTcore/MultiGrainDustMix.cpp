@@ -12,7 +12,7 @@
 #include "GrainSizeDistributionInterface.hpp"
 #include "Log.hpp"
 #include "MultiGrainDustMix.hpp"
-#include "TextFile.hpp"
+#include "TextOutFile.hpp"
 #include "Units.hpp"
 
 using namespace std;
@@ -87,7 +87,7 @@ void MultiGrainDustMix::addpopulations(const GrainComposition *gc, const GrainSi
             log->info("  Writing grain size information to " + filename + "...");
 
             // Create a text file
-            TextFile file(filename, !popIndex);
+            TextOutFile file(filename, !popIndex);
 
             if (!popIndex)
             {

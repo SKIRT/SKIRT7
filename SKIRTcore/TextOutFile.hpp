@@ -3,8 +3,8 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
-#ifndef TEXTFILE_HPP
-#define TEXTFILE_HPP
+#ifndef TEXTOUTFILE_HPP
+#define TEXTOUTFILE_HPP
 
 #include <fstream>
 #include <QString>
@@ -17,18 +17,19 @@
     automatically closed when the object is destructed. In a multiprocessing environment, only the
     root process will be allowed to write to the specified file; calls to writeLine() performed by
     other processes will have no effect. */
-class TextFile
+class TextOutFile
 {
     //=============== Construction - Destruction  ==================
 
 public:
-    /** The constructor of the TextFile class. As an argument, it takes the filename (a QString
+    /** The constructor of the TextOutFile class. As an argument, it takes the filename (a QString
         instance). If the process that invokes it is the root, the output stream for the file is
         initialized. On other processes, this output stream remains uninitialized (and is never used). */
-    TextFile(QString filename, bool overwrite = true);
+    TextOutFile(QString filename, bool overwrite = true);
 
-    /** The destructor of the TextFile class. On the root process, the file will be automatically closed. */
-    ~TextFile();
+    /** The destructor of the TextOutFile class. On the root process, the file will be automatically
+        closed. */
+    ~TextOutFile();
 
     //====================== Other functions =======================
 
@@ -40,10 +41,9 @@ public:
     //======================== Data Members ========================
 
 private:
-
     std::ofstream* _out;  // the output stream
 };
 
 ////////////////////////////////////////////////////////////////////
 
-#endif // TEXTFILE_HPP
+#endif // TEXTOUTFILE_HPP

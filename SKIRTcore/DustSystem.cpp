@@ -26,7 +26,7 @@
 #include "Random.hpp"
 #include "RootAssigner.hpp"
 #include "StaggeredAssigner.hpp"
-#include "TextFile.hpp"
+#include "TextOutFile.hpp"
 #include "TimeLogger.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
@@ -251,7 +251,7 @@ void DustSystem::writeconvergence() const
     Units* units = find<Units>();
 
     // Create a text file
-    TextFile file(filename);
+    TextOutFile file(filename);
     file.writeLine("Convergence check on the grid: ");
 
     switch (_dd->dimension())
@@ -629,7 +629,7 @@ void DustSystem::writequality(ProcessAssigner* assigner) const
     log->info("Writing quality metrics for the grid to " + filename + "...");
 
     // Create a text file
-    TextFile file(filename);
+    TextOutFile file(filename);
 
     // Write quality metrics
     file.writeLine("Mean value of density delta: "
@@ -655,7 +655,7 @@ void DustSystem::writecellproperties() const
     log->info("Writing dust cell properties to " + filename + "...");
 
     // Open the file and write a header
-    TextFile file(filename);
+    TextOutFile file(filename);
     file.writeLine("# column 1: volume (" + units->uvolume() + ")");
     file.writeLine("# column 2: density (" + units->umassvolumedensity() + ")");
     file.writeLine("# column 3: mass fraction");
@@ -981,7 +981,7 @@ void DustSystem::write() const
         find<Log>()->info("Writing number of cells crossed to " + filename + "...");
 
         // Create a text file and write a header
-        TextFile file(filename);
+        TextOutFile file(filename);
         file.writeLine("# total number of cells in grid: " + QString::number(_Ncells));
         file.writeLine("# column 1: number of cells crossed");
         file.writeLine("# column 2: number of paths that crossed this number of cells");

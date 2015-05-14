@@ -21,7 +21,7 @@
 #include "ParallelFactory.hpp"
 #include "PeerToPeerCommunicator.hpp"
 #include "RootAssigner.hpp"
-#include "TextFile.hpp"
+#include "TextOutFile.hpp"
 #include "TimeLogger.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
@@ -81,7 +81,7 @@ namespace
         log->info("Writing emissivities for " + title + " to " + filename + "...");
 
         // Create a text file
-        TextFile file(filename);
+        TextOutFile file(filename);
 
         // get emissivity for each dust mix
         int Ncomp = ds->Ncomp();
@@ -528,7 +528,7 @@ void PanDustSystem::write() const
         log->info("Writing ISRF to " + filename + "...");
 
         // Create a text file
-        TextFile file(filename);
+        TextOutFile file(filename);
 
         QString line = "";
         for (int ell=0; ell<_Nlambda; ell++)

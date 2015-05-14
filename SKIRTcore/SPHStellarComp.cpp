@@ -12,7 +12,7 @@
 #include "PhotonPackage.hpp"
 #include "Random.hpp"
 #include "SPHStellarComp.hpp"
-#include "TextFile.hpp"
+#include "TextOutFile.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
 
@@ -107,7 +107,7 @@ void SPHStellarComp::setupSelfBefore()
         find<Log>()->info("Writing luminosities to " + filename + "...");
 
         // Create a text file
-        TextFile file(filename);
+        TextOutFile file(filename);
 
         file.writeLine("# column 1: lambda (" + units->uwavelength() + ");"
                      + "  column 2: luminosity (" + units->ubolluminosity() + ")");

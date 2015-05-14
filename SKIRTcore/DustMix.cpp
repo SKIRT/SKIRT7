@@ -14,7 +14,7 @@
 #include "PlanckFunction.hpp"
 #include "PeerToPeerCommunicator.hpp"
 #include "Random.hpp"
-#include "TextFile.hpp"
+#include "TextOutFile.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
 
@@ -164,7 +164,7 @@ void DustMix::setupSelfAfter()
         log->info("Writing optical dust population properties to " + filename + "...");
 
         // Create a text file
-        TextFile file(filename);
+        TextOutFile file(filename);
 
         QString section = units->usection() + " per hydrogen atom";
         int col = 0;
@@ -192,7 +192,7 @@ void DustMix::setupSelfAfter()
         log->info("Writing dust population masses to " + filename + "...");
 
         // Create a text file
-        TextFile file(filename);
+        TextOutFile file(filename);
 
         QString bulkmass = units->ubulkmass() + " per hydrogen atom";
         file.writeLine("# total dust mass: " + QString::number(units->obulkmass(_mu), 'e', 6) + ' ' + bulkmass);
@@ -215,7 +215,7 @@ void DustMix::setupSelfAfter()
         log->info("Writing combined dust mix properties to " + filename + "...");
 
         // Create a text file
-        TextFile file(filename);
+        TextOutFile file(filename);
 
         file.writeLine("# col 1: lambda (" + units->uwavelength() + ")");
         file.writeLine("# col 2: total kappa_ext (" + units->uopacity() + ")");

@@ -4,14 +4,14 @@
 ///////////////////////////////////////////////////////////////// */
 
 #include "FatalError.hpp"
-#include "TextFile.hpp"
+#include "TextOutFile.hpp"
 #include "ProcessManager.hpp"
 
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////
 
-TextFile::TextFile(QString filename, bool overwrite)
+TextOutFile::TextOutFile(QString filename, bool overwrite)
     : _out(0)
 {
     // Initialize the output file, if this is the root process
@@ -23,7 +23,7 @@ TextFile::TextFile(QString filename, bool overwrite)
 
 ////////////////////////////////////////////////////////////////////
 
-TextFile::~TextFile()
+TextOutFile::~TextOutFile()
 {
     // Close the output file, if it was opened by this process
     if (_out)
@@ -35,7 +35,7 @@ TextFile::~TextFile()
 
 ////////////////////////////////////////////////////////////////////
 
-void TextFile::writeLine(QString line)
+void TextOutFile::writeLine(QString line)
 {
     // Only the root process can write to file
     if (!ProcessManager::isRoot()) return;
