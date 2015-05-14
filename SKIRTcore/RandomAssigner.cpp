@@ -3,6 +3,7 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
+#include "FatalError.hpp"
 #include "PeerToPeerCommunicator.hpp"
 #include "Random.hpp"
 #include "RandomAssigner.hpp"
@@ -28,7 +29,9 @@ RandomAssigner::RandomAssigner(SimulationItem *parent)
 
 void RandomAssigner::setupSelfBefore()
 {
-    SimulationItem::setupSelfBefore();
+    ProcessAssigner::setupSelfBefore();
+
+    if (!_comm) throw FATALERROR("Could not find an object of type PeerToPeerCommunicator in the simulation hierarchy");
 
     _random = find<Random>();
 }

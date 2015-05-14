@@ -17,6 +17,8 @@ ProcessAssigner::ProcessAssigner()
 
 void ProcessAssigner::setupSelfBefore()
 {
+    SimulationItem::setupSelfBefore();
+
     try
     {
         // get a pointer to the PeerToPeerCommunicator without performing setup
@@ -25,7 +27,7 @@ void ProcessAssigner::setupSelfBefore()
     }
     catch (FatalError)
     {
-        throw FATALERROR("Cannot find an object of type PeerToPeerCommunicator in the simulation hierarchy");
+        return;
     }
 
     // Do the find operation again, now to perform the setup of the

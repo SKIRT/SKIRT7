@@ -3,8 +3,9 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
-#include "SequentialAssigner.hpp"
+#include "FatalError.hpp"
 #include "PeerToPeerCommunicator.hpp"
+#include "SequentialAssigner.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
@@ -20,6 +21,15 @@ SequentialAssigner::SequentialAssigner(SimulationItem *parent)
 {
     setParent(parent);
     setup();
+}
+
+////////////////////////////////////////////////////////////////////
+
+void SequentialAssigner::setupSelfBefore()
+{
+    ProcessAssigner::setupSelfBefore();
+
+    if (!_comm) throw FATALERROR("Could not find an object of type PeerToPeerCommunicator in the simulation hierarchy");
 }
 
 ////////////////////////////////////////////////////////////////////

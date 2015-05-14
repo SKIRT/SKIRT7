@@ -25,6 +25,15 @@ IdenticalAssigner::IdenticalAssigner(SimulationItem *parent)
 
 ////////////////////////////////////////////////////////////////////
 
+void IdenticalAssigner::setupSelfBefore()
+{
+    ProcessAssigner::setupSelfBefore();
+
+    if (!_comm) throw FATALERROR("Could not find an object of type PeerToPeerCommunicator in the simulation hierarchy");
+}
+
+////////////////////////////////////////////////////////////////////
+
 void IdenticalAssigner::assign(size_t size, size_t blocks)
 {
     _nvalues = size;

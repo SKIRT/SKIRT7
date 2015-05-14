@@ -39,10 +39,9 @@ public:
     /** This constructor can be invoked by SKIRT classes that wish to hard-code the creation of a new
         ProcessAssigner object of this type (as opposed to creation through the ski file). Before the
         constructor returns, the newly created object is hooked up as a child to the specified parent
-        in the simulation hierarchy (so it will automatically be deleted) and the communicator has been
-        set to point to the object of type PeerToPeerCommunicator that is found by traversing the
-        simulation hierarchy from this parent up, if any. If no such communicator could be found, the
-        _comm pointer stays NULL. */
+        in the simulation hierarchy (so it will automatically be deleted) and the setup of the
+        ProcessAssigner base class is invoked, which sets the _comm attribute that points to the object
+        of type PeerToPeerCommunicator that is found in the simulation hierarchy. */
     explicit RootAssigner(SimulationItem* parent);
 
     //======================== Other Functions =======================

@@ -49,6 +49,10 @@ public:
         of type PeerToPeerCommunicator that is found in the simulation hierarchy. */
     explicit StaggeredAssigner(SimulationItem* parent);
 
+    /** This function verifies that the pointer to the PeerToPeerCommunicator was set by the base
+        class. If it was not, a FatalError is thrown. */
+    void setupSelfBefore();
+
     //======================== Other Functions =======================
 
 public:

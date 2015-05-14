@@ -20,6 +20,8 @@ Log::Log()
 
 void Log::setupSelfBefore()
 {
+    SimulationItem::setupSelfBefore();
+
     ProcessCommunicator* comm;
 
     try
