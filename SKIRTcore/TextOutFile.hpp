@@ -41,7 +41,7 @@ public:
     //======================== Data Members ========================
 
 private:
-    std::ofstream* _out;  // the output stream
+    std::ofstream _out;  // the output stream
 };
 
 ////////////////////////////////////////////////////////////////////
