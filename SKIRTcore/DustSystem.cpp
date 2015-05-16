@@ -246,12 +246,10 @@ void DustSystem::writeconvergence() const
 
     // Compare these values to the expected values and write the result to file
 
-    QString filename = find<FilePaths>()->output("ds_convergence.dat");
-    find<Log>()->info("Writing convergence check on the dust system to " + filename + "...");
     Units* units = find<Units>();
 
     // Create a text file
-    TextOutFile file(filename);
+    TextOutFile file(this, "ds_convergence", "convergence check on the dust system");
     file.writeLine("Convergence check on the grid: ");
 
     switch (_dd->dimension())
@@ -321,8 +319,6 @@ void DustSystem::writeconvergence() const
     file.writeLine("   - total dust mass");
     file.writeLine("         expected value = " + QString::number(units->omass(Mref)) + " " + units->umass());
     file.writeLine("         actual value =   " + QString::number(units->omass(M)) + " " + units->umass());
-
-    find<Log>()->info("File " + filename + " created.");
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -623,13 +619,8 @@ void DustSystem::writequality(ProcessAssigner* assigner) const
     log->info("  Mean value of optical depth delta: " + QString::number(calc2.meanDelta()));
     log->info("  Standard deviation of optical depth delta: " + QString::number(calc2.stddevDelta()));
 
-    // Output to file
-
-    QString filename = find<FilePaths>()->output("ds_quality.dat");
-    log->info("Writing quality metrics for the grid to " + filename + "...");
-
     // Create a text file
-    TextOutFile file(filename);
+    TextOutFile file(this, "ds_quality", "quality metrics for the grid");
 
     // Write quality metrics
     file.writeLine("Mean value of density delta: "
@@ -640,8 +631,6 @@ void DustSystem::writequality(ProcessAssigner* assigner) const
                     + units->umassvolumedensity());
     file.writeLine("Mean value of optical depth delta: " + QString::number(calc2.meanDelta()));
     file.writeLine("Standard deviation of optical depth delta: " + QString::number(calc2.stddevDelta()));
-
-    log->info("File " + filename + " created.");
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -651,11 +640,8 @@ void DustSystem::writecellproperties() const
     Log* log = find<Log>();
     Units* units = find<Units>();
 
-    QString filename = find<FilePaths>()->output("ds_cellprops.dat");
-    log->info("Writing dust cell properties to " + filename + "...");
-
     // Open the file and write a header
-    TextOutFile file(filename);
+    TextOutFile file(this, "ds_cellprops", "dust cell properties");
     file.writeLine("# column 1: volume (" + units->uvolume() + ")");
     file.writeLine("# column 2: density (" + units->umassvolumedensity() + ")");
     file.writeLine("# column 3: mass fraction");
@@ -700,8 +686,6 @@ void DustSystem::writecellproperties() const
     file.writeLine("# largest optical depth:  " + QString::number(taumax));
     file.writeLine("# average optical depth:  " + QString::number(tauavg));
     file.writeLine("# 90 % of the cells have optical depth smaller than: " + QString::number(tau90));
-
-    log->info("File " + filename + " created.");
 
     // report the statistics on optical depth to the console
     log->info("  Smallest optical depth: " + QString::number(taumin));
@@ -977,11 +961,8 @@ void DustSystem::write() const
     // If requested, output statistics on the number of cells crossed
     if (_writeCellsCrossed)
     {
-        QString filename = find<FilePaths>()->output("ds_crossed.dat");
-        find<Log>()->info("Writing number of cells crossed to " + filename + "...");
-
         // Create a text file and write a header
-        TextOutFile file(filename);
+        TextOutFile file(this, "ds_crossed", "number of cells crossed");
         file.writeLine("# total number of cells in grid: " + QString::number(_Ncells));
         file.writeLine("# column 1: number of cells crossed");
         file.writeLine("# column 2: number of paths that crossed this number of cells");
@@ -991,8 +972,6 @@ void DustSystem::write() const
         {
             file.writeLine(QString::number(index) + '\t' + QString::number(_crossed[index]));
         }
-
-        find<Log>()->info("File " + filename + " created.");
     }
 }
 

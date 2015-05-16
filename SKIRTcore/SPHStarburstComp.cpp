@@ -116,11 +116,8 @@ void SPHStarburstComp::setupSelfBefore()
         Units* units = find<Units>();
         WavelengthGrid* lambdagrid = find<WavelengthGrid>();
 
-        QString filename = find<FilePaths>()->output("HII_luminosities.dat");
-        find<Log>()->info("Writing luminosities to " + filename + "...");
-
         // Create a text file
-        TextOutFile file(filename);
+        TextOutFile file(this, "HII_luminosities", "luminosities");
 
         file.writeLine("# column 1: lambda (" + units->uwavelength() + ");"
                      + "  column 2: luminosity (" + units->ubolluminosity() + ")");

@@ -8,7 +8,10 @@
 
 #include <fstream>
 #include <QString>
+#include <QVector>
 #include "Array.hpp"
+#include "SimulationItem.hpp"
+class Log;
 
 ////////////////////////////////////////////////////////////////////
 
@@ -25,7 +28,7 @@ public:
     /** The constructor of the TextOutFile class. As an argument, it takes the filename (a QString
         instance). If the process that invokes it is the root, the output stream for the file is
         initialized. On other processes, this output stream remains uninitialized (and is never used). */
-    TextOutFile(QString filename, bool overwrite = true);
+    TextOutFile(const SimulationItem* item, QString filename, QString description, bool overwrite = true);
 
     /** The destructor of the TextOutFile class. On the root process, the file will be automatically
         closed. */
@@ -38,10 +41,21 @@ public:
         process is not the root, this function will have no effect. */
     void writeLine(QString line);
 
+    /** This function .. */
+    void addColumn(QString description, char format = 'e', int precision = 6);
+
+    /** This function .. */
+    void writeRow(QVector<double> values, QString delimiter = " ");
+
     //======================== Data Members ========================
 
 private:
+    Log* _log;
+    QString _filepath;
     std::ofstream _out;  // the output stream
+    int _ncolumns;
+    QVector<char> _formats;
+    QVector<int> _precisions;
 };
 
 ////////////////////////////////////////////////////////////////////

@@ -83,11 +83,9 @@ void MultiGrainDustMix::addpopulations(const GrainComposition *gc, const GrainSi
         if (_writeSize)
         {
             int h = find<DustDistribution>()->indexformix(this);
-            QString filename = find<FilePaths>()->output("ds_mix_" + QString::number(h) + "_size.dat");
-            log->info("  Writing grain size information to " + filename + "...");
 
             // Create a text file
-            TextOutFile file(filename, !popIndex);
+            TextOutFile file(this, "ds_mix_" + QString::number(h) + "_size", "grain size information", !popIndex);
 
             if (!popIndex)
             {

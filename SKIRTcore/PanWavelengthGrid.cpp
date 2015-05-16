@@ -41,11 +41,8 @@ void PanWavelengthGrid::setupSelfAfter()
     {
         Units* units = find<Units>();
 
-        QString filename = find<FilePaths>()->output("wavelengths.dat");
-        find<Log>()->info("Writing wavelengths to " + filename + "...");
-
         // Create a text file
-        TextOutFile file(filename);
+        TextOutFile file(this, "wavelengths", "wavelengths");
 
         file.writeLine("# column 1: lambda;  column 2: delta lambda  (" + units->uwavelength() + ")");
         for (int ell=0; ell<_Nlambda; ell++)

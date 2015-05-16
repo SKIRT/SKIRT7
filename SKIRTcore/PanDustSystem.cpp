@@ -74,14 +74,9 @@ namespace
     {
         WavelengthGrid* lambdagrid = ds->find<WavelengthGrid>();
         Units* units = ds->find<Units>();
-        Log* log = ds->find<Log>();
-
-        // inform user
-        QString filename = ds->find<FilePaths>()->output(filebody+".dat");
-        log->info("Writing emissivities for " + title + " to " + filename + "...");
 
         // Create a text file
-        TextOutFile file(filename);
+        TextOutFile file(ds, filebody, "emissivities for " + title);
 
         // get emissivity for each dust mix
         int Ncomp = ds->Ncomp();
@@ -522,13 +517,9 @@ void PanDustSystem::write() const
     {
         WavelengthGrid* lambdagrid = find<WavelengthGrid>();
         Units* units = find<Units>();
-        Log* log = find<Log>();
-
-        QString filename = find<FilePaths>()->output("ds_isrf.dat");
-        log->info("Writing ISRF to " + filename + "...");
 
         // Create a text file
-        TextOutFile file(filename);
+        TextOutFile file(this, "ds_isrf", "ISRF");
 
         QString line = "";
         for (int ell=0; ell<_Nlambda; ell++)
@@ -555,7 +546,6 @@ void PanDustSystem::write() const
                 file.writeLine(line);
             }
         }
-        log->info("File " + filename + " created.");
     }
 
     // If requested, output temperate map(s) along coordiate axes cuts
