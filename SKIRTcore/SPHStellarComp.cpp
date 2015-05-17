@@ -106,12 +106,17 @@ void SPHStellarComp::setupSelfBefore()
         // Create a text file
         TextOutFile file(this, "luminosities", "luminosities");
 
-        file.writeLine("# column 1: lambda (" + units->uwavelength() + ");"
-                     + "  column 2: luminosity (" + units->ubolluminosity() + ")");
+        // Write the header
+        file.addColumn("lambda (" + units->uwavelength() + ")", 'e', 8);
+        file.addColumn("luminosity (" + units->ubolluminosity() + ")", 'e', 8);
+
+        // Write the body
         for (int ell=0; ell<Nlambda; ell++)
         {
-            file.writeLine(QString::number(units->owavelength(lambdagrid->lambda(ell)), 'e', 8) + '\t'
-                         + QString::number(units->obolluminosity(_Ltotv[ell]), 'e', 8));
+            QVector<double> values;
+            values.append(units->owavelength(lambdagrid->lambda(ell)));
+            values.append(units->obolluminosity(_Ltotv[ell]));
+            file.writeRow(values);
         }
     }
 }

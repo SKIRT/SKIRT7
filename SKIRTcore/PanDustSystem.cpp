@@ -78,25 +78,29 @@ namespace
         // Create a text file
         TextOutFile file(ds, filebody, "emissivities for " + title);
 
-        // get emissivity for each dust mix
+        // Get the emissivity for each dust mix
         int Ncomp = ds->Ncomp();
         ArrayTable<2> evv(Ncomp,0);
         for (int h=0; h<Ncomp; h++) evv(h) = ds->dustEmissivity()->emissivity(ds->mix(h), Jv);
 
-        // write the input field and the emissivity for each dust mix to file
+        // Write the header
         file.writeLine("# Dust emissivities for " + title);
-        file.writeLine("# column 1: lambda (" + units->uwavelength() + ")");
-        file.writeLine("# column 2: embedding field mean intensity -- J_lambda (W/m3/sr)");
+        file.addColumn("lambda (" + units->uwavelength() + ")");
+        file.addColumn("embedding field mean intensity -- J_lambda (W/m3/sr)");
         for (int h=0; h<Ncomp; h++)
-            file.writeLine("# column " + QString::number(h+3) + ": dust mix " + QString::number(h) + " -- lambda*j_lambda (W/sr/H)");
+            file.addColumn("dust mix " + QString::number(h) + " -- lambda*j_lambda (W/sr/H)");
+
+        // Write the input field and the emissivity for each dust mix to file
         int Nlambda = lambdagrid->Nlambda();
         for (int ell=0; ell<Nlambda; ell++)
         {
             double lambda = lambdagrid->lambda(ell);
-            QString line = QString::number(units->owavelength(lambda)) + ' ' + QString::number(Jv[ell]);
+            QVector<double> values;
+            values.append(units->owavelength(lambda));
+            values.append(Jv[ell]);
             for (int h=0; h<Ncomp; h++)
-                line += ' ' + QString::number(ds->mix(h)->mu()*lambda*evv(h,ell));
-            file.writeLine(line);
+                values.append(ds->mix(h)->mu()*lambda*evv(h,ell));
+            file.writeRow(values);
         }
     }
 }

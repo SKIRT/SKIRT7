@@ -640,12 +640,14 @@ void DustSystem::writecellproperties() const
     Log* log = find<Log>();
     Units* units = find<Units>();
 
-    // Open the file and write a header
+    // Create a text file
     TextOutFile file(this, "ds_cellprops", "dust cell properties");
-    file.writeLine("# column 1: volume (" + units->uvolume() + ")");
-    file.writeLine("# column 2: density (" + units->umassvolumedensity() + ")");
-    file.writeLine("# column 3: mass fraction");
-    file.writeLine("# column 4: optical depth");
+
+    // Write the header
+    file.addColumn("volume (" + units->uvolume() + ")");
+    file.addColumn("density (" + units->umassvolumedensity() + ")");
+    file.addColumn("mass fraction");
+    file.addColumn("optical depth");
 
     // Write a line for each cell; remember the tau values so we can compute some statistics
     Array tauV(_Ncells);
@@ -656,8 +658,12 @@ void DustSystem::writecellproperties() const
         double V = volume(m);
         double delta = (rho*V)/totalmass;
         double tau = Units::kappaV()*rho*pow(V,1./3.);
-        file.writeLine(QString::number(units->ovolume(V)) + '\t' + QString::number(units->omassvolumedensity(rho))
-                                                    + '\t' + QString::number(delta) + '\t' + QString::number(tau));
+        QVector<double> values;
+        values.append(units->ovolume(V));
+        values.append(units->omassvolumedensity(rho));
+        values.append(delta);
+        values.append(tau);
+        file.writeRow(values);
         tauV[m] = tau;
     }
 
@@ -961,16 +967,22 @@ void DustSystem::write() const
     // If requested, output statistics on the number of cells crossed
     if (_writeCellsCrossed)
     {
-        // Create a text file and write a header
+        // Create a text file
         TextOutFile file(this, "ds_crossed", "number of cells crossed");
-        file.writeLine("# total number of cells in grid: " + QString::number(_Ncells));
-        file.writeLine("# column 1: number of cells crossed");
-        file.writeLine("# column 2: number of paths that crossed this number of cells");
 
+        // Write the header
+        file.writeLine("# total number of cells in grid: " + QString::number(_Ncells));
+        file.addColumn("number of cells crossed", 'i');
+        file.addColumn("number of paths that crossed this number of cells", 'i');
+
+        // Write the body
         int Nlines = _crossed.size();
         for (int index=0; index<Nlines; index++)
         {
-            file.writeLine(QString::number(index) + '\t' + QString::number(_crossed[index]));
+            QVector<double> values;
+            values.append(index);
+            values.append(_crossed[index]);
+            file.writeRow(values);
         }
     }
 }

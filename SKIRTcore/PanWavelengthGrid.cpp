@@ -44,11 +44,17 @@ void PanWavelengthGrid::setupSelfAfter()
         // Create a text file
         TextOutFile file(this, "wavelengths", "wavelengths");
 
-        file.writeLine("# column 1: lambda;  column 2: delta lambda  (" + units->uwavelength() + ")");
+        // Write the header
+        file.addColumn("lambda", 'e', 8);
+        file.addColumn("delta lambda  (" + units->uwavelength() + ")", 'e', 8);
+
+        // Write the body
         for (int ell=0; ell<_Nlambda; ell++)
         {
-            file.writeLine(QString::number(units->owavelength(_lambdav[ell]), 'e', 8) + '\t'
-                         + QString::number(units->owavelength(_dlambdav[ell]), 'e', 8));
+            QVector<double> values;
+            values.append(units->owavelength(_lambdav[ell]));
+            values.append(units->owavelength(_dlambdav[ell]));
+            file.writeRow(values);
         }
     }
 }

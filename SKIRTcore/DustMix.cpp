@@ -182,7 +182,6 @@ void DustMix::setupSelfAfter()
             for (int c=0; c<_Npop; c++) values.append(units->osection(_sigmaabsvv[c][ell]));
             for (int c=0; c<_Npop; c++) values.append(units->osection(_sigmascavv[c][ell]));
             for (int c=0; c<_Npop; c++) values.append(_asymmparvv[c][ell]);
-
             file.writeRow(values);
         }
     }
@@ -196,7 +195,7 @@ void DustMix::setupSelfAfter()
         // Write the header
         QString bulkmass = units->ubulkmass() + " per hydrogen atom";
         file.writeLine("# total dust mass: " + QString::number(units->obulkmass(_mu), 'e', 6) + ' ' + bulkmass);
-        file.addColumn("dust mix population index", 'f', 1);
+        file.addColumn("dust mix population index", 'i');
         file.addColumn("dust mass (" + bulkmass + ")", 'e', 6);
         file.addColumn("dust mass (% of total)", 'f', 3);
 
@@ -207,7 +206,6 @@ void DustMix::setupSelfAfter()
             values.append(c);
             values.append(units->obulkmass(_muv[c]));
             values.append(100.*_muv[c]/_mu);
-
             file.writeRow(values, "\t");
         }
     }
@@ -234,7 +232,6 @@ void DustMix::setupSelfAfter()
             values.append(units->oopacity(_kappaabsv[ell]));
             values.append(units->oopacity(_kappascav[ell]));
             values.append(_asymmparv[ell]);
-
             file.writeRow(values);
         }
     }

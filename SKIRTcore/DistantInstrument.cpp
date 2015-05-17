@@ -160,12 +160,15 @@ void DistantInstrument::calibrateAndWriteSEDs(QList< Array* > Farrays, QStringLi
 
     Units* units = find<Units>();
     TextOutFile sedfile(this, _instrumentname + "_sed", "SED");
-    sedfile.writeLine("# column 1: lambda (" + units->uwavelength() + ")");
+
+    // Write the header
+    sedfile.addColumn("lambda (" + units->uwavelength() + ")");
     for (int q = 0; q < Farrays.size(); q++)
     {
-        sedfile.writeLine("# column " + QString::number(q+2) + ": " + Fnames[q] + "; " + units->sfluxdensity() + " "
-                                      + "(" + units->ufluxdensity() + ")");
+        sedfile.addColumn(Fnames[q] + "; " + units->sfluxdensity() + " " + "(" + units->ufluxdensity() + ")");
     }
+
+    // Write the body
     for (int ell=0; ell<Nlambda; ell++)
     {
         double lambda = lambdagrid->lambda(ell);

@@ -89,11 +89,11 @@ void MultiGrainDustMix::addpopulations(const GrainComposition *gc, const GrainSi
 
             if (!popIndex)
             {
-                file.writeLine("# col 1: dust mix population index");
-                file.writeLine("# col 2: grain composition type");
-                file.writeLine("# col 3: minimum dust grain radius (" + units->ugrainsize() + ")");
-                file.writeLine("# col 4: average dust grain radius (" + units->ugrainsize() + ")");
-                file.writeLine("# col 5: maximum dust grain radius (" + units->ugrainsize() + ")");
+                file.addColumn("dust mix population index");
+                file.addColumn("grain composition type");
+                file.addColumn("minimum dust grain radius (" + units->ugrainsize() + ")");
+                file.addColumn("average dust grain radius (" + units->ugrainsize() + ")");
+                file.addColumn("maximum dust grain radius (" + units->ugrainsize() + ")");
             }
             double aminc = aminv[c];
             double amaxc = amaxv[c];
