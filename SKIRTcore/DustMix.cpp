@@ -201,11 +201,7 @@ void DustMix::setupSelfAfter()
         // Write the body
         for (int c=0; c<_Npop; c++)
         {
-            QList<double> values;
-            values << c;
-            values << units->obulkmass(_muv[c]);
-            values << 100.*_muv[c]/_mu;
-            file.writeRow(values);
+            file.writeRow(QList<double>() << c << units->obulkmass(_muv[c]) << 100.*_muv[c]/_mu);
         }
     }
 
@@ -225,13 +221,11 @@ void DustMix::setupSelfAfter()
         // Write the body
         for (int ell=0; ell<_Nlambda; ell++)
         {
-            QList<double> values;
-            values << units->owavelength(_lambdagrid->lambda(ell));
-            values << units->oopacity(_kappaextv[ell]);
-            values << units->oopacity(_kappaabsv[ell]);
-            values << units->oopacity(_kappascav[ell]);
-            values << _asymmparv[ell];
-            file.writeRow(values);
+            file.writeRow(QList<double>() << units->owavelength(_lambdagrid->lambda(ell))
+                                          << units->oopacity(_kappaextv[ell])
+                                          << units->oopacity(_kappaabsv[ell])
+                                          << units->oopacity(_kappascav[ell])
+                                          << _asymmparv[ell]);
         }
     }
 

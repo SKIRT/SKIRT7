@@ -51,10 +51,7 @@ void PanWavelengthGrid::setupSelfAfter()
         // Write the body
         for (int ell=0; ell<_Nlambda; ell++)
         {
-            QList<double> values;
-            values << units->owavelength(_lambdav[ell]);
-            values << units->owavelength(_dlambdav[ell]);
-            file.writeRow(values);
+            file.writeRow(QList<double>() << units->owavelength(_lambdav[ell]) << units->owavelength(_dlambdav[ell]));
         }
     }
 }

@@ -658,12 +658,7 @@ void DustSystem::writecellproperties() const
         double V = volume(m);
         double delta = (rho*V)/totalmass;
         double tau = Units::kappaV()*rho*pow(V,1./3.);
-        QList<double> values;
-        values << units->ovolume(V);
-        values << units->omassvolumedensity(rho);
-        values << delta;
-        values << tau;
-        file.writeRow(values);
+        file.writeRow(QList<double>() << units->ovolume(V) << units->omassvolumedensity(rho) << delta << tau);
         tauV[m] = tau;
     }
 
@@ -979,10 +974,7 @@ void DustSystem::write() const
         int Nlines = _crossed.size();
         for (int index=0; index<Nlines; index++)
         {
-            QList<double> values;
-            values << index;
-            values << _crossed[index];
-            file.writeRow(values);
+            file.writeRow(QList<double>() << index << _crossed[index]);
         }
     }
 }

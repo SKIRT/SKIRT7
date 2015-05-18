@@ -126,10 +126,8 @@ void SPHStarburstComp::setupSelfBefore()
         // Write the body
         for (int ell=0; ell<Nlambda; ell++)
         {
-            QList<double> values;
-            values << units->owavelength(lambdagrid->lambda(ell));
-            values << units->obolluminosity(_Ltotv[ell]);
-            file.writeRow(values);
+            file.writeRow(QList<double>() << units->owavelength(lambdagrid->lambda(ell))
+                                          << units->obolluminosity(_Ltotv[ell]));
         }
     }
 }
