@@ -6,8 +6,8 @@
 #ifndef RANDOMASSIGNER_HPP
 #define RANDOMASSIGNER_HPP
 
+#include <vector>
 #include "ProcessAssigner.hpp"
-#include <QVector>
 class Random;
 
 //////////////////////////////////////////////////////////////////////
@@ -89,11 +89,11 @@ public:
     //======================== Data Members ========================
 
 protected:
-    Random* _random;            // a pointer to the Random object of the simulation
-    QVector<int> _assignment;   // for each value, this vector defines the rank of the assigned process
-    QList<size_t> _values;      // a list of the values assigned to this process
-    size_t _blocksize;          // the number of parts of work per block
-    size_t _valuesInBlock;      // the number of parts of work in a block assigned to this process
+    Random* _random;                // a pointer to the Random object of the simulation
+    std::vector<int> _assignment;   // for each value, this vector defines the rank of the assigned process
+    std::vector<size_t> _values;    // a list of the values assigned to this process
+    size_t _blocksize;              // the number of parts of work per block
+    size_t _valuesInBlock;          // the number of parts of work in a block assigned to this process
 };
 
 //////////////////////////////////////////////////////////////////////

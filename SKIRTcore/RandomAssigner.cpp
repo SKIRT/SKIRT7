@@ -42,6 +42,7 @@ void RandomAssigner::assign(size_t size, size_t blocks)
 {
     _blocksize = size;
     _assignment.resize(size);
+    _values.reserve(size/_comm->size()*1.2);
 
     // For each value in a certain subset of 'size', let this process determine a random process rank
     SequentialAssigner* helpassigner = new SequentialAssigner(this);
@@ -61,7 +62,7 @@ void RandomAssigner::assign(size_t size, size_t blocks)
         // If the process assigned to this value is this process, add the value to the list
         if (_assignment[j] == _comm->rank())
         {
-            _values.append(j);
+            _values.push_back(j);
         }
     }
 
@@ -91,7 +92,7 @@ size_t RandomAssigner::relativeIndex(size_t absoluteIndex)
     size_t block = absoluteIndex / _blocksize;
     absoluteIndex = absoluteIndex - block*_blocksize;
 
-    return _values.indexOf(absoluteIndex);
+    return std::find(_values.begin(), _values.end(), absoluteIndex) - _values.begin();
 }
 
 ////////////////////////////////////////////////////////////////////
