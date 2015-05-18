@@ -41,10 +41,19 @@ public:
         process is not the root, this function will have no effect. */
     void writeLine(QString line);
 
-    /** This function .. */
+    /** This function (virtually) adds a new column to the text file, characterized by a certain
+        description, the formatting ('d' for integer values, 'e' (or 'E') for scientific notation, 'f'
+        for floating point notation and 'g' (or 'G') for the most concise ['e' ('E') or 'f']. For the
+        'e', 'E', and 'f' formats, the precision represents the number of digits after the decimal
+        point. For the 'g' and 'G' formats, the precision represents the maximum number of significant
+        digits (trailing zeroes are omitted). The description of each column is added to the header of
+        the text file, along with the column number. */
     void addColumn(QString description, char format = 'e', int precision = 6);
 
-    /** This function .. */
+    /** This function writes the specified list of (double) values to the text file, on a single row
+        where adjecent values are seperated by a space. The values are formatted according to the
+        'format' and 'precision' specified by the addColumn function. If the number of values in the
+        list does not match the number of columns, a FatalError is thrown. */
     void writeRow(QList<double> values);
 
     //======================== Data Members ========================
