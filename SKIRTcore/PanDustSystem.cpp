@@ -95,11 +95,11 @@ namespace
         for (int ell=0; ell<Nlambda; ell++)
         {
             double lambda = lambdagrid->lambda(ell);
-            QVector<double> values;
-            values.append(units->owavelength(lambda));
-            values.append(Jv[ell]);
+            QList<double> values;
+            values << units->owavelength(lambda);
+            values << Jv[ell];
             for (int h=0; h<Ncomp; h++)
-                values.append(ds->mix(h)->mu()*lambda*evv(h,ell));
+                values << ds->mix(h)->mu()*lambda*evv(h,ell);
             file.writeRow(values);
         }
     }

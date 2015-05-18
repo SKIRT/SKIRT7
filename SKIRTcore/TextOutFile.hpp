@@ -7,8 +7,8 @@
 #define TEXTOUTFILE_HPP
 
 #include <fstream>
+#include <QList>
 #include <QString>
-#include <QVector>
 #include "Array.hpp"
 #include "SimulationItem.hpp"
 class Log;
@@ -45,7 +45,7 @@ public:
     void addColumn(QString description, char format = 'e', int precision = 6);
 
     /** This function .. */
-    void writeRow(QVector<double> values, QString delimiter = " ");
+    void writeRow(QList<double> values);
 
     //======================== Data Members ========================
 
@@ -54,8 +54,8 @@ private:
     QString _filepath;
     std::ofstream _out;  // the output stream
     int _ncolumns;
-    QVector<char> _formats;
-    QVector<int> _precisions;
+    QList<char> _formats;
+    QList<int> _precisions;
 };
 
 ////////////////////////////////////////////////////////////////////

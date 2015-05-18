@@ -61,29 +61,20 @@ void TextOutFile::writeLine(QString line)
 
 ////////////////////////////////////////////////////////////////////
 
-void TextOutFile::writeRow(QVector<double> values, QString delimiter)
+void TextOutFile::writeRow(QList<double> values)
 {
     if (values.size() != _ncolumns) throw FATALERROR("Number of values in row does not match the number of columns");
 
     QString line;
-    if (_formats[0] == 'i')
+    for (int i=0; i<_ncolumns; i++)
     {
-        line += QString::number(int(values[0]));
-    }
-    else
-    {
-        line += QString::number(values[0], _formats[0], _precisions[0]);
-    }
-
-    for (int i=1; i<_ncolumns; i++)
-    {
-        if (_formats[i] == 'i')
+        if (_formats[i] == 'd')
         {
-            line += delimiter + QString::number(int(values[i]));
+            line += (i ? " " : "") + QString::number(values[i], 'f', 0);
         }
         else
         {
-            line += delimiter + QString::number(values[i], _formats[i], _precisions[i]);
+            line += (i ? " " : "") + QString::number(values[i], _formats[i], _precisions[i]);
         }
     }
     writeLine(line);

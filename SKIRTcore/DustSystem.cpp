@@ -658,11 +658,11 @@ void DustSystem::writecellproperties() const
         double V = volume(m);
         double delta = (rho*V)/totalmass;
         double tau = Units::kappaV()*rho*pow(V,1./3.);
-        QVector<double> values;
-        values.append(units->ovolume(V));
-        values.append(units->omassvolumedensity(rho));
-        values.append(delta);
-        values.append(tau);
+        QList<double> values;
+        values << units->ovolume(V);
+        values << units->omassvolumedensity(rho);
+        values << delta;
+        values << tau;
         file.writeRow(values);
         tauV[m] = tau;
     }
@@ -972,16 +972,16 @@ void DustSystem::write() const
 
         // Write the header
         file.writeLine("# total number of cells in grid: " + QString::number(_Ncells));
-        file.addColumn("number of cells crossed", 'i');
-        file.addColumn("number of paths that crossed this number of cells", 'i');
+        file.addColumn("number of cells crossed", 'd');
+        file.addColumn("number of paths that crossed this number of cells", 'd');
 
         // Write the body
         int Nlines = _crossed.size();
         for (int index=0; index<Nlines; index++)
         {
-            QVector<double> values;
-            values.append(index);
-            values.append(_crossed[index]);
+            QList<double> values;
+            values << index;
+            values << _crossed[index];
             file.writeRow(values);
         }
     }

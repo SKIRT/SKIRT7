@@ -4,7 +4,6 @@
 ///////////////////////////////////////////////////////////////// */
 
 #include <cmath>
-#include <QVector>
 #include "DustDistribution.hpp"
 #include "DustMix.hpp"
 #include "FatalError.hpp"
@@ -176,12 +175,12 @@ void DustMix::setupSelfAfter()
         // Write the body
         for (int ell=0; ell<_Nlambda; ell++)
         {
-            QVector<double> values;
-            values.append(units->owavelength(_lambdagrid->lambda(ell)));
-            for (int c=0; c<_Npop; c++) values.append(units->osection(_sigmaabsvv[c][ell]+_sigmascavv[c][ell]));
-            for (int c=0; c<_Npop; c++) values.append(units->osection(_sigmaabsvv[c][ell]));
-            for (int c=0; c<_Npop; c++) values.append(units->osection(_sigmascavv[c][ell]));
-            for (int c=0; c<_Npop; c++) values.append(_asymmparvv[c][ell]);
+            QList<double> values;
+            values << units->owavelength(_lambdagrid->lambda(ell));
+            for (int c=0; c<_Npop; c++) values << units->osection(_sigmaabsvv[c][ell]+_sigmascavv[c][ell]);
+            for (int c=0; c<_Npop; c++) values << units->osection(_sigmaabsvv[c][ell]);
+            for (int c=0; c<_Npop; c++) values << units->osection(_sigmascavv[c][ell]);
+            for (int c=0; c<_Npop; c++) values << _asymmparvv[c][ell];
             file.writeRow(values);
         }
     }
@@ -195,18 +194,18 @@ void DustMix::setupSelfAfter()
         // Write the header
         QString bulkmass = units->ubulkmass() + " per hydrogen atom";
         file.writeLine("# total dust mass: " + QString::number(units->obulkmass(_mu), 'e', 6) + ' ' + bulkmass);
-        file.addColumn("dust mix population index", 'i');
+        file.addColumn("dust mix population index", 'd');
         file.addColumn("dust mass (" + bulkmass + ")", 'e', 6);
         file.addColumn("dust mass (% of total)", 'f', 3);
 
         // Write the body
         for (int c=0; c<_Npop; c++)
         {
-            QVector<double> values;
-            values.append(c);
-            values.append(units->obulkmass(_muv[c]));
-            values.append(100.*_muv[c]/_mu);
-            file.writeRow(values, "\t");
+            QList<double> values;
+            values << c;
+            values << units->obulkmass(_muv[c]);
+            values << 100.*_muv[c]/_mu;
+            file.writeRow(values);
         }
     }
 
@@ -226,12 +225,12 @@ void DustMix::setupSelfAfter()
         // Write the body
         for (int ell=0; ell<_Nlambda; ell++)
         {
-            QVector<double> values;
-            values.append(units->owavelength(_lambdagrid->lambda(ell)));
-            values.append(units->oopacity(_kappaextv[ell]));
-            values.append(units->oopacity(_kappaabsv[ell]));
-            values.append(units->oopacity(_kappascav[ell]));
-            values.append(_asymmparv[ell]);
+            QList<double> values;
+            values << units->owavelength(_lambdagrid->lambda(ell));
+            values << units->oopacity(_kappaextv[ell]);
+            values << units->oopacity(_kappaabsv[ell]);
+            values << units->oopacity(_kappascav[ell]);
+            values << _asymmparv[ell];
             file.writeRow(values);
         }
     }

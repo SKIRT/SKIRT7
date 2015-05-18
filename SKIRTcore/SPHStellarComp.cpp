@@ -113,9 +113,9 @@ void SPHStellarComp::setupSelfBefore()
         // Write the body
         for (int ell=0; ell<Nlambda; ell++)
         {
-            QVector<double> values;
-            values.append(units->owavelength(lambdagrid->lambda(ell)));
-            values.append(units->obolluminosity(_Ltotv[ell]));
+            QList<double> values;
+            values << units->owavelength(lambdagrid->lambda(ell));
+            values << units->obolluminosity(_Ltotv[ell]);
             file.writeRow(values);
         }
     }

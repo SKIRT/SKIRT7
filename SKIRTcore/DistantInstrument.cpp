@@ -172,13 +172,13 @@ void DistantInstrument::calibrateAndWriteSEDs(QList< Array* > Farrays, QStringLi
     for (int ell=0; ell<Nlambda; ell++)
     {
         double lambda = lambdagrid->lambda(ell);
-        QVector<double> values;
-        values.append(units->owavelength(lambda));
+        QList<double> values;
+        values << units->owavelength(lambda);
         foreach (Array* Farr, Farrays)
         {
-            values.append(Farr->size() ? units->ofluxdensity(lambda, (*Farr)[ell]) : 0.);
+            values << (Farr->size() ? units->ofluxdensity(lambda, (*Farr)[ell]) : 0.);
         }
-        sedfile.writeRow(values, "\t");
+        sedfile.writeRow(values);
     }
 }
 
