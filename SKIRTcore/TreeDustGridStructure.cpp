@@ -52,8 +52,14 @@ void TreeDustGridStructure::setupSelfBefore()
 
     // Validate attribute values
 
-    if (_maxlevel <= _minlevel)
-        throw FATALERROR("Maximum tree level should be larger than minimum tree level");
+    if (_xmax <= 0.0 || _ymax <= 0.0 || _zmax <= 0.0) throw FATALERROR("The maximum extent should be positive");
+    if (_minlevel < 0) throw FATALERROR("The minimum tree level should be at least 0");
+    if (_maxlevel < 2) throw FATALERROR("The maximum tree level should be at least 2");
+    if (_maxlevel <= _minlevel) throw FATALERROR("Maximum tree level should be larger than minimum tree level");
+    if (_Nrandom < 1) throw FATALERROR("Number of random samples must be at least 1");
+    if (_maxOpticalDepth < 0.0) throw FATALERROR("The maximum mean optical depth should be positive");
+    if (_maxMassFraction < 0.0) throw FATALERROR("The maximum mass fraction should be positive");
+    if (_maxDensDispFraction < 0.0) throw FATALERROR("The maximum density dispersion fraction should be positive");
 
     // Cache some often used values
 
@@ -224,7 +230,6 @@ void TreeDustGridStructure::subdivide(TreeNode* node)
 
 void TreeDustGridStructure::setExtentX(double value)
 {
-    if (value <= 0.0) throw FATALERROR("The maximum extent (in the X direction) should be positive");
     _xmax = value;
     _xmin = - value;
 }
@@ -240,7 +245,6 @@ double TreeDustGridStructure::extentX() const
 
 void TreeDustGridStructure::setExtentY(double value)
 {
-    if (value <= 0.0) throw FATALERROR("The maximum extent (in the X direction) should be positive");
     _ymax = value;
     _ymin = - value;
 }
@@ -256,7 +260,6 @@ double TreeDustGridStructure::extentY() const
 
 void TreeDustGridStructure::setExtentZ(double value)
 {
-    if (value <= 0.0) throw FATALERROR("The maximum extent (in the X direction) should be positive");
     _zmax = value;
     _zmin = - value;
 }
@@ -272,8 +275,6 @@ double TreeDustGridStructure::extentZ() const
 
 void TreeDustGridStructure::setMinLevel(int value)
 {
-    if (value < 0) throw FATALERROR("The minimum tree level should be at least 0");
-    if (value > 50) throw FATALERROR("The minimum tree level should be at most 50");
     _minlevel = value;
 }
 
@@ -288,8 +289,6 @@ int TreeDustGridStructure::minLevel() const
 
 void TreeDustGridStructure::setMaxLevel(int value)
 {
-    if (value < 2) throw FATALERROR("The maximum tree level should be at least 2");
-    if (value > 50) throw FATALERROR("The minimum tree level should be at most 50");
     _maxlevel = value;
 }
 
@@ -318,7 +317,6 @@ TreeDustGridStructure::SearchMethod TreeDustGridStructure::searchMethod() const
 
 void TreeDustGridStructure::setSampleCount(int value)
 {
-    if (value < 10) throw FATALERROR("Number of random samples must be at least 10");
     _Nrandom = value;
 }
 
@@ -333,7 +331,6 @@ int TreeDustGridStructure::sampleCount() const
 
 void TreeDustGridStructure::setMaxOpticalDepth(double value)
 {
-    if (value < 0.0) throw FATALERROR("The maximum mean optical depth should be positive");
     _maxOpticalDepth = value;
 }
 
@@ -348,7 +345,6 @@ double TreeDustGridStructure::maxOpticalDepth() const
 
 void TreeDustGridStructure::setMaxMassFraction(double value)
 {
-    if (value < 0.0) throw FATALERROR("The maximum mass fraction should be positive");
     _maxMassFraction = value;
 }
 
@@ -363,7 +359,6 @@ double TreeDustGridStructure::maxMassFraction() const
 
 void TreeDustGridStructure::setMaxDensDispFraction(double value)
 {
-    if (value < 0.0) throw FATALERROR("The maximum density dispersion fraction should be positive");
     _maxDensDispFraction = value;
 }
 

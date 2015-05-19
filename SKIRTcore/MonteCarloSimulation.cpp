@@ -36,6 +36,12 @@ void MonteCarloSimulation::setupSelfBefore()
 {
     Simulation::setupSelfBefore();
 
+    // protect implementation limit
+    if (_packages > 1e15)
+        throw FATALERROR("Number of photon packages is larger than implementation limit of 1e15");
+    if (_packages < 0)
+        throw FATALERROR("Number of photon packages is negative");
+
     if (!_lambdagrid) throw FATALERROR("Wavelength grid was not set");
     if (!_ss) throw FATALERROR("Stellar system was not set");
     if (!_is) throw FATALERROR("Instrument system was not set");
@@ -99,12 +105,6 @@ InstrumentSystem* MonteCarloSimulation::instrumentSystem() const
 
 void MonteCarloSimulation::setPackages(double value)
 {
-    // protect implementation limit
-    if (value > 1e15)
-        throw FATALERROR("Number of photon packages is larger than implementation limit of 1e15");
-    if (value < 0)
-        throw FATALERROR("Number of photon packages is negative");
-
     _packages = value;
 }
 

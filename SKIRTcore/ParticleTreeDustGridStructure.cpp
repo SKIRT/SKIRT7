@@ -76,6 +76,9 @@ void ParticleTreeDustGridStructure::setupSelfBefore()
 {
     GenDustGridStructure::setupSelfBefore();
 
+    // Verify property values
+    if (_xmax <= 0.0 || _ymax <= 0.0 || _zmax <= 0.0) throw FATALERROR("The maximum extent should be positive");
+
     // Cache some often used values
     Log* log = find<Log>();
     _eps = 1e-12 * extent().widths().norm();
@@ -189,7 +192,6 @@ void ParticleTreeDustGridStructure::setupSelfBefore()
 
 void ParticleTreeDustGridStructure::setExtentX(double value)
 {
-    if (value <= 0.0) throw FATALERROR("The maximum extent (in the X direction) should be positive");
     _xmax = value;
     _xmin = - value;
 }
@@ -205,7 +207,6 @@ double ParticleTreeDustGridStructure::extentX() const
 
 void ParticleTreeDustGridStructure::setExtentY(double value)
 {
-    if (value <= 0.0) throw FATALERROR("The maximum extent (in the X direction) should be positive");
     _ymax = value;
     _ymin = - value;
 }
@@ -221,7 +222,6 @@ double ParticleTreeDustGridStructure::extentY() const
 
 void ParticleTreeDustGridStructure::setExtentZ(double value)
 {
-    if (value <= 0.0) throw FATALERROR("The maximum extent (in the X direction) should be positive");
     _zmax = value;
     _zmin = - value;
 }

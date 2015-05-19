@@ -18,6 +18,14 @@ CropGeometryDecorator::CropGeometryDecorator()
 
 ////////////////////////////////////////////////////////////////////
 
+void CropGeometryDecorator::setupSelfBefore()
+{
+    Geometry::setupSelfBefore();
+    if (_xmax <= 0.0 || _ymax <= 0.0 || _zmax <= 0.0) throw FATALERROR("The maximum extent should be positive");
+}
+
+////////////////////////////////////////////////////////////////////
+
 void
 CropGeometryDecorator::setupSelfAfter()
 {
@@ -61,8 +69,6 @@ const
 void
 CropGeometryDecorator::setExtentX(double value)
 {
-    if (value <= 0.0)
-        throw FATALERROR("The maximum extent in the X direction should be positive");
     _xmax = value;
 }
 
@@ -80,8 +86,6 @@ const
 void
 CropGeometryDecorator::setExtentY(double value)
 {
-    if (value <= 0.0)
-        throw FATALERROR("The maximum extent in the Y direction should be positive");
     _ymax = value;
 }
 
@@ -99,8 +103,6 @@ const
 void
 CropGeometryDecorator::setExtentZ(double value)
 {
-    if (value <= 0.0)
-        throw FATALERROR("The maximum extent in the Z direction should be positive");
     _zmax = value;
 }
 

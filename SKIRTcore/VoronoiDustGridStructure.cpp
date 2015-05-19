@@ -40,6 +40,9 @@ void VoronoiDustGridStructure::setupSelfBefore()
     GenDustGridStructure::setupSelfBefore();
     Log* log = find<Log>();
 
+    // Verify property values
+    if (_xmax <= 0.0 || _ymax <= 0.0 || _zmax <= 0.0) throw FATALERROR("The maximum extent should be positive");
+
     // Determine an appropriate set of particles and construct the Voronoi mesh
     switch (_distribution)
     {
@@ -224,7 +227,6 @@ void VoronoiDustGridStructure::setupSelfBefore()
 
 void VoronoiDustGridStructure::setExtentX(double value)
 {
-    if (value <= 0.0) throw FATALERROR("The maximum extent (in the X direction) should be positive");
     _xmax = value;
     _xmin = - value;
 }
@@ -240,7 +242,6 @@ double VoronoiDustGridStructure::extentX() const
 
 void VoronoiDustGridStructure::setExtentY(double value)
 {
-    if (value <= 0.0) throw FATALERROR("The maximum extent (in the X direction) should be positive");
     _ymax = value;
     _ymin = - value;
 }
@@ -256,7 +257,6 @@ double VoronoiDustGridStructure::extentY() const
 
 void VoronoiDustGridStructure::setExtentZ(double value)
 {
-    if (value <= 0.0) throw FATALERROR("The maximum extent (in the X direction) should be positive");
     _zmax = value;
     _zmin = - value;
 }

@@ -38,6 +38,7 @@ void SPHDustDistribution::setupSelfBefore()
 {
     // verify appropriate setup
     DustDistribution::setupSelfBefore();
+    if (_fdust <= 0.0) throw FATALERROR("The dust fraction should be positive");
     if (!_mix) throw FATALERROR("Dust mix was not set");
 
     // get conversion factors for units
@@ -119,7 +120,6 @@ QString SPHDustDistribution::filename() const
 
 void SPHDustDistribution::setDustFraction(double value)
 {
-    if (value <= 0.0) throw FATALERROR("The dust fraction should be positive");
     _fdust = value;
 }
 

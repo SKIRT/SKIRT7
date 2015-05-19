@@ -28,6 +28,16 @@ FoamGeometryDecorator::~FoamGeometryDecorator()
 
 //////////////////////////////////////////////////////////////////////
 
+void FoamGeometryDecorator::setupSelfBefore()
+{
+    GenGeometry::setupSelfBefore();
+    if (_xmax <= 0.0 || _ymax <= 0.0 || _zmax <= 0.0) throw FATALERROR("The maximum extent should be positive");
+    if (_Ncells < 1000) throw FATALERROR("The number of foam cells should be at least 1000");
+    if (_Ncells > 1000000) throw FATALERROR("The number of foam cells should be at most 1000000");
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void
 FoamGeometryDecorator::setupSelfAfter()
 {
@@ -59,7 +69,6 @@ const
 void
 FoamGeometryDecorator::setExtentX(double value)
 {
-    if (value <= 0.0) throw FATALERROR("The maximum extent (in the X direction) should be positive");
     _xmax = value;
 }
 
@@ -77,7 +86,6 @@ const
 void
 FoamGeometryDecorator::setExtentY(double value)
 {
-    if (value <= 0.0) throw FATALERROR("The maximum extent (in the Y direction) should be positive");
     _ymax = value;
 }
 
@@ -95,7 +103,6 @@ const
 void
 FoamGeometryDecorator::setExtentZ(double value)
 {
-    if (value <= 0.0) throw FATALERROR("The maximum extent (in the Z direction) should be positive");
     _zmax = value;
 }
 
@@ -113,8 +120,6 @@ const
 void
 FoamGeometryDecorator::setNumCells(int value)
 {
-    if (value < 1000) throw FATALERROR("The number of foam cells should be at least 1000");
-    if (value > 1000000) throw FATALERROR("The number of foam cells should be at most 1000000");
     _Ncells = value;
 }
 

@@ -63,6 +63,9 @@ public:
     ~FoamGeometryDecorator();
 
 protected:
+    /** This function verifies the property values. */
+    void setupSelfBefore();
+
     /** This function sets up the foam. The Foam constructor needs a pointer to an instance of the
         FoamDensity interface, which is implemented for this purpose by the FoamGeometryDecorator
         class. */

@@ -44,6 +44,7 @@ void DustSystem::setupSelfBefore()
 {
     SimulationItem::setupSelfBefore();
 
+    if (_Nrandom < 1) throw FATALERROR("Number of random samples must be at least 1");
     if (!_dd) throw FATALERROR("Dust distribution was not set");
     if (!_grid) throw FATALERROR("Dust grid structure was not set");
 }
@@ -675,7 +676,6 @@ DustGridStructure* DustSystem::dustGridStructure() const
 
 void DustSystem::setSampleCount(int value)
 {
-    if (value < 10) throw FATALERROR("Number of random samples must be at least 10");
     _Nrandom = value;
 }
 

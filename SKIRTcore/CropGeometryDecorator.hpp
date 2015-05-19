@@ -44,6 +44,9 @@ public:
     Q_INVOKABLE CropGeometryDecorator();
 
 protected:
+    /** This function verifies the property values. */
+    void setupSelfBefore();
+
     /** This function estimates the fraction \f$\chi\f$ of the mass from the original model taken
         away by the cropping. It samples the density of the geometry being decorated, and counts
         the number of generated positions that fall outside the bounding box. This value is used to

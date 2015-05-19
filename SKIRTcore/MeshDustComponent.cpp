@@ -24,6 +24,7 @@ void MeshDustComponent::setupSelfBefore()
 
     // verify property values
     if (_densityIndex < 0) throw FATALERROR("Column index for density must be specified");
+    if (_densityFraction <= 0.0) throw FATALERROR("The density fraction should be positive");
     if (!_mix) throw FATALERROR("Dust mix was not set");
 }
 
@@ -59,7 +60,6 @@ int MeshDustComponent::multiplierIndex() const
 
 void MeshDustComponent::setDensityFraction(double value)
 {
-    if (value <= 0.0) throw FATALERROR("The density fraction should be positive");
     _densityFraction = value;
 }
 
