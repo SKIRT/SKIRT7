@@ -42,7 +42,7 @@ void RandomAssigner::assign(size_t size, size_t blocks)
 {
     _blocksize = size;
     _assignment.resize(size);
-    _values.reserve(size/_comm->size()*1.2);
+    _values.reserve(1.2*size/_comm->size());
 
     // For each value in a certain subset of 'size', let this process determine a random process rank
     SequentialAssigner* helpassigner = new SequentialAssigner(this);
