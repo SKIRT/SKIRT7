@@ -4,8 +4,6 @@
 ///////////////////////////////////////////////////////////////// */
 
 #include <cmath>
-#include <fstream>
-#include <iomanip>
 #include "DustDistribution.hpp"
 #include "DustMix.hpp"
 #include "FatalError.hpp"
@@ -16,6 +14,7 @@
 #include "PlanckFunction.hpp"
 #include "PeerToPeerCommunicator.hpp"
 #include "Random.hpp"
+#include "TextOutFile.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
 
@@ -158,80 +157,76 @@ void DustMix::setupSelfAfter()
     // Output the optical properties to a text file
     // -------------------------------------------------------------
 
-    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
-
     // output the optical properties for all dust populations
-    if (_writeMix && comm->isRoot())
+    if (_writeMix)
     {
-        QString filename = find<FilePaths>()->output("ds_mix_" + QString::number(h) + "_opti.dat");
-        log->info("Writing optical dust population properties to " + filename + "...");
-        ofstream file(filename.toLocal8Bit().constData());
-        file << setprecision(6) << scientific;
-        string section = units->usection().toStdString() + " per hydrogen atom";
-        int col = 0;
-        file << "# col " << ++col << ": lambda (" << units->uwavelength().toStdString() << ")\n";
-        for (int c=0; c<_Npop; c++) file << "# col " << ++col << ": sigma_ext[" << c << "] (" << section << ")\n";
-        for (int c=0; c<_Npop; c++) file << "# col " << ++col << ": sigma_abs[" << c << "] (" << section << ")\n";
-        for (int c=0; c<_Npop; c++) file << "# col " << ++col << ": sigma_sca[" << c << "] (" << section << ")\n";
-        for (int c=0; c<_Npop; c++) file << "# col " << ++col << ": asymmpar[" << c << "]\n";
+        // Create a text file
+        TextOutFile file(this, "ds_mix_" + QString::number(h) + "_opti", "optical dust population properties");
+
+        QString section = units->usection() + " per hydrogen atom";
+
+        // Write the header
+        file.addColumn("lambda (" + units->uwavelength() + ")", 'e', 6);
+        for (int c=0; c<_Npop; c++) file.addColumn("sigma_ext[" + QString::number(c) + "] (" + section + ")", 'e', 6);
+        for (int c=0; c<_Npop; c++) file.addColumn("sigma_abs[" + QString::number(c) + "] (" + section + ")", 'e', 6);
+        for (int c=0; c<_Npop; c++) file.addColumn("sigma_sca[" + QString::number(c) + "] (" + section + ")", 'e', 6);
+        for (int c=0; c<_Npop; c++) file.addColumn("asymmpar[" + QString::number(c) + "]", 'e', 6);
+
+        // Write the body
         for (int ell=0; ell<_Nlambda; ell++)
         {
-            file << units->owavelength(_lambdagrid->lambda(ell));
-            for (int c=0; c<_Npop; c++) file << ' ' << units->osection(_sigmaabsvv[c][ell]+_sigmascavv[c][ell]);
-            for (int c=0; c<_Npop; c++) file << ' ' << units->osection(_sigmaabsvv[c][ell]);
-            for (int c=0; c<_Npop; c++) file << ' ' << units->osection(_sigmascavv[c][ell]);
-            for (int c=0; c<_Npop; c++) file << ' ' << _asymmparvv[c][ell];
-            file << '\n';
+            QList<double> values;
+            values << units->owavelength(_lambdagrid->lambda(ell));
+            for (int c=0; c<_Npop; c++) values << units->osection(_sigmaabsvv[c][ell]+_sigmascavv[c][ell]);
+            for (int c=0; c<_Npop; c++) values << units->osection(_sigmaabsvv[c][ell]);
+            for (int c=0; c<_Npop; c++) values << units->osection(_sigmascavv[c][ell]);
+            for (int c=0; c<_Npop; c++) values << _asymmparvv[c][ell];
+            file.writeRow(values);
         }
-        file.close();
-        log->info("File " + filename + " created.");
     }
 
     // output the mass properties for all dust populations
-    if (_writeMix && comm->isRoot())
+    if (_writeMix)
     {
-        QString filename = find<FilePaths>()->output("ds_mix_" + QString::number(h) + "_mass.dat");
-        log->info("Writing dust population masses to " + filename + "...");
-        ofstream file(filename.toLocal8Bit().constData());
-        file << setprecision(6) << scientific;
-        string bulkmass = units->ubulkmass().toStdString() + " per hydrogen atom";
-        file << "# total dust mass: " << units->obulkmass(_mu) << ' ' << bulkmass << '\n';
-        file << "# col 1: dust mix population index\n";
-        file << "# col 2: dust mass (" << bulkmass << ")\n";
-        file << "# col 3: dust mass (% of total)\n";
+        // Create a text file
+        TextOutFile file(this, "ds_mix_" + QString::number(h) + "_mass", "dust population masses");
+
+        // Write the header
+        QString bulkmass = units->ubulkmass() + " per hydrogen atom";
+        file.writeLine("# total dust mass: " + QString::number(units->obulkmass(_mu), 'e', 6) + ' ' + bulkmass);
+        file.addColumn("dust mix population index", 'd');
+        file.addColumn("dust mass (" + bulkmass + ")", 'e', 6);
+        file.addColumn("dust mass (% of total)", 'f', 3);
+
+        // Write the body
         for (int c=0; c<_Npop; c++)
         {
-            file << setprecision(6) << scientific;
-            file << c << '\t' << units->obulkmass(_muv[c]);
-            file << setprecision(3) << fixed;
-            file << '\t' << 100.*_muv[c]/_mu << '\n';
+            file.writeRow(QList<double>() << c << units->obulkmass(_muv[c]) << 100.*_muv[c]/_mu);
         }
-        file.close();
-        log->info("File " + filename + " created.");
     }
 
     // output the combined optical properties for the dust mixture
-    if (_writeMeanMix && comm->isRoot())
+    if (_writeMeanMix)
     {
-        QString filename = find<FilePaths>()->output("ds_mix_" + QString::number(h) + "_mean.dat");
-        log->info("Writing combined dust mix properties to " + filename + "...");
-        ofstream file(filename.toLocal8Bit().constData());
-        file << setprecision(6) << scientific;
-        file << "# col 1: lambda (" << units->uwavelength().toStdString() << ")\n";
-        file << "# col 2: total kappa_ext (" << units->uopacity().toStdString() << ")\n";
-        file << "# col 3: total kappa_abs (" << units->uopacity().toStdString() << ")\n";
-        file << "# col 4: total kappa_sca (" << units->uopacity().toStdString() << ")\n";
-        file << "# col 5: mean asymmpar\n";
+        // Create a text file
+        TextOutFile file(this, "ds_mix_" + QString::number(h) + "_mean", "combined dust mix properties");
+
+        // Write the header
+        file.addColumn("lambda (" + units->uwavelength() + ")", 'e', 6);
+        file.addColumn("total kappa_ext (" + units->uopacity() + ")", 'e', 6);
+        file.addColumn("total kappa_abs (" + units->uopacity() + ")", 'e', 6);
+        file.addColumn("total kappa_sca (" + units->uopacity() + ")", 'e', 6);
+        file.addColumn("mean asymmpar", 'e', 6);
+
+        // Write the body
         for (int ell=0; ell<_Nlambda; ell++)
         {
-            file << units->owavelength(_lambdagrid->lambda(ell)) << ' '
-                 << units->oopacity(_kappaextv[ell]) << ' '
-                 << units->oopacity(_kappaabsv[ell]) << ' '
-                 << units->oopacity(_kappascav[ell]) << ' '
-                 << _asymmparv[ell] << '\n';
+            file.writeRow(QList<double>() << units->owavelength(_lambdagrid->lambda(ell))
+                                          << units->oopacity(_kappaextv[ell])
+                                          << units->oopacity(_kappaabsv[ell])
+                                          << units->oopacity(_kappascav[ell])
+                                          << _asymmparv[ell]);
         }
-        file.close();
-        log->info("File " + filename + " created.");
     }
 
     // -------------------------------------------------------------

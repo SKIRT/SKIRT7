@@ -4,6 +4,7 @@
 ///////////////////////////////////////////////////////////////// */
 
 #include "Array.hpp"
+#include "Log.hpp"
 #include "PeerToPeerCommunicator.hpp"
 #include "ProcessManager.hpp"
 
@@ -29,10 +30,7 @@ void PeerToPeerCommunicator::sum_all(Array& arr)
 {
     if (!isMultiProc()) return;
 
-    Array results(arr.size());
-
-    ProcessManager::sum_all(&(arr[0]),&results[0],arr.size());
-    arr = results;
+    ProcessManager::sum_all(&(arr[0]),arr.size());
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -46,6 +44,22 @@ void PeerToPeerCommunicator::broadcast(Array& arr, int sender)
 
 ////////////////////////////////////////////////////////////////////
 
+void PeerToPeerCommunicator::broadcast(int& value, int sender)
+{
+    if (!isMultiProc()) return;
+
+    ProcessManager::broadcast(&value,sender);
+}
+
+////////////////////////////////////////////////////////////////////
+
+int PeerToPeerCommunicator::root()
+{
+    return ROOT;
+}
+
+////////////////////////////////////////////////////////////////////
+
 bool PeerToPeerCommunicator::isRoot()
 {
     return (rank() == ROOT);
@@ -53,9 +67,11 @@ bool PeerToPeerCommunicator::isRoot()
 
 ////////////////////////////////////////////////////////////////////
 
-void PeerToPeerCommunicator::wait()
+void PeerToPeerCommunicator::wait(QString scope)
 {
     if (!isMultiProc()) return;
+
+    find<Log>()->info("Waiting for other processes to finish " + scope + "...");
 
     ProcessManager::barrier();
 }

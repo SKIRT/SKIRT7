@@ -6,8 +6,10 @@
 #include "Instrument.hpp"
 #include "DustSystem.hpp"
 #include "FatalError.hpp"
+#include "Log.hpp"
 #include "PeerToPeerCommunicator.hpp"
 #include "PhotonPackage.hpp"
+#include "TimeLogger.hpp"
 
 using namespace std;
 
@@ -55,6 +57,9 @@ QString Instrument::instrumentName() const
 void Instrument::sumResults(QList<Array*> arrays)
 {
     PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+
+    Log* log = find<Log>();
+    TimeLogger logger(log->verbose() ? log : 0, "communication of the observed fluxes");
 
     foreach (Array* arr, arrays) if (arr->size()) comm->sum(*arr);
 }

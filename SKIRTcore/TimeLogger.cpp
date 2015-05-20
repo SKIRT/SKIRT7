@@ -12,13 +12,16 @@
 TimeLogger::TimeLogger(Log *log, QString scope)
     :_log(log), _scope(scope), _started(QDateTime::currentDateTime())
 {
-    log->info("Starting " + scope + "...");
+    if (log) log->info("Starting " + scope + "...");
 }
 
 ////////////////////////////////////////////////////////////////////
 
 TimeLogger::~TimeLogger()
 {
+    // If no Log instance was passed, we don't have to calculate the elapsed time
+    if (!_log) return;
+
     // if this destructor is executed while an execption is unwinding the stack,
     // then we shouldn't report a success message!
     if (std::uncaught_exception()) return;

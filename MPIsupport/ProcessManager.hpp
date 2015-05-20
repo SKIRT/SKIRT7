@@ -77,11 +77,11 @@ public:
         function for the communication to proceed. */
     static void sum(double* my_array, double* result_array, int nvalues, int root);
 
-    /** The purpose of this function is to sum a particular array of double values element-wise
-        across the different processes. The resulting values are stored in the array passed as the
-        second argument 'result_array', on each individual process. All processes must call this
-        function for the communication to proceed. */
-    static void sum_all(double* my_array, double* result_array, int nvalues);
+    /** The purpose of this function is to sum a particular array of double values element-wise across
+        the different processes. The resulting values are stored in the original array passed to this
+        function, on each individual process. All processes must call this function for the
+        communication to proceed. */
+    static void sum_all(double* my_array, int nvalues);
 
     /** This function is used to broadcast an array of double values from one process to all other
         processes. A pointer to the first value is passed as the first argument, the number of
@@ -90,6 +90,14 @@ public:
         this function by the receiving processes gets overwritten during the communication with the
         values stored in the array passed by the root. */
     static void broadcast(double* my_array, int nvalues, int root);
+
+    /** This function is used to broadcast a single integer value from one process to all other
+        processes. A pointer to the value is passed as the first argument and the rank of the sending
+        process as the second. All processes must call this function for the communication to proceed.
+        The memory where the integer value that is passed to this function by the receiving processes
+        is stored, will be overwritten by the value stored in the memory of the process with rank \c
+        root during the communication. */
+    static void broadcast(int* value, int root);
 
     /** This function returns a boolean indicating whether the process is assigned as root or not.
         The rank of the process is always the 'true' rank, irrespective of whether the object that

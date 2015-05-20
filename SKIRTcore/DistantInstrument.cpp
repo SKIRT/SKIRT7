@@ -3,14 +3,13 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
-#include <fstream>
-#include <iomanip>
 #include "DistantInstrument.hpp"
 #include "FatalError.hpp"
 #include "FilePaths.hpp"
 #include "Log.hpp"
 #include "PeerToPeerCommunicator.hpp"
 #include "PhotonPackage.hpp"
+#include "TextOutFile.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
 
@@ -160,27 +159,26 @@ void DistantInstrument::calibrateAndWriteSEDs(QList< Array* > Farrays, QStringLi
     // write a text file for easy SED plotting
 
     Units* units = find<Units>();
-    QString sedfilename = find<FilePaths>()->output(_instrumentname + "_sed.dat");
-    find<Log>()->info("Writing SED to " + sedfilename + "...");
-    ofstream sedfile(sedfilename.toLocal8Bit().constData());
-    sedfile << "# column 1: lambda (" << units->uwavelength().toStdString() << ")\n";
+    TextOutFile sedfile(this, _instrumentname + "_sed", "SED");
+
+    // Write the header
+    sedfile.addColumn("lambda (" + units->uwavelength() + ")", 'e', 8);
     for (int q = 0; q < Farrays.size(); q++)
     {
-        sedfile << "# column " << (q+2) << ": "
-                << Fnames[q].toStdString() << "; "
-                << units->sfluxdensity().toStdString() << " "
-                << "(" << units->ufluxdensity().toStdString() << ")\n";
+        sedfile.addColumn(Fnames[q] + "; " + units->sfluxdensity() + " " + "(" + units->ufluxdensity() + ")", 'e', 8);
     }
-    sedfile << scientific << setprecision(8);
+
+    // Write the body
     for (int ell=0; ell<Nlambda; ell++)
     {
         double lambda = lambdagrid->lambda(ell);
-        sedfile << units->owavelength(lambda);
+        QList<double> values;
+        values << units->owavelength(lambda);
         foreach (Array* Farr, Farrays)
         {
-            sedfile << '\t' << (Farr->size() ? units->ofluxdensity(lambda, (*Farr)[ell]) : 0.);
+            values << (Farr->size() ? units->ofluxdensity(lambda, (*Farr)[ell]) : 0.);
         }
-        sedfile << endl;
+        sedfile.writeRow(values);
     }
 }
 

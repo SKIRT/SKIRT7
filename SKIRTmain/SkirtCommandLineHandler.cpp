@@ -21,6 +21,7 @@
 #include "ParallelFactory.hpp"
 #include "PeerToPeerCommunicator.hpp"
 #include "ProcessManager.hpp"
+#include "RootAssigner.hpp"
 #include "Simulation.hpp"
 #include "SmileSchemaWriter.hpp"
 #include "SkirtCommandLineHandler.hpp"
@@ -159,7 +160,9 @@ int SkirtCommandLineHandler::doBatch()
                           + (_parallelSims > 1 ? ", " + QString::number(_parallelSims) + " in parallel" : ""));
         ParallelFactory factory;
         factory.setMaxThreadCount(_parallelSims);
-        factory.parallel()->call(this, &SkirtCommandLineHandler::doSimulation, _skifiles.size());
+        RootAssigner* assigner = new RootAssigner(0);
+        assigner->assign(_skifiles.size());
+        factory.parallel()->call(this, &SkirtCommandLineHandler::doSimulation, assigner);
     }
 
     // report memory statistics for the complete run

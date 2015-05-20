@@ -292,7 +292,10 @@ HEADERS += \
     ElectronDustMix.hpp \
     CubBackgroundGeometry.hpp \
     SpheBackgroundGeometry.hpp \
-    SpectralLuminosityStellarCompNormalization.hpp
+    SpectralLuminosityStellarCompNormalization.hpp \
+    RootAssigner.hpp \
+    RandomAssigner.hpp \
+    TextOutFile.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -543,4 +546,7 @@ SOURCES += \
     ElectronDustMix.cpp \
     CubBackgroundGeometry.cpp \
     SpheBackgroundGeometry.cpp \
-    SpectralLuminosityStellarCompNormalization.cpp
+    SpectralLuminosityStellarCompNormalization.cpp \
+    RootAssigner.cpp \
+    RandomAssigner.cpp \
+    TextOutFile.cpp

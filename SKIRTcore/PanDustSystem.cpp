@@ -4,7 +4,6 @@
 ///////////////////////////////////////////////////////////////// */
 
 #include <cmath>
-#include <fstream>
 #include "ArrayTable.hpp"
 #include "DustEmissivity.hpp"
 #include "DustGridStructure.hpp"
@@ -21,6 +20,9 @@
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
 #include "PeerToPeerCommunicator.hpp"
+#include "RootAssigner.hpp"
+#include "TextOutFile.hpp"
+#include "TimeLogger.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
 
@@ -72,34 +74,34 @@ namespace
     {
         WavelengthGrid* lambdagrid = ds->find<WavelengthGrid>();
         Units* units = ds->find<Units>();
-        Log* log = ds->find<Log>();
 
-        // inform user
-        QString filename = ds->find<FilePaths>()->output(filebody+".dat");
-        log->info("Writing emissivities for " + title + " to " + filename + "...");
+        // Create a text file
+        TextOutFile file(ds, filebody, "emissivities for " + title);
 
-        // get emissivity for each dust mix
+        // Get the emissivity for each dust mix
         int Ncomp = ds->Ncomp();
         ArrayTable<2> evv(Ncomp,0);
         for (int h=0; h<Ncomp; h++) evv(h) = ds->dustEmissivity()->emissivity(ds->mix(h), Jv);
 
-        // write the input field and the emissivity for each dust mix to file
-        ofstream file(filename.toLocal8Bit().constData());
-        file << "# Dust emissivities for " << title.toStdString() << "\n";
-        file << "# column 1: lambda (" << units->uwavelength().toStdString() << ")\n";
-        file << "# column 2: embedding field mean intensity -- J_lambda (W/m3/sr)\n";
+        // Write the header
+        file.writeLine("# Dust emissivities for " + title);
+        file.addColumn("lambda (" + units->uwavelength() + ")");
+        file.addColumn("embedding field mean intensity -- J_lambda (W/m3/sr)");
         for (int h=0; h<Ncomp; h++)
-            file << "# column " << h+3 << ": dust mix " << h << " -- lambda*j_lambda (W/sr/H)\n";
+            file.addColumn("dust mix " + QString::number(h) + " -- lambda*j_lambda (W/sr/H)");
+
+        // Write the input field and the emissivity for each dust mix to file
         int Nlambda = lambdagrid->Nlambda();
         for (int ell=0; ell<Nlambda; ell++)
         {
             double lambda = lambdagrid->lambda(ell);
-            file << units->owavelength(lambda) << ' ' << Jv[ell];
+            QList<double> values;
+            values << units->owavelength(lambda);
+            values << Jv[ell];
             for (int h=0; h<Ncomp; h++)
-                file << ' ' << ds->mix(h)->mu()*lambda*evv(h,ell);
-            file << '\n';
+                values << ds->mix(h)->mu()*lambda*evv(h,ell);
+            file.writeRow(values);
         }
-        file.close();
     }
 }
 
@@ -156,7 +158,6 @@ void PanDustSystem::setupSelfAfter()
 
 void PanDustSystem::setDustEmissivity(DustEmissivity* value)
 {
-
     if (_dustemissivity) delete _dustemissivity;
     _dustemissivity = value;
     if (_dustemissivity) _dustemissivity->setParent(this);
@@ -173,7 +174,6 @@ DustEmissivity* PanDustSystem::dustEmissivity() const
 
 void PanDustSystem::setDustLib(DustLib* value)
 {
-
     if (_dustlib) delete _dustlib;
     _dustlib = value;
     if (_dustlib) _dustlib->setParent(this);
@@ -380,12 +380,14 @@ void PanDustSystem::calculatedustemission(bool ynstellar)
 
 void PanDustSystem::sumResults(bool ynstellar)
 {
+    // Get a pointer to the PeerToPeerCommunicator of this simulation
     PeerToPeerCommunicator * comm = find<PeerToPeerCommunicator>();
 
-    Array* arr;
-    arr = ynstellar ? _Labsstelvv.getArray() : _Labsdustvv.getArray();
+    Log* log = find<Log>();
+    TimeLogger logger(log->verbose() ? log : 0, "communication of the absorbed luminosities");
 
-    comm->sum_all(*arr);
+    // Sum the array of luminosities across all processes
+    comm->sum_all(ynstellar ? _Labsstelvv.getArray() : _Labsdustvv.getArray());
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -512,9 +514,6 @@ namespace
 
 void PanDustSystem::write() const
 {
-    PeerToPeerCommunicator * comm = find<PeerToPeerCommunicator>();
-    if (!comm->isRoot()) return;
-
     DustSystem::write();
 
     // If requested, output the interstellar radiation field in every dust cell to a data file
@@ -522,15 +521,17 @@ void PanDustSystem::write() const
     {
         WavelengthGrid* lambdagrid = find<WavelengthGrid>();
         Units* units = find<Units>();
-        Log* log = find<Log>();
 
-        QString filename = find<FilePaths>()->output("ds_isrf.dat");
-        log->info("Writing ISRF to " + filename + "...");
-        ofstream file(filename.toLocal8Bit().constData());
+        // Create a text file
+        TextOutFile file(this, "ds_isrf", "ISRF");
 
+        QString line = "";
         for (int ell=0; ell<_Nlambda; ell++)
-            file << units->owavelength(lambdagrid->lambda(ell)) << '\t';
-        file << '\n' << '\n';
+            line += QString::number(units->owavelength(lambdagrid->lambda(ell))) + '\t';
+
+        file.writeLine(line);
+        file.writeLine("");
+
         for (int m=0; m<_Ncells; m++)
         {
             double Ltotm = Labs(m);
@@ -539,18 +540,16 @@ void PanDustSystem::write() const
                 Position bfr = _grid->centralPositionInCell(m);
                 double x, y, z;
                 bfr.cartesian(x,y,z);
-                file << m << '\t'
-                          << units->olength(x) << '\t'
-                          << units->olength(y) << '\t'
-                          << units->olength(z) << '\t';
+                QString line = QString::number(m) + '\t'
+                             + QString::number(units->olength(x)) + '\t'
+                             + QString::number(units->olength(y)) + '\t'
+                             + QString::number(units->olength(z)) + '\t';
                 const Array& Jv = meanintensityv(m);
                 for (int ell=0; ell<_Nlambda; ell++)
-                    file << Jv[ell] << '\t';
-                file << '\n';
+                    line += QString::number(Jv[ell]) + '\t';
+                file.writeLine(line);
             }
         }
-        file.close();
-        log->info("File " + filename + " created.");
     }
 
     // If requested, output temperate map(s) along coordiate axes cuts
@@ -563,10 +562,14 @@ void PanDustSystem::write() const
         // get the dimension of the dust grid
         int dimDust = _grid->dimension();
 
+        // Create an assigner that assigns all the work to the root process
+        RootAssigner* assigner = new RootAssigner(0);
+        assigner->assign(Np);
+
         // For the xy plane (always)
         {
             wt.setup(1,1,0);
-            parallel->call(&wt, Np);
+            parallel->call(&wt, assigner);
             wt.write();
         }
 
@@ -574,7 +577,7 @@ void PanDustSystem::write() const
         if (dimDust >= 2)
         {
             wt.setup(1,0,1);
-            parallel->call(&wt, Np);
+            parallel->call(&wt, assigner);
             wt.write();
         }
 
@@ -582,7 +585,7 @@ void PanDustSystem::write() const
         if (dimDust == 3)
         {
             wt.setup(0,1,1);
-            parallel->call(&wt, Np);
+            parallel->call(&wt, assigner);
             wt.write();
         }
     }

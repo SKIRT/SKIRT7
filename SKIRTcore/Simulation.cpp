@@ -44,8 +44,7 @@ void Simulation::setup()
     SimulationItem::setup();
 
     // Wait for the other processes to reach this point
-    if (_comm->isMultiProc()) _log->info("Waiting for other processes...");
-    _comm->wait();
+    _comm->wait("the setup");
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -70,15 +69,7 @@ void Simulation::setupAndRun()
     QString processInfo = _comm->isMultiProc() ? " with " + QString::number(_comm->size()) + " processes" : "";
     TimeLogger logger(_log, "simulation " + _paths->outputPrefix() + processInfo);
 
-    // Set the number of threads to 1 for the setup in multiprocessing mode
-    int Nthreads = _parfac->maxThreadCount();
-    if (_comm->isMultiProc()) _parfac->setMaxThreadCount(1);
-
     setup();
-
-    // Set the number of threads back to its original value
-    if (_comm->isMultiProc()) _parfac->setMaxThreadCount(Nthreads);
-
     run();
 }
 

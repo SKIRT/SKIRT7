@@ -13,7 +13,8 @@
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
 #include "PeerToPeerCommunicator.hpp"
-#include "SequentialAssigner.hpp"
+#include "StaggeredAssigner.hpp"
+#include "TimeLogger.hpp"
 #include "WavelengthGrid.hpp"
 
 using namespace std;
@@ -31,7 +32,8 @@ void DustLib::setupSelfBefore()
 {
     SimulationItem::setupSelfBefore();
 
-    if (!_assigner) setAssigner(new SequentialAssigner());
+    // If no assigner was set, use a StaggeredAssigner as default
+    if (!_assigner) setAssigner(new StaggeredAssigner(this));
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -182,7 +184,11 @@ void DustLib::calculate()
     // calculate the emissivity for each library entry assigned to this process
     EmissionCalculator calc(_Lvv, _nv, Nlib, this);
     Parallel* parallel = find<ParallelFactory>()->parallel();
-    parallel->call(&calc, _assigner->nvalues(), _assigner);
+    parallel->call(&calc, _assigner);
+
+    // Wait for the other processes to reach this point
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+    comm->wait("the emission spectra calculation");
 
     // assemble _Lvv from the information stored at different processes, if the work is done in parallel processes
     if (_assigner->parallel()) assemble();
@@ -208,7 +214,11 @@ double DustLib::luminosity(int m, int ell) const
 
 void DustLib::assemble()
 {
+    // Get a pointer to the PeerToPeerCommunicator of this simulation
     PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+
+    Log* log = find<Log>();
+    TimeLogger logger(log->verbose() ? log : 0, "communication of the dust emission spectra");
 
     size_t Ncells = _nv.size();
     if (_Lvv.size(0) == Ncells)     // _Lvv is indexed on m, the index of the dust cells

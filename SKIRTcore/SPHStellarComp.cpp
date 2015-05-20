@@ -3,18 +3,16 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
-#include <fstream>
-#include <iomanip>
 #include <QFile>
 #include "BruzualCharlotSEDFamily.hpp"
 #include "FatalError.hpp"
 #include "FilePaths.hpp"
 #include "Log.hpp"
 #include "NR.hpp"
-#include "PeerToPeerCommunicator.hpp"
 #include "PhotonPackage.hpp"
 #include "Random.hpp"
 #include "SPHStellarComp.hpp"
+#include "TextOutFile.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
 
@@ -99,24 +97,24 @@ void SPHStellarComp::setupSelfBefore()
         NR::cdf(_Xvv[ell], Lvv[ell]);
     }
 
-    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
-
     // if requested, write a data file with the luminosities per wavelength
-    if (_writeLuminosities && comm->isRoot())
+    if (_writeLuminosities)
     {
         Units* units = find<Units>();
         WavelengthGrid* lambdagrid = find<WavelengthGrid>();
 
-        QString filename = find<FilePaths>()->output("luminosities.dat");
-        find<Log>()->info("Writing luminosities to " + filename + "...");
-        ofstream file(filename.toLocal8Bit().constData());
-        file << "# column 1: lambda (" << units->uwavelength().toStdString() << ");"
-             << "  column 2: luminosity (" << units->ubolluminosity().toStdString() << ")\n";
-        file << scientific << setprecision(8);
+        // Create a text file
+        TextOutFile file(this, "luminosities", "luminosities");
+
+        // Write the header
+        file.addColumn("lambda (" + units->uwavelength() + ")", 'e', 8);
+        file.addColumn("luminosity (" + units->ubolluminosity() + ")", 'e', 8);
+
+        // Write the body
         for (int ell=0; ell<Nlambda; ell++)
         {
-            file << units->owavelength(lambdagrid->lambda(ell)) << '\t'
-                 << units->obolluminosity(_Ltotv[ell]) << '\n';
+            file.writeRow(QList<double>() << units->owavelength(lambdagrid->lambda(ell))
+                                          << units->obolluminosity(_Ltotv[ell]));
         }
     }
 }

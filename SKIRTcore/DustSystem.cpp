@@ -18,11 +18,16 @@
 #include "FITSInOut.hpp"
 #include "Log.hpp"
 #include "NR.hpp"
+#include "IdenticalAssigner.hpp"
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
 #include "PeerToPeerCommunicator.hpp"
 #include "PhotonPackage.hpp"
 #include "Random.hpp"
+#include "RootAssigner.hpp"
+#include "StaggeredAssigner.hpp"
+#include "TextOutFile.hpp"
+#include "TimeLogger.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
 #include <QVarLengthArray>
@@ -34,7 +39,7 @@ using namespace std;
 DustSystem::DustSystem()
     : _dd(0), _grid(0), _gdi(0), _Nrandom(100),
       _writeConvergence(true), _writeDensity(true), _writeDepthMap(false),
-      _writeQuality(false), _writeCellProperties(false), _writeCellsCrossed(false)
+      _writeQuality(false), _writeCellProperties(false), _writeCellsCrossed(false), _assigner(0)
 {
 }
 
@@ -47,6 +52,25 @@ void DustSystem::setupSelfBefore()
     if (_Nrandom < 1) throw FATALERROR("Number of random samples must be at least 1");
     if (!_dd) throw FATALERROR("Dust distribution was not set");
     if (!_grid) throw FATALERROR("Dust grid structure was not set");
+
+    // If no assigner was set, use a StaggeredAssigner as default
+    if (!_assigner) setAssigner(new StaggeredAssigner(this));
+}
+
+////////////////////////////////////////////////////////////////////
+
+void DustSystem::setAssigner(ProcessAssigner* value)
+{
+    if (_assigner) delete _assigner;
+    _assigner = value;
+    if (_assigner) _assigner->setParent(this);
+}
+
+////////////////////////////////////////////////////////////////////
+
+ProcessAssigner* DustSystem::assigner() const
+{
+    return _assigner;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -63,41 +87,54 @@ void DustSystem::setupSelfAfter()
     _volumev.resize(_Ncells);
     _rhovv.resize(_Ncells,_Ncomp);
 
-    // Set the volume of the cells
+    // Set the volume of the cells (parallelized over different threads, except when multiprocessing is enabled)
     find<Log>()->info("Calculating the volume of the cells...");
-    find<ParallelFactory>()->parallel()->call(this, &DustSystem::setVolumeBody, _Ncells);
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+    IdenticalAssigner* assigner = new IdenticalAssigner(this);
+    assigner->assign(_Ncells);
+    find<ParallelFactory>()->parallel()->call(this, &DustSystem::setVolumeBody, assigner);
 
-    // Set the density of the cells
+    // assign each process to a set of dust cells
+    _assigner->assign(_Ncells);
+
+    // Calculate and set the density of the cells that are assigned to this process
     _gdi = _grid->interface<DustGridDensityInterface>();
     if (_gdi)
     {
         // if the dust grid offers a special interface, use it
         find<Log>()->info("Setting the value of the density in the cells using grid interface...");
-        find<ParallelFactory>()->parallel()->call(this, &DustSystem::setGridDensityBody, _Ncells);
+        find<ParallelFactory>()->parallel()->call(this, &DustSystem::setGridDensityBody, _assigner);
     }
     else
     {
         // otherwise take an average of the density in 100 random positions in the cell (parallelized)
         find<Log>()->info("Setting the value of the density in the cells...");
-        find<ParallelFactory>()->parallel()->call(this, &DustSystem::setSampleDensityBody, _Ncells);
+        find<ParallelFactory>()->parallel()->call(this, &DustSystem::setSampleDensityBody, _assigner);
     }
 
-    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+    // Wait for the other processes to reach this point
+    comm->wait("the calculation of the dust cell densities");
+
+    // Create an assigner that can be used for the write functions
+    RootAssigner* writeassigner = new RootAssigner(this);
+
+    // obtain the densities in all dust cells, if the calculation has been performed by parallel processes
+    if (_assigner->parallel()) assemble();
 
     // Perform a convergence check on the grid.
-    if (_writeConvergence && comm->isRoot()) writeconvergence();
+    if (_writeConvergence) writeconvergence();
 
     // Write the density in the xy plane, xz plane and yz plane to a file.
-    if (_writeDensity && comm->isRoot()) writedensity();
+    if (_writeDensity) writedensity(writeassigner);
 
     // Output optical depth map as seen from the center
-    if (_writeDepthMap && comm->isRoot()) writedepthmap();
+    if (_writeDepthMap) writedepthmap(writeassigner);
 
     // Calculate and output some quality metrics for the dust grid
-    if (_writeQuality && comm->isRoot()) writequality();
+    if (_writeQuality) writequality(writeassigner);
 
     // Output properties for all cells in the dust grid
-    if (_writeCellProperties && comm->isRoot()) writecellproperties();
+    if (_writeCellProperties) writecellproperties();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -125,7 +162,7 @@ void DustSystem::setSampleDensityBody(size_t m)
     if (m%100000==0)
     {
         find<Log>()->info("  Computing density for cell " + QString::number(m)
-                          + " (" + QString::number(floor(100.*m/_Ncells)) + "%)");
+                          + " (" + QString::number(floor(100.*_assigner->relativeIndex(m)/_assigner->nvalues())) + "%)");
     }
     if (_grid->weight(m) > 0)
     {
@@ -144,6 +181,20 @@ void DustSystem::setSampleDensityBody(size_t m)
     {
         for (int h=0; h<_Ncomp; h++) _rhovv(m,h) = 0;
     }
+}
+
+////////////////////////////////////////////////////////////////////
+
+void DustSystem::assemble()
+{
+    // Get a pointer to the PeerToPeerCommunicator of this simulation
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+
+    Log* log = find<Log>();
+    TimeLogger logger(log->verbose() ? log : 0, "communication of the dust densities");
+
+    // Sum the densities array across all processes
+    comm->sum_all(_rhovv.getArray());
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -196,22 +247,25 @@ void DustSystem::writeconvergence() const
 
     // Compare these values to the expected values and write the result to file
 
-    QString filename = find<FilePaths>()->output("ds_convergence.dat");
-    find<Log>()->info("Writing convergence check on the dust system to " + filename + "...");
     Units* units = find<Units>();
-    ofstream file(filename.toLocal8Bit().constData());
-    file << "Convergence check on the grid: \n";
+
+    // Create a text file
+    TextOutFile file(this, "ds_convergence", "convergence check on the dust system");
+    file.writeLine("Convergence check on the grid: ");
+
     switch (_dd->dimension())
     {
         case 1:
         {
             double Sigmar = 0.5*SigmaX;
             double Sigmarref = 0.5*_dd->SigmaX();
-            file << "   - radial (r-axis) surface density\n"
-                 << "         expected value = " << units->omasssurfacedensity(Sigmarref)
-                 << " " << units->umasssurfacedensity().toStdString() << "\n"
-                 << "         actual value =   " << units->omasssurfacedensity(Sigmar)
-                 << " " << units->umasssurfacedensity().toStdString() << "\n";
+
+            // Write the surface densities to file
+            file.writeLine("   - radial (r-axis) surface density");
+            file.writeLine("         expected value = " + QString::number(units->omasssurfacedensity(Sigmarref))
+                                                        + " " + units->umasssurfacedensity());
+            file.writeLine("         actual value =   " + QString::number(units->omasssurfacedensity(Sigmar))
+                                                        + " " + units->umasssurfacedensity());
         }
         break;
         case 2:
@@ -219,16 +273,18 @@ void DustSystem::writeconvergence() const
             double SigmaR = 0.5*SigmaX;
             double SigmaRref = 0.5*_dd->SigmaX();
             double SigmaZref = _dd->SigmaZ();
-            file << "   - edge-on (R-axis) surface density\n"
-                 << "         expected value = " << units->omasssurfacedensity(SigmaRref)
-                 << " " << units->umasssurfacedensity().toStdString() << "\n"
-                 << "         actual value =   " << units->omasssurfacedensity(SigmaR)
-                 << " " << units->umasssurfacedensity().toStdString() << "\n"
-                 << "   - face-on (Z-axis) surface density\n"
-                 << "         expected value = " << units->omasssurfacedensity(SigmaZref)
-                 << " " << units->umasssurfacedensity().toStdString() << "\n"
-                 << "         actual value =   " << units->omasssurfacedensity(SigmaZ)
-                 << " " << units->umasssurfacedensity().toStdString() << "\n";
+
+            // Write the surface densities to file
+            file.writeLine("   - edge-on (R-axis) surface density");
+            file.writeLine("         expected value = " + QString::number(units->omasssurfacedensity(SigmaRref))
+                                                        + " " + units->umasssurfacedensity());
+            file.writeLine("         actual value =   " + QString::number(units->omasssurfacedensity(SigmaR))
+                                                        + " " + units->umasssurfacedensity());
+            file.writeLine("   - face-on (Z-axis) surface density");
+            file.writeLine("         expected value = " + QString::number(units->omasssurfacedensity(SigmaZref))
+                                                        + " " + units->umasssurfacedensity());
+            file.writeLine("         actual value =   " + QString::number(units->omasssurfacedensity(SigmaZ))
+                                                        + " " + units->umasssurfacedensity());
         }
         break;
         case 3:
@@ -236,34 +292,34 @@ void DustSystem::writeconvergence() const
             double SigmaXref = _dd->SigmaX();
             double SigmaYref = _dd->SigmaY();
             double SigmaZref = _dd->SigmaZ();
-            file << "   - X-axis surface density\n"
-                 << "         expected value = " << units->omasssurfacedensity(SigmaXref)
-                 << " " << units->umasssurfacedensity().toStdString() << "\n"
-                 << "         actual value =   " << units->omasssurfacedensity(SigmaX)
-                 << " " << units->umasssurfacedensity().toStdString() << "\n"
-                 << "   - Y-axis surface density\n"
-                 << "         expected value = " << units->omasssurfacedensity(SigmaYref)
-                 << " " << units->umasssurfacedensity().toStdString() << "\n"
-                 << "         actual value =   " << units->omasssurfacedensity(SigmaY)
-                 << " " << units->umasssurfacedensity().toStdString() << "\n"
-                 << "   - Z-axis surface density\n"
-                 << "         expected value = " << units->omasssurfacedensity(SigmaZref)
-                 << " " << units->umasssurfacedensity().toStdString() << "\n"
-                 << "         actual value =   " << units->omasssurfacedensity(SigmaZ)
-                 << " " << units->umasssurfacedensity().toStdString() << "\n";
+
+            // Write the surface densities to file
+            file.writeLine("   - X-axis surface density");
+            file.writeLine("         expected value = " + QString::number(units->omasssurfacedensity(SigmaXref))
+                                                        + " " + units->umasssurfacedensity());
+            file.writeLine("         actual value =   " + QString::number(units->omasssurfacedensity(SigmaX))
+                                                        + " " + units->umasssurfacedensity());
+            file.writeLine("   - Y-axis surface density");
+            file.writeLine("         expected value = " + QString::number(units->omasssurfacedensity(SigmaYref))
+                                                        + " " + units->umasssurfacedensity());
+            file.writeLine("         actual value =   " + QString::number(units->omasssurfacedensity(SigmaY))
+                                                        + " " + units->umasssurfacedensity());
+            file.writeLine("   - Z-axis surface density");
+            file.writeLine("         expected value = " + QString::number(units->omasssurfacedensity(SigmaZref))
+                                                        + " " + units->umasssurfacedensity());
+            file.writeLine("         actual value =   " + QString::number(units->omasssurfacedensity(SigmaZ))
+                                                        + " " + units->umasssurfacedensity());
         }
         break;
         default:
             throw FATALERROR("Wrong dimension in dust distribution");
     }
     double Mref = _dd->mass();
-    file << "   - total dust mass\n"
-         << "         expected value = " << units->omass(Mref)
-         << " " << units->umass().toStdString() << "\n"
-         << "         actual value =   " << units->omass(M)
-         << " " << units->umass().toStdString() << "\n";
-    file.close();
-    find<Log>()->info("File " + filename + " created.");
+
+    // Write the (expected and actual) total dust mass
+    file.writeLine("   - total dust mass");
+    file.writeLine("         expected value = " + QString::number(units->omass(Mref)) + " " + units->umass());
+    file.writeLine("         actual value =   " + QString::number(units->omass(M)) + " " + units->umass());
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -371,7 +427,7 @@ namespace
 
 ////////////////////////////////////////////////////////////////////
 
-void DustSystem::writedensity() const
+void DustSystem::writedensity(ProcessAssigner* assigner) const
 {
     // construct a private class instance to do the work (parallelized)
     WriteDensity wd(this);
@@ -380,10 +436,13 @@ void DustSystem::writedensity() const
     // get the dimension of the dust system
     int dimDust = dimension();
 
+    // Assign the work
+    assigner->assign(Np);
+
     // For the xy plane (always)
     {
         wd.setup(1,1,0);
-        parallel->call(&wd, Np);
+        parallel->call(&wd, assigner);
         wd.write();
     }
 
@@ -391,7 +450,7 @@ void DustSystem::writedensity() const
     if (dimDust >= 2)
     {
         wd.setup(1,0,1);
-        parallel->call(&wd, Np);
+        parallel->call(&wd, assigner);
         wd.write();
     }
 
@@ -399,7 +458,7 @@ void DustSystem::writedensity() const
     if (dimDust == 3)
     {
         wd.setup(0,1,1);
-        parallel->call(&wd, Np);
+        parallel->call(&wd, assigner);
         wd.write();
     }
 }
@@ -516,28 +575,34 @@ namespace
 
 ////////////////////////////////////////////////////////////////////
 
-void DustSystem::writedepthmap() const
+void DustSystem::writedepthmap(ProcessAssigner* assigner) const
 {
+    // Assign the work
+    assigner->assign(Npy);
+
     // construct a private class instance to do the work (parallelized)
     WriteDepthMap wdm(this);
     Parallel* parallel = find<ParallelFactory>()->parallel();
-    parallel->call(&wdm, Npy);
+    parallel->call(&wdm, assigner);
     wdm.write();
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void DustSystem::writequality() const
+void DustSystem::writequality(ProcessAssigner* assigner) const
 {
     Log* log = find<Log>();
     Units* units = find<Units>();
     Parallel* parallel = find<ParallelFactory>()->parallel();
 
+    // Assign the work
+    assigner->assign(_Nrandom);
+
     // Density metric
 
     log->info("Calculating quality metric for the grid density...");
     DustSystemDensityCalculator calc1(this, _Nrandom, _Ncells/5);
-    parallel->call(&calc1, _Nrandom);
+    parallel->call(&calc1, assigner);
 
     log->info("  Mean value of density delta: "
               + QString::number(units->omassvolumedensity(calc1.meanDelta()*1e9))
@@ -550,28 +615,23 @@ void DustSystem::writequality() const
 
     log->info("Calculating quality metric for the optical depth in the grid...");
     DustSystemDepthCalculator calc2(this, _Nrandom, _Ncells/50, _Nrandom*10);
-    parallel->call(&calc2, _Nrandom);
+    parallel->call(&calc2, assigner);
 
     log->info("  Mean value of optical depth delta: " + QString::number(calc2.meanDelta()));
     log->info("  Standard deviation of optical depth delta: " + QString::number(calc2.stddevDelta()));
 
-    // Output to file
+    // Create a text file
+    TextOutFile file(this, "ds_quality", "quality metrics for the grid");
 
-    QString filename = find<FilePaths>()->output("ds_quality.dat");
-    log->info("Writing quality metrics for the grid to " + filename + "...");
-    ofstream file(filename.toLocal8Bit().constData());
-    file << "Mean value of density delta: "
-         << units->omassvolumedensity(calc1.meanDelta()) << ' '
-         << units->umassvolumedensity().toStdString() << '\n'
-         << "Standard deviation of density delta: "
-         << units->omassvolumedensity(calc1.stddevDelta()) << ' '
-         << units->umassvolumedensity().toStdString() << '\n';
-    file << "Mean value of optical depth delta: "
-         << calc2.meanDelta() << '\n'
-         << "Standard deviation of optical depth delta: "
-         << calc2.stddevDelta() << '\n';
-    file.close();
-    log->info("File " + filename + " created.");
+    // Write quality metrics
+    file.writeLine("Mean value of density delta: "
+                    + QString::number(units->omassvolumedensity(calc1.meanDelta())) + ' '
+                    + units->umassvolumedensity());
+    file.writeLine("Standard deviation of density delta: "
+                    + QString::number(units->omassvolumedensity(calc1.stddevDelta())) + ' '
+                    + units->umassvolumedensity());
+    file.writeLine("Mean value of optical depth delta: " + QString::number(calc2.meanDelta()));
+    file.writeLine("Standard deviation of optical depth delta: " + QString::number(calc2.stddevDelta()));
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -581,16 +641,16 @@ void DustSystem::writecellproperties() const
     Log* log = find<Log>();
     Units* units = find<Units>();
 
-    // open the file and write a header
-    QString filename = find<FilePaths>()->output("ds_cellprops.dat");
-    log->info("Writing dust cell properties to " + filename + "...");
-    ofstream file(filename.toLocal8Bit().constData());
-    file << "# column 1: volume (" << units->uvolume().toStdString() << ")\n";
-    file << "# column 2: density (" << units->umassvolumedensity().toStdString() << ")\n";
-    file << "# column 3: mass fraction\n";
-    file << "# column 4: optical depth\n";
+    // Create a text file
+    TextOutFile file(this, "ds_cellprops", "dust cell properties");
 
-    // write a line for each cell; remember the tau values so we can compute some statistics
+    // Write the header
+    file.addColumn("volume (" + units->uvolume() + ")");
+    file.addColumn("density (" + units->umassvolumedensity() + ")");
+    file.addColumn("mass fraction");
+    file.addColumn("optical depth");
+
+    // Write a line for each cell; remember the tau values so we can compute some statistics
     Array tauV(_Ncells);
     double totalmass = _dd->mass();
     for (int m=0; m<_Ncells; m++)
@@ -599,11 +659,11 @@ void DustSystem::writecellproperties() const
         double V = volume(m);
         double delta = (rho*V)/totalmass;
         double tau = Units::kappaV()*rho*pow(V,1./3.);
-        file << units->ovolume(V) << '\t' << units->omassvolumedensity(rho) << '\t' << delta << '\t' << tau << '\n';
+        file.writeRow(QList<double>() << units->ovolume(V) << units->omassvolumedensity(rho) << delta << tau);
         tauV[m] = tau;
     }
 
-    // calculate some statistics on optical depth
+    // Calculate some statistics on optical depth
     double tauavg = tauV.sum()/_Ncells;
     double taumin = tauV.min();
     double taumax = tauV.max();
@@ -624,14 +684,10 @@ void DustSystem::writecellproperties() const
     double tau90 = taumin + index*(taumax-taumin)/Nbins;
 
     // write the statistics on optical depth to the file
-    file << "# smallest optical depth: " << taumin << '\n';
-    file << "# largest optical depth:  " << taumax << '\n';
-    file << "# average optical depth:  " << tauavg << '\n';
-    file << "# 90 % of the cells have optical depth smaller than: " << tau90 << '\n';
-
-    // close the file
-    file.close();
-    log->info("File " + filename + " created.");
+    file.writeLine("# smallest optical depth: " + QString::number(taumin));
+    file.writeLine("# largest optical depth:  " + QString::number(taumax));
+    file.writeLine("# average optical depth:  " + QString::number(tauavg));
+    file.writeLine("# 90 % of the cells have optical depth smaller than: " + QString::number(tau90));
 
     // report the statistics on optical depth to the console
     log->info("  Smallest optical depth: " + QString::number(taumin));
@@ -906,22 +962,20 @@ void DustSystem::write() const
     // If requested, output statistics on the number of cells crossed
     if (_writeCellsCrossed)
     {
-        QString filename = find<FilePaths>()->output("ds_crossed.dat");
-        find<Log>()->info("Writing number of cells crossed to " + filename + "...");
-        ofstream file(filename.toLocal8Bit().constData());
+        // Create a text file
+        TextOutFile file(this, "ds_crossed", "number of cells crossed");
 
-        file << "# total number of cells in grid: " << _Ncells << '\n';
-        file << "# column 1: number of cells crossed\n";
-        file << "# column 2: number of paths that crossed this number of cells\n";
+        // Write the header
+        file.writeLine("# total number of cells in grid: " + QString::number(_Ncells));
+        file.addColumn("number of cells crossed", 'd');
+        file.addColumn("number of paths that crossed this number of cells", 'd');
 
+        // Write the body
         int Nlines = _crossed.size();
         for (int index=0; index<Nlines; index++)
         {
-            file << index << '\t' << _crossed[index] << '\n';
+            file.writeRow(QList<double>() << index << _crossed[index]);
         }
-
-        file.close();
-        find<Log>()->info("File " + filename + " created.");
     }
 }
 

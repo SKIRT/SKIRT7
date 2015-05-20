@@ -4,13 +4,11 @@
 ///////////////////////////////////////////////////////////////// */
 
 #include <cmath>
-#include <fstream>
-#include <iomanip>
 #include "FatalError.hpp"
 #include "FilePaths.hpp"
 #include "Log.hpp"
 #include "PanWavelengthGrid.hpp"
-#include "PeerToPeerCommunicator.hpp"
+#include "TextOutFile.hpp"
 #include "Units.hpp"
 
 using namespace std;
@@ -38,22 +36,22 @@ void PanWavelengthGrid::setupSelfAfter()
         _dlambdav[ell] = lambdamax(ell)-lambdamin(ell);
     }
 
-    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
-
     // if requested, write a data file with the wavelengths and bin widths
-    if (_writeWavelengths && comm->isRoot())
+    if (_writeWavelengths)
     {
         Units* units = find<Units>();
 
-        QString filename = find<FilePaths>()->output("wavelengths.dat");
-        find<Log>()->info("Writing wavelengths to " + filename + "...");
-        ofstream file(filename.toLocal8Bit().constData());
-        file << "# column 1: lambda;  column 2: delta lambda  (" << units->uwavelength().toStdString() << ")\n";
-        file << scientific << setprecision(8);
+        // Create a text file
+        TextOutFile file(this, "wavelengths", "wavelengths");
+
+        // Write the header
+        file.addColumn("lambda", 'e', 8);
+        file.addColumn("delta lambda  (" + units->uwavelength() + ")", 'e', 8);
+
+        // Write the body
         for (int ell=0; ell<_Nlambda; ell++)
         {
-            file << units->owavelength(_lambdav[ell]) << '\t'
-                 << units->owavelength(_dlambdav[ell]) << '\n';
+            file.writeRow(QList<double>() << units->owavelength(_lambdav[ell]) << units->owavelength(_dlambdav[ell]));
         }
     }
 }

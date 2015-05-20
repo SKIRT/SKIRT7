@@ -139,11 +139,10 @@ void PanMonteCarloSimulation::rundustselfabsorption()
             setChunkParams(packages()*stage_factor[stage]);
             initprogress(QString(stage_name[stage]) + " dust self-absorption cycle " + QString::number(cycle));
             Parallel* parallel = find<ParallelFactory>()->parallel();
-            parallel->call(this, &PanMonteCarloSimulation::dodustselfabsorptionchunk, _Nchunks*_Nlambda);
+            parallel->call(this, &PanMonteCarloSimulation::dodustselfabsorptionchunk, _assigner);
 
             // Wait for the other processes to reach this point
-            if (_comm->isMultiProc()) _log->info("Waiting for other processes...");
-            _comm->wait();
+            _comm->wait("this self-absorption cycle");
 
             // Determine and log the total absorbed luminosity in the vector Labstotv.
             double Labsdusttot = _pds->Labsdusttot();
@@ -254,11 +253,10 @@ void PanMonteCarloSimulation::rundustemission()
     setChunkParams(packages()*_pds->emissionBoost());
     initprogress("dust emission");
     Parallel* parallel = find<ParallelFactory>()->parallel();
-    parallel->call(this, &PanMonteCarloSimulation::dodustemissionchunk, _Nchunks*_Nlambda);
+    parallel->call(this, &PanMonteCarloSimulation::dodustemissionchunk, _assigner);
 
     // Wait for the other processes to reach this point
-    if (_comm->isMultiProc()) _log->info("Waiting for other processes...");
-    _comm->wait();
+    _comm->wait("the dust emission phase");
 }
 
 ////////////////////////////////////////////////////////////////////

@@ -5,18 +5,20 @@
 
 #include "FatalError.hpp"
 #include "PeerToPeerCommunicator.hpp"
-#include "StaggeredAssigner.hpp"
+#include "Random.hpp"
+#include "RandomAssigner.hpp"
+#include "SequentialAssigner.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
-StaggeredAssigner::StaggeredAssigner()
+RandomAssigner::RandomAssigner()
     : _blocksize(0), _valuesInBlock(0)
 {
 }
 
 ////////////////////////////////////////////////////////////////////
 
-StaggeredAssigner::StaggeredAssigner(SimulationItem *parent)
+RandomAssigner::RandomAssigner(SimulationItem *parent)
     : _blocksize(0), _valuesInBlock(0)
 {
     setParent(parent);
@@ -25,71 +27,89 @@ StaggeredAssigner::StaggeredAssigner(SimulationItem *parent)
 
 ////////////////////////////////////////////////////////////////////
 
-void StaggeredAssigner::setupSelfBefore()
+void RandomAssigner::setupSelfBefore()
 {
     ProcessAssigner::setupSelfBefore();
 
     if (!_comm) throw FATALERROR("Could not find an object of type PeerToPeerCommunicator in the simulation hierarchy");
+
+    _random = find<Random>();
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void StaggeredAssigner::assign(size_t size, size_t blocks)
+void RandomAssigner::assign(size_t size, size_t blocks)
 {
     _blocksize = size;
+    _assignment.resize(size);
+    _values.reserve(1.2*size/_comm->size());
 
-    for (size_t i = 0; i < size; i++)
+    // For each value in a certain subset of 'size', let this process determine a random process rank
+    SequentialAssigner* helpassigner = new SequentialAssigner(this);
+    helpassigner->assign(size);
+    for (size_t i = 0; i < helpassigner->nvalues(); i++)
     {
-        int rank = i % _comm->size();
-        if (rank == _comm->rank()) _valuesInBlock++;
+        int rank = round(_random->uniform() * _comm->size());
+        _assignment[helpassigner->absoluteIndex(i)] = rank;
     }
 
-    // Calculate the total number of assigned values (the pattern is repeated for each block)
-    _nvalues = _valuesInBlock * blocks;
+    // Communication of the randomly determined ranks
+    for (size_t j = 0; j < size; j++)
+    {
+        int sender = helpassigner->rankForIndex(j);
+        _comm->broadcast(_assignment[j], sender);
+
+        // If the process assigned to this value is this process, add the value to the list
+        if (_assignment[j] == _comm->rank())
+        {
+            _values.push_back(j);
+        }
+    }
+
+    // Set the number of values assigned to this process
+    _valuesInBlock = _values.size();
+    _nvalues = _values.size()*blocks;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-size_t StaggeredAssigner::absoluteIndex(size_t relativeIndex)
+size_t RandomAssigner::absoluteIndex(size_t relativeIndex)
 {
     // Calculate the index of the block corresponding to this relativeIndex and the corresponding
     // relativeIndex in the first block
     size_t block = relativeIndex / _valuesInBlock;
     relativeIndex = relativeIndex - block*_valuesInBlock;
 
-    // Return the absolute index
-    return (_comm->rank() + relativeIndex * _comm->size());
+    return _values[relativeIndex];
 }
 
 ////////////////////////////////////////////////////////////////////
 
-size_t StaggeredAssigner::relativeIndex(size_t absoluteIndex)
+size_t RandomAssigner::relativeIndex(size_t absoluteIndex)
 {
     // Calculate the index of the block corresponding to this absoluteIndex and the corresponding
     // absoluteIndex in the first block
     size_t block = absoluteIndex / _blocksize;
     absoluteIndex = absoluteIndex - block*_blocksize;
 
-    // Return the relative index
-    return ((absoluteIndex - _comm->rank()) / _comm->size());
+    return std::find(_values.begin(), _values.end(), absoluteIndex) - _values.begin();
 }
 
 ////////////////////////////////////////////////////////////////////
 
-int StaggeredAssigner::rankForIndex(size_t index) const
+int RandomAssigner::rankForIndex(size_t index) const
 {
     // Calculate the index of the block corresponding to this (absolute) index and the corresponding
     // (absolute) index in the first block
     size_t block = index / _blocksize;
     index = index - block*_blocksize;
 
-    // Return the rank of the corresponding process
-    return (index % _comm->size());
+    return _assignment[index];
 }
 
 ////////////////////////////////////////////////////////////////////
 
-bool StaggeredAssigner::parallel() const
+bool RandomAssigner::parallel() const
 {
     return true;
 }

@@ -8,6 +8,7 @@
 #include "FatalError.hpp"
 #include "FITSInOut.hpp"
 #include "fitsio.h"
+#include "ProcessManager.hpp"
 
 using namespace std;
 
@@ -32,6 +33,9 @@ namespace
 void FITSInOut::write(QString filepath, const Array& data, int nx, int ny, int nz,
                     double incx, double incy, QString dataUnits, QString xyUnits)
 {
+    // Only the root process can write to file
+    if (!ProcessManager::isRoot()) return;
+
     // verify the data size
     size_t nelements = data.size();
     if (nelements != static_cast<size_t>(nx)*static_cast<size_t>(ny)*static_cast<size_t>(nz))
