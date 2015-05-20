@@ -163,14 +163,13 @@ void DustMix::setupSelfAfter()
         // Create a text file
         TextOutFile file(this, "ds_mix_" + QString::number(h) + "_opti", "optical dust population properties");
 
-        QString section = units->usection() + " per hydrogen atom";
-
         // Write the header
-        file.addColumn("lambda (" + units->uwavelength() + ")", 'e', 6);
-        for (int c=0; c<_Npop; c++) file.addColumn("sigma_ext[" + QString::number(c) + "] (" + section + ")", 'e', 6);
-        for (int c=0; c<_Npop; c++) file.addColumn("sigma_abs[" + QString::number(c) + "] (" + section + ")", 'e', 6);
-        for (int c=0; c<_Npop; c++) file.addColumn("sigma_sca[" + QString::number(c) + "] (" + section + ")", 'e', 6);
-        for (int c=0; c<_Npop; c++) file.addColumn("asymmpar[" + QString::number(c) + "]", 'e', 6);
+        file.addColumn("lambda (" + units->uwavelength() + ")");
+        QString section = units->usection() + " per hydrogen atom";
+        for (int c=0; c<_Npop; c++) file.addColumn("sigma_ext[" + QString::number(c) + "] (" + section + ")");
+        for (int c=0; c<_Npop; c++) file.addColumn("sigma_abs[" + QString::number(c) + "] (" + section + ")");
+        for (int c=0; c<_Npop; c++) file.addColumn("sigma_sca[" + QString::number(c) + "] (" + section + ")");
+        for (int c=0; c<_Npop; c++) file.addColumn("asymmpar[" + QString::number(c) + "]");
 
         // Write the body
         for (int ell=0; ell<_Nlambda; ell++)
@@ -193,9 +192,9 @@ void DustMix::setupSelfAfter()
 
         // Write the header
         QString bulkmass = units->ubulkmass() + " per hydrogen atom";
-        file.writeLine("# total dust mass: " + QString::number(units->obulkmass(_mu), 'e', 6) + ' ' + bulkmass);
+        file.writeLine("# total dust mass: " + QString::number(units->obulkmass(_mu)) + ' ' + bulkmass);
         file.addColumn("dust mix population index", 'd');
-        file.addColumn("dust mass (" + bulkmass + ")", 'e', 6);
+        file.addColumn("dust mass (" + bulkmass + ")");
         file.addColumn("dust mass (% of total)", 'f', 3);
 
         // Write the body
@@ -212,11 +211,11 @@ void DustMix::setupSelfAfter()
         TextOutFile file(this, "ds_mix_" + QString::number(h) + "_mean", "combined dust mix properties");
 
         // Write the header
-        file.addColumn("lambda (" + units->uwavelength() + ")", 'e', 6);
-        file.addColumn("total kappa_ext (" + units->uopacity() + ")", 'e', 6);
-        file.addColumn("total kappa_abs (" + units->uopacity() + ")", 'e', 6);
-        file.addColumn("total kappa_sca (" + units->uopacity() + ")", 'e', 6);
-        file.addColumn("mean asymmpar", 'e', 6);
+        file.addColumn("lambda (" + units->uwavelength() + ")");
+        file.addColumn("total kappa_ext (" + units->uopacity() + ")");
+        file.addColumn("total kappa_abs (" + units->uopacity() + ")");
+        file.addColumn("total kappa_sca (" + units->uopacity() + ")");
+        file.addColumn("mean asymmpar");
 
         // Write the body
         for (int ell=0; ell<_Nlambda; ell++)

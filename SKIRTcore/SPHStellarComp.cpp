@@ -104,11 +104,11 @@ void SPHStellarComp::setupSelfBefore()
         WavelengthGrid* lambdagrid = find<WavelengthGrid>();
 
         // Create a text file
-        TextOutFile file(this, "luminosities", "luminosities");
+        TextOutFile file(this, "luminosities", "stellar luminosities");
 
         // Write the header
-        file.addColumn("lambda (" + units->uwavelength() + ")", 'e', 8);
-        file.addColumn("luminosity (" + units->ubolluminosity() + ")", 'e', 8);
+        file.addColumn("lambda (" + units->uwavelength() + ")");
+        file.addColumn("luminosity (" + units->ubolluminosity() + ")");
 
         // Write the body
         for (int ell=0; ell<Nlambda; ell++)

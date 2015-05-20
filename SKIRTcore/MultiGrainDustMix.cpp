@@ -98,10 +98,10 @@ void MultiGrainDustMix::addpopulations(const GrainComposition *gc, const GrainSi
             double aminc = aminv[c];
             double amaxc = amaxv[c];
             double aavec = pow(10.0,(log10(aminc)+log10(amaxc))/2.0);
-            file.writeLine(QString::number(popIndex) + '\t'
-                            + gcname + '\t'
-                            + QString::number(units->ograinsize(aminc)) + '\t'
-                            + QString::number(units->ograinsize(aavec)) + '\t'
+            file.writeLine(QString::number(popIndex) + ' '
+                            + gcname + ' '
+                            + QString::number(units->ograinsize(aminc)) + ' '
+                            + QString::number(units->ograinsize(aavec)) + ' '
                             + QString::number(units->ograinsize(amaxc)));
         }
 

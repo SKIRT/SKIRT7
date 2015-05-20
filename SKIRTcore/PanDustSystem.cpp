@@ -525,29 +525,28 @@ void PanDustSystem::write() const
         // Create a text file
         TextOutFile file(this, "ds_isrf", "ISRF");
 
-        QString line = "";
+        // Write the header
+        file.writeLine("# Mean field intensities for all dust cells with nonzero absorption");
+        file.addColumn("dust cell index", 'd');
+        file.addColumn("x coordinate of cell center (" + units->ulength() + ")", 'g');
+        file.addColumn("y coordinate of cell center (" + units->ulength() + ")", 'g');
+        file.addColumn("z coordinate of cell center (" + units->ulength() + ")", 'g');
         for (int ell=0; ell<_Nlambda; ell++)
-            line += QString::number(units->owavelength(lambdagrid->lambda(ell))) + '\t';
+            file.addColumn("J_lambda (W/m3/sr) for lambda = "
+                           + QString::number(units->owavelength(lambdagrid->lambda(ell)))
+                           + " " + units->uwavelength(), 'g');
 
-        file.writeLine(line);
-        file.writeLine("");
-
+        // Write one line for each dust cell with nonzero absorption
         for (int m=0; m<_Ncells; m++)
         {
             double Ltotm = Labs(m);
             if (Ltotm>0.0)
             {
+                QList<double> values;
                 Position bfr = _grid->centralPositionInCell(m);
-                double x, y, z;
-                bfr.cartesian(x,y,z);
-                QString line = QString::number(m) + '\t'
-                             + QString::number(units->olength(x)) + '\t'
-                             + QString::number(units->olength(y)) + '\t'
-                             + QString::number(units->olength(z)) + '\t';
-                const Array& Jv = meanintensityv(m);
-                for (int ell=0; ell<_Nlambda; ell++)
-                    line += QString::number(Jv[ell]) + '\t';
-                file.writeLine(line);
+                values << m << units->olength(bfr.x()) << units->olength(bfr.y()) << units->olength(bfr.z());
+                for (auto J : meanintensityv(m)) values << J;
+                file.writeRow(values);
             }
         }
     }

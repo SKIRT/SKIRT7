@@ -45,8 +45,8 @@ void PanWavelengthGrid::setupSelfAfter()
         TextOutFile file(this, "wavelengths", "wavelengths");
 
         // Write the header
-        file.addColumn("lambda", 'e', 8);
-        file.addColumn("delta lambda  (" + units->uwavelength() + ")", 'e', 8);
+        file.addColumn("lambda (" + units->uwavelength() + ")", 'e', 8);
+        file.addColumn("delta lambda (" + units->uwavelength() + ")", 'e', 8);
 
         // Write the body
         for (int ell=0; ell<_Nlambda; ell++)

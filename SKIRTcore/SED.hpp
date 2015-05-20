@@ -42,14 +42,6 @@ public:
         simulation's wavelength grid. */
     const Array& luminosities() const;
 
-    /** This function writes the %SED to a file such that it can easily be plotted. Note that it
-        applies a conversion: it plots the normalized (dimensionless) wavelength-bin-averaged
-        emissivity \f$\lambda\,j(\lambda)\f$, which relates to the internally stored luminosity
-        vector \f$L_\lambda\f$ through \f[ (\lambda\,j(\lambda))_\ell =
-        \frac{\lambda_\ell\,L_\ell}{(\Delta \lambda)_\ell} \f] with \f$(\Delta\lambda)_\ell\f$ the
-        width of the \f$\ell\f$'th wavelength bin. */
-    void write(const QString &filename) const;
-
 protected:
     /** This function initializes the luminosity vector \f$L_\ell\f$; it should be called during
         setup from a subclass. The argument specifies a vector of (not necessarily normalized)

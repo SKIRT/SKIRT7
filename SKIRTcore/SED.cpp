@@ -44,27 +44,6 @@ const Array& SED::luminosities() const
 
 //////////////////////////////////////////////////////////////////////
 
-void SED::write(const QString& filename) const
-{
-    WavelengthGrid* lambdagrid = find<WavelengthGrid>();
-    Units* units = find<Units>();
-
-    ofstream file(filename.toLocal8Bit().constData());
-    file << setprecision(8) << scientific;
-    for (int ell=0; ell<lambdagrid->Nlambda(); ell++)
-    {
-        double lambda = lambdagrid->lambda(ell);
-        double dlambda = lambdagrid->dlambda(ell);
-        file << units->owavelength(lambda)
-             << '\t'
-             << _Lv[ell]/dlambda*lambda
-             << endl;
-    }
-    file.close();
-}
-
-//////////////////////////////////////////////////////////////////////
-
 void SED::setluminosities(const Array &Lv)
 {
     // copy luminosities

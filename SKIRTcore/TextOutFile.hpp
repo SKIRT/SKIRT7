@@ -25,27 +25,35 @@ class TextOutFile
     //=============== Construction - Destruction  ==================
 
 public:
-    /** The constructor of the TextOutFile class. As an argument, it takes the filename (a QString
-        instance). If the process that invokes it is the root, the output stream for the file is
-        initialized. On other processes, this output stream remains uninitialized (and is never used). */
+    /** The constructor of the TextOutFile class. If the constructor is invoked from the root
+        process, the output stream for the file is initialized and a log message is issued. For
+        other processes, this output stream remains uninitialized and is never used, i.e. calling
+        the writeLine() function has no effect. The constructor takes several arguments: (1) \em
+        item specifies a simulation item in the hierarchy of the caller (usually the caller itself)
+        used to retrieve the output file path and an appropriate logger; (2) \em filename specifies
+        the name of the file, excluding path, simulation prefix and filename extension; (3) \em
+        description specifies a description used in the log message issued after the file was
+        successfully written; (4) \em overwrite is an optional flag that can be set to false to
+        append the new lines to the existing file (it should be left to the default of true in
+        almost all cases). */
     TextOutFile(const SimulationItem* item, QString filename, QString description, bool overwrite = true);
 
-    /** The destructor of the TextOutFile class. On the root process, the file will be automatically
-        closed. */
+    /** The destructor of the TextOutFile class. On the root process, the file is closed and a log
+        message is issued. */
     ~TextOutFile();
 
     //====================== Other functions =======================
 
 public:
-    /** This function is used to write a certain string to the file as a new line. If the calling
-        process is not the root, this function will have no effect. */
+    /** This function writes the specified string to the file as a new line. If the calling process
+        is not the root, this function will have no effect. */
     void writeLine(QString line);
 
     /** This function (virtually) adds a new column to the text file, characterized by a certain
-        description, the formatting ('d' for integer values, 'e' (or 'E') for scientific notation, 'f'
-        for floating point notation and 'g' (or 'G') for the most concise ['e' ('E') or 'f']. For the
-        'e', 'E', and 'f' formats, the precision represents the number of digits after the decimal
-        point. For the 'g' and 'G' formats, the precision represents the maximum number of significant
+        description and formatting. The format is 'd' for integer values, 'e' for scientific notation, 'f'
+        for floating point notation and 'g' for the most concise 'e' or 'f'. For the
+        'e' and 'f' formats, the precision represents the number of digits after the decimal
+        point. For the 'g' format, the precision represents the maximum number of significant
         digits (trailing zeroes are omitted). The description of each column is added to the header of
         the text file, along with the column number. */
     void addColumn(QString description, char format = 'e', int precision = 6);
