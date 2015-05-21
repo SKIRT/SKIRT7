@@ -6,8 +6,9 @@
 #include "FatalError.hpp"
 #include "FilePaths.hpp"
 #include "Log.hpp"
-#include "TextOutFile.hpp"
 #include "ProcessManager.hpp"
+#include "TextOutFile.hpp"
+#include "Units.hpp"
 
 using namespace std;
 
@@ -18,6 +19,7 @@ TextOutFile::TextOutFile(const SimulationItem* item, QString filename, QString d
 {
     _log = item->find<Log>();
     _filepath = item->find<FilePaths>()->output(filename + ".dat");
+    _units = item->find<Units>();
 
     // Only open the output file if this is the root process
     if (ProcessManager::isRoot())

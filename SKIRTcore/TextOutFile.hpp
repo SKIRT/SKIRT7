@@ -12,6 +12,7 @@
 #include "Array.hpp"
 #include "SimulationItem.hpp"
 class Log;
+class Units;
 
 ////////////////////////////////////////////////////////////////////
 
@@ -66,13 +67,14 @@ public:
 
     //======================== Data Members ========================
 
-private:
+protected:
     Log* _log;
     QString _filepath;
-    std::ofstream _out;  // the output stream
+    Units* _units;
     int _ncolumns;
     QList<char> _formats;
     QList<int> _precisions;
+    std::ofstream _out;  // the output stream
 };
 
 ////////////////////////////////////////////////////////////////////

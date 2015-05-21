@@ -9,6 +9,7 @@
 #include <fstream>
 #include <vector>
 #include <QString>
+#include "TextOutFile.hpp"
 class Log;
 class Units;
 
@@ -21,17 +22,13 @@ class Units;
     in the grid. Each line in the file contains two (2D) or three (3D) coordinates seperated by
     whitespace, or is empty. Consecutive nonempty lines represent a sequence of "lineto" commands;
     an empty line marks a "moveto" command. */
-class DustGridPlotFile
+class DustGridPlotFile : TextOutFile
 {
 public:
     /** The constructor creates the output file with the specified name, and writes a message to
         the specified Log object. The specified Units object is used in the writecorners() function
         to convert the coordinates to output units. */
-    DustGridPlotFile(QString filename, Log* log, Units* units);
-
-    /** The destructor closes the output file and writes a message to the Log object specified in
-        the constructor. */
-    ~DustGridPlotFile();
+    DustGridPlotFile(const SimulationItem* item, QString filename);
 
     /** This function outputs the specified 2D line segment, using the Units object specified in
         the constructor to convert the coordinates to output units. */
@@ -63,12 +60,6 @@ public:
         vertices in the face. Assuming the polyhedron has \f$k\f$ faces, the index sequence looks like
         \f[m_0,i_{0,0},i_{0,1},...,i_{0,m_0-1},...,m_k,i_{k-1,0},i_{k-1,1},...,i_{k-1,m_k-1}\f] */
     void writePolyhedron(const std::vector<double>& coords, const std::vector<int>& indices);
-
-private:
-    QString _filename;
-    Log* _log;
-    Units* _units;
-    std::ofstream _stream;
 };
 
 ////////////////////////////////////////////////////////////////////

@@ -51,34 +51,31 @@ void DustGridStructure::setupSelfAfter()
     if (_writeGrid)
     {
         int dimension = find<MonteCarloSimulation>()->dimension();
-        FilePaths* filepaths = find<FilePaths>();
-        Units* units = find<Units>();
-        Log* log = find<Log>();
 
         // For the xy plane (always)
         {
-            DustGridPlotFile outfile(filepaths->output("ds_gridxy.dat"), log, units);
+            DustGridPlotFile outfile(this, "ds_gridxy");
             write_xy(&outfile);
         }
 
         // For the xz plane (only if dimension is at least 2)
         if (dimension >= 2)
         {
-            DustGridPlotFile outfile(filepaths->output("ds_gridxz.dat"), log, units);
+            DustGridPlotFile outfile(this, "ds_gridxz");
             write_xz(&outfile);
         }
 
         // For the yz plane (only if dimension is 3)
         if (dimension == 3)
         {
-            DustGridPlotFile outfile(filepaths->output("ds_gridyz.dat"), log, units);
+            DustGridPlotFile outfile(this, "ds_gridyz");
             write_yz(&outfile);
         }
 
         // Full 3D coordinates (only if dimension is 3)
         if (dimension == 3)
         {
-            DustGridPlotFile outfile(filepaths->output("ds_gridxyz.dat"), log, units);
+            DustGridPlotFile outfile(this, "ds_gridxyz");
             write_xyz(&outfile);
         }
     }

@@ -4,8 +4,6 @@
 ///////////////////////////////////////////////////////////////// */
 
 #include <cmath>
-#include <fstream>
-#include <iomanip>
 #include "FatalError.hpp"
 #include "NR.hpp"
 #include "SED.hpp"
