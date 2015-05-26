@@ -7,7 +7,6 @@
 #include "DustGridPlotFile.hpp"
 #include "DustParticleInterface.hpp"
 #include "FatalError.hpp"
-#include "FilePaths.hpp"
 #include "Log.hpp"
 #include "Random.hpp"
 #include "Units.hpp"
@@ -177,15 +176,11 @@ void VoronoiDustGridStructure::setupSelfBefore()
     {
         setWriteGrid(false);    // keep the base class from overwriting our plot files
 
-        Units* units = find<Units>();
-        FilePaths* filepaths = find<FilePaths>();
-
         // create the plot files
-        QString name = filepaths->output("ds_grid");
-        DustGridPlotFile plotxy(name+"xy.dat",log,units);
-        DustGridPlotFile plotxz(name+"xz.dat",log,units);
-        DustGridPlotFile plotyz(name+"yz.dat",log,units);
-        DustGridPlotFile plotxyz(name+"xyz.dat",log,units);
+        DustGridPlotFile plotxy(this, "ds_gridxy");
+        DustGridPlotFile plotxz(this, "ds_gridxz");
+        DustGridPlotFile plotyz(this, "ds_gridyz");
+        DustGridPlotFile plotxyz(this, "ds_gridxyz");
 
         // load all particles in a Voro container
         int nb = max(3, min(1000, static_cast<int>(pow(_Ncells/5.,1./3.)) ));

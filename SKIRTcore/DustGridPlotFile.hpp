@@ -6,32 +6,27 @@
 #ifndef DUSTGRIDPLOTFILE_HPP
 #define DUSTGRIDPLOTFILE_HPP
 
-#include <fstream>
 #include <vector>
 #include <QString>
+#include "TextOutFile.hpp"
 class Log;
 class Units;
 
 ////////////////////////////////////////////////////////////////////
 
-/** This is a helper class to write geometric information about a dust grid to a data file in a
-    text format that can be easily plotted. There are two format variations for 2D and 3D
-    information, respectively. The 2D format describes the intersection of a dust grid structure
-    with one of the coordinate planes. The 3D format fully describes all or part of the dust cells
-    in the grid. Each line in the file contains two (2D) or three (3D) coordinates seperated by
-    whitespace, or is empty. Consecutive nonempty lines represent a sequence of "lineto" commands;
-    an empty line marks a "moveto" command. */
-class DustGridPlotFile
+/** This class inherits from the TextOutFile class and is specifically used to write geometric
+    information about a dust grid to a data file in a text format that can be easily plotted. There
+    are two format variations for 2D and 3D information, respectively. The 2D format describes the
+    intersection of a dust grid structure with one of the coordinate planes. The 3D format fully
+    describes all or part of the dust cells in the grid. Each line in the file contains two (2D) or
+    three (3D) coordinates seperated by whitespace, or is empty. Consecutive nonempty lines
+    represent a sequence of "lineto" commands; an empty line marks a "moveto" command. */
+class DustGridPlotFile : TextOutFile
 {
 public:
-    /** The constructor creates the output file with the specified name, and writes a message to
-        the specified Log object. The specified Units object is used in the writecorners() function
-        to convert the coordinates to output units. */
-    DustGridPlotFile(QString filename, Log* log, Units* units);
-
-    /** The destructor closes the output file and writes a message to the Log object specified in
-        the constructor. */
-    ~DustGridPlotFile();
+    /** The constructor creates the output file with the specified name and sets the appropriate
+        precision for the numerical values in the text file. */
+    DustGridPlotFile(const SimulationItem* item, QString filename);
 
     /** This function outputs the specified 2D line segment, using the Units object specified in
         the constructor to convert the coordinates to output units. */
@@ -63,12 +58,6 @@ public:
         vertices in the face. Assuming the polyhedron has \f$k\f$ faces, the index sequence looks like
         \f[m_0,i_{0,0},i_{0,1},...,i_{0,m_0-1},...,m_k,i_{k-1,0},i_{k-1,1},...,i_{k-1,m_k-1}\f] */
     void writePolyhedron(const std::vector<double>& coords, const std::vector<int>& indices);
-
-private:
-    QString _filename;
-    Log* _log;
-    Units* _units;
-    std::ofstream _stream;
 };
 
 ////////////////////////////////////////////////////////////////////

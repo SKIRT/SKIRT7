@@ -60,6 +60,13 @@ class PanDustSystem : public DustSystem
     Q_CLASSINFO("Default", "yes")
     Q_CLASSINFO("RelevantIf", "dustEmissivity")
 
+    Q_CLASSINFO("Property", "cycles")
+    Q_CLASSINFO("Title", "the number of cycles in each dust self-absorption stage")
+    Q_CLASSINFO("Optional", "true")
+    Q_CLASSINFO("Silent", "true")
+    Q_CLASSINFO("Default", "0")
+    Q_CLASSINFO("RelevantIf", "selfAbsorption")
+
     //============= Construction - Setup - Destruction =============
 
 public:
@@ -138,6 +145,12 @@ public:
     /** Returns the flag indicating whether to output a data file describing the interstellar
         radiation field. If dust emission is turned off, this function returns false. */
     Q_INVOKABLE bool writeISRF() const;
+
+    /** Sets the the number of cycles in each dust self-absorption stage. */
+    Q_INVOKABLE void setCycles(int value);
+
+    /** Returns the number of cycles in each dust self-absorption stage. */
+    Q_INVOKABLE int cycles() const;
 
     //======================== Other Functions =======================
 
@@ -238,6 +251,7 @@ private:
     bool _writeEmissivity;
     bool _writeTemp;
     bool _writeISRF;
+    int _cycles;
 
     // data members initialized during setup
     int _Nlambda;
