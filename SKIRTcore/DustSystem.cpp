@@ -191,7 +191,7 @@ void DustSystem::assemble()
     PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
 
     Log* log = find<Log>();
-    TimeLogger logger(log->verbose() ? log : 0, "communication of the dust densities");
+    TimeLogger logger(log->verbose() && comm->isMultiProc() ? log : 0, "communication of the dust densities");
 
     // Sum the densities array across all processes
     comm->sum_all(_rhovv.getArray());
