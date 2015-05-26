@@ -116,9 +116,11 @@ void PanMonteCarloSimulation::rundustselfabsorption()
     const double stage_epsmax[] = {0.010, 0.007, 0.005};
     for (int stage=0; stage<Nstages; stage++)
     {
-        const int Ncyclesmax = 100;
+        bool fixedNcycles = _pds->cycles();
+        const int Ncyclesmax = fixedNcycles ? _pds->cycles() : 100;
         bool convergence = false;
-        for (int cycle=1; cycle<=Ncyclesmax; cycle++)
+        int cycle = 1;
+        while (cycle<=Ncyclesmax && (!convergence || fixedNcycles))
         {
             TimeLogger logger(_log, "the " + QString(stage_name[stage]) + " dust self-absorption cycle "
                               + QString::number(cycle));
@@ -163,13 +165,13 @@ void PanMonteCarloSimulation::rundustselfabsorption()
                 _log->info("Convergence reached; the last increase in the absorbed dust luminosity was "
                            + QString::number(eps*100, 'f', 2) + "%");
                 convergence = true;
-                break;
             }
             else
             {
                 _log->info("Convergence not yet reached; the increase in the absorbed dust luminosity was "
                            + QString::number(eps*100, 'f', 2) + "%");
             }
+            cycle++;
         }
         if (!convergence)
         {
