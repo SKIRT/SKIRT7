@@ -16,13 +16,18 @@ DustGridPlotFile::DustGridPlotFile(const SimulationItem* item, QString filename)
     : TextOutFile(item, filename, "data to plot the grid structure")
 {
     // Set the precision
-    _out << setprecision(8);
+    if (_out.is_open())
+    {
+        _out << setprecision(8);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
 
 void DustGridPlotFile::writeLine(double beg1, double beg2, double end1, double end2)
 {
+    if (!_out.is_open()) return;
+
     beg1 = _units->olength(beg1);
     beg2 = _units->olength(beg2);
     end1 = _units->olength(end1);
@@ -35,6 +40,8 @@ void DustGridPlotFile::writeLine(double beg1, double beg2, double end1, double e
 
 void DustGridPlotFile::writeRectangle(double min1, double min2, double max1, double max2)
 {
+    if (!_out.is_open()) return;
+
     min1 = _units->olength(min1);
     min2 = _units->olength(min2);
     max1 = _units->olength(max1);
@@ -50,6 +57,8 @@ void DustGridPlotFile::writeRectangle(double min1, double min2, double max1, dou
 
 void DustGridPlotFile::writeCircle(double radius)
 {
+    if (!_out.is_open()) return;
+
     radius = _units->olength(radius);
 
     for (int l=0; l<=360; l++)
@@ -64,6 +73,8 @@ void DustGridPlotFile::writeCircle(double radius)
 
 void DustGridPlotFile::writeLine(double x1, double y1, double z1, double x2, double y2, double z2)
 {
+    if (!_out.is_open()) return;
+
     x1 = _units->olength(x1);
     y1 = _units->olength(y1);
     z1 = _units->olength(z1);
@@ -78,6 +89,8 @@ void DustGridPlotFile::writeLine(double x1, double y1, double z1, double x2, dou
 
 void DustGridPlotFile::writeCube(double x1, double y1, double z1, double x2, double y2, double z2)
 {
+    if (!_out.is_open()) return;
+
     x1 = _units->olength(x1);
     y1 = _units->olength(y1);
     z1 = _units->olength(z1);
@@ -110,6 +123,8 @@ void DustGridPlotFile::writeCube(double x1, double y1, double z1, double x2, dou
 
 void DustGridPlotFile::writePolyhedron(const std::vector<double>& coords, const std::vector<int>& indices)
 {
+    if (!_out.is_open()) return;
+
     unsigned int k = 0;
     while (k < indices.size())
     {
