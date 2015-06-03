@@ -73,7 +73,7 @@ void Parallel::call(ParallelTarget* target, ProcessAssigner* assigner)
     _limit = _assigner->nvalues();
 
     // initialize the number of active threads (i.e. not waiting for new work)
-    _active = _threads.size();
+    _active = assigner->parallel() ? _threads.size() : 0;
 
     // clear the exception pointer
     _exception = 0;
