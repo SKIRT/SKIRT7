@@ -122,7 +122,6 @@
 #include "RandomAssigner.hpp"
 #include "ReadFitsGeometry.hpp"
 #include "RingGeometry.hpp"
-#include "RootAssigner.hpp"
 #include "RotateGeometryDecorator.hpp"
 #include "SEDInstrument.hpp"
 #include "SequentialAssigner.hpp"
@@ -422,7 +421,6 @@ void RegisterSimulationItems::registerAll()
     add<IdenticalAssigner>();
     add<StaggeredAssigner>();
     add<SequentialAssigner>();
-    add<RootAssigner>();
     add<RandomAssigner>();
 }
 
