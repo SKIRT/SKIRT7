@@ -78,10 +78,8 @@ void MonteCarloSimulation::setChunkParams(double packages)
         }
         else
         {
-            int myPackages = packages/Nprocs;
-            quint64 Nchunkspp = ceil( qMin(myPackages/2e4, qMax(myPackages/1e7, 10.*Nthreads/_Nlambda)) );
-            _chunksize = ceil(myPackages/Nchunkspp);
-            _Nchunks = Nchunkspp * Nprocs;
+            _Nchunks = ceil( qMax(10.*Nprocs, qMax(packages/1e7, 10.*Nthreads*Nprocs/_Nlambda)));
+            _chunksize = ceil(packages/_Nchunks);
             _Npp = _Nchunks * _chunksize;
         }
     }
