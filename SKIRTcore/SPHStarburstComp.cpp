@@ -66,7 +66,7 @@ void SPHStarburstComp::setupSelfBefore()
             SFRv.push_back(columns.value(4).toDouble());  // star formation rate in Msun / yr
             Zv.push_back(columns.value(5).toDouble());    // metallicity as dimensionless fraction
             logCv.push_back(columns.value(6).toDouble()); // log compactness (Groves 2008) as dimensionless value
-            Pv.push_back(columns.value(7).toDouble());    // ISM pressure in cgs units
+            Pv.push_back(columns.value(7).toDouble());    // ISM pressure in Pa
             fPDRv.push_back(columns.value(8).toDouble()); // dimensionless photo-dissociation region covering fraction
 
             Nparts++;
