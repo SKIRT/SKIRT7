@@ -59,7 +59,7 @@ void Instrument::sumResults(QList<Array*> arrays)
     PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
 
     Log* log = find<Log>();
-    TimeLogger logger(log->verbose() ? log : 0, "communication of the observed fluxes");
+    TimeLogger logger(log->verbose() && comm->isMultiProc() ? log : 0, "communication of the observed fluxes");
 
     foreach (Array* arr, arrays) if (arr->size()) comm->sum(*arr);
 }

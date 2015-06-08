@@ -69,12 +69,14 @@ public:
 
 protected:
     Log* _log;
-    QString _filepath;
     Units* _units;
+    std::ofstream _out;  // the output stream
+
+private:
+    QString _filepath;
     int _ncolumns;
     QList<char> _formats;
     QList<int> _precisions;
-    std::ofstream _out;  // the output stream
 };
 
 ////////////////////////////////////////////////////////////////////

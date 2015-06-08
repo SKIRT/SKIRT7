@@ -65,26 +65,37 @@ protected:
         chunks, and stores the resulting parameters in protected data members. It should be called
         at the start of each photon shooting phase.
 
-        A chunk is the unit of parallelization in the simulation, i.e. multiple chunks may be
-        performed simultaneously in different execution threads. The number of photons launched in
-        a chunk, called the chunk size, is the same for all chunks in the simulation. All photon
-        packages in a chunk have the same wavelength. If no photon packages must be launched for
-        the simulation, the number of chunks is trivially zero. If there is only a single execution
-        thread, there is no reason to split the photon packages into chunks, so the number of
-        chunks per wavelength is set to one, and the chunk size is equal to the number of photon
-        packages per wavelength. Otherwise the number of chunks is determined using a heuristic
-        that balances the following objectives: (1) the total number of chunks for all wavelengths
-        should be substantially larger than the number of parallel threads, to minimize the load
-        imbalance at the end of each phase; (2) for the same reason, the chunk size should not be
-        overly large; (3) the chunk size should not be too small, since each chunk incurs a
-        nontrivial overhead. This leads to the following formula for the number of chunks per
-        wavelength \f$N_\text{chunks}\f$ in function of the specified number of photon packages per
-        wavelength \f$N_\text{pp}\f$, the number of wavelengths in the simulation's wavelength grid
-        \f$N_\lambda\f$ and the number of parallel execution threads \f$N_\text{threads}\f$
-        \f[N_\text{chunks} = {\text{ceil}}\left[ \min(\frac{N_\text{pp}}{2\,S_\text{min}},
-        \max(\frac{N_\text{pp}}{S_\text{max}}, \frac{b\,N_\text{threads}}{N_\lambda})) \right]\f]
-        where \f$S_\text{min}=10^4\f$ is the minimum chunk size, \f$S_\text{max}=10^7\f$ is the
-        maximum chunk size, and \f$b=10\f$ is the load balancing safety factor. */
+        A chunk is the unit of parallelization in the simulation, i.e. multiple chunks may be performed
+        simultaneously in different execution threads. The number of photons launched in a chunk,
+        called the chunk size, is the same for all chunks in the simulation. All photon packages in a
+        chunk have the same wavelength. If no photon packages must be launched for the simulation, the
+        number of chunks is trivially zero. If the number of photon packages is nonzero, we
+        differentiate between 3 cases to calculate the number of chunks:
+        -# if the current simulation is <b>not parallelized</b> at all, i.e. the number of processes as
+        well as the number of threads per process is one, there is no reason to split the photon
+        packages into chunks, so the number of chunks per wavelength is set to one;
+        -# if <b>only multithreading</b> is used (the number of processes is one), the number of chunks
+        is determined by the condition that a decent load balancing is obtained among the execution
+        threads. Therefore, we dictate that at least 10 chunks (across all wavelengths) are executed by
+        each thread. This condition can be written as: \f[\boxed{N_\text{chunks} > 10\times
+        \frac{N_\text{threads}}{N_\lambda}}\f] To further enhance the load balancing, we additionally
+        enforce the chunks to not consist of more than \f$S_\text{max}=10^7\f$ photon packages:
+        \f[\boxed{N_\text{chunks} > \frac{N_\text{pp}}{S_\text{max}}}\f]
+        -# when <b>multiprocessing and multithreading</b> are used in combination, an additional
+        criterion must be met, regarding the load balancing between the parallel processes: the number
+        of chunks (per wavelength) should at least be 10 times the number of processes, since these
+        chunks will be distributed amongst the processes by the designated ProcessAssigner. This
+        condition can be expressed mathematically as: \f[\boxed{N_\text{chunks} > 10 \times
+        N_\text{procs}}\f] The criterion that ensures load balancing between the threads remains, but
+        is slightly altered to include the threads from all parallel processes
+        (\f$N_\text{threads}\times N_\text{procs}\f$). This condition can then be formulated as "the
+        total number of chunks (across all wavelengths) per process must at least be 10 times the
+        number of threads". This translates into the following mathematical expression: \f[
+        \frac{N_\text{chunks} \times N_\lambda}{N_\text{procs}} > 10 \times N_\text{threads} \f] Which
+        in turn can be rewritten into the following form: \f[ \boxed{N_\text{chunks} > 10 \times
+        \frac{N_\text{threads} \times N_\text{procs}}{N_\lambda}} \f] The final condition prevents the
+        chunks from being overly large (\f$S_\text{max}=10^7\f$): \f[\boxed{N_\text{chunks} >
+        \frac{N_\text{pp}}{S_\text{max}}}\f] */
     void setChunkParams(double packages);
 
     //======== Setters & Getters for Discoverable Attributes =======

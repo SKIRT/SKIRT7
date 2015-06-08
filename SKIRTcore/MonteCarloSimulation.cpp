@@ -56,9 +56,10 @@ void MonteCarloSimulation::setupSelfBefore()
 
 void MonteCarloSimulation::setChunkParams(double packages)
 {
-    // cache the number of wavelengths
+    // Cache the number of wavelengths
     _Nlambda = _lambdagrid->Nlambda();
-    // determine the number of chunks and the corresponding chunk size
+
+    // Determine the number of chunks and the corresponding chunk size
     if (packages <= 0)
     {
         _Nchunks = 0;
@@ -67,26 +68,21 @@ void MonteCarloSimulation::setChunkParams(double packages)
     }
     else
     {
-        int Nthreads = _parfac->maxThreadCount();
+        // Get the number of processes and threads per process
         int Nprocs = _comm->size();
+        int Nthreads = _parfac->maxThreadCount();
 
-        if (Nprocs * Nthreads == 1)
-        {
-            _Nchunks = 1;
-            _chunksize = packages;
-            _Npp = packages;
-        }
-        else
-        {
-            int myPackages = packages/Nprocs;
-            quint64 Nchunkspp = ceil( qMin(myPackages/2e4, qMax(myPackages/1e7, 10.*Nthreads/_Nlambda)) );
-            _chunksize = ceil(myPackages/Nchunkspp);
-            _Nchunks = Nchunkspp * Nprocs;
-            _Npp = _Nchunks * _chunksize;
-        }
+        // Set the number of chunks per wavelength, depending on the parallelization mode
+        if (Nprocs * Nthreads == 1) _Nchunks = 1;
+        else if (Nprocs == 1) _Nchunks = ceil( std::max({packages/1e7, 10.*Nthreads/_Nlambda}));
+        else _Nchunks = ceil( std::max({10.*Nprocs, packages/1e7, 10.*Nthreads*Nprocs/_Nlambda}));
+
+        // Calculate the size of the chunks and the definitive number of photon packages per wavelength
+        _chunksize = ceil(packages/_Nchunks);
+        _Npp = _Nchunks * _chunksize;
     }
 
-    // determine the log frequency; continuous scattering is much slower!
+    // Determine the log frequency; continuous scattering is much slower!
     _logchunksize = _continuousScattering ? 5000 : 50000;
 
     // Assign the _Nlambda x _Nchunks different chunks to the different parallel processes

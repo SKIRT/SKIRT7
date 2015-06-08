@@ -86,7 +86,7 @@ int IdenticalAssigner::rankForIndex(size_t index) const
 
 bool IdenticalAssigner::parallel() const
 {
-    return _blockassigner!=0;
+    return (!_comm->isMultiProc() || _blockassigner!=0);
 }
 
 ////////////////////////////////////////////////////////////////////
