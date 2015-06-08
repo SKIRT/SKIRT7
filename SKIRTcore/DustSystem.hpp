@@ -75,7 +75,7 @@ class DustSystem : public SimulationItem
 
     Q_CLASSINFO("Property", "assigner")
     Q_CLASSINFO("Title", "the parallel process assignment scheme")
-    Q_CLASSINFO("Default", "SequentialAssigner")
+    Q_CLASSINFO("Default", "StaggeredAssigner")
     Q_CLASSINFO("Optional", "true")
     Q_CLASSINFO("Silent", "true")
 
