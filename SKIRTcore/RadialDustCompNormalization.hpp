@@ -14,7 +14,7 @@
     symmetric dust component by defining the radial optical depth at an arbitrary wavelength.
     The radial optical depth is defined as the integral of the opacity along the line from the
     centre to the edge, \f[
-    \tau_\lambda^{\text{rad}} = \int_{-\infty}^\infty k_\lambda(r)\, {\text{d}}r. \f] */
+    \tau_\lambda^{\text{rad}} = \int_{0}^\infty k_\lambda(r)\, {\text{d}}r. \f] */
 class RadialDustCompNormalization : public DustCompNormalization
 {
     Q_OBJECT
