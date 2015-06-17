@@ -31,6 +31,9 @@ DustSystemDepthCalculator::DustSystemDepthCalculator(const DustSystem *ds,
 
 void DustSystemDepthCalculator::body(size_t index)
 {
+    // dust grid path: allocated once so it can be reused
+    DustGridPath dgp;
+
     int k = _numSamplesPerBody;
     while (k--)
     {
@@ -57,10 +60,10 @@ void DustSystemDepthCalculator::body(size_t index)
         double taut = Units::kappaV() * sumrho * ds;
 
         // determine the gridded optical depth by asking the grid for a path
-        _dgp.setPosition(Position(r1));
-        _dgp.setDirection(Direction(k));
-        _grid->path(&_dgp);
-        double taug = Units::kappaV() * _dgp.opticalDepth([this](int m){ return _ds->density(m); }, s);
+        dgp.setPosition(Position(r1));
+        dgp.setDirection(Direction(k));
+        _grid->path(&dgp);
+        double taug = Units::kappaV() * dgp.opticalDepth([this](int m){ return _ds->density(m); }, s);
 
         // store the results
         double dtau = fabs(taug-taut);
