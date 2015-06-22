@@ -64,6 +64,7 @@ class PanDustSystem : public DustSystem
     Q_CLASSINFO("Title", "the number of cycles in each dust self-absorption stage")
     Q_CLASSINFO("Optional", "true")
     Q_CLASSINFO("Silent", "true")
+    Q_CLASSINFO("Minimum", "0")
     Q_CLASSINFO("Default", "0")
     Q_CLASSINFO("RelevantIf", "selfAbsorption")
 
