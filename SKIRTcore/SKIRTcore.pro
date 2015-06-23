@@ -295,7 +295,9 @@ HEADERS += \
     SpectralLuminosityStellarCompNormalization.hpp \
     RootAssigner.hpp \
     RandomAssigner.hpp \
-    TextOutFile.hpp
+    TextOutFile.hpp \
+    SphericalAdaptiveMesh.hpp \
+    SphericalAdaptiveMeshDustDistribution.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -549,4 +551,6 @@ SOURCES += \
     SpectralLuminosityStellarCompNormalization.cpp \
     RootAssigner.cpp \
     RandomAssigner.cpp \
-    TextOutFile.cpp
+    TextOutFile.cpp \
+    SphericalAdaptiveMesh.cpp \
+    SphericalAdaptiveMeshDustDistribution.cpp
