@@ -7,7 +7,6 @@
 #include "FilePaths.hpp"
 #include "Image.hpp"
 #include "Log.hpp"
-#include "PeerToPeerCommunicator.hpp"
 #include "PhotonPackage.hpp"
 #include "SingleFrameInstrument.hpp"
 #include "Units.hpp"
@@ -121,9 +120,6 @@ int SingleFrameInstrument::pixelondetector(const PhotonPackage* pp) const
 
 void SingleFrameInstrument::calibrateAndWriteDataCubes(QList< Array*> farrays, QStringList fnames)
 {
-    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
-    if (!comm->isRoot()) return;
-
     WavelengthGrid* lambdagrid = find<WavelengthGrid>();
     int Nlambda = lambdagrid->Nlambda();
 
@@ -193,7 +189,7 @@ void SingleFrameInstrument::calibrateAndWriteDataCubes(QList< Array*> farrays, Q
             QString description = fnames[q] + " flux";
 
             // Create an image and save it
-            Image image(this, _Nxp, _Nyp, Nlambda, _xpres, _ypres);
+            Image image(this, _Nxp, _Nyp, Nlambda, _xpres, _ypres, "surfacebrightness");
             image.saveto(this, *(farrays[q]), filename, description);
         }
     }

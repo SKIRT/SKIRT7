@@ -31,10 +31,10 @@ public:
 
     /** This constructor creates an image based on an Array of double values and the header information
         for the image. */
-    Image(const SimulationItem* item, Array data, int xsize, int ysize, int nframes, double xres, double yres);
+    Image(const SimulationItem* item, Array data, int xsize, int ysize, int nframes, double xres, double yres, QString quantity, QString xyqty = "length");
 
     /** This constructor creates an image with only a header. */
-    Image(const SimulationItem* item, int xsize, int ysize, int nframes, double xres, double yres);
+    Image(const SimulationItem* item, int xsize, int ysize, int nframes, double xres, double yres, QString quantity, QString xyqty = "length");
 
     //====================== Inititialization ======================
 
@@ -67,8 +67,12 @@ public:
     /** This function can be used to export the current image to a FITS file. */
     void saveto(const SimulationItem* item, QString filename, QString description);
 
-    /** This function ... */
-    void saveto(const SimulationItem* item, Array& data, QString filename, QString description);
+    /** This function is temporary; it is used in classes where image frames are still handled as
+        Arrays, but where eventually objects of the Image class could be used (but this redesign takes
+        a lot of work). This function can save an external data container (of type const Array and
+        passed by reference), along with the header information contained in this Image instance, as a
+        FITS file. */
+    void saveto(const SimulationItem* item, const Array& data, QString filename, QString description);
 
     //=================== Numerical operations =====================
 
@@ -91,6 +95,13 @@ public:
     const double& operator()(int x, int y) const
     {
         return _data[x + _xsize*y];
+    }
+
+    /** This operator can be used to multiply each pixel by a given value. */
+    Image& operator*= (const double& value)
+    {
+        _data *= value;
+        return (*this);
     }
 
     /** This operator can be used to divide each pixel by a given value. */

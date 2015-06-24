@@ -359,7 +359,7 @@ void Optimization::clearGen(const QString & dirName)
     _genUnitsValues.clear();
 
     QDir dir(dirName);
-    find<Log>()->info("removing: "+dirName);
+    find<Log>()->info("Removing " + dirName);
 
     if (dir.exists(dirName)) {
         Q_FOREACH(QFileInfo info, dir.entryInfoList(QDir::NoDotAndDotDot | QDir::System | QDir::Hidden  |

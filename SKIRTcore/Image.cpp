@@ -36,7 +36,7 @@ Image::Image(const SimulationItem* item, QString filename)
 
 ////////////////////////////////////////////////////////////////////
 
-Image::Image(const SimulationItem* item, Array data, int xsize, int ysize, int nframes, double xres, double yres)
+Image::Image(const SimulationItem* item, Array data, int xsize, int ysize, int nframes, double xres, double yres, QString quantity, QString xyqty)
     : _data(data), _units(0), _xsize(xsize), _ysize(ysize), _nframes(nframes), _incx(0), _incy(0)
 {
     // Store a pointer to the units system
@@ -45,13 +45,13 @@ Image::Image(const SimulationItem* item, Array data, int xsize, int ysize, int n
     // Set physical image properties
     _incx = _units->olength(xres);
     _incy = _units->olength(yres);
-    _dataunits = _units->usurfacebrightness();
-    _xyunits = _units->ulength();
+    _dataunits = _units->unit(quantity);
+    _xyunits = _units->unit(xyqty);
 }
 
 ////////////////////////////////////////////////////////////////////
 
-Image::Image(const SimulationItem* item, int xsize, int ysize, int nframes, double xres, double yres)
+Image::Image(const SimulationItem* item, int xsize, int ysize, int nframes, double xres, double yres, QString quantity, QString xyqty)
     : _units(0), _xsize(xsize), _ysize(ysize), _nframes(nframes), _incx(0), _incy(0)
 {
     // Store a pointer to the units system
@@ -60,8 +60,8 @@ Image::Image(const SimulationItem* item, int xsize, int ysize, int nframes, doub
     // Set physical image properties
     _incx = _units->olength(xres);
     _incy = _units->olength(yres);
-    _dataunits = _units->usurfacebrightness();
-    _xyunits = _units->ulength();
+    _dataunits = _units->unit(quantity);
+    _xyunits = _units->unit(xyqty);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -140,16 +140,21 @@ void Image::saveto(const SimulationItem* item, QString filename, QString descrip
 
 ////////////////////////////////////////////////////////////////////
 
-void Image::saveto(const SimulationItem* item, Array& data, QString filename, QString description)
+void Image::saveto(const SimulationItem* item, const Array& data, QString filename, QString description)
 {
     // Cache a pointer to the logger
     Log* log = item->find<Log>();
 
     // Determine the path of the output FITS file
-    QString filepath = item->find<FilePaths>()->output(filename + ".fits");
+    QString filepath = item->find<FilePaths>()->output(filename.endsWith(".fits") ? filename : filename + ".fits");
 
-    // Only write the FITS file if this process is the root
-    if (item->find<PeerToPeerCommunicator>()->isRoot())
+    // Try to find a PeerToPeerCommunicator object
+    PeerToPeerCommunicator* comm = 0;
+    try {comm = item->find<PeerToPeerCommunicator>();}
+    catch (FatalError) {}
+
+    // Only write the FITS file if this process is the root or no PeerToPeerCommunicator was found
+    if (!comm || comm->isRoot())
     {
         log->info("Writing " + description + " to " + filepath + "...");
         FITSInOut::write(filepath, data, _xsize, _ysize, _nframes, _incx, _incy, _dataunits, _xyunits);

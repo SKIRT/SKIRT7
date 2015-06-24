@@ -12,6 +12,7 @@
 #include "FatalError.hpp"
 #include "FITSInOut.hpp"
 #include "FilePaths.hpp"
+#include "Image.hpp"
 #include "ISRF.hpp"
 #include "LockFree.hpp"
 #include "Log.hpp"
@@ -512,14 +513,12 @@ namespace
             }
         }
 
-        // write the results to a FITS file with an appropriate name
+        // Write the results to a FITS file with an appropriate name
         void write()
         {
-            QString filename = _paths->output("ds_temp" + plane + ".fits");
-            FITSInOut::write(filename, tempv, Np, Np, Nmaps,
-                           _units->olength(xd?xres:yres), _units->olength(zd?zres:yres),
-                           _units->utemperature(), _units->ulength());
-            _log->info("Written dust temperatures to file " + filename);
+            QString filename = "ds_temp" + plane;
+            Image image(_ds, Np, Np, Nmaps, xd?xres:yres, zd?zres:yres, "temperature");
+            image.saveto(_ds, tempv, filename, "dust temperatures");
         }
     };
 }

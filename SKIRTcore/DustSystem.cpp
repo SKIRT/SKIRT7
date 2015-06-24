@@ -19,6 +19,7 @@
 #include "Log.hpp"
 #include "NR.hpp"
 #include "IdenticalAssigner.hpp"
+#include "Image.hpp"
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
 #include "PeerToPeerCommunicator.hpp"
@@ -416,11 +417,9 @@ namespace
     private:
         void write(const Array& rhov, QString label, QString prefix)
         {
-            QString filename = _paths->output(prefix + plane + ".fits");
-            FITSInOut::write(filename, rhov, Np, Np, 1,
-                           _units->olength(xd?xres:yres), _units->olength(zd?zres:yres),
-                           _units->umassvolumedensity(), _units->ulength());
-            _log->info("Written " + label + " density to file " + filename);
+            QString filename = prefix + plane;
+            Image image(_ds, Np, Np, 1, xd?xres:yres, zd?zres:yres, "massvolumedensity");
+            image.saveto(_ds, rhov, filename, label + " density");
         }
     };
 }
@@ -554,13 +553,16 @@ namespace
         // write the results to a FITS file with an appropriate name
         void write()
         {
-            QString filename = _paths->output("ds_tau.fits");
-            FITSInOut::write(filename, tauv, Npx, Npy, 1,  360./Npx, 180./Npy, "deg", "deg");
-            WavelengthGrid* lambdagrid = _ds->find<WavelengthGrid>();
+            // Cache pointers to the units system and wavelength grid
             Units* units = _ds->find<Units>();
-            _log->info("Written optical depth map at λ = " +
-                       QString::number(units->owavelength(lambdagrid->lambda(_ell))) + " " +
-                       units->uwavelength() + " to file " + filename);
+            WavelengthGrid* lambdagrid = _ds->find<WavelengthGrid>();
+
+            QString filename = "ds_tau";
+            Image image(_ds, Npx, Npy, 1, 360./Npx, 180./Npy, "deg", "deg");
+            QString description = "optical depth map at λ = "
+                                  + QString::number(units->owavelength(lambdagrid->lambda(_ell)))
+                                  + " " + units->uwavelength();
+            image.saveto(_ds, tauv, filename, description);
         }
 
     private:
