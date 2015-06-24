@@ -64,7 +64,7 @@ void ReferenceImages::setupSelfBefore()
 
 QString ReferenceImages::path(int rimi) const
 {
-    return _rimages[rimi]->path();
+    return _rimages[rimi]->filename();
 }
 
 //////////////////////////////////////////////////////////////////////

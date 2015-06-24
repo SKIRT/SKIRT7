@@ -141,7 +141,7 @@ double OligoFitScheme::objective(AdjustableSkirtSimulation::ReplacementDict repl
             Simulations.append(CompTotal);
         }
 
-        int framesize = (rima->xdim())*(rima->ydim());
+        int framesize = (rima->xsize())*(rima->ysize());
         int simsize = Simulations[0].size();
         if (framesize != simsize)
             throw FATALERROR("Simulations and Reference Images have different dimensions");

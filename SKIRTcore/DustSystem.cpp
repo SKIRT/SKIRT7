@@ -118,7 +118,7 @@ void DustSystem::setupSelfAfter()
     // Create an assigner that can be used for the write functions
     RootAssigner* writeassigner = new RootAssigner(this);
 
-    // obtain the densities in all dust cells, if the calculation has been performed by parallel processes
+    // Obtain the densities in all dust cells, if the calculation has been performed by parallel processes
     if (_assigner->parallel()) assemble();
 
     // Perform a convergence check on the grid.

@@ -3,20 +3,19 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
-#ifndef CONVOLUTION_HPP
-#define CONVOLUTION_HPP
+#ifndef GAUSSIANKERNEL_HPP
+#define GAUSSIANKERNEL_HPP
 
-#include "Array.hpp"
-#include "SimulationItem.hpp"
+#include "ConvolutionKernel.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
-/** The Convolution class contains all information to convolve a given frame*/
-class Convolution : public SimulationItem
+/** The GaussianKernel class represents a convolution kernel that is described by a 2D (symmetric)
+    Gaussian function. */
+class GaussianKernel : public ConvolutionKernel
 {
     Q_OBJECT
-
-    Q_CLASSINFO("Title", "Convolution setup")
+    Q_CLASSINFO("Title", "a Gaussian convolution kernel")
 
     Q_CLASSINFO("Property", "fwhm")
     Q_CLASSINFO("Title", "the full width at half max in pixels")
@@ -34,9 +33,10 @@ class Convolution : public SimulationItem
 
 public:
     /** The default constructor. */
-    Q_INVOKABLE Convolution();
+    Q_INVOKABLE GaussianKernel();
 
 protected:
+    /** This function creates the image frame that describes the Gaussian kernel. */
     void setupSelfBefore();
 
     //======== Setters & Getters for Discoverable Attributes =======
@@ -54,12 +54,6 @@ public:
     /** Returns the convolution frame dimension. */
     Q_INVOKABLE int dimension() const;
 
-    //======================== Other Functions =======================
-public:
-    /** This function convolves the specified frame, with dimensions \em xdim x \em ydim, using the Convolution properties.
-        The kernel frame is created in such a way so no intensity is lost.*/
-    void convolve(Array *frame, int xdim, int ydim) const;
-
     //======================== Data Members ========================
 
 private:
@@ -69,4 +63,4 @@ private:
 
 ////////////////////////////////////////////////////////////////////
 
-#endif // CONVOLUTION_HPP
+#endif // GAUSSIANKERNEL_HPP

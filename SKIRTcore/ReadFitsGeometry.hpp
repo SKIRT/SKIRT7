@@ -6,7 +6,7 @@
 #ifndef READFITSGEOMETRY_HPP
 #define READFITSGEOMETRY_HPP
 
-#include "Array.hpp"
+#include "Image.hpp"
 #include "GenGeometry.hpp"
 
 ////////////////////////////////////////////////////////////////////
@@ -201,6 +201,10 @@ private:
     //======================== Data Members ========================
 
 private:
+    // the input image and the cumulative distribution
+    Image _image;
+    Array _Xv;
+
     // discoverable attributes
     QString _filename;
     double _deltay;
@@ -217,7 +221,6 @@ private:
     double _cospa, _sinpa, _cosi, _sini;
     double _deltax;
     double _C1x, _C1y, _C2x, _C2y, _C3x, _C3y, _C4x, _C4y;
-    Array _Lv, _Xv;
 };
 
 ////////////////////////////////////////////////////////////////////

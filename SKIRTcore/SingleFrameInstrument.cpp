@@ -5,7 +5,7 @@
 
 #include "FatalError.hpp"
 #include "FilePaths.hpp"
-#include "FITSInOut.hpp"
+#include "Image.hpp"
 #include "Log.hpp"
 #include "PeerToPeerCommunicator.hpp"
 #include "PhotonPackage.hpp"
@@ -184,18 +184,17 @@ void SingleFrameInstrument::calibrateAndWriteDataCubes(QList< Array*> farrays, Q
         }
     }
 
-    // write a FITS file for each array
-
-    QString filename = find<FilePaths>()->output(_instrumentname);
+    // Write a FITS file for each array
     for (int q = 0; q < farrays.size(); q++)
     {
         if (farrays[q]->size())
         {
-            QString fitsfilename = filename + "_" + fnames[q] + ".fits";
-            find<Log>()->info("Writing " + fnames[q] + " flux to FITS file " + fitsfilename + "...");
-            FITSInOut::write(fitsfilename, *(farrays[q]), _Nxp, _Nyp, Nlambda,
-                           units->olength(_xpres), units->olength(_ypres),
-                           units->usurfacebrightness(), units->ulength());
+            QString filename = _instrumentname + "_" + fnames[q];
+            QString description = fnames[q] + " flux";
+
+            // Create an image and save it
+            Image image(this, _Nxp, _Nyp, Nlambda, _xpres, _ypres);
+            image.saveto(this, *(farrays[q]), filename, description);
         }
     }
 }

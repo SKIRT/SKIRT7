@@ -295,7 +295,8 @@ HEADERS += \
     SpectralLuminosityStellarCompNormalization.hpp \
     RootAssigner.hpp \
     RandomAssigner.hpp \
-    TextOutFile.hpp
+    TextOutFile.hpp \
+    Image.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -549,4 +550,5 @@ SOURCES += \
     SpectralLuminosityStellarCompNormalization.cpp \
     RootAssigner.cpp \
     RandomAssigner.cpp \
-    TextOutFile.cpp
+    TextOutFile.cpp \
+    Image.cpp
