@@ -296,7 +296,9 @@ HEADERS += \
     RootAssigner.hpp \
     RandomAssigner.hpp \
     TextOutFile.hpp \
-    Image.hpp
+    Image.hpp \
+    SphericalAdaptiveMesh.hpp \
+    SphericalAdaptiveMeshDustDistribution.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -551,4 +553,6 @@ SOURCES += \
     RootAssigner.cpp \
     RandomAssigner.cpp \
     TextOutFile.cpp \
-    Image.cpp
+    Image.cpp \
+    SphericalAdaptiveMesh.cpp \
+    SphericalAdaptiveMeshDustDistribution.cpp

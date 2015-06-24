@@ -139,6 +139,7 @@
 #include "SpectralLuminosityStellarCompNormalization.hpp"
 #include "SpheBackgroundGeometry.hpp"
 #include "SpheGeometry.hpp"
+#include "SphericalAdaptiveMeshDustDistribution.hpp"
 #include "SphericalCavityGeometryDecorator.hpp"
 #include "SpheroidalGeometryDecorator.hpp"
 #include "SpiralStructureGeometryDecorator.hpp"
@@ -315,6 +316,7 @@ void RegisterSimulationItems::registerAll()
     add<CompDustDistribution>();
     add<SPHDustDistribution>();
     add<AdaptiveMeshDustDistribution>();
+    add<SphericalAdaptiveMeshDustDistribution>();
     add<VoronoiDustDistribution>();
 
     // mesh file representations
