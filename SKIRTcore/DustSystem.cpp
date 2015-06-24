@@ -558,7 +558,7 @@ namespace
             WavelengthGrid* lambdagrid = _ds->find<WavelengthGrid>();
 
             QString filename = "ds_tau";
-            Image image(_ds, Npx, Npy, 1, 360./Npx, 180./Npy, "deg", "deg");
+            Image image(_ds, Npx, Npy, 1, 2*M_PI/Npx, M_PI/Npy, "dimensionless", "posangle");
             QString description = "optical depth map at λ = "
                                   + QString::number(units->owavelength(lambdagrid->lambda(_ell)))
                                   + " " + units->uwavelength();

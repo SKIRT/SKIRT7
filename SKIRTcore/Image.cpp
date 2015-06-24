@@ -43,8 +43,8 @@ Image::Image(const SimulationItem* item, Array data, int xsize, int ysize, int n
     _units = item->find<Units>();
 
     // Set physical image properties
-    _incx = _units->olength(xres);
-    _incy = _units->olength(yres);
+    _incx = _units->out(xyqty, xres);
+    _incy = _units->out(xyqty, yres);
     _dataunits = _units->unit(quantity);
     _xyunits = _units->unit(xyqty);
 }
@@ -58,8 +58,8 @@ Image::Image(const SimulationItem* item, int xsize, int ysize, int nframes, doub
     _units = item->find<Units>();
 
     // Set physical image properties
-    _incx = _units->olength(xres);
-    _incy = _units->olength(yres);
+    _incx = _units->out(xyqty, xres);
+    _incy = _units->out(xyqty, yres);
     _dataunits = _units->unit(quantity);
     _xyunits = _units->unit(xyqty);
 }

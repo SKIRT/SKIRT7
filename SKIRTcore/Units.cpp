@@ -202,6 +202,9 @@ Units::Units()
 {
     // initialize static dictionary only if needed (to avoid function call and locking)
     if (!_initialized) initialize();
+
+    // set the unit for dimensionless quantities
+    _unitForQty["dimensionless"] = "";
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -334,10 +337,10 @@ QString Units::unit(QString qty) const
     QString result;
     if (qty == "surfacebrightness") result = usurfacebrightness();
     else if (qty == "fluxdensity") result = ufluxdensity();
-    else result = _unitForQty.value(qty);
+    else result = _unitForQty.value(qty, QString("?"));
 
     // Verify and return the resulting unit string
-    if (result.isEmpty()) throw FATALERROR("Unknow quantity " + qty);
+    if (result == "?") throw FATALERROR("Unknow quantity " + qty);
     return result;
 }
 
