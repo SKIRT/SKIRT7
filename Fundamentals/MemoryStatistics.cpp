@@ -253,26 +253,37 @@ size_t MemoryStatistics::currentMemoryUsage()
 
 ////////////////////////////////////////////////////////////////////
 
-QString MemoryStatistics::reportPeak()
+QString MemoryStatistics::reportAvailable(bool showinfo)
+{
+    double GB = 1<<30;
+    double avail = availableMemory() / GB;
+
+    if (showinfo) return QString("Available memory: %1 GB").arg(avail, 1,'g',3);
+    else return QString("%1 GB").arg(avail, 1,'g',3);
+}
+
+////////////////////////////////////////////////////////////////////
+
+QString MemoryStatistics::reportPeak(bool showinfo)
 {
     double GB = 1<<30;
     double avail = availableMemory() / GB;
     double peak = peakMemoryUsage() / GB;
 
-    return QString("Available memory: %1 GB -- Peak memory usage: %2 GB (%3%)")
-               .arg(avail, 1,'g',3) .arg(peak, 1,'g',3) .arg(100*peak/avail, 1,'f',1);
+    if (showinfo) return QString("Peak memory usage: %1 GB (%2%)").arg(peak, 1, 'g', 3).arg(100*peak/avail, 1, 'f', 1);
+    else return QString("%1 GB").arg(peak, 1, 'g', 3);
 }
 
 ////////////////////////////////////////////////////////////////////
 
-QString MemoryStatistics::reportCurrent()
+QString MemoryStatistics::reportCurrent(bool showinfo)
 {
     double GB = 1<<30;
     double avail = availableMemory() / GB;
     double current = currentMemoryUsage() / GB;
 
-    return QString("Available memory: %1 GB -- Current memory usage: %2 GB (%3%)")
-               .arg(avail, 1,'g',3) .arg(current, 1,'g',3) .arg(100*current/avail, 1,'f',1);
+    if (showinfo) return QString("Current memory usage: %1 GB (%2%)").arg(current, 1,'g',3).arg(100*current/avail, 1,'f',1);
+    else return QString("%1 GB").arg(current, 1, 'g', 3);
 }
 
 ////////////////////////////////////////////////////////////////////

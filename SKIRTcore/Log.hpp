@@ -71,6 +71,12 @@ public:
     /** Returns whether the Log is set in verbose mode or not. */
     bool verbose() const;
 
+    /** Sets or unsets the memory logging mode for this Log instance. */
+    void setMemoryLogging(bool value);
+
+    /** Returns whether memory usage is logged or not. */
+    bool memoryLogging() const;
+
     //======================== Other Functions =======================
 
 public:
@@ -111,6 +117,7 @@ private:
     Level _lowestLevel;
     Log* _link;
     bool _verbose;
+    bool _logmemory;
     QString _procNameShort;
     QString _procNameLong;
 };

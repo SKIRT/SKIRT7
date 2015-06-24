@@ -29,13 +29,17 @@ namespace MemoryStatistics
         bytes, or zero if the value cannot be determined on this OS. */
     size_t currentMemoryUsage();
 
+    /** Returns a string that reports the amount of available memory in a form ready for human
+        consumption. */
+    QString reportAvailable(bool showinfo = false);
+
     /** Returns a string that reports the peak (maximum so far) memory usage in a form ready for
         human consumption. */
-    QString reportPeak();
+    QString reportPeak(bool showinfo = false);
 
     /** Returns a string that reports the current memory usage in a form ready for human
         consumption. */
-    QString reportCurrent();
+    QString reportCurrent(bool showinfo = false);
 }
 
 ////////////////////////////////////////////////////////////////////
