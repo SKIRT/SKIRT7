@@ -36,7 +36,8 @@ Image::Image(const SimulationItem* item, QString filename)
 
 ////////////////////////////////////////////////////////////////////
 
-Image::Image(const SimulationItem* item, Array data, int xsize, int ysize, int nframes, double xres, double yres, QString quantity, QString xyqty)
+Image::Image(const SimulationItem* item, const Array& data, int xsize, int ysize, int nframes,
+             double xres, double yres, QString quantity, QString xyqty)
     : _data(data), _units(0), _xsize(xsize), _ysize(ysize), _nframes(nframes), _incx(0), _incy(0)
 {
     // Store a pointer to the units system
@@ -51,7 +52,8 @@ Image::Image(const SimulationItem* item, Array data, int xsize, int ysize, int n
 
 ////////////////////////////////////////////////////////////////////
 
-Image::Image(const SimulationItem* item, int xsize, int ysize, int nframes, double xres, double yres, QString quantity, QString xyqty)
+Image::Image(const SimulationItem* item, int xsize, int ysize, int nframes,
+             double xres, double yres, QString quantity, QString xyqty)
     : _units(0), _xsize(xsize), _ysize(ysize), _nframes(nframes), _incx(0), _incy(0)
 {
     // Store a pointer to the units system

@@ -31,12 +31,14 @@ public:
 
     /** This constructor creates an image based on an Array of double values and the header information
         for the image. */
-    Image(const SimulationItem* item, Array data, int xsize, int ysize, int nframes, double xres, double yres, QString quantity, QString xyqty = "length");
+    Image(const SimulationItem* item, const Array& data, int xsize, int ysize, int nframes,
+          double xres, double yres, QString quantity, QString xyqty = "length");
 
     /** This constructor creates an image with only a header. */
-    Image(const SimulationItem* item, int xsize, int ysize, int nframes, double xres, double yres, QString quantity, QString xyqty = "length");
+    Image(const SimulationItem* item, int xsize, int ysize, int nframes,
+          double xres, double yres, QString quantity, QString xyqty = "length");
 
-    //====================== Inititialization ======================
+    //====================== Initialization ======================
 
 public:
     /** This function implements the procedure where a FITS file is imported. It is used by the
