@@ -5,11 +5,10 @@
 
 #include <cmath>
 #include "ReadFitsGeometry.hpp"
-#include "FITSInOut.hpp"
 #include "FatalError.hpp"
-#include "FilePaths.hpp"
 #include "Log.hpp"
 #include "NR.hpp"
+#include "Image.hpp"
 #include "Random.hpp"
 
 using namespace std;
@@ -27,13 +26,7 @@ void ReadFitsGeometry::setupSelfBefore()
 {
     GenGeometry::setupSelfBefore();
 
-    // Read the input file
-    find<Log>()->info("Reading FITS file");
-    int Nx = 0, Ny = 0, Nz = 0;
-    QString filepath = find<FilePaths>()->input(_filename);
-    FITSInOut::read(filepath, _Lv, Nx, Ny, Nz);
-
-    // Verify property values
+    // Verify user-defined properties
     if (_deltay <= 0) throw FATALERROR("Pixel scale should be positive");
     if (_inclination < 0 || _inclination > M_PI/2.0) throw FATALERROR("Inclination should be between 0 and 90 degrees");
     if (_Nx <= 0) throw FATALERROR("Number of x pixels should be positive");
@@ -41,15 +34,20 @@ void ReadFitsGeometry::setupSelfBefore()
     if (_xc <= 0) throw FATALERROR("Central x position should be positive");
     if (_yc <= 0) throw FATALERROR("Central y position should be positive");
     if (_hz <= 0) throw FATALERROR("Axial scale height hz should be positive");
-    if (_Nx != Nx) throw FATALERROR("Number of x pixels does not correspond with the number of x pixels of the image");
-    if (_Ny != Ny) throw FATALERROR("Number of y pixels does not correspond with the number of y pixels of the image");
-    if (Nz != 1) throw FATALERROR("FITS image contains multiple frames");
+
+    // Read the input file
+    _image.import(this, _filename);
+
+    // Verify the image properties
+    if (_Nx != _image.xsize()) throw FATALERROR("Number of x pixels does not correspond with the number of x pixels of the image");
+    if (_Ny != _image.ysize()) throw FATALERROR("Number of y pixels does not correspond with the number of y pixels of the image");
+    if (_image.numframes() != 1) throw FATALERROR("FITS image contains multiple frames");
 
     // Normalize the luminosities
-    _Lv /= _Lv.sum();
+    _image /= _image.sum();
 
     // Construct a vector with the normalized cumulative luminosities
-    NR::cdf(_Xv, _Lv);
+    NR::cdf(_Xv, _image.data());
 
     // Calculate the boundaries of the image in physical coordinates
     _xmax = ((_Nx-_xc)*_deltay);
@@ -224,9 +222,9 @@ const
     int i = static_cast<int>(floor(x-_xmin)/_deltay);
     int j = static_cast<int>(floor(y-_ymin)/_deltay);
     if (i<0 || i>=_Nx || j<0 || j>=_Ny) return 0.0;
-    int k = i + _Nx*j;
 
-    return _Lv[k] * exp(-fabs(z)/_hz) /(2*_hz)/(_deltax*_deltay);
+    // Return the density
+    return _image(i,j) * exp(-fabs(z)/_hz) /(2*_hz)/(_deltax*_deltay);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -254,6 +252,7 @@ const
     double X2 = _random->uniform();
     double z = (X2<=0.5) ? _hz*log(2.0*X2) : -_hz*log(2.0*(1.0-X2));
 
+    // Return the position
     return Position(x,y,z);
 }
 
@@ -277,6 +276,8 @@ const
     {
         sum += density(Position(xmin + k*(xmax-xmin)/NSAMPLES, 0, 0));
     }
+
+    // Return the x-axis surface density
     return (sum/NSAMPLES)*(xmax-xmin);
 }
 
@@ -298,6 +299,8 @@ const
     {
         sum += density(Position(0, ymin + k*(ymax-ymin)/NSAMPLES, 0));
     }
+
+    // Return the y-axis surface density
     return (sum/NSAMPLES)*(ymax-ymin);
 }
 
@@ -310,9 +313,9 @@ const
     // Get the index of the luminosity vector for the center of the galaxy (-_xpmin,-_ypmin)
     int i = static_cast<int>(floor((-_xmin)/_deltay));
     int j = static_cast<int>(floor((-_ymin)/_deltay));
-    int k = i + _Nx*j;
 
-    return _Lv[k] / (_deltay*_deltay);
+    // Return the z-axis surface density
+    return _image(i,j) / (_deltay*_deltay);
 }
 
 ////////////////////////////////////////////////////////////////////

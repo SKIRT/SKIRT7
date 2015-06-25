@@ -6,10 +6,10 @@
 #include "FatalError.hpp"
 #include "FilePaths.hpp"
 #include "FITSInOut.hpp"
+#include "Image.hpp"
 #include "InstrumentFrame.hpp"
 #include "Log.hpp"
 #include "LockFree.hpp"
-#include "PeerToPeerCommunicator.hpp"
 #include "PhotonPackage.hpp"
 #include "MultiFrameInstrument.hpp"
 #include "StellarSystem.hpp"
@@ -189,9 +189,6 @@ void InstrumentFrame::calibrateAndWriteData(int ell)
 
 void InstrumentFrame::calibrateAndWriteDataFrames(int ell, QList<Array*> farrays, QStringList fnames)
 {
-    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
-    if (!comm->isRoot()) return;
-
     Units* units = find<Units>();
     WavelengthGrid* lambdagrid = find<WavelengthGrid>();
 
@@ -214,22 +211,21 @@ void InstrumentFrame::calibrateAndWriteDataFrames(int ell, QList<Array*> farrays
     // --> multiply by unit conversion factor
     double unitfactor = units->osurfacebrightness(lambdagrid->lambda(ell), 1.);
 
-    // perform the conversion, in place
+    // Perform the conversion, in place
     foreach (Array* farr, farrays)
     {
         (*farr) *= (unitfactor / (dlambda * area * fourpid2));
     }
 
-    // write a FITS file for each array
+    // Write a FITS file for each array
     for (int q = 0; q < farrays.size(); q++)
     {
-        QString filename = find<FilePaths>()->output(_instrument->instrumentName()
-                                                     + "_" + fnames[q] + "_" + QString::number(ell) + ".fits");
-        find<Log>()->info("Writing " + fnames[q] + " flux " + QString::number(ell)
-                                                     + " to FITS file " + filename + "...");
-        FITSInOut::write(filename, *(farrays[q]), _Nxp, _Nyp, 1,
-                       units->olength(_xpres), units->olength(_ypres),
-                       units->usurfacebrightness(), units->ulength());
+        QString filename = _instrument->instrumentName() + "_" + fnames[q] + "_" + QString::number(ell);
+        QString description = fnames[q] + " flux " + QString::number(ell);
+
+        // Create the image and save it
+        Image image(this, _Nxp, _Nyp, 1, _xpres, _ypres, "surfacebrightness");
+        image.saveto(this, *(farrays[q]), filename, description);
     }
 }
 

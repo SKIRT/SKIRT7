@@ -6,26 +6,26 @@
 #ifndef REFERENCEIMAGE_HPP
 #define REFERENCEIMAGE_HPP
 
-#include "Array.hpp"
+#include "Image.hpp"
 #include "SimulationItem.hpp"
 
-class Convolution;
+class ConvolutionKernel;
 
 ////////////////////////////////////////////////////////////////////
 
 /** The ReferenceImage class contains all information for a certain reference image.
     It contains the path to the file and information about the PSF.
     The \f$\chi^2\f$ value for a certain input frame can be calculated. */
-class ReferenceImage : public SimulationItem
+class ReferenceImage : public SimulationItem, public Image
 {
     Q_OBJECT
     Q_CLASSINFO("Title", "a reference image")
 
-    Q_CLASSINFO("Property", "path")
-    Q_CLASSINFO("Title", "the path to this reference image")
+    Q_CLASSINFO("Property", "filename")
+    Q_CLASSINFO("Title", "the name (or relative path) of this reference image")
 
-    Q_CLASSINFO("Property", "convolution")
-    Q_CLASSINFO("Title", "the convolution properties")
+    Q_CLASSINFO("Property", "kernel")
+    Q_CLASSINFO("Title", "the convolution kernel")
 
     Q_CLASSINFO("Property","minLuminosities")
     Q_CLASSINFO("Title","the minimum luminosity boundaries")
@@ -39,23 +39,23 @@ public:
     /** The default constructor. */
     Q_INVOKABLE ReferenceImage();
 
-    /** This function reads in the actual reference image at the given path. */
+    /** This function reads in the actual reference image with the given name. */
     void setupSelfBefore();
 
     //======== Setters & Getters for Discoverable Attributes =======
 
 public:
-    /** Sets the path to the reference image. */
-    Q_INVOKABLE void setPath(QString value);
+    /** Sets the name of the reference image. */
+    Q_INVOKABLE void setFilename(QString value);
 
-    /** Returns the path to the reference image. */
-    Q_INVOKABLE QString path() const;
+    /** Returns the name of the reference image. */
+    Q_INVOKABLE QString filename() const;
 
-    /** Sets the convolution properties for the reference image. */
-    Q_INVOKABLE void setConvolution(Convolution* value);
+    /** Sets the convolution kernel of the reference image. */
+    Q_INVOKABLE void setKernel(ConvolutionKernel* value);
 
-    /** Returns the convolution properties for the reference image. */
-    Q_INVOKABLE Convolution* convolution() const;
+    /** Returns the convolution kernel of the reference image. */
+    Q_INVOKABLE ConvolutionKernel* kernel() const;
 
     /** Sets the list of minimum luminosities, one for each wavelength in the simulation's wavelength grid.
         The list should have the same length as the simulation's wavelength grid. */
@@ -86,27 +86,14 @@ public:
         and the corresponding residual frame. */
     void returnFrame(QList<Array> *frames) const;
 
-    /** Returns the number of pixels in the reference frame in the x direction. */
-    int xdim() const;
-
-    /** Returns the number of pixels in the reference frame in the y direction. */
-    int ydim() const;
-
-    /** Returns the array containing the reference image. */
-    Array refImage() const;
-
     //======================== Data Members ========================
 
 private:
     // data members
-    QString _path;
-    Convolution* _convolution;
+    QString _filename;
+    ConvolutionKernel* _kernel;
     QList<double> _minLum;
     QList<double> _maxLum;
-    Array _refim;
-    int _xdim;
-    int _ydim;
-    int _zdim;
 };
 
 ////////////////////////////////////////////////////////////////////

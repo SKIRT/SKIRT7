@@ -8,7 +8,6 @@
 #include "FatalError.hpp"
 #include "FITSInOut.hpp"
 #include "fitsio.h"
-#include "ProcessManager.hpp"
 
 using namespace std;
 
@@ -33,20 +32,17 @@ namespace
 void FITSInOut::write(QString filepath, const Array& data, int nx, int ny, int nz,
                     double incx, double incy, QString dataUnits, QString xyUnits)
 {
-    // Only the root process can write to file
-    if (!ProcessManager::isRoot()) return;
-
-    // verify the data size
+    // Verify the data size
     size_t nelements = data.size();
     if (nelements != static_cast<size_t>(nx)*static_cast<size_t>(ny)*static_cast<size_t>(nz))
         throw FATALERROR("Inconsistent data size when creating FITS file " + filepath);
     long naxes[3] = {nx, ny, nz};
 
-    // acquire a global lock since the cfitsio library is not guaranteed to be reentrant
+    // Acquire a global lock since the cfitsio library is not guaranteed to be reentrant
     // (only when it is built with ./configure --enable-reentrant; make)
     QMutexLocker lock(&_mutex);
 
-    // time stamp and temporaries
+    // Generate time stamp and temporaries
     std::string stamp = QDateTime::currentDateTime().toUTC().toString("yyyy-MM-ddThh:mm:ss").toStdString();
     std::string localpath = filepath.toLocal8Bit().constData();
     std::string dataunits = dataUnits.toStdString();
@@ -56,20 +52,20 @@ void FITSInOut::write(QString filepath, const Array& data, int nx, int ny, int n
     double xref = (nx+1.0)/2.0;
     double yref = (ny+1.0)/2.0;
 
-    // remove any existing file with the same name
+    // Remove any existing file with the same name
     remove(localpath.c_str());
 
-    // create the fits file
+    // Create the fits file
     int status = 0;
     fitsfile *fptr;
     ffdkinit(&fptr, localpath.c_str(), &status);
     if (status) report_error(filepath, "creating", status);
 
-    // create the primary image (32-bit floating point pixels)
+    // Create the primary image (32-bit floating point pixels)
     ffcrim(fptr, FLOAT_IMG, (nz==1 ? 2 : 3), naxes, &status);
     if (status) report_error(filepath, "creating", status);
 
-    // add the relevant keywords
+    // Add the relevant keywords
     ffpky(fptr, TDOUBLE, "BSCALE", &one, "", &status);
     ffpky(fptr, TDOUBLE, "BZERO", &zero, "", &status);
     ffpkys(fptr, "DATE"  , const_cast<char*>(stamp.c_str()), "Date and time of creation (UTC)", &status);
@@ -85,11 +81,11 @@ void FITSInOut::write(QString filepath, const Array& data, int nx, int ny, int n
     ffpkys(fptr, "CTYPE2", const_cast<char*>(xyunits.c_str()), "Physical units of the Y-axis increment", &status);
     if (status) report_error(filepath, "writing", status);
 
-    // write the array of pixels to the image
+    // Write the array of pixels to the image
     ffpprd(fptr, 0, 1, nelements, const_cast<double*>(&data[0]), &status);
     if (status) report_error(filepath, "writing", status);
 
-    // close the file
+    // Close the file
     ffclos(fptr, &status);
     if (status) report_error(filepath, "writing", status);
 }
@@ -98,16 +94,16 @@ void FITSInOut::write(QString filepath, const Array& data, int nx, int ny, int n
 
 void FITSInOut::read(QString filepath, Array& data, int& nx, int& ny, int& nz)
 {
-    // acquire a global lock since the cfitsio library is not guaranteed to be reentrant
+    // Acquire a global lock since the cfitsio library is not guaranteed to be reentrant
     QMutexLocker lock(&_mutex);
 
-    // open the fits file
+    // Open the FITS file
     int status = 0;
     fitsfile *fptr;
     ffdkopn(&fptr, filepath.toLocal8Bit().constData(), READONLY, &status);
     if (status) report_error(filepath, "opening", status);
 
-    // get the dimensions of the primary image
+    // Get the dimensions of the primary image
     int naxis;
     long naxes[3];
     ffgidm(fptr, &naxis, &status);
@@ -117,16 +113,16 @@ void FITSInOut::read(QString filepath, Array& data, int& nx, int& ny, int& nz)
     ny = naxis > 1 ? naxes[1] : 1;
     nz = naxis > 2 ? naxes[2] : 1;
 
-    // resize the data container
+    // Resize the data container
     size_t nelements = static_cast<size_t>(nx)*static_cast<size_t>(ny)*static_cast<size_t>(nz);
     data.resize(nelements);
 
-    // read the array of pixels from the image
+    // Read the array of pixels from the image
     int dummy;
     ffgpvd(fptr, 0, 1, nelements, 0, &data[0], &dummy, &status);
     if (status) report_error(filepath, "reading", status);
 
-    // close the file
+    // Close the file
     ffclos(fptr, &status);
     if (status) report_error(filepath, "reading", status);
 }

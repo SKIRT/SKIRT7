@@ -8,9 +8,9 @@
 #include "FatalError.hpp"
 #include "FilePaths.hpp"
 #include "FITSInOut.hpp"
+#include "Image.hpp"
 #include "LockFree.hpp"
 #include "Log.hpp"
-#include "PeerToPeerCommunicator.hpp"
 #include "PhotonPackage.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
@@ -371,11 +371,7 @@ void PerspectiveInstrument::write()
     // Sum the flux arrays element-wise across the different processes
     sumResults(farrays);
 
-    // From here on, only the root process should continue
-    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
-    if (comm->rank()) return;
-
-    // multiply each sample by lambda/dlamdba and by the constant factor 1/(4 pi s^2)
+    // Multiply each sample by lambda/dlamdba and by the constant factor 1/(4 pi s^2)
     // to obtain the surface brightness and convert to output units (such as W/m2/arcsec2)
 
     double front = 1. / (4.*M_PI*_s*_s);
@@ -393,13 +389,11 @@ void PerspectiveInstrument::write()
         }
     }
 
-    // write a FITS file containing the data cube
+    // Write a FITS file containing the data cube
 
-    QString filename = find<FilePaths>()->output(_instrumentname + "_total.fits");
-    find<Log>()->info("Writing total flux to FITS file " + filename + "...");
-    FITSInOut::write(filename, _ftotv, _Nx, _Ny, Nlambda,
-                   units->olength(_s), units->olength(_s),
-                   units->usurfacebrightness(), units->ulength());
+    QString filename = _instrumentname + "_total";
+    Image image(this, _Nx, _Ny, Nlambda, _s, _s, "surfacebrightness");
+    image.saveto(this, _ftotv, filename, "total flux");
 }
 
 ////////////////////////////////////////////////////////////////////

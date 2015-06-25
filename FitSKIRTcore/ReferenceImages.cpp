@@ -14,7 +14,6 @@
 #include "MultiFrameInstrument.hpp"
 #include "Optimization.hpp"
 #include "ReferenceImage.hpp"
-#include "Units.hpp"
 #include <QList>
 
 using namespace std;
@@ -64,7 +63,7 @@ void ReferenceImages::setupSelfBefore()
 
 QString ReferenceImages::path(int rimi) const
 {
-    return _rimages[rimi]->path();
+    return _rimages[rimi]->filename();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -104,7 +103,6 @@ void ReferenceImages::writeOutBest(int index, int consec) const
 
     QString prefix = "tmp/tmp_"+QString::number(index);
     FilePaths* path = find<FilePaths>();
-    Units* units = find<Units>();
     AdjustableSkirtSimulation* adjSS = find<AdjustableSkirtSimulation>();
     QString instrname = adjSS->instrname();
     find<Log>()->info("Found new best fit");
@@ -113,23 +111,27 @@ void ReferenceImages::writeOutBest(int index, int consec) const
     {
         int nx, ny, nz;
         QList<Array> Total;
-        QString filepath;
-        for(int i =0; i<adjSS->ncomponents();i++){
+        QString filename;
+        for(int i =0; i<adjSS->ncomponents();i++)
+        {
             Array CompTotal;
-            filepath = path->output(prefix+"_"+instrname+"_stellar_"+
-                                    QString::number(i)+"_"+QString::number(counter)+".fits");
+            QString filepath = path->output(prefix+"_"+instrname+"_stellar_"+
+                               QString::number(i)+"_"+QString::number(counter)+".fits");
             FITSInOut::read(filepath,CompTotal,nx,ny,nz);
             Total.append(CompTotal);
         }
         rima->returnFrame(&Total);
-        filepath = path->output("Best_"+QString::number(consec)+"_"+QString::number(counter)+".fits");
-        FITSInOut::write(filepath, Total[0], nx, ny, nz,
-                       units->olength(adjSS->xpress(counter)), units->olength(adjSS->ypress(counter)),
-                       units->usurfacebrightness(), units->ulength());
-        filepath =  path->output("Residual_"+QString::number(consec)+"_"+QString::number(counter)+".fits");
-        FITSInOut::write(filepath, Total[1], nx, ny, nz,
-                       units->olength(adjSS->xpress(counter)), units->olength(adjSS->ypress(counter)),
-                       units->usurfacebrightness(), units->ulength());
+
+        // Create an image for the best fitting frame and save it
+        filename = "Best_" + QString::number(consec)+"_"+QString::number(counter);
+        Image image(this, nx, ny, nz, adjSS->xpress(counter), adjSS->ypress(counter), "surfacebrightness");
+        image.saveto(this, Total[0], filename, "best fitting frame");
+
+        // Reuse the image header for the residuals frame and save it
+        filename =  "Residual_" + QString::number(consec)+"_"+QString::number(counter);
+        image.saveto(this, Total[1], filename, "residuals frame");
+
+        // Increment the counter to keep track of which reference image we're dealing with
         counter++;
     }
 }

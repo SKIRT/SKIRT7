@@ -6,10 +6,8 @@
 #include "ReferenceImage.hpp"
 
 #include "AdjustableSkirtSimulation.hpp"
-#include "Convolution.hpp"
+#include "ConvolutionKernel.hpp"
 #include "FatalError.hpp"
-#include "FilePaths.hpp"
-#include "FITSInOut.hpp"
 #include "GALumfit.hpp"
 #include "GoldenSection.hpp"
 #include "Log.hpp"
@@ -21,7 +19,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////
 
 ReferenceImage::ReferenceImage()
-    :_convolution(0)
+    :_kernel(0)
 {
 }
 
@@ -31,41 +29,38 @@ void ReferenceImage::setupSelfBefore()
 {
     SimulationItem::setupSelfBefore();
 
-    // Reads the reference image and stores it.
-    QString filepath = find<FilePaths>()->input(_path);
-    find<Log>()->info("Read reference image at " + filepath);
-    FITSInOut::read(filepath,_refim,_xdim,_ydim,_zdim);
-    find<Log>()->info("Frame dimensions: " + QString::number(_xdim) + " x " + QString::number(_ydim));
+    // Import the reference image
+    import(this, _filename);
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void ReferenceImage::setPath(QString value)
+void ReferenceImage::setFilename(QString value)
 {
-    _path = value;
+    _filename = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-QString ReferenceImage::path() const
+QString ReferenceImage::filename() const
 {
-    return _path;
+    return _filename;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void ReferenceImage::setConvolution(Convolution* value)
+void ReferenceImage::setKernel(ConvolutionKernel* value)
 {
-    if (_convolution) delete _convolution;
-    _convolution = value;
-    if (_convolution) _convolution->setParent(this);
+    if (_kernel) delete _kernel;
+    _kernel = value;
+    if (_kernel) _kernel->setParent(this);
 }
 
 ////////////////////////////////////////////////////////////////////
 
-Convolution* ReferenceImage::convolution() const
+ConvolutionKernel* ReferenceImage::kernel() const
 {
-    return _convolution;
+    return _kernel;
 }
 //////////////////////////////////////////////////////////////////////
 
@@ -99,11 +94,11 @@ QList<double> ReferenceImage::maxLuminosities() const
 
 double ReferenceImage::chi2(QList<Array> *frames, QList<double> *monoluminosities) const
 {
-    //HERE IS WHERE I'LL HAVE TO DECIDE WHICH OPTIMIZATION ALGORITHM FOR LUM FIT
+    // Here is where I'll have to decide which optimization algorithm for lum fit
     double chi_value = 0;
-    for(int i =0;i<frames->size();i++)
+    for(int i =0; i<frames->size(); i++)
     {
-       _convolution->convolve(&((*frames)[i]), _xdim, _ydim);
+       _kernel->convolve((*frames)[i], xsize(), ysize());
     }
 
     if (find<AdjustableSkirtSimulation>()->ncomponents() == 1)
@@ -114,7 +109,7 @@ double ReferenceImage::chi2(QList<Array> *frames, QList<double> *monoluminositie
         GoldenSection gold;
         gold.setMinlum(_minLum[0]);
         gold.setMaxlum(_maxLum[0]);
-        gold.optimize(&_refim,&((*frames)[0]),lum,chi_value);
+        gold.optimize(&_data, &((*frames)[0]), lum, chi_value);
         monoluminosities->append(lum);
     }
 
@@ -129,7 +124,7 @@ double ReferenceImage::chi2(QList<Array> *frames, QList<double> *monoluminositie
         lumsim.setMaxDlum(_maxLum[0]);
         lumsim.setMinblum(_minLum[1]);
         lumsim.setMaxblum(_maxLum[1]);
-        lumsim.optimize(&_refim,&((*frames)[0]),&((*frames)[1]),dlum,blum,chi_value);
+        lumsim.optimize(&_data, &((*frames)[0]), &((*frames)[1]), dlum, blum, chi_value);
         monoluminosities->append(dlum);
         monoluminosities->append(blum);
     }
@@ -138,7 +133,7 @@ double ReferenceImage::chi2(QList<Array> *frames, QList<double> *monoluminositie
         GALumfit GAlumi;
         GAlumi.setMinLuminosities(_minLum);
         GAlumi.setMaxLuminosities(_maxLum);
-        GAlumi.optimize(&_refim,frames,monoluminosities,chi_value);
+        GAlumi.optimize(&_data, frames, monoluminosities, chi_value);
     }
     return chi_value;
 }
@@ -149,9 +144,9 @@ void ReferenceImage::returnFrame(QList<Array> *frames) const
 {
     double chi_value;
     bool oneDfit=false;
-    for(int i =0;i<frames->size();i++)
+    for(int i =0; i<frames->size(); i++)
     {
-       _convolution->convolve(&((*frames)[i]), _xdim, _ydim);
+       _kernel->convolve((*frames)[i], xsize(), ysize());
     }
     if (frames->size() == 1)
     {
@@ -159,9 +154,9 @@ void ReferenceImage::returnFrame(QList<Array> *frames) const
         double lum;
         gold.setMinlum(_minLum[0]);
         gold.setMaxlum(_maxLum[0]);
-        gold.optimize(&_refim,&((*frames)[0]),lum,chi_value);
+        gold.optimize(&_data, &((*frames)[0]), lum, chi_value);
         (*frames)[0] = lum*((*frames)[0] + 0);
-        (*frames).append(abs(_refim-(*frames)[0])/abs(_refim));
+        (*frames).append(abs(_data-(*frames)[0])/abs(_data));
         oneDfit=true;
     }
 
@@ -173,9 +168,9 @@ void ReferenceImage::returnFrame(QList<Array> *frames) const
         lumsim.setMaxDlum(_maxLum[0]);
         lumsim.setMinblum(_minLum[1]);
         lumsim.setMaxblum(_maxLum[1]);
-        lumsim.optimize(&_refim,&((*frames)[0]),&((*frames)[1]),dlum,blum,chi_value);
+        lumsim.optimize(&_data, &((*frames)[0]), &((*frames)[1]), dlum, blum, chi_value);
         (*frames)[0] = dlum*(*frames)[0] + blum*(*frames)[1];
-        (*frames)[1]= abs(_refim-(*frames)[0])/abs(_refim);
+        (*frames)[1]= abs(_data-(*frames)[0])/abs(_data);
     }
     if (find<AdjustableSkirtSimulation>()->ncomponents() >= 3)
     {
@@ -184,34 +179,14 @@ void ReferenceImage::returnFrame(QList<Array> *frames) const
         GAlumi.setFixedSeed(find<OligoFitScheme>()->fixedSeed());
         GAlumi.setMinLuminosities(_minLum);
         GAlumi.setMaxLuminosities(_maxLum);
-        GAlumi.optimize(&_refim,frames,&(monoluminosities),chi_value);
+        GAlumi.optimize(&_data, frames, &(monoluminosities), chi_value);
         (*frames)[0] = monoluminosities[0]*(*frames)[0];
         for(int i =1;i<monoluminosities.size();i++)
         {
             (*frames)[0] = (*frames)[0] + monoluminosities[i]*(*frames)[i];
         }
-        (*frames)[1]= abs(_refim-(*frames)[0])/abs(_refim);
+        (*frames)[1]= abs(_data-(*frames)[0])/abs(_data);
     }
-}
-
-////////////////////////////////////////////////////////////////////
-int ReferenceImage::xdim() const
-{
-    return _xdim;
-}
-
-////////////////////////////////////////////////////////////////////
-
-int ReferenceImage::ydim() const
-{
-    return _ydim;
-}
-
-////////////////////////////////////////////////////////////////////
-
-Array ReferenceImage::refImage() const
-{
-    return _refim;
 }
 
 ////////////////////////////////////////////////////////////////////

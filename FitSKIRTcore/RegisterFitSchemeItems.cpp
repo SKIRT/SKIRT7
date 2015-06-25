@@ -9,8 +9,10 @@
 // add new items in alphabetical order
 
 #include "AdjustableSkirtSimulation.hpp"
-#include "Convolution.hpp"
+#include "ConvolutionKernel.hpp"
 #include "FitScheme.hpp"
+#include "FitsKernel.hpp"
+#include "GaussianKernel.hpp"
 #include "LumSimplex.hpp"
 #include "MasterSlaveCommunicator.hpp"
 #include "OligoFitScheme.hpp"
@@ -34,7 +36,9 @@ void RegisterFitSchemeItems::registerAll()
     add<OligoFitScheme>();
 
     add<AdjustableSkirtSimulation>();
-    add<Convolution>();
+    add<ConvolutionKernel>(false);
+    add<GaussianKernel>();
+    add<FitsKernel>();
     add<LumSimplex>();
     add<MasterSlaveCommunicator>();
     add<Optimization>();

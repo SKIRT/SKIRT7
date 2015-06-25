@@ -38,7 +38,6 @@ unix: PRE_TARGETDEPS += $$OUT_PWD/../Fundamentals/libfundamentals.a \
 
 HEADERS += \
     AdjustableSkirtSimulation.hpp \
-    Convolution.hpp \
     FitScheme.hpp \
     LumSimplex.hpp \
     OligoFitScheme.hpp \
@@ -49,11 +48,13 @@ HEADERS += \
     ReferenceImages.hpp \
     RegisterFitSchemeItems.hpp \
     GoldenSection.hpp \
-    GALumfit.hpp
+    GALumfit.hpp \
+    ConvolutionKernel.hpp \
+    GaussianKernel.hpp \
+    FitsKernel.hpp
 
 SOURCES += \
     AdjustableSkirtSimulation.cpp \
-    Convolution.cpp \
     FitScheme.cpp \
     LumSimplex.cpp \
     OligoFitScheme.cpp \
@@ -64,4 +65,7 @@ SOURCES += \
     ReferenceImages.cpp \
     RegisterFitSchemeItems.cpp \
     GoldenSection.cpp \
-    GALumfit.cpp
+    GALumfit.cpp \
+    ConvolutionKernel.cpp \
+    GaussianKernel.cpp \
+    FitsKernel.cpp

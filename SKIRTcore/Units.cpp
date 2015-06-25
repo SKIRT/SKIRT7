@@ -202,6 +202,9 @@ Units::Units()
 {
     // initialize static dictionary only if needed (to avoid function call and locking)
     if (!_initialized) initialize();
+
+    // set the unit for dimensionless quantities
+    _unitForQty["dimensionless"] = "";
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -329,8 +332,15 @@ bool Units::isQuantity(QString qty) const
 
 QString Units::unit(QString qty) const
 {
-    QString result = _unitForQty.value(qty);
-    if (result.isEmpty()) throw FATALERROR("Unknow quantity " + qty);
+    // Check whether the given quantity is either surface brightness or flux density; in those cases
+    // appropriate functions are called to return the corresponding units for the current flux output style
+    QString result;
+    if (qty == "surfacebrightness") result = usurfacebrightness();
+    else if (qty == "fluxdensity") result = ufluxdensity();
+    else result = _unitForQty.value(qty, QString("?"));
+
+    // Verify and return the resulting unit string
+    if (result == "?") throw FATALERROR("Unknow quantity " + qty);
     return result;
 }
 
@@ -348,7 +358,6 @@ double Units::out(QString qty, double value) const
     return out(qty, _unitForQty.value(qty), value);
 }
 
-////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////
 
 double Units::c()
@@ -440,7 +449,6 @@ double Units::sigmaThomson()
     return _sigmaThomson;
 }
 
-////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////
 
 QString Units::ulength() const
@@ -966,7 +974,6 @@ double Units::opressure(double p) const
     return p/_cpressure;
 }
 
-////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////
 
 QString Units::sfluxdensity() const

@@ -6,6 +6,7 @@
 #include "FatalError.hpp"
 #include "QDateTime"
 #include "Log.hpp"
+#include "MemoryStatistics.hpp"
 #include "ProcessCommunicator.hpp"
 #include "ProcessManager.hpp"
 
@@ -98,17 +99,37 @@ bool Log::verbose() const
 
 ////////////////////////////////////////////////////////////////////
 
+void Log::setMemoryLogging(bool value)
+{
+    _logmemory = value;
+    if (_link) _link->setMemoryLogging(value);
+}
+
+////////////////////////////////////////////////////////////////////
+
+bool Log::memoryLogging() const
+{
+    return _logmemory;
+}
+
+////////////////////////////////////////////////////////////////////
+
 void Log::info(QString message)
 {
+    // Pass the message to the linked log
     if (_link) _link->info(message);
 
+    // Obtain a string denoting the amount of used memory, if requested
+    QString memory = _logmemory ? "(" + MemoryStatistics::reportCurrent() + ") " : "";
+
+    // Output the message
     if (verbose())
     {
-        if (Info >= _lowestLevel) output(timestamp() + "   " + _procNameLong + message, Info);
+        if (Info >= _lowestLevel) output(timestamp() + "   " + _procNameLong + memory +  message, Info);
     }
     else if (ProcessManager::isRoot())
     {
-        if (Info >= _lowestLevel) output(timestamp() + "   " + message, Info);
+        if (Info >= _lowestLevel) output(timestamp() + "   " + memory + message, Info);
     }
 }
 
@@ -116,23 +137,34 @@ void Log::info(QString message)
 
 void Log::warning(QString message)
 {
+    // Pass the message to the linked log
     if (_link) _link->warning(message);
-    if (Warning >= _lowestLevel) output(timestamp() + " ! " + _procNameLong + message, Warning);
+
+    // Obtain a string denoting the amount of used memory, if requested
+    QString memory = _logmemory ? "(" + MemoryStatistics::reportCurrent() + ") " : "";
+
+    // Output the message
+    if (Warning >= _lowestLevel) output(timestamp() + " ! " + _procNameLong + memory + message, Warning);
 }
 
 ////////////////////////////////////////////////////////////////////
 
 void Log::success(QString message)
 {
+    // Pass the message to the linked log
     if (_link) _link->success(message);
 
+    // Obtain a string denoting the amount of used memory, if requested
+    QString memory = _logmemory ? "(" + MemoryStatistics::reportCurrent() + ") " : "";
+
+    // Output the message
     if (verbose())
     {
-        if (Success >= _lowestLevel) output(timestamp() + " - " + _procNameLong + message, Success);
+        if (Success >= _lowestLevel) output(timestamp() + " - " + _procNameLong + memory + message, Success);
     }
     else if (ProcessManager::isRoot())
     {
-        if (Success >= _lowestLevel) output(timestamp() + " - " + message, Success);
+        if (Success >= _lowestLevel) output(timestamp() + " - " + memory + message, Success);
     }
 }
 
@@ -140,7 +172,10 @@ void Log::success(QString message)
 
 void Log::error(QString message)
 {
+    // Pass the message to the linked log
     if (_link) _link->error(message);
+
+    // Output the message
     if (Error >= _lowestLevel) output(timestamp() + " * " + _procNameLong + "*** Error: " + message, Error);
 }
 
