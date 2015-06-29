@@ -4,8 +4,8 @@
 ///////////////////////////////////////////////////////////////// */
 
 #include <cmath>
+#include <mutex>
 #include <QHash>
-#include <QMutex>
 #include "FatalError.hpp"
 #include "Units.hpp"
 
@@ -36,7 +36,7 @@ namespace
 namespace
 {
     // mutex to guard initialization of the static dictionary
-    QMutex _mutex;
+    std::mutex _mutex;
 
     // flag becomes true if static dictionary has been initialized
     bool _initialized = false;
@@ -50,7 +50,7 @@ namespace
     {
         // initialization must be locked to protect against race conditions when used in multiple threads
         // (which can happen if the application fails to explicitly call this function).
-        QMutexLocker lock(&_mutex);
+        std::unique_lock<std::mutex> lock(_mutex);
 
         if (!_initialized)
         {

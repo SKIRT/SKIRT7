@@ -7,11 +7,8 @@
 #define PARALLEL_HPP
 
 #include <atomic>
-#include <QHash>
-#include <QList>
-#include <QMutex>
-#include <QThread>
-#include <QWaitCondition>
+#include <mutex>
+#include <thread>
 #include "ParallelTarget.hpp"
 #include "ProcessAssigner.hpp"
 class FatalError;
@@ -29,15 +26,17 @@ class ParallelFactory;
         void Test::body(size_t index) { ... }
         ...
         ParallelFactory factory;
-        factory.parallel()->call(this, &Test::body, 1000);
+
+        assigner->assign(1000);
+        factory.parallel()->call(this, &Test::body, assigner);
         \endcode
 
     A Parallel instance can be created only through the ParallelFactory class. The default
     construction shown above determines a reasonable number of threads for the computer on which
     the code is running, and the call() function distributes the work over these threads.
 
-    The parallelized body should protect (write-) access to shared data through the use of a QMutex
-    or QReadWriteLock. Shared data includes the data members of the target object (in the context
+    The parallelized body should protect (write-) access to shared data through the use of an
+    std::mutex object. Shared data includes the data members of the target object (in the context
     of which the target function executes) and essentially everything other than local variables.
     Also note that the parallelized body includes all functions directly or indirectly called by
     the target function.
@@ -133,47 +132,31 @@ private:
         void (T::*_targetMember)(size_t index);
     };
 
-    /** The declaration for this class is nested in the Parallel class declaration. An instance of
-        this class represents a parallel execution thread managed by the Parallel class. */
-    class Thread : public QThread
-    {
-    public:
-        /** The constructor remembers the Parallel object managing this thread. */
-        Thread(Parallel* manager) : QThread(), _manager(manager) { }
-
-    private:
-        /** This function is the execution body of the thread. It simply calls a function of the
-            same name in the managing Parallel object to provide easy access to all of the
-            manager's member variables. */
-        void run() { _manager->run(); }
-
-        // the managing Parallel object
-        Parallel* _manager;
-    };
-
     //======================== Data Members ========================
 
 private:
     // data members keeping track of the threads
-    const QThread* _parentThread;  // the thread that invoked our constructor
-    QList<Thread*> _threads;    // the parallel threads (other than the parent thread)
+    std::thread::id _parentThread;      // the ID of the thread that invoked our constructor
+    std::vector<std::thread> _threads;  // the parallel threads (other than the parent thread)
 
     // data members shared by all threads; changed only when no parallel threads are active
     ParallelTarget* _target;    // the target to be called
     size_t _limit;              // the limit of the for loop being implemented
     bool _terminate;            // becomes true when the parallel threads must exit
 
+    // synchronization
+    std::mutex _mutex;                          // the mutex to synchronize with the parallel threads
+    std::condition_variable _condition_extra;   // the wait condition used by the parallel threads
+    std::condition_variable _condition_main;    // the wait condition used by the main thread
+
     // data members shared by all threads; changes are protected by a mutex
-    QMutex _mutex;              // the mutex to synchronize with the parallel threads
-    QWaitCondition _waitExtra;  // the wait condition used by the parallel threads
-    QWaitCondition _waitMain;   // the wait condition used by the main thread
-    int _active;                // the number of parallel threads that are still doing some work
-    FatalError* _exception;     // a pointer to a heap-allocated copy of the exception thrown by a work thread
-                                // or zero if no exception was thrown
-    ProcessAssigner* _assigner; // a pointer to the process assigner, if present
+    int _active;                 // the number of parallel threads that are still doing some work
+    FatalError* _exception;      // a pointer to a heap-allocated copy of the exception thrown by a work thread
+                                 // or zero if no exception was thrown
+    ProcessAssigner* _assigner;  // a pointer to the process assigner, if present
 
     // data member shared by all threads; changes are atomic (no need for protection)
-    std::atomic<size_t> _next;  // the current index of the for loop being implemented
+    std::atomic<size_t> _next;   // the current index of the for loop being implemented
 };
 
 ////////////////////////////////////////////////////////////////////

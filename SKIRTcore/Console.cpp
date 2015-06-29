@@ -3,7 +3,7 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
-#include <QMutex>
+#include <mutex>
 #include <QProcessEnvironment>
 #include <QTextStream>
 #include "Console.hpp"
@@ -14,7 +14,7 @@
 // so we can use static data made private by an unnamed namespace
 namespace
 {
-    QMutex _mutex;   // mutex to guard the input/output operations
+    std::mutex _mutex;         // mutex to guard the input/output operations
     bool _initialized = false; // flag becomes true if static data have been initialized
 
     QTextStream _out(stdout);  // Unicode aware output
@@ -31,11 +31,11 @@ namespace
 
 Console::Console()
 {
-    QMutexLocker lock(&_mutex);
+    std::unique_lock<std::mutex> lock(_mutex);
 
     if (!_initialized)
     {
-        // set console encoding on systems where the default QTextCodec::codecForLocale() is incorrect,
+        // Set console encoding on systems where the default QTextCodec::codecForLocale() is incorrect,
         // such as when running on MacOS X in the X11 terminal launched by Qt creator
         // !! this assumes that the environment variable "CONSOLE_ENCODING" has been set
         // !! to the appropriate encoding name on those systems where it is needed
@@ -55,7 +55,7 @@ Console::Console()
 
 void Console::output(QString message, Log::Level level)
 {
-    QMutexLocker lock(&_mutex);
+    std::unique_lock<std::mutex> lock(_mutex);
     _out << (_colored ? _colorBegin[level] : "") << message << (_colored ? _colorEnd[level] : "") << endl;
 }
 
@@ -63,7 +63,7 @@ void Console::output(QString message, Log::Level level)
 
 QString Console::promptForInput(QString message)
 {
-    QMutexLocker lock(&_mutex);
+    std::unique_lock<std::mutex> lock(_mutex);
     _out << (_colored ? _colorBegin[Error+1] : "")
          << timestamp() << " ? " << message
          << (_colored ? _colorEnd[Error+1] : "") << ": " << flush;

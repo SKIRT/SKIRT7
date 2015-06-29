@@ -4,8 +4,8 @@
 ///////////////////////////////////////////////////////////////// */
 
 #include <cmath>
+#include <mutex>
 #include <vector>
-#include <QMutex>
 #include "Box.hpp"
 #include "SPHGasParticle.hpp"
 
@@ -15,7 +15,7 @@
 namespace
 {
     // mutex to guard initialization of the static vector with the sampled values
-    QMutex _mutex;
+    std::mutex _mutex;
 
     // flag becomes true if the static vector has been initialized
     bool _initialized = false;
@@ -33,7 +33,7 @@ namespace
     void initialize_myerf()
     {
         // initialization must be locked to protect against race conditions when used in multiple threads
-        QMutexLocker lock(&_mutex);
+        std::unique_lock<std::mutex> lock(_mutex);
 
         if (!_initialized)
         {

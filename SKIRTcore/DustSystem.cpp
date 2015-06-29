@@ -922,7 +922,7 @@ void DustSystem::fillOpticalDepth(PhotonPackage* pp)
     // if such statistics are requested, keep track of the number of cells crossed
     if (_writeCellsCrossed)
     {
-        QMutexLocker lock(&_crossedMutex);
+        std::unique_lock<std::mutex> lock(_crossedMutex);
         unsigned int index = pp->size();
         if (index >= _crossed.size()) _crossed.resize(index+1);
         _crossed[index] += 1;
@@ -947,7 +947,7 @@ double DustSystem::opticaldepth(PhotonPackage* pp, double distance)
     // if such statistics are requested, keep track of the number of cells crossed
     if (_writeCellsCrossed)
     {
-        QMutexLocker lock(&_crossedMutex);
+        std::unique_lock<std::mutex> lock(_crossedMutex);
         unsigned int index = pp->size();
         if (index >= _crossed.size()) _crossed.resize(index+1);
         _crossed[index] += 1;

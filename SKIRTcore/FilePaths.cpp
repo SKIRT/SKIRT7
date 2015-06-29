@@ -3,10 +3,10 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
+#include <mutex>
 #include <QCoreApplication>
 #include <QDirIterator>
 #include <QFileInfo>
-#include <QMutex>
 #include "FatalError.hpp"
 #include "FilePaths.hpp"
 
@@ -15,7 +15,7 @@
 namespace
 {
     // mutex to guard initialization of the static application and resource paths
-    QMutex _mutex;
+    std::mutex _mutex;
 
     // flag becomes true if the static paths have been initialized
     bool _initialized = false;
@@ -36,7 +36,7 @@ namespace
     void setStaticPaths()
     {
         // initialization must be locked to protect against race conditions when used in multiple threads
-        QMutexLocker lock(&_mutex);
+        std::unique_lock<std::mutex> lock(_mutex);
 
         if (!_initialized)
         {
