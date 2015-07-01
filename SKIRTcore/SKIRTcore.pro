@@ -298,7 +298,8 @@ HEADERS += \
     TextOutFile.hpp \
     Image.hpp \
     SphericalAdaptiveMesh.hpp \
-    SphericalAdaptiveMeshDustDistribution.hpp
+    SphericalAdaptiveMeshDustDistribution.hpp \
+    TextInFile.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -555,4 +556,5 @@ SOURCES += \
     TextOutFile.cpp \
     Image.cpp \
     SphericalAdaptiveMesh.cpp \
-    SphericalAdaptiveMeshDustDistribution.cpp
+    SphericalAdaptiveMeshDustDistribution.cpp \
+    TextInFile.cpp
