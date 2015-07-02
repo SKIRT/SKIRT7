@@ -56,23 +56,25 @@ void FullInstrument::setupSelfBefore()
 
     // resize the detector arrays only when meaningful
     int Nlambda = find<WavelengthGrid>()->Nlambda();
-    _fdirv.resize(Nlambda*_Nframep);
-    _Fdirv.resize(Nlambda);
+    _ftrav.resize(Nlambda*_Nframep);
+    _Ftrav.resize(Nlambda);
     if (_dustsystem)
     {
-        _ftrav.resize(Nlambda*_Nframep);
-        _Ftrav.resize(Nlambda);
-        _fscav.resize(Nlambda*_Nframep);
-        _Fscav.resize(Nlambda);
-        if (_Nscatt > 0)
-        {
-            _fscavv.resize(_Nscatt+1, Nlambda*_Nframep);
-            _Fscavv.resize(_Nscatt+1, Nlambda);
-        }
+        _fstrdirv.resize(Nlambda*_Nframep);
+        _Fstrdirv.resize(Nlambda);
+        _fstrscav.resize(Nlambda*_Nframep);
+        _Fstrscav.resize(Nlambda);
         if (_dustemission)
         {
-            _fdusv.resize(Nlambda*_Nframep);
-            _Fdusv.resize(Nlambda);
+            _fdusdirv.resize(Nlambda*_Nframep);
+            _Fdusdirv.resize(Nlambda);
+            _fdusscav.resize(Nlambda*_Nframep);
+            _Fdusscav.resize(Nlambda);
+        }
+        if (_Nscatt > 0)
+        {
+            _fstrscavv.resize(_Nscatt, Nlambda*_Nframep);
+            _Fstrscavv.resize(_Nscatt, Nlambda);
         }
         if (_polarization)
         {
@@ -104,6 +106,7 @@ int FullInstrument::scatteringLevels() const
 
 void FullInstrument::detect(PhotonPackage* pp)
 {
+    int nscatt = pp->nScatt();
     int l = pixelondetector(pp);
     int ell = pp->ell();
     double L = pp->luminosity();
@@ -114,21 +117,21 @@ void FullInstrument::detect(PhotonPackage* pp)
     // SEDs
     if (pp->isStellar())
     {
-        int nscatt = pp->nScatt();
         if (nscatt==0)
         {
-            if (_dustsystem) LockFree::add(_Ftrav[ell], L);
-            LockFree::add(_Fdirv[ell], Lextf);
+            LockFree::add(_Ftrav[ell], L);
+            if (_dustsystem) LockFree::add(_Fstrdirv[ell], Lextf);
         }
         else
         {
-            LockFree::add(_Fscav[ell], Lextf);
-            if (nscatt<=_Nscatt) LockFree::add(_Fscavv[nscatt][ell], Lextf);
+            LockFree::add(_Fstrscav[ell], Lextf);
+            if (nscatt<=_Nscatt) LockFree::add(_Fstrscavv[nscatt-1][ell], Lextf);
         }
     }
     else
     {
-        LockFree::add(_Fdusv[ell], Lextf);
+        if (nscatt==0) LockFree::add(_Fdusdirv[ell], Lextf);
+        else LockFree::add(_Fdusscav[ell], Lextf);
     }
     if (_polarization)
     {
@@ -143,21 +146,21 @@ void FullInstrument::detect(PhotonPackage* pp)
         size_t m = l + ell*_Nframep;
         if (pp->isStellar())
         {
-            int nscatt = pp->nScatt();
             if (nscatt==0)
             {
-                if (_dustsystem) LockFree::add(_ftrav[m], L);
-                LockFree::add(_fdirv[m], Lextf);
+                LockFree::add(_ftrav[m], L);
+                if (_dustsystem) LockFree::add(_fstrdirv[m], Lextf);
             }
             else
             {
-                LockFree::add(_fscav[m], Lextf);
-                if (nscatt<=_Nscatt) LockFree::add(_fscavv[nscatt][m], Lextf);
+                LockFree::add(_fstrscav[m], Lextf);
+                if (nscatt<=_Nscatt) LockFree::add(_fstrscavv[nscatt-1][m], Lextf);
             }
         }
         else
         {
-            LockFree::add(_fdusv[m], Lextf);
+            if (nscatt==0) LockFree::add(_fdusdirv[m], Lextf);
+            else LockFree::add(_fdusscav[m], Lextf);
         }
         if (_polarization)
         {
@@ -172,34 +175,38 @@ void FullInstrument::detect(PhotonPackage* pp)
 
 void FullInstrument::write()
 {
-    // compute the total flux in temporary arrays
+    // compute the total flux and the total dust flux in temporary arrays
     Array ftotv;
     Array Ftotv;
+    Array ftotdusv;
+    Array Ftotdusv;
     if (_dustemission)
     {
-        ftotv = _fdirv + _fscav + _fdusv;
-        Ftotv = _Fdirv + _Fscav + _Fdusv;
+        ftotv = _fstrdirv + _fstrscav + _fdusdirv + _fdusscav;
+        Ftotv = _Fstrdirv + _Fstrscav + _Fdusdirv + _Fdusscav;
+        ftotdusv = _fdusdirv + _fdusscav;
+        Ftotdusv = _Fdusdirv + _Fdusscav;
     }
     else if (_dustsystem)
     {
-        ftotv = _fdirv + _fscav;
-        Ftotv = _Fdirv + _Fscav;
+        ftotv = _fstrdirv + _fstrscav;
+        Ftotv = _Fstrdirv + _Fstrscav;
     }
     else
     {
-        // don't output direct or transparent frame's separately because they are identical to the total frame
-        ftotv = _fdirv;
-        _fdirv.resize(0);
+        // don't output transparent frame separately because it is identical to the total frame
+        ftotv = _ftrav;
+        _ftrav.resize(0);
         // do output integrated fluxes to avoid confusing zeros
-        Ftotv = _Fdirv;
-        _Ftrav = _Fdirv;
+        Ftotv = _Ftrav;
+        _Fstrdirv = _Ftrav;
     }
 
     // lists of f-array and F-array pointers, and the corresponding file and column names
-    QList< Array* > farrays, Farrays;
+    QList<Array*> farrays, Farrays;
     QStringList fnames, Fnames;
-    farrays << &ftotv << &_fdirv << &_fscav << &_fdusv << &_ftrav;
-    Farrays << &Ftotv << &_Fdirv << &_Fscav << &_Fdusv << &_Ftrav;
+    farrays << &ftotv << &_fstrdirv << &_fstrscav << &ftotdusv << &_ftrav;
+    Farrays << &Ftotv << &_Fstrdirv << &_Fstrscav << &Ftotdusv << &_Ftrav;
     fnames << "total" << "direct" << "scattered" << "dust" << "transparent";
     Fnames << "total flux" << "direct stellar flux" << "scattered stellar flux" << "dust flux" << "transparent flux";
     if (_polarization)
@@ -209,12 +216,12 @@ void FullInstrument::write()
         fnames << "stokesQ" << "stokesU" << "stokesV";
         Fnames << "total Stokes Q" << "total Stokes U" << "total Stokes V";
     }
-    for (int nscatt=1; nscatt<=_Nscatt; nscatt++)
+    for (int nscatt=0; nscatt<_Nscatt; nscatt++)
     {
-        farrays << &(_fscavv[nscatt]);
-        Farrays << &(_Fscavv[nscatt]);
-        fnames << ("scatteringlevel" + QString::number(nscatt));
-        Fnames << (QString::number(nscatt) + "-times scattered flux");
+        farrays << &(_fstrscavv[nscatt]);
+        Farrays << &(_Fstrscavv[nscatt]);
+        fnames << ("scatteringlevel" + QString::number(nscatt+1));
+        Fnames << (QString::number(nscatt+1) + "-times scattered flux");
     }
 
     // Sum the flux arrays element-wise across the different processes
