@@ -205,10 +205,11 @@ void FullInstrument::write()
     // lists of f-array and F-array pointers, and the corresponding file and column names
     QList<Array*> farrays, Farrays;
     QStringList fnames, Fnames;
-    farrays << &ftotv << &_fstrdirv << &_fstrscav << &ftotdusv << &_ftrav;
-    Farrays << &Ftotv << &_Fstrdirv << &_Fstrscav << &Ftotdusv << &_Ftrav;
-    fnames << "total" << "direct" << "scattered" << "dust" << "transparent";
-    Fnames << "total flux" << "direct stellar flux" << "scattered stellar flux" << "dust flux" << "transparent flux";
+    farrays << &ftotv << &_fstrdirv << &_fstrscav << &ftotdusv << &_fdusscav << &_ftrav;
+    Farrays << &Ftotv << &_Fstrdirv << &_Fstrscav << &Ftotdusv << &_Fdusscav << &_Ftrav;
+    fnames << "total" << "direct" << "scattered" << "dust" << "dustscattered" << "transparent";
+    Fnames << "total flux" << "direct stellar flux" << "scattered stellar flux"
+           << "total dust emission flux" << "dust emission scattered flux" << "transparent flux";
     if (_polarization)
     {
         farrays << &_ftotQv << &_ftotUv << &_ftotVv;
