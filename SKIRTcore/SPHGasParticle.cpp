@@ -4,8 +4,8 @@
 ///////////////////////////////////////////////////////////////// */
 
 #include <cmath>
+#include <mutex>
 #include <vector>
-#include <QMutex>
 #include "Box.hpp"
 #include "SPHGasParticle.hpp"
 
@@ -14,11 +14,8 @@
 // fast sampled version of the error function with better than 1 promille accuracy
 namespace
 {
-    // mutex to guard initialization of the static vector with the sampled values
-    QMutex _mutex;
-
     // flag becomes true if the static vector has been initialized
-    bool _initialized = false;
+    std::once_flag _initialized;
 
     // the number of values in the static vector (after it has been initialized)
     const int _N = 5000;
@@ -32,16 +29,8 @@ namespace
     // initialize the static vector with the sampled values
     void initialize_myerf()
     {
-        // initialization must be locked to protect against race conditions when used in multiple threads
-        QMutexLocker lock(&_mutex);
-
-        if (!_initialized)
-        {
-            _erf.resize(_N+1);
-            for (int i=0; i<=_N; i++) _erf[i] = erf( (i*_Xmax)/_N );
-
-            _initialized = true;
-        }
+        _erf.resize(_N+1);
+        for (int i=0; i<=_N; i++) _erf[i] = erf( (i*_Xmax)/_N );
     }
 
     // returns the appropriate sampled value for erf(x)
@@ -104,8 +93,8 @@ double SPHGasParticle::metalMass() const
 
 double SPHGasParticle::metalMassInBox(const Box& box) const
 {
-    // ensure that the sampled version of the erf function is properly initialized
-    if (!_initialized) initialize_myerf();
+    // ensure that the sampled version of the erf function is properly initialized (and only once so)
+    std::call_once(_initialized, initialize_myerf);
     Vec r1 = _s * (box.rmin()-_rc);
     Vec r2 = _s * (box.rmax()-_rc);
     return _MZ8 * (myerf(r2.x())-myerf(r1.x())) * (myerf(r2.y())-myerf(r1.y())) * (myerf(r2.z())-myerf(r1.z()));

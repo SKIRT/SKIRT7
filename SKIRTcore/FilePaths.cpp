@@ -3,10 +3,10 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
+#include <mutex>
 #include <QCoreApplication>
 #include <QDirIterator>
 #include <QFileInfo>
-#include <QMutex>
 #include "FatalError.hpp"
 #include "FilePaths.hpp"
 
@@ -14,11 +14,8 @@
 
 namespace
 {
-    // mutex to guard initialization of the static application and resource paths
-    QMutex _mutex;
-
     // flag becomes true if the static paths have been initialized
-    bool _initialized = false;
+    std::once_flag _initialized;
 
     // the static application and resource paths
     QString _applicationPath;
@@ -35,34 +32,27 @@ namespace
     // sets the static application and resource paths, or throws an error if there is a problem
     void setStaticPaths()
     {
-        // initialization must be locked to protect against race conditions when used in multiple threads
-        QMutexLocker lock(&_mutex);
+        // get the location of the executable
+        QString appPath = QCoreApplication::applicationDirPath();
 
-        if (!_initialized)
+        // verify that its a directory and store the canonical path
+        QFileInfo test(appPath);
+        if (test.isDir()) _applicationPath = test.canonicalFilePath() + "/";
+        else throw FATALERROR("Could not locate SKIRT directory '" + appPath + "'");
+
+        // iterate over the relative paths
+        for (int i=0; i<_Ndatpaths; i++)
         {
-            // get the location of the executable
-            QString appPath = QCoreApplication::applicationDirPath();
-
-            // verify that its a directory and store the canonical path
-            QFileInfo test(appPath);
-            if (test.isDir()) _applicationPath = test.canonicalFilePath() + "/";
-            else throw FATALERROR("Could not locate SKIRT directory '" + appPath + "'");
-
-            // iterate over the relative paths
-            for (int i=0; i<_Ndatpaths; i++)
+            QFileInfo test(appPath + "/" + _datpaths[i]);
+            if (test.isDir())
             {
-                QFileInfo test(appPath + "/" + _datpaths[i]);
-                if (test.isDir())
-                {
-                    _resourcePath = test.canonicalFilePath() + "/";
-                    _initialized = true;
-                    return;
-                }
+                _resourcePath = test.canonicalFilePath() + "/";
+                return;
             }
-
-            // if we reach here, the "dat" folder wasn't found
-            throw FATALERROR("Could not locate 'dat' directory relative to '" + appPath + "'");
         }
+
+        // if we reach here, the "dat" folder wasn't found
+        throw FATALERROR("Could not locate 'dat' directory relative to '" + appPath + "'");
     }
 }
 
@@ -70,8 +60,8 @@ namespace
 
 FilePaths::FilePaths()
 {
-    // verify existence of the dat directory sooner rather than later
-    if (!_initialized) setStaticPaths();
+    // verify existence of the dat directory only once
+    std::call_once(_initialized, setStaticPaths);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -146,8 +136,8 @@ QString FilePaths::output(QString name) const
 
 QString FilePaths::application(QString name)
 {
-    // set the static paths if needed
-    if (!_initialized) setStaticPaths();
+    // verify existence of the dat directory only once
+    std::call_once(_initialized, setStaticPaths);
     return _applicationPath + name;
 }
 
@@ -155,8 +145,8 @@ QString FilePaths::application(QString name)
 
 QString FilePaths::resource(QString name)
 {
-    // set the static paths if needed
-    if (!_initialized) setStaticPaths();
+    // verify existence of the dat directory only once
+    std::call_once(_initialized, setStaticPaths);
     return _resourcePath + name;
 }
 

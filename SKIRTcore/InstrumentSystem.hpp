@@ -7,7 +7,6 @@
 #define INSTRUMENTSYSTEM_HPP
 
 #include <vector>
-#include <QMutex>
 #include <QPair>
 #include "SimulationItem.hpp"
 class Instrument;

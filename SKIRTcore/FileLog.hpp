@@ -6,8 +6,8 @@
 #ifndef FILELOG_HPP
 #define FILELOG_HPP
 
+#include <mutex>
 #include <QFile>
-#include <QMutex>
 #include <QTextStream>
 #include "Log.hpp"
 
@@ -50,7 +50,7 @@ protected:
     //======================== Data Members ========================
 
 private:
-    QMutex _mutex;   // mutex to guard the input/output operations
+    std::mutex _mutex;   // mutex to guard the input/output operations
     QFile _file;
     QTextStream _out;
 };

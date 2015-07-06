@@ -4,12 +4,10 @@
 ///////////////////////////////////////////////////////////////// */
 
 #include <cmath>
+#include <mutex>
 #include <QHash>
-#include <QMutex>
 #include "FatalError.hpp"
 #include "Units.hpp"
-
-using namespace std;
 
 ////////////////////////////////////////////////////////////////////
 
@@ -35,11 +33,8 @@ namespace
 
 namespace
 {
-    // mutex to guard initialization of the static dictionary
-    QMutex _mutex;
-
     // flag becomes true if static dictionary has been initialized
-    bool _initialized = false;
+    std::once_flag _initialized;
 
     // static dictionary holding the proportionality factor for each predefined unit
     // (converting from specified unit to SI unit)
@@ -48,150 +43,141 @@ namespace
     // initialize the predefined units in the static dictionary
     void initialize()
     {
-        // initialization must be locked to protect against race conditions when used in multiple threads
-        // (which can happen if the application fails to explicitly call this function).
-        QMutexLocker lock(&_mutex);
+        // *** add any extra quantity/unit combinations to the list below
 
-        if (!_initialized)
-        {
-            // *** add any extra quantity/unit combinations to the list below
+        // length
+        _factor["length m"] = 1.;
+        _factor["length cm"] = 1e-2;
+        _factor["length km"] = 1e3;
+        _factor["length AU"] = _AU;
+        _factor["length pc"] = _pc;
+        _factor["length kpc"] = 1e3 * _pc;
+        _factor["length Mpc"] = 1e6 * _pc;
 
-            // length
-            _factor["length m"] = 1.;
-            _factor["length cm"] = 1e-2;
-            _factor["length km"] = 1e3;
-            _factor["length AU"] = _AU;
-            _factor["length pc"] = _pc;
-            _factor["length kpc"] = 1e3 * _pc;
-            _factor["length Mpc"] = 1e6 * _pc;
+        // distance
+        _factor["distance m"] = 1.;
+        _factor["distance cm"] = 1e-2;
+        _factor["distance km"] = 1e3;
+        _factor["distance AU"] = _AU;
+        _factor["distance pc"] = _pc;
+        _factor["distance kpc"] = 1e3 * _pc;
+        _factor["distance Mpc"] = 1e6 * _pc;
 
-            // distance
-            _factor["distance m"] = 1.;
-            _factor["distance cm"] = 1e-2;
-            _factor["distance km"] = 1e3;
-            _factor["distance AU"] = _AU;
-            _factor["distance pc"] = _pc;
-            _factor["distance kpc"] = 1e3 * _pc;
-            _factor["distance Mpc"] = 1e6 * _pc;
+        // wavelength
+        _factor["wavelength m"] = 1.;
+        _factor["wavelength cm"] = 1e-2;
+        _factor["wavelength mm"] = 1e-3;
+        _factor["wavelength micron"] = 1e-6;
+        _factor["wavelength nm"] = 1e-9;
+        _factor["wavelength A"] = 1e-10;
 
-            // wavelength
-            _factor["wavelength m"] = 1.;
-            _factor["wavelength cm"] = 1e-2;
-            _factor["wavelength mm"] = 1e-3;
-            _factor["wavelength micron"] = 1e-6;
-            _factor["wavelength nm"] = 1e-9;
-            _factor["wavelength A"] = 1e-10;
+        // grainsize
+        _factor["grainsize m"] = 1.;
+        _factor["grainsize cm"] = 1e-2;
+        _factor["grainsize mm"] = 1e-3;
+        _factor["grainsize micron"] = 1e-6;
+        _factor["grainsize nm"] = 1e-9;
+        _factor["grainsize A"] = 1e-10;
 
-            // grainsize
-            _factor["grainsize m"] = 1.;
-            _factor["grainsize cm"] = 1e-2;
-            _factor["grainsize mm"] = 1e-3;
-            _factor["grainsize micron"] = 1e-6;
-            _factor["grainsize nm"] = 1e-9;
-            _factor["grainsize A"] = 1e-10;
+        // cross section
+        _factor["section m2"] = 1.;
 
-            // cross section
-            _factor["section m2"] = 1.;
+        // volume
+        _factor["volume m3"] = 1.;
+        _factor["volume AU3"] = pow(_AU,3);
+        _factor["volume pc3"] = pow(_pc,3);
 
-            // volume
-            _factor["volume m3"] = 1.;
-            _factor["volume AU3"] = pow(_AU,3);
-            _factor["volume pc3"] = pow(_pc,3);
+        // velocity
+        _factor["velocity m/s"] = 1.;
+        _factor["velocity km/s"] = 1e3;
 
-            // velocity
-            _factor["velocity m/s"] = 1.;
-            _factor["velocity km/s"] = 1e3;
+        // mass
+        _factor["mass kg"] = 1.;
+        _factor["mass g"] = 1e-3;
+        _factor["mass Msun"] = _Msun;
 
-            // mass
-            _factor["mass kg"] = 1.;
-            _factor["mass g"] = 1e-3;
-            _factor["mass Msun"] = _Msun;
+        // bulk mass
+        _factor["bulkmass kg"] = 1.;
 
-            // bulk mass
-            _factor["bulkmass kg"] = 1.;
+        // bulk mass density
+        _factor["bulkmassdensity kg/m3"] = 1.;
+        _factor["bulkmassdensity g/cm3"] = 1e3;
 
-            // bulk mass density
-            _factor["bulkmassdensity kg/m3"] = 1.;
-            _factor["bulkmassdensity g/cm3"] = 1e3;
+        // mass surface density
+        _factor["masssurfacedensity kg/m2"] = 1.;
+        _factor["masssurfacedensity Msun/AU2"] = _Msun/pow(_AU,2);
+        _factor["masssurfacedensity Msun/pc2"] = _Msun/pow(_pc,2);
 
-            // mass surface density
-            _factor["masssurfacedensity kg/m2"] = 1.;
-            _factor["masssurfacedensity Msun/AU2"] = _Msun/pow(_AU,2);
-            _factor["masssurfacedensity Msun/pc2"] = _Msun/pow(_pc,2);
+        // mass volume density
+        _factor["massvolumedensity kg/m3"] = 1.;
+        _factor["massvolumedensity g/cm3"] = 1e3;
+        _factor["massvolumedensity Msun/AU3"] = _Msun/pow(_AU,3);
+        _factor["massvolumedensity Msun/pc3"] = _Msun/pow(_pc,3);
 
-            // mass volume density
-            _factor["massvolumedensity kg/m3"] = 1.;
-            _factor["massvolumedensity g/cm3"] = 1e3;
-            _factor["massvolumedensity Msun/AU3"] = _Msun/pow(_AU,3);
-            _factor["massvolumedensity Msun/pc3"] = _Msun/pow(_pc,3);
+        // opacity
+        _factor["opacity m2/kg"] = 1.;
 
-            // opacity
-            _factor["opacity m2/kg"] = 1.;
+        // energy
+        _factor["energy J"] = 1.;
 
-            // energy
-            _factor["energy J"] = 1.;
+        // bolometric luminosity
+        _factor["bolluminosity W"] = 1.;
+        _factor["bolluminosity Lsun"] = _Lsun;
 
-            // bolometric luminosity
-            _factor["bolluminosity W"] = 1.;
-            _factor["bolluminosity Lsun"] = _Lsun;
+        // monochromatic luminosity
+        _factor["monluminosity W/m"] = 1.;
+        _factor["monluminosity W/micron"] = 1e6;
+        _factor["monluminosity Lsun/micron"] = _Lsun * 1e6;
 
-            // monochromatic luminosity
-            _factor["monluminosity W/m"] = 1.;
-            _factor["monluminosity W/micron"] = 1e6;
-            _factor["monluminosity Lsun/micron"] = _Lsun * 1e6;
+        // neutral flux density (lambda F_lambda = nu F_nu)
+        _factor["neutralfluxdensity W/m2"] = 1.;
 
-            // neutral flux density (lambda F_lambda = nu F_nu)
-            _factor["neutralfluxdensity W/m2"] = 1.;
+        // neutral surface brightness (lambda f_lambda = nu f_nu)
+        _factor["neutralsurfacebrightness W/m2/sr"] = 1.;
+        _factor["neutralsurfacebrightness W/m2/arcsec2"] = 1. / pow(M_PI/(180.*3600.),2);
 
-            // neutral surface brightness (lambda f_lambda = nu f_nu)
-            _factor["neutralsurfacebrightness W/m2/sr"] = 1.;
-            _factor["neutralsurfacebrightness W/m2/arcsec2"] = 1. / pow(M_PI/(180.*3600.),2);
+        // wavelength flux density (F_lambda)
+        _factor["wavelengthfluxdensity W/m3"] = 1.;
+        _factor["wavelengthfluxdensity W/m2/micron"] = 1e6;
 
-            // wavelength flux density (F_lambda)
-            _factor["wavelengthfluxdensity W/m3"] = 1.;
-            _factor["wavelengthfluxdensity W/m2/micron"] = 1e6;
+        // wavelength surface brightness (f_lambda)
+        _factor["wavelengthsurfacebrightness W/m3/sr"] = 1.;
+        _factor["wavelengthsurfacebrightness W/m2/micron/sr"] = 1e6;
+        _factor["wavelengthsurfacebrightness W/m2/micron/arcsec2"] = 1e6 / pow(M_PI/(180.*3600.),2);
 
-            // wavelength surface brightness (f_lambda)
-            _factor["wavelengthsurfacebrightness W/m3/sr"] = 1.;
-            _factor["wavelengthsurfacebrightness W/m2/micron/sr"] = 1e6;
-            _factor["wavelengthsurfacebrightness W/m2/micron/arcsec2"] = 1e6 / pow(M_PI/(180.*3600.),2);
+        // frequency flux density (F_nu)
+        _factor["frequencyfluxdensity W/m2/Hz"] = 1.;
+        _factor["frequencyfluxdensity Jy"] = 1e-26;
+        _factor["frequencyfluxdensity mJy"] = 1e-29;
+        _factor["frequencyfluxdensity MJy"] = 1e-20;
 
-            // frequency flux density (F_nu)
-            _factor["frequencyfluxdensity W/m2/Hz"] = 1.;
-            _factor["frequencyfluxdensity Jy"] = 1e-26;
-            _factor["frequencyfluxdensity mJy"] = 1e-29;
-            _factor["frequencyfluxdensity MJy"] = 1e-20;
+        // frequency surface brightness (f_nu)
+        _factor["frequencysurfacebrightness W/m2/Hz/sr"] = 1.;
+        _factor["frequencysurfacebrightness W/m2/Hz/arcsec2"] = 1. / pow(M_PI/(180.*3600.),2);
+        _factor["frequencysurfacebrightness Jy/sr"] = 1e-26;
+        _factor["frequencysurfacebrightness Jy/arcsec2"] = 1e-26 / pow(M_PI/(180.*3600.),2);
+        _factor["frequencysurfacebrightness MJy/sr"] = 1e-20;
+        _factor["frequencysurfacebrightness MJy/arcsec2"] = 1e-20 / pow(M_PI/(180.*3600.),2);
 
-            // frequency surface brightness (f_nu)
-            _factor["frequencysurfacebrightness W/m2/Hz/sr"] = 1.;
-            _factor["frequencysurfacebrightness W/m2/Hz/arcsec2"] = 1. / pow(M_PI/(180.*3600.),2);
-            _factor["frequencysurfacebrightness Jy/sr"] = 1e-26;
-            _factor["frequencysurfacebrightness Jy/arcsec2"] = 1e-26 / pow(M_PI/(180.*3600.),2);
-            _factor["frequencysurfacebrightness MJy/sr"] = 1e-20;
-            _factor["frequencysurfacebrightness MJy/arcsec2"] = 1e-20 / pow(M_PI/(180.*3600.),2);
+        // temperature
+        _factor["temperature K"] = 1.;
 
-            // temperature
-            _factor["temperature K"] = 1.;
+        // angular size (for objects in the sky)
+        _factor["angle rad"] = 1.;
+        _factor["angle deg"] = M_PI/180.;
+        _factor["angle arcsec"] = M_PI/(180.*3600.);
 
-            // angular size (for objects in the sky)
-            _factor["angle rad"] = 1.;
-            _factor["angle deg"] = M_PI/180.;
-            _factor["angle arcsec"] = M_PI/(180.*3600.);
+        // positioning angle (for instruments)
+        _factor["posangle rad"] = 1.;
+        _factor["posangle deg"] = M_PI/180.;
 
-            // positioning angle (for instruments)
-            _factor["posangle rad"] = 1.;
-            _factor["posangle deg"] = M_PI/180.;
+        // solid angle
+        _factor["solidangle sr"] = 1.;
+        _factor["solidangle arcsec2"] = pow(M_PI/(180.*3600.),2);
 
-            // solid angle
-            _factor["solidangle sr"] = 1.;
-            _factor["solidangle arcsec2"] = pow(M_PI/(180.*3600.),2);
-
-            // pressure
-            _factor["pressure Pa"] = 1.;
-            _factor["pressure K/m3"] = _k;
-
-            _initialized = true;
-        }
+        // pressure
+        _factor["pressure Pa"] = 1.;
+        _factor["pressure K/m3"] = _k;
     }
 }
 
@@ -200,8 +186,8 @@ namespace
 Units::Units()
     : _fluxOutputStyle(Neutral)
 {
-    // initialize static dictionary only if needed (to avoid function call and locking)
-    if (!_initialized) initialize();
+    // initialize static dictionary only once
+    std::call_once(_initialized, initialize);
 
     // set the unit for dimensionless quantities
     _unitForQty["dimensionless"] = "";
@@ -284,8 +270,8 @@ Units::FluxOutputStyle Units::fluxOutputStyle() const
 
 double Units::in(QString qty, QString unit, double value)
 {
-    // initialize static dictionary only if needed (to avoid function call and locking)
-    if (!_initialized) initialize();
+    // initialize static dictionary only once
+    std::call_once(_initialized, initialize);
 
     double factor = _factor.value(qty + " " + unit, 0.);
     if (factor) return value * factor;
@@ -296,8 +282,8 @@ double Units::in(QString qty, QString unit, double value)
 
 double Units::out(QString qty, QString unit, double value)
 {
-    // initialize static dictionary only if needed (to avoid function call and locking)
-    if (!_initialized) initialize();
+    // initialize static dictionary only once
+    std::call_once(_initialized, initialize);
 
     double factor = _factor.value(qty + " " + unit, 0.);
     if (factor) return value / factor;
@@ -308,8 +294,8 @@ double Units::out(QString qty, QString unit, double value)
 
 QStringList Units::units(QString qty)
 {
-    // initialize static dictionary only if needed (to avoid function call and locking)
-    if (!_initialized) initialize();
+    // initialize static dictionary only once
+    std::call_once(_initialized, initialize);
 
     QStringList result;
     foreach (QString qty_unit, _factor.keys())

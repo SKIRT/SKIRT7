@@ -3,8 +3,8 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
+#include <mutex>
 #include <QDateTime>
-#include <QMutex>
 #include "FatalError.hpp"
 #include "FITSInOut.hpp"
 #include "fitsio.h"
@@ -16,7 +16,7 @@ using namespace std;
 namespace
 {
     // mutex to guard the FITS input/output operations
-    QMutex _mutex;
+    std::mutex _mutex;
 
     // function to report cfitsio errors
     void report_error(QString filepath, QString action, int status)
@@ -40,7 +40,7 @@ void FITSInOut::write(QString filepath, const Array& data, int nx, int ny, int n
 
     // Acquire a global lock since the cfitsio library is not guaranteed to be reentrant
     // (only when it is built with ./configure --enable-reentrant; make)
-    QMutexLocker lock(&_mutex);
+    std::unique_lock<std::mutex> lock(_mutex);
 
     // Generate time stamp and temporaries
     std::string stamp = QDateTime::currentDateTime().toUTC().toString("yyyy-MM-ddThh:mm:ss").toStdString();
@@ -95,7 +95,7 @@ void FITSInOut::write(QString filepath, const Array& data, int nx, int ny, int n
 void FITSInOut::read(QString filepath, Array& data, int& nx, int& ny, int& nz)
 {
     // Acquire a global lock since the cfitsio library is not guaranteed to be reentrant
-    QMutexLocker lock(&_mutex);
+    std::unique_lock<std::mutex> lock(_mutex);
 
     // Open the FITS file
     int status = 0;
