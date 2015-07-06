@@ -23,14 +23,13 @@ ParallelFactory::ParallelFactory()
 
 ParallelFactory::~ParallelFactory()
 {
-    for (size_t i = 0; i<_children.size(); i++) delete _children[i];
 }
 
 ////////////////////////////////////////////////////////////////////
 
 void ParallelFactory::setMaxThreadCount(int value)
 {
-    _maxThreadCount = qMax(1, value);
+    _maxThreadCount = std::max(1, value);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -56,15 +55,13 @@ Parallel* ParallelFactory::parallel(int maxThreadCount)
     if (std::this_thread::get_id() != _parentThread)
         throw FATALERROR("Parallel not spawned from thread that constructed the factory");
 
-    // Get or create a child with the appropriate number of threads
-    int numThreads = maxThreadCount>0 ? qMin(maxThreadCount, _maxThreadCount) : _maxThreadCount;
-    auto child = _children[numThreads];
-    if (!child)
-    {
-        child = new Parallel(numThreads, this);
-        _children[numThreads] = child;
-    }
-    return child;
+    // Determine the appropriate number of threads
+    int numThreads = maxThreadCount>0 ? std::min(maxThreadCount, _maxThreadCount) : _maxThreadCount;
+
+    // Get or create a child with that number of threads
+    auto& child = _children[numThreads];
+    if (!child) child.reset( new Parallel(numThreads, this) );
+    return child.get();
 }
 
 ////////////////////////////////////////////////////////////////////

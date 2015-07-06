@@ -141,19 +141,19 @@ private:
 
     // data members shared by all threads; changed only when no parallel threads are active
     ParallelTarget* _target;    // the target to be called
+    ProcessAssigner* _assigner; // the process assigner
     size_t _limit;              // the limit of the for loop being implemented
     bool _terminate;            // becomes true when the parallel threads must exit
 
     // synchronization
     std::mutex _mutex;                          // the mutex to synchronize with the parallel threads
-    std::condition_variable _condition_extra;   // the wait condition used by the parallel threads
-    std::condition_variable _condition_main;    // the wait condition used by the main thread
+    std::condition_variable _conditionExtra;   // the wait condition used by the parallel threads
+    std::condition_variable _conditionMain;    // the wait condition used by the main thread
 
     // data members shared by all threads; changes are protected by a mutex
     int _active;                 // the number of parallel threads that are still doing some work
     FatalError* _exception;      // a pointer to a heap-allocated copy of the exception thrown by a work thread
                                  // or zero if no exception was thrown
-    ProcessAssigner* _assigner;  // a pointer to the process assigner, if present
 
     // data member shared by all threads; changes are atomic (no need for protection)
     std::atomic<size_t> _next;   // the current index of the for loop being implemented

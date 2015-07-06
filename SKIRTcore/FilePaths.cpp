@@ -60,7 +60,7 @@ namespace
 
 FilePaths::FilePaths()
 {
-    // verify existence of the dat directory only once
+    // verify existence of the dat directory as soon as possible
     std::call_once(_initialized, setStaticPaths);
 }
 
@@ -136,7 +136,7 @@ QString FilePaths::output(QString name) const
 
 QString FilePaths::application(QString name)
 {
-    // verify existence of the dat directory only once
+    // initialize the static paths if needed
     std::call_once(_initialized, setStaticPaths);
     return _applicationPath + name;
 }
@@ -145,7 +145,7 @@ QString FilePaths::application(QString name)
 
 QString FilePaths::resource(QString name)
 {
-    // verify existence of the dat directory only once
+    // initialize the static paths if needed
     std::call_once(_initialized, setStaticPaths);
     return _resourcePath + name;
 }
@@ -154,6 +154,9 @@ QString FilePaths::resource(QString name)
 
 QString FilePaths::externalResource(QString name)
 {
+    // initialize the static paths if needed
+    std::call_once(_initialized, setStaticPaths);
+
     // iterate over the relative paths
     for (int i=0; i<_Nextdatpaths; i++)
     {

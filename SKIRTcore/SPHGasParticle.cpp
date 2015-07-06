@@ -93,7 +93,7 @@ double SPHGasParticle::metalMass() const
 
 double SPHGasParticle::metalMassInBox(const Box& box) const
 {
-    // ensure that the sampled version of the erf function is properly initialized (and only once so)
+    // ensure that the sampled version of the erf function is properly initialized
     std::call_once(_initialized, initialize_myerf);
     Vec r1 = _s * (box.rmin()-_rc);
     Vec r2 = _s * (box.rmax()-_rc);

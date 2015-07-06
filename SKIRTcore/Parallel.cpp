@@ -10,7 +10,6 @@
 ////////////////////////////////////////////////////////////////////
 
 Parallel::Parallel(int threadCount, ParallelFactory* factory)
-    : _assigner(0)
 {
     // Remember the ID of the current thread
     _parentThread = std::this_thread::get_id();
@@ -40,7 +39,7 @@ Parallel::~Parallel()
 
     // Ask the parallel threads to exit
     _terminate = true;
-    _condition_extra.notify_all();
+    _conditionExtra.notify_all();
 
     // Wait for them to do so
     for (auto& thread: _threads) thread.join();
@@ -76,7 +75,7 @@ void Parallel::call(ParallelTarget* target, ProcessAssigner* assigner)
     _next = 0;
 
     // Wake all parallel threads, if multithreading is allowed
-    if (assigner->parallel()) _condition_extra.notify_all();
+    if (assigner->parallel()) _conditionExtra.notify_all();
 
     // Do some work ourselves as well
     doWork();
@@ -96,14 +95,15 @@ void Parallel::call(ParallelTarget* target, ProcessAssigner* assigner)
 
 void Parallel::run()
 {
-    forever
+    while (true)
     {
         // Wait for new work in a critical section
-        std::unique_lock<std::mutex> lock(_mutex);
-        _active--;                                  // indicate that this thread is not longer doing work
-        if (!_active) _condition_main.notify_all(); // tell the main thread that all parallel threads may be waiting
-        _condition_extra.wait(lock);
-        lock.unlock();
+        {
+            std::unique_lock<std::mutex> lock(_mutex);
+            _active--;                                 // indicate that this thread is not longer doing work
+            if (!_active) _conditionMain.notify_all(); // tell the main thread that all parallel threads may be waiting
+            _conditionExtra.wait(lock);
+        }
 
         // Check for termination request (don't bother decrementing _active; it's no longer used)
         if (_terminate) break;
@@ -120,7 +120,7 @@ void Parallel::doWork()
     try
     {
         // Do work as long as some is available
-        forever
+        while (true)
         {
             size_t index = _next++;                  // get the next index atomically
             if (index >= _limit) break;              // break if no more are available
@@ -154,7 +154,6 @@ void Parallel::reportException(FatalError* exception)
         // Make the other threads stop by taking away their work
         _limit = 0;  // this is safe because another thread will see either the old value, or zero
     }
-    lock.unlock();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -163,12 +162,7 @@ void Parallel::waitForThreads()
 {
     // Wait until all parallel threads are in wait
     std::unique_lock<std::mutex> lock(_mutex);
-    forever
-    {
-        if (_active) _condition_main.wait(lock);
-        if (!_active) break;
-    }
-    // lock is automatically released
+    while (_active) _conditionMain.wait(lock);
 }
 
 ////////////////////////////////////////////////////////////////////
