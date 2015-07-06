@@ -182,9 +182,9 @@ QVariant Optimization::chi2(QVariant input)
         counter++;
     }
     OligoFitScheme* oligofit = find<OligoFitScheme>();
-    QList<double> Chis;
+    QList<double> chis;
     QList<QList<double>> luminosities;
-    double chi_sum = oligofit->objective((*replacementsGenome),&luminosities,&Chis, index);
+    double chi_sum = oligofit->objective((*replacementsGenome), luminosities, chis, index);
     QList<QVariant> output, lumis, chivalues;
     for(int i=0; i<luminosities.size(); i++)
     {
@@ -192,11 +192,11 @@ QVariant Optimization::chi2(QVariant input)
         {
             lumis.append((luminosities[i])[j]);
         }
-        chivalues.append(Chis[i]);
+        chivalues.append(chis[i]);
     }
     output.append(chi_sum);
-    output.insert(output.size(),lumis);
-    output.insert(output.size(),chivalues);
+    output.insert(output.size(), lumis);
+    output.insert(output.size(), chivalues);
 
     return output;
 
@@ -290,14 +290,14 @@ void Optimization::writeLine(std::ofstream *stream, int i)
 
 void Optimization::PopEvaluate(GAPopulation & p)
 {
-    find<Log>()->info("Evaluating generation "+QString::number(_ga->statistics().generation()));
+    find<Log>()->info("Evaluating generation " + QString::number(_ga->statistics().generation()));
 
-    //creating a temporary folder to store the simulations
+    // Create a temporary folder to store the simulations
     QString folderpath = find<FilePaths>()->output("tmp");
     if(!QDir(folderpath).exists())
         QDir().mkdir(folderpath);
 
-    //loop over all individuals and make replacement for all unevaluated individuals
+    // Loop over all individuals and make replacement for all unevaluated individuals
     for (int i=0; i<p.size(); i++)
     {
         if (p.individual(i).isEvaluated()==gaFalse)

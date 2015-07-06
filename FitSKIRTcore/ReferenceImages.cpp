@@ -4,7 +4,6 @@
 ///////////////////////////////////////////////////////////////// */
 
 #include "ReferenceImages.hpp"
-
 #include "AdjustableSkirtSimulation.hpp"
 #include "FatalError.hpp"
 #include "FilePaths.hpp"
@@ -74,10 +73,9 @@ int ReferenceImages::size() const
 }
 //////////////////////////////////////////////////////////////////////
 
-double ReferenceImages::chi2(QList<QList<Array>> *frames,
-                             QList<QList<double>> *luminosities, QList<double> *Chis)
+double ReferenceImages::chi2(QList<QList<Image>>& frames, QList<QList<double>>& luminosities, QList<double>& chis)
 {
-    if (frames->size() != _rimages.size())
+    if (frames.size() != _rimages.size())
         throw FATALERROR("Total number of simulated frames does not match the number of reference frames");
     int counter=0;
     double chi2_sum=0;
@@ -86,10 +84,10 @@ double ReferenceImages::chi2(QList<QList<Array>> *frames,
     {
         double chi;
         QList<double> monolum;
-        chi=rima->chi2(&((*frames)[counter]), &(monolum));
-        luminosities->append(monolum);
+        chi = rima->chi2(frames[counter], monolum);
+        luminosities << monolum;
         chi2_sum += chi;
-        Chis->append(chi);
+        chis << chi;
         counter++;
     }
     return chi2_sum;
@@ -101,35 +99,31 @@ void ReferenceImages::writeOutBest(int index, int consec) const
 {
     int counter=0;
 
-    QString prefix = "tmp/tmp_"+QString::number(index);
-    FilePaths* path = find<FilePaths>();
+    QString prefix = "tmp_" + QString::number(index);
+    QString tmpdir = find<FilePaths>()->output("tmp");
     AdjustableSkirtSimulation* adjSS = find<AdjustableSkirtSimulation>();
     QString instrname = adjSS->instrname();
     find<Log>()->info("Found new best fit");
 
     foreach (ReferenceImage* rima, _rimages)
     {
-        int nx, ny, nz;
-        QList<Array> Total;
+        QList<Image> total;
         QString filename;
-        for(int i =0; i<adjSS->ncomponents();i++)
+        for(int i = 0; i < adjSS->ncomponents(); i++)
         {
-            Array CompTotal;
-            QString filepath = path->output(prefix+"_"+instrname+"_stellar_"+
-                               QString::number(i)+"_"+QString::number(counter)+".fits");
-            FITSInOut::read(filepath,CompTotal,nx,ny,nz);
-            Total.append(CompTotal);
+            QString filename = prefix + "_" + instrname + "_stellar_" + QString::number(i) + "_" + QString::number(counter);
+            Image compTotal(this, filename, tmpdir, adjSS->xpress(counter), adjSS->ypress(counter), "surfacebrightness");
+            total << compTotal;
         }
-        rima->returnFrame(&Total);
+        rima->returnFrame(total);
 
-        // Create an image for the best fitting frame and save it
-        filename = "Best_" + QString::number(consec)+"_"+QString::number(counter);
-        Image image(this, nx, ny, nz, adjSS->xpress(counter), adjSS->ypress(counter), "surfacebrightness");
-        image.saveto(this, Total[0], filename, "best fitting frame");
+        // Save the best fitting image
+        filename = "Best_" + QString::number(consec) + "_" + QString::number(counter);
+        total[0].saveto(this, filename, "best fitting frame");
 
-        // Reuse the image header for the residuals frame and save it
-        filename =  "Residual_" + QString::number(consec)+"_"+QString::number(counter);
-        image.saveto(this, Total[1], filename, "residuals frame");
+        // Save the residuals frame
+        filename =  "Residual_" + QString::number(consec) + "_" + QString::number(counter);
+        total[1].saveto(this, filename, "residuals frame");
 
         // Increment the counter to keep track of which reference image we're dealing with
         counter++;

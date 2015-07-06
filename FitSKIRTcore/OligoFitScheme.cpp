@@ -4,11 +4,10 @@
 ///////////////////////////////////////////////////////////////// */
 
 #include "OligoFitScheme.hpp"
-
 #include "Array.hpp"
-#include "FITSInOut.hpp"
 #include "FatalError.hpp"
 #include "FilePaths.hpp"
+#include "Image.hpp"
 #include "Log.hpp"
 #include "Optimization.hpp"
 #include "ParameterRange.hpp"
@@ -115,44 +114,38 @@ Optimization* OligoFitScheme::optim() const
 ////////////////////////////////////////////////////////////////////
 
 double OligoFitScheme::objective(AdjustableSkirtSimulation::ReplacementDict replacement,
-                                 QList<QList<double> >*luminosities, QList<double> *Chis, int index)
+                                 QList<QList<double>>& luminosities, QList<double>& chis, int index)
 {
-    //perform the adjusted simulation
-    QString prefix = "tmp/tmp_"+QString::number(index);
-    _simulation->performWith(replacement, prefix);
+    // Perform the adjusted simulation
+    QString prefix = "tmp_" + QString::number(index);
+    QString outprefix = "tmp/" + prefix;
+    QString tmpdir = find<FilePaths>()->output("tmp");
+    _simulation->performWith(replacement, outprefix);
     QString instrname = find<AdjustableSkirtSimulation>()->instrname();
 
-    //read the simulation frames and compare the frame size with the reference image
+    // Read the simulation frames and compare the frame size with the reference image
     int counter=0;
-    QList<Array> Simulations;
-    QList<QList<Array>> frames;
-    FilePaths* path = find<FilePaths>();
-
+    QList<QList<Image>> frames;
     foreach (ReferenceImage* rima, _rimages->images())
     {
-        int nx,ny,nz; //dummy values;
-        QString filepath;
-
-        for(int i =0; i<_simulation->ncomponents();i++){
-            Array CompTotal;
-            filepath = path->output(prefix+"_"+instrname+"_stellar_"+
-                                    QString::number(i)+"_"+QString::number(counter)+".fits");
-            FITSInOut::read(filepath,CompTotal,nx,ny,nz);
-            Simulations.append(CompTotal);
+        QList<Image> components;
+        for (int i = 0; i < _simulation->ncomponents(); i++)
+        {
+            QString filename = prefix + "_" + instrname + "_stellar_" + QString::number(i) + "_" + QString::number(counter);
+            Image component(this, filename, tmpdir);
+            components << component;
         }
 
         int framesize = (rima->xsize())*(rima->ysize());
-        int simsize = Simulations[0].size();
-        if (framesize != simsize)
-            throw FATALERROR("Simulations and Reference Images have different dimensions");
+        int simsize = components[0].xsize()*components[0].ysize();
+        if (framesize != simsize) throw FATALERROR("Simulations and Reference Images have different dimensions");
 
-        frames.append(Simulations);
-        Simulations.clear();
+        frames << components;
         counter++;
     }
 
-    //determine the best fitting luminosities and lowest chi2 value
-    double test_chi2functions = _rimages->chi2(&frames,luminosities, Chis);
+    // Determine the best fitting luminosities and lowest chi2 value
+    double test_chi2functions = _rimages->chi2(frames, luminosities, chis);
     return test_chi2functions;
 }
 

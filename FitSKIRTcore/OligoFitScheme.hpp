@@ -87,8 +87,8 @@ public:
     /** This function is used by the Optimization object. It requires a ReplacementDict for the
         AdjustableSkirtSimulation and returns the total \f$\chi^2\f$ value together with lists of the best fitting
         luminosities, the separate \f$\chi^2\f$ values and the masked simulations. */
-    double objective(AdjustableSkirtSimulation::ReplacementDict replacement, QList<QList<double>> *luminosities,
-                     QList<double> *Chis, int index);
+    double objective(AdjustableSkirtSimulation::ReplacementDict replacement, QList<QList<double>>& luminosities,
+                     QList<double>& chis, int index);
 
     //======================== Data Members ========================
 

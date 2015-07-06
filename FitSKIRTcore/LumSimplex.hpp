@@ -6,7 +6,7 @@
 #ifndef LUMSIMPLEX_HPP
 #define LUMSIMPLEX_HPP
 
-#include "Array.hpp"
+#include "Image.hpp"
 #include "SimulationItem.hpp"
 
 ////////////////////////////////////////////////////////////////////
@@ -79,26 +79,26 @@ public:
     /** This function sets the _ref, _disk, _bulge and returns best fitting disk luminosity and bulge-to-disk ratio.
         The disk and bulge simulations are adapted so they contain the same mask as the reference image.
         Together with the adapted simulations and best fitting parameters, the lowest \f$\chi^2\f$ value is returned.*/
-    void optimize(const Array *Rframe, Array *Dframe, Array *Bframe,
-                  double &Dlum, double &blumratio, double &chi2);
+    void optimize(const Image& refframe, Image& diskframe, Image& bulgeframe,
+                  double& disklum, double& blumratio, double& chi2);
 
 private:
     /** This function determines if the x- or y-value is present in the simplex. */
     bool inSimplex(double simplex[3][3], double value, int x_y ) const;
 
     /** This function determines the \f$\chi^2\f$ value for certain luminosity values. */
-    double function(Array *disk, Array *bulge, double x, double y);
+    double function(Image& disk, Image& bulge, double x, double y);
 
     /** This function determines if the simplex needs to be contracted or shrunk. */
-    void contract(Array *disk, Array *bulge,
-                  double simplex[3][3], double center[], double refl[], double Beta, double Delta);
+    void contract(Image& disk, Image& bulge,
+                  double simplex[3][3], double center[], double refl[], double beta, double delta);
 
     /** This function determines if the simplex needs to be reflected or expanded. */
-    void expand(Array *disk, Array *bulge,
+    void expand(Image& disk, Image& bulge,
                 double simplex[3][3], double center[], double refl[], int counter, double Gamma);
 
     /** This function determines the initial simplex and sorts it. */
-    void initialize(Array *disk, Array *bulge, double simplex[3][3]);
+    void initialize(Image& disk, Image& bulge, double simplex[3][3]);
 
     /** This function checks if the simplex goes out of bound and corrects if necessary.
         The counter is used to make sure the corrections are not applied twice so the
@@ -107,15 +107,14 @@ private:
 
     /** This function places the two values in the simplex in the correct place.
         The simplex is sorted from lowest \f$\chi^2\f$ value to highest. */
-    void place(Array *disk, Array *bulge, double simplex[3][3], double x, double y);
+    void place(Image& disk, Image& bulge, double simplex[3][3], double x, double y);
 
     /** This function determines and sets the center and reflected point. */
-    void setCenterReflected(Array *disk, Array *bulge,
-                            double simplex[3][3], double center[], double reflected[], int counter, double Alpha);
+    void setCenterReflected(Image& disk, Image& bulge,
+                            double simplex[3][3], double center[], double reflected[], int counter, double alpha);
 
     /** This function determines if the simplex needs to be shrunk. */
-    void shrink(Array *disk, Array *bulge,
-                double simplex[3][3], double Delta);
+    void shrink(Image& disk, Image& bulge, double simplex[3][3], double delta);
 
     //======================== Data Members ========================
 
@@ -124,7 +123,7 @@ private:
     double _maxDlum;
     double _minblum;
     double _maxblum;
-    const Array *_ref;
+    const Image* _ref;
 };
 
 ////////////////////////////////////////////////////////////////////
