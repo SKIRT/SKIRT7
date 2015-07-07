@@ -7,6 +7,7 @@
 #define PARALLEL_HPP
 
 #include <atomic>
+#include <condition_variable>
 #include <mutex>
 #include <thread>
 #include "ParallelTarget.hpp"
