@@ -76,7 +76,7 @@ void FileLog::output(QString message, Log::Level level)
 
     if (_file.isOpen())
     {
-        QMutexLocker lock(&_mutex);
+        std::unique_lock<std::mutex> lock(_mutex);
         _out << message << endl;
     }
 }

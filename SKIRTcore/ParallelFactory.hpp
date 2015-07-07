@@ -6,8 +6,8 @@
 #ifndef PARALLELFACTORY_HPP
 #define PARALLELFACTORY_HPP
 
-#include <QHash>
-#include <QThread>
+#include <thread>
+#include <unordered_map>
 #include "SimulationItem.hpp"
 class Parallel;
 
@@ -73,15 +73,15 @@ private:
     /** Adds a dictionary item linking the specified thread to a particular index. This is a
         private function used from the Parallel() constructor to provide the information required
         by the currentThreadIndex() function. */
-    void addThreadIndex(const QThread* thread, int index);
+    void addThreadIndex(std::thread::id threadid, int index);
 
     //======================== Data Members ========================
 
 private:
-    int _maxThreadCount;                // the maximum thread count for the factory
-    const QThread* _parentThread;       // the thread that invoked our constructor
-    QHash<int, Parallel*> _children;    // our children, keyed on number of threads
-    QHash<const QThread*,int> _indices; // the index for each thread, including parent, for all our children
+    int _maxThreadCount;                                // the maximum thread count for the factory
+    std::thread::id _parentThread;                      // the thread that invoked our constructor
+    std::unordered_map<int, std::unique_ptr<Parallel>> _children; // our children, keyed on number of threads
+    std::unordered_map<std::thread::id, int> _indices;  // the index for each child thread and the parent thread
 };
 
 #endif // PARALLELFACTORY_HPP

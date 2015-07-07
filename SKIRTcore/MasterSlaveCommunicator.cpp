@@ -8,14 +8,14 @@
 #include "Parallel.hpp"
 #include "ProcessManager.hpp"
 #include <QDataStream>
-#include <QThread>
+#include <thread>
 
 ////////////////////////////////////////////////////////////////////
 
 namespace
 {
-    // the thread that invoked initialize(), or the first constructor
-    QThread* _mainThread = 0;
+    // the thread that invoked the first constructor
+    std::thread::id _mainThread;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -23,14 +23,14 @@ namespace
 MasterSlaveCommunicator::MasterSlaveCommunicator()
     : _acquired(false), _performing(false), _bufsize(4000), _assigner(0)
 {
-    if (_mainThread)
+    if (_mainThread == std::thread::id())
     {
-        if (QThread::currentThread() != _mainThread)
-            throw FATALERROR("Must be invoked from the thread that initialized MasterSlaveCommunicator");
+        _mainThread = std::this_thread::get_id();
     }
     else
     {
-        _mainThread = QThread::currentThread();
+        if (std::this_thread::get_id() != _mainThread)
+            throw FATALERROR("Must be invoked from the thread that initialized MasterSlaveCommunicator");
     }
 
     // Create an assigner that utilizes no specific assignment scheme (assignment of tasks is performed
@@ -174,7 +174,7 @@ namespace
 
 QVector<QVariant> MasterSlaveCommunicator::performTask(int taskIndex, QVector<QVariant> inputVector)
 {
-    if (QThread::currentThread() != _mainThread)
+    if (std::this_thread::get_id() != _mainThread)
         throw FATALERROR("Must be invoked from the thread that initialized MasterSlaveCommunicator");
     if (_performing) throw FATALERROR("Already performing tasks");
     if (isSlave()) throw FATALERROR("Only the master can command the slaves");

@@ -13,7 +13,7 @@
 ////////////////////////////////////////////////////////////////////
 
 Log::Log()
-    : _lowestLevel(Info), _link(0), _verbose(false)
+    : _lowestLevel(Info), _link(0), _verbose(false), _logmemory(false)
 {
 }
 
@@ -125,7 +125,7 @@ void Log::info(QString message)
     // Output the message
     if (verbose())
     {
-        if (Info >= _lowestLevel) output(timestamp() + "   " + _procNameLong + memory +  message, Info);
+        if (Info >= _lowestLevel) output(timestamp() + "   " + _procNameLong + memory + message, Info);
     }
     else if (ProcessManager::isRoot())
     {

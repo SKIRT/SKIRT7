@@ -6,8 +6,8 @@
 #ifndef DUSTSYSTEM_HPP
 #define DUSTSYSTEM_HPP
 
+#include <mutex>
 #include <vector>
-#include <QMutex>
 #include "Array.hpp"
 #include "Position.hpp"
 #include "SimulationItem.hpp"
@@ -414,7 +414,7 @@ protected:
     Array _volumev;     // volume for each cell (indexed on m)
     Table<2> _rhovv;    // density for each cell and each dust component (indexed on m,h)
     std::vector<qint64> _crossed;
-    QMutex _crossedMutex;
+    std::mutex _crossedMutex;
 };
 
 //////////////////////////////////////////////////////////////////////

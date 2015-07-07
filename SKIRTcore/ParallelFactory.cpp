@@ -11,11 +11,11 @@
 
 ParallelFactory::ParallelFactory()
 {
-    // initialize default maximum number of threads
+    // Initialize default maximum number of threads
     _maxThreadCount = defaultThreadCount();
 
-    // remember the current thread, and provide it with an index
-    _parentThread = QThread::currentThread();
+    // Remember the current thread, and provide it with an index
+    _parentThread = std::this_thread::get_id();
     addThreadIndex(_parentThread, 0);
 }
 
@@ -23,14 +23,13 @@ ParallelFactory::ParallelFactory()
 
 ParallelFactory::~ParallelFactory()
 {
-    foreach (Parallel* child, _children) delete child;
 }
 
 ////////////////////////////////////////////////////////////////////
 
 void ParallelFactory::setMaxThreadCount(int value)
 {
-    _maxThreadCount = qMax(1, value);
+    _maxThreadCount = std::max(1, value);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -44,7 +43,7 @@ int ParallelFactory::maxThreadCount() const
 
 int ParallelFactory::defaultThreadCount()
 {
-    int count = QThread::idealThreadCount();
+    int count = std::thread::hardware_concurrency();
     return count>0 ? count : 1;
 }
 
@@ -52,35 +51,33 @@ int ParallelFactory::defaultThreadCount()
 
 Parallel* ParallelFactory::parallel(int maxThreadCount)
 {
-    // verify that we're being called from our parent thread
-    if (QThread::currentThread() != _parentThread)
+    // Verify that we're being called from our parent thread
+    if (std::this_thread::get_id() != _parentThread)
         throw FATALERROR("Parallel not spawned from thread that constructed the factory");
 
-    // get or create a child with the appropriate number of threads
-    int numThreads = maxThreadCount>0 ? qMin(maxThreadCount, _maxThreadCount) : _maxThreadCount;
-    Parallel* child = _children.value(numThreads, 0);
-    if (!child)
-    {
-        child = new Parallel(numThreads, this);
-        _children[numThreads] = child;
-    }
-    return child;
+    // Determine the appropriate number of threads
+    int numThreads = maxThreadCount>0 ? std::min(maxThreadCount, _maxThreadCount) : _maxThreadCount;
+
+    // Get or create a child with that number of threads
+    auto& child = _children[numThreads];
+    if (!child) child.reset( new Parallel(numThreads, this) );
+    return child.get();
 }
 
 ////////////////////////////////////////////////////////////////////
 
 int ParallelFactory::currentThreadIndex() const
 {
-    int index = _indices.value(QThread::currentThread(), -1);
-    if (index<0) throw FATALERROR("Current thread index was not found");
-    return index;
+    auto search = _indices.find(std::this_thread::get_id());
+    if (search == _indices.end()) throw FATALERROR("Current thread index was not found");
+    return search->second;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void ParallelFactory::addThreadIndex(const QThread* thread, int index)
+void ParallelFactory::addThreadIndex(std::thread::id threadId, int index)
 {
-    _indices[thread] = index;
+    _indices[threadId] = index;
 }
 
 ////////////////////////////////////////////////////////////////////

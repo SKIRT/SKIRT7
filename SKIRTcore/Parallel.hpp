@@ -7,15 +7,12 @@
 #define PARALLEL_HPP
 
 #include <atomic>
-#include <QHash>
-#include <QList>
-#include <QMutex>
-#include <QThread>
-#include <QWaitCondition>
+#include <mutex>
+#include <thread>
 #include "ParallelTarget.hpp"
-#include "ProcessAssigner.hpp"
 class FatalError;
 class ParallelFactory;
+class ProcessAssigner;
 
 ////////////////////////////////////////////////////////////////////
 
@@ -28,16 +25,19 @@ class ParallelFactory;
         \code
         void Test::body(size_t index) { ... }
         ...
+        IdenticalAssigner assigner;
         ParallelFactory factory;
-        factory.parallel()->call(this, &Test::body, 1000);
+        ...
+        assigner.assign(1000);
+        factory.parallel()->call(this, &Test::body, &assigner);
         \endcode
 
     A Parallel instance can be created only through the ParallelFactory class. The default
     construction shown above determines a reasonable number of threads for the computer on which
     the code is running, and the call() function distributes the work over these threads.
 
-    The parallelized body should protect (write-) access to shared data through the use of a QMutex
-    or QReadWriteLock. Shared data includes the data members of the target object (in the context
+    The parallelized body should protect (write-) access to shared data through the use of an
+    std::mutex object. Shared data includes the data members of the target object (in the context
     of which the target function executes) and essentially everything other than local variables.
     Also note that the parallelized body includes all functions directly or indirectly called by
     the target function.
@@ -57,7 +57,7 @@ class ParallelFactory;
     scope of the loop body. Recursively invoking the call() function on the same Parallel instance is
     not allowed and results in undefined behavior.
 
-    The Parallel class uses Qt's multi-threading capabilities, avoiding the complexities of using
+    The Parallel class uses C++11 multi-threading capabilities, avoiding the complexities of using
     yet another library (such as OpenMP) and making it possible to properly handle exceptions. It
     is designed to minimize the run-time overhead for loops with many iterations. */
 class Parallel
@@ -97,7 +97,7 @@ public:
 
 private:
     /** The function that gets executed inside each of the parallel threads. */
-    void run();
+    void run(int threadIndex);
 
     /** The function to do the actual work; used by call() and run(). */
     void doWork();
@@ -107,6 +107,11 @@ private:
 
     /** A function to wait for the parallel threads; used by constructor and call(). */
     void waitForThreads();
+
+    /** This helper function returns true if at least one of the parallel threads (not including
+        the parent thread) is still active, and false if not. This function does not perform any
+        locking; callers should lock the shared data members of this class instance. */
+    bool threadsActive();
 
     //======================== Nested Classes =======================
 
@@ -133,47 +138,31 @@ private:
         void (T::*_targetMember)(size_t index);
     };
 
-    /** The declaration for this class is nested in the Parallel class declaration. An instance of
-        this class represents a parallel execution thread managed by the Parallel class. */
-    class Thread : public QThread
-    {
-    public:
-        /** The constructor remembers the Parallel object managing this thread. */
-        Thread(Parallel* manager) : QThread(), _manager(manager) { }
-
-    private:
-        /** This function is the execution body of the thread. It simply calls a function of the
-            same name in the managing Parallel object to provide easy access to all of the
-            manager's member variables. */
-        void run() { _manager->run(); }
-
-        // the managing Parallel object
-        Parallel* _manager;
-    };
-
     //======================== Data Members ========================
 
 private:
     // data members keeping track of the threads
-    const QThread* _parentThread;  // the thread that invoked our constructor
-    QList<Thread*> _threads;    // the parallel threads (other than the parent thread)
+    int _threadCount;                   // the total number of threads, including the parent thread
+    std::thread::id _parentThread;      // the ID of the thread that invoked our constructor
+    std::vector<std::thread> _threads;  // the parallel threads (other than the parent thread)
 
-    // data members shared by all threads; changed only when no parallel threads are active
-    ParallelTarget* _target;    // the target to be called
-    size_t _limit;              // the limit of the for loop being implemented
-    bool _terminate;            // becomes true when the parallel threads must exit
+    // synchronization
+    std::mutex _mutex;                         // the mutex to synchronize with the parallel threads
+    std::condition_variable _conditionExtra;   // the wait condition used by the parallel threads
+    std::condition_variable _conditionMain;    // the wait condition used by the main thread
 
     // data members shared by all threads; changes are protected by a mutex
-    QMutex _mutex;              // the mutex to synchronize with the parallel threads
-    QWaitCondition _waitExtra;  // the wait condition used by the parallel threads
-    QWaitCondition _waitMain;   // the wait condition used by the main thread
-    int _active;                // the number of parallel threads that are still doing some work
+    ParallelTarget* _target;    // the target to be called
+    ProcessAssigner* _assigner; // the process assigner
+    size_t _limit;              // the limit of the for loop being implemented
+    std::vector<bool> _active;  // flag for each parallel thread (other than the parent thread)
+                                // ... that indicates whether the thread is currently active
     FatalError* _exception;     // a pointer to a heap-allocated copy of the exception thrown by a work thread
-                                // or zero if no exception was thrown
-    ProcessAssigner* _assigner; // a pointer to the process assigner, if present
+                                // ... or zero if no exception was thrown
+    bool _terminate;            // becomes true when the parallel threads must exit
 
-    // data member shared by all threads; changes are atomic (no need for protection)
-    std::atomic<size_t> _next;  // the current index of the for loop being implemented
+    // data member shared by all threads; incrementing is atomic (no need for protection)
+    std::atomic<size_t> _next;   // the current index of the for loop being implemented
 };
 
 ////////////////////////////////////////////////////////////////////
