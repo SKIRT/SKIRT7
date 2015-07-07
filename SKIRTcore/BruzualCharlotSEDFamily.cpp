@@ -25,10 +25,26 @@ namespace
     const int NZ = 6;
 }
 
-//////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
 
-BruzualCharlotSEDFamily::BruzualCharlotSEDFamily(SimulationItem* item)
+BruzualCharlotSEDFamily::BruzualCharlotSEDFamily()
 {
+}
+
+///////////////////////////////////////////////////////////////////
+
+BruzualCharlotSEDFamily::BruzualCharlotSEDFamily(SimulationItem* parent)
+{
+    setParent(parent);
+    setup();
+}
+
+///////////////////////////////////////////////////////////////////
+
+void BruzualCharlotSEDFamily::setupSelfBefore()
+{
+    SEDFamily::setupSelfBefore();
+
     // local constants for units
     const double Lsun = Units::Lsun();
     const double Angstrom = 1e-10;
@@ -56,7 +72,7 @@ BruzualCharlotSEDFamily::BruzualCharlotSEDFamily(SimulationItem* item)
         ifstream bcfile(bcfilename.toLocal8Bit().constData());
         if (! bcfile.is_open()) throw FATALERROR("Could not open the data file " + bcfilename);
 
-        item->find<Log>()->info("Reading SED data from file " + bcfilename + "...");
+        find<Log>()->info("Reading SED data from file " + bcfilename + "...");
         int iNt, iNlambda;
         bcfile >> iNt;
         if (iNt != Nt)
@@ -100,11 +116,11 @@ BruzualCharlotSEDFamily::BruzualCharlotSEDFamily(SimulationItem* item)
             }
         }
         bcfile.close();
-        item->find<Log>()->info("File " + bcfilename + " closed.");
+        find<Log>()->info("File " + bcfilename + " closed.");
     }
 
     // cache the simulation's wavelength grid
-    _lambdagrid = item->find<WavelengthGrid>();
+    _lambdagrid = find<WavelengthGrid>();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -156,6 +172,20 @@ Array BruzualCharlotSEDFamily::luminosities(double M, double Z, double t) const
     // multiply by the mass of the population (in solar masses),
     // and return the result
     return NR::resample<NR::interpolate_loglog>(_lambdagrid->lambdav(), _lambdav, jv) * _lambdagrid->dlambdav() * M;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+int BruzualCharlotSEDFamily::nparams_generic() const
+{
+    return 3;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+Array BruzualCharlotSEDFamily::luminosities_generic(const Array& params, int skipvals) const
+{
+    return luminosities(params[skipvals], params[skipvals+1], params[skipvals+2]);
 }
 
 //////////////////////////////////////////////////////////////////////

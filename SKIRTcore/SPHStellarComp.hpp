@@ -102,18 +102,19 @@ public:
     //======================== Data Members ========================
 
 private:
+    // discoverable properties
     QString _filename;
     bool _writeLuminosities;
 
+    // particle position and size
     std::vector<Vec> _rv;
     std::vector<double> _hv;
-    std::vector<double> _Mv;
-    std::vector<double> _Zv;
-    std::vector<double> _tv;
 
+    // luminosity info
     Array _Ltotv;
     ArrayTable<2> _Xvv;
 
+    // cached
     Random* _random;
 };
 

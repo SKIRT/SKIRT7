@@ -4,7 +4,6 @@
 ///////////////////////////////////////////////////////////////// */
 
 #include <cmath>
-#include <QFile>
 #include "FatalError.hpp"
 #include "FilePaths.hpp"
 #include "Log.hpp"
@@ -12,6 +11,7 @@
 #include "Random.hpp"
 #include "SPHGeometry.hpp"
 #include "SPHGasParticleGrid.hpp"
+#include "TextInFile.hpp"
 #include "Units.hpp"
 
 using namespace std;
@@ -40,44 +40,27 @@ void SPHGeometry::setupSelfBefore()
     const double pc = Units::pc();
     const double Msun = Units::Msun();
 
-    // read in the SPH gas particles
-    QString filepath = find<FilePaths>()->input(_filename);
-    QFile infile(filepath);
-    if (!infile.open(QIODevice::ReadOnly|QIODevice::Text))
-        throw FATALERROR("Could not open the SPH gas data file " + filepath);
-    find<Log>()->info("Reading SPH gas particles from file " + filepath + "...");
+    // load the SPH gas particles
+    TextInFile infile(this, _filename, "SPH gas particles");
     int Nignored = 0;
     double Mtot = 0;
     double Mmetal = 0;
-    while (!infile.atEnd())
+    double x, y, z, h, M, Z, T;
+    while (infile.readRow(1, x, y, z, h, M, Z, T))
     {
-        // read a line, split it in columns, and skip empty and comment lines
-        QList<QByteArray> columns = infile.readLine().simplified().split(' ');
-        if (!columns.isEmpty() && !columns[0].startsWith('#'))
+        // ignore particle if the temperature is higher than the maximum (assuming both T and Tmax are valid)
+        if (T > 0 && _Tmax > 0 && T > _Tmax)
         {
-            // get the optional temperature value; missing or illegal values default to zero
-            double T = columns.value(6).toDouble();
-
-            // ignore particle if the temperature is higher than the maximum (assuming both T and Tmax are valid)
-            if (T > 0 && _Tmax > 0 && T > _Tmax)
-            {
-                Nignored++;
-            }
-            else
-            {
-                // add a particle using the other column values; missing or illegal values default to zero
-                _pv.push_back(SPHGasParticle(Vec(columns.value(0).toDouble()*pc,
-                                                 columns.value(1).toDouble()*pc,
-                                                 columns.value(2).toDouble()*pc),
-                                             columns.value(3).toDouble()*pc,
-                                             columns.value(4).toDouble()*Msun,
-                                             columns.value(5).toDouble()));
-                Mtot += columns.value(4).toDouble();
-                Mmetal += columns.value(4).toDouble() * columns.value(5).toDouble();
-            }
-       }
+            Nignored++;
+        }
+        else
+        {
+            // add a particle
+            _pv.push_back(SPHGasParticle(Vec(x,y,z)*pc, h*pc, M*Msun, Z));
+            Mtot += M;
+            Mmetal += M * Z;
+        }
     }
-    infile.close();
     find<Log>()->info("  Number of high-temperature particles ignored: " + QString::number(Nignored));
     find<Log>()->info("  Number of SPH gas particles containing dust: " + QString::number(_pv.size()));
     find<Log>()->info("  Total gas mass: " + QString::number(Mtot) + " Msun");

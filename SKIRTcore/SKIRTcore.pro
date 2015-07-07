@@ -299,7 +299,8 @@ HEADERS += \
     Image.hpp \
     SphericalAdaptiveMesh.hpp \
     SphericalAdaptiveMeshDustDistribution.hpp \
-    TextInFile.hpp
+    TextInFile.hpp \
+    SEDFamily.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -557,4 +558,5 @@ SOURCES += \
     Image.cpp \
     SphericalAdaptiveMesh.cpp \
     SphericalAdaptiveMeshDustDistribution.cpp \
-    TextInFile.cpp
+    TextInFile.cpp \
+    SEDFamily.cpp

@@ -28,8 +28,24 @@ namespace
 
 //////////////////////////////////////////////////////////////////////
 
-MappingsSEDFamily::MappingsSEDFamily(SimulationItem* item)
+MappingsSEDFamily::MappingsSEDFamily()
 {
+}
+
+///////////////////////////////////////////////////////////////////
+
+MappingsSEDFamily::MappingsSEDFamily(SimulationItem* parent)
+{
+    setParent(parent);
+    setup();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void MappingsSEDFamily::setupSelfBefore()
+{
+    SEDFamily::setupSelfBefore();
+
     // Prepare the vectors for the MAPPINGS III library SEDs
     _lambdav.resize(Nlambda);
     _Zrelv.resize(NZrel);
@@ -70,7 +86,7 @@ MappingsSEDFamily::MappingsSEDFamily(SimulationItem* item)
                                    + Zrelnamev[i] + "_" + logCnamev[j] + "_" + logpnamev[k] + ".dat";
                 ifstream file(filename.toLocal8Bit().constData());
                 if (! file.is_open()) throw FATALERROR("Could not open the data file " + filename);
-                item->find<Log>()->info("Reading SED data from file " + filename + "...");
+                find<Log>()->info("Reading SED data from file " + filename + "...");
                 for (int l=0; l<Nlambda; l++)
                 {
                     file >> lambda >> j0 >> j1;
@@ -79,17 +95,16 @@ MappingsSEDFamily::MappingsSEDFamily(SimulationItem* item)
                     j1v[l] = j1;
                 }
                 file.close();
-                item->find<Log>()->info("File " + filename + " closed.");
+                find<Log>()->info("File " + filename + " closed.");
             }
 
     // cache the simulation's wavelength grid
-    _lambdagrid = item->find<WavelengthGrid>();
+    _lambdagrid = find<WavelengthGrid>();
 }
 
 //////////////////////////////////////////////////////////////////////
 
-Array
-MappingsSEDFamily::luminosities(double SFR, double Z, double logC, double pressure, double fPDR) const
+Array MappingsSEDFamily::luminosities(double SFR, double Z, double logC, double pressure, double fPDR) const
 {
     // convert the input parameters to the parameters that are assumed in MAPPINGS III.
     // * the metallicity is converted from an absolute value Z to a value Zrel relative to the
@@ -159,6 +174,21 @@ MappingsSEDFamily::luminosities(double SFR, double Z, double logC, double pressu
     // multiply by the SFR (the MAPPINGSIII templates correspond to a SFR of 1 Msun/yr)
     // and return the result
     return NR::resample<NR::interpolate_loglog>(_lambdagrid->lambdav(), _lambdav, jv) * _lambdagrid->dlambdav() * SFR;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+int MappingsSEDFamily::nparams_generic() const
+{
+    return 5;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+Array MappingsSEDFamily::luminosities_generic(const Array& params, int skipvals) const
+{
+    return luminosities(params[skipvals], params[skipvals+1], params[skipvals+2],
+                        params[skipvals+3], params[skipvals+4]);
 }
 
 //////////////////////////////////////////////////////////////////////

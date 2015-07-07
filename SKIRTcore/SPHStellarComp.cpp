@@ -3,7 +3,6 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
-#include <QFile>
 #include "BruzualCharlotSEDFamily.hpp"
 #include "FatalError.hpp"
 #include "FilePaths.hpp"
@@ -12,6 +11,7 @@
 #include "PhotonPackage.hpp"
 #include "Random.hpp"
 #include "SPHStellarComp.hpp"
+#include "TextInFile.hpp"
 #include "TextOutFile.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
@@ -31,6 +31,9 @@ void SPHStellarComp::setupSelfBefore()
 {
     StellarComp::setupSelfBefore();
 
+    // construct the library of SED models
+    BruzualCharlotSEDFamily bc(this);
+
     // cache the random generator
     _random = find<Random>();
 
@@ -38,56 +41,54 @@ void SPHStellarComp::setupSelfBefore()
     const double pc = Units::pc();
 
     // load the SPH star particles
-    QString filepath = find<FilePaths>()->input(_filename);
-    QFile infile(filepath);
-    if (!infile.open(QIODevice::ReadOnly|QIODevice::Text))
-        throw FATALERROR("Could not open the SPH star data file " + filepath);
-    find<Log>()->info("Reading SPH star particles from file " + filepath + "...");
-    int Nstars = 0;
-    double Mtot = 0;
-    while (!infile.atEnd())
+    vector<Array> stars;
+    TextInFile infile(this, _filename, "SPH star particles");
+    while (true)
     {
-        // read a line, split it in columns, and skip empty and comment lines
-        QList<QByteArray> columns = infile.readLine().simplified().split(' ');
-        if (!columns.isEmpty() && !columns[0].startsWith('#'))
+        stars.emplace_back();                   // add a default-constructed array to the vector
+        if (!infile.readRow(stars.back(), 7))   // read next line's values into that array
         {
-            // get the column values; missing or illegal values default to zero
-            _rv.push_back(Vec(columns.value(0).toDouble()*pc,
-                              columns.value(1).toDouble()*pc,
-                              columns.value(2).toDouble()*pc));
-            _hv.push_back(columns.value(3).toDouble()*pc);
-            _Mv.push_back(columns.value(4).toDouble());  // mass in Msun
-            _Zv.push_back(columns.value(5).toDouble());  // metallicity as dimensionless fraction
-            _tv.push_back(columns.value(6).toDouble());  // age in years
-            Nstars++;
-            Mtot += columns.value(4).toDouble();
+            stars.pop_back();                   // at the end, remove the extraneous array
+            break;
         }
     }
-    infile.close();
-    find<Log>()->info("  Total number of SPH star particles: " + QString::number(Nstars));
-    find<Log>()->info("  Total stellar mass: " + QString::number(Mtot) + " Msun");
 
-    find<Log>()->info("Filling the vectors with the SEDs of the particles... ");
+    find<Log>()->info("Processing the particle properties... ");
 
-    // construct the library of SED models
-    BruzualCharlotSEDFamily bc(this);
-
-    // construct a temporary matrix Lvv with the luminosity of each particle at each wavelength
-    // and also the permanent vector _Ltotv with the total luminosity for every wavelength bin
+    // provide room for the relevant particle properties and statistics
+    //  - the permanent vectors with the particle positions and sizes
+    //  - a temporary matrix Lvv with the luminosity of each particle at each wavelength
+    //  - the permanent vector _Ltotv with the total luminosity for every wavelength bin
+    //  - total luminosity and total mass
     int Nlambda = find<WavelengthGrid>()->Nlambda();
+    int Nstars = stars.size();
+    _rv.resize(Nstars);
+    _hv.resize(Nstars);
     ArrayTable<2> Lvv(Nlambda,Nstars);
     _Ltotv.resize(Nlambda);
     double Ltot = 0;
-    for (int i=0; i<Nstars; i++)
+    double Mtot = 0;
+
+    // actually gather the information
+    for (int i=0; i!=Nstars; ++i)
     {
-        const Array& Lv = bc.luminosities(_Mv[i], _Zv[i], _tv[i]);
+        const Array& star = stars[i];
+
+        _rv[i] = Vec(star[0],star[1],star[2])*pc;
+        _hv[i] = star[3]*pc;
+
+        const Array& Lv = bc.luminosities_generic(star, 4);
         for (int ell=0; ell<Nlambda; ell++)
         {
             Lvv[ell][i] = Lv[ell];
             _Ltotv[ell] += Lv[ell];
             Ltot += Lv[ell];
         }
+
+        Mtot += star[4];  // total mass in Msun
     }
+    find<Log>()->info("  Total number of SPH star particles: " + QString::number(Nstars));
+    find<Log>()->info("  Total stellar mass: " + QString::number(Mtot) + " Msun");
     find<Log>()->info("  Total luminosity: " + QString::number(Ltot/Units::Lsun()) + " Lsun");
 
     // construct the permanent vectors _Xvv with the normalized cumulative luminosities (per wavelength bin)
