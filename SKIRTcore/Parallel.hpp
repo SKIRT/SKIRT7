@@ -10,9 +10,9 @@
 #include <mutex>
 #include <thread>
 #include "ParallelTarget.hpp"
-#include "ProcessAssigner.hpp"
 class FatalError;
 class ParallelFactory;
+class ProcessAssigner;
 
 ////////////////////////////////////////////////////////////////////
 
@@ -25,10 +25,11 @@ class ParallelFactory;
         \code
         void Test::body(size_t index) { ... }
         ...
+        IdenticalAssigner assigner;
         ParallelFactory factory;
-
-        assigner->assign(1000);
-        factory.parallel()->call(this, &Test::body, assigner);
+        ...
+        assigner.assign(1000);
+        factory.parallel()->call(this, &Test::body, &assigner);
         \endcode
 
     A Parallel instance can be created only through the ParallelFactory class. The default
@@ -56,7 +57,7 @@ class ParallelFactory;
     scope of the loop body. Recursively invoking the call() function on the same Parallel instance is
     not allowed and results in undefined behavior.
 
-    The Parallel class uses Qt's multi-threading capabilities, avoiding the complexities of using
+    The Parallel class uses C++11 multi-threading capabilities, avoiding the complexities of using
     yet another library (such as OpenMP) and making it possible to properly handle exceptions. It
     is designed to minimize the run-time overhead for loops with many iterations. */
 class Parallel
@@ -96,7 +97,7 @@ public:
 
 private:
     /** The function that gets executed inside each of the parallel threads. */
-    void run();
+    void run(int threadIndex);
 
     /** The function to do the actual work; used by call() and run(). */
     void doWork();
@@ -106,6 +107,11 @@ private:
 
     /** A function to wait for the parallel threads; used by constructor and call(). */
     void waitForThreads();
+
+    /** This helper function returns true if at least one of the parallel threads (not including
+        the parent thread) is still active, and false if not. This function does not perform any
+        locking; callers should lock the shared data members of this class instance. */
+    bool threadsActive();
 
     //======================== Nested Classes =======================
 
@@ -136,26 +142,26 @@ private:
 
 private:
     // data members keeping track of the threads
+    int _threadCount;                   // the total number of threads, including the parent thread
     std::thread::id _parentThread;      // the ID of the thread that invoked our constructor
     std::vector<std::thread> _threads;  // the parallel threads (other than the parent thread)
 
-    // data members shared by all threads; changed only when no parallel threads are active
-    ParallelTarget* _target;    // the target to be called
-    ProcessAssigner* _assigner; // the process assigner
-    size_t _limit;              // the limit of the for loop being implemented
-    bool _terminate;            // becomes true when the parallel threads must exit
-
     // synchronization
-    std::mutex _mutex;                          // the mutex to synchronize with the parallel threads
+    std::mutex _mutex;                         // the mutex to synchronize with the parallel threads
     std::condition_variable _conditionExtra;   // the wait condition used by the parallel threads
     std::condition_variable _conditionMain;    // the wait condition used by the main thread
 
     // data members shared by all threads; changes are protected by a mutex
-    int _active;                 // the number of parallel threads that are still doing some work
-    FatalError* _exception;      // a pointer to a heap-allocated copy of the exception thrown by a work thread
-                                 // or zero if no exception was thrown
+    ParallelTarget* _target;    // the target to be called
+    ProcessAssigner* _assigner; // the process assigner
+    size_t _limit;              // the limit of the for loop being implemented
+    std::vector<bool> _active;  // flag for each parallel thread (other than the parent thread)
+                                // ... that indicates whether the thread is currently active
+    FatalError* _exception;     // a pointer to a heap-allocated copy of the exception thrown by a work thread
+                                // ... or zero if no exception was thrown
+    bool _terminate;            // becomes true when the parallel threads must exit
 
-    // data member shared by all threads; changes are atomic (no need for protection)
+    // data member shared by all threads; incrementing is atomic (no need for protection)
     std::atomic<size_t> _next;   // the current index of the for loop being implemented
 };
 
