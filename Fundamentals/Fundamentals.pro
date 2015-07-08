@@ -32,9 +32,7 @@ HEADERS += \
     Table.hpp \
     Vec.hpp \
     LockFree.hpp \
-    MemoryStatistics.hpp \
-    FftwConvolution.hpp \
-    Factorize.hpp
+    MemoryStatistics.hpp
 
 SOURCES += \
     CommandLineArguments.cpp \

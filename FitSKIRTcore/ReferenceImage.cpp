@@ -5,6 +5,7 @@
 
 #include "ReferenceImage.hpp"
 #include "AdjustableSkirtSimulation.hpp"
+#include "Convolution.hpp"
 #include "ConvolutionKernel.hpp"
 #include "FatalError.hpp"
 #include "GALumfit.hpp"
@@ -97,7 +98,7 @@ double ReferenceImage::chi2(QList<Image>& frames, QList<double>& monoluminositie
     double chi_value = 0;
     for (int i = 0; i < frames.size(); i++)
     {
-        frames[i].convolve(*_kernel);
+        Convolution::convolve(frames[i], *_kernel);
     }
 
     if (find<AdjustableSkirtSimulation>()->ncomponents() == 1)
@@ -145,7 +146,7 @@ void ReferenceImage::returnFrame(QList<Image>& frames) const
     bool oneDfit = false;
     for (int i = 0; i < frames.size(); i++)
     {
-        frames[i].convolve(*_kernel);
+        Convolution::convolve(frames[i], *_kernel);
     }
     if (frames.size() == 1)
     {

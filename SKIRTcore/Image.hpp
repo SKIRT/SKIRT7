@@ -68,6 +68,10 @@ public:
     /** This function resizes the image to a specified width and height, erasing the current data. */
     void resize(int xsize, int ysize, int nframes = 1);
 
+    /** This function steals the data from an Array object and sets it as its own data (without
+        copying). */
+    void steal(Array& data);
+
     //===================== Basic properties =======================
 
 public:
@@ -108,10 +112,6 @@ public:
     void saveto(const SimulationItem* item, const Array& data, QString filename, QString description);
 
     //=================== Numerical operations =====================
-
-public:
-    /** This function performs a convolution on this image with a given kernel.*/
-    void convolve(const Image& kernel);
 
     //========================= Operators ==========================
 
