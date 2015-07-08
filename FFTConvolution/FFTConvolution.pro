@@ -29,7 +29,7 @@ unix: PRE_TARGETDEPS += $$OUT_PWD/../Fundamentals/libfundamentals.a
 
 # include the necessary paths for FFTW3 if present
 exists ('/usr/local/include/fftw3.h'){
-    message (using FFTW3 library)
+    message (using FFTW3 library for $$TARGET project)
     QMAKE_CXXFLAGS += -DUSING_FFTW3
     CONFIG += USING_FFTW3
     LIBS += -L/usr/local/lib -lfftw3

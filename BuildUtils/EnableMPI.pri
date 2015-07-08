@@ -30,7 +30,7 @@ BUILDING_WITH_MPI {
 
 # use MPI compiler/linker if available, and inform the user
 BUILDING_WITH_MPI {
-    message (using MPI compiler $$MPI_COMPILER)
+    message (using MPI compiler $$MPI_COMPILER for $$TARGET project)
     QMAKE_CXXFLAGS += -DBUILDING_WITH_MPI
     QMAKE_CXX = $$MPI_COMPILER
     QMAKE_LINK = $$MPI_COMPILER
