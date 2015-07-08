@@ -41,17 +41,7 @@ void SPHStellarComp::setupSelfBefore()
     const double pc = Units::pc();
 
     // load the SPH star particles
-    vector<Array> stars;
-    TextInFile infile(this, _filename, "SPH star particles");
-    while (true)
-    {
-        stars.emplace_back();                   // add a default-constructed array to the vector
-        if (!infile.readRow(stars.back(), 7))   // read next line's values into that array
-        {
-            stars.pop_back();                   // at the end, remove the extraneous array
-            break;
-        }
-    }
+    const vector<Array>& stars = TextInFile(this, _filename, "SPH star particles").readAllRows(7);
 
     find<Log>()->info("Processing the particle properties... ");
 

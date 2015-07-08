@@ -60,3 +60,20 @@ bool TextInFile::readRow(Array& values, size_t ncols, size_t noptcols)
 }
 
 ////////////////////////////////////////////////////////////////////
+
+vector<Array> TextInFile::readAllRows(size_t ncols, size_t noptcols)
+{
+    vector<Array> rows;
+    while (true)
+    {
+        rows.emplace_back();                        // add a default-constructed array to the vector
+        if (!readRow(rows.back(), ncols, noptcols)) // read next line's values into that array
+        {
+            rows.pop_back();                        // at the end, remove the extraneous array
+            break;
+        }
+    }
+    return rows;
+}
+
+////////////////////////////////////////////////////////////////////
