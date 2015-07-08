@@ -24,6 +24,7 @@
 #include "BlackBodySED.hpp"
 #include "BolLuminosityStellarCompNormalization.hpp"
 #include "BruzualCharlotSED.hpp"
+#include "BruzualCharlotSEDFamily.hpp"
 #include "ClumpyGeometryDecorator.hpp"
 #include "CombineGeometryDecorator.hpp"
 #include "CompDustDistribution.hpp"
@@ -81,6 +82,7 @@
 #include "LogSpheDustGridStructure.hpp"
 #include "LogWavelengthGrid.hpp"
 #include "LuminosityStellarCompNormalization.hpp"
+#include "MappingsSEDFamily.hpp"
 #include "MGEGeometry.hpp"
 #include "MRNDustMix.hpp"
 #include "MarastonSED.hpp"
@@ -417,6 +419,11 @@ void RegisterSimulationItems::registerAll()
     add<KuruczSED>();
     add<QuasarSED>();
     add<FileSED>();
+
+    // SED families
+    add<SEDFamily>(false);
+    add<BruzualCharlotSEDFamily>();
+    add<MappingsSEDFamily>();
 
     // process assigners
     add<ProcessAssigner>(false);

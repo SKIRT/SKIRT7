@@ -55,13 +55,21 @@ public:
 
     /** This function returns the number of parameters used by this particular %SED family, in
         other words the number of arguments of the luminosities() function. */
-    int nparams_generic() const;
+    int nparams() const;
 
     /** This function returns the luminosity \f$L_\ell\f$ at each wavelength in the simulation's
         wavelength grid for the specified parameter values, which should be in the same order and
         using the same units as the arguments described for the luminosities() function. The first
         \em skipvals values in the \em params array are ignored. */
     Array luminosities_generic(const Array& params, int skipvals=0) const;
+
+    /** This function returns a short name for the type of sources typically assigned to this
+        particular %SED family. */
+     QString sourceName() const;
+
+     /** This function returns a description for the type of sources typically assigned to this
+         particular %SED family. */
+      QString sourceDescription() const;
 
     //====================== Data members =====================
 

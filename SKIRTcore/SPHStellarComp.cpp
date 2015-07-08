@@ -21,7 +21,7 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////
 
 SPHStellarComp::SPHStellarComp()
-    : _writeLuminosities(false)
+    : _sedFamily(0), _writeLuminosities(false)
 {
 }
 
@@ -31,17 +31,26 @@ void SPHStellarComp::setupSelfBefore()
 {
     StellarComp::setupSelfBefore();
 
-    // construct the library of SED models
-    BruzualCharlotSEDFamily bc(this);
+    // make sure we have an SED family
+    if (!_sedFamily) throw FATALERROR("SED family was not specified");
 
     // cache the random generator
     _random = find<Random>();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void SPHStellarComp::setupSelfAfter()
+{
+    StellarComp::setupSelfAfter();
 
     // local constant for units
     const double pc = Units::pc();
 
-    // load the SPH star particles
-    const vector<Array>& stars = TextInFile(this, _filename, "SPH star particles").readAllRows(7);
+    // load the SPH source particles, including the parameters for our SED family
+    int Nparams = _sedFamily->nparams();
+    QString description = "SPH " + _sedFamily->sourceDescription() + " particles";
+    const vector<Array>& stars = TextInFile(this, _filename, description).readAllRows(4+Nparams);
 
     find<Log>()->info("Processing the particle properties... ");
 
@@ -67,7 +76,7 @@ void SPHStellarComp::setupSelfBefore()
         _rv[i] = Vec(star[0],star[1],star[2])*pc;
         _hv[i] = star[3]*pc;
 
-        const Array& Lv = bc.luminosities_generic(star, 4);
+        const Array& Lv = _sedFamily->luminosities_generic(star, 4);
         for (int ell=0; ell<Nlambda; ell++)
         {
             Lvv[ell][i] = Lv[ell];
@@ -77,8 +86,8 @@ void SPHStellarComp::setupSelfBefore()
 
         Mtot += star[4];  // total mass in Msun
     }
-    find<Log>()->info("  Total number of SPH star particles: " + QString::number(Nstars));
-    find<Log>()->info("  Total stellar mass: " + QString::number(Mtot) + " Msun");
+    find<Log>()->info("  Number of particles: " + QString::number(Nstars));
+    find<Log>()->info("  Total mass: " + QString::number(Mtot) + " Msun");
     find<Log>()->info("  Total luminosity: " + QString::number(Ltot/Units::Lsun()) + " Lsun");
 
     // construct the permanent vectors _Xvv with the normalized cumulative luminosities (per wavelength bin)
@@ -95,7 +104,7 @@ void SPHStellarComp::setupSelfBefore()
         WavelengthGrid* lambdagrid = find<WavelengthGrid>();
 
         // Create a text file
-        TextOutFile file(this, "luminosities", "stellar luminosities");
+        TextOutFile file(this, _sedFamily->sourceName() + "_luminosities", "SPH source luminosities");
 
         // Write the header
         file.addColumn("lambda (" + units->uwavelength() + ")");
@@ -122,6 +131,22 @@ void SPHStellarComp::setFilename(QString value)
 QString SPHStellarComp::filename() const
 {
     return _filename;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void SPHStellarComp::setSedFamily(SEDFamily* value)
+{
+    if (_sedFamily) delete _sedFamily;
+    _sedFamily = value;
+    if (_sedFamily) _sedFamily->setParent(this);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+SEDFamily*SPHStellarComp::sedFamily() const
+{
+    return _sedFamily;
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -176,7 +176,7 @@ Array BruzualCharlotSEDFamily::luminosities(double M, double Z, double t) const
 
 //////////////////////////////////////////////////////////////////////
 
-int BruzualCharlotSEDFamily::nparams_generic() const
+int BruzualCharlotSEDFamily::nparams() const
 {
     return 3;
 }
@@ -186,6 +186,20 @@ int BruzualCharlotSEDFamily::nparams_generic() const
 Array BruzualCharlotSEDFamily::luminosities_generic(const Array& params, int skipvals) const
 {
     return luminosities(params[skipvals], params[skipvals+1], params[skipvals+2]);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+QString BruzualCharlotSEDFamily::sourceName() const
+{
+    return "star";
+}
+
+//////////////////////////////////////////////////////////////////////
+
+QString BruzualCharlotSEDFamily::sourceDescription() const
+{
+    return "star";
 }
 
 //////////////////////////////////////////////////////////////////////

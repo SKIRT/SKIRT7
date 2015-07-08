@@ -178,7 +178,7 @@ Array MappingsSEDFamily::luminosities(double SFR, double Z, double logC, double 
 
 //////////////////////////////////////////////////////////////////////
 
-int MappingsSEDFamily::nparams_generic() const
+int MappingsSEDFamily::nparams() const
 {
     return 5;
 }
@@ -188,7 +188,21 @@ int MappingsSEDFamily::nparams_generic() const
 Array MappingsSEDFamily::luminosities_generic(const Array& params, int skipvals) const
 {
     return luminosities(params[skipvals], params[skipvals+1], params[skipvals+2],
-                        params[skipvals+3], params[skipvals+4]);
+            params[skipvals+3], params[skipvals+4]);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+QString MappingsSEDFamily::sourceName() const
+{
+    return "hii";
+}
+
+//////////////////////////////////////////////////////////////////////
+
+QString MappingsSEDFamily::sourceDescription() const
+{
+    return "HII region";
 }
 
 //////////////////////////////////////////////////////////////////////

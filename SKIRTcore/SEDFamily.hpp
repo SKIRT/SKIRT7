@@ -30,7 +30,7 @@ protected:
 
 public:
     /** This function returns the number of parameters used by this particular %SED family. */
-    virtual int nparams_generic() const = 0;
+    virtual int nparams() const = 0;
 
     /** This function returns the luminosity \f$L_\ell\f$ (defined as emissivity multiplied by the
         width of the wavelength bin) at each wavelength in the simulation's wavelength grid for the
@@ -38,6 +38,15 @@ public:
         of parameter values in the order specified by the particular %SED family subclass.
         The first \em skipvals values in the array are ignored. */
     virtual Array luminosities_generic(const Array& params, int skipvals=0) const = 0;
+
+    /** This function returns a short name for the type of sources typically assigned to this
+        particular %SED family. The name is used as part of filenames; it should be lowercase only
+        and it should not contain spaces or punctuation. */
+    virtual QString sourceName() const = 0;
+
+    /** This function returns a description for the type of sources typically assigned to this
+        particular %SED family. The description is used in log messages. */
+     virtual QString sourceDescription() const = 0;
 };
 
 ////////////////////////////////////////////////////////////////////

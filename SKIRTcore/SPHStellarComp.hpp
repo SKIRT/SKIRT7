@@ -10,6 +10,7 @@
 #include "StellarComp.hpp"
 #include "Vec.hpp"
 class Random;
+class SEDFamily;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -22,7 +23,11 @@ class SPHStellarComp : public StellarComp
     Q_CLASSINFO("Title", "a stellar component derived from an SPH output file")
 
     Q_CLASSINFO("Property", "filename")
-    Q_CLASSINFO("Title", "the name of the file with the SPH star particles")
+    Q_CLASSINFO("Title", "the name of the file with the SPH source particles")
+
+    Q_CLASSINFO("Property", "sedFamily")
+    Q_CLASSINFO("Title", "the SED family used to assign a spectral energy distribution to each particle")
+    Q_CLASSINFO("Default", "BruzualCharlotSEDFamily")
 
     Q_CLASSINFO("Property", "writeLuminosities")
     Q_CLASSINFO("Title", "output a data file with the luminosities per wavelength bin")
@@ -35,6 +40,9 @@ public:
     Q_INVOKABLE SPHStellarComp();
 
 protected:
+    /** This function verifies that the %SED family was set. */
+    void setupSelfBefore();
+
     /** This function performs setup for the SPH stellar component. The first step is to load the
         properties for each of the SPH star particles from the specified file. The second step is
         to calculate the luminosity \f$L_{\ell,i}\f$ for each particle \f$i\f$ and at each
@@ -47,7 +55,7 @@ protected:
         X_{\ell,i} = \frac{ \sum_{j=0}^{i-1} L_{\ell,j} }{ \sum_{j=0}^{N-1} L_{\ell,j} } \f] . This
         matrix will be used for the efficient generation of random photon packages from the stellar
         component. */
-    void setupSelfBefore();
+    void setupSelfAfter();
 
     //======== Setters & Getters for Discoverable Attributes =======
 
@@ -64,6 +72,12 @@ public:
 
     /** Returns the name of the file containing the information on the SPH star particles. */
     Q_INVOKABLE QString filename() const;
+
+    /** Sets the SED family for the stellar component. */
+    Q_INVOKABLE void setSedFamily(SEDFamily* value);
+
+    /** Returns the SED family for the stellar component. */
+    Q_INVOKABLE SEDFamily* sedFamily() const;
 
     /** Sets the flag that indicates whether or not to output a data file with the luminosities per
         wavelength bin. The default value is false. */
@@ -104,6 +118,7 @@ public:
 private:
     // discoverable properties
     QString _filename;
+    SEDFamily* _sedFamily;
     bool _writeLuminosities;
 
     // particle position and size
