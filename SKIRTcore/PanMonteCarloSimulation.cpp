@@ -10,6 +10,7 @@
 #include "PanWavelengthGrid.hpp"
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
+#include "PeerToPeerCommunicator.hpp"
 #include "PhotonPackage.hpp"
 #include "Random.hpp"
 #include "SED.hpp"

@@ -6,25 +6,38 @@
 #include "FatalError.hpp"
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
+#include "ProcessAssigner.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
 Parallel::Parallel(int threadCount, ParallelFactory* factory)
-    : _assigner(0)
 {
+    // Cache the number of threads
+    _threadCount = threadCount;
+
     // Remember the ID of the current thread
     _parentThread = std::this_thread::get_id();
     factory->addThreadIndex(_parentThread, 0);
 
-    // Initialize the number of active threads (i.e. not waiting for new work) other than the current thread
-    _terminate = false;
-    _active = threadCount - 1;
-
-    // Create the extra parallel threads
-    for (int index = 1; index < threadCount; index++)
+    // Initialize shared data members and launch threads in a critical section
     {
-        _threads.push_back(std::thread(&Parallel::run, this));
-        factory->addThreadIndex(_threads.back().get_id(), index);
+        std::unique_lock<std::mutex> lock(_mutex);
+
+        // Initialize shared data members
+        _target = nullptr;
+        _assigner = nullptr;
+        _limit = 0;
+        _active.assign(threadCount, true);
+        _exception = nullptr;
+        _terminate = false;
+        _next = 0;
+
+        // Create the extra parallel threads with one-based index (parent thread has index zero)
+        for (int index = 1; index < threadCount; index++)
+        {
+            _threads.push_back(std::thread(&Parallel::run, this, index));
+            factory->addThreadIndex(_threads.back().get_id(), index);
+        }
     }
 
     // Wait until all parallel threads are ready
@@ -35,12 +48,17 @@ Parallel::Parallel(int threadCount, ParallelFactory* factory)
 
 Parallel::~Parallel()
 {
-    // Verify that none of the threads are active
-    if (_active) throw FATALERROR("Parallel threads still active upon destruction");
+    // Ask the parallel threads to exit in a critical section
+    {
+        std::unique_lock<std::mutex> lock(_mutex);
 
-    // Ask the parallel threads to exit
-    _terminate = true;
-    _condition_extra.notify_all();
+        // Verify that none of the threads are active
+        if (threadsActive()) throw FATALERROR("Parallel threads still active upon destruction");
+
+        // Ask the parallel threads to exit
+        _terminate = true;
+        _conditionExtra.notify_all();
+    }
 
     // Wait for them to do so
     for (auto& thread: _threads) thread.join();
@@ -50,7 +68,7 @@ Parallel::~Parallel()
 
 int Parallel::threadCount() const
 {
-    return _threads.size() + 1;  // also count the parent thread
+    return _threadCount;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -61,22 +79,27 @@ void Parallel::call(ParallelTarget* target, ProcessAssigner* assigner)
     if (std::this_thread::get_id() != _parentThread)
         throw FATALERROR("Parallel call not invoked from thread that constructed this object");
 
-    // Copy the arguments so they can be used from any of the threads
-    _target = target;
-    _assigner = assigner;
-    _limit = _assigner->nvalues();
+    // Initialize shared data members and activate threads in a critical section
+    {
+        std::unique_lock<std::mutex> lock(_mutex);
 
-    // Initialize the number of active threads (i.e. not waiting for new work)
-    _active = assigner->parallel() ? _threads.size() : 0;
+        // Copy the arguments so they can be used from any of the threads
+        _target = target;
+        _assigner = assigner;
+        _limit = assigner->nvalues();
 
-    // Clear the exception pointer
-    _exception = 0;
+        // Initialize the number of active threads (i.e. not waiting for new work)
+        if (assigner->parallel()) _active.assign(_threadCount, true);
 
-    // Initialize the loop variable
-    _next = 0;
+        // Clear the exception pointer
+        _exception = 0;
 
-    // Wake all parallel threads, if multithreading is allowed
-    if (assigner->parallel()) _condition_extra.notify_all();
+        // Initialize the loop variable
+        _next = 0;
+
+        // Wake all parallel threads, if multithreading is allowed
+        if (assigner->parallel()) _conditionExtra.notify_all();
+    }
 
     // Do some work ourselves as well
     doWork();
@@ -87,26 +110,38 @@ void Parallel::call(ParallelTarget* target, ProcessAssigner* assigner)
     // Check for and process the exception, if any
     if (_exception)
     {
-        throw *_exception;  // throw by value
-        delete _exception;  // destroy the heap-allocated copy
+        throw *_exception;  // throw by value (the memory for the heap-allocated exception is leaked)
     }
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void Parallel::run()
+void Parallel::run(int threadIndex)
 {
-    forever
+    while (true)
     {
         // Wait for new work in a critical section
-        std::unique_lock<std::mutex> lock(_mutex);
-        _active--;                                  // indicate that this thread is not longer doing work
-        if (!_active) _condition_main.notify_all(); // tell the main thread that all parallel threads may be waiting
-        _condition_extra.wait(lock);
-        lock.unlock();
+        {
+            std::unique_lock<std::mutex> lock(_mutex);
 
-        // Check for termination request (don't bother decrementing _active; it's no longer used)
-        if (_terminate) break;
+            // Indicate that this thread is no longer doing work
+            _active[threadIndex] = false;
+
+            // Tell the main thread when all parallel threads are inactive
+            if (!threadsActive()) _conditionMain.notify_all();
+
+            // Wait for new work
+            while (true)
+            {
+                _conditionExtra.wait(lock);
+
+                // Check for termination request (don't bother with _active; it's no longer used)
+                if (_terminate) return;
+
+                // Check that we actually have new work
+                if (_active[threadIndex]) break;
+            }
+        }
 
         // Do work as long as some is available
         doWork();
@@ -120,7 +155,7 @@ void Parallel::doWork()
     try
     {
         // Do work as long as some is available
-        forever
+        while (true)
         {
             size_t index = _next++;                  // get the next index atomically
             if (index >= _limit) break;              // break if no more are available
@@ -154,21 +189,23 @@ void Parallel::reportException(FatalError* exception)
         // Make the other threads stop by taking away their work
         _limit = 0;  // this is safe because another thread will see either the old value, or zero
     }
-    lock.unlock();
 }
 
 ////////////////////////////////////////////////////////////////////
 
 void Parallel::waitForThreads()
 {
-    // Wait until all parallel threads are in wait
+    // Wait until all parallel threads are inactive
     std::unique_lock<std::mutex> lock(_mutex);
-    forever
-    {
-        if (_active) _condition_main.wait(lock);
-        if (!_active) break;
-    }
-    // lock is automatically released
+    while (threadsActive()) _conditionMain.wait(lock);
+}
+
+////////////////////////////////////////////////////////////////////
+
+bool Parallel::threadsActive()
+{
+    // Check for active threads, skipping the parent thread with index 0
+    return std::any_of(_active.begin()+1, _active.end(), [](bool flag){return flag;});
 }
 
 ////////////////////////////////////////////////////////////////////

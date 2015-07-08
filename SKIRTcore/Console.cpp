@@ -14,12 +14,12 @@
 // so we can use static data made private by an unnamed namespace
 namespace
 {
-    std::mutex _mutex;         // mutex to guard the input/output operations
-    bool _initialized = false; // flag becomes true if static data have been initialized
+    std::mutex _mutex;              // mutex to guard the input/output operations
+    std::once_flag _initialized;    // flag becomes true if static data have been initialized
 
-    QTextStream _out(stdout);  // Unicode aware output
-    QTextStream _in(stdin);    // Unicode aware input
-    bool _colored = false;     // set to true if the console supports ANSI escape sequences for coloring
+    QTextStream _out(stdout);       // Unicode aware output
+    QTextStream _in(stdin);         // Unicode aware input
+    bool _colored = false;          // set to true if the console supports ANSI escape sequences for coloring
 
     // ANSI escape sequences for coloring, indexed by level (Info, Warning, Success, Error, Prompt=Error+1)
     // NOTE: this depends on the order in the Level enum --> sligthly dirty
@@ -31,9 +31,7 @@ namespace
 
 Console::Console()
 {
-    std::unique_lock<std::mutex> lock(_mutex);
-
-    if (!_initialized)
+    std::call_once(_initialized, []
     {
         // Set console encoding on systems where the default QTextCodec::codecForLocale() is incorrect,
         // such as when running on MacOS X in the X11 terminal launched by Qt creator
@@ -48,7 +46,7 @@ Console::Console()
 
         // we assume that coloring is supported if the TERM environment variable is defined
         _colored = !QProcessEnvironment::systemEnvironment().value("TERM").isEmpty();
-    }
+    });
 }
 
 ////////////////////////////////////////////////////////////////////

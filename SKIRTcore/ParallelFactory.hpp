@@ -80,7 +80,7 @@ private:
 private:
     int _maxThreadCount;                                // the maximum thread count for the factory
     std::thread::id _parentThread;                      // the thread that invoked our constructor
-    std::unordered_map<int, Parallel*> _children;       // our children, keyed on number of threads
+    std::unordered_map<int, std::unique_ptr<Parallel>> _children; // our children, keyed on number of threads
     std::unordered_map<std::thread::id, int> _indices;  // the index for each child thread and the parent thread
 };
 

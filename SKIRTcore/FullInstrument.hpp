@@ -24,15 +24,16 @@
     of the Stokes vector are not recorded. These adjustments save memory and processing time where
     appropriate.
 
-    Generally speaking, rather than the total flux \f$F_\lambda^{\text{tot}}\f$, this
-    instrument separately stores the contributions due to direct stellar radiation
-    (\f$F_\lambda^{\text{dir}}\f$), due to scattered stellar radiation
-    (\f$F_\lambda^{\text{sca}}\f$), and due to thermal radiation emitted by the dust
-    (\f$F_\lambda^{\text{dus}}\f$), with obviously \f[ F_\lambda^{\text{tot}} =
-    F_\lambda^{\text{dir}} + F_\lambda^{\text{sca}} + F_\lambda^{\text{dus}} \f] The instrument
-    also stores the flux from the object as it would be seen without any dust attenuation, i.e. the
-    transparent view of the system. Furthermore, the contributions from individual scattering
-    levels (up to a certain maximum level \f$N_{\text{max}}\f$) can be recorded separately. By
+    Specifically, this instrument separately records the contributions to the total flux
+    \f$F_\lambda^{\text{tot}}\f$ due to the direct stellar radiation
+    \f$F_\lambda^{*,\text{dir}}\f$, the scattered stellar radiation \f$F_\lambda^{*,\text{sca}}\f$,
+    the direct dust radiation \f$F_\lambda^{\text{dust},\text{dir}}\f$, and the scattered dust
+    radiation \f$F_\lambda^{\text{dust},\text{sca}}\f$, with obviously \f[ F_\lambda^{\text{tot}} =
+    F_\lambda^{*,\text{dir}} + F_\lambda^{*,\text{sca}} + F_\lambda^{\text{dust},\text{dir}} +
+    F_\lambda^{\text{dust},\text{sca}}. \f] The instrument also stores the flux from the object as
+    it would be seen without any dust attenuation, i.e. the transparent view of the system.
+    Furthermore, the contributions from individual scattering levels (stellar radiation only)
+    up to a certain maximum level \f$N_{\text{max}}\f$ can be recorded separately. By
     default, the maximum level is set to zero, effectively disabling this feature. Finally, the
     instrument also records the values corresponding to each of the elements of the Stokes vector,
     i.e. \f$Q_\lambda^{\text{tot}}\f$, \f$U_\lambda^{\text{tot}}\f$, and
@@ -125,21 +126,23 @@ private:
     bool _polarization;
 
     // detector arrays (frames)
-    Array _fdirv;
-    Array _fscav;
     Array _ftrav;
-    Array _fdusv;
-    ArrayTable<2> _fscavv;
+    Array _fstrdirv;
+    Array _fstrscav;
+    Array _fdusdirv;
+    Array _fdusscav;
+    ArrayTable<2> _fstrscavv;
     Array _ftotQv;
     Array _ftotUv;
     Array _ftotVv;
 
     // detector arrays (SEDs)
-    Array _Fdirv;
-    Array _Fscav;
     Array _Ftrav;
-    Array _Fdusv;
-    ArrayTable<2> _Fscavv;
+    Array _Fstrdirv;
+    Array _Fstrscav;
+    Array _Fdusdirv;
+    Array _Fdusscav;
+    ArrayTable<2> _Fstrscavv;
     Array _FtotQv;
     Array _FtotUv;
     Array _FtotVv;
