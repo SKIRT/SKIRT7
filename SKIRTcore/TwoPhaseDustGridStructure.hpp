@@ -66,7 +66,6 @@ class TwoPhaseDustGridStructure : public CubDustGridStructure
 
     Q_CLASSINFO("Property", "contrast")
     Q_CLASSINFO("Title", "the density contrast between the high- and low-density medium")
-    Q_CLASSINFO("Quantity", "length")
     Q_CLASSINFO("MinValue", "0")
 
     //============= Construction - Setup - Destruction =============

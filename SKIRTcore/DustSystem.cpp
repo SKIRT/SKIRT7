@@ -165,7 +165,8 @@ void DustSystem::setSampleDensityBody(size_t m)
         find<Log>()->info("  Computing density for cell " + QString::number(m)
                           + " (" + QString::number(floor(100.*_assigner->relativeIndex(m)/_assigner->nvalues())) + "%)");
     }
-    if (_grid->weight(m) > 0)
+    double weight = _grid->weight(m);
+    if (weight > 0)
     {
         Array sumv(_Ncomp);
         for (int n=0; n<_Nrandom; n++)
@@ -175,7 +176,7 @@ void DustSystem::setSampleDensityBody(size_t m)
         }
         for (int h=0; h<_Ncomp; h++)
         {
-            _rhovv(m,h) = sumv[h]/_Nrandom;
+            _rhovv(m,h) = weight*sumv[h]/_Nrandom;
         }
     }
     else
