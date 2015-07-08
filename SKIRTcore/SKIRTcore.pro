@@ -285,7 +285,6 @@ HEADERS += \
     SpiralStructureGeometryDecorator.hpp \
     ClumpyGeometryDecorator.hpp \
     FoamGeometryDecorator.hpp \
-    SPHStarburstComp.hpp \
     CombineGeometryDecorator.hpp \
     CropGeometryDecorator.hpp \
     LaserGeometry.hpp \
@@ -544,7 +543,6 @@ SOURCES += \
     SpiralStructureGeometryDecorator.cpp \
     ClumpyGeometryDecorator.cpp \
     FoamGeometryDecorator.cpp \
-    SPHStarburstComp.cpp \
     CombineGeometryDecorator.cpp \
     CropGeometryDecorator.cpp \
     LaserGeometry.cpp \

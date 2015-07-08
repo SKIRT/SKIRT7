@@ -131,7 +131,6 @@
 #include "SolarPatchGeometry.hpp"
 #include "SPHDustDistribution.hpp"
 #include "SPHGeometry.hpp"
-#include "SPHStarburstComp.hpp"
 #include "SPHStellarComp.hpp"
 #include "SersicGeometry.hpp"
 #include "ShellGeometry.hpp"
@@ -234,7 +233,6 @@ void RegisterSimulationItems::registerAll()
     add<LuminosityStellarCompNormalization>();
     add<SpectralLuminosityStellarCompNormalization>();
     add<SPHStellarComp>();
-    add<SPHStarburstComp>();
     add<AdaptiveMeshStellarComp>();
     add<VoronoiStellarComp>();
 

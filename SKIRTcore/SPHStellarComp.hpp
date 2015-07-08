@@ -14,8 +14,8 @@ class SEDFamily;
 
 //////////////////////////////////////////////////////////////////////
 
-/** The SPHStellarComp class represents a stellar component defined from a set of SPH star particles,
-    such as for example resulting from a cosmological simulation. The information on the SPH star
+/** The SPHStellarComp class represents a stellar component defined from a set of SPH source particles,
+    such as for example resulting from a cosmological simulation. The information on the SPH source
     particles is read from a file formatted as described with the setFilename() function. */
 class SPHStellarComp : public StellarComp
 {
@@ -44,33 +44,42 @@ protected:
     void setupSelfBefore();
 
     /** This function performs setup for the SPH stellar component. The first step is to load the
-        properties for each of the SPH star particles from the specified file. The second step is
+        properties for each of the SPH source particles from the specified file. The second step is
         to calculate the luminosity \f$L_{\ell,i}\f$ for each particle \f$i\f$ and at each
-        wavelength grid point \f$\ell\f$. The luminosity distribution for each particle is
-        determined using bilinear interpolation on age and metallicity in the family of Bruzual &
-        Charlot SEDs (read from the appropriate resource files). These particle-specific SEDs are
-        resampled on the simulation's global wavelength grid. Summing over all particles, a vector
-        with the total luminosity for each wavelength bin is constructed. Finally, a matrix
-        \f$X_{\ell,i}\f$ is filled that contains the normalized cumulative luminosity, \f[
-        X_{\ell,i} = \frac{ \sum_{j=0}^{i-1} L_{\ell,j} }{ \sum_{j=0}^{N-1} L_{\ell,j} } \f] . This
-        matrix will be used for the efficient generation of random photon packages from the stellar
-        component. */
+        wavelength grid point \f$\ell\f$ through the %SED family specified as a property. Summing
+        over all particles, a vector with the total luminosity for each wavelength bin is
+        constructed. Finally, a matrix \f$X_{\ell,i}\f$ is filled that contains the normalized
+        cumulative luminosity, \f[ X_{\ell,i} = \frac{ \sum_{j=0}^{i-1} L_{\ell,j} }{
+        \sum_{j=0}^{N-1} L_{\ell,j} }. \f] This matrix will be used for the efficient generation
+        of random photon packages from the stellar component. */
     void setupSelfAfter();
 
     //======== Setters & Getters for Discoverable Attributes =======
 
 public:
-    /** Sets the name of the file containing the information on the SPH star particles, optionally
-        including an absolute or relative path. This text file should contain exactly 7 columns of
+    /** Sets the name of the file containing the information on the SPH source particles,
+        optionally including an absolute or relative path. This text file should contain columns of
         numbers separated by whitespace; lines starting with # are ignored. The first three columns
-        are the \f$x\f$, \f$y\f$ and \f$z\f$ coordinates of the particles (in pc), the fourth
-        column is the SPH smoothing length \f$h\f$ (in pc), the fifth column is the initial mass of
-        the stellar population (in \f$M_\odot\f$ at \f$t=0\f$), the sixth column is the metallicity
-        \f$Z\f$ of the stellar population (dimensionless fraction), and the seventh column is the
-        age of the stellar population (in yr). */
+        are the \f$x\f$, \f$y\f$ and \f$z\f$ coordinates of the particles (in pc) and the fourth
+        column is the SPH smoothing length \f$h\f$ (in pc). The number and interpretation of the
+        subsequent columns depends on the %SED family specified as a property to this particular
+        SPHStellarComp instance.
+
+        For the Bruzual-Charlot %SED family, the remaining three columns provide the properties of
+        the stellar population. The fifth column is the initial mass of the stellar population (in
+        \f$M_\odot\f$ at \f$t=0\f$), the sixth column is the metallicity \f$Z\f$ of the stellar
+        population (dimensionless fraction), and the seventh column is the age of the stellar
+        population (in yr).
+
+        For the Mappings III %SED family, the remaining five columns provide the properties of the
+        corresponding HII region in the following order: the star formation rate \f$\dot{M}\f$,
+        assumed to be constant over the past 10 Myr (in \f$M_\odot\,{\text{yr}}^{-1}\f$),
+        metallicity \f$Z\f$ (as a dimensionless fraction), the logarithm of the compactness \f$\log
+        C\f$ (as a dimensionless fraction), the ISM pressure \f$p\f$ (in Pa), and the dimensionless
+        PDR covering factor \f$f_{\text{PDR}}\f$. */
     Q_INVOKABLE void setFilename(QString value);
 
-    /** Returns the name of the file containing the information on the SPH star particles. */
+    /** Returns the name of the file containing the information on the SPH source particles. */
     Q_INVOKABLE QString filename() const;
 
     /** Sets the SED family for the stellar component. */
