@@ -8,6 +8,7 @@
 
 #ifdef USING_FFTW3
 #include <fftw3.h>
+#include <mutex>
 #include "Array.hpp"
 
 //////////////////////////////////////////////////////////////////////
@@ -64,6 +65,7 @@ private:
     fftw_plan _p_forw_src;
     fftw_plan _p_forw_kernel;
     fftw_plan _p_back;
+    std::mutex _mutex;
 };
 
 #endif

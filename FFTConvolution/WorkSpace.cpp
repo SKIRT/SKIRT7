@@ -126,12 +126,15 @@ void WorkSpace::initialize(Convolution_Mode mode, int w_src, int h_src, int w_ke
     _out_kernel = (double*) fftw_malloc(sizeof(fftw_complex) * _h_fftw * (_w_fftw/2+1));
     _dst_fft = new double[_h_fftw * _w_fftw];
 
-    // Initialization of the plans
-    _p_forw_src = fftw_plan_dft_r2c_2d(_h_fftw, _w_fftw, _in_src, (fftw_complex*)_out_src, FFTW_ESTIMATE);
-    _p_forw_kernel = fftw_plan_dft_r2c_2d(_h_fftw, _w_fftw, _in_kernel, (fftw_complex*)_out_kernel, FFTW_ESTIMATE);
+    // Initialization of the plans; we lock this step since the FFTW3 library is not re-entrant when creating plans
+    {
+        std::unique_lock<std::mutex> lock(_mutex);
+        _p_forw_src = fftw_plan_dft_r2c_2d(_h_fftw, _w_fftw, _in_src, (fftw_complex*)_out_src, FFTW_ESTIMATE);
+        _p_forw_kernel = fftw_plan_dft_r2c_2d(_h_fftw, _w_fftw, _in_kernel, (fftw_complex*)_out_kernel, FFTW_ESTIMATE);
 
-    // The backward FFT takes _out_kernel as input !!
-    _p_back = fftw_plan_dft_c2r_2d(_h_fftw, _w_fftw, (fftw_complex*)_out_kernel, _dst_fft, FFTW_ESTIMATE);
+        // The backward FFT takes _out_kernel as input
+        _p_back = fftw_plan_dft_c2r_2d(_h_fftw, _w_fftw, (fftw_complex*)_out_kernel, _dst_fft, FFTW_ESTIMATE);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
