@@ -10,6 +10,7 @@
 #include <fftw3.h>
 #include <mutex>
 #include "Array.hpp"
+#endif
 
 //////////////////////////////////////////////////////////////////////
 
@@ -36,6 +37,7 @@ public:
     /** Default constructor. */
     WorkSpace();
 
+#ifdef USING_FFTW3
     //======================== Other Functions =======================
 
 public:
@@ -66,9 +68,8 @@ private:
     fftw_plan _p_forw_kernel;
     fftw_plan _p_back;
     std::mutex _mutex;
-};
-
 #endif
+};
 
 ////////////////////////////////////////////////////////////////////
 

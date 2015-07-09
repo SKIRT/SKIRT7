@@ -17,6 +17,9 @@ FftConvolution::FftConvolution(int input_xsize, int input_ysize, int kernel_xsiz
 
     // Initialize the workspace
     _ws->initialize(LINEAR_SAME, input_xsize, input_ysize, kernel_xsize, kernel_ysize);
+#else
+    _ws = nullptr;
+    (void)input_xsize; (void)input_ysize; (void)kernel_xsize; (void)kernel_ysize;
 #endif
 }
 
@@ -40,6 +43,8 @@ void FftConvolution::perform(const Array& input, const Array& kernel, Array& out
 #ifdef USING_FFTW3
     // Do the convolution
     _ws->convolve(input, kernel, output);
+#else
+    (void)input; (void)kernel; (void)output;
 #endif
 }
 

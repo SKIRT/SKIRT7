@@ -3,32 +3,39 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
+#include "WorkSpace.hpp"
+
 #ifdef USING_FFTW3
 #include <cassert>
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <stdexcept>
-#include "WorkSpace.hpp"
 #include "Factorize.hpp"
+#endif
 
 ////////////////////////////////////////////////////////////////////
 
+#ifdef USING_FFTW3
 namespace
 {
     int FFTW_FACTORS[7] = {13,11,7,5,3,2,0};    // end with zero to detect the end of the array
 }
+#endif
 
 ////////////////////////////////////////////////////////////////////
 
 WorkSpace::WorkSpace()
+#ifdef USING_FFTW3
     : _in_src(0), _out_src(0), _in_kernel(0), _out_kernel(0), _h_src(0), _w_src(0), _h_kernel(0),
       _w_kernel(0), _w_fftw(0), _h_fftw(0), _dst_fft(0), _h_dst(0), _w_dst(0)
+#endif
 {
 }
 
 ////////////////////////////////////////////////////////////////////
 
+#ifdef USING_FFTW3
 void WorkSpace::initialize(Convolution_Mode mode, int w_src, int h_src, int w_kernel, int h_kernel)
 {
     // Copy the arguments
@@ -136,9 +143,11 @@ void WorkSpace::initialize(Convolution_Mode mode, int w_src, int h_src, int w_ke
         _p_back = fftw_plan_dft_c2r_2d(_h_fftw, _w_fftw, (fftw_complex*)_out_kernel, _dst_fft, FFTW_ESTIMATE);
     }
 }
+#endif
 
 ////////////////////////////////////////////////////////////////////
 
+#ifdef USING_FFTW3
 void WorkSpace::clear()
 {
     // Release memory that is no longer used
@@ -153,9 +162,11 @@ void WorkSpace::clear()
     fftw_destroy_plan(_p_forw_kernel);
     fftw_destroy_plan(_p_back);
 }
+#endif
 
 ////////////////////////////////////////////////////////////////////
 
+#ifdef USING_FFTW3
 void WorkSpace::convolve(const Array& src, const Array& kernel, Array& dst)
 {
     if (_h_fftw <= 0 || _w_fftw <= 0) return;
@@ -212,9 +223,11 @@ void WorkSpace::convolve(const Array& src, const Array& kernel, Array& dst)
                                     "   - CIRCULAR_FULL\n");
     }
 }
+#endif
 
 ////////////////////////////////////////////////////////////////////
 
+#ifdef USING_FFTW3
 void WorkSpace::fftw_circular_convolution(const Array& src, const Array& kernel)
 {
     double* ptr,* ptr_end,* ptr2;
@@ -257,7 +270,6 @@ void WorkSpace::fftw_circular_convolution(const Array& src, const Array& kernel)
     for (ptr = _dst_fft, ptr_end = _dst_fft + _w_fftw*_h_fftw ; ptr != ptr_end ; ++ptr)
         *ptr /= double(_h_fftw*_w_fftw);
 }
+#endif
 
 ////////////////////////////////////////////////////////////////////
-
-#endif

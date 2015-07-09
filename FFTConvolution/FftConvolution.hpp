@@ -7,9 +7,7 @@
 #define FFTCONVOLUTION_HPP
 
 class Array;
-#ifdef USING_FFTW3
 class WorkSpace;
-#endif
 
 ////////////////////////////////////////////////////////////////////
 
@@ -39,10 +37,8 @@ public:
 
     //======================== Data Members ========================
 
-#ifdef USING_FFTW3
 private:
     WorkSpace* _ws;
-#endif
 };
 
 ////////////////////////////////////////////////////////////////////
