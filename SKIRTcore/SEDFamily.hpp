@@ -39,6 +39,12 @@ public:
         The first \em skipvals values in the array are ignored. */
     virtual Array luminosities_generic(const Array& params, int skipvals=0) const = 0;
 
+    /** This function returns the mass (in \f$M_\odot\f$) of the source represented by the
+        specified set of parameter values. The \em params array must contain the appropriate number
+        of parameter values in the order specified by the particular %SED family subclass. The
+        first \em skipvals values in the array are ignored. */
+    virtual double mass_generic(const Array& params, int skipvals=0) const = 0;
+
     /** This function returns a short name for the type of sources typically assigned to this
         particular %SED family. The name is used as part of filenames; it should be lowercase only
         and it should not contain spaces or punctuation. */

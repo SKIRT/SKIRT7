@@ -11,6 +11,7 @@
 #include "Vec.hpp"
 class Random;
 class SEDFamily;
+namespace SPHStellarComp_Private { class VelocityAnisotropy; }
 
 //////////////////////////////////////////////////////////////////////
 
@@ -38,6 +39,9 @@ class SPHStellarComp : public StellarComp
 public:
     /** The default constructor. */
     Q_INVOKABLE SPHStellarComp();
+
+    /** The destructor. */
+    ~SPHStellarComp();
 
 protected:
     /** This function verifies that the %SED family was set. */
@@ -129,14 +133,18 @@ private:
     QString _filename;
     SEDFamily* _sedFamily;
     bool _writeLuminosities;
+    bool _velocity;
 
     // particle position and size
     std::vector<Vec> _rv;
     std::vector<double> _hv;
 
     // luminosity info
-    Array _Ltotv;
-    ArrayTable<2> _Xvv;
+    Array _Ltotv;         // total luminosity for each wavelength bin -- [ell]
+    ArrayTable<2> _Xvv;   // cumulative luminosity over particles, for each wavelength bin -- [ell, i]
+
+    // anisotropy information for each particle (only if _velocity is true)
+    std::vector<SPHStellarComp_Private::VelocityAnisotropy*> _av;
 
     // cached
     Random* _random;

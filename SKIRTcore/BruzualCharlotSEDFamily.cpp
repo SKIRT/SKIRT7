@@ -190,6 +190,13 @@ Array BruzualCharlotSEDFamily::luminosities_generic(const Array& params, int ski
 
 //////////////////////////////////////////////////////////////////////
 
+double BruzualCharlotSEDFamily::mass_generic(const Array& params, int skipvals) const
+{
+    return params[skipvals];
+}
+
+//////////////////////////////////////////////////////////////////////
+
 QString BruzualCharlotSEDFamily::sourceName() const
 {
     return "star";

@@ -193,6 +193,13 @@ Array MappingsSEDFamily::luminosities_generic(const Array& params, int skipvals)
 
 //////////////////////////////////////////////////////////////////////
 
+double MappingsSEDFamily::mass_generic(const Array& params, int skipvals) const
+{
+    return params[skipvals] * 1e7;    // assume constant SFR over 10 Myr
+}
+
+//////////////////////////////////////////////////////////////////////
+
 QString MappingsSEDFamily::sourceName() const
 {
     return "hii";

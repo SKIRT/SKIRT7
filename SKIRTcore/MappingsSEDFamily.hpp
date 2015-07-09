@@ -63,6 +63,12 @@ public:
         \em skipvals values in the \em params array are ignored. */
     Array luminosities_generic(const Array& params, int skipvals=0) const;
 
+    /** This function returns the mass (in \f$M_\odot\f$) of the source represented by the
+        specified set of parameter values. The \em params array must contain the appropriate number
+        of parameter values in the order specified by the particular %SED family subclass. The
+        first \em skipvals values in the array are ignored. */
+    double mass_generic(const Array& params, int skipvals=0) const;
+
     /** This function returns a short name for the type of sources typically assigned to this
         particular %SED family. */
      QString sourceName() const;
