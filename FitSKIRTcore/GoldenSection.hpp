@@ -6,7 +6,7 @@
 #ifndef GOLDENSECTION_HPP
 #define GOLDENSECTION_HPP
 
-#include "Array.hpp"
+#include "Image.hpp"
 #include "Log.hpp"
 #include "SimulationItem.hpp"
 
@@ -59,19 +59,18 @@ public:
     /** This function sets the _ref and returns best fitting luminosity.
         The simulation is adapted so they contain the same mask as the reference image.
         Together with the adapted simulation and best fitting parameter, the lowest \f$\chi^2\f$ value is returned.*/
-    void optimize(const Array *Rframe, Array *frame, double &lum, double &chi2);
+    void optimize(const Image& refframe, Image& frame, double& lum, double& chi2);
 
 private:
-
     /** This function determines the \f$\chi^2\f$ value for a certain luminosity value x. */
-    double function(Array *frame, double x);
+    double function(Image& frame, double x);
 
     //======================== Data Members ========================
 
 private:
     double _minLum;
     double _maxLum;
-    const Array *_ref;
+    const Image* _ref;
 };
 
 ////////////////////////////////////////////////////////////////////

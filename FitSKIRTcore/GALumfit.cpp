@@ -14,27 +14,28 @@ using namespace std;
 
 float Objective(GAGenome & g, QList<Array> *sim)
 {
-
-    //reading the array list and taking out the reference image in the back
+    // Read the array list and take out the reference image in the back
     Array ref = sim->last();
     sim->pop_back();
     GARealGenome& genome = (GARealGenome&)g;
     if (sim->size() != genome.size()) throw FATALERROR("Number of luminosities and components do not match");
 
-    //reading the suggested luminosities for each component
+    // Read the suggested luminosities for each component
     QList<double> lumis;
-    for(int i=0; i<genome.length(); i++){
-      lumis.append(pow(10,genome.gene(i)));
+    for (int i = 0; i < genome.length(); i++)
+    {
+        lumis.append(pow(10,genome.gene(i)));
     }
 
-    //determining the chi2 value for this genome
+    // Determine the chi2 value for this genome
     int arraysize = (*sim)[0].size();
     double chi=0;
 
     for (int m=0; m<arraysize; m++)
     {
         double total_sim =  0;
-        //create the correct summed image and take over masks from the reference image
+
+        // Create the correct summed image and take over masks from the reference image
         for(int n=0; n<sim->size(); n++)
         {
             if (ref[m]==0)
@@ -47,7 +48,7 @@ float Objective(GAGenome & g, QList<Array> *sim)
             }
         }
 
-        //calculate the chi2 value if for non masked regions
+        // Calculate the chi2 value if for non masked regions
         double sigma = sqrt(abs(ref[m]) + total_sim);
         if (ref[m]==0)
         {
@@ -61,7 +62,7 @@ float Objective(GAGenome & g, QList<Array> *sim)
 
     }
 
-    //returning the reference frame in the back of the list
+    // Returning the reference frame in the back of the list
     sim->append(ref);
     return chi;
 }
@@ -69,9 +70,9 @@ float Objective(GAGenome & g, QList<Array> *sim)
 
 void Evaluator(GAPopulation & p)
 {
-    QList<Array> *sim = (QList<Array> *)p.userData();
+    QList<Array>* sim = (QList<Array> *)p.userData();
 
-    //loop over all individuals and make replacement for all unevaluated individuals
+    // loop over all individuals and make replacement for all unevaluated individuals
     for (int i=0; i<p.size(); i++)
     {
         if (p.individual(i).isEvaluated()==gaFalse)
@@ -141,23 +142,20 @@ QList<double> GALumfit::maxLuminosities() const
 
 ////////////////////////////////////////////////////////////////////
 
-void GALumfit::optimize(const Array *Rframe, QList<Array> *frames, QList<double> *lumis, double &chi2)
+void GALumfit::optimize(const Image& refframe, QList<Image>& frames, QList<double>& lumis, double& chi2)
 {
+    // Set the reference frame and frames list
+    _ref = &refframe;
 
-    //set the reference frame and frames list
-    _ref = Rframe;
-    QList<Array> *sim = frames;
-    frames = sim;
-
-    //create the boundaries, set to be uniform in logscale
+    // Create the boundaries, set to be uniform in logscale
     GARealAlleleSetArray allelesetarray;
-    for(int i=0;i<_minLum.size();i++)
+    for (int i = 0; i < _minLum.size(); i++)
     {
-        GARealAlleleSet RealAllele(log10(_minLum[i]),log10(_maxLum[i]));
+        GARealAlleleSet RealAllele(log10(_minLum[i]), log10(_maxLum[i]));
         allelesetarray.add(RealAllele);
     }
 
-    //set the initializers, mutator and crossover scheme
+    // Set the initializers, mutator and crossover scheme
     GARealGenome* genome = new GARealGenome(allelesetarray);
     genome->initializer(GARealGenome::UniformInitializer);
     genome->mutator(GARealGaussianMutator);
@@ -166,30 +164,28 @@ void GALumfit::optimize(const Array *Rframe, QList<Array> *frames, QList<double>
     GASigmaTruncationScaling scaling;
     _ga->minimize();
     GAPopulation popu = _ga->population();
-    sim->append(*Rframe);
-    popu.userData(sim);
+    frames << refframe;
+    popu.userData(&frames);
     popu.evaluator(Evaluator);
 
-    //set the populationsize and generations to scale with the number of components
+    // Set the population size and generations to scale with the number of components
     _ga->population(popu);
-    _ga->populationSize(frames->size()*30);
-    _ga->nGenerations(frames->size()*20);
+    _ga->populationSize(frames.size()*30);
+    _ga->nGenerations(frames.size()*20);
     _ga->pMutation(0.03);
     _ga->pCrossover(0.65);
     _ga->scaling(scaling);
     _ga->scoreFrequency(0);  // was 1e-22 implicitly converted to integer 0
     _ga->selectScores(GAStatistics::AllScores);
     _ga->flushFrequency(0);  // was 1e-22 implicitly converted to integer 0
-    if(_fixedSeed) _ga->initialize(4357);
+    if (_fixedSeed) _ga->initialize(4357);
     else _ga->initialize();
 
-    //loop over the GA untill it is done and print out the best fitting values
+    // Loop over the GA until it is done and print out the best fitting values
     GARealGenome& best_genome = (GARealGenome&) _ga->statistics().bestIndividual();
-    while(!_ga->done())_ga->step();
-    for(int i=0;i<_minLum.size();i++) lumis->append(pow(10,best_genome.gene(i)));
-    chi2=best_genome.score();
-
-
+    while (!_ga->done()) _ga->step();
+    for (int i = 0; i < _minLum.size(); i++) lumis.append(pow(10, best_genome.gene(i)));
+    chi2 = best_genome.score();
 }
 
 ////////////////////////////////////////////////////////////////////

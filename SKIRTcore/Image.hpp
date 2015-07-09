@@ -25,9 +25,28 @@ public:
     Image(int xsize, int ysize, int nframes = 1);
 
     /** This constructor creates an image from a specified FITS file. As an argument, it takes the name
-        of that FITS file (without the extension). Additionally, it requires a pointer to an item in
+        of that FITS file (with or without the extension). Additionally, it requires a pointer to an item in
         the simulation hierarchy. */
     Image(const SimulationItem* item, QString filename);
+
+    /** This constructor creates an image from a specified FITS file. As arguments, it takes the name
+        of that FITS file (with or without the extension) and the path to the directory that contains
+        this file. */
+    Image(const SimulationItem* item, QString filename, QString directory);
+
+    /** This constructor creates an image from a specified FITS file and from header information passed
+        to this function. */
+    Image(const SimulationItem* item, QString filename, double xres, double yres, QString quantity,
+          QString xyqty = "length");
+
+    /** This constructor creates an image from a specified FITS file in a specified directory, and from
+        header information passed to this function. */
+    Image(const SimulationItem* item, QString filename, QString directory, double xres, double yres,
+          QString quantity, QString xyqty = "length");
+
+    /** This constructor creates an image based on the header of another image and the data, passed as
+        an Array object. */
+    Image(const Image& header, const Array& data);
 
     /** This constructor creates an image based on an Array of double values and the header information
         for the image. */
@@ -44,10 +63,14 @@ public:
     /** This function implements the procedure where a FITS file is imported. It is used by the
         constructor that takes the same arguments, but can also be called from the derived classes
         (such as ConvolutionKernel). */
-    void import(const SimulationItem* item, QString filename);
+    void import(const SimulationItem* item, QString filename, QString directory = QString());
 
     /** This function resizes the image to a specified width and height, erasing the current data. */
     void resize(int xsize, int ysize, int nframes = 1);
+
+    /** This function steals the data from an Array object and sets it as its own data (without
+        copying). */
+    void steal(Array& data);
 
     //===================== Basic properties =======================
 
@@ -60,6 +83,18 @@ public:
 
     /** This function returns the number of frames in the image. */
     int numframes() const;
+
+    /** This function returns the total number of pixels in this image. */
+    int numpixels() const;
+
+    /** This function returns the resolution in the x direction. */
+    double xres() const;
+
+    /** This function returns the resolution in the y direction. */
+    double yres() const;
+
+    /** This function returns the sum of all the pixel values in the image. */
+    double sum() const;
 
     /** This function returns a reference to the internal data array. */
     const Array& data() const;
@@ -78,13 +113,22 @@ public:
 
     //=================== Numerical operations =====================
 
-public:
-    /** This function returns the sum of all the pixel values in the image. */
-    double sum() const;
-
     //========================= Operators ==========================
 
 public:
+    /** This operator can be used to access (read and change) the value at a certain index of the
+        underlying Array object. */
+    double& operator[](int i)
+    {
+        return _data[i];
+    }
+
+    /** This operator can be used to read the value at a certain index of the underlying Array object. */
+    const double& operator[](int i) const
+    {
+        return _data[i];
+    }
+
     /** This operator can be used to access (read and change) the value of a certain pixel in the
         image, defined by an x and y coordinate. */
     double& operator()(int x, int y)
@@ -111,6 +155,20 @@ public:
     {
         _data /= value;
         return (*this);
+    }
+
+    /** This operator returns a new image, created by multiplying this image by a given value. */
+    Image operator*(double value) const
+    {
+        Image result = *this;
+        return (result *= value);
+    }
+
+    /** This operator returns a new image, created by adding another image element-wise to this image. */
+    Image operator+(const Image& image2)
+    {
+        Image result = Image(*this, _data + image2.data());
+        return result;
     }
 
     //======================== Data Members ========================

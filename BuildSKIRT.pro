@@ -15,6 +15,7 @@ SUBDIRS += \
     Cfitsio \
     Discover \
     DoxStyle \
+    FFTConvolution \
     FitSKIRTcore \
     FitSKIRTmain \
     Fundamentals \
@@ -29,9 +30,10 @@ include(BuildUtils/BuildOptions.pri)
 BUILDING_GUI:SUBDIRS += SkirtMakeUp
 
 # define dependencies between subprojects
-SKIRTcore.depends    = Cfitsio Voro Fundamentals MPIsupport
-Discover.depends     = Cfitsio Voro Fundamentals MPIsupport SKIRTcore
-SKIRTmain.depends    = Cfitsio Voro Fundamentals MPIsupport SKIRTcore Discover
-FitSKIRTcore.depends = GAlib Cfitsio Voro Fundamentals MPIsupport SKIRTcore Discover
-FitSKIRTmain.depends = GAlib Cfitsio Voro Fundamentals MPIsupport SKIRTcore Discover FitSKIRTcore
-BUILDING_GUI:SkirtMakeUp.depends = GAlib Cfitsio Voro Fundamentals MPIsupport SKIRTcore Discover FitSKIRTcore
+FFTConvolution.depends = Fundamentals
+SKIRTcore.depends      = Cfitsio Voro Fundamentals MPIsupport
+Discover.depends       = Cfitsio Voro Fundamentals MPIsupport SKIRTcore
+SKIRTmain.depends      = Cfitsio Voro Fundamentals MPIsupport SKIRTcore Discover
+FitSKIRTcore.depends   = FFTConvolution GAlib Cfitsio Voro Fundamentals MPIsupport SKIRTcore Discover
+FitSKIRTmain.depends   = FFTConvolution GAlib Cfitsio Voro Fundamentals MPIsupport SKIRTcore Discover FitSKIRTcore
+BUILDING_GUI:SkirtMakeUp.depends = FFTConvolution GAlib Cfitsio Voro Fundamentals MPIsupport SKIRTcore Discover FitSKIRTcore

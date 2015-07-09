@@ -4,8 +4,8 @@
 ///////////////////////////////////////////////////////////////// */
 
 #include "ReferenceImage.hpp"
-
 #include "AdjustableSkirtSimulation.hpp"
+#include "Convolution.hpp"
 #include "ConvolutionKernel.hpp"
 #include "FatalError.hpp"
 #include "GALumfit.hpp"
@@ -92,13 +92,13 @@ QList<double> ReferenceImage::maxLuminosities() const
 
 //////////////////////////////////////////////////////////////////////
 
-double ReferenceImage::chi2(QList<Array> *frames, QList<double> *monoluminosities) const
+double ReferenceImage::chi2(QList<Image>& frames, QList<double>& monoluminosities) const
 {
     // Here is where I'll have to decide which optimization algorithm for lum fit
     double chi_value = 0;
-    for(int i =0; i<frames->size(); i++)
+    for (int i = 0; i < frames.size(); i++)
     {
-       _kernel->convolve((*frames)[i], xsize(), ysize());
+        Convolution::convolve(frames[i], *_kernel);
     }
 
     if (find<AdjustableSkirtSimulation>()->ncomponents() == 1)
@@ -109,8 +109,8 @@ double ReferenceImage::chi2(QList<Array> *frames, QList<double> *monoluminositie
         GoldenSection gold;
         gold.setMinlum(_minLum[0]);
         gold.setMaxlum(_maxLum[0]);
-        gold.optimize(&_data, &((*frames)[0]), lum, chi_value);
-        monoluminosities->append(lum);
+        gold.optimize(*this, frames[0], lum, chi_value);
+        monoluminosities << lum;
     }
 
     if (find<AdjustableSkirtSimulation>()->ncomponents() == 2)
@@ -124,43 +124,42 @@ double ReferenceImage::chi2(QList<Array> *frames, QList<double> *monoluminositie
         lumsim.setMaxDlum(_maxLum[0]);
         lumsim.setMinblum(_minLum[1]);
         lumsim.setMaxblum(_maxLum[1]);
-        lumsim.optimize(&_data, &((*frames)[0]), &((*frames)[1]), dlum, blum, chi_value);
-        monoluminosities->append(dlum);
-        monoluminosities->append(blum);
+        lumsim.optimize(*this, frames[0], frames[1], dlum, blum, chi_value);
+        monoluminosities << dlum;
+        monoluminosities << blum;
     }
     if (find<AdjustableSkirtSimulation>()->ncomponents() >= 3)
     {
         GALumfit GAlumi;
         GAlumi.setMinLuminosities(_minLum);
         GAlumi.setMaxLuminosities(_maxLum);
-        GAlumi.optimize(&_data, frames, monoluminosities, chi_value);
+        GAlumi.optimize(*this, frames, monoluminosities, chi_value);
     }
     return chi_value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void ReferenceImage::returnFrame(QList<Array> *frames) const
+void ReferenceImage::returnFrame(QList<Image>& frames) const
 {
     double chi_value;
-    bool oneDfit=false;
-    for(int i =0; i<frames->size(); i++)
+    bool oneDfit = false;
+    for (int i = 0; i < frames.size(); i++)
     {
-       _kernel->convolve((*frames)[i], xsize(), ysize());
+        Convolution::convolve(frames[i], *_kernel);
     }
-    if (frames->size() == 1)
+    if (frames.size() == 1)
     {
         GoldenSection gold;
         double lum;
         gold.setMinlum(_minLum[0]);
         gold.setMaxlum(_maxLum[0]);
-        gold.optimize(&_data, &((*frames)[0]), lum, chi_value);
-        (*frames)[0] = lum*((*frames)[0] + 0);
-        (*frames).append(abs(_data-(*frames)[0])/abs(_data));
-        oneDfit=true;
+        gold.optimize(*this, frames[0], lum, chi_value);
+        frames[0] *= lum;
+        frames.append(Image(frames[0], abs(_data-frames[0].data())/abs(_data)));
+        oneDfit = true;
     }
-
-    if (frames->size() == 2 && !oneDfit)
+    if (frames.size() == 2 && !oneDfit)
     {
         double dlum, blum;
         LumSimplex lumsim;
@@ -168,9 +167,9 @@ void ReferenceImage::returnFrame(QList<Array> *frames) const
         lumsim.setMaxDlum(_maxLum[0]);
         lumsim.setMinblum(_minLum[1]);
         lumsim.setMaxblum(_maxLum[1]);
-        lumsim.optimize(&_data, &((*frames)[0]), &((*frames)[1]), dlum, blum, chi_value);
-        (*frames)[0] = dlum*(*frames)[0] + blum*(*frames)[1];
-        (*frames)[1]= abs(_data-(*frames)[0])/abs(_data);
+        lumsim.optimize(*this, frames[0], frames[1], dlum, blum, chi_value);
+        frames[0] = frames[0]*dlum + frames[1]*blum;
+        frames[1] = Image(frames[0], abs(_data-frames[0].data())/abs(_data));
     }
     if (find<AdjustableSkirtSimulation>()->ncomponents() >= 3)
     {
@@ -179,13 +178,13 @@ void ReferenceImage::returnFrame(QList<Array> *frames) const
         GAlumi.setFixedSeed(find<OligoFitScheme>()->fixedSeed());
         GAlumi.setMinLuminosities(_minLum);
         GAlumi.setMaxLuminosities(_maxLum);
-        GAlumi.optimize(&_data, frames, &(monoluminosities), chi_value);
-        (*frames)[0] = monoluminosities[0]*(*frames)[0];
-        for(int i =1;i<monoluminosities.size();i++)
+        GAlumi.optimize(*this, frames, monoluminosities, chi_value);
+        frames[0] = frames[0]*monoluminosities[0];
+        for (int i = 1; i < monoluminosities.size(); i++)
         {
-            (*frames)[0] = (*frames)[0] + monoluminosities[i]*(*frames)[i];
+            frames[0] = frames[0] + frames[i]*monoluminosities[i];
         }
-        (*frames)[1]= abs(_data-(*frames)[0])/abs(_data);
+        frames[1] = Image(frames[0], abs(_data-frames[0].data())/abs(_data));
     }
 }
 
