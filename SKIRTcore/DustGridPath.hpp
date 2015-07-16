@@ -74,15 +74,15 @@ public:
     /** This function returns the number of cells crossed along the path. */
     int size() const { return _v.size(); }
 
-    /** This function returns the cell number \f$m\f$ for segment $i$ in the path. */
+    /** This function returns the cell number \f$m\f$ for segment \f$i\f$ in the path. */
     int m(int i) const { return _v[i].m; }
 
-    /** This function returns the path length covered within the cell in segment $i$ in the path.
+    /** This function returns the path length covered within the cell in segment \f$i\f$ in the path.
         */
     double ds(int i) const { return _v[i].ds; }
 
     /** This function returns the path length covered from the initial position of the path until
-        the end point of the cell in segment $i$ in the path. */
+        the end point of the cell in segment \f$i\f$ in the path. */
     double s(int i) const { return _v[i].s; }
 
     // ------- Handling data on optical depth -------
