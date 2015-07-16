@@ -299,7 +299,8 @@ HEADERS += \
     SphericalAdaptiveMesh.hpp \
     SphericalAdaptiveMeshDustDistribution.hpp \
     TextInFile.hpp \
-    SEDFamily.hpp
+    SEDFamily.hpp \
+    CylindricalCavityGeometryDecorator.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -557,4 +558,5 @@ SOURCES += \
     SphericalAdaptiveMesh.cpp \
     SphericalAdaptiveMeshDustDistribution.cpp \
     TextInFile.cpp \
-    SEDFamily.cpp
+    SEDFamily.cpp \
+    CylindricalCavityGeometryDecorator.cpp

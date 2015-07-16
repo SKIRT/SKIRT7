@@ -32,6 +32,7 @@
 #include "CropGeometryDecorator.hpp"
 #include "CubBackgroundGeometry.hpp"
 #include "CubicSplineSmoothingKernel.hpp"
+#include "CylindricalCavityGeometryDecorator.hpp"
 #include "Dim1DustLib.hpp"
 #include "Dim2DustLib.hpp"
 #include "DraineGraphiteGrainComposition.hpp"
@@ -281,6 +282,7 @@ void RegisterSimulationItems::registerAll()
     add<SpheroidalGeometryDecorator>();
     add<TriaxialGeometryDecorator>();
     add<SphericalCavityGeometryDecorator>();
+    add<CylindricalCavityGeometryDecorator>();
     add<CropGeometryDecorator>();
     add<SpiralStructureGeometryDecorator>();
     add<ClumpyGeometryDecorator>();

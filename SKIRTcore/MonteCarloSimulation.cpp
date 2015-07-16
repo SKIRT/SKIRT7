@@ -212,7 +212,7 @@ void MonteCarloSimulation::dostellaremissionchunk(size_t index)
     double L = _ss->luminosity(ell)/_Npp;
     if (L > 0)
     {
-        double Lmin = 1e-4 * L;
+        double Lmin = 1e-6 * L;
         PhotonPackage pp,ppp;
 
         quint64 remaining = _chunksize;
@@ -228,7 +228,7 @@ void MonteCarloSimulation::dostellaremissionchunk(size_t index)
                     _ds->fillOpticalDepth(&pp);
                     if (_continuousScattering) continuouspeeloffscattering(&pp,&ppp);
                     simulateescapeandabsorption(&pp,_ds->dustemission());
-                    if (pp.luminosity() <= Lmin) break;
+                    if (pp.luminosity() <= Lmin && pp.nScatt() > 2) break;
                     simulatepropagation(&pp);
                     if (!_continuousScattering) peeloffscattering(&pp,&ppp);
                     simulatescattering(&pp);
