@@ -67,6 +67,7 @@ class TransientDustEmissivity : public DustEmissivity
 {
     Q_OBJECT
     Q_CLASSINFO("Title", "transient heating dust emissivity (with full non-LTE treatment)")
+    Q_CLASSINFO("AllowedIf", "MultiGrainDustMix")
 
     //============= Construction - Setup - Destruction =============
 
