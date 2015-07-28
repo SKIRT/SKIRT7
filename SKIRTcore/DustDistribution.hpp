@@ -65,6 +65,10 @@ public:
         the total mass density of the dust. */
     virtual Position generatePosition() const = 0;
 
+    /** This pure virtual function returns the total mass of the \f$h\f$'th component of the dust
+        distribution. */
+    virtual double mass(int h) const = 0;
+
     /** This pure virtual function returns the total dust mass of the dust distribution. */
     virtual double mass() const = 0;
 

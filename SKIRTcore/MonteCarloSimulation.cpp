@@ -3,6 +3,7 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
+#include "DustDistribution.hpp"
 #include "DustGridStructure.hpp"
 #include "DustMix.hpp"
 #include "DustSystem.hpp"
@@ -19,7 +20,9 @@
 #include "PhotonPackage.hpp"
 #include "Random.hpp"
 #include "StellarSystem.hpp"
+#include "TextOutFile.hpp"
 #include "TimeLogger.hpp"
+#include "Units.hpp"
 #include "WavelengthGrid.hpp"
 
 using namespace std;
@@ -27,7 +30,10 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////
 
 MonteCarloSimulation::MonteCarloSimulation()
-    : _is(0), _packages(0), _continuousScattering(false), _lambdagrid(0), _ss(0), _ds(0), _assigner(0)
+    : _is(0), _packages(0), _minWeightReduction(0),
+      _minfsref(0), _lambdafsref(0),
+      _continuousScattering(false),
+      _lambdagrid(0), _ss(0), _ds(0), _assigner(0)
 {
 }
 
@@ -38,18 +44,66 @@ void MonteCarloSimulation::setupSelfBefore()
     Simulation::setupSelfBefore();
 
     // protect implementation limit
-    if (_packages > 1e15)
-        throw FATALERROR("Number of photon packages is larger than implementation limit of 1e15");
     if (_packages < 0)
         throw FATALERROR("Number of photon packages is negative");
-
-    if (!_lambdagrid) throw FATALERROR("Wavelength grid was not set");
-    if (!_ss) throw FATALERROR("Stellar system was not set");
-    if (!_is) throw FATALERROR("Instrument system was not set");
+    if (_packages > 1e15)
+        throw FATALERROR("Number of photon packages is larger than implementation limit of 1e15");
+    if (_minWeightReduction < 1e3)
+        throw FATALERROR("The minimum weight reduction factor should be larger than 1000");
+    if (_minWeightReduction > 1e9)
+        throw FATALERROR("The minimum weight reduction factor should be smaller than 1e9");
+    if (_minfsref < 0)
+        throw FATALERROR("The minimum number of scattering events is negative");
+    if (_minfsref > 1000)
+        throw FATALERROR("The minimum number of scattering events should be smaller than 1000");
+    if (!_lambdagrid)
+        throw FATALERROR("Wavelength grid was not set");
+    if (!_ss)
+        throw FATALERROR("Stellar system was not set");
+    if (!_is)
+        throw FATALERROR("Instrument system was not set");
     // dust system is optional; nr of packages has a valid default
 
     // If no assigner was set, use an IdenticalAssigner as default
     if (!_assigner) setAssigner(new IdenticalAssigner(this));
+}
+
+////////////////////////////////////////////////////////////////////
+
+void MonteCarloSimulation::setupSelfAfter()
+{
+    Simulation::setupSelfAfter();
+    Units* units = find<Units>();
+
+    // calculate the maximum number of scatterings for each wavelength bin
+    _log->info("Calculating the number of forced scatterings for each wavelength bin");
+    double kapparef = 0.0;
+    int Nlambda = _lambdagrid->Nlambda();
+    int Ncomp = _ds->Ncomp();
+    for (int h=0; h<Ncomp; h++)
+        kapparef += _ds->mix(h)->kappaext(_lambdafsref) * _ds->dustDistribution()->mass(h);
+    _minfsv.resize(Nlambda,0.0);
+    for (int ell=0; ell<Nlambda; ell++)
+    {
+        double kappa = 0.0;
+        for (int h=0; h<_ds->Ncomp(); h++)
+            kappa += _ds->mix(h)->kappaext(ell) * _ds->dustDistribution()->mass(h);
+        int minfs = int(ceil(_minfsref*kappa/kapparef));
+        _minfsv[ell] = minfs;
+    }
+
+    // --------------------------------------------------------------
+    // Output the minimum number of forced scatterings to a text file
+    // --------------------------------------------------------------
+
+    TextOutFile file(this, "mc_minfs", "minimum number of forced scatterings");
+    file.addColumn("wavelength index");
+    file.addColumn("lambda (" + units->uwavelength() + ")");
+    file.addColumn("minimum number of forced scatterings");
+    for (int ell=0; ell<Nlambda; ell++)
+        file.writeLine(QString::number(ell) + "\t"
+                       + QString::number(units->owavelength(_lambdagrid->lambda(ell)),'f',6) + "\t"
+                       + QString::number(_minfsv[ell]));
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -117,6 +171,48 @@ void MonteCarloSimulation::setPackages(double value)
 double MonteCarloSimulation::packages() const
 {
     return _packages;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void MonteCarloSimulation::setMinWeightReduction(double value)
+{
+    _minWeightReduction = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double MonteCarloSimulation::minWeightReduction() const
+{
+    return _minWeightReduction;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void MonteCarloSimulation::setMinScattEvents(int value)
+{
+    _minfsref = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+int MonteCarloSimulation::minScattEvents() const
+{
+    return _minfsref;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void MonteCarloSimulation::setScattWavelength(double value)
+{
+    _lambdafsref = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double MonteCarloSimulation::scattWavelength() const
+{
+    return _lambdafsref;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -212,7 +308,7 @@ void MonteCarloSimulation::dostellaremissionchunk(size_t index)
     double L = _ss->luminosity(ell)/_Npp;
     if (L > 0)
     {
-        double Lmin = 1e-6 * L;
+        double Lthreshold = L / minWeightReduction();
         PhotonPackage pp,ppp;
 
         quint64 remaining = _chunksize;
@@ -228,7 +324,7 @@ void MonteCarloSimulation::dostellaremissionchunk(size_t index)
                     _ds->fillOpticalDepth(&pp);
                     if (_continuousScattering) continuouspeeloffscattering(&pp,&ppp);
                     simulateescapeandabsorption(&pp,_ds->dustemission());
-                    if (pp.luminosity() <= Lmin && pp.nScatt() > 2) break;
+                    if (pp.luminosity()<=Lthreshold && pp.nScatt()>minfs(ell)) break;
                     simulatepropagation(&pp);
                     if (!_continuousScattering) peeloffscattering(&pp,&ppp);
                     simulatescattering(&pp);
@@ -484,6 +580,13 @@ void MonteCarloSimulation::write()
     TimeLogger logger(_log, "writing results");
     if (_is) _is->write();
     if (_ds) _ds->write();
+}
+
+////////////////////////////////////////////////////////////////////
+
+int MonteCarloSimulation::minfs(int ell) const
+{
+    return _minfsv[ell];
 }
 
 ////////////////////////////////////////////////////////////////////

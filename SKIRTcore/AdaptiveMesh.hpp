@@ -165,6 +165,12 @@ public:
     double density(Position bfr) const;
 
     /** This function returns the value of the total density distribution integrated over the complete domain,
+        with index \f$0\le h \le N_{distributions}-1\f$. In other words, it computes \f[ \iiint_\text{domain}
+        D_h({\bf{r}}) \,\text{d}{\bf{r}} \approx \sum_{m=0}^{N_\text{cells}-1} D_h(m)\times V_m \f] This information
+        is stored internally. */
+    double integratedDensity(int h) const;
+
+    /** This function returns the value of the total density distribution integrated over the complete domain,
         in other words it computes \f[ \iiint_\text{domain} \sum_h D_h({\bf{r}}) \,\text{d}{\bf{r}} \approx
         \sum_{m=0}^{N_\text{cells}-1} \sum_h D_h(m)\times V_m \f] This can be useful to help normalize the
         density distribution over the domain. If no density distribution was added,
@@ -217,6 +223,7 @@ private:
     QList<int> _densityMultiplierFields;        // indexed on h; contains storage index s
     QList<double> _densityFractions;            // indexed on h
     double _integratedDensity;                  // total over all h and m (0 if there is no density distribution)
+    std::vector<double> _integratedDensityv;    // the previous split per component
 
     // node tree
     AdaptiveMeshNode* _root;                    // root node representing the complete domain

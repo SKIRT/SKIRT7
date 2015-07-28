@@ -216,6 +216,13 @@ double AdaptiveMeshDustDistribution::mass() const
 
 //////////////////////////////////////////////////////////////////////
 
+double AdaptiveMeshDustDistribution::mass(int h) const
+{
+    return _densityUnits * _mesh->integratedDensity(h);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 double AdaptiveMeshDustDistribution::SigmaX() const
 {
     return _densityUnits * _mesh->SigmaX();

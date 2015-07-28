@@ -195,6 +195,13 @@ Position SphericalAdaptiveMeshDustDistribution::generatePosition() const
 
 //////////////////////////////////////////////////////////////////////
 
+double SphericalAdaptiveMeshDustDistribution::mass(int h) const
+{
+    return _densityUnits * _mesh->integratedDensity(h);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 double SphericalAdaptiveMeshDustDistribution::mass() const
 {
     return _densityUnits * _mesh->integratedDensity();
