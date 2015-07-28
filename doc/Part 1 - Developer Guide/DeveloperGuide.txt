@@ -4,7 +4,7 @@
 
 This guide offers guidelines on how to extend or adjust the SKIRT code.
 
-The <tt>SKIRT</tt> code will never be finished. Fundamental changes and additions will probably be developed by the core 
+The <tt>SKIRT</tt> code will never be finished. Fundamental changes and additions will probably be developed by the core
 <tt>SKIRT</tt> team at the Ghent University. Other changes, such as introducing a new spectral energy distribution for the sources or a new function
 describing the geometrical distribution of the dust, can easily be contributed by any heavy-duty <tt>SKIRT</tt> user.
 In fact, when you plan to use <tt>SKIRT</tt> for a particular radiative transfer problem, chances are that you will
@@ -16,8 +16,9 @@ This guide consists of multiple topics:
 - \ref DevBuildDocs
 - \ref DevStyle
 - \ref DevCodeStruct
-- \ref DevTut
+- \ref DevDiscoUsage
 - \ref DevGit
 - \ref ChangingBuildOptions
+- \ref DevTut
 
 */
