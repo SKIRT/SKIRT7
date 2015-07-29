@@ -418,7 +418,7 @@ protected:
     quint64 _Npp;           // the precise number of photon packages to be launched per wavelength
     quint64 _logchunksize;  // the number of photon packages to be processed between logprogress() invocations
 
-protected:
+private:
     std::vector<int> _minfsv;   // vector that contains the minimum number of forced scatterings for each wavelength
 
 private:
