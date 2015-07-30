@@ -208,6 +208,13 @@ Position VoronoiDustDistribution::generatePosition() const
 
 //////////////////////////////////////////////////////////////////////
 
+double VoronoiDustDistribution::mass(int h) const
+{
+    return _densityUnits * _mesh->integratedDensity(h);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 double VoronoiDustDistribution::mass() const
 {
     return _densityUnits * _mesh->integratedDensity();

@@ -120,6 +120,15 @@ Position CompDustDistribution::generatePosition() const
 //////////////////////////////////////////////////////////////////////
 
 double
+CompDustDistribution::mass(int h)
+const
+{
+    return _dcv[h]->mass();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+double
 CompDustDistribution::mass()
 const
 {

@@ -81,6 +81,9 @@ public:
         phase. Then a position is generated for the selected component. */
     Position generatePosition() const;
 
+    /** This function returns the total mass of the \f$h\f$'th component of the dust distribution. */
+    double mass(int h) const;
+
     /** This function returns the total dust mass of the dust distribution. For a component-based
         dust distribution, it just sums the contribution of the different components. */
     double mass() const;

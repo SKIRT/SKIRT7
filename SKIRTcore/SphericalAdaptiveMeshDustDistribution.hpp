@@ -134,6 +134,9 @@ public:
         phase. Then a position is determined randomly within the cell boundaries. */
     Position generatePosition() const;
 
+    /** This function returns the total dust mass of the \f$h\f$'th component of the dust distribution. */
+    double mass(int h) const;
+
     /** This function returns the total dust mass of the dust distribution. For this type of dust
         distribution, it just sums the contribution of the different components. */
     double mass() const;

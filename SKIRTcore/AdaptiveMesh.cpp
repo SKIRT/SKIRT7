@@ -77,12 +77,15 @@ void AdaptiveMesh::addDensityDistribution(int densityField, int densityMultiplie
     _Ndistribs++;
 
     // update the integrated density (ignore cells with negative density)
+    double integratedDensity = 0.0;
     for (int m=0; m<_Ncells; m++)
     {
         double density = _fieldvalues[densityField][m] * densityFraction;
         if (densityMultiplierField >= 0) density *= _fieldvalues[densityMultiplierField][m];
-        if (density > 0) _integratedDensity += density*_leafnodes[m]->volume();
+        if (density > 0) integratedDensity += density*_leafnodes[m]->volume();
     }
+    _integratedDensityv.push_back(integratedDensity);
+    _integratedDensity += integratedDensity;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -227,6 +230,14 @@ double AdaptiveMesh::density(Position bfr) const
 {
     int m = cellIndex(bfr);
     return m>=0 ? density(m) : 0;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double AdaptiveMesh::integratedDensity(int h) const
+{
+    if (h < 0 || h >= _Ndistribs) throw FATALERROR("Density distribution index out of range: " + QString::number(h));
+    return _integratedDensityv[h];
 }
 
 ////////////////////////////////////////////////////////////////////

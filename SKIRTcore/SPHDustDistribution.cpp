@@ -223,6 +223,14 @@ double SPHDustDistribution::massInBox(const Box& box) const
 
 //////////////////////////////////////////////////////////////////////
 
+double SPHDustDistribution::mass(int h) const
+{
+    if (h!=0) throw FATALERROR("Wrong value for h (" + QString::number(h) + ")");
+    return mass();
+}
+
+//////////////////////////////////////////////////////////////////////
+
 double SPHDustDistribution::mass() const
 {
     double sum = 0.0;

@@ -206,7 +206,7 @@ void PanMonteCarloSimulation::dodustselfabsorptionchunk(size_t index)
 
         PhotonPackage pp;
         double L = Ltot / _Npp;
-        double Lmin = 1e-4*L;
+        double Lthreshold = L / minWeightReduction();
 
         quint64 remaining = _chunksize;
         while (remaining > 0)
@@ -223,7 +223,7 @@ void PanMonteCarloSimulation::dodustselfabsorptionchunk(size_t index)
                 {
                     _pds->fillOpticalDepth(&pp);
                     simulateescapeandabsorption(&pp,true);
-                    if (pp.luminosity() <= Lmin) break;
+                    if (pp.luminosity()<=Lthreshold && pp.nScatt()>minfs(ell)) break;
                     simulatepropagation(&pp);
                     simulatescattering(&pp);
                 }
@@ -286,7 +286,7 @@ void PanMonteCarloSimulation::dodustemissionchunk(size_t index)
 
         PhotonPackage pp,ppp;
         double L = Ltot / _Npp;
-        double Lmin = 1e-4 * L;
+        double Lthreshold = L / minWeightReduction();
 
         quint64 remaining = _chunksize;
         while (remaining > 0)
@@ -305,7 +305,7 @@ void PanMonteCarloSimulation::dodustemissionchunk(size_t index)
                     _pds->fillOpticalDepth(&pp);
                     if (continuousScattering()) continuouspeeloffscattering(&pp,&ppp);
                     simulateescapeandabsorption(&pp,false);
-                    if (pp.luminosity() <= Lmin) break;
+                    if (pp.luminosity()<=Lthreshold && pp.nScatt()>minfs(ell)) break;
                     simulatepropagation(&pp);
                     if (!continuousScattering()) peeloffscattering(&pp,&ppp);
                     simulatescattering(&pp);

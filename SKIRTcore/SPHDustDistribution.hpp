@@ -113,7 +113,7 @@ public:
 
     /** This function returns the mass density \f$\rho_h({\bf{r}})\f$ of the \f$h\f$'th component
         of the dust distribution at the position \f${\bf{r}}\f$. If \f$h\f$ is not equal to zero,
-        an FatalError error is thrown. In the other case, the call is passed to the total density
+        a FatalError error is thrown. In the other case, the call is passed to the total density
         function. */
     double density(int h, Position bfr) const;
 
@@ -164,6 +164,11 @@ public:
         (\text{erf}(\frac{a\,y_\text{min}}{h})\right) \left(\text{erf}(\frac{a\,z_\text{max}}{h}) -
         (\text{erf}(\frac{a\,y_\text{min}}{h})\right) \f] */
     double massInBox(const Box& box) const;
+
+    /** This function returns the total mass of the \f$h\f$'th component of the dust distribution. If
+        \f$h\f$ is not equal to zero, a FatalError error is thrown. In the other case, the call is passed
+        to the total mass. */
+    double mass(int h) const;
 
     /** This function returns the total dust mass of the dust distribution. For a SPH dust
         distribution, the total dust mass is calculated as \f[ M = f_{\text{dust}} \sum_i Z_i\, M_i

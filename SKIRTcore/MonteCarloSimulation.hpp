@@ -35,10 +35,29 @@ class MonteCarloSimulation : public Simulation
     Q_CLASSINFO("Default", "InstrumentSystem")
 
     Q_CLASSINFO("Property", "packages")
-    Q_CLASSINFO("Title", "the number of photon (γ) packages per wavelength")
+    Q_CLASSINFO("Title", "the number of photon packages per wavelength")
     Q_CLASSINFO("MinValue", "0")
     Q_CLASSINFO("MaxValue", "1e15")
     Q_CLASSINFO("Default", "1e6")
+
+    Q_CLASSINFO("Property", "minWeightReduction")
+    Q_CLASSINFO("Title", "the minimum weight reduction factor of a photon package")
+    Q_CLASSINFO("MinValue", "1e3")
+    Q_CLASSINFO("MaxValue", "1e9")
+    Q_CLASSINFO("Default", "1e4")
+
+    Q_CLASSINFO("Property", "minScattEvents")
+    Q_CLASSINFO("Title", "the minimum number of forced scattering events")
+    Q_CLASSINFO("MinValue", "0")
+    Q_CLASSINFO("MaxValue", "1000")
+    Q_CLASSINFO("Default", "0")
+
+    Q_CLASSINFO("Property", "scattWavelength")
+    Q_CLASSINFO("Title", "the wavelength at which the minimum number of scattering events is specified")
+    Q_CLASSINFO("Quantity", "wavelength")
+    Q_CLASSINFO("MinValue", "1 A")
+    Q_CLASSINFO("MaxValue", "1 m")
+    Q_CLASSINFO("Default", "0.55 micron")
 
     Q_CLASSINFO("Property", "continuousScattering")
     Q_CLASSINFO("Title", "use continuous scattering")
@@ -60,6 +79,11 @@ protected:
     /** This function verifies that all attribute values have been appropriately set. The dust
         system is optional and thus it may have a null value. */
     void setupSelfBefore();
+
+    /** This function calculates the minimum number of scattering events that a photon package of
+        each wavelength has to undergo before it can be eliminated from the simulation. It scales with
+        the total extinction value of the dust. */
+    void setupSelfAfter();
 
     /** This function determines how the specified number of photon packages should be split over
         chunks, and stores the resulting parameters in protected data members. It should be called
@@ -123,6 +147,28 @@ public:
     /** Returns the number of photon packages to be launched per wavelength for this simulation
         exactly as specified by the setPackages() function (i.e. the value is not yet adjusted). */
     Q_INVOKABLE double packages() const;
+
+    /** Sets the minimum weight reduction factor of a photon package before its life cycle is
+        terminated. */
+    Q_INVOKABLE void setMinWeightReduction(double value);
+
+    /** Returns the minimum weight reduction factor of a photon package before its life cycle is
+        terminated. */
+    Q_INVOKABLE double minWeightReduction() const;
+
+    /** Sets the minimum number of scattering events that a photon package should experience before
+        its life cycle is terminated. */
+    Q_INVOKABLE void setMinScattEvents(int value);
+
+    /** Returns the minimum number of scattering events that a photon package should experience
+        before its life cycle is terminated. */
+    Q_INVOKABLE int minScattEvents() const;
+
+    /** Sets the wavelength at which the minimum number of scattering events is specified. */
+    Q_INVOKABLE void setScattWavelength(double value);
+
+    /** Returns the wavelength at which the minimum number of scattering events is specified. */
+    Q_INVOKABLE double scattWavelength() const;
 
     /** Sets the flag that indicates whether continuous scattering should be used. The default
         value is false. */
@@ -341,12 +387,18 @@ protected:
         simulation can be analyzed. */
     void write();
 
+    /** Coming soon. */
+    int minfs(int ell) const;
+
     //======================== Data Members ========================
 
 private:
     // *** discoverable attributes managed by this class ***
     InstrumentSystem* _is;
     double _packages;       // the specified number of photon packages to be launched per wavelength
+    double _minWeightReduction;
+    int _minfsref;
+    double _lambdafsref;
     bool _continuousScattering;  // true if continuous scattering should be used
 
 protected:
@@ -365,6 +417,9 @@ protected:
     quint64 _chunksize;     // the number of photon packages in one chunk
     quint64 _Npp;           // the precise number of photon packages to be launched per wavelength
     quint64 _logchunksize;  // the number of photon packages to be processed between logprogress() invocations
+
+private:
+    std::vector<int> _minfsv;   // vector that contains the minimum number of forced scatterings for each wavelength
 
 private:
     // *** data members used by the XXXprogress() functions in this class ***
