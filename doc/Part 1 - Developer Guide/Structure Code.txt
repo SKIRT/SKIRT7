@@ -213,6 +213,8 @@ Specifically this means that:
  - New interfaces (such as perhaps a graphical user interface) can be added later, without changing any of the
    existing code, and without duplicating information about specific simulation item classes.
 
+For more details on adding the appropriate information to simulation item classes, see \ref DevDiscoUsage.
+
 The following diagram presents the relationships between some important classes implementing the Discovery
 mechanism and the interfaces using it. A dashed line ending in a V-shaped arrow means "A references B";
 A solid line ending in an empty triangular arrow means "A inherits B":
