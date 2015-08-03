@@ -77,7 +77,7 @@ void MonteCarloSimulation::setupSelfAfter()
     // Calculate the maximum number of scatterings for each wavelength bin
     int Nlambda = _lambdagrid->Nlambda();
     _minfsv.resize(Nlambda);
-    if (_minfsref > 0)
+    if (_ds && _minfsref > 0)
     {
         _log->info("Calculating the number of forced scatterings for each wavelength bin");
         int Ncomp = _ds->Ncomp();
