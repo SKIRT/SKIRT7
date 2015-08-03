@@ -89,17 +89,16 @@ void MonteCarloSimulation::setupSelfAfter()
             double kappa = 0.0;
             for (int h=0; h<_ds->Ncomp(); h++)
                 kappa += _ds->mix(h)->kappaext(ell) * _ds->dustDistribution()->mass(h);
-            _minfsv[ell] = static_cast<int>(ceil(_minfsref*kappa/kapparef));
+            _minfsv[ell] = std::max(1, static_cast<int>((_minfsref*kappa/kapparef)+0.5));
         }
 
         // Output the minimum number of forced scatterings to a text file
         Units* units = find<Units>();
         TextOutFile file(this, "mc_minfs", "minimum number of forced scatterings");
-        file.addColumn("wavelength index", 'd');
         file.addColumn("lambda (" + units->uwavelength() + ")");
         file.addColumn("minimum number of forced scatterings", 'd');
         for (int ell=0; ell<Nlambda; ell++)
-            file.writeRow(QList<double>() << ell << units->owavelength(_lambdagrid->lambda(ell)) << _minfsv[ell]);
+            file.writeRow(QList<double>() << units->owavelength(_lambdagrid->lambda(ell)) << _minfsv[ell]);
     }
 }
 
