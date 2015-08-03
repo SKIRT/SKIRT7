@@ -247,7 +247,7 @@ public:
     double density(Position bfr) const;
 
     /** This function returns the value of the total density distribution with index \f$0\le
-        h \le N_{distributions}-1\f$integrated over the complete domain. */
+        h \le N_{distributions}-1\f$ integrated over the complete domain. */
     double integratedDensity(int h) const;
 
     /** This function returns the value of the total density distribution integrated over the

@@ -54,6 +54,7 @@ class MonteCarloSimulation : public Simulation
 
     Q_CLASSINFO("Property", "scattWavelength")
     Q_CLASSINFO("Title", "the wavelength at which the minimum number of scattering events is specified")
+    Q_CLASSINFO("RelevantIf", "minScattEvents")
     Q_CLASSINFO("Quantity", "wavelength")
     Q_CLASSINFO("MinValue", "1 A")
     Q_CLASSINFO("MaxValue", "1 m")
@@ -204,6 +205,10 @@ public:
     int dimension() const;
 
 protected:
+    /** This function returns the minimum number of scattering events that a photon package of
+        the specified wavelength has to undergo before it can be eliminated from the simulation. */
+    int minfs(int ell) const;
+
     /** This function initializes the progress counter used in logprogress() for the specified
         phase and logs the number of photon packages and wavelengths to be processed. */
     void initprogress(QString phase);
@@ -387,28 +392,23 @@ protected:
         simulation can be analyzed. */
     void write();
 
-    /** Coming soon. */
-    int minfs(int ell) const;
-
     //======================== Data Members ========================
 
 private:
     // *** discoverable attributes managed by this class ***
     InstrumentSystem* _is;
-    double _packages;       // the specified number of photon packages to be launched per wavelength
+    double _packages;           // the specified number of photon packages to be launched per wavelength
     double _minWeightReduction;
     int _minfsref;
     double _lambdafsref;
-    bool _continuousScattering;  // true if continuous scattering should be used
+    bool _continuousScattering; // true if continuous scattering should be used
+    ProcessAssigner* _assigner; // determines which wavelengths are assigned to this process
 
 protected:
     // *** discoverable attributes to be setup by a subclass ***
     WavelengthGrid* _lambdagrid;
     StellarSystem* _ss;
     DustSystem* _ds;
-
-    // the process assigner; determines which wavelengths are assigned to this process
-    ProcessAssigner* _assigner;
 
 protected:
     // *** data members initialized by this class through the setChunkParams() function ***
@@ -419,7 +419,8 @@ protected:
     quint64 _logchunksize;  // the number of photon packages to be processed between logprogress() invocations
 
 private:
-    std::vector<int> _minfsv;   // vector that contains the minimum number of forced scatterings for each wavelength
+    // *** data members initialized during setup ***
+    std::vector<int> _minfsv;   // the minimum number of forced scatterings for each wavelength
 
 private:
     // *** data members used by the XXXprogress() functions in this class ***

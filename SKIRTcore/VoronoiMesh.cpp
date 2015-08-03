@@ -232,7 +232,7 @@ using namespace VoronoiMesh_Private;
 
 VoronoiMesh::VoronoiMesh(VoronoiMeshFile* meshfile, QList<int> fieldIndices, const Box& extent)
     : _extent(extent), _eps(1e-12 * extent.widths().norm()),
-      _Ndistribs(0), _integratedDensity(0), _integratedDensityv(0)
+      _Ndistribs(0), _integratedDensity(0)
 {
     // create a list of indices (g) without duplicates, ignoring negative values
     // create a hash table to map field indices (g) to storage indices (s)
@@ -280,7 +280,7 @@ VoronoiMesh::VoronoiMesh(VoronoiMeshFile* meshfile, QList<int> fieldIndices, con
 
 VoronoiMesh::VoronoiMesh(const std::vector<Vec> &particles, const Box &extent)
     : _extent(extent), _eps(1e-12 * extent.widths().norm()),
-      _Ndistribs(0), _integratedDensity(0), _integratedDensityv(0)
+      _Ndistribs(0), _integratedDensity(0)
 {
     // construct the Voronoi tesselation
     buildMesh(particles);
@@ -290,7 +290,7 @@ VoronoiMesh::VoronoiMesh(const std::vector<Vec> &particles, const Box &extent)
 
 VoronoiMesh::VoronoiMesh(DustParticleInterface *dpi, const Box &extent)
     : _extent(extent), _eps(1e-12 * extent.widths().norm()),
-      _Ndistribs(0), _integratedDensity(0), _integratedDensityv(0)
+      _Ndistribs(0), _integratedDensity(0)
 {
     // copy the particle locations into a temporary vector
     vector<Vec> particles;

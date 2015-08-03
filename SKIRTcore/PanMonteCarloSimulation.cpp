@@ -142,7 +142,7 @@ void PanMonteCarloSimulation::rundustselfabsorption()
             setChunkParams(packages()*stage_factor[stage]);
             initprogress(QString(stage_name[stage]) + " dust self-absorption cycle " + QString::number(cycle));
             Parallel* parallel = find<ParallelFactory>()->parallel();
-            parallel->call(this, &PanMonteCarloSimulation::dodustselfabsorptionchunk, _assigner);
+            parallel->call(this, &PanMonteCarloSimulation::dodustselfabsorptionchunk, assigner());
 
             // Wait for the other processes to reach this point
             _comm->wait("this self-absorption cycle");
@@ -223,7 +223,7 @@ void PanMonteCarloSimulation::dodustselfabsorptionchunk(size_t index)
                 {
                     _pds->fillOpticalDepth(&pp);
                     simulateescapeandabsorption(&pp,true);
-                    if (pp.luminosity()<=Lthreshold && pp.nScatt()>minfs(ell)) break;
+                    if (pp.luminosity()<=Lthreshold && pp.nScatt()>=minfs(ell)) break;
                     simulatepropagation(&pp);
                     simulatescattering(&pp);
                 }
@@ -256,7 +256,7 @@ void PanMonteCarloSimulation::rundustemission()
     setChunkParams(packages()*_pds->emissionBoost());
     initprogress("dust emission");
     Parallel* parallel = find<ParallelFactory>()->parallel();
-    parallel->call(this, &PanMonteCarloSimulation::dodustemissionchunk, _assigner);
+    parallel->call(this, &PanMonteCarloSimulation::dodustemissionchunk, assigner());
 
     // Wait for the other processes to reach this point
     _comm->wait("the dust emission phase");
@@ -305,7 +305,7 @@ void PanMonteCarloSimulation::dodustemissionchunk(size_t index)
                     _pds->fillOpticalDepth(&pp);
                     if (continuousScattering()) continuouspeeloffscattering(&pp,&ppp);
                     simulateescapeandabsorption(&pp,false);
-                    if (pp.luminosity()<=Lthreshold && pp.nScatt()>minfs(ell)) break;
+                    if (pp.luminosity()<=Lthreshold && pp.nScatt()>=minfs(ell)) break;
                     simulatepropagation(&pp);
                     if (!continuousScattering()) peeloffscattering(&pp,&ppp);
                     simulatescattering(&pp);
