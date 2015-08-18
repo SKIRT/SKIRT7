@@ -5,6 +5,7 @@
 
 #include <cmath>
 #include <limits>
+#include "FatalError.hpp"
 #include "NetzerAccretionDiskGeometry.hpp"
 #include "Random.hpp"
 
@@ -83,8 +84,12 @@ double NetzerAccretionDiskGeometry::SigmaZ() const
 
 //////////////////////////////////////////////////////////////////////
 
-double NetzerAccretionDiskGeometry::probabilityForDirection(Position /*bfr*/, Direction bfk) const
+double
+NetzerAccretionDiskGeometry::probabilityForDirection(Position bfr, Direction bfk)
+const
 {
+    if (bfr.radius()>0.0)
+        throw FATALERROR("the angular probability function is not defined for positions besides the origin");
     double theta, phi;
     bfk.spherical(theta, phi);
     double ct = cos(theta);
@@ -94,8 +99,12 @@ double NetzerAccretionDiskGeometry::probabilityForDirection(Position /*bfr*/, Di
 
 //////////////////////////////////////////////////////////////////////
 
-Direction NetzerAccretionDiskGeometry::generateDirection(Position /*bfr*/) const
+Direction
+NetzerAccretionDiskGeometry::generateDirection(Position bfr)
+const
 {
+    if (bfr.radius()>0.0)
+        throw FATALERROR("no directions should be generated at positions besides the origin");
     double theta = _random->cdf(_thetav,_Xv);
     double phi = 2.0*M_PI*_random->uniform();
     return Direction(theta,phi);
