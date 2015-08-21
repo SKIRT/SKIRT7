@@ -144,7 +144,7 @@ private:
     ArrayTable<2> _Xvv;   // cumulative luminosity over particles, for each wavelength bin -- [ell, i]
 
     // anisotropy information for each particle (only if _velocity is true)
-    std::vector<SPHStellarComp_Private::VelocityAnisotropy*> _av;
+    std::vector<SPHStellarComp_Private::VelocityAnisotropy*> _av;  // [i]
 
     // cached
     Random* _random;
