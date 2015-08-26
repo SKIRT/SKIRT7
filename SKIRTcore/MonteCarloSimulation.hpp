@@ -159,11 +159,11 @@ public:
 
     /** Sets the minimum number of scattering events that a photon package should experience before
         its life cycle is terminated. */
-    Q_INVOKABLE void setMinScattEvents(int value);
+    Q_INVOKABLE void setMinScattEvents(double value);
 
     /** Returns the minimum number of scattering events that a photon package should experience
         before its life cycle is terminated. */
-    Q_INVOKABLE int minScattEvents() const;
+    Q_INVOKABLE double minScattEvents() const;
 
     /** Sets the wavelength at which the minimum number of scattering events is specified. */
     Q_INVOKABLE void setScattWavelength(double value);
@@ -399,7 +399,7 @@ private:
     InstrumentSystem* _is;
     double _packages;           // the specified number of photon packages to be launched per wavelength
     double _minWeightReduction;
-    int _minfsref;
+    double _minfsref;
     double _lambdafsref;
     bool _continuousScattering; // true if continuous scattering should be used
     ProcessAssigner* _assigner; // determines which wavelengths are assigned to this process

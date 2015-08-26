@@ -74,7 +74,7 @@ void MonteCarloSimulation::setupSelfAfter()
 {
     Simulation::setupSelfAfter();
 
-    // Calculate the maximum number of scatterings for each wavelength bin
+    // Calculate the minimum number of scatterings for each wavelength bin
     int Nlambda = _lambdagrid->Nlambda();
     _minfsv.resize(Nlambda);
     if (_ds && _minfsref > 0)
@@ -185,14 +185,14 @@ double MonteCarloSimulation::minWeightReduction() const
 
 ////////////////////////////////////////////////////////////////////
 
-void MonteCarloSimulation::setMinScattEvents(int value)
+void MonteCarloSimulation::setMinScattEvents(double value)
 {
     _minfsref = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-int MonteCarloSimulation::minScattEvents() const
+double MonteCarloSimulation::minScattEvents() const
 {
     return _minfsref;
 }
