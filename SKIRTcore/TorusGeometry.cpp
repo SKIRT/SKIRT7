@@ -14,7 +14,8 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////
 
 TorusGeometry::TorusGeometry()
-    : _p(0), _q(0), _Delta(0), _rmin(0), _rmax(0), _sinDelta(0), _smin(0), _sdiff(0), _A(0)
+    : _p(0), _q(0), _Delta(0), _rmin(0), _rmax(0), _rani(false), _rcut(0),
+      _sinDelta(0), _smin(0), _sdiff(0), _A(0)
 {
 }
 
@@ -30,6 +31,7 @@ void TorusGeometry::setupSelfBefore()
     if (_Delta < 0) throw FATALERROR("The half opening angle of the torus should be positive");
     if (_rmin <= 0) throw FATALERROR("The minimum radius of the torus should be positive");
     if (_rmax <= _rmin) throw FATALERROR("The maximum radius of the torus should be larger than the minimum radius");
+    if (_rani && _rcut <= 0) throw FATALERROR("The inner cutoff radius of the torus should be positive");
 
     // cache frequently used values
     _sinDelta = sin(_Delta);
@@ -113,13 +115,52 @@ double TorusGeometry::maxRadius() const
     return _rmax;
 }
 
+////////////////////////////////////////////////////////////////////
+
+void TorusGeometry::setAnisoRadius(bool value)
+{
+    _rani = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+bool TorusGeometry::anisoRadius() const
+{
+    return _rani;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void TorusGeometry::setCutRadius(double value)
+{
+    _rcut = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double TorusGeometry::cutRadius() const
+{
+    return _rcut;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 double TorusGeometry::density(double R, double z) const
 {
     double r = sqrt(R*R+z*z);
-    if (r<= _rmin || r>= _rmax) return 0.0;
     double costheta = z/r;
+
+    if (r>=_rmax) return 0.0;
+    if (_rani)
+    {
+        double rminani = _rmin*sqrt(6./7.*fabs(costheta)*(2.*fabs(costheta)+1));
+        if (r<=rminani || r<_rcut) return 0.0;
+    }
+    else
+    {
+        if (r<=_rmin) return 0.0;
+    }
+
     if (fabs(costheta) >=_sinDelta) return 0.0;
     return _A * pow(r,-_p) * exp(-_q*fabs(costheta));
 }
