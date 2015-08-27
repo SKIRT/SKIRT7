@@ -37,12 +37,12 @@ exists ('/usr/local/include/fftw3.h'){
 }
 
 # include the necessary paths for FFTW3 if present in the home directory
-exists ('$HOME/FFTW/include/fftw3.h'){
+exists ('$$(HOME)/FFTW/include/fftw3.h'){
     message (using FFTW3 library for $$TARGET project)
     QMAKE_CXXFLAGS += -DUSING_FFTW3
     CONFIG += USING_FFTW3
-    LIBS += -L$HOME/FFTW/lib -lfftw3
-    INCLUDEPATH += $HOME/FFTW/include
+    LIBS += -L$$(HOME)/FFTW/lib -lfftw3
+    INCLUDEPATH += $$(HOME)/FFTW/include
 }
 
 #--------------------------------------------------
