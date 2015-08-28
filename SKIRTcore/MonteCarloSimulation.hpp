@@ -166,11 +166,11 @@ public:
 
     /** Sets the minimum number of scattering events that a photon package should experience before
         its life cycle is terminated. */
-    Q_INVOKABLE void setMinScattEvents(int value);
+    Q_INVOKABLE void setMinScattEvents(double value);
 
     /** Returns the minimum number of scattering events that a photon package should experience
         before its life cycle is terminated. */
-    Q_INVOKABLE int minScattEvents() const;
+    Q_INVOKABLE double minScattEvents() const;
 
     /** Sets the wavelength at which the minimum number of scattering events is specified. */
     Q_INVOKABLE void setScattWavelength(double value);

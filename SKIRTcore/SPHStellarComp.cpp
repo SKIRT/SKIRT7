@@ -29,26 +29,48 @@ namespace SPHStellarComp_Private
     {
     public:
         /** The constructor */
-        VelocityAnisotropy() { }
+        VelocityAnisotropy(const Array& particle, const SEDFamily* sedFamily, Random* random)
+            : _random(random)
+        {
+            // get velocity, converting from km/s to m/s, and remember normalized direction of velocity
+            Vec bfv = Vec(particle[4],particle[5],particle[6])*1e3;
+            _bfkv = Direction(bfv/bfv.norm());
+
+            (void)sedFamily;
+        }
 
         /** This function returns the probability \f$P(\Omega)\f$ for a given direction
-            \f$(\theta,\phi)\f$ at the specified position. We assume that the specified position
-            matches the position of the particle represented by this instance. */
+            \f$(\theta,\phi)\f$ for the particle represented by this instance. The function ignores
+            the specified position, which is assumed to be near the position of the particle. */
         double probabilityForDirection(Position /*bfr*/, Direction bfk) const
         {
-            (void)bfk;
-            return 0;
+            int ell = 0; // this will become a parameter of the function!
+            double costheta = Vec::dot(bfk,_bfkv);
+            int t = NR::locate_clip(_costhetav, costheta);
+            return NR::interpolate_linlin(costheta, _costhetav[t], _costhetav[t+1], _Lvv(ell,t), _Lvv(ell,t+1));
         }
 
         /** This function generates a random direction \f$(\theta,\phi)\f$ drawn from the
-            probability distribution \f$P(\Omega)\,{\mathrm{d}}\Omega\f$ at the specified position.
-            We assume that the specified position matches the position of the particle represented
-            by this instance. */
+            probability distribution \f$P(\Omega)\,{\mathrm{d}}\Omega\f$ for the particle
+            represented by this instance. The function ignores the specified position, which is
+            assumed to be near the position of the particle. */
         Direction generateDirection(Position /*bfr*/) const
         {
-            return Direction();
+            int ell = 0; // this will become a parameter of the function!
+            double theta = acos(_random->cdf(_costhetav, _Xvv[ell]));
+            double phi = 2*M_PI * _random->uniform();
+            return Direction(theta,phi); // should be relative to the direction of the particle's velocity
         }
+
+    private:
+        Random* _random;    // pointer to the simulation's random generator
+        Direction _bfkv;    // unit vector along the direction of the particle's velocity
+        ArrayTable<2> _Lvv; // [ell,t] normalized luminosity distribution over cos(theta), for each wavelength index
+        ArrayTable<2> _Xvv; // [ell,t] cumulative luminosity distribution over cos(theta), for each wavelength index
+        static Array _costhetav; // [t] values of cos(theta) corresponding to second index in previous tables
     };
+
+    Array VelocityAnisotropy::_costhetav;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -89,9 +111,11 @@ void SPHStellarComp::setupSelfAfter()
     const double pc = Units::pc();
 
     // load the SPH source particles, including the parameters for our SED family
-    int Nparams = _sedFamily->nparams();
+    // and including the velocity, if requested
+    int Nbase = _velocity ? 7 : 4;
+    int Nsed = _sedFamily->nparams();
     QString description = "SPH " + _sedFamily->sourceDescription() + " particles";
-    const vector<Array>& particles = TextInFile(this, _filename, description).readAllRows(4+Nparams);
+    const vector<Array>& particles = TextInFile(this, _filename, description).readAllRows(Nbase+Nsed);
 
     find<Log>()->info("Processing the particle properties... ");
 
@@ -105,34 +129,37 @@ void SPHStellarComp::setupSelfAfter()
         const Array& particle = particles[i];
         _rv[i] = Vec(particle[0],particle[1],particle[2])*pc;
         _hv[i] = particle[3]*pc;
-        Mtot += _sedFamily->mass_generic(particle, 4);
+        Mtot += _sedFamily->mass_generic(particle, Nbase);
     }
 
     // construct a temporary matrix with the luminosity of each particle at each wavelength
-    int Nlambda = find<WavelengthGrid>()->Nlambda();
     ArrayTable<2> Lvv(Np,0);  // [i,ell]
     for (int i=0; i!=Np; ++i)
     {
-        Lvv[i] = _sedFamily->luminosities_generic(particles[i], 4);
+        Lvv[i] = _sedFamily->luminosities_generic(particles[i], Nbase);
     }
 
     // calculate the total luminosity for every wavelength bin, and the grand total luminosity
+    int Nlambda = find<WavelengthGrid>()->Nlambda();
     _Ltotv.resize(Nlambda);
-    double Ltot = 0;
-    for (int i=0; i!=Np; ++i)
-    {
-        for (int ell=0; ell<Nlambda; ell++)
-        {
-            _Ltotv[ell] += Lvv(i,ell);
-            Ltot += Lvv(i,ell);
-        }
-    }
+    for (int i=0; i!=Np; ++i) _Ltotv += Lvv[i];
+    double Ltot = _Ltotv.sum();
 
     // construct the normalized cumulative luminosity distribution over particles, for each wavelength bin
     _Xvv.resize(Nlambda,0);  // [ell,i]
     for (int ell=0; ell<Nlambda; ell++)
     {
         NR::cdf(_Xvv[ell], Np, [&Lvv, ell](int i) { return Lvv(i,ell); });
+    }
+
+    // construct anisotropy information for each particle, if requested
+    if (_velocity)
+    {
+        _av.resize(Np);
+        for (int i=0; i!=Np; ++i)
+        {
+            _av[i] = new SPHStellarComp_Private::VelocityAnisotropy(particles[i], _sedFamily, _random);
+        }
     }
 
     // log key statistics
@@ -224,16 +251,26 @@ double SPHStellarComp::luminosity(int ell) const
 
 void SPHStellarComp::launch(PhotonPackage* pp, int ell, double L) const
 {
+    // select random particle
     int i = NR::locate_clip(_Xvv[ell], _random->uniform());
+
+    // determine random position in Gaussian particle
     double x = _random->gauss();
     double y = _random->gauss();
     double z = _random->gauss();
     Position bfr( _rv[i] + Vec(x,y,z) * (_hv[i] / 2.42 / M_SQRT2) );
-    Direction bfk( _random->direction() );
-    pp->launch(L,ell,bfr,bfk);
 
-    // if we have particle velocity data, setup the resulting anisotropic luminosity distribution
-    if (_velocity) pp->setAngularDistribution(_av[i]);
+    // if we have velocity data, launch using the particle's anisotropic luminosity distribution
+    if (_velocity)
+    {
+        pp->launch(L, ell, bfr, _av[i]->generateDirection(bfr));
+        pp->setAngularDistribution(_av[i]);
+    }
+    // otherwise launch using the default isotropic distribution
+    else
+    {
+        pp->launch(L, ell, bfr, _random->direction());
+    }
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -41,7 +41,7 @@ RotateGeometryDecorator::setupSelfBefore()
     _cosgamma = cos(_gamma);
     _R11 = _cosalpha*_cosgamma - _sinalpha*_cosbeta*_singamma;
     _R12 = _sinalpha*_cosgamma + _cosalpha*_cosbeta*_singamma;
-    _R13 = _cosbeta*_singamma;
+    _R13 = _sinbeta*_singamma;
     _R21 = -_cosalpha*_singamma - _sinalpha*_cosbeta*_cosgamma;
     _R22 = -_sinalpha*_singamma + _cosalpha*_cosbeta*_cosgamma;
     _R23 = _sinbeta*_cosgamma;

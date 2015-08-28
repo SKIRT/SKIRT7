@@ -49,6 +49,17 @@ class TorusGeometry : public AxGeometry
     Q_CLASSINFO("Quantity", "length")
     Q_CLASSINFO("MinValue", "0")
 
+    Q_CLASSINFO("Property", "anisoRadius")
+    Q_CLASSINFO("Title", "the anisotropic inner radius")
+    Q_CLASSINFO("Default", "no")
+
+    Q_CLASSINFO("Property", "cutRadius")
+    Q_CLASSINFO("Title", "the inner cutoff radius of the torus")
+    Q_CLASSINFO("Quantity", "length")
+    Q_CLASSINFO("MinValue", "0")
+    Q_CLASSINFO("Default", "0")
+    Q_CLASSINFO("RelevantIf", "anisoRadius")
+
     //============= Construction - Setup - Destruction =============
 
 public:
@@ -100,6 +111,19 @@ public:
 
     /** Returns the maximum radius of the torus. */
     Q_INVOKABLE double maxRadius() const;
+
+    /** Sets the flag indicating whether to reshape the inner wall of the torus according to the
+        Netzer luminosity profile. */
+    Q_INVOKABLE void setAnisoRadius(bool value);
+
+    /** Returns the flag indicating whether to use anisotropic inner radius of the torus. */
+    Q_INVOKABLE bool anisoRadius() const;
+
+    /** Sets the inner cutoff radius of the torus. */
+    Q_INVOKABLE void setCutRadius(double value);
+
+    /** Returns the inner cutoff radius of the torus. */
+    Q_INVOKABLE double cutRadius() const;
 
     //======================== Other Functions =======================
 
@@ -169,6 +193,8 @@ private:
     double _Delta;
     double _rmin;
     double _rmax;
+    bool _rani;
+    double _rcut;
 
     // data members initialized during setup
     double _sinDelta;
