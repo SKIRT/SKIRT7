@@ -31,7 +31,7 @@ using namespace std;
 
 MonteCarloSimulation::MonteCarloSimulation()
     : _is(0), _packages(0), _minWeightReduction(0),
-      _minfsref(0), _lambdafsref(0),
+      _minfsref(0), _lambdafsref(0), _xi(0),
       _continuousScattering(false), _assigner(0),
       _lambdagrid(0), _ss(0), _ds(0)
 {
@@ -56,6 +56,8 @@ void MonteCarloSimulation::setupSelfBefore()
         throw FATALERROR("The minimum number of scattering events is negative");
     if (_minfsref > 1000)
         throw FATALERROR("The minimum number of scattering events should be smaller than 1000");
+    if (_xi < 0 || _xi > 1)
+        throw FATALERROR("The scattering bias should be between 0 and 1");
     if (!_lambdagrid)
         throw FATALERROR("Wavelength grid was not set");
     if (!_ss)
@@ -213,6 +215,20 @@ double MonteCarloSimulation::scattWavelength() const
 
 ////////////////////////////////////////////////////////////////////
 
+void MonteCarloSimulation::setScattBias(double value)
+{
+    _xi = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double MonteCarloSimulation::scattBias() const
+{
+    return _xi;
+}
+
+////////////////////////////////////////////////////////////////////
+
 void MonteCarloSimulation::setContinuousScattering(bool value)
 {
     _continuousScattering = value;
@@ -327,7 +343,9 @@ void MonteCarloSimulation::dostellaremissionchunk(size_t index)
                     _ds->fillOpticalDepth(&pp);
                     if (_continuousScattering) continuouspeeloffscattering(&pp,&ppp);
                     simulateescapeandabsorption(&pp,_ds->dustemission());
-                    if (pp.luminosity()<=Lthreshold && pp.nScatt()>=minfs(ell)) break;
+                    double L = pp.luminosity();
+                    if (L==0.0) break;
+                    if (L<=Lthreshold && pp.nScatt()>=minfs(ell)) break;
                     simulatepropagation(&pp);
                     if (!_continuousScattering) peeloffscattering(&pp,&ppp);
                     simulatescattering(&pp);
@@ -559,7 +577,19 @@ void MonteCarloSimulation::simulateescapeandabsorption(PhotonPackage* pp, bool d
 void MonteCarloSimulation::simulatepropagation(PhotonPackage* pp)
 {
     double taupath = pp->tau();
-    double tau = _random->exponcutoff(taupath);
+    if (taupath==0.0) return;
+    double tau = 0.0;
+    if (_xi==0.0)
+        tau = _random->exponcutoff(taupath);
+    else
+    {
+        double X = _random->uniform();
+        tau = (X<_xi) ? _random->uniform()*taupath : _random->exponcutoff(taupath);
+        double p = -exp(-tau)/expm1(-taupath);
+        double q = (1.0-_xi)*p + _xi/taupath;
+        double weight = p/q;
+        pp->setLuminosity(pp->luminosity()*weight);
+    }
     double s = pp->pathlength(tau);
     pp->propagate(s);
 }

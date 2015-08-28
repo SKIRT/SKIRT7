@@ -60,10 +60,17 @@ class MonteCarloSimulation : public Simulation
     Q_CLASSINFO("MaxValue", "1 m")
     Q_CLASSINFO("Default", "0.55 micron")
 
+    Q_CLASSINFO("Property", "scattBias")
+    Q_CLASSINFO("Title", "the scattering bias")
+    Q_CLASSINFO("MinValue", "0")
+    Q_CLASSINFO("MaxValue", "1")
+    Q_CLASSINFO("Default", "0")
+    Q_CLASSINFO("Silent","true")
+
     Q_CLASSINFO("Property", "continuousScattering")
     Q_CLASSINFO("Title", "use continuous scattering")
     Q_CLASSINFO("Default", "no")
-    Q_CLASSINFO("Silent", "yes")
+    Q_CLASSINFO("Silent", "true")
 
     Q_CLASSINFO("Property", "assigner")
     Q_CLASSINFO("Title", "the assignment scheme that assigns the wavelengths to the different parallel processes")
@@ -170,6 +177,14 @@ public:
 
     /** Returns the wavelength at which the minimum number of scattering events is specified. */
     Q_INVOKABLE double scattWavelength() const;
+
+    /** Sets the scattering bias, i.e. the fraction of the probability function for the
+        optial depth distribution after a scattering event that is a constant function
+        of \f$\tau\f$ rather than an exponentially declining function. */
+    Q_INVOKABLE void setScattBias(double value);
+
+    /** Returns the scattering bias. */
+    Q_INVOKABLE double scattBias() const;
 
     /** Sets the flag that indicates whether continuous scattering should be used. The default
         value is false. */
@@ -360,13 +375,23 @@ protected:
     /** This function determines the next scattering location of a photon package and the simulates
         the propagation to this position. Given the total optical depth along the path of the
         photon package \f$\tau_{\ell,\text{path}}\f$ (this quantity is stored in the PhotonPackage
-        object provided as an input parameter of this function), a random optical depth
-        \f$\tau_\ell\f$ is generated from an exponential probability distribution cut off at
-        \f$\tau_{\ell,\text{path}}\f$, distribution \f[ p(\tau_\ell)\,{\text{d}}\tau_\ell \propto
-        \begin{cases} \;{\text{e}}^{-\tau_\ell}\,{\text{d}}\tau_\ell &\qquad \text{for
-        }0<\tau_\ell<\tau_{\ell,\text{path}}, \\ \;0 &\qquad \text{for
-        }\tau_\ell>\tau_{\ell,\text{path}}. \end{cases} \f] Once this random optical depth is
-        determined, it is converted to a physical path length \f$s\f$ and the photon package is
+        object provided as an input parameter of this function), the appropriate probability
+        distribution for the covered optical depth is an exponential probability
+        distribution cut off at \f$\tau_{\ell,\text{path}}\f$. Properly normalized, it reads as
+        \f[ p(\tau_\ell) = \frac{{\text{e}}^{-\tau_\ell}}
+        {1-{\text{e}}^{\tau_{\ell,\text{path}}}} \f] where the range of \f$\tau_\ell\f$ is limited
+        to the interval \f$[0,\tau_{\ell,\text{path}}]\f$. Instead of generating a
+        random optical depth \f$\tau_\ell\f$ directly from this distribution, we use the biasing
+        technique in order to cover the entire allowed optical depth range \f$[0,\tau_{\ell,
+        \text{path}}]\f$ more uniformly. As the biased probability distribution, we use a linear
+        combination between an exponential distribution and a uniform distribution, with a parameter
+        \f$\xi\f$ setting the relative importance of the linear part. In formula form, \f[
+        q(\tau_\ell) = (1-\xi)\, \frac{ {\text{e}}^{-\tau_\ell} }
+        { 1-{\text{e}}^{\tau_{\ell,\text{path}}} } + \frac{\xi}{\tau_{\ell,\text{path}}}. \f] A
+        random optical depth from this distribution is readily determined. Since we use biasing, the
+        weight, or correspondingly the luminosity, of the photon package needs to be adjusted with
+        a bias factor \f$p(\tau_\ell)/q(\tau_\ell)\f$. Finally, the randomly determined optical
+        depth is converted to a physical path length \f$s\f$, and the photon package is
         propagated over this distance. */
     void simulatepropagation(PhotonPackage* pp);
 
@@ -398,9 +423,10 @@ private:
     // *** discoverable attributes managed by this class ***
     InstrumentSystem* _is;
     double _packages;           // the specified number of photon packages to be launched per wavelength
-    double _minWeightReduction;
-    int _minfsref;
-    double _lambdafsref;
+    double _minWeightReduction; // the minimum weight reduction factor
+    int _minfsref;              // the minimum number of scattering events at the reference wavelength
+    double _lambdafsref;        // the reference wavelength for _minfsref
+    double _xi;                 // the scattering bias
     bool _continuousScattering; // true if continuous scattering should be used
     ProcessAssigner* _assigner; // determines which wavelengths are assigned to this process
 
