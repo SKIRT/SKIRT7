@@ -379,15 +379,15 @@ protected:
         distribution for the covered optical depth is an exponential probability
         distribution cut off at \f$\tau_{\ell,\text{path}}\f$. Properly normalized, it reads as
         \f[ p(\tau_\ell) = \frac{{\text{e}}^{-\tau_\ell}}
-        {1-{\text{e}}^{\tau_{\ell,\text{path}}}} \f] where the range of \f$\tau_\ell\f$ is limited
+        {1-{\text{e}}^{-\tau_{\ell,\text{path}}}} \f] where the range of \f$\tau_\ell\f$ is limited
         to the interval \f$[0,\tau_{\ell,\text{path}}]\f$. Instead of generating a
         random optical depth \f$\tau_\ell\f$ directly from this distribution, we use the biasing
         technique in order to cover the entire allowed optical depth range \f$[0,\tau_{\ell,
         \text{path}}]\f$ more uniformly. As the biased probability distribution, we use a linear
         combination between an exponential distribution and a uniform distribution, with a parameter
-        \f$\xi\f$ setting the relative importance of the linear part. In formula form, \f[
+        \f$\xi\f$ setting the relative importance of the uniform part. In formula form, \f[
         q(\tau_\ell) = (1-\xi)\, \frac{ {\text{e}}^{-\tau_\ell} }
-        { 1-{\text{e}}^{\tau_{\ell,\text{path}}} } + \frac{\xi}{\tau_{\ell,\text{path}}}. \f] A
+        { 1-{\text{e}}^{-\tau_{\ell,\text{path}}} } + \frac{\xi}{\tau_{\ell,\text{path}}}. \f] A
         random optical depth from this distribution is readily determined. Since we use biasing, the
         weight, or correspondingly the luminosity, of the photon package needs to be adjusted with
         a bias factor \f$p(\tau_\ell)/q(\tau_\ell)\f$. Finally, the randomly determined optical
