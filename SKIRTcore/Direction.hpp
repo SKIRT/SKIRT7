@@ -39,7 +39,7 @@ public:
         type conversions. In order to avoid abundant calculations, it is not checked whether the
         three cartesian coordinates satisfy the condition \f[ k_x^2+k_y^2+k_z^2=1. \f] It is the
         user's responsibility to provide valid coordinates. */
-    inline Direction(Vec k) : Vec(k) { }
+    explicit inline Direction(Vec k) : Vec(k) { }
 
     /** Constructor for a direction with a given azimuth and polar angle. The cartesian coordinates
         are calculated as \f[ \begin{split} k_x &= \sin\theta\,\cos\varphi, \\ k_y &=

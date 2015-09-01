@@ -176,8 +176,7 @@ Random::exponcutoff(double xmax)
 
 //////////////////////////////////////////////////////////////////////
 
-Direction
-Random::direction()
+Direction Random::direction()
 {
     double theta = acos(2.0*uniform()-1.0);
     double phi = 2.0*M_PI*uniform();
@@ -186,17 +185,40 @@ Random::direction()
 
 //////////////////////////////////////////////////////////////////////
 
-Direction
-Random::cosdirection()
+Direction Random::direction(Direction bfk, double costheta)
 {
-    double X = uniform();
-    double theta = 0.0;
-    if (X<0.5)
-        theta = acos(sqrt(1.0-2.0*X));
+    // generate random phi and get the sine and cosine for both angles
+    double phi = 2.0*M_PI * uniform();
+    double cosphi = cos(phi);
+    double sinphi = sin(phi);
+    double sintheta = sqrt(fabs((1.0-costheta)*(1.0+costheta)));
+
+    // get the old direction
+    double kx, ky, kz;
+    bfk.cartesian(kx,ky,kz);
+
+    // determine the new direction
+    double kxnew, kynew, kznew;
+    if (kz>0.99999)
+    {
+        kxnew = cosphi * sintheta;
+        kynew = sinphi * sintheta;
+        kznew = costheta;
+    }
+    else if (kz<-0.99999)
+    {
+        kxnew = cosphi * sintheta;
+        kynew = sinphi * sintheta;
+        kznew = -costheta;
+    }
     else
-        theta = acos(-sqrt(2.0*X-1.0));
-    double phi = 2.0*M_PI*uniform();
-    return Direction(theta,phi);
+    {
+        double root = sqrt((1.0-kz)*(1.0+kz));
+        kxnew = sintheta/root*(-kx*kz*cosphi+ky*sinphi) + kx*costheta;
+        kynew = -sintheta/root*(ky*kz*cosphi+kx*sinphi) + ky*costheta;
+        kznew = root*sintheta*cosphi + kz*costheta;
+    }
+    return Direction(kxnew,kynew,kznew);
 }
 
 //////////////////////////////////////////////////////////////////////

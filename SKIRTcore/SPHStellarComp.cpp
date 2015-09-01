@@ -16,6 +16,7 @@
 #include "TextOutFile.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
+#include <mutex>
 
 using namespace std;
 
@@ -23,8 +24,12 @@ using namespace std;
 
 namespace SPHStellarComp_Private
 {
+    Array _costhetav;            // grid of cos(theta) values indexed on t
+    const int _Ncostheta = 45;   // number of values in cos(theta) grid
+    std::once_flag _costhetav_initialized; // flag indicating whether cos(theta) grid has been initialized
+
     /** An instance of this class holds all relevant luminosity information to implement the
-      AngularDistribution interface for an SPH source particle with velocity information. */
+        AngularDistribution interface for an SPH source particle with velocity information. */
     class VelocityAnisotropy : public AngularDistribution
     {
     public:
@@ -36,6 +41,10 @@ namespace SPHStellarComp_Private
             Vec bfv = Vec(particle[4],particle[5],particle[6])*1e3;
             _bfkv = Direction(bfv/bfv.norm());
 
+            // initialize the global cos(theta) grid upon first invocation
+            std::call_once(_costhetav_initialized, [] { NR::lingrid(_costhetav, -1., +1., _Ncostheta-1); });
+
+            // TODO: properly initialize _Lvv and _Xvv
             (void)sedFamily;
         }
 
@@ -44,7 +53,7 @@ namespace SPHStellarComp_Private
             the specified position, which is assumed to be near the position of the particle. */
         double probabilityForDirection(Position /*bfr*/, Direction bfk) const
         {
-            int ell = 0; // this will become a parameter of the function!
+            int ell = 0; // TODO: this will become a parameter of the function!
             double costheta = Vec::dot(bfk,_bfkv);
             int t = NR::locate_clip(_costhetav, costheta);
             return NR::interpolate_linlin(costheta, _costhetav[t], _costhetav[t+1], _Lvv(ell,t), _Lvv(ell,t+1));
@@ -56,10 +65,9 @@ namespace SPHStellarComp_Private
             assumed to be near the position of the particle. */
         Direction generateDirection(Position /*bfr*/) const
         {
-            int ell = 0; // this will become a parameter of the function!
-            double theta = acos(_random->cdf(_costhetav, _Xvv[ell]));
-            double phi = 2*M_PI * _random->uniform();
-            return Direction(theta,phi); // should be relative to the direction of the particle's velocity
+            int ell = 0; // TODO: this will become a parameter of the function!
+            double costheta = _random->cdf(_costhetav, _Xvv[ell]);
+            return _random->direction(_bfkv, costheta);
         }
 
     private:
@@ -67,10 +75,8 @@ namespace SPHStellarComp_Private
         Direction _bfkv;    // unit vector along the direction of the particle's velocity
         ArrayTable<2> _Lvv; // [ell,t] normalized luminosity distribution over cos(theta), for each wavelength index
         ArrayTable<2> _Xvv; // [ell,t] cumulative luminosity distribution over cos(theta), for each wavelength index
-        static Array _costhetav; // [t] values of cos(theta) corresponding to second index in previous tables
-    };
 
-    Array VelocityAnisotropy::_costhetav;
+    };
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -591,59 +591,33 @@ namespace
 Direction DustMix::scatteringDirectionAndPolarization(StokesVector* out, const PhotonPackage* pp) const
 {
     // determine the angles between the previous and new direction
-    double costheta, sintheta, cosphi, sinphi;
     if (_polarization)
     {
         int ell = pp->ell();
         double theta = sampleTheta(ell);
         double phi = pp->polarizationAngle() + samplePhi(ell, theta, pp->linearPolarizationDegree());
-        cosphi = cos(phi);
-        sinphi = sin(phi);
-        costheta = cos(theta);
-        sintheta = sin(theta);
+        //double cosphi = cos(phi);
+        //double sinphi = sin(phi);
+        double costheta = cos(theta);
+        //double sintheta = sin(theta);
 
         // also calculate and store the new polarization state
         *out = *pp;
         out->rotateStokes(phi);
         int t = indexForTheta(theta, _Ntheta);
         out->applyMueller(_S11vv(ell,t), _S12vv(ell,t), _S33vv(ell,t), _S34vv(ell,t));
+
+        // calculate and return the new direction (not yet implemented!!)
+        return _random->direction(pp->direction(), costheta);
     }
     else
     {
         double g = _asymmparv[pp->ell()];
         if (fabs(g)<1e-6) return _random->direction();
-        double phi = 2.0*M_PI*_random->uniform();
-        cosphi = cos(phi);
-        sinphi = sin(phi);
         double f = ((1.0-g)*(1.0+g))/(1.0-g+2.0*g*_random->uniform());
-        costheta = (1.0+g*g-f*f)/(2.0*g);
-        sintheta = sqrt(fabs((1.0-costheta)*(1.0+costheta)));
+        double costheta = (1.0+g*g-f*f)/(2.0*g);
+        return _random->direction(pp->direction(), costheta);
     }
-
-    // determine the new direction from the old direction and the relative change
-    double kx, ky, kz;
-    pp->direction().cartesian(kx,ky,kz);
-    double kxnew, kynew, kznew;
-    if (kz>0.99999)
-    {
-        kxnew = cosphi * sintheta;
-        kynew = sinphi * sintheta;
-        kznew = costheta;
-    }
-    else if (kz<-0.99999)
-    {
-        kxnew = cosphi * sintheta;
-        kynew = sinphi * sintheta;
-        kznew = -costheta;
-    }
-    else
-    {
-        double root = sqrt(fabs((1.0-kz)*(1.0+kz)));
-        kxnew = sintheta/root*(-kx*kz*cosphi+ky*sinphi) + kx*costheta;
-        kynew = -sintheta/root*(ky*kz*cosphi+kx*sinphi) + ky*costheta;
-        kznew = root*sintheta*cosphi + kz*costheta;
-    }
-    return Direction(kxnew,kynew,kznew);
 }
 
 ////////////////////////////////////////////////////////////////////
