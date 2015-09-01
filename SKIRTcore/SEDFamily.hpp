@@ -36,8 +36,14 @@ public:
         width of the wavelength bin) at each wavelength in the simulation's wavelength grid for the
         specified set of parameter values. The \em params array must contain the appropriate number
         of parameter values in the order specified by the particular %SED family subclass.
-        The first \em skipvals values in the array are ignored. */
-    virtual Array luminosities_generic(const Array& params, int skipvals=0) const = 0;
+        The first \em skipvals values in the array are ignored.
+
+        If the redshift argument \f$z\f$ is present and nonzero, the spectrum is redshifted
+        according to the specified value. In function of the rest wavelength \f$\lambda_0\f$, the
+        redshifted wavelength \f$\lambda_z\f$ is given by \f$\lambda_z=(1+z)\,\lambda_0\f$. For
+        \f$z<<1\f$, the observed luminosity at each wavelength in the simulation's wavelength grid
+        can then be written as \f[L_z[\lambda_\ell] = L_0[(1-z)\,\lambda_\ell]\f] */
+    virtual Array luminosities_generic(const Array& params, int skipvals=0, double z=0) const = 0;
 
     /** This function returns the mass (in \f$M_\odot\f$) of the source represented by the
         specified set of parameter values. The \em params array must contain the appropriate number

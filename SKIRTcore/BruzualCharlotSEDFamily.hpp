@@ -50,8 +50,13 @@ public:
         wavelength grid for a stellar population with given initial mass \em M (in \f$M_\odot\f$
         at \f$t=0\f$), metallicity \em Z (as a dimensionless fraction), and age \em t (in years).
         The luminosity is defined as the emissivity multiplied by the width of the wavelength bin.
-        */
-    Array luminosities(double M, double Z, double t) const;
+
+        If the redshift argument \f$z\f$ is present and nonzero, the spectrum is redshifted
+        according to the specified value. In function of the rest wavelength \f$\lambda_0\f$, the
+        redshifted wavelength \f$\lambda_z\f$ is given by \f$\lambda_z=(1+z)\,\lambda_0\f$. For
+        \f$z<<1\f$, the observed luminosity at each wavelength in the simulation's wavelength grid
+        can then be written as \f[L_z[\lambda_\ell] = L_0[(1-z)\,\lambda_\ell]\f] */
+    Array luminosities(double M, double Z, double t, double z=0) const;
 
     /** This function returns the number of parameters used by this particular %SED family, in
         other words the number of arguments of the luminosities() function. */
@@ -61,7 +66,7 @@ public:
         wavelength grid for the specified parameter values, which should be in the same order and
         using the same units as the arguments described for the luminosities() function. The first
         \em skipvals values in the \em params array are ignored. */
-    Array luminosities_generic(const Array& params, int skipvals=0) const;
+    Array luminosities_generic(const Array& params, int skipvals=0, double z=0) const;
 
     /** This function returns the mass (in \f$M_\odot\f$) of the source represented by the
         specified set of parameter values. The \em params array must contain the appropriate number

@@ -50,8 +50,14 @@ public:
         wavelength grid for a starbursting population, given the star formation rate \f$\dot{M}\f$
         (assumed to be constant over the past 10 Myr, in \f$M_\odot\,{\text{yr}}^{-1}\f$),
         metallicity \f$Z\f$, the logarithm of the compactness \f$\log C\f$, the ISM pressure
-        \f$p\f$ (in Pa), and the dimensionless PDR covering factor \f$f_{\text{PDR}}\f$. */
-    Array luminosities(double SFR, double Z, double logC, double pressure, double fPDR) const;
+        \f$p\f$ (in Pa), and the dimensionless PDR covering factor \f$f_{\text{PDR}}\f$.
+
+        If the redshift argument \f$z\f$ is present and nonzero, the spectrum is redshifted
+        according to the specified value. In function of the rest wavelength \f$\lambda_0\f$, the
+        redshifted wavelength \f$\lambda_z\f$ is given by \f$\lambda_z=(1+z)\,\lambda_0\f$. For
+        \f$z<<1\f$, the observed luminosity at each wavelength in the simulation's wavelength grid
+        can then be written as \f[L_z[\lambda_\ell] = L_0[(1-z)\,\lambda_\ell]\f] */
+    Array luminosities(double SFR, double Z, double logC, double pressure, double fPDR, double z=0) const;
 
     /** This function returns the number of parameters used by this particular %SED family, in
         other words the number of arguments of the luminosities() function. */
@@ -61,7 +67,7 @@ public:
         wavelength grid for the specified parameter values, which should be in the same order and
         using the same units as the arguments described for the luminosities() function. The first
         \em skipvals values in the \em params array are ignored. */
-    Array luminosities_generic(const Array& params, int skipvals=0) const;
+    Array luminosities_generic(const Array& params, int skipvals=0, double z=0) const;
 
     /** This function returns the mass (in \f$M_\odot\f$) of the source represented by the
         specified set of parameter values. The \em params array must contain the appropriate number

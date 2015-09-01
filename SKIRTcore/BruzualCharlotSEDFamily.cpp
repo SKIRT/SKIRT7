@@ -125,7 +125,7 @@ void BruzualCharlotSEDFamily::setupSelfBefore()
 
 //////////////////////////////////////////////////////////////////////
 
-Array BruzualCharlotSEDFamily::luminosities(double M, double Z, double t) const
+Array BruzualCharlotSEDFamily::luminosities(double M, double Z, double t, double z) const
 {
     // find the appropriate SED from interpolating in the BC library
     int mL, mR;
@@ -167,11 +167,12 @@ Array BruzualCharlotSEDFamily::luminosities(double M, double Z, double t) const
                 + ht*(1.0-hZ)*jRLv[k]
                 + ht*hZ*jRRv[k];
 
-    // resample to the simulation wavelength grid,
+    // resample to the possibly redshifted simulation wavelength grid,
     // convert emissivities to luminosities (i.e. multiply by the wavelength bins),
     // multiply by the mass of the population (in solar masses),
     // and return the result
-    return NR::resample<NR::interpolate_loglog>(_lambdagrid->lambdav(), _lambdav, jv) * _lambdagrid->dlambdav() * M;
+    return NR::resample<NR::interpolate_loglog>(_lambdagrid->lambdav()*(1-z), _lambdav, jv)
+                                    * _lambdagrid->dlambdav() * M;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -183,9 +184,9 @@ int BruzualCharlotSEDFamily::nparams() const
 
 //////////////////////////////////////////////////////////////////////
 
-Array BruzualCharlotSEDFamily::luminosities_generic(const Array& params, int skipvals) const
+Array BruzualCharlotSEDFamily::luminosities_generic(const Array& params, int skipvals, double z) const
 {
-    return luminosities(params[skipvals], params[skipvals+1], params[skipvals+2]);
+    return luminosities(params[skipvals], params[skipvals+1], params[skipvals+2], z);
 }
 
 //////////////////////////////////////////////////////////////////////

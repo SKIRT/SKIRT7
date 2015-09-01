@@ -104,7 +104,7 @@ void MappingsSEDFamily::setupSelfBefore()
 
 //////////////////////////////////////////////////////////////////////
 
-Array MappingsSEDFamily::luminosities(double SFR, double Z, double logC, double pressure, double fPDR) const
+Array MappingsSEDFamily::luminosities(double SFR, double Z, double logC, double pressure, double fPDR, double z) const
 {
     // convert the input parameters to the parameters that are assumed in MAPPINGS III.
     // * the metallicity is converted from an absolute value Z to a value Zrel relative to the
@@ -169,11 +169,12 @@ Array MappingsSEDFamily::luminosities(double SFR, double Z, double logC, double 
         jv[k] = (1.0-fPDR)*j0 + fPDR*j1;
     }
 
-    // resample to the simulation wavelength grid,
+    // resample to the possibly redshifted simulation wavelength grid,
     // convert emissivities to luminosities (i.e. multiply by the wavelength bins),
     // multiply by the SFR (the MAPPINGSIII templates correspond to a SFR of 1 Msun/yr)
     // and return the result
-    return NR::resample<NR::interpolate_loglog>(_lambdagrid->lambdav(), _lambdav, jv) * _lambdagrid->dlambdav() * SFR;
+    return NR::resample<NR::interpolate_loglog>(_lambdagrid->lambdav()*(1-z), _lambdav, jv)
+                                    * _lambdagrid->dlambdav() * SFR;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -185,10 +186,10 @@ int MappingsSEDFamily::nparams() const
 
 //////////////////////////////////////////////////////////////////////
 
-Array MappingsSEDFamily::luminosities_generic(const Array& params, int skipvals) const
+Array MappingsSEDFamily::luminosities_generic(const Array& params, int skipvals, double z) const
 {
     return luminosities(params[skipvals], params[skipvals+1], params[skipvals+2],
-            params[skipvals+3], params[skipvals+4]);
+            params[skipvals+3], params[skipvals+4], z);
 }
 
 //////////////////////////////////////////////////////////////////////

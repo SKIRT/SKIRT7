@@ -25,7 +25,7 @@ using namespace std;
 namespace SPHStellarComp_Private
 {
     Array _costhetav;            // grid of cos(theta) values indexed on t
-    const int _Ncostheta = 45;   // number of values in cos(theta) grid
+    const int _Ncostheta = 46;   // number of values in cos(theta) grid
     std::once_flag _costhetav_initialized; // flag indicating whether cos(theta) grid has been initialized
 
     /** An instance of this class holds all relevant luminosity information to implement the
@@ -37,15 +37,40 @@ namespace SPHStellarComp_Private
         VelocityAnisotropy(const Array& particle, const SEDFamily* sedFamily, Random* random)
             : _random(random)
         {
-            // get velocity, converting from km/s to m/s, and remember normalized direction of velocity
+            // get velocity, converting from km/s to m/s
             Vec bfv = Vec(particle[4],particle[5],particle[6])*1e3;
-            _bfkv = Direction(bfv/bfv.norm());
+
+            // remember beta = |v|/c and normalized direction of velocity
+            double v = bfv.norm();
+            double beta = v / Units::c();
+            _bfkv = Direction(bfv/v);
 
             // initialize the global cos(theta) grid upon first invocation
             std::call_once(_costhetav_initialized, [] { NR::lingrid(_costhetav, -1., +1., _Ncostheta-1); });
 
-            // TODO: properly initialize _Lvv and _Xvv
-            (void)sedFamily;
+            // get the doppler-shifted SED for each cos(theta) value
+            ArrayTable<2> Lvv(_Ncostheta,0);  // [t,ell]
+            for (int t=0; t<_Ncostheta; t++)
+            {
+                double z = - beta * _costhetav[t];
+                Lvv[t] = sedFamily->luminosities_generic(particle, 7, z);   // TODO !!!
+            }
+            int Nlambda = Lvv.rowsize();
+
+            // construct the normalized luminosity distribution over cos(theta), for each wavelength index
+            _Lvv.resize(Nlambda,_Ncostheta);  // [ell,t]
+            for (int ell=0; ell<Nlambda; ell++)
+            {
+                for (int t=0; t<_Ncostheta; t++) _Lvv(ell,t) = Lvv(t,ell);
+                _Lvv[ell] /= _Lvv[ell].sum();
+            }
+
+            // construct the cumulative luminosity distribution over cos(theta), for each wavelength index
+            _Xvv.resize(Nlambda,0);  // [ell,t]
+            for (int ell=0; ell<Nlambda; ell++)
+            {
+                NR::cdf(_Xvv[ell], Lvv[ell]);
+            }
         }
 
         /** This function returns the probability \f$P(\Omega)\f$ for a given direction
@@ -74,7 +99,6 @@ namespace SPHStellarComp_Private
         Direction _bfkv;    // unit vector along the direction of the particle's velocity
         ArrayTable<2> _Lvv; // [ell,t] normalized luminosity distribution over cos(theta), for each wavelength index
         ArrayTable<2> _Xvv; // [ell,t] cumulative luminosity distribution over cos(theta), for each wavelength index
-
     };
 }
 
