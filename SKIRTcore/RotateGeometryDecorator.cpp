@@ -159,22 +159,22 @@ const
 ////////////////////////////////////////////////////////////////////
 
 double
-RotateGeometryDecorator::probabilityForDirection(Position bfr, Direction bfk)
+RotateGeometryDecorator::probabilityForDirection(int ell, Position bfr, Direction bfk)
 const
 {
     Position bfrorig = derotate(bfr);
     Direction bfkorig = derotate(bfk);
-    return _geometry->probabilityForDirection(bfrorig,bfkorig);
+    return _geometry->probabilityForDirection(ell,bfrorig,bfkorig);
 }
 
 ////////////////////////////////////////////////////////////////////
 
 Direction
-RotateGeometryDecorator::generateDirection(Position bfr)
+RotateGeometryDecorator::generateDirection(int ell, Position bfr)
 const
 {
     Position bfrorig = derotate(bfr);
-    Direction bfkorig = _geometry->generateDirection(bfrorig);
+    Direction bfkorig = _geometry->generateDirection(ell,bfrorig);
     Direction bfk = rotate(bfkorig);
     return bfk;
 }

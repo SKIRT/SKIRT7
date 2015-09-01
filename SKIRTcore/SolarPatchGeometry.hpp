@@ -92,7 +92,7 @@ public:
         \f$\theta\f$ is the polar angle, i.e. the angle between the direction \f${\bf{k}}\f$ and the Z-axis.
         This distribution is correctly normalized in the sense that \f[ \frac{1}{4\pi} \iint
         p({\bf{k}})\, {\text{d}}\Omega = 1. \f] */
-    double probabilityForDirection(Position bfr, Direction bfk) const;
+    double probabilityForDirection(int ell, Position bfr, Direction bfk) const;
 
     /** This function generates a random direction appropriate for the anisotropic outward radiation
         field at the location \f${\bf{r}}\f$. The probability distribution is given by
@@ -107,7 +107,7 @@ public:
         \end{split} \f] for \f$\theta\f$ and \f$\varphi\f$. The solution is readily found, \f[
         \begin{split} \theta &= \arcsin \sqrt{{\cal{X}}_1} \\ \varphi &= 2\pi\,{\cal{X}}_2.
         \end{split} \f] */
-    Direction generateDirection(Position bfr) const;
+    Direction generateDirection(int ell, Position bfr) const;
 
     //======================== Data Members ========================
 

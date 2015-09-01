@@ -175,16 +175,16 @@ double SphericalCavityGeometryDecorator::SigmaZ() const
 
 ////////////////////////////////////////////////////////////////////
 
-double SphericalCavityGeometryDecorator::probabilityForDirection(Position bfr, Direction bfk) const
+double SphericalCavityGeometryDecorator::probabilityForDirection(int ell, Position bfr, Direction bfk) const
 {
-    return _geometry->probabilityForDirection(bfr, bfk);
+    return _geometry->probabilityForDirection(ell, bfr, bfk);
 }
 
 ////////////////////////////////////////////////////////////////////
 
-Direction SphericalCavityGeometryDecorator::generateDirection(Position bfr) const
+Direction SphericalCavityGeometryDecorator::generateDirection(int ell, Position bfr) const
 {
-    return _geometry->generateDirection(bfr);
+    return _geometry->generateDirection(ell, bfr);
 }
 
 ////////////////////////////////////////////////////////////////////

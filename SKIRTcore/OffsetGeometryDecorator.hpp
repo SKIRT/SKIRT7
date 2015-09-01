@@ -123,14 +123,14 @@ public:
         position. It calls the corresponding function for the geometry being decorated with
         the position \f${\bf{r}}_{\text{orig}} = {\bf{r}} - {\bf{r}}_{\text{offset}}\f$ and
         the direction \f${\bf{k}}\f$ as arguments. */
-    double probabilityForDirection(Position bfr, Direction bfk) const;
+    double probabilityForDirection(int ell, Position bfr, Direction bfk) const;
 
     /** This function implements part of the AngularDistribution interface. It generates a random
         direction \f$(\theta,\phi)\f$ drawn from the probability distribution \f$P(\Omega)
         \,{\mathrm{d}}\Omega\f$ at the specified position. The routine calls the corresponding
         function for the geometry being decorated with \f${\bf{r}}_{\text{orig}}
         = {\bf{r}} - {\bf{r}}_{\text{offset}}\f$ as its argument. */
-    Direction generateDirection(Position bfr) const;
+    Direction generateDirection(int ell, Position bfr) const;
 
     //======================== Data Members ========================
 

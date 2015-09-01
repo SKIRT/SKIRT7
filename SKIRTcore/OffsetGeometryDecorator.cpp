@@ -130,23 +130,23 @@ const
 ////////////////////////////////////////////////////////////////////
 
 double
-OffsetGeometryDecorator::probabilityForDirection(Position bfr, Direction bfk)
+OffsetGeometryDecorator::probabilityForDirection(int ell, Position bfr, Direction bfk)
 const
 {
     double x,y,z;
     bfr.cartesian(x,y,z);
-    return _geometry->probabilityForDirection(Position(x-_offsetX, y-_offsetY, z-_offsetZ),bfk);
+    return _geometry->probabilityForDirection(ell, Position(x-_offsetX, y-_offsetY, z-_offsetZ),bfk);
 }
 
 ////////////////////////////////////////////////////////////////////
 
 Direction
-OffsetGeometryDecorator::generateDirection(Position bfr)
+OffsetGeometryDecorator::generateDirection(int ell, Position bfr)
 const
 {
     double x,y,z;
     bfr.cartesian(x,y,z);
-    return _geometry->generateDirection(Position(x-_offsetX, y-_offsetY, z-_offsetZ));
+    return _geometry->generateDirection(ell, Position(x-_offsetX, y-_offsetY, z-_offsetZ));
 }
 
 ////////////////////////////////////////////////////////////////////

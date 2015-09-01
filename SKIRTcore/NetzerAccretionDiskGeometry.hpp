@@ -81,7 +81,7 @@ public:
         luminosity profile. It simply implements a properly normalized version of the function
         \f$L(\theta)\f$ defined in the header of this class, subject to the normalization \f[
         \frac{1}{4\pi} \iint p({\bf{k}})\, {\text{d}}\Omega = 1 \f] */
-    double probabilityForDirection(Position bfr, Direction bfk) const;
+    double probabilityForDirection(int ell, Position bfr, Direction bfk) const;
 
     /** This function generates a random direction drawn from the appropriate angular
         probability distribution at the specified position. When \f${\bf{r}}\f$ is not the
@@ -90,7 +90,7 @@ public:
         luminosity profile i.e. with \f$\phi\f$ distributed uniformly over the interval
         \f$0\le\phi\le 2\pi\f$, and \f$\theta\f$ determined from the cumulative distribution
         calculated during setup. */
-    Direction generateDirection(Position bfr) const;
+    Direction generateDirection(int ell, Position bfr) const;
 
     //======================== Data Members ========================
 

@@ -90,7 +90,7 @@ double SolarPatchGeometry::SigmaZ() const
 
 //////////////////////////////////////////////////////////////////////
 
-double SolarPatchGeometry::probabilityForDirection(Position /*bfr*/, Direction bfk) const
+double SolarPatchGeometry::probabilityForDirection(int /*ell*/, Position /*bfr*/, Direction bfk) const
 {
     double kx, ky, kz;
     bfk.cartesian(kx,ky,kz);
@@ -99,7 +99,7 @@ double SolarPatchGeometry::probabilityForDirection(Position /*bfr*/, Direction b
 
 //////////////////////////////////////////////////////////////////////
 
-Direction SolarPatchGeometry::generateDirection(Position /*bfr*/) const
+Direction SolarPatchGeometry::generateDirection(int /*ell*/, Position /*bfr*/) const
 {
     double theta = asin(sqrt(_random->uniform()));
     double phi = 2.0*M_PI*_random->uniform();

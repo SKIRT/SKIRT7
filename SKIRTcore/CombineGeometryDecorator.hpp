@@ -110,14 +110,14 @@ public:
     /** This function implements part of the AngularDistribution interface. It returns the
         probability \f$P(\Omega)\f$ for a given direction \f$(\theta,\phi)\f$ at the specified
         position. It adds the contribution of the two components, weighted by their weights. */
-    double probabilityForDirection(Position bfr, Direction bfk) const;
+    double probabilityForDirection(int ell, Position bfr, Direction bfk) const;
 
     /** This function implements part of the AngularDistribution interface. It generates a random
         direction \f$(\theta,\phi)\f$ drawn from the probability distribution \f$P(\Omega)
         \,{\mathrm{d}}\Omega\f$ at the specified position. It first generates a random component,
         and subsequently generates a random position from this component by calling the
         corresponding generateDirection(bfr) function. */
-    Direction generateDirection(Position bfr) const;
+    Direction generateDirection(int ell, Position bfr) const;
 
     //======================== Data Members ========================
 

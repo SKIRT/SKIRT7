@@ -104,7 +104,7 @@ const
 //////////////////////////////////////////////////////////////////////
 
 double
-SpheBackgroundGeometry::probabilityForDirection(Position bfr, Direction bfk)
+SpheBackgroundGeometry::probabilityForDirection(int /*ell*/, Position bfr, Direction bfk)
 const
 {
     if (fabs(bfr.radius()/_rbg-1.0) > 1e-8)
@@ -119,7 +119,7 @@ const
 //////////////////////////////////////////////////////////////////////
 
 Direction
-SpheBackgroundGeometry::generateDirection(Position bfr)
+SpheBackgroundGeometry::generateDirection(int /*ell*/, Position bfr)
 const
 {
     if (fabs(bfr.radius()/_rbg-1.0) > 1e-8)

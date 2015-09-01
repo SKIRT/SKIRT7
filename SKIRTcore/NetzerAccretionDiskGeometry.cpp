@@ -85,7 +85,7 @@ double NetzerAccretionDiskGeometry::SigmaZ() const
 //////////////////////////////////////////////////////////////////////
 
 double
-NetzerAccretionDiskGeometry::probabilityForDirection(Position bfr, Direction bfk)
+NetzerAccretionDiskGeometry::probabilityForDirection(int /*ell*/, Position bfr, Direction bfk)
 const
 {
     if (bfr.radius()>0.0)
@@ -100,7 +100,7 @@ const
 //////////////////////////////////////////////////////////////////////
 
 Direction
-NetzerAccretionDiskGeometry::generateDirection(Position bfr)
+NetzerAccretionDiskGeometry::generateDirection(int /*ell*/, Position bfr)
 const
 {
     if (bfr.radius()>0.0)

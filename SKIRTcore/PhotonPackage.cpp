@@ -43,7 +43,7 @@ void PhotonPackage::launchEmissionPeelOff(const PhotonPackage* pp, Direction bfk
     clearStokes();
 
     // apply emission direction bias if not isotropic
-    if (pp->_ad) _L *= pp->_ad->probabilityForDirection(_bfr, _bfk);
+    if (pp->_ad) _L *= pp->_ad->probabilityForDirection(_ell, _bfr, _bfk);
 }
 
 ////////////////////////////////////////////////////////////////////

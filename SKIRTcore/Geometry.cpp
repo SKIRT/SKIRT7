@@ -23,14 +23,14 @@ void Geometry::setupSelfBefore()
 
 //////////////////////////////////////////////////////////////////////
 
-double Geometry::probabilityForDirection(Position /*bfr*/, Direction /*bfk*/) const
+double Geometry::probabilityForDirection(int /*ell*/, Position /*bfr*/, Direction /*bfk*/) const
 {
     return 1.;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-Direction Geometry::generateDirection(Position /*bfr*/) const
+Direction Geometry::generateDirection(int /*ell*/, Position /*bfr*/) const
 {
     return _random->direction();
 }

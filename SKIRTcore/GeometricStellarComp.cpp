@@ -75,7 +75,7 @@ double GeometricStellarComp::luminosity(int ell) const
 void GeometricStellarComp::launch(PhotonPackage* pp, int ell, double L) const
 {
     Position bfr = _geom->generatePosition();
-    Direction bfk = _geom->generateDirection(bfr);
+    Direction bfk = _geom->generateDirection(ell,bfr);
     pp->launch(L,ell,bfr,bfk);
     pp->setAngularDistribution(_geom);
 }

@@ -73,7 +73,7 @@ const
 //////////////////////////////////////////////////////////////////////
 
 double
-LaserGeometry::probabilityForDirection(Position bfr, Direction bfk)
+LaserGeometry::probabilityForDirection(int /*ell*/, Position bfr, Direction bfk)
 const
 {
     if (bfr.radius()>0.0)
@@ -86,7 +86,7 @@ const
 //////////////////////////////////////////////////////////////////////
 
 Direction
-LaserGeometry::generateDirection(Position bfr)
+LaserGeometry::generateDirection(int /*ell*/, Position bfr)
 const
 {
     if (bfr.radius()>0.0)

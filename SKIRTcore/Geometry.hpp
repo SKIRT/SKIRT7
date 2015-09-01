@@ -74,19 +74,20 @@ public:
 
     /** This function implements part of the AngularDistribution interface. It returns the
         probability \f$P(\Omega)\f$ for a given direction \f$(\theta,\phi)\f$ at the specified
-        position. The default implementation provided in this top-level class implements an
-        isotropic distribution, in other words this function always returns 1 for any direction and
-        any position. Override this function and generateDirection() to implement anisotropic
-        emission. */
-    double probabilityForDirection(Position bfr, Direction bfk) const;
+        wavelength and position. The default implementation provided in this top-level class offers
+        an isotropic distribution, in other words this function always returns 1 for any direction,
+        and for any wavelength and position. Override this function and generateDirection() to
+        implement anisotropic emission. */
+    double probabilityForDirection(int ell, Position bfr, Direction bfk) const;
 
     /** This function implements part of the AngularDistribution interface. It generates a random
         direction \f$(\theta,\phi)\f$ drawn from the probability distribution \f$P(\Omega)
-        \,{\mathrm{d}}\Omega\f$ at the specified position. The default implementation provided in
-        this top-level class implements an isotropic distribution, i.e. a direction is drawn
-        randomly from a uniform distribution on the unit sphere, regardless of position. Override
-        this function and probabilityForDirection() to implement anisotropic emission. */
-    Direction generateDirection(Position bfr) const;
+        \,{\mathrm{d}}\Omega\f$ at the specified wavelength and position. The default
+        implementation provided in this top-level class offers an isotropic distribution, i.e. a
+        direction is drawn randomly from a uniform distribution on the unit sphere, regardless of
+        wavelength and position. Override this function and probabilityForDirection() to implement
+        anisotropic emission. */
+    Direction generateDirection(int ell, Position bfr) const;
 
     //======================== Data Members ========================
 

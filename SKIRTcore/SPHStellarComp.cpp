@@ -49,23 +49,22 @@ namespace SPHStellarComp_Private
         }
 
         /** This function returns the probability \f$P(\Omega)\f$ for a given direction
-            \f$(\theta,\phi)\f$ for the particle represented by this instance. The function ignores
-            the specified position, which is assumed to be near the position of the particle. */
-        double probabilityForDirection(Position /*bfr*/, Direction bfk) const
+            \f$(\theta,\phi)\f$ at a given wavelength for the particle represented by this
+            instance. The function ignores the specified position, which is assumed to be near the
+            position of the particle. */
+        double probabilityForDirection(int ell, Position /*bfr*/, Direction bfk) const
         {
-            int ell = 0; // TODO: this will become a parameter of the function!
             double costheta = Vec::dot(bfk,_bfkv);
             int t = NR::locate_clip(_costhetav, costheta);
             return NR::interpolate_linlin(costheta, _costhetav[t], _costhetav[t+1], _Lvv(ell,t), _Lvv(ell,t+1));
         }
 
         /** This function generates a random direction \f$(\theta,\phi)\f$ drawn from the
-            probability distribution \f$P(\Omega)\,{\mathrm{d}}\Omega\f$ for the particle
-            represented by this instance. The function ignores the specified position, which is
-            assumed to be near the position of the particle. */
-        Direction generateDirection(Position /*bfr*/) const
+            probability distribution \f$P(\Omega)\,{\mathrm{d}}\Omega\f$ at a given wavelength for
+            the particle represented by this instance. The function ignores the specified position,
+            which is assumed to be near the position of the particle. */
+        Direction generateDirection(int ell, Position /*bfr*/) const
         {
-            int ell = 0; // TODO: this will become a parameter of the function!
             double costheta = _random->cdf(_costhetav, _Xvv[ell]);
             return _random->direction(_bfkv, costheta);
         }
@@ -269,7 +268,7 @@ void SPHStellarComp::launch(PhotonPackage* pp, int ell, double L) const
     // if we have velocity data, launch using the particle's anisotropic luminosity distribution
     if (_velocity)
     {
-        pp->launch(L, ell, bfr, _av[i]->generateDirection(bfr));
+        pp->launch(L, ell, bfr, _av[i]->generateDirection(ell, bfr));
         pp->setAngularDistribution(_av[i]);
     }
     // otherwise launch using the default isotropic distribution

@@ -95,7 +95,7 @@ public:
         the outward normal on the stellar surface, i.e. \f[ \cos\theta' = \frac{{\bf{k}} \cdot
         {\bf{r}}}{r_*}. \f] This distribution is correctly normalized in the sense that
         \f[ \frac{1}{4\pi} \iint p({\bf{k}})\, {\text{d}}\Omega = 1. \f] */
-    double probabilityForDirection(Position bfr, Direction bfk) const;
+    double probabilityForDirection(int ell, Position bfr, Direction bfk) const;
 
     /** This function generates a random direction appropriate for the anisotropic outward
         radiation field at the location \f${\bf{r}}\f$. This distribution is ill-defined
@@ -141,7 +141,7 @@ public:
         \begin{bmatrix} k'_x \\ k'_y \\ k'_z \end{bmatrix}
         \f]
     */
-    Direction generateDirection(Position bfr) const;
+    Direction generateDirection(int ell, Position bfr) const;
 
     //======================== Data Members ========================
 

@@ -173,19 +173,19 @@ const
 ////////////////////////////////////////////////////////////////////
 
 double
-CylindricalCavityGeometryDecorator::probabilityForDirection(Position bfr, Direction bfk)
+CylindricalCavityGeometryDecorator::probabilityForDirection(int ell, Position bfr, Direction bfk)
 const
 {
-    return _geometry->probabilityForDirection(bfr, bfk);
+    return _geometry->probabilityForDirection(ell, bfr, bfk);
 }
 
 ////////////////////////////////////////////////////////////////////
 
 Direction
-CylindricalCavityGeometryDecorator::generateDirection(Position bfr)
+CylindricalCavityGeometryDecorator::generateDirection(int ell, Position bfr)
 const
 {
-    return _geometry->generateDirection(bfr);
+    return _geometry->generateDirection(ell, bfr);
 }
 
 ////////////////////////////////////////////////////////////////////

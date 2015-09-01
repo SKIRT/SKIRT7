@@ -162,7 +162,7 @@ public:
         the derotated position \f${\bf{r}}_{\text{orig}} = {\bf{R}}^{\text{T}}\,{\bf{r}}\f$ and
         the derotated direction \f${\bf{k}}_{\text{orig}} = {\bf{R}}^{\text{T}}\,{\bf{k}}\f$ as
         arguments. */
-    double probabilityForDirection(Position bfr, Direction bfk) const;
+    double probabilityForDirection(int ell, Position bfr, Direction bfk) const;
 
     /** This function implements part of the AngularDistribution interface. It generates a random
         direction \f$(\theta,\phi)\f$ drawn from the probability distribution \f$P(\Omega)
@@ -170,7 +170,7 @@ public:
         function for the geometry being decorated with the derotated position \f${\bf{r}}_{\text{orig}}
         = {\bf{R}}^{\text{T}}\,{\bf{r}}\f$ as an argument, and subsequently rotates the resulting
         direction vector \f${\bf{k}}_{\text{orig}}\f$. */
-    Direction generateDirection(Position bfr) const;
+    Direction generateDirection(int ell, Position bfr) const;
 
 private:
     /** This function rotates a position \f${\bf{r}}_{\text{orig}}\f$, i.e.\ it returns the rotated

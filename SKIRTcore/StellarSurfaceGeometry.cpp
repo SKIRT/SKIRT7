@@ -102,7 +102,7 @@ const
 //////////////////////////////////////////////////////////////////////
 
 double
-StellarSurfaceGeometry::probabilityForDirection(Position bfr, Direction bfk)
+StellarSurfaceGeometry::probabilityForDirection(int /*ell*/, Position bfr, Direction bfk)
 const
 {
     if (fabs(bfr.radius()/_rstar-1.0) > 1e-8)
@@ -117,7 +117,7 @@ const
 //////////////////////////////////////////////////////////////////////
 
 Direction
-StellarSurfaceGeometry::generateDirection(Position bfr)
+StellarSurfaceGeometry::generateDirection(int /*ell*/, Position bfr)
 const
 {
     if (fabs(bfr.radius()/_rstar-1.0) > 1e-8)

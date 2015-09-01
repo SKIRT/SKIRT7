@@ -69,13 +69,13 @@ public:
         Dirac delta function, \f$4\pi\delta({\bf{k}}-{\bf{e}}_z)\f$. The function returns
         infinity if \f${\bf{k}} = {\bf{e}}_z\f$, or equivalently if \f$\theta=0\f$, and
         zero in all other cases. */
-    double probabilityForDirection(Position bfr, Direction bfk) const;
+    double probabilityForDirection(int ell, Position bfr, Direction bfk) const;
 
     /** This function generates a random direction drawn from the appropriate angular
         probability distribution at the specified position. When \f${\bf{r}}\f$ is not the
         origin, a fatal error is returned. When \f${\bf{r}}\f$ is the origin, this function
         simply returns \f${\bf{k}} = {\bf{e}}_z\f$. */
-    Direction generateDirection(Position bfr) const;
+    Direction generateDirection(int ell, Position bfr) const;
 
 };
 

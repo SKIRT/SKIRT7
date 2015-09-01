@@ -175,19 +175,19 @@ const
 ////////////////////////////////////////////////////////////////////
 
 double
-CropGeometryDecorator::probabilityForDirection(Position bfr, Direction bfk)
+CropGeometryDecorator::probabilityForDirection(int ell, Position bfr, Direction bfk)
 const
 {
-    return _geometry->probabilityForDirection(bfr, bfk);
+    return _geometry->probabilityForDirection(ell, bfr, bfk);
 }
 
 ////////////////////////////////////////////////////////////////////
 
 Direction
-CropGeometryDecorator::generateDirection(Position bfr)
+CropGeometryDecorator::generateDirection(int ell, Position bfr)
 const
 {
-    return _geometry->generateDirection(bfr);
+    return _geometry->generateDirection(ell, bfr);
 }
 
 ////////////////////////////////////////////////////////////////////

@@ -89,7 +89,7 @@ public:
         \leq \theta' < \pi \end{cases} \f] Here \f$\theta'\f$ is the angle between the
         direction \f${\bf{k}}\f$ and the outward normal on the wall of the cube. For each of the
         walls, this angle is easily calculated. */
-    double probabilityForDirection(Position bfr, Direction bfk) const;
+    double probabilityForDirection(int ell, Position bfr, Direction bfk) const;
 
     /** This function returns the normalized probability for a direction \f${\bf{k}}\f$,
         given that the point of emission is \f${\bf{r}}\f$. This distribution is ill-defined
@@ -108,7 +108,7 @@ public:
         \sqrt{{\cal{X}}_1} \\ \varphi' &= 2\pi\,{\cal{X}}_2. \end{split} \f] Once these values
         have been determined, we need to rotate such that the Z' axis is perpendicular to the
         wall corresponding to the position \f${\bf{r}}\f$. */
-    Direction generateDirection(Position bfr) const;
+    Direction generateDirection(int ell, Position bfr) const;
 
     //======================== Data Members ========================
 

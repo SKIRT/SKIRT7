@@ -125,7 +125,7 @@ const
 //////////////////////////////////////////////////////////////////////
 
 double
-CubBackgroundGeometry::probabilityForDirection(Position bfr, Direction bfk)
+CubBackgroundGeometry::probabilityForDirection(int /*ell*/, Position bfr, Direction bfk)
 const
 {
     double eps = 1e-8;
@@ -159,7 +159,7 @@ const
 //////////////////////////////////////////////////////////////////////
 
 Direction
-CubBackgroundGeometry::generateDirection(Position bfr)
+CubBackgroundGeometry::generateDirection(int /*ell*/, Position bfr)
 const
 {
     // picking a random (theta',phi')

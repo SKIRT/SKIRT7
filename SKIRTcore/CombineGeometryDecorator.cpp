@@ -167,24 +167,24 @@ const
 ////////////////////////////////////////////////////////////////////
 
 double
-CombineGeometryDecorator::probabilityForDirection(Position bfr, Direction bfk)
+CombineGeometryDecorator::probabilityForDirection(int ell, Position bfr, Direction bfk)
 const
 {
-    return _w1*_geometry1->probabilityForDirection(bfr,bfk)
-            + _w2*_geometry2->probabilityForDirection(bfr,bfk);
+    return _w1*_geometry1->probabilityForDirection(ell,bfr,bfk)
+            + _w2*_geometry2->probabilityForDirection(ell,bfr,bfk);
 }
 
 ////////////////////////////////////////////////////////////////////
 
 Direction
-CombineGeometryDecorator::generateDirection(Position bfr)
+CombineGeometryDecorator::generateDirection(int ell, Position bfr)
 const
 {
     double X = _random->uniform();
     if (X<_w1)
-        return _geometry1->generateDirection(bfr);
+        return _geometry1->generateDirection(ell,bfr);
     else
-        return _geometry2->generateDirection(bfr);
+        return _geometry2->generateDirection(ell,bfr);
 }
 
 ////////////////////////////////////////////////////////////////////
