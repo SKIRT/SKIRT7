@@ -114,12 +114,12 @@ void DustMix::setupSelfAfter()
         _pfnormv.resize(_Nlambda);
         for (int ell=0; ell<_Nlambda; ell++)
         {
-            double N = 0.;
+            double sum = 0.;
             for (int t=0; t<_Ntheta; t++)
             {
-                N += _S11vv(ell,t)*sin(_thetav[t])*dt;
+                sum += _S11vv(ell,t)*sin(_thetav[t])*dt;
             }
-            _pfnormv[ell] = 1./(2.0*M_PI*N);
+            _pfnormv[ell] = 2.0/sum;
         }
 
         // create tables listing phi, phi/2pi and sin(2phi)/4pi for a number of phi indices

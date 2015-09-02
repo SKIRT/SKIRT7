@@ -309,19 +309,23 @@ public:
                                        Direction bfkx, Direction bfky);
 
     /** This function returns the value of the scattering phase function in case the specified
-        photon package is scattered to the specified new direction. For a dustmix that doesn't
-        support polarization, the function returns \f$\Phi_\ell({\bf{k}}_{\text{pp}},
-        {\bf{k}}_{\text{new}})\f$ for the current propagation direction of the photon package
-        \f${\bf{k}}_{\text{pp}}\f$ and the specified new direction \f${\bf{k}}_{\text{new}}\f$, at
-        wavelength index \f$\ell\f$ of the photon package. For a dustmix that does support
-        polarization, the function returns the phase function for polarized radiation given by
-        \f[\Phi_\ell(\Omega) = \frac{1}{N} \left( S_{11,\ell}(\theta) + P_\text{L}
-        S_{12,\ell}(\theta) \cos 2(\varphi-\gamma) \right)\f] where \f$\theta\f$ is the angle
-        between the photon package's propagation direction and the new scattering direction;
+        photon package is scattered to the specified new direction, where the phase function is
+        normalized as \f[\int\Phi_\ell(\Omega)\,\mathrm{d}\Omega=4\pi.\f]
+
+        For a dustmix that doesn't support polarization, the function returns
+        \f$\Phi_\ell({\bf{k}}_{\text{pp}}, {\bf{k}}_{\text{new}})\f$ for the current propagation
+        direction of the photon package \f${\bf{k}}_{\text{pp}}\f$ and the specified new direction
+        \f${\bf{k}}_{\text{new}}\f$, at wavelength index \f$\ell\f$ of the photon package, as
+        described by the Henyey-Greenstein phase function.
+
+        For a dustmix that does support polarization, the function returns the phase function for
+        polarized radiation given by \f[\Phi_\ell(\Omega) = N \left( S_{11,\ell}(\theta) +
+        P_\text{L} S_{12,\ell}(\theta) \cos 2(\varphi-\gamma) \right)\f] where \f$\theta\f$ is the
+        angle between the photon package's propagation direction and the new scattering direction;
         \f$\phi\f$ is the angle between the previous and current scattering plane of the photon
         package; \f$\gamma\f$ is the polarization angle of the photon package, \f$P_\text{L}\f$ is
         the linear polarization degree of the photon package; and \f$N\f$ is a normalization factor
-        to ensure that the integral over the unit sphere is equal to 1. */
+        to ensure that the integral over the unit sphere is equal to \f$4\pi\f$. */
     double phaseFunctionValue(const PhotonPackage* pp, Direction bfknew) const;
 
     /** This function returns the Planck-integrated absorption cross section per hydrogen atom
