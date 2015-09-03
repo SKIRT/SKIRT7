@@ -57,21 +57,21 @@ void StokesVector::rotateStokes(double phi, Direction k)
     // if this is the first scattering: generate normal to scattering plane
     if (!_polarized)
     {
-        double kx, ky, kz, nx, ny, nz;
+        double kx, ky, kz;
         k.cartesian(kx, ky, kz);
         // this is the Bianchi formula as used in Direction Random::direction(Direction bfk, double costheta)
         // with phi = 0 and theta = 90 deg.
-        if(kz*kz > 0.999999)
+        if (fabs(kz) > 0.99999)
         {
-            nx = 1;
+            _normal.set(1, 0, 0);
         }
         else
         {
-            nz = sqrt((1.0-kz)*(1.0+kz));
-            nx = -kx*kz/nz;
-            ny = -ky*kz/nz;
+            double nz = sqrt((1.0-kz)*(1.0+kz));
+            double nx = -kx*kz/nz;
+            double ny = -ky*kz/nz;
+            _normal.set(nx, ny, nz);
         }
-        _normal.set(nx, ny, nz);
         _polarized = true;
     }
 
@@ -84,8 +84,8 @@ void StokesVector::rotateStokes(double phi, Direction k)
     _U = U;
 
     // rotate the stored scattering plane to obtain the new scattering plane
+    // using Rodrigues' rotation formula
     _normal = Direction(_normal*cos(phi) + Vec::cross(k, _normal)*sin(phi));
-
 }
 
 //////////////////////////////////////////////////////////////////////

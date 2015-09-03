@@ -550,9 +550,9 @@ namespace
     }
 
     // This helper function returns the angle phi between the previous and current scattering planes
-    // given the previous plane and the current and new propagation directions of the photon package.
-    // It returns a zero angle if the light is unpolarized or when current scattering event is completely
-    // forward or backward.
+    // given the normal to the previous scattering plane and the current and new propagation directions
+    // of the photon package. The function returns a zero angle if the light is unpolarized or when the
+    // current scattering event is completely forward or backward.
     double angleBetweenScatteringPlanes(Direction np, Direction kc, Direction kn)
     {
         Vec nc = Vec::cross(kc,kn);
@@ -606,6 +606,7 @@ Direction DustMix::scatteringDirectionAndPolarization(StokesVector* out, const P
 //        out->applyMueller(_S11vv(ell,t), _S12vv(ell,t), _S33vv(ell,t), _S34vv(ell,t));
 
         // calculate and return the new direction (not yet implemented!!)
+        (void)out;
         return _random->direction();
     }
     else
