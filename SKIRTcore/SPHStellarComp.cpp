@@ -234,6 +234,20 @@ QString SPHStellarComp::filename() const
 
 //////////////////////////////////////////////////////////////////////
 
+void SPHStellarComp::setVelocity(bool value)
+{
+    _velocity = value;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+bool SPHStellarComp::velocity() const
+{
+    return _velocity;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void SPHStellarComp::setSedFamily(SEDFamily* value)
 {
     if (_sedFamily) delete _sedFamily;

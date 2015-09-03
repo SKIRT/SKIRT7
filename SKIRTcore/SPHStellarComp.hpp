@@ -26,6 +26,10 @@ class SPHStellarComp : public StellarComp
     Q_CLASSINFO("Property", "filename")
     Q_CLASSINFO("Title", "the name of the file with the SPH source particles")
 
+    Q_CLASSINFO("Property", "velocity")
+    Q_CLASSINFO("Title", "import velocity information from the SPH particle file")
+    Q_CLASSINFO("Default", "false")
+
     Q_CLASSINFO("Property", "sedFamily")
     Q_CLASSINFO("Title", "the SED family used to assign a spectral energy distribution to each particle")
     Q_CLASSINFO("Default", "BruzualCharlotSEDFamily")
@@ -65,9 +69,13 @@ public:
         optionally including an absolute or relative path. This text file should contain columns of
         numbers separated by whitespace; lines starting with # are ignored. The first three columns
         are the \f$x\f$, \f$y\f$ and \f$z\f$ coordinates of the particles (in pc) and the fourth
-        column is the SPH smoothing length \f$h\f$ (in pc). The number and interpretation of the
-        subsequent columns depends on the %SED family specified as a property to this particular
-        SPHStellarComp instance.
+        column is the SPH smoothing length \f$h\f$ (in pc). If the \em velocity flag is set to true,
+        the subsequent three columns (i.e. the fifth through the seventh columns) contain the
+        \f$v_\mathrm{x}\f$, \f$v_\mathrm{y}\f$ and \f$v_\mathrm{z}\f$ components of the particle's
+        velocity (in km/s). If the \em velocity flag is set to false, these columns are not present.
+
+        The number and interpretation of the subsequent columns depends on the %SED family specified
+        as a property to this particular SPHStellarComp instance.
 
         For the Bruzual-Charlot %SED family, the remaining three columns provide the properties of
         the stellar population. The fifth column is the initial mass of the stellar population (in
@@ -85,6 +93,14 @@ public:
 
     /** Returns the name of the file containing the information on the SPH source particles. */
     Q_INVOKABLE QString filename() const;
+
+    /** Sets the flag that determines whether to import velocity information from the SPH particle
+        file. The velocity introduces a corresponding doppler shift to each particle's SED. */
+    Q_INVOKABLE void setVelocity(bool value);
+
+    /** Returns the flag that determines whether to import velocity information from the SPH
+        particle file. */
+    Q_INVOKABLE bool velocity() const;
 
     /** Sets the SED family for the stellar component. */
     Q_INVOKABLE void setSedFamily(SEDFamily* value);
