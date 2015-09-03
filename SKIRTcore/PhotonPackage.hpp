@@ -128,16 +128,9 @@ public:
         */
     int nScatt() const { return _nscatt; }
 
-    /** This function returns the previous propagation direction of the photon package, i.e. the
-        propagation direction just before the most recent scattering event. If the photon package
-        has not yet been scattered, the function returns the current propagation direction instead.
-        */
-    Direction previousDirection() const { return _bfk_prev; }
-
     // ------- Data members -------
 
 private:
-    Direction _bfk_prev;
     double _L;
     int _ell;
     int _nscatt;
