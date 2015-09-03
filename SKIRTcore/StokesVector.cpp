@@ -10,19 +10,19 @@ using namespace std;
 
 //////////////////////////////////////////////////////////////////////
 
-void StokesVector::setStokes(double I, double Q, double U, double V)
+void StokesVector::setPolarized(double I, double Q, double U, double V, Direction n)
 {
     if (I!=0.0)
     {
         _Q = Q/I;
         _U = U/I;
         _V = V/I;
+        _normal = n;
+        _polarized = true;
     }
     else
     {
-        _Q = 0;
-        _U = 0;
-        _V = 0;
+        setUnpolarized();
     }
 }
 
@@ -52,14 +52,40 @@ double StokesVector::polarizationAngle() const
 
 //////////////////////////////////////////////////////////////////////
 
-void StokesVector::rotateStokes(double alpha)
+void StokesVector::rotateStokes(double phi, Direction k)
 {
-    double cos2alpha = cos(2.0*alpha);
-    double sin2alpha = sin(2.0*alpha);
-    double Q =  cos2alpha*_Q + sin2alpha*_U;
-    double U = -sin2alpha*_Q + cos2alpha*_U;
+    // if this is the first scattering: generate normal to scattering plane
+    if (!_polarized)
+    {
+        double kx, ky, kz;
+        k.cartesian(kx, ky, kz);
+        // this is the Bianchi formula as used in Direction Random::direction(Direction bfk, double costheta)
+        // with phi = 0 and theta = 90 deg.
+        if (fabs(kz) > 0.99999)
+        {
+            _normal.set(1, 0, 0);
+        }
+        else
+        {
+            double nz = sqrt((1.0-kz)*(1.0+kz));
+            double nx = -kx*kz/nz;
+            double ny = -ky*kz/nz;
+            _normal.set(nx, ny, nz);
+        }
+        _polarized = true;
+    }
+
+    // rotate the Q and U in the new reference frame
+    double cos2phi = cos(2.0*phi);
+    double sin2phi = sin(2.0*phi);
+    double Q =  cos2phi*_Q + sin2phi*_U;
+    double U = -sin2phi*_Q + cos2phi*_U;
     _Q = Q;
     _U = U;
+
+    // rotate the stored scattering plane to obtain the new scattering plane
+    // using Rodrigues' rotation formula
+    _normal = Direction(_normal*cos(phi) + Vec::cross(k, _normal)*sin(phi));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -70,7 +96,7 @@ void StokesVector::applyMueller(double S11, double S12, double S33, double S34)
     double Q =  S12*1. + S11*_Q;
     double U =  S33*_U + S34*_V;
     double V = -S34*_U + S33*_V;
-    setStokes(I, Q, U, V);
+    setPolarized(I, Q, U, V, _normal);
 }
 
 //////////////////////////////////////////////////////////////////////

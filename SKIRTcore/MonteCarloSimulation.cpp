@@ -415,7 +415,7 @@ void MonteCarloSimulation::peeloffscattering(PhotonPackage* pp, PhotonPackage* p
             V += w * sv.stokesV();
         }
         ppp->launchScatteringPeelOff(pp, bfkobs, I);
-        ppp->setStokes(I, Q, U, V);
+        ppp->setPolarized(I, Q, U, V, pp->normal());
         instr->detect(ppp);
     }
 }
@@ -483,7 +483,7 @@ void MonteCarloSimulation::continuouspeeloffscattering(PhotonPackage *pp, Photon
                         V += w * sv.stokesV();
                     }
                     ppp->launchScatteringPeelOff(pp, bfrnew, bfkobs, factorm*I);
-                    ppp->setStokes(I, Q, U, V);
+                    ppp->setPolarized(I, Q, U, V, pp->normal());
                     instr->detect(ppp);
                 }
             }

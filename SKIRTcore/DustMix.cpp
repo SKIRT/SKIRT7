@@ -550,14 +550,12 @@ namespace
     }
 
     // This helper function returns the angle phi between the previous and current scattering planes
-    // given the previous, current and new propagation directions of the photon package.
-    // It returns a zero angle when the previous and/or current scattering event is completely
-    // forward or backward, because then one or both of the scattering planes are ill-defined.
-    double angleBetweenScatteringPlanes(Direction kp, Direction kc, Direction kn)
+    // given the normal to the previous scattering plane and the current and new propagation directions
+    // of the photon package. The function returns a zero angle if the light is unpolarized or when the
+    // current scattering event is completely forward or backward.
+    double angleBetweenScatteringPlanes(Direction np, Direction kc, Direction kn)
     {
-        Vec np = Vec::cross(kp,kc);
         Vec nc = Vec::cross(kc,kn);
-        np /= np.norm();
         nc /= nc.norm();
         double cosphi = Vec::dot(np,nc);
         double sinphi = Vec::dot(Vec::cross(np,nc), kc);
@@ -593,22 +591,23 @@ Direction DustMix::scatteringDirectionAndPolarization(StokesVector* out, const P
     // determine the angles between the previous and new direction
     if (_polarization)
     {
-        int ell = pp->ell();
-        double theta = sampleTheta(ell);
-        double phi = pp->polarizationAngle() + samplePhi(ell, theta, pp->linearPolarizationDegree());
-        //double cosphi = cos(phi);
-        //double sinphi = sin(phi);
-        double costheta = cos(theta);
-        //double sintheta = sin(theta);
+//        int ell = pp->ell();
+//        double theta = sampleTheta(ell);
+//        double phi = pp->polarizationAngle() + samplePhi(ell, theta, pp->linearPolarizationDegree());
+//        //double cosphi = cos(phi);
+//        //double sinphi = sin(phi);
+//        double costheta = cos(theta);
+//        //double sintheta = sin(theta);
 
-        // also calculate and store the new polarization state
-        *out = *pp;
-        out->rotateStokes(phi);
-        int t = indexForTheta(theta, _Ntheta);
-        out->applyMueller(_S11vv(ell,t), _S12vv(ell,t), _S33vv(ell,t), _S34vv(ell,t));
+//        // also calculate and store the new polarization state
+//        *out = *pp;
+//        out->rotateStokes(phi);
+//        int t = indexForTheta(theta, _Ntheta);
+//        out->applyMueller(_S11vv(ell,t), _S12vv(ell,t), _S33vv(ell,t), _S34vv(ell,t));
 
         // calculate and return the new direction (not yet implemented!!)
-        return _random->direction(pp->direction(), costheta);
+        (void)out;
+        return _random->direction();
     }
     else
     {
@@ -631,8 +630,8 @@ void DustMix::scatteringPeelOffPolarization(StokesVector* out, const PhotonPacka
         *out = *pp;
 
         // rotate over the angle between scattering planes
-        double phi = angleBetweenScatteringPlanes(pp->previousDirection(), pp->direction(), bfknew);
-        if (phi) out->rotateStokes(phi);
+        double phi = angleBetweenScatteringPlanes(pp->normal(), pp->direction(), bfknew);
+        if (phi) out->rotateStokes(phi, pp->direction());
 
         // apply the Mueller matrix
         double theta = acos(Vec::dot(pp->direction(),bfknew));
@@ -643,7 +642,7 @@ void DustMix::scatteringPeelOffPolarization(StokesVector* out, const PhotonPacka
         // rotate over the angle between the reference axis in the peel-off scattering plane
         // and the x-axis in the instrument frame
         double alpha = angleBetweenScatteringAndInstrumentReference(pp->direction(), bfknew, bfkx, bfky);
-        if (alpha) out->rotateStokes(alpha);
+        if (alpha) out->rotateStokes(alpha, pp->direction());
     }
 }
 
@@ -654,7 +653,7 @@ double DustMix::phaseFunctionValue(const PhotonPackage* pp, Direction bfknew) co
     if (_polarization)
     {
         // determine the scattering angles
-        double phi = angleBetweenScatteringPlanes(pp->previousDirection(), pp->direction(), bfknew);
+        double phi = angleBetweenScatteringPlanes(pp->normal(), pp->direction(), bfknew);
         double theta = acos(Vec::dot(pp->direction(),bfknew));
 
         // calculate the phase function value
