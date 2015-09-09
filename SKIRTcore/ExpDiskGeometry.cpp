@@ -14,7 +14,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////
 
 ExpDiskGeometry::ExpDiskGeometry()
-    : _hR(0), _hz(0), _Rmax(0), _zmax(0), _rho0(0)
+    : _hR(0), _hz(0), _Rmax(0), _zmax(0), _Rmin(0), _rho0(0)
 {
 }
 
@@ -29,13 +29,17 @@ void ExpDiskGeometry::setupSelfBefore()
     if (_hz <= 0) throw FATALERROR("The axial scale height hz should be positive");
     if (_Rmax < 0) throw FATALERROR("The radial truncation length Rmax should be zero or positive");
     if (_zmax < 0) throw FATALERROR("The axial truncation length zmax should be zero or positive");
+    if (_Rmin < 0) throw FATALERROR("The minimum radius Rmax should be zero or positive");
+    else if (_Rmin > _Rmax && _Rmax > 0)
+        throw FATALERROR("The minimum radius Rmin should be larger than the truncation radius Rmax");
 
     // calculate central density
-    _rho0 = 1.0/(4.0*M_PI*_hz*_hR*_hR);
-    if (_Rmax>0.0)
-        _rho0 /= 1.0-(1.0+_Rmax/_hR)*exp(-_Rmax/_hR);
-    if (_zmax>0.0)
-        _rho0 /= 1.0-exp(-_zmax/_hz);
+    double intphi = 2.0*M_PI;
+    double intz = (_zmax>0) ? 2.0*_hz*expm1(-_zmax/_hz) : 2.0*_hz;
+    double tmin = (_Rmin>0) ? exp(-_Rmin/_hR)*(1.0+_Rmin/_hR) : 1.0;
+    double tmax = (_Rmax>0) ? exp(-_Rmax/_hR)*(1.0+_Rmax/_hR) : 0.0;
+    double intR = _hR*_hR*(tmax-tmin);
+    _rho0 = 1.0/(intR*intphi*intz);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -96,6 +100,20 @@ double ExpDiskGeometry::axialTrunc() const
 
 ////////////////////////////////////////////////////////////////////
 
+void ExpDiskGeometry::setInnerRadius(double value)
+{
+    _Rmin = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double ExpDiskGeometry::innerRadius() const
+{
+    return _Rmin;
+}
+
+////////////////////////////////////////////////////////////////////
+
 double
 ExpDiskGeometry::density(double R, double z)
 const
@@ -104,6 +122,8 @@ const
     if (_Rmax>0.0 && R>_Rmax)
         return 0.0;
     else if (_zmax>0.0 && absz>_zmax)
+        return 0.0;
+    else if (R<_Rmin)
         return 0.0;
     return _rho0 * exp(-R/_hR) * exp(-absz/_hz);
 }
@@ -120,7 +140,7 @@ const
         X = _random->uniform();
         R =_hR*(-1.0-SpecialFunctions::LambertW1((X-1.0)/M_E));
     }
-    while (_Rmax>0.0 && R>=_Rmax);
+    while ( (_Rmax>0.0 && R>=_Rmax) || R<=_Rmin);
     return R;
 }
 
@@ -147,9 +167,9 @@ ExpDiskGeometry::SigmaR()
 const
 {
     if (_Rmax>0.0)
-        return _rho0 * _hR * (1.0-exp(-_Rmax/_hR));
+        return _rho0 * _hR * (exp(-_Rmin/_hR)-exp(-_Rmax/_hR));
     else
-        return _rho0 * _hR;
+        return _rho0 * _hR * exp(-_Rmin/_hR);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -158,8 +178,10 @@ double
 ExpDiskGeometry::SigmaZ()
 const
 {
-    if (_zmax>0.0)
-        return 2.0 * _rho0 * _hz * (1.0-exp(-_zmax/_hz));
+    if (_Rmin>0.0)
+        return 0.0;
+    else if (_zmax>0.0)
+        return -2.0 * _rho0 * _hz * expm1(-_zmax/_hz);
     else
         return 2.0 * _rho0 * _hz;
 }
