@@ -35,10 +35,10 @@ void ExpDiskGeometry::setupSelfBefore()
 
     // calculate central density
     double intphi = 2.0*M_PI;
-    double intz = (_zmax>0) ? 2.0*_hz*expm1(-_zmax/_hz) : 2.0*_hz;
+    double intz = (_zmax>0) ? -2.0*_hz*expm1(-_zmax/_hz) : 2.0*_hz;
     double tmin = (_Rmin>0) ? exp(-_Rmin/_hR)*(1.0+_Rmin/_hR) : 1.0;
     double tmax = (_Rmax>0) ? exp(-_Rmax/_hR)*(1.0+_Rmax/_hR) : 0.0;
-    double intR = _hR*_hR*(tmax-tmin);
+    double intR = _hR*_hR*(tmin-tmax);
     _rho0 = 1.0/(intR*intphi*intz);
 }
 
