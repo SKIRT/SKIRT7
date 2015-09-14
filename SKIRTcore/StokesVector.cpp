@@ -89,7 +89,6 @@ void StokesVector::rotateStokes(double phi, Direction k)
 
     // to prevent degradation
     _normal /= _normal.norm();
-
 }
 
 //////////////////////////////////////////////////////////////////////

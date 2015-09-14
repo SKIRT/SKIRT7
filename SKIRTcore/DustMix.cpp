@@ -103,8 +103,7 @@ void DustMix::setupSelfAfter()
             _thetav[t] = t * dt;
         }
 
-        // create a table with the cumulative distribution of theta for each wavelength
-        // at the end of cdf(...) the array is normalized to one.
+        // create a table with the normalized cumulative distribution of theta for each wavelength
         _thetaXvv.resize(_Nlambda,0);
         for (int ell=0; ell<_Nlambda; ell++)
         {
@@ -123,7 +122,7 @@ void DustMix::setupSelfAfter()
             _pfnormv[ell] = 2.0/sum;
         }
 
-        // create tables listing phi, phi/(2Pi), sin(2 phi) and cos(2 phi) for a number of phi indices
+        // create tables listing phi, phi/(2 pi), sin(2 phi) and 1-cos(2 phi) for a number of phi indices
         _phiv.resize(_Nphi);
         _phi1v.resize(_Nphi);
         _phisv.resize(_Nphi);
@@ -136,7 +135,7 @@ void DustMix::setupSelfAfter()
             _phiv[f] = phi;
             _phi1v[f] = phi/(2*M_PI);
             _phisv[f] = sin(2*phi);
-            _phicv[f] = cos(2*phi);
+            _phicv[f] = 1-cos(2*phi);
         }
     }
 
@@ -607,12 +606,10 @@ Direction DustMix::scatteringDirectionAndPolarization(StokesVector* out, const P
         out->applyMueller(_S11vv(ell,t), _S12vv(ell,t), _S33vv(ell,t), _S34vv(ell,t));
 
         // rotate the propagation direction in the scattering plane
-        Vec res = pp->direction()*cos(theta) + Vec::cross(out->normal(), pp->direction())*sin(theta);
+        Vec newdir = pp->direction()*cos(theta) + Vec::cross(out->normal(), pp->direction())*sin(theta);
 
-        // to prevent degradation
-        res /= res.norm();
-
-        return Direction(res);
+        // normalize direction to prevent degradation
+        return Direction(newdir/newdir.norm());
     }
     else
     {
@@ -636,7 +633,7 @@ void DustMix::scatteringPeelOffPolarization(StokesVector* out, const PhotonPacka
 
         // rotate over the angle between scattering planes
         double phi = angleBetweenScatteringPlanes(pp->normal(), pp->direction(), bfknew);
-        // we always have to rotate, so the StokesVektor knows the reference.
+        // we always have to rotate, so the StokesVektor knows the reference
         out->rotateStokes(phi, pp->direction());
 
         // apply the Mueller matrix
@@ -731,11 +728,11 @@ double DustMix::sampleTheta(int ell) const
 
 double DustMix::samplePhi(int ell, double theta, double polDegree, double polAngle) const
 {
-    double cos2polAngle = cos(2*polAngle);
-    double sin2polAngle = sin(2*polAngle);
     int t = indexForTheta(theta, _Ntheta);
-    double PF = polDegree/(2* M_PI) * _S12vv(ell,t)/_S11vv(ell,t) / 2;
-    const_cast<DustMix*>(this)->_phiXv = _phi1v + PF*cos2polAngle*_phisv + PF*sin2polAngle*(1-_phicv);
+    double PF = polDegree * _S12vv(ell,t)/_S11vv(ell,t) / (4*M_PI);
+    double cos2polAngle = cos(2*polAngle) * PF;
+    double sin2polAngle = sin(2*polAngle) * PF;
+    const_cast<DustMix*>(this)->_phiXv = _phi1v + cos2polAngle*_phisv + sin2polAngle*_phicv;
     return _random->cdf(_phiv, _phiXv);
 }
 

@@ -367,8 +367,8 @@ private:
     double sampleTheta(int ell) const;
 
     /** This function returns a random scattering angle \f$\phi\f$ sampled from the phase function
-        according to the incident linear polarization degree, the polarization angle and the
-        scattering angle \f$\theta\f$, at wavelength index \f$\ell\f$. */
+        according to the scattering angle \f$\theta\f$ and the incident linear polarization degree
+        and polarization angle, at wavelength index \f$\ell\f$. */
     double samplePhi(int ell, double theta, double polDegree, double polAngle) const;
 
     //======================== Data Members ========================
