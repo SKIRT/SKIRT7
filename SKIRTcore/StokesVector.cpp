@@ -86,6 +86,9 @@ void StokesVector::rotateStokes(double phi, Direction k)
     // rotate the stored scattering plane to obtain the new scattering plane
     // using Rodrigues' rotation formula
     _normal = Direction(_normal*cos(phi) + Vec::cross(k, _normal)*sin(phi));
+
+    // to prevent degradation
+    _normal /= _normal.norm();
 }
 
 //////////////////////////////////////////////////////////////////////

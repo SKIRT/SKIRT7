@@ -103,7 +103,7 @@ void DustMix::setupSelfAfter()
             _thetav[t] = t * dt;
         }
 
-        // create a table with the cumulative distribution of theta for each wavelength
+        // create a table with the normalized cumulative distribution of theta for each wavelength
         _thetaXvv.resize(_Nlambda,0);
         for (int ell=0; ell<_Nlambda; ell++)
         {
@@ -122,10 +122,11 @@ void DustMix::setupSelfAfter()
             _pfnormv[ell] = 2.0/sum;
         }
 
-        // create tables listing phi, phi/2pi and sin(2phi)/4pi for a number of phi indices
+        // create tables listing phi, phi/(2 pi), sin(2 phi) and 1-cos(2 phi) for a number of phi indices
         _phiv.resize(_Nphi);
         _phi1v.resize(_Nphi);
-        _phi2v.resize(_Nphi);
+        _phisv.resize(_Nphi);
+        _phicv.resize(_Nphi);
         _phiXv.resize(_Nphi);
         double df = 2*M_PI/(_Nphi-1);
         for (int f=0; f<_Nphi; f++)
@@ -133,7 +134,8 @@ void DustMix::setupSelfAfter()
             double phi = f * df;
             _phiv[f] = phi;
             _phi1v[f] = phi/(2*M_PI);
-            _phi2v[f] = sin(2*phi)/(4*M_PI);
+            _phisv[f] = sin(2*phi);
+            _phicv[f] = 1-cos(2*phi);
         }
     }
 
@@ -588,26 +590,26 @@ namespace
 
 Direction DustMix::scatteringDirectionAndPolarization(StokesVector* out, const PhotonPackage* pp) const
 {
-    // determine the angles between the previous and new direction
     if (_polarization)
     {
-//        int ell = pp->ell();
-//        double theta = sampleTheta(ell);
-//        double phi = pp->polarizationAngle() + samplePhi(ell, theta, pp->linearPolarizationDegree());
-//        //double cosphi = cos(phi);
-//        //double sinphi = sin(phi);
-//        double costheta = cos(theta);
-//        //double sintheta = sin(theta);
+        // determine the angles between the previous and new direction
+        int ell = pp->ell();
+        double theta = sampleTheta(ell);
+        double phi = samplePhi(ell, theta, pp->linearPolarizationDegree(), pp->polarizationAngle());
 
-//        // also calculate and store the new polarization state
-//        *out = *pp;
-//        out->rotateStokes(phi);
-//        int t = indexForTheta(theta, _Ntheta);
-//        out->applyMueller(_S11vv(ell,t), _S12vv(ell,t), _S33vv(ell,t), _S34vv(ell,t));
+        // rotate the Stokes vector (and the scattering plane)
+        *out = *pp;
+        out->rotateStokes(phi, pp->direction());
 
-        // calculate and return the new direction (not yet implemented!!)
-        (void)out;
-        return _random->direction();
+        // apply Mueller matrix
+        int t = indexForTheta(theta, _Ntheta);
+        out->applyMueller(_S11vv(ell,t), _S12vv(ell,t), _S33vv(ell,t), _S34vv(ell,t));
+
+        // rotate the propagation direction in the scattering plane
+        Vec newdir = pp->direction()*cos(theta) + Vec::cross(out->normal(), pp->direction())*sin(theta);
+
+        // normalize direction to prevent degradation
+        return Direction(newdir/newdir.norm());
     }
     else
     {
@@ -631,7 +633,8 @@ void DustMix::scatteringPeelOffPolarization(StokesVector* out, const PhotonPacka
 
         // rotate over the angle between scattering planes
         double phi = angleBetweenScatteringPlanes(pp->normal(), pp->direction(), bfknew);
-        if (phi) out->rotateStokes(phi, pp->direction());
+        // we always have to rotate, so the StokesVektor knows the reference
+        out->rotateStokes(phi, pp->direction());
 
         // apply the Mueller matrix
         double theta = acos(Vec::dot(pp->direction(),bfknew));
@@ -723,11 +726,13 @@ double DustMix::sampleTheta(int ell) const
 
 ////////////////////////////////////////////////////////////////////
 
-double DustMix::samplePhi(int ell, double theta, double polDegree) const
+double DustMix::samplePhi(int ell, double theta, double polDegree, double polAngle) const
 {
     int t = indexForTheta(theta, _Ntheta);
-    double PS = _S12vv(ell,t)/_S11vv(ell,t)*polDegree;
-    const_cast<DustMix*>(this)->_phiXv = _phi1v + PS*_phi2v;
+    double PF = polDegree * _S12vv(ell,t)/_S11vv(ell,t) / (4*M_PI);
+    double cos2polAngle = cos(2*polAngle) * PF;
+    double sin2polAngle = sin(2*polAngle) * PF;
+    const_cast<DustMix*>(this)->_phiXv = _phi1v + cos2polAngle*_phisv + sin2polAngle*_phicv;
     return _random->cdf(_phiv, _phiXv);
 }
 
