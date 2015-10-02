@@ -12,10 +12,10 @@ using namespace std;
 
 ////////////////////////////////////////////////////////////////////
 
-float Objective(GAGenome & g, QList<Array> *sim)
+float Objective(GAGenome & g, QList<Image> *sim)
 {
     // Read the array list and take out the reference image in the back
-    Array ref = sim->last();
+    Image ref = sim->last();
     sim->pop_back();
     GARealGenome& genome = (GARealGenome&)g;
     if (sim->size() != genome.size()) throw FATALERROR("Number of luminosities and components do not match");
@@ -28,7 +28,7 @@ float Objective(GAGenome & g, QList<Array> *sim)
     }
 
     // Determine the chi2 value for this genome
-    int arraysize = (*sim)[0].size();
+    int arraysize = (*sim)[0].numpixels();
     double chi=0;
 
     for (int m=0; m<arraysize; m++)
@@ -70,7 +70,7 @@ float Objective(GAGenome & g, QList<Array> *sim)
 
 void Evaluator(GAPopulation & p)
 {
-    QList<Array>* sim = (QList<Array> *)p.userData();
+    QList<Image>* sim = (QList<Image> *)p.userData();
 
     // loop over all individuals and make replacement for all unevaluated individuals
     for (int i=0; i<p.size(); i++)
@@ -81,7 +81,6 @@ void Evaluator(GAPopulation & p)
             p.individual(i).score(value);
         }
     }
-
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -144,9 +143,6 @@ QList<double> GALumfit::maxLuminosities() const
 
 void GALumfit::optimize(const Image& refframe, QList<Image>& frames, QList<double>& lumis, double& chi2)
 {
-    // Set the reference frame and frames list
-    _ref = &refframe;
-
     // Create the boundaries, set to be uniform in logscale
     GARealAlleleSetArray allelesetarray;
     for (int i = 0; i < _minLum.size(); i++)

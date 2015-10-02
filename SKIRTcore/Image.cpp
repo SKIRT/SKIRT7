@@ -172,7 +172,7 @@ void Image::resize(int xsize, int ysize, int nframes)
 
 void Image::steal(Array& data)
 {
-    std::swap(_data, data);
+    swap(_data, data);
 }
 
 ////////////////////////////////////////////////////////////////////

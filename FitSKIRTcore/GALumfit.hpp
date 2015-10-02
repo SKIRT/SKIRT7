@@ -87,7 +87,6 @@ private:
 private:
     QList<double> _minLum;
     QList<double> _maxLum;
-    const Image *_ref;
     bool _fixedSeed = false;
 };
 
