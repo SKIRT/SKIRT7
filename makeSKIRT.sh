@@ -13,38 +13,64 @@
 
 # --------------------------------------------------------------------
 
-# List of possible paths of qmake (separate paths with a space)
-PATHLIST=( /usr/local/bin/qmake $HOME/Qt5.4.1/5.4/clang_64/bin/qmake $HOME/Qt5.4.1/5.4/clang_64/bin/qmake $HOME/Qt5.4.1/5.4/gcc_64/bin/qmake $HOME/Qt/Desktop/5.4.1/bin/qmake /usr/local/Qt/5.4.1/bin/qmake
-$HOME/Qt5.4.0/5.4/clang_64/bin/qmake $HOME/Qt5.4.0/5.4/gcc_64/bin/qmake $HOME/Qt/Desktop/5.4.0/bin/qmake /usr/local/Qt/5.4.0/bin/qmake
-$HOME/Qt5.3.2/5.3/clang_64/bin/qmake $HOME/Qt5.3.2/5.3/gcc_64/bin/qmake $HOME/Qt/Desktop/5.3.2/bin/qmake /usr/local/Qt/5.3.2/bin/qmake
-$HOME/Qt5.2.1/5.2.1/clang_64/bin/qmake $HOME/Qt5.2.1/5.2.1/gcc_64/bin/qmake $HOME/Qt/Desktop/5.2.1/bin/qmake /usr/local/Qt/5.2.1/bin/qmake )
+# Search for qmake in the home directory
+PATHLIST="$(find $HOME/Qt* -name qmake -type f | tr '\n' ' ')"
 
+# Search for qmake in the $PATH
+PATHLIST="$(which qmake) $PATHLIST"
+
+# Set the QMAKEPATH to an empty string initially
 QMAKEPATH=""
 
-# Determine the qmake install path on this system
-count=$((${#PATHLIST[@]} - 1))
-for i in $(eval echo {0..$count})
-do
-POSSIBLEPATH=${PATHLIST[$i]}
-if [ -e "$POSSIBLEPATH" ]
-then
-QMAKEPATH=$POSSIBLEPATH
-echo "Found qmake in $QMAKEPATH"
-break  # Break the for loop
-fi
-done
+# This function returns the Qt version associated with a certain qmake executable
+function qt_version {
+    
+    local VERSION_OUTPUT="$($1 -v | tr '\n' ' ')"
+    local VERSION_OUTPUT="$(tr -d ' ' <<< $VERSION_OUTPUT)"
+    local SPLITTED="$(sed s/'Qtversion'/' '/g <<< $VERSION_OUTPUT)"
+    local LIST=($SPLITTED)
+    local SECOND_PART=${LIST[1]}
+    local SPLITTED="$(sed s/'in'/' '/g <<< $SECOND_PART)"
+    local LIST=($SPLITTED)
+    local VERSION=${LIST[0]}
+    echo $VERSION
+}
 
-# If qmake is not found above, try qmake installed in the standard system path
-if [ "$QMAKEPATH" == "" ] && which qmake >/dev/null
-then
-QMAKEPATH=qmake
-fi
+# Loop over all the qmake paths
+for path in $PATHLIST; do
+    
+    # Get the associated Qt version
+    VERSION="$(qt_version $path)"
+    
+    # Check whether the Qt version is supported
+    if [[ $VERSION > '5.2.0' ]]
+    then
+        
+        # If another supported qmake was found, check whether this qmake corresponds to
+        # a more recent Qt installation
+        if [[ ! "$QMAKEPATH" == "" ]]
+        then
+          CURRENT_VERSION="$(qt_version $path)"
+          if [[ $VERSION > $CURRENT_VERSION ]]
+          then
+              QMAKEPATH=$path
+          fi
+          
+        # Else, just use this qmake
+        else
+          QMAKEPATH=$path  
+        fi
+    fi 
+
+done
 
 # Exit with an error if we don't find qmake
 if [ "$QMAKEPATH" == "" ]
 then
-echo error: qmake not found
+echo error: There was no supported version of qmake found on this system
 exit
+else
+echo Using qmake in $QMAKEPATH
 fi
 
 # Create the make file and perform the build
