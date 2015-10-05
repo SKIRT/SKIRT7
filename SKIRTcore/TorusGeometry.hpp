@@ -11,7 +11,7 @@
 ////////////////////////////////////////////////////////////////////
 
 /** The TorusGeometry class is a subclass of the AxGeometry class and describes the geometry of an
-    axisymmetric torus as assumed to be present in the centre of active galactic nuclei. This
+    axisymmetric torus as assumed to be present in the centre of active galactic nuclei (AGN). This
     geometry is described by a radial power-law density with a finite opening angle; see Stalevski
     et al. (2012, MNRAS, 420, 2756–2772) and Granato & Danese (1994, MNRAS, 268, 235). In formula,
     it is most easily expressed in spherical coordinates as \f[ \rho(r,\theta) = A\,
@@ -19,7 +19,28 @@
     } \frac{\pi}{2}-\Delta<\theta<\frac{\pi}{2} +\Delta. \f] There are five free parameters
     describing this dust geometry: the inner and outer radii \f$r_{\text{min}}\f$ and
     \f$r_{\text{max}}\f$ of the torus, the radial power law index \f$p\f$, the polar index \f$q\f$
-    and the angle \f$\Delta\f$ describing the opening angle of the torus. */
+    and the angle \f$\Delta\f$ describing the opening angle of the torus.
+
+    If the dusty system under consideration is in the vicinity of an AGN central engine or another
+    source which is luminous enough to heat the dust up to sublimation temperature, the inner
+    radius should correspond to sublimation radius and scale as \f$ r_{\text{min}} \propto
+    L(\theta)^{0.5}\f$ (Barvainis, 1987, ApJ, 320, 537, eq (5)). If the primary source assumes
+    anisotropic emission, the inner radius must follow the same dependence as the distribution of
+    the primary source luminosity. Otherwise, dust temperature on the inner boundary of geometry is
+    very likely to be under- or over-estimated. Thus, if the NetzerAccretionDiskGeometry
+    distribution is chosen to describe primary source emission, it is recommended to turn on the
+    anisotropic inner radius option for the torus geometry. The inner radius will then be set by
+    the following formula: \f[ r_{\text{min}} \propto (\cos\theta\,(2\cos\theta+1))^{0.5}.\f] This
+    should allow dust to approach all the way to the primary central source in the equatorial
+    plane. However, due to the finite resolution of dust cells, it may happen that some of the
+    innermost cells end up with unphysically high temperatures. For this reason, there is an
+    additional input parameter, the cutoff radius \f$r_{\text{cut}}\f$. The value of the cutoff
+    radius is usually found after a few trial-and-error experiments by inspecting temperature
+    distribution maps, until the inner wall of the geometry is at the expected sublimation
+    temperature for a given dust population.
+
+    The total dust mass of the model corresponds to the mass of the original geometry, before the
+    inner wall is reshaped to account for anisotropy; the difference is usually rather small. */
 class TorusGeometry : public AxGeometry
 {
     Q_OBJECT
@@ -116,7 +137,8 @@ public:
         Netzer luminosity profile. */
     Q_INVOKABLE void setAnisoRadius(bool value);
 
-    /** Returns the flag indicating whether to use anisotropic inner radius of the torus. */
+    /** Returns the flag indicating whether to reshape the inner wall of the torus according to the
+        Netzer luminosity profile. */
     Q_INVOKABLE bool anisoRadius() const;
 
     /** Sets the inner cutoff radius of the torus. */

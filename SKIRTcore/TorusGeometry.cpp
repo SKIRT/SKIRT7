@@ -169,23 +169,26 @@ double TorusGeometry::density(double R, double z) const
 
 Position TorusGeometry::generatePosition() const
 {
-    double X = _random->uniform();
-    double s = _smin + X*_sdiff;
-    double r = SpecialFunctions::gexp(_p-2.0,s);
-    X = _random->uniform();
-    double costheta = 0.0;
-    if (_q<1e-3)
-        costheta = (1.0-2.0*X)*_sinDelta;
-    else
+    while (true)
     {
-        double B = 1.0-exp(-_q*_sinDelta);
-        costheta = (X<0.5) ? -log(1.0-B*(1.0-2.0*X))/_q : log(1.0-B*(2.0*X-1.0))/_q;
+        double X = _random->uniform();
+        double s = _smin + X*_sdiff;
+        double r = SpecialFunctions::gexp(_p-2.0,s);
+        X = _random->uniform();
+        double costheta = 0.0;
+        if (_q<1e-3)
+            costheta = (1.0-2.0*X)*_sinDelta;
+        else
+        {
+            double B = 1.0-exp(-_q*_sinDelta);
+            costheta = (X<0.5) ? -log(1.0-B*(1.0-2.0*X))/_q : log(1.0-B*(2.0*X-1.0))/_q;
+        }
+        double theta = acos(costheta);
+        X = _random->uniform();
+        double phi = 2.0 * M_PI * X;
+        Position bfr(r,theta,phi,Position::SPHERICAL);
+        if (density(bfr.cylradius(),bfr.height())) return bfr;
     }
-    double theta = acos(costheta);
-    X = _random->uniform();
-    double phi = 2.0 * M_PI * X;
-    Position bfr(r,theta,phi,Position::SPHERICAL);
-    return bfr;
 }
 
 //////////////////////////////////////////////////////////////////////
