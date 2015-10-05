@@ -29,6 +29,7 @@
 #include "CombineGeometryDecorator.hpp"
 #include "CompDustDistribution.hpp"
 #include "ConfigurableDustMix.hpp"
+#include "ConicalShellGeometry.hpp"
 #include "CropGeometryDecorator.hpp"
 #include "CubBackgroundGeometry.hpp"
 #include "CubicSplineSmoothingKernel.hpp"
@@ -254,6 +255,7 @@ void RegisterSimulationItems::registerAll()
     add<TTauriDiskGeometry>();
     add<RingGeometry>();
     add<TorusGeometry>();
+    add<ConicalShellGeometry>();
     add<GenGeometry>(false);
     add<UniformCuboidGeometry>();
     add<SPHGeometry>();

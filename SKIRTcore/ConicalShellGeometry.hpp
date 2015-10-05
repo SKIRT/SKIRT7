@@ -3,23 +3,26 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
-#ifndef TORUSGEOMETRY_HPP
-#define TORUSGEOMETRY_HPP
+#ifndef CONICALSHELLGEOMETRY_HPP
+#define CONICALSHELLGEOMETRY_HPP
 
 #include "AxGeometry.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
-/** The TorusGeometry class is a subclass of the AxGeometry class and describes the geometry of an
-    axisymmetric torus as assumed to be present in the centre of active galactic nuclei (AGN). This
-    geometry is described by a radial power-law density with a finite opening angle; see Stalevski
-    et al. (2012, MNRAS, 420, 2756–2772) and Granato & Danese (1994, MNRAS, 268, 235). In formula,
-    it is most easily expressed in spherical coordinates as \f[ \rho(r,\theta) = A\,
-    r^{-p}\,{\text{e}}^{-q|\cos\theta|} \quad\text{for } r_{\text{min}}<r<r_{\text{max}} \text{ and
-    } \frac{\pi}{2}-\Delta<\theta<\frac{\pi}{2} +\Delta. \f] There are five free parameters
-    describing this dust geometry: the inner and outer radii \f$r_{\text{min}}\f$ and
-    \f$r_{\text{max}}\f$ of the torus, the radial power law index \f$p\f$, the polar index \f$q\f$
-    and the angle \f$\Delta\f$ describing the opening angle of the torus.
+/** The ConicalShellGeometry class is a subclass of the AxGeometry class and describes the geometry
+    of an axisymmetric conical shell which may be present, in addition to the torus, in the centre
+    of active galactic nuclei (AGN). Very similar to the TorusGeometry, this geometry is described
+    by a radial power-law density (see Stalevski et al. 2012, MNRAS, 420, 2756–2772) but with two
+    finite opening angles, inner and outer. In formula, it is most easily expressed in spherical
+    coordinates as \f[ \rho(r,\theta) = A\, r^{-p}\,{\text{e}}^{-q|\cos\theta|} \quad\text{for }
+    r_{\text{min}}<r<r_{\text{max}} \text{ and }
+    \frac{\pi}{2}-\Delta_{\text{out}}<\theta<\frac{\pi}{2}-\Delta_{\text{in}} \text{ and }
+    \frac{\pi}{2}+\Delta_{\text{in}}<\theta<\frac{\pi}{2}+\Delta_{\text{out}}. \f] There are six
+    free parameters describing this dust geometry: the inner and outer radii \f$r_{\text{min}}\f$
+    and \f$r_{\text{max}}\f$ of the conical shell, the radial power law index \f$p\f$, the polar
+    index \f$q\f$ and the inner and outer opening angles \f$\Delta_{\text{in}}\f$ and
+    \f$\Delta_{\text{out}}\f$ describing the inner and outer edge of the shell.
 
     If the dusty system under consideration is in the vicinity of an AGN central engine or another
     source which is luminous enough to heat the dust up to sublimation temperature, the inner
@@ -41,32 +44,38 @@
 
     The total dust mass of the model corresponds to the mass of the original geometry, before the
     inner wall is reshaped to account for anisotropy; the difference is usually rather small. */
-class TorusGeometry : public AxGeometry
+class ConicalShellGeometry : public AxGeometry
 {
     Q_OBJECT
-    Q_CLASSINFO("Title", "a torus geometry")
+    Q_CLASSINFO("Title", "a conical shell geometry")
 
     Q_CLASSINFO("Property", "expon")
-    Q_CLASSINFO("Title", "the radial powerlaw exponent p of the torus")
+    Q_CLASSINFO("Title", "the radial powerlaw exponent p of the conical shell")
     Q_CLASSINFO("MinValue", "0")
 
     Q_CLASSINFO("Property", "index")
-    Q_CLASSINFO("Title", "the polar index q of the torus")
+    Q_CLASSINFO("Title", "the polar index q of the conical shell")
     Q_CLASSINFO("MinValue", "0")
 
-    Q_CLASSINFO("Property", "openAngle")
-    Q_CLASSINFO("Title", "the half opening angle of the torus")
+    Q_CLASSINFO("Property", "inAngle")
+    Q_CLASSINFO("Title", "the inner angle of the conical shell")
+    Q_CLASSINFO("Quantity", "posangle")
+    Q_CLASSINFO("MinValue", "0 deg")
+    Q_CLASSINFO("MaxValue", "90 deg")
+
+    Q_CLASSINFO("Property", "outAngle")
+    Q_CLASSINFO("Title", "the outer angle of the conical shell")
     Q_CLASSINFO("Quantity", "posangle")
     Q_CLASSINFO("MinValue", "0 deg")
     Q_CLASSINFO("MaxValue", "90 deg")
 
     Q_CLASSINFO("Property", "minRadius")
-    Q_CLASSINFO("Title", "the minimum radius of the torus")
+    Q_CLASSINFO("Title", "the minimum radius of the conical shell")
     Q_CLASSINFO("Quantity", "length")
     Q_CLASSINFO("MinValue", "0")
 
     Q_CLASSINFO("Property", "maxRadius")
-    Q_CLASSINFO("Title", "the maximum radius of the torus")
+    Q_CLASSINFO("Title", "the maximum radius of the conical shell")
     Q_CLASSINFO("Quantity", "length")
     Q_CLASSINFO("MinValue", "0")
 
@@ -75,7 +84,7 @@ class TorusGeometry : public AxGeometry
     Q_CLASSINFO("Default", "no")
 
     Q_CLASSINFO("Property", "cutRadius")
-    Q_CLASSINFO("Title", "the inner cutoff radius of the torus")
+    Q_CLASSINFO("Title", "the inner cutoff radius of the conical shell")
     Q_CLASSINFO("Quantity", "length")
     Q_CLASSINFO("MinValue", "0")
     Q_CLASSINFO("Default", "0")
@@ -85,73 +94,80 @@ class TorusGeometry : public AxGeometry
 
 public:
     /** The default constructor. */
-    Q_INVOKABLE TorusGeometry();
+    Q_INVOKABLE ConicalShellGeometry();
 
 protected:
-    /** This function verifies the validity of the geometry parameters. The normalization
-        parameter \f$A\f$ is set by the normalization
-        condition that total mass equals one, i.e. \f[ 1 = 2\pi\, A\,
-        \int_{\pi/2-\Delta}^{\pi/2+\Delta} e^{-q|\cos\theta|}\sin\theta\, {\text{d}}\theta
-        \int_{r_{\text{min}}}^{r_{\text{max}}} r^{2-p}\, {\text{d}}r. \f] This results in \f[ A =
-        \frac{q}{4\pi\, (1-{\text{e}}^{-q\sin\Delta})}\, \frac{1}{ {\text{gln}}_{p-2}\,
-        r_{\text{max}} - {\text{gln}}_{p-2}\, r_{\text{min}} }, \f] with \f${\text{gln}}_p\, x\f$
-        the generalized logarithm defined in SpecialFunctions::gln. If \f$q=0\f$, this expression
-        reduces to \f[ A = \frac{1}{4\pi\,\sin\Delta\, ({\text{gln}}_{p-2}\,
-        r_{\text{max}} - {\text{gln}}_{p-2}\, r_{\text{min}} )}. \f] */
+    /** This function verifies the validity of the geometry parameters. The normalization parameter
+        \f$A\f$ is set by the normalization condition that total mass equals one, i.e. \f[ 1 =
+        2\pi\, A\, 2\int_{\pi/2+\Delta_{\text{in}}}^{\pi/2+\Delta_{\text{out}}} e^{-q|\cos\theta|}\sin\theta\,
+        {\text{d}}\theta \int_{r_{\text{min}}}^{r_{\text{max}}} r^{2-p}\, {\text{d}}r. \f] This
+        results in \f[ A = \frac{q}{4\pi\, ({\text{e}}^{-q\sin\Delta_{\text{in}}} -
+        {\text{e}}^{-q\sin\Delta_{\text{out}}})}\, \frac{1}{ {\text{gln}}_{p-2}\, r_{\text{max}} -
+        {\text{gln}}_{p-2}\, r_{\text{min}} }, \f] with \f${\text{gln}}_p\, x\f$ the generalized
+        logarithm defined in SpecialFunctions::gln. If \f$q=0\f$, this expression reduces to \f[ A
+        = \frac{1}{4\pi\,(\sin\Delta_{\text{out}} - \sin\Delta_{\text{in}})\,
+        ({\text{gln}}_{p-2}\, r_{\text{max}} - {\text{gln}}_{p-2}\,
+        r_{\text{min}} )}. \f] */
     void setupSelfBefore();
 
     //======== Setters & Getters for Discoverable Attributes =======
 
 public:
-    /** Sets the radial power law exponent \f$p\f$ of the torus. */
+    /** Sets the radial power law exponent \f$p\f$ of the conical shell. */
     Q_INVOKABLE void setExpon(double value);
 
-    /** Returns the radial power law exponent \f$p\f$ of the torus. */
+    /** Returns the radial power law exponent \f$p\f$ of the conical shell. */
     Q_INVOKABLE double expon() const;
 
-    /** Sets the polar index \f$q\f$ of the torus. */
+    /** Sets the polar index \f$q\f$ of the conical shell. */
     Q_INVOKABLE void setIndex(double value);
 
-    /** Returns the polar index \f$q\f$ of the torus. */
+    /** Returns the polar index \f$q\f$ of the conical shell. */
     Q_INVOKABLE double index() const;
 
-    /** Sets the half opening angle of the torus. */
-    Q_INVOKABLE void setOpenAngle(double value);
+    /** Sets the inner half opening angle of the conical shell. */
+    Q_INVOKABLE void setInAngle(double value);
 
-    /** Returns the half opening angle of the torus. */
-    Q_INVOKABLE double openAngle() const;
+    /** Returns the inner half opening angle of the conical shell. */
+    Q_INVOKABLE double inAngle() const;
 
-    /** Sets the minimum radius of the torus. */
+    /** Sets the outher half opening angle of the conical shell. */
+    Q_INVOKABLE void setOutAngle(double value);
+
+    /** Returns the outher half opening angle of the conical shell. */
+    Q_INVOKABLE double outAngle() const;
+
+    /** Sets the minimum radius of the conical shell. */
     Q_INVOKABLE void setMinRadius(double value);
 
-    /** Returns the minimum radius of the torus. */
+    /** Returns the minimum radius of the conical shell. */
     Q_INVOKABLE double minRadius() const;
 
-    /** Sets the maximum radius of the torus. */
-    Q_INVOKABLE void setMaxRadius(double value);
-
-    /** Returns the maximum radius of the torus. */
-    Q_INVOKABLE double maxRadius() const;
-
-    /** Sets the flag indicating whether to reshape the inner wall of the torus according to the
-        Netzer luminosity profile. */
+    /** Sets the flag indicating whether to reshape the inner wall of the conical shell according
+        to the Netzer luminosity profile. */
     Q_INVOKABLE void setAnisoRadius(bool value);
 
-    /** Returns the flag indicating whether to reshape the inner wall of the torus according to the
-        Netzer luminosity profile. */
+    /** Returns the flag indicating whether to use anisotropic inner radius of the conical shell.
+        */
     Q_INVOKABLE bool anisoRadius() const;
 
-    /** Sets the inner cutoff radius of the torus. */
+    /** Sets the inner cutoff radius of the conical shell. */
     Q_INVOKABLE void setCutRadius(double value);
 
-    /** Returns the inner cutoff radius of the torus. */
+    /** Returns the inner cutoff radius of the conical shell. */
     Q_INVOKABLE double cutRadius() const;
+
+    /** Sets the maximum radius of the conical shell. */
+    Q_INVOKABLE void setMaxRadius(double value);
+
+    /** Returns the maximum radius of the conical shell. */
+    Q_INVOKABLE double maxRadius() const;
 
     //======================== Other Functions =======================
 
 public:
-    /** This function returns the density \f$\rho(R,z)\f$ at the cylindrical radius
-        \f$R\f$ and height \f$z\f$. It just implements the analytical formula. */
+    /** This function returns the density \f$\rho(R,z)\f$ at the cylindrical radius \f$R\f$ and
+        height \f$z\f$. It just implements the analytical formula. */
     double density(double R, double z) const;
 
     /** This function generates a random position from the torus geometry, by
@@ -189,21 +205,24 @@ public:
         {\text{e}}^{-q\sin\Delta}\right) (1-2{\cal{X}}) \right] &
         \quad\text{if $0<{\cal{X}}<\tfrac12$} \\[1.2em] \; \dfrac{1}{q} \ln\left[ 1-\left(1
         -{\text{e}}^{-q\sin\Delta}\right) (2{\cal{X}}-1) \right] & \quad\text{if $\tfrac12<{\cal{X}}<1$}
-        \end{cases}. \f] */
+        \end{cases}. \f] Since this function generates a random position from the torus geometry, positions
+        are rejected until they fall into non-zere area, i.e. inside the conical shell. */
     Position generatePosition() const;
 
-    /** This function returns the radial surface density, i.e. the integration of
-        the density along a line in the equatorial plane starting at the centre of the coordinate
-        system, \f[ \Sigma_R = \int_0^\infty \rho(R,0)\,{\text{d}}R. \f] For the torus geometry,
-        \f[ \Sigma_R = A\, ( {\text{gln}}_p\, r_{\text{max}} -
-        {\text{gln}}_p\, r_{\text{min}} ) \f] with \f${\text{gln}}_p\,x\f$ the generalized
-        logarithm defined in SpecialFunctions::gln.*/
+    /** This function returns the radial surface density, i.e. the integration of the density along
+        a line going through the conical shell, in the plane half way between inner and outer edge
+        of the shell, starting at the centre of the coordinate system, \f[ \Sigma_R = \int_0^\infty
+        \rho(r,\Delta)\,{\text{d}}r \quad\text{with}\quad \Delta=\frac{\Delta_{\text{in}}+\Delta_{\text{out}}}{2}. \f]
+        For the conical shell geometry, \f[ \Sigma_R = A\,
+        {\text{e}}^{-q\cos\Delta}\, ( {\text{gln}}_p\, r_{\text{max}} - {\text{gln}}_p\,
+        r_{\text{min}} ) \f] with \f${\text{gln}}_p\,x\f$ the generalized logarithm defined in
+        SpecialFunctions::gln. */
     double SigmaR() const;
 
-    /** This function returns the Z-axis surface density, i.e. the integration of
-        the density along the entire Z-axis, \f[ \Sigma_Z = \int_{-\infty}^\infty \rho(0,0,z)\,
-        {\text{d}}z. \f] For the torus geometry this integral is simply zero (we exclude the special
-        limiting case where \f$\Delta=\tfrac{\pi}{2}\f$). */
+    /** This function returns the Z-axis surface density, i.e. the integration of the density along
+        the entire Z-axis, \f[ \Sigma_Z = \int_{-\infty}^\infty \rho(0,0,z)\, {\text{d}}z. \f] For
+        the conical shell geometry this integral is simply zero (we exclude the special limiting
+        case where \f$\Delta=\tfrac{\pi}{2}\f$). */
     double SigmaZ() const;
 
     //======================== Data Members ========================
@@ -212,14 +231,17 @@ private:
     // data members for which there are setters and getters
     double _p;
     double _q;
-    double _Delta;
+    double _DeltaIn;
+    double _DeltaOut;
     double _rmin;
-    double _rmax;
     bool _rani;
     double _rcut;
+    double _rmax;
 
     // data members initialized during setup
-    double _sinDelta;
+    double _sinDeltaIn;
+    double _sinDeltaOut;
+    double _cosDelta;
     double _smin;
     double _sdiff;
     double _A;
@@ -227,4 +249,4 @@ private:
 
 ////////////////////////////////////////////////////////////////////
 
-#endif // TORUSGEOMETRY_HPP
+#endif // CONICALSHELLGEOMETRY_HPP
