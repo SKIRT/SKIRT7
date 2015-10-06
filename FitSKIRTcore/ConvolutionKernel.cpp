@@ -22,8 +22,9 @@ void ConvolutionKernel::setupSelfBefore()
 
 void ConvolutionKernel::setupSelfAfter()
 {
+    SimulationItem::setupSelfAfter();
+
     _data /= _data.sum();
 }
 
 ////////////////////////////////////////////////////////////////////
-

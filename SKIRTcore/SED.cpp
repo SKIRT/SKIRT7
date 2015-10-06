@@ -22,6 +22,8 @@ SED::SED()
 
 void SED::setupSelfAfter()
 {
+    SimulationItem::setupSelfAfter();
+
     size_t Nlambda = find<WavelengthGrid>()->Nlambda();
     if (_Lv.size() != Nlambda) throw FATALERROR("The luminosities in the SED have not been properly set");
 }
