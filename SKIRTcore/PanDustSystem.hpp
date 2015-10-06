@@ -238,7 +238,13 @@ public:
         B_\lambda({\bar{T}}_c({\boldsymbol{r}}))\, {\text{d}}\lambda, \f] where
         \f$\kappa_{\lambda,c}^{\text{abs}}\f$ is the absorption coefficient of the \f$c\f$'th dust
         population. Note that this mean dust temperature is only illustrative: it does not imply
-        that the dust emits as a modified blackbody at an equibrium temperature. */
+        that the dust emits as a modified blackbody at an equibrium temperature.
+
+        Furthermore, if the writeTemperature attribute is true, this function writes out a text
+        file containing the mass and indicative dust temperature for each cell in the dust grid.
+        The indicative dust temperature is defined as the mean temperature (calculated as described
+        above) averaged over all dust populations (weighed by mass in the dust mix) and all dust
+        components (weighed by density in the dust cell). */
     void write() const;
 
     //======================== Data Members ========================

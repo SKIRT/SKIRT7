@@ -421,14 +421,13 @@ namespace
     // The image size in each direction, in pixels
     const int Np = 1024;
 
-    class WriteTemp : public ParallelTarget
+    class WriteTempCut : public ParallelTarget
     {
     private:
         // cached values initialized in constructor
         const PanDustSystem* _ds;
         DustGridStructure* _grid;
         Units* _units;
-        FilePaths* _paths;
         Log* _log;
         double xbase, ybase, zbase, xres, yres, zres;
         int Nmaps;
@@ -442,13 +441,12 @@ namespace
 
     public:
         // constructor
-        WriteTemp(const PanDustSystem* ds)
+        WriteTempCut(const PanDustSystem* ds)
         {
             _ds = ds;
             _grid = ds->dustGridStructure();
             _units = ds->find<Units>();
             _log = ds->find<Log>();
-            _paths = ds->find<FilePaths>();
 
             double xmax = _grid->xmax();
             double ymax = _grid->ymax();
@@ -525,6 +523,93 @@ namespace
 
 ////////////////////////////////////////////////////////////////////
 
+// Private class to output a text file with an indicative temperature for each dust cell
+namespace
+{
+    class WriteTempData : public ParallelTarget
+    {
+    private:
+        // cached values initialized in constructor
+        const PanDustSystem* _ds;
+        DustGridStructure* _grid;
+        Units* _units;
+        int _Ncells;
+
+        // results vectors, properly sized in constructor
+        Array _Mv, _Tv;
+
+    public:
+        // constructor
+        WriteTempData(const PanDustSystem* ds)
+        {
+            _ds = ds;
+            _grid = ds->dustGridStructure();
+            _units = ds->find<Units>();
+            _Ncells = ds->Ncells();
+            _Mv.resize(_Ncells);
+            _Tv.resize(_Ncells);
+        }
+
+        // the parallized loop body; calculates the results for a single dust cell
+        void body(size_t m)
+        {
+            // dust mass in cell
+            _Mv[m] = _ds->density(m) * _ds->volume(m);
+
+            // indicative temperature = average population equilibrium temperature weighed by population mass fraction
+            if (_ds->Labs(m)>0.0)
+            {
+                const Array& Jv = _ds->meanintensityv(m);
+
+                // average over dust components
+                double sumRho_h = 0;
+                double sumRhoT_h = 0;
+                for (int h=0; h<_ds->Ncomp(); h++)
+                {
+                    double rho_h = _ds->density(m,h);
+                    if (rho_h>0.0)
+                    {
+                        // average over dust populations within component
+                        double sumMu_c = 0;
+                        double sumMuT_c = 0;
+                        for (int c=0; c<_ds->mix(h)->Npop(); c++)
+                        {
+                            double mu_c = _ds->mix(h)->mu(c);
+                            double T_c = _ds->mix(h)->equilibrium(Jv,c);
+                            sumMu_c += mu_c;
+                            sumMuT_c += mu_c * T_c;
+                        }
+                        double T_h = sumMuT_c / sumMu_c;
+
+                        sumRho_h += rho_h;
+                        sumRhoT_h += rho_h * T_h;
+                    }
+                }
+                _Tv[m] = sumRhoT_h / sumRho_h;
+            }
+        }
+
+        // Write the results to a text file with an appropriate name
+        void write()
+        {
+            // Create a text file
+            TextOutFile file(_ds, "ds_celltemps", "dust cell temperatures");
+
+            // Write the header
+            file.addColumn("dust mass in cell (" + _units->umass() + ")");
+            file.addColumn("indicative temperature in cell (" + _units->utemperature() + ")");
+
+            // Write a line for each cell
+            for (int m=0; m<_Ncells; m++)
+            {
+                file.writeRow(QList<double>() << _units->omass(_Mv[m]) << _units->otemperature(_Tv[m]));
+            }
+        }
+    };
+}
+
+////////////////////////////////////////////////////////////////////
+
 void PanDustSystem::write() const
 {
     DustSystem::write();
@@ -564,40 +649,54 @@ void PanDustSystem::write() const
         }
     }
 
-    // If requested, output temperate map(s) along coordiate axes cuts
+    // If requested, output temperature map(s) along coordinate axes and temperature data for each dust cell
     if (_writeTemp)
     {
-        // construct a private class instance to do the work (parallelized)
-        WriteTemp wt(this);
+        // Get the parallel engine and construct an assigner that assigns all the work to the root process
         Parallel* parallel = find<ParallelFactory>()->parallel();
+        RootAssigner assigner(0);
+        assigner.assign(Np);
 
-        // get the dimension of the dust grid
-        int dimDust = _grid->dimension();
-
-        // Create an assigner that assigns all the work to the root process
-        RootAssigner* assigner = new RootAssigner(0);
-        assigner->assign(Np);
-
-        // For the xy plane (always)
+        // Output temperature map(s) along coordinate axes
         {
-            wt.setup(1,1,0);
-            parallel->call(&wt, assigner);
-            wt.write();
+            // Construct a private class instance to do the work (parallelized)
+            WriteTempCut wt(this);
+
+            // Get the dimension of the dust grid
+            int dimDust = _grid->dimension();
+
+            // For the xy plane (always)
+            {
+                wt.setup(1,1,0);
+                parallel->call(&wt, &assigner);
+                wt.write();
+            }
+
+            // For the xz plane (only if dimension is at least 2)
+            if (dimDust >= 2)
+            {
+                wt.setup(1,0,1);
+                parallel->call(&wt, &assigner);
+                wt.write();
+            }
+
+            // For the yz plane (only if dimension is 3)
+            if (dimDust == 3)
+            {
+                wt.setup(0,1,1);
+                parallel->call(&wt, &assigner);
+                wt.write();
+            }
         }
 
-        // For the xz plane (only if dimension is at least 2)
-        if (dimDust >= 2)
+        // Output a text file with temperature data for each dust cell
         {
-            wt.setup(1,0,1);
-            parallel->call(&wt, assigner);
-            wt.write();
-        }
+            find<Log>()->info("Calculating indicative dust temperatures for each cell...");
 
-        // For the yz plane (only if dimension is 3)
-        if (dimDust == 3)
-        {
-            wt.setup(0,1,1);
-            parallel->call(&wt, assigner);
+            // Construct a private class instance to do the work (parallelized)
+            WriteTempData wt(this);
+            assigner.assign(_Ncells);
+            parallel->call(&wt, &assigner);
             wt.write();
         }
     }
