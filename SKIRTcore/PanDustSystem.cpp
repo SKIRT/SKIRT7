@@ -6,7 +6,7 @@
 #include <cmath>
 #include "ArrayTable.hpp"
 #include "DustEmissivity.hpp"
-#include "DustGridStructure.hpp"
+#include "DustGrid.hpp"
 #include "DustLib.hpp"
 #include "DustMix.hpp"
 #include "FatalError.hpp"
@@ -426,10 +426,10 @@ namespace
     private:
         // cached values initialized in constructor
         const PanDustSystem* _ds;
-        DustGridStructure* _grid;
+        DustGrid* _grid;
         Units* _units;
         Log* _log;
-        double xbase, ybase, zbase, xres, yres, zres;
+        double xbase, ybase, zbase, xres, yres, zres, xcenter, ycenter, zcenter;
         int Nmaps;
 
         // data members initialized in setup()
@@ -444,19 +444,23 @@ namespace
         WriteTempCut(const PanDustSystem* ds)
         {
             _ds = ds;
-            _grid = ds->dustGridStructure();
+            _grid = ds->dustGrid();
             _units = ds->find<Units>();
             _log = ds->find<Log>();
 
-            double xmax = _grid->xmax();
-            double ymax = _grid->ymax();
-            double zmax = _grid->zmax();
-            xres = 2.0*xmax/Np;
-            yres = 2.0*ymax/Np;
-            zres = 2.0*zmax/Np;
-            xbase = -xmax + 0.5*xres;
-            ybase = -ymax + 0.5*yres;
-            zbase = -zmax + 0.5*zres;
+            double xmin, ymin, zmin, xmax, ymax, zmax;
+            Box bb = _grid->boundingbox();
+            bb.extent(xmin,ymin,zmin,xmax,ymax,zmax);
+            xres = (xmax-xmin)/Np;
+            yres = (ymax-ymin)/Np;
+            zres = (zmax-zmin)/Np;
+            xbase = xmin + 0.5*xres;
+            ybase = ymin + 0.5*yres;
+            zbase = zmin + 0.5*zres;
+            xcenter = (xmin+xmax)/2.0;
+            ycenter = (ymin+ymax)/2.0;
+            zcenter = (zmin+zmax)/2.0;
+
             Nmaps = 0;
             for (int h=0; h<_ds->Ncomp(); h++) Nmaps += _ds->mix(h)->Npop();
 
@@ -515,7 +519,8 @@ namespace
         void write()
         {
             QString filename = "ds_temp" + plane;
-            Image image(_ds, Np, Np, Nmaps, xd?xres:yres, zd?zres:yres, "temperature");
+            Image image(_ds, Np, Np, Nmaps, xd?xres:yres, zd?zres:yres,
+                        xd?xcenter:ycenter, zd?zcenter:ycenter, "temperature");
             image.saveto(_ds, tempv, filename, "dust temperatures");
         }
     };
@@ -531,7 +536,7 @@ namespace
     private:
         // cached values initialized in constructor
         const PanDustSystem* _ds;
-        DustGridStructure* _grid;
+        DustGrid* _grid;
         Units* _units;
         int _Ncells;
 
@@ -543,7 +548,7 @@ namespace
         WriteTempData(const PanDustSystem* ds)
         {
             _ds = ds;
-            _grid = ds->dustGridStructure();
+            _grid = ds->dustGrid();
             _units = ds->find<Units>();
             _Ncells = ds->Ncells();
             _Mv.resize(_Ncells);

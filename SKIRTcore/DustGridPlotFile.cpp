@@ -13,7 +13,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////
 
 DustGridPlotFile::DustGridPlotFile(const SimulationItem* item, QString filename)
-    : TextOutFile(item, filename, "data to plot the grid structure")
+    : TextOutFile(item, filename, "data to plot the dust grid")
 {
     // Set the precision
     if (_out.is_open())

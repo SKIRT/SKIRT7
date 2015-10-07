@@ -14,8 +14,8 @@
 #include "Table.hpp"
 
 class DustDistribution;
+class DustGrid;
 class DustGridDensityInterface;
-class DustGridStructure;
 class DustMix;
 class PhotonPackage;
 class ProcessAssigner;
@@ -24,12 +24,12 @@ class ProcessAssigner;
 
 /** DustSystem is an abstract class for representing complete dust systems, including both a dust
     distribution (i.e. a complete description of the spatial distribution and optical properties of
-    the dust) and a grid structure on which this distribution is discretized. There are specialized
+    the dust) and a grid on which this distribution is discretized. There are specialized
     subclasses for use with oligochromatic and panchromatic simulations respectively. A DustSystem
     object contains a vector of dust cells, each of which contain all useful information on the
     dust within that particular piece of the configuration space. Furthermore, a DustSystem object
-    contains pointers a DustDistribution object and to a DustGridStructure object). A subclass
-    may of course maintain additional information depending on its needs. */
+    contains pointers a DustDistribution object and to a DustGridStructure object). A subclass may
+    of course maintain additional information depending on its needs. */
 class DustSystem : public SimulationItem
 {
     Q_OBJECT
@@ -39,9 +39,9 @@ class DustSystem : public SimulationItem
     Q_CLASSINFO("Title", "the dust distribution")
     Q_CLASSINFO("Default", "CompDustDistribution")
 
-    Q_CLASSINFO("Property", "dustGridStructure")
-    Q_CLASSINFO("Title", "the dust grid structure")
-    Q_CLASSINFO("Default", "OctTreeDustGridStructure")
+    Q_CLASSINFO("Property", "dustGrid")
+    Q_CLASSINFO("Title", "the dust grid")
+    Q_CLASSINFO("Default", "OctTreeDustGrid")
 
     Q_CLASSINFO("Property", "sampleCount")
     Q_CLASSINFO("Title", "the number of random density samples for determining cell mass")
@@ -92,17 +92,18 @@ protected:
         phase consists of the creation of the vectors that hold the volumes and densities of the
         dust cells. The second phase consists of calculating and storing the volume and the dust
         density (for every dust component) of all the cells. To calculate the volume of a given
-        dust cell, we just call the corresponding function of the dust grid structure. To calculate
-        and set the density corresponding to given dust component in a given cell, a number of
-        random positions are generated within the cell (see sampleCount()). The density in the cell
-        is calculated as the mean of the density values (found using a call to the corresponding
+        dust cell, we just call the corresponding function of the dust grid. To calculate and set
+        the density corresponding to given dust component in a given cell, a number of random
+        positions are generated within the cell (see sampleCount()). The density in the cell is
+        calculated as the mean of the density values (found using a call to the corresponding
         function of the dust distribution) in these points. The calculation of both volume and
         density is parallellized. In the last phase, the function optionally invokes various
         writeXXX() functions depending on the state of the corresponding write flags. */
     void setupSelfAfter();
 
 private:
-    /** This function serves as the parallelization body for calculating the volume of each cell. */
+    /** This function serves as the parallelization body for calculating the volume of each cell.
+        */
     void setVolumeBody(size_t m);
 
     /** This function serves as the parallelization body for setting the density value of each cell
@@ -118,8 +119,8 @@ private:
         mass, the face-on surface density and the edge-on surface density by directly integrating
         over the dust grid, and compares these values with the expected "theoretical" values found
         by just calling the corresponding functions of the dust distribution. The results are
-        written to the file and can be studied to see whether the chosen dust grid structure is
-        adequate for the chosen dust distribution. */
+        written to the file and can be studied to see whether the chosen dust grid is adequate for
+        the chosen dust distribution. */
     void writeconvergence() const;
 
     /** This function writes out FITS files with the theoretical dust density and the
@@ -133,24 +134,21 @@ private:
         <tt>prefix_ds_grhoXX.fits</tt>) is the following: the theoretical dust density is the total
         dust density of the dust distribution, i.e.\ the actual dust density that would correspond
         to an infinitely fine dust grid. The grid-discretized dust density maps on the other hand
-        give the value of the dust as read from the finite-resolution dust grid structure. A
-        comparison of both sets of maps can reveal whether the chosen dust grid structure is
-        suitable (in the ideal case, there would be no difference between both sets of maps). */
+        give the value of the dust as read from the finite-resolution dust grid. A comparison of
+        both sets of maps can reveal whether the chosen dust grid is suitable (in the ideal case,
+        there would be no difference between both sets of maps). */
     void writedensity(ProcessAssigner* assigner) const;
 
     /** This function writes out a FITS file named <tt>prefix_ds_tau.fits</tt> with an all-sky
         V-band optical depth map as seen from the coordinate origin. The map has 1600 x 800 pixels
-        and uses the Mollweide projection to project the complete sky onto a proportional 2:1 ellipse.
-        The values outside of the ellipse are set to zero. The direction \f$\bf{k}=(\theta,\phi)\f$
-        corresponding to the pixel in the map with horizontal and vertical indices \f$(i,j)\f$ can
-        be found through the inverse Mollweide projection, which in this case can be written as
-        follows:
-        \f[ x=(i+\frac{1}{2})/N_\mathrm{pixels,x} \f]
-        \f[ y=(j+\frac{1}{2})/N_\mathrm{pixels,y} \f]
-        \f[ \alpha=\arcsin(2y-1) \f]
-        \f[ \theta=\arccos(\frac{2\alpha+\sin 2\alpha}{\pi}) \f]
-        \f[ \phi=\frac{\pi(2x-1)}{\cos\alpha} \f]
-    */
+        and uses the Mollweide projection to project the complete sky onto a proportional 2:1
+        ellipse. The values outside of the ellipse are set to zero. The direction
+        \f$\bf{k}=(\theta,\phi)\f$ corresponding to the pixel in the map with horizontal and
+        vertical indices \f$(i,j)\f$ can be found through the inverse Mollweide projection, which
+        in this case can be written as follows: \f[ x=(i+\frac{1}{2})/N_\mathrm{pixels,x} \f] \f[
+        y=(j+\frac{1}{2})/N_\mathrm{pixels,y} \f] \f[ \alpha=\arcsin(2y-1) \f] \f[
+        \theta=\arccos(\frac{2\alpha+\sin 2\alpha}{\pi}) \f] \f[ \phi=\frac{\pi(2x-1)}{\cos\alpha}
+        \f] */
     void writedepthmap(ProcessAssigner* assigner) const;
 
     /** This function writes out a simple text file, named <tt>prefix_ds_quality.dat</tt>,
@@ -179,11 +177,11 @@ public:
     /** Returns the dust distribution. */
     Q_INVOKABLE DustDistribution* dustDistribution() const;
 
-    /** Sets the dust grid structure. */
-    Q_INVOKABLE void setDustGridStructure(DustGridStructure* value);
+    /** Sets the dust grid. */
+    Q_INVOKABLE void setDustGrid(DustGrid* value);
 
-    /** Returns the dust grid structure. See also grid(). */
-    Q_INVOKABLE DustGridStructure* dustGridStructure() const;
+    /** Returns the dust grid. See also grid(). */
+    Q_INVOKABLE DustGrid* dustGrid() const;
 
     /** Sets the number of random positions on which the density is sampled for each cell in the
         dust grid. The default value is 100 samples per cell. */
@@ -244,14 +242,15 @@ public:
     Q_INVOKABLE bool writeCellsCrossed() const;
 
     /** This function sets the process assigner for this dust system. The process assigner is the
-        object that assigns different dust cells to different processes, to parallelize the calculation
-        of the dust density in each cell. The ProcessAssigner class is the abstract class that
-        represents different types of assigners; different subclass implement the assignment in
-        different ways. While the most straightforward types of process assigners are used to assign
-        each dust cell to a different process to speed up the calculation, one ProcessAssigner subclass
-        lets all processes calculate the densities for all dust cells. This can be useful if the
-        calculation itsself, perhaps by using an efficient grid density interface, is not CPU expensive
-        but the subsequent communication between processes proves to be time consuming. */
+        object that assigns different dust cells to different processes, to parallelize the
+        calculation of the dust density in each cell. The ProcessAssigner class is the abstract
+        class that represents different types of assigners; different subclass implement the
+        assignment in different ways. While the most straightforward types of process assigners are
+        used to assign each dust cell to a different process to speed up the calculation, one
+        ProcessAssigner subclass lets all processes calculate the densities for all dust cells.
+        This can be useful if the calculation itsself, perhaps by using an efficient grid density
+        interface, is not CPU expensive but the subsequent communication between processes proves
+        to be time consuming. */
     Q_INVOKABLE void setAssigner(ProcessAssigner* value);
 
     /** Returns the process assigner for this dust system. */
@@ -284,11 +283,11 @@ public:
 
     /** This function returns the number of the dust cell that contains the position
         \f${\boldsymbol{r}}\f$. The function just passes the call to corresponding function of the
-        dust grid structure. */
+        dust grid. */
     int whichcell(Position bfr) const;
 
     /** This function returns a random location in the dust cell with cell number \f$m\f$. The
-        function just passes the call to corresponding function of the dust grid structure. */
+        function just passes the call to corresponding function of the dust grid. */
     Position randomPositionInCell(int m) const;
 
     /** This function returns the volume of the dust cell with cell number \f$m\f$. */
@@ -310,15 +309,13 @@ public:
         \f${\boldsymbol{r}}\f$ into the direction \f${\boldsymbol{k}}\f$, where \f$\ell\f$,
         \f${\boldsymbol{r}}\f$ and \f${\boldsymbol{k}}\f$ are obtained from the specified
         PhotonPackage object, and it stores the resulting details back into the photon package
-        object.
-
-        The hard work is done by calling the DustGridStructure::path() function which stores the
-        geometrical information on the path through the dust grid into the photon package: the cell
-        numbers \f$m\f$ of the cells that are crossed by the path, the pathlength \f$(\Delta
-        s)_m\f$ covered in that particular cell and a total path length counter \f$s_m\f$ that
-        gives the total path length covered between the starting point \f${\boldsymbol{r}}\f$ and
-        the boundary of the cell. With this information given, the calculation of the optical depth
-        is rather straightforward: it is calculated as \f[
+        object. The hard work is done by calling the DustGridStructure::path() function which
+        stores the geometrical information on the path through the dust grid into the photon
+        package: the cell numbers \f$m\f$ of the cells that are crossed by the path, the pathlength
+        \f$(\Delta s)_m\f$ covered in that particular cell and a total path length counter
+        \f$s_m\f$ that gives the total path length covered between the starting point
+        \f${\boldsymbol{r}}\f$ and the boundary of the cell. With this information given, the
+        calculation of the optical depth is rather straightforward: it is calculated as \f[
         \tau_{\ell,{\text{path}}}({\boldsymbol{r}},{\boldsymbol{k}}) = \sum_m (\Delta s)_m \sum_h
         \kappa_{\ell,h}^{\text{ext}}\, \rho_m, \f] where \f$\kappa_{\ell,h}^{\text{abs}}\f$ is the
         extinction coefficient corresponding to the \f$h\f$'th dust component at wavelength index
@@ -350,11 +347,10 @@ public:
         per path calculated through the grid. The first column on each line specifies a particular
         number of cells crossed; the second column indicates the number of paths that crossed this
         precise number of cells. In effect this provides a histogram for the distribution of the
-        path length (measured in the number of cells crossed).
-
-        This virtual function can be overridden in a subclass to write out additional results of
-        the simulation stored in the dust system. In that case, the overriding function must also
-        call the implementation in this base class. */
+        path length (measured in the number of cells crossed). This virtual function can be
+        overridden in a subclass to write out additional results of the simulation stored in the
+        dust system. In that case, the overriding function must also call the implementation in
+        this base class. */
     virtual void write() const;
 
     /** This pure virtual function must be implemented in each subclass to indicate whether dust
@@ -375,19 +371,19 @@ public:
     bool polarization() const;
 
 private:
-    /** This function is used to assemble the container that stores the densities of all dust cells for
-        each dust component. If multiprocessing is enabled, the calculation of these densities can be
-        performed in parallel by the different processes, depending on the type of ProcessAssigner that
-        is used for this dust system. When a ProcessAssigner subclass is used which distributes the
-        calculation of the dust cell densities amongst the different parallel processes, each process
-        contains only the densities for a particular set of dust cells (but for each dust component).
-        Therefore, this function uses the PeerToPeerCommunicator object to broadcast the densities of
-        the dust cells assigned to a particular process to all other processes and storing them in the
-        appropriate place in the container. This is implemented as an element-wise summation of this
-        container across all processes, where the density for a particular dust cell and dust component
-        will be added to a series of zeros, coming from the processes that were not assigned to that
-        dust cell. The end result will be an assembly of the densities, where each process stores the
-        density over the entire dust grid. */
+    /** This function is used to assemble the container that stores the densities of all dust cells
+        for each dust component. If multiprocessing is enabled, the calculation of these densities
+        can be performed in parallel by the different processes, depending on the type of
+        ProcessAssigner that is used for this dust system. When a ProcessAssigner subclass is used
+        which distributes the calculation of the dust cell densities amongst the different parallel
+        processes, each process contains only the densities for a particular set of dust cells (but
+        for each dust component). Therefore, this function uses the PeerToPeerCommunicator object
+        to broadcast the densities of the dust cells assigned to a particular process to all other
+        processes and storing them in the appropriate place in the container. This is implemented
+        as an element-wise summation of this container across all processes, where the density for
+        a particular dust cell and dust component will be added to a series of zeros, coming from
+        the processes that were not assigned to that dust cell. The end result will be an assembly
+        of the densities, where each process stores the density over the entire dust grid. */
     void assemble();
 
     //======================== Data Members ========================
@@ -395,7 +391,7 @@ private:
 protected:
     // data members to be set before setup is invoked
     DustDistribution* _dd;
-    DustGridStructure* _grid;
+    DustGrid* _grid;
     DustGridDensityInterface* _gdi;
     int _Nrandom;
     bool _writeConvergence;

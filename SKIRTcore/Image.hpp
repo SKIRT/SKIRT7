@@ -53,9 +53,18 @@ public:
     Image(const SimulationItem* item, const Array& data, int xsize, int ysize, int nframes,
           double xres, double yres, QString quantity, QString xyqty = "length");
 
+    /** This constructor creates an image based on an Array of double values and the header information
+        for the image. */
+    Image(const SimulationItem* item, const Array& data, int xsize, int ysize, int nframes,
+          double xres, double yres, double xc, double yc, QString quantity, QString xyqty = "length");
+
     /** This constructor creates an image with only a header. */
     Image(const SimulationItem* item, int xsize, int ysize, int nframes,
           double xres, double yres, QString quantity, QString xyqty = "length");
+
+    /** This constructor creates an image with only a header. */
+    Image(const SimulationItem* item, int xsize, int ysize, int nframes,
+          double xres, double yres, double xc, double yc, QString quantity, QString xyqty = "length");
 
     //====================== Initialization ======================
 
@@ -92,6 +101,12 @@ public:
 
     /** This function returns the resolution in the y direction. */
     double yres() const;
+
+    /** This function returns the center of the image in the x direction. */
+    double xc() const;
+
+    /** This function returns the center of the image in the y direction. */
+    double yc() const;
 
     /** This function returns the sum of all the pixel values in the image. */
     double sum() const;
@@ -188,6 +203,8 @@ protected:
     // the physical properties of the image
     double _incx;
     double _incy;
+    double _xc;
+    double _yc;
     QString _dataunits;
     QString _xyunits;
 };

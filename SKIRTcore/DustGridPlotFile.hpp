@@ -17,10 +17,10 @@ class Units;
 /** This class inherits from the TextOutFile class and is specifically used to write geometric
     information about a dust grid to a data file in a text format that can be easily plotted. There
     are two format variations for 2D and 3D information, respectively. The 2D format describes the
-    intersection of a dust grid structure with one of the coordinate planes. The 3D format fully
-    describes all or part of the dust cells in the grid. Each line in the file contains two (2D) or
-    three (3D) coordinates seperated by whitespace, or is empty. Consecutive nonempty lines
-    represent a sequence of "lineto" commands; an empty line marks a "moveto" command. */
+    intersection of a dust grid with one of the coordinate planes. The 3D format fully describes
+    all or part of the dust cells in the grid. Each line in the file contains two (2D) or three
+    (3D) coordinates seperated by whitespace, or is empty. Consecutive nonempty lines represent a
+    sequence of "lineto" commands; an empty line marks a "moveto" command. */
 class DustGridPlotFile : TextOutFile
 {
 public:
@@ -55,7 +55,8 @@ public:
         coordinates as a sequence \f[x_0,y_0,z_0,x_1,y_1,z_1,...,x_{n-1},y_{n-1},y_{n-1}\f] The
         second vector contains the vertex indices for all polyhedron faces. Each vertex index is a
         number in the range \f$[0,n-1]\f$. The indices for each face are preceded by the number of
-        vertices in the face. Assuming the polyhedron has \f$k\f$ faces, the index sequence looks like
+        vertices in the face. Assuming the polyhedron has \f$k\f$ faces, the index sequence looks
+        like
         \f[m_0,i_{0,0},i_{0,1},...,i_{0,m_0-1},...,m_k,i_{k-1,0},i_{k-1,1},...,i_{k-1,m_k-1}\f] */
     void writePolyhedron(const std::vector<double>& coords, const std::vector<int>& indices);
 };

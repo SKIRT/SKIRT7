@@ -16,21 +16,24 @@
 ////////////////////////////////////////////////////////////////////
 
 Image::Image()
-    : _units(0), _xsize(0), _ysize(0), _nframes(0), _incx(0), _incy(0)
+    : _units(0), _xsize(0), _ysize(0), _nframes(0),
+      _incx(0), _incy(0), _xc(0), _yc(0)
 {
 }
 
 ////////////////////////////////////////////////////////////////////
 
 Image::Image(int xsize, int ysize, int nframes)
-    : _units(0), _xsize(xsize), _ysize(ysize), _nframes(nframes), _incx(0), _incy(0)
+    : _units(0), _xsize(xsize), _ysize(ysize), _nframes(nframes),
+      _incx(0), _incy(0), _xc(0), _yc(0)
 {
 }
 
 ////////////////////////////////////////////////////////////////////
 
 Image::Image(const SimulationItem* item, QString filename)
-    : _units(0), _xsize(0), _ysize(0), _nframes(0), _incx(0), _incy(0)
+    : _units(0), _xsize(0), _ysize(0), _nframes(0),
+      _incx(0), _incy(0), _xc(0), _yc(0)
 {
     import(item, filename);
 }
@@ -38,7 +41,8 @@ Image::Image(const SimulationItem* item, QString filename)
 ////////////////////////////////////////////////////////////////////
 
 Image::Image(const SimulationItem* item, QString filename, QString directory)
-    : _units(0), _xsize(0), _ysize(0), _nframes(0), _incx(0), _incy(0)
+    : _units(0), _xsize(0), _ysize(0), _nframes(0),
+      _incx(0), _incy(0), _xc(0), _yc(0)
 {
     import(item, filename, directory);
 }
@@ -46,7 +50,8 @@ Image::Image(const SimulationItem* item, QString filename, QString directory)
 ////////////////////////////////////////////////////////////////////
 
 Image::Image(const SimulationItem* item, QString filename, double xres, double yres, QString quantity, QString xyqty)
-    : _units(0), _xsize(0), _ysize(0), _nframes(0), _incx(0), _incy(0)
+    : _units(0), _xsize(0), _ysize(0), _nframes(0),
+      _incx(0), _incy(0), _xc(0), _yc(0)
 {
     import(item, filename);
 
@@ -64,7 +69,8 @@ Image::Image(const SimulationItem* item, QString filename, double xres, double y
 
 Image::Image(const SimulationItem* item, QString filename, QString directory, double xres, double yres,
              QString quantity, QString xyqty)
-    : _units(0), _xsize(0), _ysize(0), _nframes(0), _incx(0), _incy(0)
+    : _units(0), _xsize(0), _ysize(0), _nframes(0),
+      _incx(0), _incy(0), _xc(0), _yc(0)
 {
     import(item, filename, directory);
 
@@ -82,7 +88,7 @@ Image::Image(const SimulationItem* item, QString filename, QString directory, do
 
 Image::Image(const Image& header, const Array& data)
     : _data(data), _units(0), _xsize(header.xsize()), _ysize(header.ysize()), _nframes(header.numframes()),
-      _incx(header.xres()), _incy(header.yres())
+      _incx(header.xres()), _incy(header.yres()), _xc(header.xc()), _yc(header.yc())
 {
 }
 
@@ -90,7 +96,8 @@ Image::Image(const Image& header, const Array& data)
 
 Image::Image(const SimulationItem* item, const Array& data, int xsize, int ysize, int nframes,
              double xres, double yres, QString quantity, QString xyqty)
-    : _data(data), _units(0), _xsize(xsize), _ysize(ysize), _nframes(nframes), _incx(0), _incy(0)
+    : _data(data), _units(0), _xsize(xsize), _ysize(ysize), _nframes(nframes),
+      _incx(0), _incy(0), _xc(0), _yc(0)
 {
     // Store a pointer to the units system
     _units = item->find<Units>();
@@ -106,7 +113,8 @@ Image::Image(const SimulationItem* item, const Array& data, int xsize, int ysize
 
 Image::Image(const SimulationItem* item, int xsize, int ysize, int nframes,
              double xres, double yres, QString quantity, QString xyqty)
-    : _units(0), _xsize(xsize), _ysize(ysize), _nframes(nframes), _incx(0), _incy(0)
+    : _units(0), _xsize(xsize), _ysize(ysize), _nframes(nframes),
+      _incx(0), _incy(0), _xc(0), _yc(0)
 {
     // Store a pointer to the units system
     _units = item->find<Units>();
@@ -114,6 +122,25 @@ Image::Image(const SimulationItem* item, int xsize, int ysize, int nframes,
     // Set physical image properties
     _incx = _units->out(xyqty, xres);
     _incy = _units->out(xyqty, yres);
+    _dataunits = _units->unit(quantity);
+    _xyunits = _units->unit(xyqty);
+}
+
+////////////////////////////////////////////////////////////////////
+
+Image::Image(const SimulationItem* item, int xsize, int ysize, int nframes,
+             double xres, double yres, double xc, double yc, QString quantity, QString xyqty)
+    : _units(0), _xsize(xsize), _ysize(ysize), _nframes(nframes),
+      _incx(0), _incy(0), _xc(0), _yc(0)
+{
+    // Store a pointer to the units system
+    _units = item->find<Units>();
+
+    // Set physical image properties
+    _incx = _units->out(xyqty, xres);
+    _incy = _units->out(xyqty, yres);
+    _xc = _units->out(xyqty, xc);
+    _yc = _units->out(xyqty, yc);
     _dataunits = _units->unit(quantity);
     _xyunits = _units->unit(xyqty);
 }
@@ -219,6 +246,20 @@ double Image::yres() const
 
 ////////////////////////////////////////////////////////////////////
 
+double Image::xc() const
+{
+    return _xc;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double Image::yc() const
+{
+    return _yc;
+}
+
+////////////////////////////////////////////////////////////////////
+
 double Image::sum() const
 {
     return _data.sum();
@@ -257,7 +298,7 @@ void Image::saveto(const SimulationItem* item, const Array& data, QString filena
     if (!comm || comm->isRoot())
     {
         log->info("Writing " + description + " to " + filepath + "...");
-        FITSInOut::write(filepath, data, _xsize, _ysize, _nframes, _incx, _incy, _dataunits, _xyunits);
+        FITSInOut::write(filepath, data, _xsize, _ysize, _nframes, _incx, _incy, _xc, _yc, _dataunits, _xyunits);
     }
 }
 

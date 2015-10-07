@@ -39,21 +39,17 @@ HEADERS += \
     AdaptiveMeshAmrvacFile.hpp \
     AdaptiveMeshAsciiFile.hpp \
     AdaptiveMeshDustDistribution.hpp \
-    AdaptiveMeshDustGridStructure.hpp \
     AdaptiveMeshFile.hpp \
     AdaptiveMeshGeometry.hpp \
     AdaptiveMeshInterface.hpp \
     AdaptiveMeshNode.hpp \
     AllCellsDustLib.hpp \
     AngularDistribution.hpp \
-    AxDustGridStructure.hpp \
     AxGeometry.hpp \
-    AxSpheDustGridStructure.hpp \
     BaryBinTreeNode.hpp \
     BaryOctTreeNode.hpp \
     Benchmark1DDustMix.hpp \
     Benchmark2DDustMix.hpp \
-    BinTreeDustGridStructure.hpp \
     BinTreeNode.hpp \
     BlackBodySED.hpp \
     BolLuminosityStellarCompNormalization.hpp \
@@ -62,7 +58,6 @@ HEADERS += \
     CompDustDistribution.hpp \
     ConfigurableDustMix.hpp \
     Console.hpp \
-    CubDustGridStructure.hpp \
     CubicSplineSmoothingKernel.hpp \
     Dim1DustLib.hpp \
     Dim2DustLib.hpp \
@@ -81,7 +76,6 @@ HEADERS += \
     DustGridDensityInterface.hpp \
     DustGridPath.hpp \
     DustGridPlotFile.hpp \
-    DustGridStructure.hpp \
     DustLib.hpp \
     DustMassDustCompNormalization.hpp \
     DustMassInBoxInterface.hpp \
@@ -115,9 +109,7 @@ HEADERS += \
     FullInstrument.hpp \
     GammaGeometry.hpp \
     GaussianGeometry.hpp \
-    GenDustGridStructure.hpp \
     GenGeometry.hpp \
-    GenLinCubDustGridStructure.hpp \
     Geometry.hpp \
     GrainComposition.hpp \
     GrainSizeDistribution.hpp \
@@ -130,15 +122,7 @@ HEADERS += \
     InstrumentSystem.hpp \
     InterstellarDustMix.hpp \
     KuruczSED.hpp \
-    LinAxDustGridStructure.hpp \
-    LinCubDustGridStructure.hpp \
-    LinSpheDustGridStructure.hpp \
     Log.hpp \
-    LogLinAxDustGridStructure.hpp \
-    LogLinAxSpheDustGridStructure.hpp \
-    LogNormalGrainSizeDistribution.hpp \
-    LogPowAxDustGridStructure.hpp \
-    LogSpheDustGridStructure.hpp \
     LogWavelengthGrid.hpp \
     LuminosityStellarCompNormalization.hpp \
     MGEGeometry.hpp \
@@ -156,7 +140,6 @@ HEADERS += \
     MultiGrainDustMix.hpp \
     NestedLogWavelengthGrid.hpp \
     NetzerAccretionDiskGeometry.hpp \
-    OctTreeDustGridStructure.hpp \
     OctTreeNode.hpp \
     OligoDustSystem.hpp \
     OligoMonteCarloSimulation.hpp \
@@ -169,7 +152,6 @@ HEADERS += \
     Parallel.hpp \
     ParallelFactory.hpp \
     ParallelTarget.hpp \
-    ParticleTreeDustGridStructure.hpp \
     PegaseSED.hpp \
     PerspectiveInstrument.hpp \
     PhotonPackage.hpp \
@@ -177,9 +159,6 @@ HEADERS += \
     PlummerGeometry.hpp \
     PointGeometry.hpp \
     Position.hpp \
-    PowAxDustGridStructure.hpp \
-    PowCubDustGridStructure.hpp \
-    PowSpheDustGridStructure.hpp \
     PowerLawGrainSizeDistribution.hpp \
     PseudoSersicGeometry.hpp \
     QuasarSED.hpp \
@@ -203,7 +182,6 @@ HEADERS += \
     SingleFrameInstrument.hpp \
     SmoothingKernel.hpp \
     SpecialFunctions.hpp \
-    SpheDustGridStructure.hpp \
     SpheGeometry.hpp \
     StarburstSED.hpp \
     StellarComp.hpp \
@@ -217,7 +195,6 @@ HEADERS += \
     TimeLogger.hpp \
     TorusGeometry.hpp \
     TransientDustEmissivity.hpp \
-    TreeDustGridStructure.hpp \
     TreeNode.hpp \
     TreeNodeBoxDensityCalculator.hpp \
     TreeNodeDensityCalculator.hpp \
@@ -231,12 +208,10 @@ HEADERS += \
     TrustMeanDustMix.hpp \
     TrustNeutralPAHGrainComposition.hpp \
     TrustSilicateGrainComposition.hpp \
-    TwoPhaseDustGridStructure.hpp \
     UniformCuboidGeometry.hpp \
     UniformSmoothingKernel.hpp \
     Units.hpp \
     VoronoiDustDistribution.hpp \
-    VoronoiDustGridStructure.hpp \
     VoronoiGeometry.hpp \
     VoronoiMesh.hpp \
     VoronoiMeshAsciiFile.hpp \
@@ -301,26 +276,42 @@ HEADERS += \
     TextInFile.hpp \
     SEDFamily.hpp \
     CylindricalCavityGeometryDecorator.hpp \
-    ConicalShellGeometry.hpp
+    Mesh.hpp \
+    LinMesh.hpp \
+    PowMesh.hpp \
+    SymPowMesh.hpp \
+    DustGrid.hpp \
+    Sphere1DDustGrid.hpp \
+    SphereDustGrid.hpp \
+    BoxDustGrid.hpp \
+    CartesianDustGrid.hpp \
+    TreeDustGrid.hpp \
+    OctTreeDustGrid.hpp \
+    BinTreeDustGrid.hpp \
+    VoronoiDustGrid.hpp \
+    ParticleTreeDustGrid.hpp \
+    AdaptiveMeshDustGrid.hpp \
+    Cylinder2DDustGrid.hpp \
+    CylinderDustGrid.hpp \
+    Sphere2DDustGrid.hpp \
+    ConicalShellGeometry.hpp \
+    TwoPhaseDustGrid.hpp \
+    LogNormalGrainSizeDistribution.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
     AdaptiveMeshAmrvacFile.cpp \
     AdaptiveMeshAsciiFile.cpp \
     AdaptiveMeshDustDistribution.cpp \
-    AdaptiveMeshDustGridStructure.cpp \
     AdaptiveMeshFile.cpp \
     AdaptiveMeshGeometry.cpp \
     AdaptiveMeshNode.cpp \
     AllCellsDustLib.cpp \
-    AxDustGridStructure.cpp \
     AxGeometry.cpp \
-    AxSpheDustGridStructure.cpp \
     BaryBinTreeNode.cpp \
     BaryOctTreeNode.cpp \
     Benchmark1DDustMix.cpp \
     Benchmark2DDustMix.cpp \
-    BinTreeDustGridStructure.cpp \
     BinTreeNode.cpp \
     BlackBodySED.cpp \
     BolLuminosityStellarCompNormalization.cpp \
@@ -329,7 +320,6 @@ SOURCES += \
     CompDustDistribution.cpp \
     ConfigurableDustMix.cpp \
     Console.cpp \
-    CubDustGridStructure.cpp \
     CubicSplineSmoothingKernel.cpp \
     Dim1DustLib.cpp \
     Dim2DustLib.cpp \
@@ -347,7 +337,6 @@ SOURCES += \
     DustEmissivity.cpp \
     DustGridPath.cpp \
     DustGridPlotFile.cpp \
-    DustGridStructure.cpp \
     DustLib.cpp \
     DustMassDustCompNormalization.cpp \
     DustMix.cpp \
@@ -378,9 +367,7 @@ SOURCES += \
     FullInstrument.cpp \
     GammaGeometry.cpp \
     GaussianGeometry.cpp \
-    GenDustGridStructure.cpp \
     GenGeometry.cpp \
-    GenLinCubDustGridStructure.cpp \
     Geometry.cpp \
     GrainComposition.cpp \
     GrainSizeDistribution.cpp \
@@ -392,15 +379,8 @@ SOURCES += \
     InstrumentSystem.cpp \
     InterstellarDustMix.cpp \
     KuruczSED.cpp \
-    LinAxDustGridStructure.cpp \
-    LinCubDustGridStructure.cpp \
-    LinSpheDustGridStructure.cpp \
     Log.cpp \
-    LogLinAxDustGridStructure.cpp \
-    LogLinAxSpheDustGridStructure.cpp \
     LogNormalGrainSizeDistribution.cpp \
-    LogPowAxDustGridStructure.cpp \
-    LogSpheDustGridStructure.cpp \
     LogWavelengthGrid.cpp \
     LuminosityStellarCompNormalization.cpp \
     MGEGeometry.cpp \
@@ -418,7 +398,6 @@ SOURCES += \
     MultiGrainDustMix.cpp \
     NestedLogWavelengthGrid.cpp \
     NetzerAccretionDiskGeometry.cpp \
-    OctTreeDustGridStructure.cpp \
     OctTreeNode.cpp \
     OligoDustSystem.cpp \
     OligoMonteCarloSimulation.cpp \
@@ -431,7 +410,6 @@ SOURCES += \
     Parallel.cpp \
     ParallelFactory.cpp \
     ParallelTarget.cpp \
-    ParticleTreeDustGridStructure.cpp \
     PegaseSED.cpp \
     PerspectiveInstrument.cpp \
     PhotonPackage.cpp \
@@ -439,9 +417,6 @@ SOURCES += \
     PlummerGeometry.cpp \
     PointGeometry.cpp \
     Position.cpp \
-    PowAxDustGridStructure.cpp \
-    PowCubDustGridStructure.cpp \
-    PowSpheDustGridStructure.cpp \
     PowerLawGrainSizeDistribution.cpp \
     PseudoSersicGeometry.cpp \
     QuasarSED.cpp \
@@ -465,7 +440,6 @@ SOURCES += \
     SingleFrameInstrument.cpp \
     SmoothingKernel.cpp \
     SpecialFunctions.cpp \
-    SpheDustGridStructure.cpp \
     SpheGeometry.cpp \
     StarburstSED.cpp \
     StellarComp.cpp \
@@ -479,7 +453,6 @@ SOURCES += \
     TimeLogger.cpp \
     TorusGeometry.cpp \
     TransientDustEmissivity.cpp \
-    TreeDustGridStructure.cpp \
     TreeNode.cpp \
     TreeNodeBoxDensityCalculator.cpp \
     TreeNodeSampleDensityCalculator.cpp \
@@ -492,12 +465,10 @@ SOURCES += \
     TrustMeanDustMix.cpp \
     TrustNeutralPAHGrainComposition.cpp \
     TrustSilicateGrainComposition.cpp \
-    TwoPhaseDustGridStructure.cpp \
     UniformCuboidGeometry.cpp \
     UniformSmoothingKernel.cpp \
     Units.cpp \
     VoronoiDustDistribution.cpp \
-    VoronoiDustGridStructure.cpp \
     VoronoiGeometry.cpp \
     VoronoiMesh.cpp \
     VoronoiMeshAsciiFile.cpp \
@@ -561,4 +532,23 @@ SOURCES += \
     TextInFile.cpp \
     SEDFamily.cpp \
     CylindricalCavityGeometryDecorator.cpp \
-    ConicalShellGeometry.cpp
+    Mesh.cpp \
+    LinMesh.cpp \
+    PowMesh.cpp \
+    SymPowMesh.cpp \
+    DustGrid.cpp \
+    Sphere1DDustGrid.cpp \
+    SphereDustGrid.cpp \
+    BoxDustGrid.cpp \
+    CartesianDustGrid.cpp \
+    TreeDustGrid.cpp \
+    OctTreeDustGrid.cpp \
+    BinTreeDustGrid.cpp \
+    VoronoiDustGrid.cpp \
+    ParticleTreeDustGrid.cpp \
+    AdaptiveMeshDustGrid.cpp \
+    Cylinder2DDustGrid.cpp \
+    CylinderDustGrid.cpp \
+    Sphere2DDustGrid.cpp \
+    ConicalShellGeometry.cpp \
+    TwoPhaseDustGrid.cpp

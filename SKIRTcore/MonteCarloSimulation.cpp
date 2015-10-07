@@ -4,7 +4,6 @@
 ///////////////////////////////////////////////////////////////// */
 
 #include "DustDistribution.hpp"
-#include "DustGridStructure.hpp"
 #include "DustMix.hpp"
 #include "DustSystem.hpp"
 #include "FatalError.hpp"

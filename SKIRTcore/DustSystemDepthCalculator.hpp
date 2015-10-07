@@ -11,7 +11,8 @@
 #include "DustGridPath.hpp"
 #include "ParallelTarget.hpp"
 class DustDistribution;
-class DustGridStructure;
+// class DustGridStructure;
+class DustGrid;
 class DustSystem;
 class Random;
 
@@ -60,7 +61,8 @@ private:
     // input data; initialized in constructor
     const DustSystem* _ds;
     const DustDistribution* _dd;
-    const DustGridStructure* _grid;
+    // const DustGridStructure* _grid;
+    const DustGrid* _grid;
     Random* _random;
     int _numBodies, _numSamplesPerBody, _numSamplesPerPath;
     Box _extent;
