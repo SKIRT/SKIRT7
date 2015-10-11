@@ -17,7 +17,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////
 
 SingleFrameInstrument::SingleFrameInstrument()
-    : _Nxp(0), _xpmax(0), _Nyp(0), _ypmax(0)
+    : _Nxp(0), _fovxp(0), _xpc(0), _Nyp(0), _fovyp(0), _ypc(0)
 {
 }
 
@@ -29,14 +29,16 @@ void SingleFrameInstrument::setupSelfBefore()
 
     // verify attribute values
     if (_Nxp <= 0 || _Nyp <= 0) throw FATALERROR("Number of pixels was not set");
-    if (_xpmax <= 0 || _ypmax <= 0) throw FATALERROR("Maximum extent was not set");
+    if (_fovxp <= 0 || _fovyp <= 0) throw FATALERROR("Field of view was not set");
 
     // calculate derived values
     _Nframep = _Nxp * _Nyp;
-    _xpres = 2.0*_xpmax/(_Nxp-1);
-    _ypres = 2.0*_ypmax/(_Nyp-1);
-    _xpmin = -_xpmax;
-    _ypmin = -_ypmax;
+    _xpmin = _xpc - 0.5*_fovxp;
+    _xpmax = _xpc + 0.5*_fovxp;
+    _xpres = _fovxp/_Nxp;
+    _ypmin = _ypc - 0.5*_fovyp;
+    _ypmax = _ypc + 0.5*_fovyp;
+    _ypres = _fovyp/_Nyp;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -55,16 +57,30 @@ int SingleFrameInstrument::pixelsX() const
 
 ////////////////////////////////////////////////////////////////////
 
-void SingleFrameInstrument::setExtentX(double value)
+void SingleFrameInstrument::setFieldOfViewX(double value)
 {
-    _xpmax = value;
+    _fovxp = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double SingleFrameInstrument::extentX() const
+double SingleFrameInstrument::fieldOfViewX() const
 {
-    return _xpmax;
+    return _fovxp;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void SingleFrameInstrument::setCenterX(double value)
+{
+    _xpc = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double SingleFrameInstrument::centerX() const
+{
+    return _xpc;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -83,16 +99,30 @@ int SingleFrameInstrument::pixelsY() const
 
 ////////////////////////////////////////////////////////////////////
 
-void SingleFrameInstrument::setExtentY(double value)
+void SingleFrameInstrument::setFieldOfViewY(double value)
 {
-    _ypmax = value;
+    _fovyp = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double SingleFrameInstrument::extentY() const
+double SingleFrameInstrument::fieldOfViewY() const
 {
-    return _ypmax;
+    return _fovyp;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void SingleFrameInstrument::setCenterY(double value)
+{
+    _ypc = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double SingleFrameInstrument::centerY() const
+{
+    return _ypc;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -110,10 +140,10 @@ int SingleFrameInstrument::pixelondetector(const PhotonPackage* pp) const
     double yp = _sinpa * xpp + _cospa * ypp;
 
     // scale and round to pixel index
-    int i = static_cast<int>(floor(((xp-_xpmin)/_xpres)+0.5));
-    int j = static_cast<int>(floor(((yp-_ypmin)/_ypres)+0.5));
-    if (i<0 || i>=_Nxp || j<0 || j>=_Nyp) return -1;
-    else return i + _Nxp*j;
+    if (xp<_xpmin || xp>=_xpmax || yp<_ypmin || yp >= _ypmax) return -1;
+    int i = static_cast<int>(floor((xp-_xpmin)/_xpres));
+    int j = static_cast<int>(floor((yp-_ypmin)/_ypres));
+    return i + _Nxp*j;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -189,7 +219,7 @@ void SingleFrameInstrument::calibrateAndWriteDataCubes(QList< Array*> farrays, Q
             QString description = fnames[q] + " flux";
 
             // Create an image and save it
-            Image image(this, _Nxp, _Nyp, Nlambda, _xpres, _ypres, "surfacebrightness");
+            Image image(this, _Nxp, _Nyp, Nlambda, _xpres, _ypres, _xpc, _ypc, "surfacebrightness");
             image.saveto(this, *(farrays[q]), filename, description);
         }
     }

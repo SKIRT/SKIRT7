@@ -13,39 +13,49 @@ class MultiFrameInstrument;
 
 ////////////////////////////////////////////////////////////////////
 
-/** The InstrumentFrame class implements a single instrument frame with a specific extent and pixel
-    resolution. It is used by the MultiFrameInstrument class to support a different frame for each
-    wavelength. The position of the instrument frame is determined by the properties of its parent
-    MultiFrameInstrument object (in fact, by the angle attributes of its DistantInstrument base
-    class). It is assumed that the distance to the system is sufficiently large so that parallel
-    projection can be used. Refer to the SingleInstrument class for more information on the extent
-    and pixel size attributes offered by this class. */
+/** The InstrumentFrame class implements a single instrument frame with a number of pixels,
+    field-of-view and center. It is used by the MultiFrameInstrument class to support a different
+    frame for each wavelength. The position of the instrument frame is determined by the properties
+    of its parent MultiFrameInstrument object (in fact, by the angle attributes of its
+    DistantInstrument base class). It is assumed that the distance to the system is sufficiently
+    large so that parallel projection can be used. Refer to the SingleInstrument class for more
+    information on the extent and pixel size attributes offered by this class. */
 class InstrumentFrame : public SimulationItem
 {
     Q_OBJECT
     Q_CLASSINFO("Title", "a frame in the multi-frame instrument")
 
+    Q_CLASSINFO("Property", "fieldOfViewX")
+    Q_CLASSINFO("Title", "the total field of view in the horizontal direction")
+    Q_CLASSINFO("Quantity", "length")
+    Q_CLASSINFO("MinValue", "0")
+
     Q_CLASSINFO("Property", "pixelsX")
     Q_CLASSINFO("Title", "the number of pixels in the horizontal direction")
-    Q_CLASSINFO("MinValue", "25")
+    Q_CLASSINFO("MinValue", "1")
     Q_CLASSINFO("MaxValue", "10000")
     Q_CLASSINFO("Default", "250")
 
-    Q_CLASSINFO("Property", "extentX")
-    Q_CLASSINFO("Title", "the maximal horizontal extent")
+    Q_CLASSINFO("Property", "centerX")
+    Q_CLASSINFO("Title", "the center of the frame in the horizontal direction")
+    Q_CLASSINFO("Quantity", "length")
+    Q_CLASSINFO("Default", "0")
+
+    Q_CLASSINFO("Property", "fieldOfViewY")
+    Q_CLASSINFO("Title", "the total field of view in the vertical direction")
     Q_CLASSINFO("Quantity", "length")
     Q_CLASSINFO("MinValue", "0")
 
     Q_CLASSINFO("Property", "pixelsY")
     Q_CLASSINFO("Title", "the number of pixels in the vertical direction")
-    Q_CLASSINFO("MinValue", "25")
+    Q_CLASSINFO("MinValue", "1")
     Q_CLASSINFO("MaxValue", "10000")
     Q_CLASSINFO("Default", "250")
 
-    Q_CLASSINFO("Property", "extentY")
-    Q_CLASSINFO("Title", "the maximal vertical extent")
+    Q_CLASSINFO("Property", "centerY")
+    Q_CLASSINFO("Title", "the center of the frame in the vertical direction")
     Q_CLASSINFO("Quantity", "length")
-    Q_CLASSINFO("MinValue", "0")
+    Q_CLASSINFO("Default", "0")
 
     //============= Construction - Setup - Destruction =============
 
@@ -61,35 +71,41 @@ protected:
     //======== Setters & Getters for Discoverable Attributes =======
 
 public:
-    /** Sets the number of pixels \f$N_x\f$ in the instrument frame in the horizontal direction. */
+    /** Sets the number of pixels in the horizontal direction. */
     Q_INVOKABLE void setPixelsX(int value);
 
-    /** Returns the number of pixels \f$N_x\f$ in the instrument frame in the horizontal direction.
-        */
+    /** Returns the number of pixels in the horizontal direction. */
     Q_INVOKABLE int pixelsX() const;
 
-    /** Sets the maximum extent \f$x_{\text{max}}\f$ for the instrument frame in the horizontal
-        direction. */
-    Q_INVOKABLE void setExtentX(double value);
+    /** Sets the total field of view in the horizontal direction. */
+    Q_INVOKABLE void setFieldOfViewX(double value);
 
-    /** Returns the maximum extent \f$x_{\text{max}}\f$ for the instrument frame in the horizontal
-        direction. */
-    Q_INVOKABLE double extentX() const;
+    /** Returns the total field of view in the horizontal direction. */
+    Q_INVOKABLE double fieldOfViewX() const;
 
-    /** Sets the number of pixels \f$N_y\f$ in the instrument frame in the vertical direction. */
+    /** Sets the center of the frame in the horizontal direction. */
+    Q_INVOKABLE void setCenterX(double value);
+
+    /** Returns the center of the frame in the horizontal direction. */
+    Q_INVOKABLE double centerX() const;
+
+   /** Sets the number of pixels in the vertical direction. */
     Q_INVOKABLE void setPixelsY(int value);
 
-    /** Returns the number of pixels \f$N_y\f$ in the instrument frame in the vertical direction.
-        */
+    /** Returns the number of pixels in the vertical direction. */
     Q_INVOKABLE int pixelsY() const;
 
-    /** Sets the maximum extent \f$y_{\text{max}}\f$ for the instrument frame in the vertical
-        direction. */
-    Q_INVOKABLE void setExtentY(double value);
+    /** Sets the total field of view in the vertical direction. */
+    Q_INVOKABLE void setFieldOfViewY(double value);
 
-    /** Returns the maximum extent \f$y_{\text{max}}\f$ for the instrument frame in the vertical
-        direction. */
-    Q_INVOKABLE double extentY() const;
+    /** Returns the total field of view in the vertical direction. */
+    Q_INVOKABLE double fieldOfViewY() const;
+
+    /** Sets the center of the frame in the vertical direction. */
+    Q_INVOKABLE void setCenterY(double value);
+
+    /** Returns the center of the frame in the vertical direction. */
+    Q_INVOKABLE double centerY() const;
 
     //======================== Other Functions =======================
 
@@ -127,15 +143,20 @@ private:
 private:
     // discoverable attributes of this frame
     int _Nxp;
-    double _xpmax;
+    double _fovxp;
+    double _xpc;
     int _Nyp;
-    double _ypmax;
+    double _fovyp;
+    double _ypc;
 
-    // data members derived from discoverable attributes during setup
-    double _xpres;
-    double _ypres;
+    // data members derived from the published attributes during setup
+    size_t _Nframep; // number of pixels in a frame; size_t so that array size and index calculations happen in 64 bit
     double _xpmin;
+    double _xpmax;
+    double _xpres;
     double _ypmin;
+    double _ypmax;
+    double _ypres;
 
     // data members copied from the parent multi-frame instrument during setup
     MultiFrameInstrument* _instrument;

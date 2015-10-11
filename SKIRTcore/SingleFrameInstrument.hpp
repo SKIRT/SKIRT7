@@ -10,54 +10,59 @@
 
 ////////////////////////////////////////////////////////////////////
 
-/** SingleFrameInstrument is an abstract class representing an integral field spectrograph,
-    i.e. a three-dimensional detector with two spatial and one wavelength dimension. Depending on
-    the subclass, this 3D detector can be subdivided into different subdetectors.
-
-    In every dimension, the detector is specified by a fixed grid. The wavelength grid is determined
-    by the simulation's wavelength grid; the resolution and the extent of the grids in the spatial
-    dimensions can be set separately. The spatial grid consists of a linear \f$(x_i,y_j)\f$ grid
-    with \f$x\f$ ranging from \f$x_0=-x_{\text{max}}\f$ to \f$x_{N_x-1}=x_{\text{max}}\f$ and
-    \f$y\f$ ranging from \f$y_0=-y_{\text{max}}\f$ to \f$y_{N_y-1}=y_{\text{max}}\f$. These points
-    are to be considered as the centres of pixels, each with a size \f$\Delta x \times \Delta y\f$
-    with \f[ \begin{split} \Delta x &= \frac{2\,x_{\text{max}}}{N_x-1} \\ \Delta y &=
-    \frac{2\,y_{\text{max}}}{N_y-1} \end{split} \f] This accounts also for the outermost pixels.
-    For example the first pixel has its centre at \f$(x_0,y_0) = (-x_{\text{max}},-y_{\text{max}})
-    \f$ and its bottom-left corner is at \f$ (x,y) = ( -x_{\text{max}}-\tfrac12\,\Delta
-    x,-y_{\text{max}}-\tfrac12\,\Delta y ) \f$. The total field of view of the detectors is hence
-    not \f$2x_{\text{max}} \times 2y_{\text{max}}\f$ but \f$ (2x_{\text{max}}+\Delta x) \times
-    (2y_{\text{max}}+\Delta y) \f$.
-
-    The position of the observing instrument is determined by the properties of the DistantInstrument
-    base class. It is assumed that the distance to the system is sufficiently large so that parallel
-    projection can be used.
-*/
+/** SingleFrameInstrument is an abstract class representing an integral field spectrograph, i.e. a
+    three-dimensional detector with two spatial and one wavelength dimension. Depending on the
+    subclass, this 3D detector can be subdivided into different subdetectors. In every dimension,
+    the detector is specified by a fixed grid. The wavelength grid is determined by the
+    simulation's wavelength grid; the field-of-view, number of pixels and image centre in the
+    spatial dimensions can be set separately. The spatial grid consists of a linear grid of \f$N_x
+    \times N_y\f$ rectangular pixels. Each pixel covers a surface \f$\Delta x \times \Delta y\f$
+    with \f[ \Delta x = \frac{{\text{FOV}}_x}{N_x}, \Delta_y = \frac{{\text{FOV}}_y}{N_y} \f] where
+    \f${\text{FOV}}_x\f$ and \f${\text{FOV}}_y\f$ are obviously the field-of-view in the X and Y
+    direction, respectively. If we denote the centre of the image as \f$(x_c,y_c)\f$, we have \f[
+    \begin{split} x_{\text{min}} &= x_c - \tfrac12\,{\text{FOV}}_x \\ x_{\text{max}} &= x_c +
+    \tfrac12\,{\text{FOV}}_x \end{split} \f] and similar for the Y direction. The first pixel of
+    the grid corresponds to \f[ \begin{split} x_{\text{min}} \leq &x < x_{\text{min}} + \Delta x \\
+    y_{\text{min}} \leq &y < y_{\text{min}} + \Delta y \end{split} \f] The position of the
+    observing instrument is determined by the properties of the DistantInstrument base class. It is
+    assumed that the distance to the system is sufficiently large so that parallel projection can
+    be used. */
 class SingleFrameInstrument : public DistantInstrument
 {
     Q_OBJECT
     Q_CLASSINFO("Title", "a single-frame instrument")
 
+    Q_CLASSINFO("Property", "fieldOfViewX")
+    Q_CLASSINFO("Title", "the total field of view in the horizontal direction")
+    Q_CLASSINFO("Quantity", "length")
+    Q_CLASSINFO("MinValue", "0")
+
     Q_CLASSINFO("Property", "pixelsX")
     Q_CLASSINFO("Title", "the number of pixels in the horizontal direction")
-    Q_CLASSINFO("MinValue", "25")
+    Q_CLASSINFO("MinValue", "1")
     Q_CLASSINFO("MaxValue", "10000")
     Q_CLASSINFO("Default", "250")
 
-    Q_CLASSINFO("Property", "extentX")
-    Q_CLASSINFO("Title", "the maximal horizontal extent")
+    Q_CLASSINFO("Property", "centerX")
+    Q_CLASSINFO("Title", "the center of the frame in the horizontal direction")
+    Q_CLASSINFO("Quantity", "length")
+    Q_CLASSINFO("Default", "0")
+
+    Q_CLASSINFO("Property", "fieldOfViewY")
+    Q_CLASSINFO("Title", "the total field of view in the vertical direction")
     Q_CLASSINFO("Quantity", "length")
     Q_CLASSINFO("MinValue", "0")
 
     Q_CLASSINFO("Property", "pixelsY")
     Q_CLASSINFO("Title", "the number of pixels in the vertical direction")
-    Q_CLASSINFO("MinValue", "25")
+    Q_CLASSINFO("MinValue", "1")
     Q_CLASSINFO("MaxValue", "10000")
     Q_CLASSINFO("Default", "250")
 
-    Q_CLASSINFO("Property", "extentY")
-    Q_CLASSINFO("Title", "the maximal vertical extent")
+    Q_CLASSINFO("Property", "centerY")
+    Q_CLASSINFO("Title", "the center of the frame in the vertical direction")
     Q_CLASSINFO("Quantity", "length")
-    Q_CLASSINFO("MinValue", "0")
+    Q_CLASSINFO("Default", "0")
 
     //============= Construction - Setup - Destruction =============
 
@@ -72,33 +77,41 @@ protected:
     //======== Setters & Getters for Discoverable Attributes =======
 
 public:
-    /** Sets the number of pixels \f$N_x\f$ in the instrument in the horizontal direction. */
+    /** Sets the number of pixels in the horizontal direction. */
     Q_INVOKABLE void setPixelsX(int value);
 
-    /** Returns the number of pixels \f$N_x\f$ in the instrument in the horizontal direction. */
+    /** Returns the number of pixels in the horizontal direction. */
     Q_INVOKABLE int pixelsX() const;
 
-    /** Sets the maximum extent \f$x_{\text{max}}\f$ for the instrument in the horizontal
-        direction. */
-    Q_INVOKABLE void setExtentX(double value);
+    /** Sets the total field of view in the horizontal direction. */
+    Q_INVOKABLE void setFieldOfViewX(double value);
 
-    /** Returns the maximum extent \f$x_{\text{max}}\f$ for the instrument in the horizontal
-        direction. */
-    Q_INVOKABLE double extentX() const;
+    /** Returns the total field of view in the horizontal direction. */
+    Q_INVOKABLE double fieldOfViewX() const;
 
-    /** Sets the number of pixels \f$N_y\f$ in the instrument in the vertical direction. */
+    /** Sets the center of the frame in the horizontal direction. */
+    Q_INVOKABLE void setCenterX(double value);
+
+    /** Returns the center of the frame in the horizontal direction. */
+    Q_INVOKABLE double centerX() const;
+
+   /** Sets the number of pixels in the vertical direction. */
     Q_INVOKABLE void setPixelsY(int value);
 
-    /** Returns the number of pixels \f$N_y\f$ in the instrument in the vertical direction. */
+    /** Returns the number of pixels in the vertical direction. */
     Q_INVOKABLE int pixelsY() const;
 
-    /** Sets the maximum extent \f$y_{\text{max}}\f$ for the instrument in the vertical direction.
-        */
-    Q_INVOKABLE void setExtentY(double value);
+    /** Sets the total field of view in the vertical direction. */
+    Q_INVOKABLE void setFieldOfViewY(double value);
 
-    /** Returns the maximum extent \f$y_{\text{max}}\f$ for the instrument in the vertical
-        direction. */
-    Q_INVOKABLE double extentY() const;
+    /** Returns the total field of view in the vertical direction. */
+    Q_INVOKABLE double fieldOfViewY() const;
+
+    /** Sets the center of the frame in the vertical direction. */
+    Q_INVOKABLE void setCenterY(double value);
+
+    /** Returns the center of the frame in the vertical direction. */
+    Q_INVOKABLE double centerY() const;
 
     //======================== Other Functions =======================
 
@@ -122,14 +135,13 @@ protected:
         about the new Z-axis over the position angle \f$\omega\f$ reduced by 90 degrees (this
         constant transformation over -90 degrees is represented above as a separate matrix). The 90
         degree correction on the position angle is introduced so that it would be more natural to
-        specify this angle; in most cases it can be left to its default value of 0.
-
-        Given these impact coordinates, the pixel indices \f$i\f$ and \f$j\f$ are determined as \f[
-        \begin{split} i &= \frac{[x_{\text{p}}-x_{\text{max}}]}{\Delta x} \\ j &=
-        \frac{[y_{\text{p}}-y_{\text{max}}]}{\Delta y} \end{split} \f] where \f$\Delta x\f$ and
-        \f$\Delta y\f$ are the resolution of the detector array and \f$[z]\f$ is an operator
-        rounding to the nearest integer. The spatial pixel number \f$l\f$ is then determined as
-        \f$l=i+j\,N_x\f$, asuming \f$i\f$ and \f$j\f$ are indeed within the detector range. */
+        specify this angle; in most cases it can be left to its default value of 0. Given these
+        impact coordinates, the pixel indices \f$i\f$ and \f$j\f$ are determined as \f[
+        \begin{split} i &= \frac{{\text{floor}}({x_{\text{p}}-x_{\text{min}})}{\Delta x} \\ j &=
+        \frac{{\text{floor}}(y_{\text{p}}-y_{\text{max}})}{\Delta y} \end{split} \f] where
+        \f${\text{floor}}(z)\f$ is an operator that returns the largest integer that is not greater
+        than \f$y\f$. The spatial pixel number \f$l\f$ is then determined as \f$l=i+j\,N_x\f$,
+        asuming \f$i\f$ and \f$j\f$ are indeed within the detector range. */
     int pixelondetector(const PhotonPackage* pp) const;
 
     /** This convenience function calibrates one or more luminosity data cubes gathered by a
@@ -151,16 +163,20 @@ protected:
 protected:
     // discoverable attributes of a generic instrument
     int _Nxp;
-    double _xpmax;
+    double _fovxp;
+    double _xpc;
     int _Nyp;
-    double _ypmax;
+    double _fovyp;
+    double _ypc;
 
     // data members derived from the published attributes during setup
     size_t _Nframep; // number of pixels in a frame; size_t so that array size and index calculations happen in 64 bit
-    double _xpres;
-    double _ypres;
     double _xpmin;
+    double _xpmax;
+    double _xpres;
     double _ypmin;
+    double _ypmax;
+    double _ypres;
 };
 
 ////////////////////////////////////////////////////////////////////
