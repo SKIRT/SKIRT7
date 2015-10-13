@@ -11,18 +11,19 @@
 
 //////////////////////////////////////////////////////////////////////
 
-/** The LyaStellarComp class is a subclass of the GeometricStellarComp class and represents a Lyα
-    emitting component that uses a built-in geometry in a Lyα simulation. The velocity spectrum of
-    the emission can be chosen to be either line emission at a specified velocity, or a flat
-    continuum spectrum over the entire velocity range. */
+/** The LyaStellarComp class is a subclass of the GeometricStellarComp class and represents a
+    component that radiates the primary emission that can be used in a Lyα simulation. The geometry
+    (i.e. the spatial location of the sources) and the spectral distribution (the amount of
+    radiation emitted as a function of the velocity or wavelength) of the component can be set
+    independently. */
 class LyaStellarComp : public GeometricStellarComp
 {
     Q_OBJECT
-    Q_CLASSINFO("Title", "a Lyα component with a built-in geometry")
+    Q_CLASSINFO("Title", "a component with a built-in geometry (to be used in a Lyα simulation)")
     Q_CLASSINFO("AllowedIf", "LyaMonteCarloSimulation")
 
     Q_CLASSINFO("Property", "spectrum")
-    Q_CLASSINFO("Title", "the emission spectrum of the component")
+    Q_CLASSINFO("Title", "the emission spectrum")
 
     //============= Construction - Setup - Destruction =============
 
