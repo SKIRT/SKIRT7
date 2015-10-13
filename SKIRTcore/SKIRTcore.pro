@@ -296,7 +296,14 @@ HEADERS += \
     ZubkoDustMix.hpp \
     ZubkoSilicateGrainSizeDistribution.hpp \
     ZubkoGraphiteGrainSizeDistribution.hpp \
-    ZubkoPAHGrainSizeDistribution.hpp
+    ZubkoPAHGrainSizeDistribution.hpp \
+    LyaMonteCarloSimulation.hpp \
+    LyaWavelengthGrid.hpp \
+    LyaDustSystem.hpp \
+    LyaStellarComp.hpp \
+    LyaSpectrum.hpp \
+    ContinuumLyaSpectrum.hpp \
+    LineLyaSpectrum.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -551,4 +558,11 @@ SOURCES += \
     ZubkoDustMix.cpp \
     ZubkoSilicateGrainSizeDistribution.cpp \
     ZubkoGraphiteGrainSizeDistribution.cpp \
-    ZubkoPAHGrainSizeDistribution.cpp 
+    ZubkoPAHGrainSizeDistribution.cpp \ 
+    LyaWavelengthGrid.cpp \
+    LyaMonteCarloSimulation.cpp \
+    LyaDustSystem.cpp \
+    LyaStellarComp.cpp \
+    LyaSpectrum.cpp \
+    ContinuumLyaSpectrum.cpp \
+    LineLyaSpectrum.cpp

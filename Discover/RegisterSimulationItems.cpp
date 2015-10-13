@@ -30,6 +30,7 @@
 #include "CompDustDistribution.hpp"
 #include "ConfigurableDustMix.hpp"
 #include "ConicalShellGeometry.hpp"
+#include "ContinuumLyaSpectrum.hpp"
 #include "CropGeometryDecorator.hpp"
 #include "CubBackgroundGeometry.hpp"
 #include "CubicSplineSmoothingKernel.hpp"
@@ -75,10 +76,16 @@
 #include "InterstellarDustMix.hpp"
 #include "KuruczSED.hpp"
 #include "LaserGeometry.hpp"
+#include "LineLyaSpectrum.hpp"
 #include "LinMesh.hpp"
 #include "LogNormalGrainSizeDistribution.hpp"
 #include "LogWavelengthGrid.hpp"
 #include "LuminosityStellarCompNormalization.hpp"
+#include "LyaDustSystem.hpp"
+#include "LyaMonteCarloSimulation.hpp"
+#include "LyaSpectrum.hpp"
+#include "LyaStellarComp.hpp"
+#include "LyaWavelengthGrid.hpp"
 #include "MappingsSEDFamily.hpp"
 #include "Mesh.hpp"
 #include "MGEGeometry.hpp"
@@ -103,6 +110,7 @@
 #include "PanDustSystem.hpp"
 #include "PanMonteCarloSimulation.hpp"
 #include "PanStellarComp.hpp"
+#include "PanWavelengthGrid.hpp"
 #include "ParticleTreeDustGrid.hpp"
 #include "PeerToPeerCommunicator.hpp"
 #include "PegaseSED.hpp"
@@ -203,6 +211,7 @@ void RegisterSimulationItems::registerAll()
     add<MonteCarloSimulation>(false);
     add<OligoMonteCarloSimulation>();
     add<PanMonteCarloSimulation>();
+    add<LyaMonteCarloSimulation>();
 
     // instruments
     add<InstrumentSystem>();
@@ -222,6 +231,7 @@ void RegisterSimulationItems::registerAll()
     add<LogWavelengthGrid>();
     add<NestedLogWavelengthGrid>();
     add<FileWavelengthGrid>();
+    add<LyaWavelengthGrid>();
 
     // stellar systems
     add<StellarSystem>();
@@ -229,6 +239,7 @@ void RegisterSimulationItems::registerAll()
     add<GeometricStellarComp>(false);
     add<OligoStellarComp>();
     add<PanStellarComp>();
+    add<LyaStellarComp>();
     add<StellarCompNormalization>(false);
     add<BolLuminosityStellarCompNormalization>();
     add<LuminosityStellarCompNormalization>();
@@ -299,6 +310,7 @@ void RegisterSimulationItems::registerAll()
     add<DustSystem>(false);
     add<OligoDustSystem>();
     add<PanDustSystem>();
+    add<LyaDustSystem>();
 
     // dust components and corresponding normalizations
     add<DustComp>();
@@ -408,6 +420,11 @@ void RegisterSimulationItems::registerAll()
     add<AllCellsDustLib>();
     add<Dim1DustLib>();
     add<Dim2DustLib>();
+
+    // Lyα emission spectra
+    add<LyaSpectrum>(false);
+    add<ContinuumLyaSpectrum>();
+    add<LineLyaSpectrum>();
 
     // stellar SEDs
     add<StellarSED>(false);
