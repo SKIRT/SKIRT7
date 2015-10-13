@@ -225,7 +225,7 @@ void PanMonteCarloSimulation::dodustselfabsorptionchunk(size_t index)
                     simulateescapeandabsorption(&pp,true);
                     double L = pp.luminosity();
                     if (L==0.0) break;
-                    if (L<=Lthreshold && pp.nScatt()>=minfs(ell)) break;
+                    if (L<=Lthreshold && pp.nScatt()>=minScattEvents()) break;
                     simulatepropagation(&pp);
                     simulatescattering(&pp);
                 }
@@ -309,7 +309,7 @@ void PanMonteCarloSimulation::dodustemissionchunk(size_t index)
                     simulateescapeandabsorption(&pp,false);
                     double L = pp.luminosity();
                     if (L==0.0) break;
-                    if (L<=Lthreshold && pp.nScatt()>=minfs(ell)) break;
+                    if (L<=Lthreshold && pp.nScatt()>=minScattEvents()) break;
                     simulatepropagation(&pp);
                     if (!continuousScattering()) peeloffscattering(&pp,&ppp);
                     simulatescattering(&pp);

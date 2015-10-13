@@ -45,26 +45,20 @@ class MonteCarloSimulation : public Simulation
     Q_CLASSINFO("MinValue", "1e3")
     Q_CLASSINFO("MaxValue", "1e9")
     Q_CLASSINFO("Default", "1e4")
+    Q_CLASSINFO("Silent", "true")
 
     Q_CLASSINFO("Property", "minScattEvents")
     Q_CLASSINFO("Title", "the minimum number of forced scattering events")
     Q_CLASSINFO("MinValue", "0")
     Q_CLASSINFO("MaxValue", "1000")
     Q_CLASSINFO("Default", "0")
-
-    Q_CLASSINFO("Property", "scattWavelength")
-    Q_CLASSINFO("Title", "the wavelength at which the minimum number of scattering events is specified")
-    Q_CLASSINFO("RelevantIf", "minScattEvents")
-    Q_CLASSINFO("Quantity", "wavelength")
-    Q_CLASSINFO("MinValue", "1 A")
-    Q_CLASSINFO("MaxValue", "1 m")
-    Q_CLASSINFO("Default", "0.55 micron")
+    Q_CLASSINFO("Silent", "true")
 
     Q_CLASSINFO("Property", "scattBias")
     Q_CLASSINFO("Title", "the scattering bias")
     Q_CLASSINFO("MinValue", "0")
     Q_CLASSINFO("MaxValue", "1")
-    Q_CLASSINFO("Default", "0")
+    Q_CLASSINFO("Default", "0.5")
     Q_CLASSINFO("Silent","true")
 
     Q_CLASSINFO("Property", "continuousScattering")
@@ -87,11 +81,6 @@ protected:
     /** This function verifies that all attribute values have been appropriately set. The dust
         system is optional and thus it may have a null value. */
     void setupSelfBefore();
-
-    /** This function calculates the minimum number of scattering events that a photon package of
-        each wavelength has to undergo before it can be eliminated from the simulation. It scales with
-        the total extinction value of the dust. */
-    void setupSelfAfter();
 
     /** This function determines how the specified number of photon packages should be split over
         chunks, and stores the resulting parameters in protected data members. It should be called
@@ -172,12 +161,6 @@ public:
         before its life cycle is terminated. */
     Q_INVOKABLE double minScattEvents() const;
 
-    /** Sets the wavelength at which the minimum number of scattering events is specified. */
-    Q_INVOKABLE void setScattWavelength(double value);
-
-    /** Returns the wavelength at which the minimum number of scattering events is specified. */
-    Q_INVOKABLE double scattWavelength() const;
-
     /** Sets the scattering bias, i.e. the fraction of the probability function for the
         optial depth distribution after a scattering event that is a constant function
         of \f$\tau\f$ rather than an exponentially declining function. */
@@ -220,10 +203,6 @@ public:
     int dimension() const;
 
 protected:
-    /** This function returns the minimum number of scattering events that a photon package of
-        the specified wavelength has to undergo before it can be eliminated from the simulation. */
-    int minfs(int ell) const;
-
     /** This function initializes the progress counter used in logprogress() for the specified
         phase and logs the number of photon packages and wavelengths to be processed. */
     void initprogress(QString phase);
@@ -424,8 +403,7 @@ private:
     InstrumentSystem* _is;
     double _packages;           // the specified number of photon packages to be launched per wavelength
     double _minWeightReduction; // the minimum weight reduction factor
-    int _minfsref;              // the minimum number of scattering events at the reference wavelength
-    double _lambdafsref;        // the reference wavelength for _minfsref
+    int _minfs;                 // the minimum number of scattering events
     double _xi;                 // the scattering bias
     bool _continuousScattering; // true if continuous scattering should be used
     ProcessAssigner* _assigner; // determines which wavelengths are assigned to this process
@@ -443,10 +421,6 @@ protected:
     quint64 _chunksize;     // the number of photon packages in one chunk
     quint64 _Npp;           // the precise number of photon packages to be launched per wavelength
     quint64 _logchunksize;  // the number of photon packages to be processed between logprogress() invocations
-
-private:
-    // *** data members initialized during setup ***
-    std::vector<int> _minfsv;   // the minimum number of forced scatterings for each wavelength
 
 private:
     // *** data members used by the XXXprogress() functions in this class ***
