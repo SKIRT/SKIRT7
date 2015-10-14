@@ -303,7 +303,10 @@ HEADERS += \
     LyaStellarComp.hpp \
     LyaSpectrum.hpp \
     ContinuumLyaSpectrum.hpp \
-    LineLyaSpectrum.hpp
+    LineLyaSpectrum.hpp \
+    MoveableMesh.hpp \
+    AnchoredMesh.hpp \
+    LogMesh.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -565,4 +568,7 @@ SOURCES += \
     LyaStellarComp.cpp \
     LyaSpectrum.cpp \
     ContinuumLyaSpectrum.cpp \
-    LineLyaSpectrum.cpp
+    LineLyaSpectrum.cpp \
+    MoveableMesh.cpp \
+    AnchoredMesh.cpp \
+    LogMesh.cpp

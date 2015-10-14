@@ -6,7 +6,7 @@
 #ifndef SYMPOWMESH_HPP
 #define SYMPOWMESH_HPP
 
-#include "Mesh.hpp"
+#include "MoveableMesh.hpp"
 
 //////////////////////////////////////////////////////////////////////
 
@@ -17,8 +17,10 @@
     innermost bins. The actual distribution is characterized by a single parameter: the bin width
     ratio between the outermost and the innermost bins. This ratio can be larger than one (in which
     case the bin size increases when moving outwards) or smaller than one (in which case the bin
-    size decrease from the centre to the edge of the interval). */
-class SymPowMesh : public Mesh
+    size decrease from the centre to the edge of the interval). If the mesh has only one bin, this
+    bin spans the complete interval \f$[0,1]\f$. If the mesh has two bins, each bin spans exactly
+    half of the interval \f$[0,1]\f$. */
+class SymPowMesh : public MoveableMesh
 {
     Q_OBJECT
     Q_CLASSINFO("Title", "a symmetric power-law mesh")

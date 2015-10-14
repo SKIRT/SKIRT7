@@ -6,7 +6,7 @@
 #ifndef POWMESH_HPP
 #define POWMESH_HPP
 
-#include "Mesh.hpp"
+#include "MoveableMesh.hpp"
 
 //////////////////////////////////////////////////////////////////////
 
@@ -16,8 +16,9 @@
     distribution is characterized by a single parameter: the bin width ratio between the last and
     the first bin, \f[ {\cal{R}} = \frac{t_N-t_{N-1}}{t_1-t_0}.\f] This ratio can be larger than
     one (in which case the first bin is the smallest) or smaller than one (in which case the last
-    bin is the smallest). */
-class PowMesh : public Mesh
+    bin is the smallest). If the mesh has only one bin, this single bin spans the complete interval
+    \f$[0,1]\f$. */
+class PowMesh : public MoveableMesh
 {
     Q_OBJECT
     Q_CLASSINFO("Title", "a power-law mesh")

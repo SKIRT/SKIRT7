@@ -56,7 +56,7 @@ Mesh* Cylinder2DDustGrid::meshR() const
 
 //////////////////////////////////////////////////////////////////////
 
-void Cylinder2DDustGrid::setMeshZ(Mesh* value)
+void Cylinder2DDustGrid::setMeshZ(MoveableMesh* value)
 {
     if (_meshz) delete _meshz;
     _meshz = value;
@@ -65,7 +65,7 @@ void Cylinder2DDustGrid::setMeshZ(Mesh* value)
 
 //////////////////////////////////////////////////////////////////////
 
-Mesh* Cylinder2DDustGrid::meshZ() const
+MoveableMesh* Cylinder2DDustGrid::meshZ() const
 {
     return _meshz;
 }

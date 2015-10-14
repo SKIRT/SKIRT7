@@ -6,13 +6,13 @@
 #ifndef LINMESH_HPP
 #define LINMESH_HPP
 
-#include "Mesh.hpp"
+#include "MoveableMesh.hpp"
 
 //////////////////////////////////////////////////////////////////////
 
 /** The LinMesh class represents meshes on the unit interval \f$[0,1]\f$ with a linear distribution
     of the mesh points. */
-class LinMesh : public Mesh
+class LinMesh : public MoveableMesh
 {
     Q_OBJECT
     Q_CLASSINFO("Title", "a linear mesh")

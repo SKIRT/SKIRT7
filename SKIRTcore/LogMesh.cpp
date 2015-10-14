@@ -4,46 +4,46 @@
 ///////////////////////////////////////////////////////////////// */
 
 #include "FatalError.hpp"
-#include "PowMesh.hpp"
+#include "LogMesh.hpp"
 #include "NR.hpp"
 
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////
 
-PowMesh::PowMesh()
-    : _ratio(0)
+LogMesh::LogMesh()
+    : _tc(0)
 {
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void PowMesh::setupSelfBefore()
+void LogMesh::setupSelfBefore()
 {
-    MoveableMesh::setupSelfBefore();
-    if (_ratio<=0) throw FATALERROR("the bin width ratio should be positive");
+    AnchoredMesh::setupSelfBefore();
+    if (_tc<=0 || _tc>=0) throw FATALERROR("The central bin width fraction should be within range ]0,1[");
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void PowMesh::setRatio(double value)
+void LogMesh::setCentralBinFraction(double value)
 {
-    _ratio = value;
+    _tc = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double PowMesh::ratio() const
+double LogMesh::centralBinFraction() const
 {
-    return _ratio;
+    return _tc;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-Array PowMesh::mesh() const
+Array LogMesh::mesh() const
 {
     Array tv;
-    if (numBins()>1) NR::powgrid(tv, 0.0, 1.0, numBins(), _ratio);
+    if (numBins()>1) NR::zerologgrid(tv, _tc, 1.0, numBins());
     else NR::lingrid(tv, 0.0, 1.0, 1);
     return tv;
 }

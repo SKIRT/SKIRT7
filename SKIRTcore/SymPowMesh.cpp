@@ -20,7 +20,7 @@ SymPowMesh::SymPowMesh()
 
 void SymPowMesh::setupSelfBefore()
 {
-    Mesh::setupSelfBefore();
+    MoveableMesh::setupSelfBefore();
     if (_ratio<=0) throw FATALERROR("the bin width ratio should be positive");
 }
 
@@ -43,7 +43,8 @@ double SymPowMesh::ratio() const
 Array SymPowMesh::mesh() const
 {
     Array tv;
-    NR::sympowgrid(tv, 0.0, 1.0, numBins(), _ratio);
+    if (numBins()>2) NR::sympowgrid(tv, 0.0, 1.0, numBins(), _ratio);
+    else NR::lingrid(tv, 0.0, 1.0, numBins());
     return tv;
 }
 

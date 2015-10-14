@@ -8,7 +8,7 @@
 
 #include "Array.hpp"
 #include "BoxDustGrid.hpp"
-#include "Mesh.hpp"
+#include "MoveableMesh.hpp"
 #include "Random.hpp"
 
 ////////////////////////////////////////////////////////////////////
@@ -47,22 +47,22 @@ public:
 
 public:
     /** Sets the bin distribution in the X direction. */
-    Q_INVOKABLE void setMeshX(Mesh* value);
+    Q_INVOKABLE void setMeshX(MoveableMesh* value);
 
     /** Returns the bin distribution in the X direction. */
-    Q_INVOKABLE Mesh* meshX() const;
+    Q_INVOKABLE MoveableMesh* meshX() const;
 
     /** Sets the bin distribution in the Y direction. */
-    Q_INVOKABLE void setMeshY(Mesh* value);
+    Q_INVOKABLE void setMeshY(MoveableMesh* value);
 
     /** Returns the bin distribution in the Y direction. */
-    Q_INVOKABLE Mesh* meshY() const;
+    Q_INVOKABLE MoveableMesh* meshY() const;
 
     /** Sets the bin distribution in the Z direction. */
-    Q_INVOKABLE void setMeshZ(Mesh* value);
+    Q_INVOKABLE void setMeshZ(MoveableMesh* value);
 
     /** Returns the bin distribution in the Z direction. */
-    Q_INVOKABLE Mesh* meshZ() const;
+    Q_INVOKABLE MoveableMesh* meshZ() const;
 
     //======================== Other Functions =======================
 
@@ -138,9 +138,9 @@ private:
 
 private:
     // discoverable properties
-    Mesh* _meshx;
-    Mesh* _meshy;
-    Mesh* _meshz;
+    MoveableMesh* _meshx;
+    MoveableMesh* _meshy;
+    MoveableMesh* _meshz;
 
     // other data members
     Random* _random;

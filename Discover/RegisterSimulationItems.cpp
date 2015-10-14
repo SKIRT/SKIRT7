@@ -79,6 +79,7 @@
 #include "LaserGeometry.hpp"
 #include "LineLyaSpectrum.hpp"
 #include "LinMesh.hpp"
+#include "LogMesh.hpp"
 #include "LogNormalGrainSizeDistribution.hpp"
 #include "LogWavelengthGrid.hpp"
 #include "LuminosityStellarCompNormalization.hpp"
@@ -88,7 +89,6 @@
 #include "LyaStellarComp.hpp"
 #include "LyaWavelengthGrid.hpp"
 #include "MappingsSEDFamily.hpp"
-#include "Mesh.hpp"
 #include "MGEGeometry.hpp"
 #include "MRNDustMix.hpp"
 #include "MarastonSED.hpp"
@@ -344,9 +344,12 @@ void RegisterSimulationItems::registerAll()
 
     // meshes for the dust grids
     add<Mesh>(false);
+    add<MoveableMesh>(false);
     add<LinMesh>();
     add<PowMesh>();
     add<SymPowMesh>();
+    add<AnchoredMesh>(false);
+    add<LogMesh>();
 
     // dust grids
     add<DustGrid>(false);

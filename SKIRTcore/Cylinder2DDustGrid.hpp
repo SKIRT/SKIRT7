@@ -8,7 +8,7 @@
 
 #include "Array.hpp"
 #include "CylinderDustGrid.hpp"
-#include "Mesh.hpp"
+#include "MoveableMesh.hpp"
 #include "Random.hpp"
 
 ////////////////////////////////////////////////////////////////////
@@ -59,10 +59,10 @@ public:
     Q_INVOKABLE Mesh* meshR() const;
 
     /** Sets the bin distribution in the Z direction. */
-    Q_INVOKABLE void setMeshZ(Mesh* value);
+    Q_INVOKABLE void setMeshZ(MoveableMesh* value);
 
     /** Returns the bin distribution in the Z direction. */
-    Q_INVOKABLE Mesh* meshZ() const;
+    Q_INVOKABLE MoveableMesh* meshZ() const;
 
     //======================== Other Functions =======================
 
@@ -132,7 +132,7 @@ private:
 private:
     // discoverable properties
     Mesh* _meshR;
-    Mesh* _meshz;
+    MoveableMesh* _meshz;
 
     // other data members
     Random* _random;

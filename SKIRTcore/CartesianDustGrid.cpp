@@ -44,7 +44,7 @@ void CartesianDustGrid::setupSelfAfter()
 
 //////////////////////////////////////////////////////////////////////
 
-void CartesianDustGrid::setMeshX(Mesh* value)
+void CartesianDustGrid::setMeshX(MoveableMesh* value)
 {
     if (_meshx) delete _meshx;
     _meshx = value;
@@ -53,14 +53,14 @@ void CartesianDustGrid::setMeshX(Mesh* value)
 
 //////////////////////////////////////////////////////////////////////
 
-Mesh* CartesianDustGrid::meshX() const
+MoveableMesh* CartesianDustGrid::meshX() const
 {
     return _meshx;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void CartesianDustGrid::setMeshY(Mesh* value)
+void CartesianDustGrid::setMeshY(MoveableMesh* value)
 {
     if (_meshy) delete _meshy;
     _meshy = value;
@@ -69,14 +69,14 @@ void CartesianDustGrid::setMeshY(Mesh* value)
 
 //////////////////////////////////////////////////////////////////////
 
-Mesh* CartesianDustGrid::meshY() const
+MoveableMesh* CartesianDustGrid::meshY() const
 {
     return _meshy;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void CartesianDustGrid::setMeshZ(Mesh* value)
+void CartesianDustGrid::setMeshZ(MoveableMesh* value)
 {
     if (_meshz) delete _meshz;
     _meshz = value;
@@ -85,7 +85,7 @@ void CartesianDustGrid::setMeshZ(Mesh* value)
 
 //////////////////////////////////////////////////////////////////////
 
-Mesh* CartesianDustGrid::meshZ() const
+MoveableMesh* CartesianDustGrid::meshZ() const
 {
     return _meshz;
 }
