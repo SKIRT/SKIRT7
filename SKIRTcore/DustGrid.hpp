@@ -66,20 +66,19 @@ public:
 public:
     /** This pure virtual function returns the dimension of the dust grid, which depends on its
         (lack of) symmetry. A value of 1 means spherical symmetry, 2 means axial symmetry and 3
-        means none of these symmetries. The function's implementation must be provided in a
-        subclass. */
+        means none of these symmetries. */
     virtual int dimension() const = 0;
 
-    /** Returns the number of cells in the dust grid. */
-    int numCells() const;
+    /** This pure virtual function returns the number of cells in the dust grid. */
+    virtual int numCells() const = 0;
 
-    /** Returns the bounding box that encloses the dust grid. */
-    Box boundingbox() const;
+    /** This pure virtual function returns the bounding box that encloses the dust grid. */
+    virtual Box boundingbox() const = 0;
 
     /** This virtual function returns the weight corresponding to the cell with cell number
         \f$m\f$. It is defaulted to return the value 1 for all cells, which is appropriate for
-        virtually all dust grids. However, this function can be (and is) overwritten by a number of
-        special subclasses. */
+        virtually all dust grids. However, this function can be (and is) overwritten by special
+        subclasses. */
     virtual double weight(int m) const;
 
     /** This pure virtual function returns the volume of the dust cell with cell number \f$m\f$. */
@@ -107,12 +106,6 @@ public:
     virtual void path(DustGridPath* path) const = 0;
 
 protected:
-    /** Sets the number of cells in the dust grid. */
-    void setNumCells(int value);
-
-    /** Sets the bounding box that encloses the dust grid. */
-    void setBoundingbox(Box value);
-
     /** This virtual function writes the intersection of the dust grid with the xy plane to the
         specified DustGridPlotFile object. The default implementation does nothing. */
     virtual void write_xy(DustGridPlotFile* outfile) const;
@@ -135,10 +128,6 @@ protected:
 private:
     // discoverable attributes
     bool _writeGrid;
-
-    // other data members
-    int _Ncells;
-    Box _boundingbox;
 };
 
 //////////////////////////////////////////////////////////////////////

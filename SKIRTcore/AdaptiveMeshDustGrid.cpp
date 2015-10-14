@@ -37,12 +37,6 @@ void AdaptiveMeshDustGrid::setupSelfBefore()
     // calculate the normalization factor imposed by the dust distribution
     // we need this to directly compute cell densities for the DustGridDensityInterface
     _nf = dd->mass() / _amesh->integratedDensity();
-
-    // set the total number of cells
-    setNumCells(_amesh->Ncells());
-
-    // set the bounding box
-    setBoundingbox(_amesh->extent());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -50,6 +44,20 @@ void AdaptiveMeshDustGrid::setupSelfBefore()
 int AdaptiveMeshDustGrid::dimension() const
 {
     return 3;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+int AdaptiveMeshDustGrid::numCells() const
+{
+    return _amesh->Ncells();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+Box AdaptiveMeshDustGrid::boundingbox() const
+{
+    return _amesh->extent();
 }
 
 //////////////////////////////////////////////////////////////////////

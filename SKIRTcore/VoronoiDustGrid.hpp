@@ -107,6 +107,9 @@ public:
     /** This function returns the volume of the dust cell with cell number \f$m\f$. */
     double volume(int m) const;
 
+    /** This function returns the number of cells in the dust grid. */
+    int numCells() const;
+
     /** This function returns the number of the dust cell that contains the position
         \f${\bf{r}}\f$. See the VoronoiMesh class for more information. */
     int whichcell(Position bfr) const;

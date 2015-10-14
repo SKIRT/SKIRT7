@@ -11,6 +11,7 @@
 #include "AdaptiveMeshAmrvacFile.hpp"
 #include "AdaptiveMeshAsciiFile.hpp"
 #include "AdaptiveMeshDustDistribution.hpp"
+#include "AdaptiveMeshDustGrid.hpp"
 #include "AdaptiveMeshGeometry.hpp"
 #include "AdaptiveMeshStellarComp.hpp"
 #include "AllCellsDustLib.hpp"
@@ -361,6 +362,7 @@ void RegisterSimulationItems::registerAll()
     add<BinTreeDustGrid>();
     add<ParticleTreeDustGrid>();
     add<VoronoiDustGrid>();
+    add<AdaptiveMeshDustGrid>();
 
     // dust mixtures
     add<DustMix>(false);

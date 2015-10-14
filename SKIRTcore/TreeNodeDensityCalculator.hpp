@@ -10,7 +10,7 @@ class Vec;
 
 //////////////////////////////////////////////////////////////////////
 
-/** This is a pure interface used by the TreeDustGridStructure and TreeNode classes to obtain
+/** This is a pure interface used by the TreeDustGrid and TreeNode classes to obtain
     properties such as total mass or barycenter for the dust cell corresponding to a given tree
     node. Helper classes implementing this interface may use different strategies to calculate this
     information. */

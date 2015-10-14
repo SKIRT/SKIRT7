@@ -137,11 +137,14 @@ private:
     //======================== Data Members ========================
 
 private:
+    // discoverable properties
+    Mesh* _meshr;
+    Mesh* _meshtheta;
+
+    // other data members
     Random* _random;
     int _Nr;
     int _Ntheta;
-    Mesh* _meshr;
-    Mesh* _meshtheta;
     Array _rv;
     Array _thetav;
     Array _cv;

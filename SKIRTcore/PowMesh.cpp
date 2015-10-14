@@ -22,7 +22,6 @@ void PowMesh::setupSelfBefore()
 {
     Mesh::setupSelfBefore();
     if (_ratio<=0) throw FATALERROR("the bin width ratio should be positive");
-    NR::powgrid(_tv,0.0,1.0,_N,_ratio);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -37,6 +36,15 @@ void PowMesh::setRatio(double value)
 double PowMesh::ratio() const
 {
     return _ratio;
+}
+
+////////////////////////////////////////////////////////////////////
+
+Array PowMesh::mesh() const
+{
+    Array tv;
+    NR::powgrid(tv, 0.0, 1.0, numBins(), _ratio);
+    return tv;
 }
 
 //////////////////////////////////////////////////////////////////////

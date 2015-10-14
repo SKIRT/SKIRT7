@@ -49,20 +49,15 @@ public:
     //======================== Other Functions =======================
 
 public:
-
-    /** Returns the mesh as an Array. */
-    Array mesh() const;
-
-    /** Returns the \f$i\f$'th mesh point. If \f$i<0\f$ or \f$i\geq N\f$ a fatal error is returned.
-        */
-    double meshpoint(int i) const;
+    /** This pure virtual function returns an array containing the \f$N+1\f$ mesh points
+        \f$\{t_i\}\f$ in ascending order, with \f$t_0=0\f$ and \f$t_N=1\f$. */
+    virtual Array mesh() const = 0;
 
     //======================== Data Members ========================
 
-protected:
+private:
+    // discoverable property
     int _N;
-    Array _tv;
-
 };
 
 //////////////////////////////////////////////////////////////////////

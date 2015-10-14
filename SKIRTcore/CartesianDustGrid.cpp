@@ -19,8 +19,7 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////
 
 CartesianDustGrid::CartesianDustGrid()
-    : _random(), _Nx(0), _Ny(0), _Nz(0),
-      _meshx(0), _meshy(0), _meshz(0), _xv(0), _yv(0), _zv(0)
+    : _meshx(0), _meshy(0), _meshz(0), _random(), _Nx(0), _Ny(0), _Nz(0)
 {
 }
 
@@ -28,10 +27,10 @@ CartesianDustGrid::CartesianDustGrid()
 
 void CartesianDustGrid::setupSelfAfter()
 {
+    // initialize our local mesh arrays
     _Nx = _meshx->numBins();
     _Ny = _meshy->numBins();
     _Nz = _meshz->numBins();
-    setNumCells(_Nx*_Ny*_Nz);
     _xv = _meshx->mesh()*(_xmax-_xmin) + _xmin;
     _yv = _meshy->mesh()*(_ymax-_ymin) + _ymin;
     _zv = _meshz->mesh()*(_zmax-_zmin) + _zmin;
@@ -39,6 +38,7 @@ void CartesianDustGrid::setupSelfAfter()
     // cache the random number generator
     _random = find<Random>();
 
+    // base class setupSelfAfter() depends on initialization performed above
     BoxDustGrid::setupSelfAfter();
 }
 
@@ -88,6 +88,13 @@ void CartesianDustGrid::setMeshZ(Mesh* value)
 Mesh* CartesianDustGrid::meshZ() const
 {
     return _meshz;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+int CartesianDustGrid::numCells() const
+{
+    return _Nx*_Ny*_Nz;
 }
 
 //////////////////////////////////////////////////////////////////////

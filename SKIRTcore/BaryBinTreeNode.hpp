@@ -10,7 +10,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
-/** BaryBinTreeNode is a TreeNode subclass that represents nodes in a BinTreeDustGridStructure, using
+/** BaryBinTreeNode is a TreeNode subclass that represents nodes in a BinTreeDustGrid, using
     the barycenter of a node for determining the orientation of its subdivision plane.
 */
 class BaryBinTreeNode : public BinTreeNode

@@ -35,10 +35,10 @@ void SingleFrameInstrument::setupSelfBefore()
     _Nframep = _Nxp * _Nyp;
     _xpmin = _xpc - 0.5*_fovxp;
     _xpmax = _xpc + 0.5*_fovxp;
-    _xpres = _fovxp/_Nxp;
+    _xpsiz = _fovxp/_Nxp;
     _ypmin = _ypc - 0.5*_fovyp;
     _ypmax = _ypc + 0.5*_fovyp;
-    _ypres = _fovyp/_Nyp;
+    _ypsiz = _fovyp/_Nyp;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -140,10 +140,10 @@ int SingleFrameInstrument::pixelondetector(const PhotonPackage* pp) const
     double yp = _sinpa * xpp + _cospa * ypp;
 
     // scale and round to pixel index
-    if (xp<_xpmin || xp>=_xpmax || yp<_ypmin || yp >= _ypmax) return -1;
-    int i = static_cast<int>(floor((xp-_xpmin)/_xpres));
-    int j = static_cast<int>(floor((yp-_ypmin)/_ypres));
-    return i + _Nxp*j;
+    int i = static_cast<int>(floor((xp-_xpmin)/_xpsiz));
+    int j = static_cast<int>(floor((yp-_ypmin)/_ypsiz));
+    if (i<0 || i>=_Nxp || j<0 || j>=_Nyp) return -1;
+    else return i + _Nxp*j;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -173,9 +173,9 @@ void SingleFrameInstrument::calibrateAndWriteDataCubes(QList< Array*> farrays, Q
 
     // calibration step 2: correction for the area of the pixels of the images; the units are now W/m/sr
 
-    double xpresang = 2.0*atan(_xpres/(2.0*_distance));
-    double ypresang = 2.0*atan(_ypres/(2.0*_distance));
-    double area = xpresang*ypresang;
+    double xpsizang = 2.0*atan(_xpsiz/(2.0*_distance));
+    double ypsizang = 2.0*atan(_ypsiz/(2.0*_distance));
+    double area = xpsizang*ypsizang;
     foreach (Array* farr, farrays)
     {
         (*farr) /= area;
@@ -219,7 +219,7 @@ void SingleFrameInstrument::calibrateAndWriteDataCubes(QList< Array*> farrays, Q
             QString description = fnames[q] + " flux";
 
             // Create an image and save it
-            Image image(this, _Nxp, _Nyp, Nlambda, _xpres, _ypres, _xpc, _ypc, "surfacebrightness");
+            Image image(this, _Nxp, _Nyp, Nlambda, _xpsiz, _ypsiz, _xpc, _ypc, "surfacebrightness");
             image.saveto(this, *(farrays[q]), filename, description);
         }
     }

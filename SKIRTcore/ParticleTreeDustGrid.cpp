@@ -154,14 +154,14 @@ void ParticleTreeDustGrid::setupSelfBefore()
             m++;
         }
     }
-    setNumCells(_idv.size());
+    int Ncells = _idv.size();
 
     // Log the number of cells
     log->info("Construction of the tree finished.");
     log->info("  Total number of nodes: " + QString::number(Nnodes));
-    log->info("  Total number of leaves: " + QString::number(numCells()));
+    log->info("  Total number of leaves: " + QString::number(Ncells));
     vector<int> countv(maxlevel+1);
-    for (int m=0; m<numCells(); m++)
+    for (int m=0; m<Ncells; m++)
     {
         TreeNode* node = _tree[_idv[m]];
         int level = node->level();
@@ -222,6 +222,13 @@ double ParticleTreeDustGrid::volume(int m) const
         throw FATALERROR("Invalid cell number: " + QString::number(m));
     TreeNode* node = getnode(m);
     return node->xwidth() * node->ywidth() * node->zwidth();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+int ParticleTreeDustGrid::numCells() const
+{
+    return _idv.size();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -343,7 +350,8 @@ void ParticleTreeDustGrid::write_xy(DustGridPlotFile* outfile) const
 {
     // Output the root cell and all leaf cells that are close to the section plane
     outfile->writeRectangle(_xmin, _ymin, _xmax, _ymax);
-    for (int m=0; m<numCells(); m++)
+    int Ncells = numCells();
+    for (int m=0; m<Ncells; m++)
     {
         TreeNode* node = getnode(m);
         if (fabs(node->zmin()) < 1e-8*extent().zwidth())
@@ -359,7 +367,8 @@ void ParticleTreeDustGrid::write_xz(DustGridPlotFile* outfile) const
 {
     // Output the root cell and all leaf cells that are close to the section plane
     outfile->writeRectangle(_xmin, _zmin, _xmax, _zmax);
-    for (int m=0; m<numCells(); m++)
+    int Ncells = numCells();
+    for (int m=0; m<Ncells; m++)
     {
         TreeNode* node = getnode(m);
         if (fabs(node->ymin()) < 1e-8*extent().ywidth())
@@ -375,7 +384,8 @@ void ParticleTreeDustGrid::write_yz(DustGridPlotFile* outfile) const
 {
     // Output the root cell and all leaf cells that are close to the section plane
     outfile->writeRectangle(_ymin, _zmin, _ymax, _zmax);
-    for (int m=0; m<numCells(); m++)
+    int Ncells = numCells();
+    for (int m=0; m<Ncells; m++)
     {
         TreeNode* node = getnode(m);
         if (fabs(node->xmin()) < 1e-8*extent().xwidth())
@@ -390,7 +400,8 @@ void ParticleTreeDustGrid::write_yz(DustGridPlotFile* outfile) const
 void ParticleTreeDustGrid::write_xyz(DustGridPlotFile* outfile) const
 {
     // Output all leaf cells up to a certain level
-    for (int m=0; m<numCells(); m++)
+    int Ncells = numCells();
+    for (int m=0; m<Ncells; m++)
     {
         TreeNode* node = getnode(m);
         if (node->level() <= _highestWriteLevel)

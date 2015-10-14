@@ -37,8 +37,7 @@ protected:
     /** The default constructor; it is protected since this is an abstract class. */
     CylinderDustGrid();
 
-    /** This function verifies the characteristics of the grid, and sets the correct
-        dimensions of the bounding box. */
+    /** This function verifies the characteristics of the grid. */
     void setupSelfBefore();
 
     //======== Setters & Getters for Discoverable Attributes =======
@@ -62,13 +61,18 @@ public:
     /** Returns the end point \f$z_{\text{max}}\f$ of the cylinder in the Z direction. */
     Q_INVOKABLE double maxZ() const;
 
+    //======================== Other Functions =======================
+
+    /** This function returns the bounding box that encloses the dust grid. */
+    Box boundingbox() const;
+
     //======================== Data Members ========================
 
 private:
+    // discoverable properties
     double _Rmax;
     double _zmin;
     double _zmax;
-
 };
 
 ////////////////////////////////////////////////////////////////////

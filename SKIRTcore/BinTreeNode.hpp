@@ -10,7 +10,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
-/** BinTreeNode is a TreeNode subclass that represents nodes in a BinTreeDustGridStructure. It
+/** BinTreeNode is a TreeNode subclass that represents nodes in a BinTreeDustGrid. It
     implements a regular alternating subdivision scheme, and can be subclassed to implement a more
     complicated scheme.*/
 class BinTreeNode : public TreeNode

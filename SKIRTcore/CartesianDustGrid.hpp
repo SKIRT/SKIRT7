@@ -39,7 +39,8 @@ public:
     /** The default constructor. */
     Q_INVOKABLE CartesianDustGrid();
 
-    /** This function sets up a number of data members. */
+    /** This function sets up a number of data members that depend on the Mesh objects configured
+        for this grid. */
     void setupSelfAfter();
 
     //======== Setters & Getters for Discoverable Attributes =======
@@ -66,6 +67,9 @@ public:
     //======================== Other Functions =======================
 
 public:
+    /** This function returns the number of cells in the dust grid. */
+    int numCells() const;
+
     /** This function returns the volume of the dust cell with cell number \f$m\f$. For a cartesian
         dust grid, the function determines the bin indices \f$i\f$, \f$j\f$ and \f$k\f$
         corresponding to the X, Y and Z directions. The volume is then easily calculated as \f$V =
@@ -133,13 +137,16 @@ private:
     //======================== Data Members ========================
 
 private:
+    // discoverable properties
+    Mesh* _meshx;
+    Mesh* _meshy;
+    Mesh* _meshz;
+
+    // other data members
     Random* _random;
     int _Nx;
     int _Ny;
     int _Nz;
-    Mesh* _meshx;
-    Mesh* _meshy;
-    Mesh* _meshz;
     Array _xv;
     Array _yv;
     Array _zv;

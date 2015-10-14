@@ -16,7 +16,7 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////
 
 Sphere1DDustGrid::Sphere1DDustGrid()
-    : _random(0), _Nr(0), _meshr(0), _rv(0)
+    : _meshr(0), _random(0), _Nr(0)
 {
 }
 
@@ -30,8 +30,8 @@ void Sphere1DDustGrid::setupSelfAfter()
     // Set up the grid properties
     _Nr = _meshr->numBins();
     _rv = _meshr->mesh() * maxR();
-    setNumCells(_Nr);
 
+    // base class setupSelfAfter() depends on initialization performed above
     SphereDustGrid::setupSelfAfter();
 }
 
@@ -56,6 +56,13 @@ Mesh* Sphere1DDustGrid::meshR() const
 int Sphere1DDustGrid::dimension() const
 {
     return 1;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+int Sphere1DDustGrid::numCells() const
+{
+    return _Nr;
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -136,14 +136,13 @@ void VoronoiDustGrid::setupSelfBefore()
         throw FATALERROR("Unknown distribution type");
     }
 
-    // Communicate the number of dust cells to the base class
-    setNumCells(_mesh->Ncells());
+    int Ncells = _mesh->Ncells();
 
     // Log statistics on the cell neighbors
     double avgNeighbors;
     int minNeighbors, maxNeighbors;
     _mesh->neighborStatistics(avgNeighbors, minNeighbors, maxNeighbors);
-    log->info("Computed Voronoi tesselation with " + QString::number(numCells()) + " cells:");
+    log->info("Computed Voronoi tesselation with " + QString::number(Ncells) + " cells:");
     log->info("  Average number of neighbors per cell: " + QString::number(avgNeighbors,'f',1));
     log->info("  Minimum number of neighbors per cell: " + QString::number(minNeighbors));
     log->info("  Maximum number of neighbors per cell: " + QString::number(maxNeighbors));
@@ -154,7 +153,7 @@ void VoronoiDustGrid::setupSelfBefore()
     int minRefsPerBlock, maxRefsPerBlock;
     _mesh->blockStatistics(avgRefsPerBlock, minRefsPerBlock, maxRefsPerBlock);
     log->info("Created grid to accelerate which-cell operations:");
-    log->info("  Number of cells                  : " + QString::number(numCells()));
+    log->info("  Number of cells                  : " + QString::number(Ncells));
     log->info("  Number of blocks                 : " + QString::number(nblocks*nblocks*nblocks) +
               " (" + QString::number(nblocks) + " in each dimension)");
     log->info("  Average number of cells per block: " + QString::number(avgRefsPerBlock,'f',1));
@@ -184,9 +183,9 @@ void VoronoiDustGrid::setupSelfBefore()
         DustGridPlotFile plotxyz(this, "ds_gridxyz");
 
         // load all particles in a Voro container
-        int nb = max(3, min(1000, static_cast<int>(pow(numCells()/5.,1./3.)) ));
+        int nb = max(3, min(1000, static_cast<int>(pow(Ncells/5.,1./3.)) ));
         voro::container con(xmin(), xmax(), ymin(), ymax(), zmin(), zmax(), nb, nb, nb, false,false,false, 8);
-        for (int m=0; m<numCells(); m++)
+        for (int m=0; m<Ncells; m++)
         {
             Vec r = _mesh->particlePosition(m);
             con.put(m, r.x(),r.y(),r.z());
@@ -268,6 +267,13 @@ VoronoiMeshFile* VoronoiDustGrid::voronoiMeshFile() const
 double VoronoiDustGrid::volume(int m) const
 {
     return _mesh->volume(m);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+int VoronoiDustGrid::numCells() const
+{
+    return _mesh->Ncells();
 }
 
 //////////////////////////////////////////////////////////////////////

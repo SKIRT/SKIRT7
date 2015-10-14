@@ -35,8 +35,7 @@ public:
     Q_INVOKABLE PowMesh();
 
 protected:
-    /** This function verifies the attributes and sets up the mesh by calling the powgrid function
-        in the NR class. */
+    /** This function verifies the property values. */
     void setupSelfBefore();
 
     //======== Setters & Getters for Discoverable Attributes =======
@@ -48,11 +47,16 @@ public:
     /** Returns the bin width ratio of the mesh. */
     Q_INVOKABLE double ratio() const;
 
+    //======================== Other Functions =======================
+
+public:
+    /** This function returns an array containing the mesh points. */
+    Array mesh() const;
+
     //======================== Data Members ========================
 
 private:
     double _ratio;
-
 };
 
 //////////////////////////////////////////////////////////////////////

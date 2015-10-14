@@ -45,7 +45,8 @@ public:
     /** The default constructor. */
     Q_INVOKABLE Cylinder2DDustGrid();
 
-    /** This function sets up a number of data members. */
+    /** This function sets up a number of data members that depend on the Mesh objects configured
+        for this grid. */
     void setupSelfAfter();
 
     //======== Setters & Getters for Discoverable Attributes =======
@@ -68,6 +69,9 @@ public:
 public:
     /** This function returns the dimension of the grid, which is 2 for this class. */
     int dimension() const;
+
+    /** This function returns the number of cells in the dust grid. */
+    int numCells() const;
 
     /** This function returns the volume of the dust cell with cell number \f$m\f$. For an
         axisymmetric dust grid, the function determines the radial and vertical bin indices \f$i\f$
@@ -126,11 +130,14 @@ private:
     //======================== Data Members ========================
 
 private:
+    // discoverable properties
+    Mesh* _meshR;
+    Mesh* _meshz;
+
+    // other data members
     Random* _random;
     int _NR;
     int _Nz;
-    Mesh* _meshR;
-    Mesh* _meshz;
     Array _Rv;
     Array _zv;
 };

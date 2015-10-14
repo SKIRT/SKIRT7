@@ -173,10 +173,10 @@ protected:
     size_t _Nframep; // number of pixels in a frame; size_t so that array size and index calculations happen in 64 bit
     double _xpmin;
     double _xpmax;
-    double _xpres;
+    double _xpsiz;
     double _ypmin;
     double _ypmax;
-    double _ypres;
+    double _ypsiz;
 };
 
 ////////////////////////////////////////////////////////////////////

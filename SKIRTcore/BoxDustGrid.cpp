@@ -27,12 +27,6 @@ void BoxDustGrid::setupSelfBefore()
         throw FATALERROR("The extent of the box should be positive in the Y direction");
     if (_zmax <= _zmin)
         throw FATALERROR("The extent of the box should be positive in the Z direction");
-
-    // set the characteristics of the box
-    extent(_xmin,_ymin,_zmin,_xmax,_ymax,_zmax);
-
-    // set the bounding box, it is just the object itself, which is also from the Box type
-    setBoundingbox(extent());
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -124,6 +118,14 @@ double BoxDustGrid::maxZ() const
 int BoxDustGrid::dimension() const
 {
     return 3;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+Box BoxDustGrid::boundingbox() const
+{
+    // use our inherited Box
+    return extent();
 }
 
 //////////////////////////////////////////////////////////////////////

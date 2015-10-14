@@ -9,10 +9,7 @@
 #include "LockFree.hpp"
 #include "PanDustSystem.hpp"
 #include "PhotonPackage.hpp"
-#include "Units.hpp"
 #include "WavelengthGrid.hpp"
-
-#include <iostream>
 
 using namespace std;
 

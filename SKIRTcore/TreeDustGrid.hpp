@@ -21,7 +21,7 @@ class ProcessAssigner;
     dust grids with cuboidal cells organized in a tree. The tree's root node encloses the complete
     spatial domain, and nodes on subsequent levels recursively divide space into ever finer nodes.
     The depth of the tree can vary from place to place. The leaf cells (those that are not further
-    subdivided) are the actual dust cells. The type of TreeNode used by the TreeDustGridStructure
+    subdivided) are the actual dust cells. The type of TreeNode used by the TreeDustGrid
     is decided in each subclass through a factory method. Depending on the type of TreeNode, the
     tree can become an octtree (8 children per node) or a kd-tree (2 children per node). Other node
     types could be implemented, as long as they are cuboids lined up with the axes. */
@@ -217,6 +217,9 @@ public:
         calculates the volume of the corresponding cuboidal cell using \f$V = \Delta x\, \Delta y\,
         \Delta z\f$. */
     double volume(int m) const;
+
+    /** This function returns the number of cells in the dust grid. */
+    int numCells() const;
 
     /** This function returns the number of the dust cell that contains the position
         \f${\bf{r}}\f$. For a tree dust grid, the search algorithm starts at the root node and

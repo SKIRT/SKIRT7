@@ -12,7 +12,7 @@ class TreeNodeDensityCalculator;
 
 //////////////////////////////////////////////////////////////////////
 
-/** TreeNode is an abstract class that represents nodes in a TreeDustGridStructure. It holds a node
+/** TreeNode is an abstract class that represents nodes in a TreeDustGrid. It holds a node
     identifier, the corners of the node in the three spatial directions, and links to the father,
     children and neighbors of the node. */
 class TreeNode : public Box

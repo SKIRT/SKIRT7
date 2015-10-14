@@ -429,7 +429,7 @@ namespace
         DustGrid* _grid;
         Units* _units;
         Log* _log;
-        double xbase, ybase, zbase, xres, yres, zres, xcenter, ycenter, zcenter;
+        double xbase, ybase, zbase, xpsize, ypsize, zpsize, xcenter, ycenter, zcenter;
         int Nmaps;
 
         // data members initialized in setup()
@@ -449,14 +449,13 @@ namespace
             _log = ds->find<Log>();
 
             double xmin, ymin, zmin, xmax, ymax, zmax;
-            Box bb = _grid->boundingbox();
-            bb.extent(xmin,ymin,zmin,xmax,ymax,zmax);
-            xres = (xmax-xmin)/Np;
-            yres = (ymax-ymin)/Np;
-            zres = (zmax-zmin)/Np;
-            xbase = xmin + 0.5*xres;
-            ybase = ymin + 0.5*yres;
-            zbase = zmin + 0.5*zres;
+            _grid->boundingbox().extent(xmin,ymin,zmin,xmax,ymax,zmax);
+            xpsize = (xmax-xmin)/Np;
+            ypsize = (ymax-ymin)/Np;
+            zpsize = (zmax-zmin)/Np;
+            xbase = xmin + 0.5*xpsize;
+            ybase = ymin + 0.5*ypsize;
+            zbase = zmin + 0.5*zpsize;
             xcenter = (xmin+xmax)/2.0;
             ycenter = (ymin+ymax)/2.0;
             zcenter = (zmin+zmax)/2.0;
@@ -485,11 +484,11 @@ namespace
         // the parallized loop body; calculates the results for a single line in the images
         void body(size_t j)
         {
-            double z = zd ? (zbase + j*zres) : 0.;
+            double z = zd ? (zbase + j*zpsize) : 0.;
             for (int i=0; i<Np; i++)
             {
-                double x = xd ? (xbase + i*xres) : 0.;
-                double y = yd ? (ybase + (zd ? i : j)*yres) : 0.;
+                double x = xd ? (xbase + i*xpsize) : 0.;
+                double y = yd ? (ybase + (zd ? i : j)*ypsize) : 0.;
                 Position bfr(x,y,z);
                 int m = _grid->whichcell(bfr);
                 if (m!=-1 && _ds->Labs(m)>0.0)
@@ -519,7 +518,7 @@ namespace
         void write()
         {
             QString filename = "ds_temp" + plane;
-            Image image(_ds, Np, Np, Nmaps, xd?xres:yres, zd?zres:yres,
+            Image image(_ds, Np, Np, Nmaps, xd?xpsize:ypsize, zd?zpsize:ypsize,
                         xd?xcenter:ycenter, zd?zcenter:ycenter, "temperature");
             image.saveto(_ds, tempv, filename, "dust temperatures");
         }

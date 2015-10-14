@@ -4,7 +4,6 @@
 ///////////////////////////////////////////////////////////////// */
 
 #include "LinMesh.hpp"
-#include "Log.hpp"
 #include "NR.hpp"
 
 using namespace std;
@@ -18,10 +17,11 @@ LinMesh::LinMesh()
 
 ////////////////////////////////////////////////////////////////////
 
-void LinMesh::setupSelfBefore()
+Array LinMesh::mesh() const
 {
-    Mesh::setupSelfBefore();
-    NR::lingrid(_tv, 0.0, 1.0, _N);
+    Array tv;
+    NR::lingrid(tv, 0.0, 1.0, numBins());
+    return tv;
 }
 
 //////////////////////////////////////////////////////////////////////

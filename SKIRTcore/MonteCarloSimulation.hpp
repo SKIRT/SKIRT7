@@ -58,7 +58,7 @@ class MonteCarloSimulation : public Simulation
     Q_CLASSINFO("Title", "the scattering bias")
     Q_CLASSINFO("MinValue", "0")
     Q_CLASSINFO("MaxValue", "1")
-    Q_CLASSINFO("Default", "0.5")
+    Q_CLASSINFO("Default", "0")
     Q_CLASSINFO("Silent","true")
 
     Q_CLASSINFO("Property", "continuousScattering")

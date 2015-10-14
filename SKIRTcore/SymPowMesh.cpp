@@ -22,7 +22,6 @@ void SymPowMesh::setupSelfBefore()
 {
     Mesh::setupSelfBefore();
     if (_ratio<=0) throw FATALERROR("the bin width ratio should be positive");
-    NR::sympowgrid(_tv,0.0,1.0,_N,_ratio);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -37,6 +36,15 @@ void SymPowMesh::setRatio(double value)
 double SymPowMesh::ratio() const
 {
     return _ratio;
+}
+
+////////////////////////////////////////////////////////////////////
+
+Array SymPowMesh::mesh() const
+{
+    Array tv;
+    NR::sympowgrid(tv, 0.0, 1.0, numBins(), _ratio);
+    return tv;
 }
 
 //////////////////////////////////////////////////////////////////////

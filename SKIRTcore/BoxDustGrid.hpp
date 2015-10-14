@@ -50,8 +50,7 @@ protected:
     /** The default constructor; it is protected since this is an abstract class. */
     BoxDustGrid();
 
-    /** This function verifies the characteristics of the grid, and sets the correct
-        dimensions of the bounding box. */
+    /** This function verifies the characteristics of the grid. */
     void setupSelfBefore();
 
     //======== Setters & Getters for Discoverable Attributes =======
@@ -99,6 +98,8 @@ public:
     /** This function returns the dimension of the grid, which is 3 for all subclasses of this class. */
     int dimension() const;
 
+    /** This function returns the bounding box that encloses the dust grid. */
+    Box boundingbox() const;
 };
 
 ////////////////////////////////////////////////////////////////////

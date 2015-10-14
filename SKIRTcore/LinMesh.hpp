@@ -23,8 +23,11 @@ public:
     /** The default constructor. */
     Q_INVOKABLE LinMesh();
 
-    /** This function sets up the mesh by calling the lingrid function in the NR class. */
-    void setupSelfBefore();
+    //======================== Other Functions =======================
+
+public:
+    /** This function returns an array containing the mesh points. */
+    Array mesh() const;
 
 };
 

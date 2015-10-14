@@ -43,7 +43,8 @@ public:
     /** The default constructor. */
     Q_INVOKABLE Sphere1DDustGrid();
 
-    /** This function sets up a number of data members. */
+    /** This function sets up a number of data members that depend on the Mesh object configured
+        for this grid. */
     void setupSelfAfter();
 
     //======== Setters & Getters for Discoverable Attributes =======
@@ -60,6 +61,9 @@ public:
 public:
     /** This function returns the dimension of the grid, which is 1 for this class. */
     int dimension() const;
+
+    /** This function returns the number of cells in the dust grid. */
+    int numCells() const;
 
     /** This function returns the volume of the dust cell with cell number \f$m\f$. For a spherical
         dust grid, cell number \f$m\f$ corresponds to the radial bin with lower border index
@@ -99,9 +103,12 @@ private:
     //======================== Data Members ========================
 
 private:
+    // discoverable properties
+    Mesh* _meshr;
+
+    // other data members
     Random* _random;
     int _Nr;
-    Mesh* _meshr;
     Array _rv;
 };
 

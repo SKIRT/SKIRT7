@@ -43,6 +43,12 @@ public:
     /** Returns the outer radius \f$r_{\text{max}}\f$ of the dust grid. */
     Q_INVOKABLE double maxR() const;
 
+    //======================== Other Functions =======================
+
+public:
+    /** This function returns the bounding box that encloses the dust grid. */
+    Box boundingbox() const;
+
     //======================== Data Members ========================
 
 private:

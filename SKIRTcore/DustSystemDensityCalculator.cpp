@@ -6,7 +6,6 @@
 #include <cmath>
 #include "DustSystemDensityCalculator.hpp"
 #include "DustDistribution.hpp"
-// #include "DustGridStructure.hpp"
 #include "DustGrid.hpp"
 #include "DustSystem.hpp"
 #include "Random.hpp"
@@ -16,10 +15,8 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////
 
 DustSystemDensityCalculator::DustSystemDensityCalculator(const DustSystem *ds, int numBodies, int numSamplesPerBody)
-//    : _ds(ds), _dd(ds->dustDistribution()), _grid(ds->dustGridStructure()), _random(ds->find<Random>()),
     : _ds(ds), _dd(ds->dustDistribution()), _grid(ds->dustGrid()), _random(ds->find<Random>()),
       _numBodies(numBodies), _numSamplesPerBody(numSamplesPerBody),
-//      _extent(_grid->xmax(), -_grid->ymax(), -_grid->zmax(), _grid->xmax(), _grid->ymax(), _grid->zmax()),
       _extent(_grid->boundingbox()),
       _drhov(numBodies), _drho2v(numBodies),
       _meanDelta(0), _stddevDelta(0),

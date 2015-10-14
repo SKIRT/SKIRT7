@@ -19,7 +19,7 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////
 
 Sphere2DDustGrid::Sphere2DDustGrid()
-    : _random(0), _Nr(0), _Ntheta(0), _meshr(0), _meshtheta(0), _rv(0), _thetav(0)
+    : _meshr(0), _meshtheta(0), _random(0), _Nr(0), _Ntheta(0)
 {
 }
 
@@ -32,36 +32,56 @@ void Sphere2DDustGrid::setupSelfAfter()
 
     // Set up the radial grid
     _Nr = _meshr->numBins();
-    double rmax = maxR();
-    _rv = _meshr->mesh() * rmax;
+    _rv = _meshr->mesh() * maxR();
 
-    // Set up the polar grid. One particular curiosity of the Sphere2DDustGrid class is that the
-    // path() function requires that there is a grid point corresponding to pi=pi/2 (i.e. the xy-plane).
-    // So if it is not there, add it. We are using the vector class since there is no mechanism foreseen
-    // in the Array class to insert data points.
-
-    int Nt = _meshtheta->numBins();
-    vector<double> tv(Nt+1);
-    for (int k=0; k<=Nt; k++) tv[k] = _meshtheta->meshpoint(k);
-    bool halfinmesh = false;
-    for (int k=0; k<=Nt; k++)
-        if (fabs(_meshtheta->meshpoint(k)-0.5) < 1e-11)
-        {
-            halfinmesh = true;
-            break;
-        }
-    if (!halfinmesh)
-    {
-        tv.push_back(0.5);
-        std::sort(tv.begin(),tv.end());
-    }
-    _Ntheta = tv.size();
-    _thetav.resize(_Ntheta+1);
-    for (int k=0; k<=_Ntheta; k++)
-        _thetav[k] = tv[k]*M_PI;
+    // Set up the polar grid; pre-calculate the cosines for each angular boundary
+    _Ntheta = _meshtheta->numBins();
+    _thetav = _meshtheta->mesh() * M_PI;
     _cv = cos(_thetav);
 
-    // Call the setupSelfAfter function for the SphereDustGrid base class
+    // Make sure that the boundary cosine values are exact
+    _cv[0] = 1.;
+    _cv[_Ntheta] = -1.;
+
+    // The path() function in this class requires that there is a grid point corresponding to pi/2 (i.e. the xy-plane)
+
+    // If there is a cosine value close to zero, make it exactly zero so that the test in path() succeeds
+    int numzeroes = 0;
+    for (int k=1; k<_Ntheta; k++)
+    {
+        if (fabs(_cv[k]) < 1e-9)
+        {
+            numzeroes++;
+            _cv[k] = 0.;
+        }
+    }
+    if (numzeroes > 1) throw FATALERROR("There are multiple grid points very close to pi/2");
+
+    // If there is no cosine value close to zero, add an extra grid point
+    if (numzeroes == 0)
+    {
+        // Make temporary copy of the original grid
+        Array or_thetav = _thetav;
+        Array or_cv = _cv;
+
+        // Resize the grid to contain one extra bin; this clears all values
+        _Ntheta++;
+        _thetav.resize(_Ntheta+1);
+        _cv.resize(_Ntheta+1);
+
+        // Initialize the new grid with values corresponding to the xy-plane so we can skip that index while copying
+        _thetav = M_PI_2;
+
+        // Copy the values from the original to the new grid, skipping the xy-plane
+        for (int k=0; k<=_Ntheta; k++)
+        {
+            int target = (or_cv[k] > 0) ? k : k+1;
+            _thetav[target] = or_thetav[k];
+            _cv[target] = or_cv[k];
+        }
+    }
+
+    // base class setupSelfAfter() depends on initialization performed above
     SphereDustGrid::setupSelfAfter();
 }
 

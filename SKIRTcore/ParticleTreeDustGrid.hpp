@@ -68,7 +68,6 @@ protected:
     //======== Setters & Getters for Discoverable Attributes =======
 
 public:
-
     /** The enumeration type indicating the type of tree to be constructed. */
     Q_ENUMS(TreeType)
     enum TreeType { OctTree, BinTree };
@@ -93,6 +92,9 @@ public:
         calculates the volume of the corresponding cuboidal cell using \f$V = \Delta x\, \Delta y\,
         \Delta z\f$. */
     double volume(int m) const;
+
+    /** This function returns the number of cells in the dust grid. */
+    int numCells() const;
 
     /** This function returns the number of the dust cell that contains the position
         \f${\bf{r}}\f$. For a tree dust grid, the search algorithm starts at the root node and

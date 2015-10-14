@@ -13,7 +13,7 @@ class TreeNode;
 
 //////////////////////////////////////////////////////////////////////
 
-/** This is a helper class used by the TreeDustGridStructure and TreeNode classes. It calculates
+/** This is a helper class used by the TreeDustGrid and TreeNode classes. It calculates
     properties such as total mass and optical depth for the dust cell corresponding to a given tree
     node using the DustMassInBoxInterface interface. This class does \em not support calculation of
     the barycenter and density dispersion. */

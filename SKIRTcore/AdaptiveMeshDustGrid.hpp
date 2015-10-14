@@ -31,8 +31,7 @@ public:
     Q_INVOKABLE AdaptiveMeshDustGrid();
 
     /** This function locates the adaptive mesh in the simulation hierarchy, and remembers a
-        pointer to it. It also initializes the number of cells in the data member maintained by the
-        base class. */
+        pointer to it. */
     void setupSelfBefore();
 
     //======================== Other Functions =======================
@@ -40,6 +39,12 @@ public:
 public:
     /** This function returns the dimension of the dust grid, which is 3 for an adaptive mesh dust grid. */
     int dimension() const;
+
+    /** This function returns the number of cells in the dust grid. */
+    int numCells() const;
+
+    /** This function returns the bounding box that encloses the dust grid. */
+    Box boundingbox() const;
 
     /** This function returns the volume of the dust cell with cell number \f$m\f$. */
     double volume(int m) const;

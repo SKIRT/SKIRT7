@@ -14,7 +14,7 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////
 
 Cylinder2DDustGrid::Cylinder2DDustGrid()
-    : _random(), _NR(0), _Nz(0), _meshR(0), _meshz(0), _Rv(0), _zv(0)
+    : _meshR(0), _meshz(0), _random(), _NR(0), _Nz(0)
 {
 }
 
@@ -22,9 +22,9 @@ Cylinder2DDustGrid::Cylinder2DDustGrid()
 
 void Cylinder2DDustGrid::setupSelfAfter()
 {
+    // initialize our local mesh arrays
     _NR = _meshR->numBins();
     _Nz = _meshz->numBins();
-    setNumCells(_NR*_Nz);
     double Rmax = maxR();
     double zmin = minZ();
     double zmax = maxZ();
@@ -34,6 +34,7 @@ void Cylinder2DDustGrid::setupSelfAfter()
     // cache the random number generator
     _random = find<Random>();
 
+    // base class setupSelfAfter() depends on initialization performed above
     CylinderDustGrid::setupSelfAfter();
 }
 
@@ -74,6 +75,13 @@ Mesh* Cylinder2DDustGrid::meshZ() const
 int Cylinder2DDustGrid::dimension() const
 {
     return 2;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+int Cylinder2DDustGrid::numCells() const
+{
+    return _NR*_Nz;
 }
 
 //////////////////////////////////////////////////////////////////////

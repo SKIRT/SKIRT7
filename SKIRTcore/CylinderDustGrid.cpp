@@ -22,7 +22,6 @@ void CylinderDustGrid::setupSelfBefore()
     DustGrid::setupSelfBefore();
     if (_Rmax <= 0) throw FATALERROR("The outer radius of the grid should be positive");
     if (_zmax <= _zmin) throw FATALERROR("The extent of the Cylinder should be positive in the Z direction");
-    setBoundingbox(Box(-_Rmax,-_Rmax,_zmin,_Rmax,_Rmax,_zmax));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -65,6 +64,13 @@ void CylinderDustGrid::setMaxZ(double value)
 double CylinderDustGrid::maxZ() const
 {
     return _zmax;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+Box CylinderDustGrid::boundingbox() const
+{
+    return Box(-_Rmax,-_Rmax,_zmin,_Rmax,_Rmax,_zmax);
 }
 
 //////////////////////////////////////////////////////////////////////

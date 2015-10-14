@@ -22,7 +22,6 @@ void SphereDustGrid::setupSelfBefore()
     DustGrid::setupSelfBefore();
     if (_rmax <= 0)
         throw FATALERROR("The outer radius of the grid should be positive");
-    setBoundingbox(Box(-_rmax,-_rmax,-_rmax,_rmax,_rmax,_rmax));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -37,6 +36,13 @@ void SphereDustGrid::setMaxR(double value)
 double SphereDustGrid::maxR() const
 {
     return _rmax;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+Box SphereDustGrid::boundingbox() const
+{
+    return Box(-_rmax,-_rmax,-_rmax,_rmax,_rmax,_rmax);
 }
 
 //////////////////////////////////////////////////////////////////////

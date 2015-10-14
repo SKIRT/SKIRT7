@@ -28,7 +28,7 @@ class ProcessAssigner;
     subclasses for use with oligochromatic and panchromatic simulations respectively. A DustSystem
     object contains a vector of dust cells, each of which contain all useful information on the
     dust within that particular piece of the configuration space. Furthermore, a DustSystem object
-    contains pointers a DustDistribution object and to a DustGridStructure object). A subclass may
+    contains pointers a DustDistribution object and to a DustGrid object). A subclass may
     of course maintain additional information depending on its needs. */
 class DustSystem : public SimulationItem
 {
@@ -309,7 +309,7 @@ public:
         \f${\boldsymbol{r}}\f$ into the direction \f${\boldsymbol{k}}\f$, where \f$\ell\f$,
         \f${\boldsymbol{r}}\f$ and \f${\boldsymbol{k}}\f$ are obtained from the specified
         PhotonPackage object, and it stores the resulting details back into the photon package
-        object. The hard work is done by calling the DustGridStructure::path() function which
+        object. The hard work is done by calling the DustGrid::path() function which
         stores the geometrical information on the path through the dust grid into the photon
         package: the cell numbers \f$m\f$ of the cells that are crossed by the path, the pathlength
         \f$(\Delta s)_m\f$ covered in that particular cell and a total path length counter
