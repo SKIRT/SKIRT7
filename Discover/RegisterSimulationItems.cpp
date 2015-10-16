@@ -15,6 +15,7 @@
 #include "AdaptiveMeshStellarComp.hpp"
 #include "AllCellsDustLib.hpp"
 #include "AmHydrocarbonGrainComposition.hpp"
+#include "AnalyticalHIDistribution.hpp"
 #include "AxGeometry.hpp"
 #include "Benchmark1DDustMix.hpp"
 #include "Benchmark2DDustMix.hpp"
@@ -70,6 +71,8 @@
 #include "GaussianGeometry.hpp"
 #include "GenGeometry.hpp"
 #include "GreyBodyDustEmissivity.hpp"
+#include "HIDistribution.hpp"
+#include "HISystem.hpp"
 #include "IdenticalAssigner.hpp"
 #include "InstrumentFrame.hpp"
 #include "InstrumentSystem.hpp"
@@ -81,7 +84,6 @@
 #include "LogNormalGrainSizeDistribution.hpp"
 #include "LogWavelengthGrid.hpp"
 #include "LuminosityStellarCompNormalization.hpp"
-#include "LyaDustSystem.hpp"
 #include "LyaMonteCarloSimulation.hpp"
 #include "LyaSpectrum.hpp"
 #include "LyaStellarComp.hpp"
@@ -153,6 +155,7 @@
 #include "SpiralStructureGeometryDecorator.hpp"
 #include "StaggeredAssigner.hpp"
 #include "StarburstSED.hpp"
+#include "StaticSphereHIDistribution.hpp"
 #include "StellarSurfaceGeometry.hpp"
 #include "StellarSystem.hpp"
 #include "StellarUnits.hpp"
@@ -310,7 +313,9 @@ void RegisterSimulationItems::registerAll()
     add<DustSystem>(false);
     add<OligoDustSystem>();
     add<PanDustSystem>();
-    add<LyaDustSystem>();
+
+    // neutral hydrogen systems
+    add<HISystem>();
 
     // dust components and corresponding normalizations
     add<DustComp>();
@@ -333,6 +338,11 @@ void RegisterSimulationItems::registerAll()
     add<AdaptiveMeshDustDistribution>();
     add<SphericalAdaptiveMeshDustDistribution>();
     add<VoronoiDustDistribution>();
+
+    // neutral hydrogen distributions
+    add<HIDistribution>(false);
+    add<AnalyticalHIDistribution>(false);
+    add<StaticSphereHIDistribution>();
 
     // mesh file representations
     add<AdaptiveMeshFile>(false);
@@ -364,10 +374,9 @@ void RegisterSimulationItems::registerAll()
 
     // dust mixtures
     add<DustMix>(false);
-    add<DraineLiDustMix>();
     add<InterstellarDustMix>();
+    add<DraineLiDustMix>();
     add<MeanZubkoDustMix>();
-    add<ElectronDustMix>();
     add<Benchmark1DDustMix>();
     add<Benchmark2DDustMix>();
     add<TrustMeanDustMix>();
@@ -376,6 +385,7 @@ void RegisterSimulationItems::registerAll()
     add<ZubkoDustMix>();
     add<TrustDustMix>();
     add<ConfigurableDustMix>();
+    add<ElectronDustMix>();
 
     // grain compositions
     add<GrainComposition>(false);

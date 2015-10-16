@@ -299,11 +299,14 @@ HEADERS += \
     ZubkoPAHGrainSizeDistribution.hpp \
     LyaMonteCarloSimulation.hpp \
     LyaWavelengthGrid.hpp \
-    LyaDustSystem.hpp \
     LyaStellarComp.hpp \
     LyaSpectrum.hpp \
     ContinuumLyaSpectrum.hpp \
-    LineLyaSpectrum.hpp
+    LineLyaSpectrum.hpp \
+    HIDistribution.hpp \
+    HISystem.hpp \
+    AnalyticalHIDistribution.hpp \
+    StaticSphereHIDistribution.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -561,8 +564,11 @@ SOURCES += \
     ZubkoPAHGrainSizeDistribution.cpp \ 
     LyaWavelengthGrid.cpp \
     LyaMonteCarloSimulation.cpp \
-    LyaDustSystem.cpp \
     LyaStellarComp.cpp \
     LyaSpectrum.cpp \
     ContinuumLyaSpectrum.cpp \
-    LineLyaSpectrum.cpp
+    LineLyaSpectrum.cpp \
+    HIDistribution.cpp \
+    HISystem.cpp \
+    AnalyticalHIDistribution.cpp \
+    StaticSphereHIDistribution.cpp

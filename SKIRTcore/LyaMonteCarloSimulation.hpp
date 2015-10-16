@@ -7,7 +7,8 @@
 #define LYAMONTECARLOSIMULATION_HPP
 
 #include "MonteCarloSimulation.hpp"
-class LyaDustSystem;
+class HISystem;
+class DustSystem;
 class LyaWavelengthGrid;
 
 //////////////////////////////////////////////////////////////////////
@@ -24,13 +25,13 @@ class LyaMonteCarloSimulation : public MonteCarloSimulation
     Q_CLASSINFO("Default", "LyaWavelengthGrid")
 
     Q_CLASSINFO("Property", "stellarSystem")
-    Q_CLASSINFO("Title", "the stellar system")
+    Q_CLASSINFO("Title", "the 'stellar' system")
     Q_CLASSINFO("Default", "StellarSystem")
 
-    Q_CLASSINFO("Property", "dustSystem")
-    Q_CLASSINFO("Title", "the dust system")
+    Q_CLASSINFO("Property", "hISystem")
+    Q_CLASSINFO("Title", "the neutral hydrogen system")
     Q_CLASSINFO("Optional", "true")
-    Q_CLASSINFO("Default", "LyaDustSystem")
+//    Q_CLASSINFO("Default", "DustSystem")
 
     //============= Construction - Setup - Destruction =============
 
@@ -53,18 +54,24 @@ public:
     /** Returns the stellar system for this simulation. */
     Q_INVOKABLE StellarSystem* stellarSystem() const;
 
-    /** Sets the optional dust system for this simulation. */
-    Q_INVOKABLE void setDustSystem(LyaDustSystem* value);
+    /** Sets the optional neutral hydrogen system for this simulation. */
+    Q_INVOKABLE void setHISystem(HISystem* value);
 
-    /** Returns the dust system for this simulation, or null if there is no dust. */
-    Q_INVOKABLE LyaDustSystem* dustSystem() const;
+    /** Returns the neutral hydrogen system for this simulation, or null if there is no gas. */
+    Q_INVOKABLE HISystem* hISystem() const;
 
     //======================== Other Functions =======================
 
 protected:
-    /** This function actually runs the simulation. For a Lyα alpha simulation, this just
+    /** This function actually runs the simulation. For a Lyα simulation, this just
         includes the stellar emission phase (plus writing the results). */
     void runSelf();
+
+    //======================== Data Members ========================
+
+private:
+    // discoverable attributes
+    HISystem* _his;
 };
 
 ////////////////////////////////////////////////////////////////////
