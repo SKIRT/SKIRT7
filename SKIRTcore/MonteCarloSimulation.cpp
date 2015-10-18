@@ -48,8 +48,6 @@ void MonteCarloSimulation::setupSelfBefore()
         throw FATALERROR("Number of photon packages is larger than implementation limit of 1e15");
     if (_minWeightReduction < 1e3)
         throw FATALERROR("The minimum weight reduction factor should be larger than 1000");
-    if (_minWeightReduction > 1e9)
-        throw FATALERROR("The minimum weight reduction factor should be smaller than 1e9");
     if (_minfs < 0)
         throw FATALERROR("The minimum number of scattering events is negative");
     if (_minfs > 1000)
