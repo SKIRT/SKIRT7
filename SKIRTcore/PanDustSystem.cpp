@@ -32,7 +32,7 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////
 
 PanDustSystem::PanDustSystem()
-    : _dustemissivity(0), _dustlib(0), _emissionBoost(1), _selfabsorption(true), _writeEmissivity(false),
+    : _dustemissivity(0), _dustlib(0), _emissionBias(0), _emissionBoost(1), _selfabsorption(true), _writeEmissivity(false),
       _writeTemp(true), _writeISRF(true), _cycles(0), _Nlambda(0), _haveLabsstel(false), _haveLabsdust(false)
 {
 }
@@ -48,9 +48,9 @@ void PanDustSystem::setupSelfBefore()
     {
         setDustLib(0);
         setSelfAbsorption(false);
+        setWriteEmissivity(false);
         setWriteTemperature(false);
         setWriteISRF(false);
-        setWriteEmissivity(false);
     }
     // if there is dust emission, make sure that there is a dust library as well
     else
@@ -189,16 +189,30 @@ DustLib* PanDustSystem::dustLib() const
 
 ////////////////////////////////////////////////////////////////////
 
-void PanDustSystem::setEmissionBoost(int value)
+void PanDustSystem::setEmissionBias(double value)
+{
+    _emissionBias = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double PanDustSystem::emissionBias() const
+{
+    return _emissionBias;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void PanDustSystem::setEmissionBoost(double value)
 {
     _emissionBoost = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-int PanDustSystem::emissionBoost() const
+double PanDustSystem::emissionBoost() const
 {
-    return _dustemissivity ? _emissionBoost : 1;
+    return _emissionBoost;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -213,6 +227,20 @@ void PanDustSystem::setSelfAbsorption(bool value)
 bool PanDustSystem::selfAbsorption() const
 {
     return _dustemissivity && _selfabsorption;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void PanDustSystem::setCycles(int value)
+{
+    _cycles = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+int PanDustSystem::cycles() const
+{
+    return _cycles;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -255,20 +283,6 @@ void PanDustSystem::setWriteISRF(bool value)
 bool PanDustSystem::writeISRF() const
 {
     return _dustemissivity && _writeISRF;
-}
-
-////////////////////////////////////////////////////////////////////
-
-void PanDustSystem::setCycles(int value)
-{
-    _cycles = value;
-}
-
-////////////////////////////////////////////////////////////////////
-
-int PanDustSystem::cycles() const
-{
-    return _cycles;
 }
 
 ////////////////////////////////////////////////////////////////////

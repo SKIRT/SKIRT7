@@ -283,19 +283,15 @@ void PanMonteCarloSimulation::dodustemissionchunk(size_t index)
     // Emit photon packages
     if (Ltot > 0)
     {
-        // We consider biasing in the selection of the cell from which the photon packages are
-        // emitted. Half are emitted from the "natural" distribution, in which each cell is weighted
-        // according to its total luminosity (Lv[em]). The other half are emitted from
+        // We consider biasing in the selection of the cell from which the photon packages are emitted.
+        // A fraction of the cells is selected from the "natural" distribution, in which each cell is
+        // weighted according to its total luminosity (Lv[em]). The other cells are selected from
         // a uniform distribution in which each cell has a equal probability.
-        double xi = 0.5;    // the biasing factor
+        double xi = _pds->emissionBias();    // the fraction to be selected from a uniform distribution
 
         // the cumulative distribution of the natural pdf (Lv does not need to be normalized before)
         Array cumLv;
         NR::cdf(cumLv, Lv);
-
-        // the cumulative distribution of a uniform pdf
-        Array cumuv(_Ncells+1);
-        for (int m=0; m<_Ncells; m++) cumuv[m] = m/static_cast<double>(_Ncells);
 
         PhotonPackage pp,ppp;
         double Lmean = Ltot/_Ncells;
@@ -310,12 +306,16 @@ void PanMonteCarloSimulation::dodustemissionchunk(size_t index)
             {
                 int m;
                 double X = _random->uniform();
-                if (X<0.5)
-                    // rescale the deviate from [0,0.5[ to [0,1[
-                    m = NR::locate_clip(cumLv,2.0*X);
+                if (X<xi)
+                {
+                    // rescale the deviate from [0,xi[ to [0,Ncells[
+                    m = max(0,min(_Ncells-1,static_cast<int>(_Ncells/xi)));
+                }
                 else
-                    // rescale the deviate from [0.5,1[ to [0,1[
-                    m = NR::locate_clip(cumuv,2.0*X-1.0);
+                {
+                    // rescale the deviate from [xi,1[ to [0,1[
+                    m = NR::locate_clip(cumLv,(X-xi)/(1-xi));
+                }
                 double weight = 1.0/(1-xi+xi*Lmean/Lv[m]);
                 Position bfr = _pds->randomPositionInCell(m);
                 Direction bfk = _random->direction();

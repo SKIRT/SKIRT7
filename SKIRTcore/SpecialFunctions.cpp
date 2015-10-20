@@ -13,7 +13,7 @@ using namespace std;
 
 ////////////////////////////////////////////////////////////////////
 
-double SpecialFunctions::lngamma(const double a)
+double SpecialFunctions::lngamma(double a)
 {
     int j;
     double xx, y, tmp, ser;
@@ -34,14 +34,14 @@ double SpecialFunctions::lngamma(const double a)
 
 ////////////////////////////////////////////////////////////////////
 
-double SpecialFunctions::gamma(const double a)
+double SpecialFunctions::gamma(double a)
 {
     return exp(lngamma(a));
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double SpecialFunctions::incompletegamma(const double a, const double x)
+double SpecialFunctions::incompletegamma(double a, double x)
 {
     const int ITMAX = 100;
     const double EPS = 3.0e-7;
@@ -95,21 +95,21 @@ double SpecialFunctions::incompletegamma(const double a, const double x)
 
 ////////////////////////////////////////////////////////////////////
 
-double SpecialFunctions::beta(const double a, const double b)
+double SpecialFunctions::beta(double a, double b)
 {
     return exp(lngamma(a)+lngamma(b)-lngamma(a+b));
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double SpecialFunctions::beta(const double x, const double a, const double b)
+double SpecialFunctions::beta(double x, double a, double b)
 {
     return betaregularized(x,a,b)*beta(a,b);
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double SpecialFunctions::betaregularized(const double x, const double a, const double b)
+double SpecialFunctions::betaregularized(double x, double a, double b)
 {
     double bt;
     if (x<0.0 || x>1.0) throw FATALERROR("x should be between 0 and 1 (x = " + QString::number(x) + ")");
@@ -171,7 +171,7 @@ double SpecialFunctions::betaregularized(const double x, const double a, const d
 
 ////////////////////////////////////////////////////////////////////
 
-double SpecialFunctions::bessi1(const double x)
+double SpecialFunctions::bessi1(double x)
 {
     double ax, ans, y;
     if ((ax=fabs(x)) < 3.75)
@@ -198,7 +198,7 @@ double SpecialFunctions::bessi1(const double x)
 
 ////////////////////////////////////////////////////////////////////
 
-double SpecialFunctions::bessk1(const double x)
+double SpecialFunctions::bessk1(double x)
 {
     double ans, y;
     if (x <= 0.0) throw FATALERROR("x should be positive (x = " + QString::number(x) + ")");
@@ -227,7 +227,7 @@ double SpecialFunctions::bessk1(const double x)
 
 ////////////////////////////////////////////////////////////////////
 
-double SpecialFunctions::dawson(const double x)
+double SpecialFunctions::dawson(double x)
 {
     const int NMAX=6;
     const double H=0.4, a1=2.0/3.0, a2=0.4, a3=2.0/7.0;
@@ -270,7 +270,7 @@ double SpecialFunctions::dawson(const double x)
 
 ////////////////////////////////////////////////////////////////////
 
-double SpecialFunctions::rf(const double x, const double y, const double z)
+double SpecialFunctions::rf(double x, double y, double z)
 {
     const double ERRTOL=0.0025, TINY=1.5e-38, BIG=3.0e37, THIRD=1.0/3.0;
     const double C1=1.0/24.0, C2=0.1, C3=3.0/44.0, C4=1.0/14.0;
@@ -301,7 +301,7 @@ double SpecialFunctions::rf(const double x, const double y, const double z)
 
 ////////////////////////////////////////////////////////////////////
 
-double SpecialFunctions::rd(const double x, const double y, const double z)
+double SpecialFunctions::rd(double x, double y, double z)
 {
     const double ERRTOL=0.0015, TINY=1.0e-25, BIG=4.5e21;
     const double C1=3.0/14.0, C2=1.0/6.0, C3=9.0/22.0;
@@ -341,7 +341,7 @@ double SpecialFunctions::rd(const double x, const double y, const double z)
 
 ////////////////////////////////////////////////////////////////////
 
-double SpecialFunctions::rj(const double x, const double y, const double z, const double p)
+double SpecialFunctions::rj(double x, double y, double z, double p)
 {
     const double ERRTOL=0.0015, TINY=2.5e-13, BIG=9.0e11;
     const double C1=3.0/14.0, C2=1.0/3.0, C3=3.0/22.0, C4=3.0/26.0;
@@ -410,7 +410,7 @@ double SpecialFunctions::rj(const double x, const double y, const double z, cons
 
 ////////////////////////////////////////////////////////////////////
 
-double SpecialFunctions::rc(const double x, const double y)
+double SpecialFunctions::rc(double x, double y)
 {
     const double ERRTOL=0.0012, TINY=1.69e-38, SQRTNY=1.3e-19, BIG=3.0e37;
     const double TNBG=TINY*BIG, COMP1=2.236/SQRTNY, COMP2=TNBG*TNBG/25.0;
@@ -443,7 +443,7 @@ double SpecialFunctions::rc(const double x, const double y)
 
 ////////////////////////////////////////////////////////////////////
 
-double SpecialFunctions::EllipticF(const double z, const double k)
+double SpecialFunctions::EllipticF(double z, double k)
 {
     double a = (1.0-z)*(1.0+z);
     double b = (1.0-z*k)*(1.0+z*k);
@@ -453,7 +453,7 @@ double SpecialFunctions::EllipticF(const double z, const double k)
 
 ////////////////////////////////////////////////////////////////////
 
-double SpecialFunctions::EllipticE(const double z, const double k)
+double SpecialFunctions::EllipticE(double z, double k)
 {
     double a = (1.0-z)*(1.0+z);
     double b = (1.0-z*k)*(1.0+z*k);
@@ -463,7 +463,7 @@ double SpecialFunctions::EllipticE(const double z, const double k)
 
 ////////////////////////////////////////////////////////////////////
 
-double SpecialFunctions::EllipticPi(const double z, const double nu, const double k)
+double SpecialFunctions::EllipticPi(double z, double nu, double k)
 {
     double a = (1.0-z)*(1.0+z);
     double b = (1.0-z*k)*(1.0+z*k);
@@ -475,28 +475,28 @@ double SpecialFunctions::EllipticPi(const double z, const double nu, const doubl
 
 ////////////////////////////////////////////////////////////////////
 
-double SpecialFunctions::EllipticK(const double k)
+double SpecialFunctions::EllipticK(double k)
 {
     return EllipticF(1.0,k);
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double SpecialFunctions::EllipticE(const double k)
+double SpecialFunctions::EllipticE(double k)
 {
     return EllipticE(1.0,k);
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double SpecialFunctions::EllipticPi(const double nu, const double k)
+double SpecialFunctions::EllipticPi(double nu, double k)
 {
     return EllipticPi(1.0,nu,k);
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double SpecialFunctions::functionX(const double s)
+double SpecialFunctions::functionX(double s)
 {
     const double s0 = 0.01;
     double ans;
@@ -528,7 +528,7 @@ double SpecialFunctions::functionX(const double s)
 
 ////////////////////////////////////////////////////////////////////
 
-double SpecialFunctions::LambertW(const double z)
+double SpecialFunctions::LambertW(double z)
 {
     int i;
     const double eps=4.0e-16;
@@ -576,7 +576,7 @@ double SpecialFunctions::LambertW(const double z)
 
 ////////////////////////////////////////////////////////////////////
 
-double SpecialFunctions::LambertW1(const double z)
+double SpecialFunctions::LambertW1(double z)
 {
     const double eps=1.0e-12;
     const double em1=0.3678794411714423215955237701614608;
@@ -627,7 +627,7 @@ double SpecialFunctions::LambertW1(const double z)
 
 ////////////////////////////////////////////////////////////////////
 
-double SpecialFunctions::DebyeD(const int n, const double x)
+double SpecialFunctions::DebyeD(int n, double x)
 {
     if (x<0.0 || n<1 || n>20)
         throw FATALERROR("Bad arguments (x = " + QString::number(x) + ", n = " + QString::number(n) + ")");
@@ -751,7 +751,7 @@ double SpecialFunctions::DebyeD(const int n, const double x)
 
 ////////////////////////////////////////////////////////////////////
 
-double SpecialFunctions::gln(const double p, const double x)
+double SpecialFunctions::gln(double p, double x)
 {
     const double q = 1.0-p;
     if (q==0.0)
@@ -768,14 +768,14 @@ double SpecialFunctions::gln(const double p, const double x)
 
 ////////////////////////////////////////////////////////////////////
 
-double SpecialFunctions::gln2(const double p, const double x1, const double x2)
+double SpecialFunctions::gln2(double p, double x1, double x2)
 {
     return pow(x2, 1.0-p) * gln(p, x1/x2);
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double SpecialFunctions::gexp(const double p, const double x)
+double SpecialFunctions::gexp(double p, double x)
 {
     const double q = 1.0-p;
     if (q==0.0)
@@ -792,9 +792,9 @@ double SpecialFunctions::gexp(const double p, const double x)
 
 ////////////////////////////////////////////////////////////////////
 
-double SpecialFunctions::voigthjerting(const double a, const double x)
+double SpecialFunctions::voigthjerting(double a, double x)
 {
-    return 0.0;
+    return a*x;  // just so the arguments are in use
 }
 
 ////////////////////////////////////////////////////////////////////
