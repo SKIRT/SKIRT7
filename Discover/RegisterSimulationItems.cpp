@@ -16,7 +16,6 @@
 #include "AdaptiveMeshStellarComp.hpp"
 #include "AllCellsDustLib.hpp"
 #include "AmHydrocarbonGrainComposition.hpp"
-#include "AnalyticalHIDistribution.hpp"
 #include "AxGeometry.hpp"
 #include "Benchmark1DDustMix.hpp"
 #include "Benchmark2DDustMix.hpp"
@@ -32,7 +31,6 @@
 #include "CompDustDistribution.hpp"
 #include "ConfigurableDustMix.hpp"
 #include "ConicalShellGeometry.hpp"
-#include "ContinuumLyaSpectrum.hpp"
 #include "CropGeometryDecorator.hpp"
 #include "CubBackgroundGeometry.hpp"
 #include "CubicSplineSmoothingKernel.hpp"
@@ -72,24 +70,17 @@
 #include "GaussianGeometry.hpp"
 #include "GenGeometry.hpp"
 #include "GreyBodyDustEmissivity.hpp"
-#include "HIDistribution.hpp"
-#include "HISystem.hpp"
 #include "IdenticalAssigner.hpp"
 #include "InstrumentFrame.hpp"
 #include "InstrumentSystem.hpp"
 #include "InterstellarDustMix.hpp"
 #include "KuruczSED.hpp"
 #include "LaserGeometry.hpp"
-#include "LineLyaSpectrum.hpp"
 #include "LinMesh.hpp"
 #include "LogMesh.hpp"
 #include "LogNormalGrainSizeDistribution.hpp"
 #include "LogWavelengthGrid.hpp"
 #include "LuminosityStellarCompNormalization.hpp"
-#include "LyaMonteCarloSimulation.hpp"
-#include "LyaSpectrum.hpp"
-#include "LyaStellarComp.hpp"
-#include "LyaWavelengthGrid.hpp"
 #include "MappingsSEDFamily.hpp"
 #include "MGEGeometry.hpp"
 #include "MRNDustMix.hpp"
@@ -156,7 +147,6 @@
 #include "SpiralStructureGeometryDecorator.hpp"
 #include "StaggeredAssigner.hpp"
 #include "StarburstSED.hpp"
-#include "StaticSphereHIDistribution.hpp"
 #include "StellarSurfaceGeometry.hpp"
 #include "StellarSystem.hpp"
 #include "StellarUnits.hpp"
@@ -215,7 +205,6 @@ void RegisterSimulationItems::registerAll()
     add<MonteCarloSimulation>(false);
     add<OligoMonteCarloSimulation>();
     add<PanMonteCarloSimulation>();
-    add<LyaMonteCarloSimulation>();
 
     // instruments
     add<InstrumentSystem>();
@@ -235,7 +224,6 @@ void RegisterSimulationItems::registerAll()
     add<LogWavelengthGrid>();
     add<NestedLogWavelengthGrid>();
     add<FileWavelengthGrid>();
-    add<LyaWavelengthGrid>();
 
     // stellar systems
     add<StellarSystem>();
@@ -243,7 +231,6 @@ void RegisterSimulationItems::registerAll()
     add<GeometricStellarComp>(false);
     add<OligoStellarComp>();
     add<PanStellarComp>();
-    add<LyaStellarComp>();
     add<StellarCompNormalization>(false);
     add<BolLuminosityStellarCompNormalization>();
     add<LuminosityStellarCompNormalization>();
@@ -315,9 +302,6 @@ void RegisterSimulationItems::registerAll()
     add<OligoDustSystem>();
     add<PanDustSystem>();
 
-    // neutral hydrogen systems
-    add<HISystem>();
-
     // dust components and corresponding normalizations
     add<DustComp>();
     add<MeshDustComponent>();
@@ -339,11 +323,6 @@ void RegisterSimulationItems::registerAll()
     add<AdaptiveMeshDustDistribution>();
     add<SphericalAdaptiveMeshDustDistribution>();
     add<VoronoiDustDistribution>();
-
-    // neutral hydrogen distributions
-    add<HIDistribution>(false);
-    add<AnalyticalHIDistribution>(false);
-    add<StaticSphereHIDistribution>();
 
     // mesh file representations
     add<AdaptiveMeshFile>(false);
@@ -435,11 +414,6 @@ void RegisterSimulationItems::registerAll()
     add<AllCellsDustLib>();
     add<Dim1DustLib>();
     add<Dim2DustLib>();
-
-    // Lyα emission spectra
-    add<LyaSpectrum>(false);
-    add<ContinuumLyaSpectrum>();
-    add<LineLyaSpectrum>();
 
     // stellar SEDs
     add<StellarSED>(false);

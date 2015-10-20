@@ -297,19 +297,9 @@ HEADERS += \
     ZubkoSilicateGrainSizeDistribution.hpp \
     ZubkoGraphiteGrainSizeDistribution.hpp \
     ZubkoPAHGrainSizeDistribution.hpp \
-    LyaMonteCarloSimulation.hpp \
-    LyaWavelengthGrid.hpp \
-    LyaStellarComp.hpp \
-    LyaSpectrum.hpp \
-    ContinuumLyaSpectrum.hpp \
-    LineLyaSpectrum.hpp \
     MoveableMesh.hpp \
     AnchoredMesh.hpp \
     LogMesh.hpp \
-    HIDistribution.hpp \
-    HISystem.hpp \
-    AnalyticalHIDistribution.hpp \
-    StaticSphereHIDistribution.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -565,16 +555,6 @@ SOURCES += \
     ZubkoSilicateGrainSizeDistribution.cpp \
     ZubkoGraphiteGrainSizeDistribution.cpp \
     ZubkoPAHGrainSizeDistribution.cpp \
-    LyaWavelengthGrid.cpp \
-    LyaMonteCarloSimulation.cpp \
-    LyaStellarComp.cpp \
-    LyaSpectrum.cpp \
-    ContinuumLyaSpectrum.cpp \
-    LineLyaSpectrum.cpp \
     MoveableMesh.cpp \
     AnchoredMesh.cpp \
     LogMesh.cpp \
-    HIDistribution.cpp \
-    HISystem.cpp \
-    AnalyticalHIDistribution.cpp \
-    StaticSphereHIDistribution.cpp
