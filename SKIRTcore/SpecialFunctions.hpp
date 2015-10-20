@@ -12,8 +12,8 @@
     mathematical special functions such as the gamma function and elliptic integrals, but also a
     number of specific functions that often occur in the program. Many functions are copied or
     adapted from the famous Numerical Recipes books. The version used is the second edition of
-    Numerical Recipes in C++ (Press et al. 2002). Other functions are taken from the web or are just
-    implemented ad hoc. */
+    Numerical Recipes in C++ (Press et al. 2002). Other functions are taken from the web or are
+    just implemented ad hoc. */
 namespace SpecialFunctions
 {
     /** This function returns the logarithm of the Gamma function, i.e. \f$\ln\Gamma(a)\f$. The
@@ -196,8 +196,7 @@ namespace SpecialFunctions
     /** This function returns the Debye function of order \f$n\f$, defined as \f[ D_n(x) =
         \frac{n}{x^n} \int_0^x \frac{t^n\,{\text{d}}t}{{\text{e}}^t-1}. \f] The order \f$n\f$
         should be an integer number between 1 and 20; the argument \f$x\f$ is a positive real
-        number. The implementation is adapted from Richard Mathar's website at MPIA Heidelberg.
-        */
+        number. The implementation is adapted from Richard Mathar's website at MPIA Heidelberg. */
     double DebyeD(const int n, const double x);
 
     /** This function returns a generalized logarithmic function \f${\text{gln}}(p,x)\f$, defined
@@ -213,8 +212,8 @@ namespace SpecialFunctions
         function \f${\text{gln}}(p,x)\f$ with the same exponent \f$p\f$. Compared to simply
         subtracting the two generalized logarithms, this function achieves much better accuracy for
         large arguments \f$x_1\f$ and \f$x_2\f$ by using the identity \f[ {\text{gln2}}(p,x_1,x_2)
-        = {\text{gln}}(p,x_1) - {\text{gln}}(p,x_2) = (x_2)^{1-p} \, {\text{gln}}(p,\frac{x_1}{x_2}).
-        \f] */
+        = {\text{gln}}(p,x_1) - {\text{gln}}(p,x_2) = (x_2)^{1-p} \,
+        {\text{gln}}(p,\frac{x_1}{x_2}). \f] */
     double gln2(const double p, const double x1, const double x2);
 
     /** This function returns a generalized exponential function \f${\text{gexp}}(p,x)\f$, defined
@@ -222,9 +221,15 @@ namespace SpecialFunctions
         \begin{cases} \; ((1-p)\,x+1)^{\frac{1}{1-p}} & p\ne1 \\ \; {\text{e}}^p & p=1. \end{cases}
         \f] Both \f$x\f$ and \f$p\f$ should be positive real numbers. When \f$p\f$ approaches 1, we
         use the expansion \f[ {\text{gexp}}(p,x) \approx {\text{e}}^x\left[ 1 - \frac12\,(1-p)\,x^2
-        + \frac{1}{24}\, (1-p)^2\, (3x+8)\,x^3 - \frac{1}{48}\, (1-p)^3\, (x^2+8x+12)\, x^4 + \ldots
-        \right] \f] */
+        + \frac{1}{24}\, (1-p)^2\, (3x+8)\,x^3 - \frac{1}{48}\, (1-p)^3\, (x^2+8x+12)\, x^4 +
+        \ldots \right] \f] */
     double gexp(const double p, const double x);
+
+    /** This function returns an approximation for the Voigt-Hjerting function \f[ H(a,x) =
+        \frac{a}{\pi} \int_{-\infty}^\infty \frac{ {\text{e}}^{-y^2}\,{\text{d}}y }{ (x-y)^2+a^2 }
+        \f] Both \f$a\f$ and \f$x\f$ are positive real numbers. We use the approximation presented
+        by ... */
+    double voigthjerting(const double a, const double x);
 }
 
 ////////////////////////////////////////////////////////////////////

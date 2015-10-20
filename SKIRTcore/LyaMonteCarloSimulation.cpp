@@ -3,7 +3,8 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
-#include "LyaDustSystem.hpp"
+#include "DustSystem.hpp"
+#include "HISystem.hpp"
 #include "LyaMonteCarloSimulation.hpp"
 #include "LyaWavelengthGrid.hpp"
 #include "StellarSystem.hpp"
@@ -13,6 +14,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////
 
 LyaMonteCarloSimulation::LyaMonteCarloSimulation()
+    : _his(0)
 {
 }
 
@@ -50,18 +52,18 @@ StellarSystem* LyaMonteCarloSimulation::stellarSystem() const
 
 ////////////////////////////////////////////////////////////////////
 
-void LyaMonteCarloSimulation::setDustSystem(LyaDustSystem* value)
+void LyaMonteCarloSimulation::setHISystem(HISystem* value)
 {
-    if (_ds) delete _ds;
-    _ds = value;
-    if (_ds) _ds->setParent(this);
+    if (_his) delete _his;
+    _his = value;
+    if (_his) _his->setParent(this);
 }
 
 ////////////////////////////////////////////////////////////////////
 
-LyaDustSystem* LyaMonteCarloSimulation::dustSystem() const
+HISystem* LyaMonteCarloSimulation::hISystem() const
 {
-    return dynamic_cast<LyaDustSystem*>(_ds);
+    return _his;
 }
 
 ////////////////////////////////////////////////////////////////////

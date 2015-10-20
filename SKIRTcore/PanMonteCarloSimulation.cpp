@@ -278,17 +278,29 @@ void PanMonteCarloSimulation::dodustemissionchunk(size_t index)
         double Labsbol = _Labsbolv[m];
         if (Labsbol>0.0) Lv[m] = Labsbol * _pds->dustluminosity(m,ell);
     }
-    double Ltot = Lv.sum();
+    double Ltot = Lv.sum();  // the total luminosity to be emitted at this wavelength index
 
     // Emit photon packages
     if (Ltot > 0)
     {
-        Array Xv;
-        NR::cdf(Xv, Lv);
+        // We consider biasing in the selection of the cell from which the photon packages are
+        // emitted. Half are emitted from the "natural" distribution, in which each cell is weighted
+        // according to its total luminosity (Lv[em]). The other half are emitted from
+        // a uniform distribution in which each cell has a equal probability.
+        double xi = 0.5;    // the biasing factor
+
+        // the cumulative distribution of the natural pdf (Lv does not need to be normalized before)
+        Array cumLv;
+        NR::cdf(cumLv, Lv);
+
+        // the cumulative distribution of a uniform pdf
+        Array cumuv(_Ncells+1);
+        for (int m=0; m<_Ncells; m++) cumuv[m] = m/static_cast<double>(_Ncells);
 
         PhotonPackage pp,ppp;
-        double L = Ltot / _Npp;
-        double Lthreshold = L / minWeightReduction();
+        double Lmean = Ltot/_Ncells;
+        double Lem = Ltot / _Npp;
+        double Lthreshold = Lem / minWeightReduction();
 
         quint64 remaining = _chunksize;
         while (remaining > 0)
@@ -296,11 +308,18 @@ void PanMonteCarloSimulation::dodustemissionchunk(size_t index)
             quint64 count = qMin(remaining, _logchunksize);
             for (quint64 i=0; i<count; i++)
             {
+                int m;
                 double X = _random->uniform();
-                int m = NR::locate_clip(Xv,X);
+                if (X<0.5)
+                    // rescale the deviate from [0,0.5[ to [0,1[
+                    m = NR::locate_clip(cumLv,2.0*X);
+                else
+                    // rescale the deviate from [0.5,1[ to [0,1[
+                    m = NR::locate_clip(cumuv,2.0*X-1.0);
+                double weight = 1.0/(1-xi+xi*Lmean/Lv[m]);
                 Position bfr = _pds->randomPositionInCell(m);
                 Direction bfk = _random->direction();
-                pp.launch(L,ell,bfr,bfk);
+                pp.launch(Lem*weight,ell,bfr,bfk);
                 peeloffemission(&pp,&ppp);
                 while (true)
                 {

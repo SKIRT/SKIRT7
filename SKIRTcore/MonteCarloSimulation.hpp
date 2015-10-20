@@ -43,7 +43,6 @@ class MonteCarloSimulation : public Simulation
     Q_CLASSINFO("Property", "minWeightReduction")
     Q_CLASSINFO("Title", "the minimum weight reduction factor of a photon package")
     Q_CLASSINFO("MinValue", "1e3")
-    Q_CLASSINFO("MaxValue", "1e9")
     Q_CLASSINFO("Default", "1e4")
     Q_CLASSINFO("Silent", "true")
 
