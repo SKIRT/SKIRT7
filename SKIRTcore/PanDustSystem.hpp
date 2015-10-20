@@ -46,6 +46,7 @@ class PanDustSystem : public DustSystem
     Q_CLASSINFO("MinValue", "1")
     Q_CLASSINFO("MaxValue", "1000")
     Q_CLASSINFO("Default", "1")
+    Q_CLASSINFO("Silent","true")
     Q_CLASSINFO("RelevantIf", "dustEmissivity")
 
     Q_CLASSINFO("Property", "selfAbsorption")
