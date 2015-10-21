@@ -14,7 +14,10 @@
 # --------------------------------------------------------------------
 
 # Search for qmake in the home directory
-PATHLIST="$(find $HOME/Qt* -name qmake -type f | tr '\n' ' ')"
+PATHLIST="$(find $HOME/Qt* -name qmake -type f 2>/dev/null | tr '\n' ' ')"
+
+# Search for qmake in the /usr/local directory
+PATHLIST="$(find /usr/local/Qt* -name qmake -type f 2>/dev/null | tr '\n' ' ') $PATHLIST"
 
 # Search for qmake in the $PATH
 PATHLIST="$(which qmake) $PATHLIST"
