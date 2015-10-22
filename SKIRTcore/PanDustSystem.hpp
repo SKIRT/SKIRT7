@@ -43,7 +43,7 @@ class PanDustSystem : public DustSystem
 
     Q_CLASSINFO("Property", "emissionBoost")
     Q_CLASSINFO("Title", "the factor by which to boost the number of dust emission photon packages")
-    Q_CLASSINFO("MinValue", "1")
+    Q_CLASSINFO("MinValue", "0")
     Q_CLASSINFO("MaxValue", "1000")
     Q_CLASSINFO("Default", "1")
     Q_CLASSINFO("Silent","true")
