@@ -73,7 +73,7 @@ void Sphere2DDustGrid::setupSelfAfter()
         _thetav = M_PI_2;
 
         // Copy the values from the original to the new grid, skipping the xy-plane
-        for (int k=0; k<=_Ntheta; k++)
+        for (int k=0; k<_Ntheta; k++)
         {
             int target = (or_cv[k] > 0) ? k : k+1;
             _thetav[target] = or_thetav[k];
@@ -122,6 +122,13 @@ Mesh* Sphere2DDustGrid::meshTheta() const
 int Sphere2DDustGrid::dimension() const
 {
     return 2;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+int Sphere2DDustGrid::numCells() const
+{
+    return _Nr*_Ntheta;
 }
 
 //////////////////////////////////////////////////////////////////////

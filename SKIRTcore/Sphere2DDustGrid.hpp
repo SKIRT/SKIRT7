@@ -41,7 +41,7 @@ class Sphere2DDustGrid : public SphereDustGrid
 
 public:
     /** The default constructor. */
-    Sphere2DDustGrid();
+    Q_INVOKABLE Sphere2DDustGrid();
 
     /** This function sets up a number of data members. It also pre-calculates and stores the opening angle cosines \f$c_k = \cos\theta_k\f$
         for the boundary cones in the angular grid, to help speed up calculations in the path()
@@ -68,6 +68,9 @@ public:
 public:
     /** This function returns the dimension of the grid, which is 2 for this class. */
     int dimension() const;
+
+    /** This function returns the number of cells in the dust grid. */
+    int numCells() const;
 
     /** This function returns the volume of the dust cell with cell number \f$m\f$. In this class,
         the function determines the radial and angular bin indices \f$i\f$ and \f$k\f$ that

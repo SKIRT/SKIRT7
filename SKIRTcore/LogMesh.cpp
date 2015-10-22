@@ -21,7 +21,7 @@ LogMesh::LogMesh()
 void LogMesh::setupSelfBefore()
 {
     AnchoredMesh::setupSelfBefore();
-    if (_tc<=0 || _tc>=0) throw FATALERROR("The central bin width fraction should be within range ]0,1[");
+    if (_tc<=0 || _tc>=1) throw FATALERROR("The central bin width fraction should be within range ]0,1[");
 }
 
 ////////////////////////////////////////////////////////////////////
