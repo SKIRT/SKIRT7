@@ -309,7 +309,7 @@ void PanMonteCarloSimulation::dodustemissionchunk(size_t index)
                 if (X<xi)
                 {
                     // rescale the deviate from [0,xi[ to [0,Ncells[
-                    m = max(0,min(_Ncells-1,static_cast<int>(_Ncells/xi)));
+                    m = max(0,min(_Ncells-1,static_cast<int>(_Ncells*X/xi)));
                 }
                 else
                 {
