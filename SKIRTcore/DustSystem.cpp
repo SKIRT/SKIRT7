@@ -58,22 +58,6 @@ void DustSystem::setupSelfBefore()
     if (!_assigner) setAssigner(new StaggeredAssigner(this));
 }
 
-////////////////////////////////////////////////////////////////////
-
-void DustSystem::setAssigner(ProcessAssigner* value)
-{
-    if (_assigner) delete _assigner;
-    _assigner = value;
-    if (_assigner) _assigner->setParent(this);
-}
-
-////////////////////////////////////////////////////////////////////
-
-ProcessAssigner* DustSystem::assigner() const
-{
-    return _assigner;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 void DustSystem::setupSelfAfter()
@@ -83,6 +67,13 @@ void DustSystem::setupSelfAfter()
     // Copy some basic properties
     _Ncomp = _dd->Ncomp();
     _Ncells = _grid->numCells();
+
+    // Make sure that all dust mixes support polarization, or none of them do
+    for (int h=1; h<_Ncomp; h++)
+    {
+        if (_dd->mix(h)->polarization() != _dd->mix(0)->polarization())
+            throw FATALERROR("All dust mixes must consistenly support polarization, or not support polarization");
+    }
 
     // Resize the tables that hold essential dust cell properties
     _volumev.resize(_Ncells);
@@ -832,6 +823,22 @@ bool DustSystem::writeCellsCrossed() const
     return _writeCellsCrossed;
 }
 
+////////////////////////////////////////////////////////////////////
+
+void DustSystem::setAssigner(ProcessAssigner* value)
+{
+    if (_assigner) delete _assigner;
+    _assigner = value;
+    if (_assigner) _assigner->setParent(this);
+}
+
+////////////////////////////////////////////////////////////////////
+
+ProcessAssigner* DustSystem::assigner() const
+{
+    return _assigner;
+}
+
 //////////////////////////////////////////////////////////////////////
 
 int DustSystem::dimension() const
@@ -851,6 +858,13 @@ int DustSystem::Ncells() const
 int DustSystem::Ncomp() const
 {
     return _Ncomp;
+}
+
+////////////////////////////////////////////////////////////////////
+
+bool DustSystem::polarization() const
+{
+    return _Ncomp>0 ? _dd->mix(0)->polarization() : false;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -983,17 +997,6 @@ void DustSystem::write() const
             file.writeRow(QList<double>() << index << _crossed[index]);
         }
     }
-}
-
-////////////////////////////////////////////////////////////////////
-
-bool DustSystem::polarization() const
-{
-    for (int h=0; h<_Ncomp; h++)
-    {
-        if (_dd->mix(h)->polarization()) return true;
-    }
-    return false;
 }
 
 //////////////////////////////////////////////////////////////////////

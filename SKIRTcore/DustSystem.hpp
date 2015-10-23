@@ -88,17 +88,17 @@ protected:
     /** This function verifies that all attribute values have been appropriately set. */
     void setupSelfBefore();
 
-    /** This function performs setup for the dust system, which takes several phases. The first
-        phase consists of the creation of the vectors that hold the volumes and densities of the
-        dust cells. The second phase consists of calculating and storing the volume and the dust
+    /** This function performs setup for the dust system, which includes several tasks. First, the
+        function verifies that either all dust mixes in the dust system support polarization, or
+        none of them do. The next task consists of calculating and storing the volume and the dust
         density (for every dust component) of all the cells. To calculate the volume of a given
         dust cell, we just call the corresponding function of the dust grid. To calculate and set
         the density corresponding to given dust component in a given cell, a number of random
         positions are generated within the cell (see sampleCount()). The density in the cell is
         calculated as the mean of the density values (found using a call to the corresponding
         function of the dust distribution) in these points. The calculation of both volume and
-        density is parallellized. In the last phase, the function optionally invokes various
-        writeXXX() functions depending on the state of the corresponding write flags. */
+        density is parallellized. Finally, the function optionally invokes various writeXXX()
+        functions depending on the state of the corresponding write flags. */
     void setupSelfAfter();
 
 private:
@@ -113,6 +113,21 @@ private:
     /** This function serves as the parallelization body for setting the density value of each cell
         by taking random density sample. */
     void setSampleDensityBody(size_t m);
+
+    /** This function is used to assemble the container that stores the densities of all dust cells
+        for each dust component. If multiprocessing is enabled, the calculation of these densities
+        can be performed in parallel by the different processes, depending on the type of
+        ProcessAssigner that is used for this dust system. When a ProcessAssigner subclass is used
+        which distributes the calculation of the dust cell densities amongst the different parallel
+        processes, each process contains only the densities for a particular set of dust cells (but
+        for each dust component). Therefore, this function uses the PeerToPeerCommunicator object
+        to broadcast the densities of the dust cells assigned to a particular process to all other
+        processes and storing them in the appropriate place in the container. This is implemented
+        as an element-wise summation of this container across all processes, where the density for
+        a particular dust cell and dust component will be added to a series of zeros, coming from
+        the processes that were not assigned to that dust cell. The end result will be an assembly
+        of the densities, where each process stores the density over the entire dust grid. */
+    void assemble();
 
     /** This function writes out a simple text file, named <tt>prefix_ds_convergence.dat</tt>,
         providing a convergence check on the dust system. The function calculates the total dust
@@ -270,6 +285,11 @@ public:
     /** This function returns the number of dust components. */
     int Ncomp() const;
 
+    /** This function returns true if the dust mixes in this dust system support polarization;
+        false otherwise. During setup it is verified that either all dust mixes support
+        polarization, or none of them do. */
+    bool polarization() const;
+
     /** This function returns a pointer to the dust mixture corresponding to the \f$h\f$'th dust
         component. */
     DustMix* mix(int h) const;
@@ -365,26 +385,6 @@ public:
         referenced from the general MonteCarloSimulation class (although it is actually invoked
         only for panchromatic simulations). */
     virtual void absorb(int m, int ell, double DeltaL, bool ynstellar) = 0;
-
-    /** This function returns true if at least one dust mix in this dust system supports
-        polarization; false otherwise. */
-    bool polarization() const;
-
-private:
-    /** This function is used to assemble the container that stores the densities of all dust cells
-        for each dust component. If multiprocessing is enabled, the calculation of these densities
-        can be performed in parallel by the different processes, depending on the type of
-        ProcessAssigner that is used for this dust system. When a ProcessAssigner subclass is used
-        which distributes the calculation of the dust cell densities amongst the different parallel
-        processes, each process contains only the densities for a particular set of dust cells (but
-        for each dust component). Therefore, this function uses the PeerToPeerCommunicator object
-        to broadcast the densities of the dust cells assigned to a particular process to all other
-        processes and storing them in the appropriate place in the container. This is implemented
-        as an element-wise summation of this container across all processes, where the density for
-        a particular dust cell and dust component will be added to a series of zeros, coming from
-        the processes that were not assigned to that dust cell. The end result will be an assembly
-        of the densities, where each process stores the density over the entire dust grid. */
-    void assemble();
 
     //======================== Data Members ========================
 
