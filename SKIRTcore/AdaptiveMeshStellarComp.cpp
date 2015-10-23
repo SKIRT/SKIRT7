@@ -22,7 +22,6 @@ using namespace std;
 
 AdaptiveMeshStellarComp::AdaptiveMeshStellarComp()
     : _meshfile(0), _densityIndex(0), _metallicityIndex(1), _ageIndex(2),
-      _xmax(0), _ymax(0), _zmax(0),
       _random(0), _mesh(0)
 {
 }
@@ -38,17 +37,13 @@ AdaptiveMeshStellarComp::~AdaptiveMeshStellarComp()
 
 void AdaptiveMeshStellarComp::setupSelfBefore()
 {
-    StellarComp::setupSelfBefore();
-
-    // verify property values
-    if (_xmax <= 0 || _ymax <= 0 || _zmax <= 0) throw FATALERROR("Domain size should be positive");
+    BoxStellarComp::setupSelfBefore();
 
     // cache the random generator
     _random = find<Random>();
 
     // import the adaptive mesh
-    _mesh = new AdaptiveMesh(_meshfile, QList<int>() << _densityIndex << _metallicityIndex << _ageIndex,
-                             Box(-_xmax,-_ymax,-_zmax, _xmax,_ymax,_zmax));
+    _mesh = new AdaptiveMesh(_meshfile, QList<int>() << _densityIndex << _metallicityIndex << _ageIndex, extent());
     find<Log>()->info("Adaptive mesh data was successfully imported: " + QString::number(_mesh->Ncells()) + " cells.");
 
     // construct the library of SED models
@@ -148,55 +143,6 @@ void AdaptiveMeshStellarComp::setAgeIndex(int value)
 int AdaptiveMeshStellarComp::ageIndex() const
 {
     return _ageIndex;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void AdaptiveMeshStellarComp::setExtentX(double value)
-{
-    _xmax = value;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double AdaptiveMeshStellarComp::extentX() const
-{
-    return _xmax;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void AdaptiveMeshStellarComp::setExtentY(double value)
-{
-    _ymax = value;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double AdaptiveMeshStellarComp::extentY() const
-{
-    return _ymax;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void AdaptiveMeshStellarComp::setExtentZ(double value)
-{
-    _zmax = value;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double AdaptiveMeshStellarComp::extentZ() const
-{
-    return _zmax;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-int AdaptiveMeshStellarComp::dimension() const
-{
-    return 3;
 }
 
 //////////////////////////////////////////////////////////////////////

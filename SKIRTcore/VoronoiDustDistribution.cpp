@@ -17,7 +17,7 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////
 
 VoronoiDustDistribution::VoronoiDustDistribution()
-    : _meshfile(0), _densityUnits(0), _xmax(0), _ymax(0), _zmax(0), _mesh(0)
+    : _meshfile(0), _densityUnits(0), _mesh(0)
 {
 }
 
@@ -32,11 +32,10 @@ VoronoiDustDistribution::~VoronoiDustDistribution()
 
 void VoronoiDustDistribution::setupSelfBefore()
 {
-    DustDistribution::setupSelfBefore();
+    BoxDustDistribution::setupSelfBefore();
 
     // verify property values
     if (_densityUnits <= 0) throw FATALERROR("Density units should be positive");
-    if (_xmax <= 0 || _ymax <= 0 || _zmax <= 0) throw FATALERROR("Domain size should be positive");
     if (_dcv.isEmpty()) throw FATALERROR("There are no dust components");
 }
 
@@ -44,7 +43,7 @@ void VoronoiDustDistribution::setupSelfBefore()
 
 void VoronoiDustDistribution::setupSelfAfter()
 {
-    DustDistribution::setupSelfAfter();
+    BoxDustDistribution::setupSelfAfter();
 
     // make a list of the field indices needed by any of our components
     QList<int> fieldIndices;
@@ -54,7 +53,7 @@ void VoronoiDustDistribution::setupSelfAfter()
     }
 
     // import the Voronoi mesh
-    _mesh = new VoronoiMesh(_meshfile, fieldIndices, Box(-_xmax,-_ymax,-_zmax, _xmax,_ymax,_zmax));
+    _mesh = new VoronoiMesh(_meshfile, fieldIndices, extent());
     find<Log>()->info("Voronoi mesh data was successfully imported: " + QString::number(_mesh->Ncells()) + " cells.");
 
     // add a density field for each of our components, so that the mesh holds the total density
@@ -95,48 +94,6 @@ void VoronoiDustDistribution::setDensityUnits(double value)
 double VoronoiDustDistribution::densityUnits() const
 {
     return _densityUnits;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void VoronoiDustDistribution::setExtentX(double value)
-{
-    _xmax = value;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double VoronoiDustDistribution::extentX() const
-{
-    return _xmax;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void VoronoiDustDistribution::setExtentY(double value)
-{
-    _ymax = value;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double VoronoiDustDistribution::extentY() const
-{
-    return _ymax;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void VoronoiDustDistribution::setExtentZ(double value)
-{
-    _zmax = value;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double VoronoiDustDistribution::extentZ() const
-{
-    return _zmax;
 }
 
 //////////////////////////////////////////////////////////////////////

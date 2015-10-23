@@ -7,7 +7,7 @@
 #define ADAPTIVEMESHSTELLARCOMP_HPP
 
 #include "ArrayTable.hpp"
-#include "StellarComp.hpp"
+#include "BoxStellarComp.hpp"
 class AdaptiveMesh;
 class AdaptiveMeshFile;
 class Random;
@@ -21,9 +21,8 @@ class Random;
     initial stellar density \f$\rho\f$ (in \f$M_\odot\,\text{pc}^{-3}\f$ at \f$t=0\f$), the
     metallicity \f$Z\f$ of the stellar population (dimensionless fraction), and the age of the
     stellar population (in yr). Since the adaptive mesh data format does not specify the size of
-    the domain, this information must be provided as properties of this class as well. The domain
-    size is assumed to be symmetrical relative to the origin. */
-class AdaptiveMeshStellarComp : public StellarComp
+    the domain, this information must be provided as properties of this class as well. */
+class AdaptiveMeshStellarComp : public BoxStellarComp
 {
     Q_OBJECT
     Q_CLASSINFO("Title", "a stellar component imported from an adaptive mesh data file")
@@ -49,21 +48,6 @@ class AdaptiveMeshStellarComp : public StellarComp
     Q_CLASSINFO("MinValue", "0")
     Q_CLASSINFO("MaxValue", "99")
     Q_CLASSINFO("Default", "2")
-
-    Q_CLASSINFO("Property", "extentX")
-    Q_CLASSINFO("Title", "the outer radius of the domain in the x direction")
-    Q_CLASSINFO("Quantity", "length")
-    Q_CLASSINFO("MinValue", "0")
-
-    Q_CLASSINFO("Property", "extentY")
-    Q_CLASSINFO("Title", "the outer radius of the domain in the y direction")
-    Q_CLASSINFO("Quantity", "length")
-    Q_CLASSINFO("MinValue", "0")
-
-    Q_CLASSINFO("Property", "extentZ")
-    Q_CLASSINFO("Title", "the outer radius of the domain in the z direction")
-    Q_CLASSINFO("Quantity", "length")
-    Q_CLASSINFO("MinValue", "0")
 
     //============= Construction - Setup - Destruction =============
 
@@ -121,34 +105,9 @@ public:
         population for this stellar component. */
     Q_INVOKABLE int ageIndex() const;
 
-    /** Sets the outer radius of the domain in the X direction. The total size of the domain in
-        this direction is twice as large. */
-    Q_INVOKABLE void setExtentX(double value);
-
-    /** Returns the outer radius of the domain in the X direction. */
-    Q_INVOKABLE double extentX() const;
-
-    /** Sets the outer radius of the domain in the Y direction. The total size of the domain in
-        this direction is twice as large. */
-    Q_INVOKABLE void setExtentY(double value);
-
-    /** Returns the outer radius of the domain in the Y direction. */
-    Q_INVOKABLE double extentY() const;
-
-    /** Sets the outer radius of the domain in the Z direction. The total size of the domain in
-        this direction is twice as large. */
-    Q_INVOKABLE void setExtentZ(double value);
-
-    /** Returns the outer radius of the domain in the Z direction. */
-    Q_INVOKABLE double extentZ() const;
-
     //======================== Other Functions =======================
 
 public:
-    /** This function returns the dimension of the stellar component, which for this class is always 3
-        since there are no symmetries in the geometry. */
-    int dimension() const;
-
     /** This function returns the monochromatic luminosity \f$L_\ell\f$ of the stellar component at
         the wavelength index \f$\ell\f$. It just reads the appropriate number from the internally
         stored vector. */
@@ -169,9 +128,6 @@ private:
     int _densityIndex;
     int _metallicityIndex;
     int _ageIndex;
-    double _xmax;
-    double _ymax;
-    double _zmax;
 
     // other data members
     Random* _random;

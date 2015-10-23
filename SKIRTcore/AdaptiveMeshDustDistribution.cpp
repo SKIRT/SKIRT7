@@ -18,7 +18,7 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////
 
 AdaptiveMeshDustDistribution::AdaptiveMeshDustDistribution()
-    : _meshfile(0), _densityUnits(0), _xmax(0), _ymax(0), _zmax(0), _mesh(0)
+    : _meshfile(0), _densityUnits(0), _mesh(0)
 {
 }
 
@@ -33,11 +33,10 @@ AdaptiveMeshDustDistribution::~AdaptiveMeshDustDistribution()
 
 void AdaptiveMeshDustDistribution::setupSelfBefore()
 {
-    DustDistribution::setupSelfBefore();
+    BoxDustDistribution::setupSelfBefore();
 
     // verify property values
     if (_densityUnits <= 0) throw FATALERROR("Density units should be positive");
-    if (_xmax <= 0 || _ymax <= 0 || _zmax <= 0) throw FATALERROR("Domain size should be positive");
     if (_dcv.isEmpty()) throw FATALERROR("There are no dust components");
 }
 
@@ -45,7 +44,7 @@ void AdaptiveMeshDustDistribution::setupSelfBefore()
 
 void AdaptiveMeshDustDistribution::setupSelfAfter()
 {
-    DustDistribution::setupSelfAfter();
+    BoxDustDistribution::setupSelfAfter();
 
     // make a list of the field indices needed by any of our components
     QList<int> fieldIndices;
@@ -55,7 +54,7 @@ void AdaptiveMeshDustDistribution::setupSelfAfter()
     }
 
     // import the adaptive mesh
-    _mesh = new AdaptiveMesh(_meshfile, fieldIndices, Box(-_xmax,-_ymax,-_zmax, _xmax,_ymax,_zmax), find<Log>());
+    _mesh = new AdaptiveMesh(_meshfile, fieldIndices, extent(), find<Log>());
     find<Log>()->info("Adaptive mesh data was successfully imported: " + QString::number(_mesh->Ncells()) + " cells.");
 
     // add a density field for each of our components, so that the mesh holds the total density
@@ -96,48 +95,6 @@ void AdaptiveMeshDustDistribution::setDensityUnits(double value)
 double AdaptiveMeshDustDistribution::densityUnits() const
 {
     return _densityUnits;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void AdaptiveMeshDustDistribution::setExtentX(double value)
-{
-    _xmax = value;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double AdaptiveMeshDustDistribution::extentX() const
-{
-    return _xmax;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void AdaptiveMeshDustDistribution::setExtentY(double value)
-{
-    _ymax = value;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double AdaptiveMeshDustDistribution::extentY() const
-{
-    return _ymax;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void AdaptiveMeshDustDistribution::setExtentZ(double value)
-{
-    _zmax = value;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double AdaptiveMeshDustDistribution::extentZ() const
-{
-    return _zmax;
 }
 
 //////////////////////////////////////////////////////////////////////
