@@ -6,46 +6,30 @@
 #ifndef FOAMGEOMETRYDECORATOR_HPP
 #define FOAMGEOMETRYDECORATOR_HPP
 
-#include "GenGeometry.hpp"
+#include "BoxGeometry.hpp"
 #include "FoamDensity.hpp"
 class Foam;
 
 ////////////////////////////////////////////////////////////////////
 
-/** The FoamGeometryDecorator class is a decorator for the Geometry class that
-    provides an alternative method to generate random positions. The FoamDecoGeometry class
-    uses a three-dimensional cell structure, called the foam. A foam is based on the
-    three-dimensional unit cube \f$[0,1]^3\f$, subdivided into a large number of small
-    cuboidal cells. The distribution of the grid cells is performed completely
-    automatically, based on the density distribution of the geometry that is being
-    decorated. The foam implementation, characterized by the Foam class, allows to
-    efficiently generate random numbers drawn from this probability distribution on this
-    unit cube. One problem is that the stellar density \f$\rho({\bf{r}})\f$ is typically
-    defined on the entire 3D space, whereas the foam requires a density distribution on
-    the unit cube. We solve this problem using a simple linear transformation, where we
-    map the volume from which we sample (assumed to be a box) to the unit cube. */
-class FoamGeometryDecorator : public GenGeometry, FoamDensity
+/** The FoamGeometryDecorator class is a decorator for the Geometry class that provides an
+    alternative method to generate random positions, using a three-dimensional cell structure,
+    called the foam. A foam is based on the three-dimensional unit cube \f$[0,1]^3\f$, subdivided
+    into a large number of small cuboidal cells. The distribution of the grid cells is performed
+    completely automatically, based on the density distribution of the geometry that is being
+    decorated. The foam implementation, characterized by the Foam class, allows to efficiently
+    generate random numbers drawn from this probability distribution on this unit cube. One problem
+    is that the stellar density \f$\rho({\bf{r}})\f$ is typically defined on the entire 3D space,
+    whereas the foam requires a density distribution on the unit cube. We solve this problem using
+    a simple linear transformation, where we map the volume from which we sample (assumed to be a
+    box) to the unit cube. */
+class FoamGeometryDecorator : public BoxGeometry, FoamDensity
 {
     Q_OBJECT
     Q_CLASSINFO("Title", "a decorator that provides an alternative random position generator")
 
     Q_CLASSINFO("Property", "geometry")
     Q_CLASSINFO("Title", "the geometry to be alternatively sampled")
-
-    Q_CLASSINFO("Property", "extentX")
-    Q_CLASSINFO("Title", "the outer radius of the bounding box in the x direction")
-    Q_CLASSINFO("Quantity", "length")
-    Q_CLASSINFO("MinValue", "0")
-
-    Q_CLASSINFO("Property", "extentY")
-    Q_CLASSINFO("Title", "the outer radius of the bounding box in the y direction")
-    Q_CLASSINFO("Quantity", "length")
-    Q_CLASSINFO("MinValue", "0")
-
-    Q_CLASSINFO("Property", "extentZ")
-    Q_CLASSINFO("Title", "the outer radius of the bounding box in the z direction")
-    Q_CLASSINFO("Quantity", "length")
-    Q_CLASSINFO("MinValue", "0")
 
     Q_CLASSINFO("Property", "numCells")
     Q_CLASSINFO("Title", "the number of cells in the foam")
@@ -79,24 +63,6 @@ public:
 
     /** Returns the geometry to be decorated. */
     Q_INVOKABLE Geometry* geometry() const;
-
-    /** Sets the maximum extent of the bounding box in the X direction. */
-    Q_INVOKABLE void setExtentX(double value);
-
-    /** Returns the maximum extent of the bounding box in the X direction. */
-    Q_INVOKABLE double extentX() const;
-
-    /** Sets the maximum extent of the bounding box in the Y direction. */
-    Q_INVOKABLE void setExtentY(double value);
-
-    /** Returns the maximum extent of the bounding box in the Y direction. */
-    Q_INVOKABLE double extentY() const;
-
-    /** Sets the maximum extent of the bounding box in the Z direction. */
-    Q_INVOKABLE void setExtentZ(double value);
-
-    /** Returns the maximum extent of the bounding box in the Z direction. */
-    Q_INVOKABLE double extentZ() const;
 
     /** Sets the number of cells in the foam. */
     Q_INVOKABLE void setNumCells(int value);
@@ -151,8 +117,8 @@ public:
         \bar{x}}\, \frac{{\text{d}}y}{{\text{d}}\bar{y}}\, \frac{{\text{d}}z}{{\text{d}}
         \bar{z}}, \f] with \f$\rho(x,y,z)\f$ the stellar density. The transformation between
         the coordinates \f$(x,y,z)\f$ and \f$(\bar{x},\bar{y},\bar{z})\f$ is a simple linear
-        transformation from the cuboid defined by \f$-x_{\text{max}} < x < x_{\text{max}}\f$,
-        \f$-y_{\text{max}} < y < y_{\text{max}}\f$ and \f$-z_{\text{max}} < z <
+        transformation from the cuboid defined by \f$x_{\text{min}} < x < x_{\text{max}}\f$,
+        \f$y_{\text{min}} < y < y_{\text{max}}\f$ and \f$z_{\text{min}} < z <
         z_{\text{max}}\f$ to the unit cube. */
     double foamdensity(int ndim, double* par) const;
 
@@ -161,12 +127,10 @@ public:
 private:
     // data members for which there are setters and getters
     Geometry* _geometry;
-    double _xmax;
-    double _ymax;
-    double _zmax;
     int _Ncells;
 
-    // data member initialized during setup
+    // data members initialized during setup
+    double _jacobian;
     Foam* _foam;
 };
 

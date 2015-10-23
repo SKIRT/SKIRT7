@@ -12,16 +12,8 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////
 
 CropGeometryDecorator::CropGeometryDecorator()
-    : _geometry(0), _xmax(0), _ymax(0), _zmax(0)
+    : _geometry(0)
 {
-}
-
-////////////////////////////////////////////////////////////////////
-
-void CropGeometryDecorator::setupSelfBefore()
-{
-    Geometry::setupSelfBefore();
-    if (_xmax <= 0.0 || _ymax <= 0.0 || _zmax <= 0.0) throw FATALERROR("The maximum extent should be positive");
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -29,7 +21,7 @@ void CropGeometryDecorator::setupSelfBefore()
 void
 CropGeometryDecorator::setupSelfAfter()
 {
-    Geometry::setupSelfAfter();
+    BoxGeometry::setupSelfAfter();
 
     // estimate the original geometry's mass outside the bounding box
     int Nsamples = 10000;
@@ -37,9 +29,7 @@ CropGeometryDecorator::setupSelfAfter()
     for (int k=0; k<Nsamples; k++)
     {
         Position bfr = _geometry->generatePosition();
-        double x, y, z;
-        bfr.cartesian(x,y,z);
-        if (x<-_xmax || x>_xmax || y<-_ymax || y>_ymax || z<-_zmax || z>_zmax) Ncrop++;
+        if (!contains(bfr)) Ncrop++;
     }
     double chi = Ncrop/(1.0*Nsamples);
     _norm = 1.0/(1.0-chi);
@@ -47,8 +37,7 @@ CropGeometryDecorator::setupSelfAfter()
 
 ////////////////////////////////////////////////////////////////////
 
-void
-CropGeometryDecorator::setGeometry(Geometry* value)
+void CropGeometryDecorator::setGeometry(Geometry* value)
 {
     if (_geometry) delete _geometry;
     _geometry = value;
@@ -57,135 +46,60 @@ CropGeometryDecorator::setGeometry(Geometry* value)
 
 ////////////////////////////////////////////////////////////////////
 
-Geometry*
-CropGeometryDecorator::geometry()
-const
+Geometry* CropGeometryDecorator::geometry() const
 {
     return _geometry;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void
-CropGeometryDecorator::setExtentX(double value)
+double CropGeometryDecorator::density(Position bfr) const
 {
-    _xmax = value;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double
-CropGeometryDecorator::extentX()
-const
-{
-    return _xmax;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void
-CropGeometryDecorator::setExtentY(double value)
-{
-    _ymax = value;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double
-CropGeometryDecorator::extentY()
-const
-{
-    return _ymax;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void
-CropGeometryDecorator::setExtentZ(double value)
-{
-    _zmax = value;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double
-CropGeometryDecorator::extentZ()
-const
-{
-    return _zmax;
+    return contains(bfr) ? _geometry->density(bfr) * _norm : 0.0;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double
-CropGeometryDecorator::density(Position bfr)
-const
-{
-    double x, y, z;
-    bfr.cartesian(x,y,z);
-    if (x<-_xmax || x>_xmax || y<-_ymax || y>_ymax || z<-_zmax || z>_zmax)
-        return 0.0;
-    else
-        return _geometry->density(bfr) * _norm;
-}
-
-////////////////////////////////////////////////////////////////////
-
-Position
-CropGeometryDecorator::generatePosition()
-const
+Position CropGeometryDecorator::generatePosition() const
 {
     while (true)
     {
         Position bfr = _geometry->generatePosition();
-        double x, y, z;
-        bfr.cartesian(x,y,z);
-        if (x>-_xmax && x<_xmax && y>-_ymax && y<_ymax && z>-_zmax && z<_zmax)
-            return bfr;
+        if (contains(bfr)) return bfr;
     }
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double
-CropGeometryDecorator::SigmaX()
-const
+double CropGeometryDecorator::SigmaX() const
 {
     return _geometry->SigmaX();
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double
-CropGeometryDecorator::SigmaY()
-const
+double CropGeometryDecorator::SigmaY() const
 {
     return _geometry->SigmaY();
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double
-CropGeometryDecorator::SigmaZ()
-const
+double CropGeometryDecorator::SigmaZ() const
 {
     return _geometry->SigmaZ();
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double
-CropGeometryDecorator::probabilityForDirection(int ell, Position bfr, Direction bfk)
-const
+double CropGeometryDecorator::probabilityForDirection(int ell, Position bfr, Direction bfk) const
 {
     return _geometry->probabilityForDirection(ell, bfr, bfk);
 }
 
 ////////////////////////////////////////////////////////////////////
 
-Direction
-CropGeometryDecorator::generateDirection(int ell, Position bfr)
-const
+Direction CropGeometryDecorator::generateDirection(int ell, Position bfr) const
 {
     return _geometry->generateDirection(ell, bfr);
 }

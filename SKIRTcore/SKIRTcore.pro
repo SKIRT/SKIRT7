@@ -300,6 +300,7 @@ HEADERS += \
     MoveableMesh.hpp \
     AnchoredMesh.hpp \
     LogMesh.hpp \
+    BoxGeometry.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -558,3 +559,4 @@ SOURCES += \
     MoveableMesh.cpp \
     AnchoredMesh.cpp \
     LogMesh.cpp \
+    BoxGeometry.cpp

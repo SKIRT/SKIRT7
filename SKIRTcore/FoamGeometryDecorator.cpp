@@ -15,7 +15,7 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
 FoamGeometryDecorator::FoamGeometryDecorator()
-    : _geometry(0), _xmax(0), _ymax(0), _zmax(0), _Ncells(0), _foam(0)
+    : _geometry(0), _Ncells(0), _jacobian(0), _foam(0)
 {
 }
 
@@ -30,25 +30,23 @@ FoamGeometryDecorator::~FoamGeometryDecorator()
 
 void FoamGeometryDecorator::setupSelfBefore()
 {
-    GenGeometry::setupSelfBefore();
-    if (_xmax <= 0.0 || _ymax <= 0.0 || _zmax <= 0.0) throw FATALERROR("The maximum extent should be positive");
+    BoxGeometry::setupSelfBefore();
     if (_Ncells < 1000) throw FATALERROR("The number of foam cells should be at least 1000");
     if (_Ncells > 1000000) throw FATALERROR("The number of foam cells should be at most 1000000");
+    _jacobian = volume();
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void
-FoamGeometryDecorator::setupSelfAfter()
+void FoamGeometryDecorator::setupSelfAfter()
 {
-    GenGeometry::setupSelfAfter();
+    BoxGeometry::setupSelfAfter();
     _foam = Foam::createFoam(find<Log>(), _random, this, 3, _Ncells);
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void
-FoamGeometryDecorator::setGeometry(Geometry* value)
+void FoamGeometryDecorator::setGeometry(Geometry* value)
 {
     if (_geometry) delete _geometry;
     _geometry = value;
@@ -57,150 +55,68 @@ FoamGeometryDecorator::setGeometry(Geometry* value)
 
 ////////////////////////////////////////////////////////////////////
 
-Geometry*
-FoamGeometryDecorator::geometry()
-const
+Geometry* FoamGeometryDecorator::geometry() const
 {
     return _geometry;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void
-FoamGeometryDecorator::setExtentX(double value)
-{
-    _xmax = value;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double
-FoamGeometryDecorator::extentX()
-const
-{
-    return _xmax;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void
-FoamGeometryDecorator::setExtentY(double value)
-{
-    _ymax = value;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double
-FoamGeometryDecorator::extentY()
-const
-{
-    return _ymax;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void
-FoamGeometryDecorator::setExtentZ(double value)
-{
-    _zmax = value;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double
-FoamGeometryDecorator::extentZ()
-const
-{
-    return _zmax;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void
-FoamGeometryDecorator::setNumCells(int value)
+void FoamGeometryDecorator::setNumCells(int value)
 {
     _Ncells = value;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-int
-FoamGeometryDecorator::numCells()
-const
+int FoamGeometryDecorator::numCells() const
 {
     return _Ncells;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-double
-FoamGeometryDecorator::density(Position bfr)
-const
+double FoamGeometryDecorator::density(Position bfr) const
 {
     return _geometry->density(bfr);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-double
-FoamGeometryDecorator::SigmaX()
-const
+double FoamGeometryDecorator::SigmaX() const
 {
     return _geometry->SigmaX();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-double
-FoamGeometryDecorator::SigmaY()
-const
+double FoamGeometryDecorator::SigmaY() const
 {
     return _geometry->SigmaY();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-double
-FoamGeometryDecorator::SigmaZ()
-const
+double FoamGeometryDecorator::SigmaZ() const
 {
     return _geometry->SigmaZ();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Position
-FoamGeometryDecorator::generatePosition()
-const
+Position FoamGeometryDecorator::generatePosition() const
 {
     double par[3];
     _foam->MCgenerate(par);
-    double xbar = par[0];
-    double ybar = par[1];
-    double zbar = par[2];
-    double x = (2.0*xbar-1.0)*_xmax;
-    double y = (2.0*ybar-1.0)*_ymax;
-    double z = (2.0*zbar-1.0)*_zmax;
-    return Position(x,y,z);
+    return Position(fracpos(par[0], par[1], par[2]));
 }
 
 /////////////////////////////////////////////////////////////////////
 
-double
-FoamGeometryDecorator::foamdensity(int ndim, double* par)
-const
+double FoamGeometryDecorator::foamdensity(int ndim, double* par) const
 {
-    if (ndim != 3)
-        throw FATALERROR("Incorrect dimension (ndim = " + QString::number(ndim) + ")");
-    double xbar = par[0];
-    double ybar = par[1];
-    double zbar = par[2];
-    double x = (2.0*xbar-1.0)*_xmax;
-    double y = (2.0*ybar-1.0)*_ymax;
-    double z = (2.0*zbar-1.0)*_zmax;
-    double jacobian = 8.0*_xmax*_ymax*_zmax;
-    return _geometry->density(Position(x,y,z)) * jacobian;
+    if (ndim != 3) throw FATALERROR("Incorrect dimension (ndim = " + QString::number(ndim) + ")");
+    return _geometry->density(Position(fracpos(par[0], par[1], par[2]))) * _jacobian;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

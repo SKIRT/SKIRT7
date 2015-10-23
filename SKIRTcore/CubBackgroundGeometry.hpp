@@ -22,7 +22,7 @@ class CubBackgroundGeometry : public Geometry
     Q_CLASSINFO("Title", "a cubic background geometry with an anisotropic inward radiation field")
 
     Q_CLASSINFO("Property", "extent")
-    Q_CLASSINFO("Title", "the extent of the background cube")
+    Q_CLASSINFO("Title", "the extent (half-size) of the background cube")
     Q_CLASSINFO("Quantity", "length")
     Q_CLASSINFO("MinValue", "0")
 
