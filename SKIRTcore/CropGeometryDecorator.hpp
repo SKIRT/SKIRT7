@@ -6,36 +6,20 @@
 #ifndef CROPGEOMETRYDECORATOR_HPP
 #define CROPGEOMETRYDECORATOR_HPP
 
-#include "GenGeometry.hpp"
+#include "BoxGeometry.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
-/** The CropGeometryDecorator class is a decorator that crop any geometry. It sets the
-    density equal to zero outside a given cuboidal bounding box, and increases the density
-    within this bounding box with a constant factor to ensure that the total mass remains equal
-    to one. */
-class CropGeometryDecorator : public GenGeometry
+/** The CropGeometryDecorator class is a decorator that crops any geometry. It sets the density
+    equal to zero outside a given cuboidal bounding box, and increases the density within this
+    bounding box with a constant factor to ensure that the total mass remains equal to one. */
+class CropGeometryDecorator : public BoxGeometry
 {
     Q_OBJECT
     Q_CLASSINFO("Title", "a decorator that crops any geometry")
 
     Q_CLASSINFO("Property", "geometry")
     Q_CLASSINFO("Title", "the geometry to be cropped")
-
-    Q_CLASSINFO("Property", "extentX")
-    Q_CLASSINFO("Title", "the outer radius of the bounding box in the x direction")
-    Q_CLASSINFO("Quantity", "length")
-    Q_CLASSINFO("MinValue", "0")
-
-    Q_CLASSINFO("Property", "extentY")
-    Q_CLASSINFO("Title", "the outer radius of the bounding box in the y direction")
-    Q_CLASSINFO("Quantity", "length")
-    Q_CLASSINFO("MinValue", "0")
-
-    Q_CLASSINFO("Property", "extentZ")
-    Q_CLASSINFO("Title", "the outer radius of the bounding box in the z direction")
-    Q_CLASSINFO("Quantity", "length")
-    Q_CLASSINFO("MinValue", "0")
 
     //============= Construction - Setup - Destruction =============
 
@@ -44,9 +28,6 @@ public:
     Q_INVOKABLE CropGeometryDecorator();
 
 protected:
-    /** This function verifies the property values. */
-    void setupSelfBefore();
-
     /** This function estimates the fraction \f$\chi\f$ of the mass from the original model taken
         away by the cropping. It samples the density of the geometry being decorated, and counts
         the number of generated positions that fall outside the bounding box. This value is used to
@@ -62,24 +43,6 @@ public:
 
     /** Returns the geometry to be cropped (i.e. the geometry being decorated). */
     Q_INVOKABLE Geometry* geometry() const;
-
-    /** Sets the maximum extent of the bounding box in the X direction. */
-    Q_INVOKABLE void setExtentX(double value);
-
-    /** Returns the maximum extent of the bounding box in the X direction. */
-    Q_INVOKABLE double extentX() const;
-
-    /** Sets the maximum extent of the bounding box in the Y direction. */
-    Q_INVOKABLE void setExtentY(double value);
-
-    /** Returns the maximum extent of the bounding box in the Y direction. */
-    Q_INVOKABLE double extentY() const;
-
-    /** Sets the maximum extent of the bounding box in the Z direction. */
-    Q_INVOKABLE void setExtentZ(double value);
-
-    /** Returns the maximum extent of the bounding box in the Z direction. */
-    Q_INVOKABLE double extentZ() const;
 
     //======================== Other Functions =======================
 
@@ -127,7 +90,6 @@ public:
 private:
     // data members for discoverable attributes
     Geometry* _geometry;
-    double _xmax, _ymax, _zmax;
 
     // values initialized during setup
     double _norm;

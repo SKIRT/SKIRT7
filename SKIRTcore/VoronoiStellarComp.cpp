@@ -22,7 +22,6 @@ using namespace std;
 
 VoronoiStellarComp::VoronoiStellarComp()
     : _meshfile(0), _densityIndex(0), _metallicityIndex(1), _ageIndex(2),
-      _xmax(0), _ymax(0), _zmax(0),
       _random(0), _mesh(0)
 {
 }
@@ -38,17 +37,13 @@ VoronoiStellarComp::~VoronoiStellarComp()
 
 void VoronoiStellarComp::setupSelfBefore()
 {
-    StellarComp::setupSelfBefore();
-
-    // verify property values
-    if (_xmax <= 0 || _ymax <= 0 || _zmax <= 0) throw FATALERROR("Domain size should be positive");
+    BoxStellarComp::setupSelfBefore();
 
     // cache the random generator
     _random = find<Random>();
 
     // import the Voronoi mesh
-    _mesh = new VoronoiMesh(_meshfile, QList<int>() << _densityIndex << _metallicityIndex << _ageIndex,
-                             Box(-_xmax,-_ymax,-_zmax, _xmax,_ymax,_zmax));
+    _mesh = new VoronoiMesh(_meshfile, QList<int>() << _densityIndex << _metallicityIndex << _ageIndex, extent());
     find<Log>()->info("Voronoi mesh data was successfully imported: " + QString::number(_mesh->Ncells()) + " cells.");
 
     // construct the library of SED models
@@ -148,55 +143,6 @@ void VoronoiStellarComp::setAgeIndex(int value)
 int VoronoiStellarComp::ageIndex() const
 {
     return _ageIndex;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void VoronoiStellarComp::setExtentX(double value)
-{
-    _xmax = value;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double VoronoiStellarComp::extentX() const
-{
-    return _xmax;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void VoronoiStellarComp::setExtentY(double value)
-{
-    _ymax = value;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double VoronoiStellarComp::extentY() const
-{
-    return _ymax;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void VoronoiStellarComp::setExtentZ(double value)
-{
-    _zmax = value;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double VoronoiStellarComp::extentZ() const
-{
-    return _zmax;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-int VoronoiStellarComp::dimension() const
-{
-    return 3;
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -21,7 +21,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////
 
 InstrumentFrame::InstrumentFrame()
-    : _Nxp(0), _xpmax(0), _Nyp(0), _ypmax(0)
+    : _Nxp(0), _fovxp(0), _xpc(0), _Nyp(0), _fovyp(0), _ypc(0)
 {
 }
 
@@ -33,13 +33,16 @@ void InstrumentFrame::setupSelfBefore()
 
     // verify attribute values
     if (_Nxp <= 0 || _Nyp <= 0) throw FATALERROR("Number of pixels was not set");
-    if (_xpmax <= 0 || _ypmax <= 0) throw FATALERROR("Maximum extent was not set");
+    if (_fovxp <= 0 || _fovyp <= 0) throw FATALERROR("Field of view was not set");
 
     // calculate derived values
-    _xpres = 2.0*_xpmax/(_Nxp-1);
-    _ypres = 2.0*_ypmax/(_Nyp-1);
-    _xpmin = -_xpmax;
-    _ypmin = -_ypmax;
+    _Nframep = _Nxp * _Nyp;
+    _xpmin = _xpc - 0.5*_fovxp;
+    _xpmax = _xpc + 0.5*_fovxp;
+    _xpsiz = _fovxp/_Nxp;
+    _ypmin = _ypc - 0.5*_fovyp;
+    _ypmax = _ypc + 0.5*_fovyp;
+    _ypsiz = _fovyp/_Nyp;
 
     // copy information from parent instrument
     _instrument = find<MultiFrameInstrument>();
@@ -57,8 +60,8 @@ void InstrumentFrame::setupSelfBefore()
     _sinpa = sin(positionangle);
 
     // initialize pixel frame(s)
-    if (_writeTotal) _ftotv.resize(_Nxp*_Nyp);
-    if (_writeStellarComps) _fcompvv.resize(find<StellarSystem>()->Ncomp(), _Nxp*_Nyp);
+    if (_writeTotal) _ftotv.resize(_Nframep);
+    if (_writeStellarComps) _fcompvv.resize(find<StellarSystem>()->Ncomp(), _Nframep);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -77,16 +80,30 @@ int InstrumentFrame::pixelsX() const
 
 ////////////////////////////////////////////////////////////////////
 
-void InstrumentFrame::setExtentX(double value)
+void InstrumentFrame::setFieldOfViewX(double value)
 {
-    _xpmax = value;
+    _fovxp = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double InstrumentFrame::extentX() const
+double InstrumentFrame::fieldOfViewX() const
 {
-    return _xpmax;
+    return _fovxp;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void InstrumentFrame::setCenterX(double value)
+{
+    _xpc = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double InstrumentFrame::centerX() const
+{
+    return _xpc;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -105,16 +122,30 @@ int InstrumentFrame::pixelsY() const
 
 ////////////////////////////////////////////////////////////////////
 
-void InstrumentFrame::setExtentY(double value)
+void InstrumentFrame::setFieldOfViewY(double value)
 {
-    _ypmax = value;
+    _fovyp = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double InstrumentFrame::extentY() const
+double InstrumentFrame::fieldOfViewY() const
 {
-    return _ypmax;
+    return _fovyp;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void InstrumentFrame::setCenterY(double value)
+{
+    _ypc = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double InstrumentFrame::centerY() const
+{
+    return _ypc;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -132,8 +163,8 @@ int InstrumentFrame::pixelondetector(const PhotonPackage* pp) const
     double yp = _sinpa * xpp + _cospa * ypp;
 
     // scale and round to pixel index
-    int i = static_cast<int>(floor(((xp-_xpmin)/_xpres)+0.5));
-    int j = static_cast<int>(floor(((yp-_ypmin)/_ypres)+0.5));
+    int i = static_cast<int>(floor((xp-_xpmin)/_xpsiz));
+    int j = static_cast<int>(floor((yp-_ypmin)/_ypsiz));
     if (i<0 || i>=_Nxp || j<0 || j>=_Nyp) return -1;
     else return i + _Nxp*j;
 }
@@ -198,9 +229,9 @@ void InstrumentFrame::calibrateAndWriteDataFrames(int ell, QList<Array*> farrays
 
     // correction for the area of the pixels of the images; the units are now W/m/sr
     // --> divide by area
-    double xpresang = 2.0*atan(_xpres/(2.0*_distance));
-    double ypresang = 2.0*atan(_ypres/(2.0*_distance));
-    double area = xpresang*ypresang;
+    double xpsizang = 2.0*atan(_xpsiz/(2.0*_distance));
+    double ypsizang = 2.0*atan(_ypsiz/(2.0*_distance));
+    double area = xpsizang*ypsizang;
 
     // calibration step 3: conversion of the flux per pixel from monochromatic luminosity units (W/m/sr)
     // to flux density units (W/m3/sr) by taking into account the distance
@@ -224,7 +255,7 @@ void InstrumentFrame::calibrateAndWriteDataFrames(int ell, QList<Array*> farrays
         QString description = fnames[q] + " flux " + QString::number(ell);
 
         // Create the image and save it
-        Image image(this, _Nxp, _Nyp, 1, _xpres, _ypres, "surfacebrightness");
+        Image image(this, _Nxp, _Nyp, 1, _xpsiz, _ypsiz, _xpc, _ypc, "surfacebrightness");
         image.saveto(this, *(farrays[q]), filename, description);
     }
 }

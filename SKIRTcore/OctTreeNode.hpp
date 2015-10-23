@@ -10,7 +10,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
-/** OctTreeNode is a TreeNode subclass that represents nodes in an OctTreeDustGridStructure. It
+/** OctTreeNode is a TreeNode subclass that represents nodes in an OctTreeDustGrid. It
     implements a regular geometric subdivision scheme, and can be subclassed to implement a more
     complicated scheme. */
 class OctTreeNode : public TreeNode

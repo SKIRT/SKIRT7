@@ -30,7 +30,7 @@ namespace
 ////////////////////////////////////////////////////////////////////
 
 void FITSInOut::write(QString filepath, const Array& data, int nx, int ny, int nz,
-                    double incx, double incy, QString dataUnits, QString xyUnits)
+                    double incx, double incy, double xc, double yc, QString dataUnits, QString xyUnits)
 {
     // Verify the data size
     size_t nelements = data.size();
@@ -72,11 +72,11 @@ void FITSInOut::write(QString filepath, const Array& data, int nx, int ny, int n
     ffpkys(fptr, "ORIGIN", const_cast<char*>("SKIRT simulation"), "Astronomical Observatory, Ghent University", &status);
     ffpkys(fptr, "BUNIT" , const_cast<char*>(dataunits.c_str()), "Physical unit of the array values", &status);
     ffpky(fptr, TDOUBLE, "CRPIX1", &xref, "X-axis coordinate system reference pixel", &status);
-    ffpky(fptr, TDOUBLE, "CRVAL1", &zero, "Coordinate system value at X-axis reference pixel", &status);
+    ffpky(fptr, TDOUBLE, "CRVAL1", &xc, "Coordinate system value at X-axis reference pixel", &status);
     ffpky(fptr, TDOUBLE, "CDELT1", &incx, "Coordinate increment along X-axis", &status);
     ffpkys(fptr, "CTYPE1", const_cast<char*>(xyunits.c_str()), "Physical units of the X-axis increment", &status);
     ffpky(fptr, TDOUBLE, "CRPIX2", &yref, "Y-axis coordinate system reference pixel", &status);
-    ffpky(fptr, TDOUBLE, "CRVAL2", &zero, "Coordinate system value at Y-axis reference pixel", &status);
+    ffpky(fptr, TDOUBLE, "CRVAL2", &yc, "Coordinate system value at Y-axis reference pixel", &status);
     ffpky(fptr, TDOUBLE, "CDELT2", &incy, "Coordinate increment along Y-axis", &status);
     ffpkys(fptr, "CTYPE2", const_cast<char*>(xyunits.c_str()), "Physical units of the Y-axis increment", &status);
     if (status) report_error(filepath, "writing", status);

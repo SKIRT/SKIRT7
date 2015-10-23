@@ -10,7 +10,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
-/** BaryOctTreeNode is a TreeNode subclass that represents nodes in an OctTreeDustGridStructure
+/** BaryOctTreeNode is a TreeNode subclass that represents nodes in an OctTreeDustGrid
     using barycentric subdivision. */
 class BaryOctTreeNode : public OctTreeNode
 {

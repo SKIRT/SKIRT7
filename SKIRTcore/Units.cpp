@@ -23,10 +23,11 @@ namespace
     const double _Mproton = 1.67262178e-27;
     const double _Melectron = 9.10938215e-31;
     const double _Msun = 1.9891e30;
-    const double _Lsun = 3.839e26;              // solar luminosity without solar neutrino radiation
-    const double _lambdaV = 550e-9;             // V-band wavelength
-    const double _kappaV = 2600.;               // "standard" extinction coefficient in V-band
-    const double _sigmaThomson = 6.652458734e-29; // Thomson cross-section for an electron
+    const double _Lsun = 3.839e26;                  // solar luminosity without solar neutrino radiation
+    const double _lambdaLya = 1215.67e-10;          // central wavelength of Lyα transition
+    const double _lambdaV = 550e-9;                 // V-band wavelength
+    const double _kappaV = 2600.;                   // "standard" extinction coefficient in V-band
+    const double _sigmaThomson = 6.652458734e-29;   // Thomson cross-section for an electron
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -412,6 +413,13 @@ double Units::Msun()
 double Units::Lsun()
 {
     return _Lsun;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double Units::lambdaLya()
+{
+    return _lambdaLya;
 }
 
 ////////////////////////////////////////////////////////////////////

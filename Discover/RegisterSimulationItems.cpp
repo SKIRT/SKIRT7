@@ -11,20 +11,21 @@
 #include "AdaptiveMeshAmrvacFile.hpp"
 #include "AdaptiveMeshAsciiFile.hpp"
 #include "AdaptiveMeshDustDistribution.hpp"
-#include "AdaptiveMeshDustGridStructure.hpp"
+#include "AdaptiveMeshDustGrid.hpp"
 #include "AdaptiveMeshGeometry.hpp"
 #include "AdaptiveMeshStellarComp.hpp"
 #include "AllCellsDustLib.hpp"
 #include "AmHydrocarbonGrainComposition.hpp"
 #include "AxGeometry.hpp"
-#include "AxSpheDustGridStructure.hpp"
 #include "Benchmark1DDustMix.hpp"
 #include "Benchmark2DDustMix.hpp"
-#include "BinTreeDustGridStructure.hpp"
+#include "BinTreeDustGrid.hpp"
 #include "BlackBodySED.hpp"
 #include "BolLuminosityStellarCompNormalization.hpp"
+#include "BoxDustGrid.hpp"
 #include "BruzualCharlotSED.hpp"
 #include "BruzualCharlotSEDFamily.hpp"
+#include "CartesianDustGrid.hpp"
 #include "ClumpyGeometryDecorator.hpp"
 #include "CombineGeometryDecorator.hpp"
 #include "CompDustDistribution.hpp"
@@ -33,6 +34,8 @@
 #include "CropGeometryDecorator.hpp"
 #include "CubBackgroundGeometry.hpp"
 #include "CubicSplineSmoothingKernel.hpp"
+#include "Cylinder2DDustGrid.hpp"
+#include "CylinderDustGrid.hpp"
 #include "CylindricalCavityGeometryDecorator.hpp"
 #include "Dim1DustLib.hpp"
 #include "Dim2DustLib.hpp"
@@ -45,7 +48,7 @@
 #include "DustCompNormalization.hpp"
 #include "DustDistribution.hpp"
 #include "DustEmGrainComposition.hpp"
-#include "DustGridStructure.hpp"
+#include "DustGrid.hpp"
 #include "DustMassDustCompNormalization.hpp"
 #include "DustMixPopulation.hpp"
 #include "EdgeOnDustCompNormalization.hpp"
@@ -66,7 +69,6 @@
 #include "GammaGeometry.hpp"
 #include "GaussianGeometry.hpp"
 #include "GenGeometry.hpp"
-#include "GenLinCubDustGridStructure.hpp"
 #include "GreyBodyDustEmissivity.hpp"
 #include "IdenticalAssigner.hpp"
 #include "InstrumentFrame.hpp"
@@ -74,14 +76,9 @@
 #include "InterstellarDustMix.hpp"
 #include "KuruczSED.hpp"
 #include "LaserGeometry.hpp"
-#include "LinAxDustGridStructure.hpp"
-#include "LinCubDustGridStructure.hpp"
-#include "LinSpheDustGridStructure.hpp"
-#include "LogLinAxDustGridStructure.hpp"
-#include "LogLinAxSpheDustGridStructure.hpp"
+#include "LinMesh.hpp"
+#include "LogMesh.hpp"
 #include "LogNormalGrainSizeDistribution.hpp"
-#include "LogPowAxDustGridStructure.hpp"
-#include "LogSpheDustGridStructure.hpp"
 #include "LogWavelengthGrid.hpp"
 #include "LuminosityStellarCompNormalization.hpp"
 #include "MappingsSEDFamily.hpp"
@@ -98,7 +95,7 @@
 #include "MultiFrameInstrument.hpp"
 #include "NestedLogWavelengthGrid.hpp"
 #include "NetzerAccretionDiskGeometry.hpp"
-#include "OctTreeDustGridStructure.hpp"
+#include "OctTreeDustGrid.hpp"
 #include "OffsetGeometryDecorator.hpp"
 #include "OligoDustSystem.hpp"
 #include "OligoMonteCarloSimulation.hpp"
@@ -107,7 +104,8 @@
 #include "PanDustSystem.hpp"
 #include "PanMonteCarloSimulation.hpp"
 #include "PanStellarComp.hpp"
-#include "ParticleTreeDustGridStructure.hpp"
+#include "PanWavelengthGrid.hpp"
+#include "ParticleTreeDustGrid.hpp"
 #include "PeerToPeerCommunicator.hpp"
 #include "PegaseSED.hpp"
 #include "PerspectiveInstrument.hpp"
@@ -115,9 +113,7 @@
 #include "PointGeometry.hpp"
 #include "PolarizedGraphiteGrainComposition.hpp"
 #include "PolarizedSilicateGrainComposition.hpp"
-#include "PowAxDustGridStructure.hpp"
-#include "PowCubDustGridStructure.hpp"
-#include "PowSpheDustGridStructure.hpp"
+#include "PowMesh.hpp"
 #include "PowerLawGrainSizeDistribution.hpp"
 #include "PseudoSersicGeometry.hpp"
 #include "QuasarSED.hpp"
@@ -142,6 +138,9 @@
 #include "SpectralLuminosityStellarCompNormalization.hpp"
 #include "SpheBackgroundGeometry.hpp"
 #include "SpheGeometry.hpp"
+#include "Sphere1DDustGrid.hpp"
+#include "Sphere2DDustGrid.hpp"
+#include "SphereDustGrid.hpp"
 #include "SphericalAdaptiveMeshDustDistribution.hpp"
 #include "SphericalCavityGeometryDecorator.hpp"
 #include "SpheroidalGeometryDecorator.hpp"
@@ -152,9 +151,11 @@
 #include "StellarSystem.hpp"
 #include "StellarUnits.hpp"
 #include "SunSED.hpp"
+#include "SymPowMesh.hpp"
 #include "TTauriDiskGeometry.hpp"
 #include "TorusGeometry.hpp"
 #include "TransientDustEmissivity.hpp"
+#include "TreeDustGrid.hpp"
 #include "TriaxialGeometryDecorator.hpp"
 #include "Trust1Geometry.hpp"
 #include "Trust2Geometry.hpp"
@@ -166,11 +167,11 @@
 #include "TrustMeanDustMix.hpp"
 #include "TrustNeutralPAHGrainComposition.hpp"
 #include "TrustSilicateGrainComposition.hpp"
-#include "TwoPhaseDustGridStructure.hpp"
+#include "TwoPhaseDustGrid.hpp"
 #include "UniformCuboidGeometry.hpp"
 #include "UniformSmoothingKernel.hpp"
 #include "VoronoiDustDistribution.hpp"
-#include "VoronoiDustGridStructure.hpp"
+#include "VoronoiDustGrid.hpp"
 #include "VoronoiGeometry.hpp"
 #include "VoronoiMeshAsciiFile.hpp"
 #include "VoronoiStellarComp.hpp"
@@ -330,32 +331,36 @@ void RegisterSimulationItems::registerAll()
     add<VoronoiMeshFile>(false);
     add<VoronoiMeshAsciiFile>();
 
-    // dust grid structures
-    add<DustGridStructure>(false);
-    add<LinSpheDustGridStructure>();
-    add<PowSpheDustGridStructure>();
-    add<LogSpheDustGridStructure>();
-    add<LinAxDustGridStructure>();
-    add<PowAxDustGridStructure>();
-    add<LogLinAxDustGridStructure>();
-    add<LogPowAxDustGridStructure>();
-    add<LogLinAxSpheDustGridStructure>();
-    add<LinCubDustGridStructure>();
-    add<GenLinCubDustGridStructure>();
-    add<PowCubDustGridStructure>();
-    add<TwoPhaseDustGridStructure>();
-    add<OctTreeDustGridStructure>();
-    add<BinTreeDustGridStructure>();
-    add<ParticleTreeDustGridStructure>();
-    add<VoronoiDustGridStructure>();
-    add<AdaptiveMeshDustGridStructure>();
+    // meshes for the dust grids
+    add<Mesh>(false);
+    add<MoveableMesh>(false);
+    add<LinMesh>();
+    add<PowMesh>();
+    add<SymPowMesh>();
+    add<AnchoredMesh>(false);
+    add<LogMesh>();
+
+    // dust grids
+    add<DustGrid>(false);
+    add<SphereDustGrid>(false);
+    add<Sphere1DDustGrid>();
+    add<Sphere2DDustGrid>();
+    add<CylinderDustGrid>(false);
+    add<Cylinder2DDustGrid>();
+    add<BoxDustGrid>(false);
+    add<CartesianDustGrid>();
+    add<TwoPhaseDustGrid>();
+    add<OctTreeDustGrid>();
+    add<BinTreeDustGrid>();
+    add<ParticleTreeDustGrid>();
+    add<VoronoiDustGrid>();
+    add<AdaptiveMeshDustGrid>();
 
     // dust mixtures
     add<DustMix>(false);
-    add<DraineLiDustMix>();
     add<InterstellarDustMix>();
+    add<DraineLiDustMix>();
     add<MeanZubkoDustMix>();
-    add<ElectronDustMix>();
     add<Benchmark1DDustMix>();
     add<Benchmark2DDustMix>();
     add<TrustMeanDustMix>();
@@ -364,6 +369,7 @@ void RegisterSimulationItems::registerAll()
     add<ZubkoDustMix>();
     add<TrustDustMix>();
     add<ConfigurableDustMix>();
+    add<ElectronDustMix>();
 
     // grain compositions
     add<GrainComposition>(false);

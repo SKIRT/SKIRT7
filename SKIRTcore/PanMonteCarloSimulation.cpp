@@ -225,7 +225,7 @@ void PanMonteCarloSimulation::dodustselfabsorptionchunk(size_t index)
                     simulateescapeandabsorption(&pp,true);
                     double L = pp.luminosity();
                     if (L==0.0) break;
-                    if (L<=Lthreshold && pp.nScatt()>=minfs(ell)) break;
+                    if (L<=Lthreshold && pp.nScatt()>=minScattEvents()) break;
                     simulatepropagation(&pp);
                     simulatescattering(&pp);
                 }
@@ -278,17 +278,25 @@ void PanMonteCarloSimulation::dodustemissionchunk(size_t index)
         double Labsbol = _Labsbolv[m];
         if (Labsbol>0.0) Lv[m] = Labsbol * _pds->dustluminosity(m,ell);
     }
-    double Ltot = Lv.sum();
+    double Ltot = Lv.sum();  // the total luminosity to be emitted at this wavelength index
 
     // Emit photon packages
     if (Ltot > 0)
     {
-        Array Xv;
-        NR::cdf(Xv, Lv);
+        // We consider biasing in the selection of the cell from which the photon packages are emitted.
+        // A fraction of the cells is selected from the "natural" distribution, in which each cell is
+        // weighted according to its total luminosity (Lv[em]). The other cells are selected from
+        // a uniform distribution in which each cell has a equal probability.
+        double xi = _pds->emissionBias();    // the fraction to be selected from a uniform distribution
+
+        // the cumulative distribution of the natural pdf (Lv does not need to be normalized before)
+        Array cumLv;
+        NR::cdf(cumLv, Lv);
 
         PhotonPackage pp,ppp;
-        double L = Ltot / _Npp;
-        double Lthreshold = L / minWeightReduction();
+        double Lmean = Ltot/_Ncells;
+        double Lem = Ltot / _Npp;
+        double Lthreshold = Lem / minWeightReduction();
 
         quint64 remaining = _chunksize;
         while (remaining > 0)
@@ -296,11 +304,22 @@ void PanMonteCarloSimulation::dodustemissionchunk(size_t index)
             quint64 count = qMin(remaining, _logchunksize);
             for (quint64 i=0; i<count; i++)
             {
+                int m;
                 double X = _random->uniform();
-                int m = NR::locate_clip(Xv,X);
+                if (X<xi)
+                {
+                    // rescale the deviate from [0,xi[ to [0,Ncells[
+                    m = max(0,min(_Ncells-1,static_cast<int>(_Ncells*X/xi)));
+                }
+                else
+                {
+                    // rescale the deviate from [xi,1[ to [0,1[
+                    m = NR::locate_clip(cumLv,(X-xi)/(1-xi));
+                }
+                double weight = 1.0/(1-xi+xi*Lmean/Lv[m]);
                 Position bfr = _pds->randomPositionInCell(m);
                 Direction bfk = _random->direction();
-                pp.launch(L,ell,bfr,bfk);
+                pp.launch(Lem*weight,ell,bfr,bfk);
                 peeloffemission(&pp,&ppp);
                 while (true)
                 {
@@ -309,7 +328,7 @@ void PanMonteCarloSimulation::dodustemissionchunk(size_t index)
                     simulateescapeandabsorption(&pp,false);
                     double L = pp.luminosity();
                     if (L==0.0) break;
-                    if (L<=Lthreshold && pp.nScatt()>=minfs(ell)) break;
+                    if (L<=Lthreshold && pp.nScatt()>=minScattEvents()) break;
                     simulatepropagation(&pp);
                     if (!continuousScattering()) peeloffscattering(&pp,&ppp);
                     simulatescattering(&pp);

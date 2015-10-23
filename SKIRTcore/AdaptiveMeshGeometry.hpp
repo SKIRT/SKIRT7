@@ -8,7 +8,7 @@
 
 #include "AdaptiveMeshInterface.hpp"
 #include "Array.hpp"
-#include "GenGeometry.hpp"
+#include "BoxGeometry.hpp"
 class AdaptiveMeshFile;
 
 ////////////////////////////////////////////////////////////////////
@@ -22,9 +22,8 @@ class AdaptiveMeshFile;
     after importing the probability distribution, so the probability distribution in the data file
     does not have to be normalized, and the units of the values in the data file are irrelevant.
     Since the adaptive mesh data format does not specify the size of the domain, this information
-    must be provided as properties of this class as well. The domain size is assumed to be
-    symmetrical relative to the origin. */
-class AdaptiveMeshGeometry : public GenGeometry, public AdaptiveMeshInterface
+    must be provided as properties of this class as well. */
+class AdaptiveMeshGeometry : public BoxGeometry, public AdaptiveMeshInterface
 {
     Q_OBJECT
     Q_CLASSINFO("Title", "a geometry imported from an adaptive mesh data file")
@@ -44,21 +43,6 @@ class AdaptiveMeshGeometry : public GenGeometry, public AdaptiveMeshInterface
     Q_CLASSINFO("MinValue", "-1")
     Q_CLASSINFO("MaxValue", "99")
     Q_CLASSINFO("Default", "-1")
-
-    Q_CLASSINFO("Property", "extentX")
-    Q_CLASSINFO("Title", "the outer radius of the domain in the x direction")
-    Q_CLASSINFO("Quantity", "length")
-    Q_CLASSINFO("MinValue", "0")
-
-    Q_CLASSINFO("Property", "extentY")
-    Q_CLASSINFO("Title", "the outer radius of the domain in the y direction")
-    Q_CLASSINFO("Quantity", "length")
-    Q_CLASSINFO("MinValue", "0")
-
-    Q_CLASSINFO("Property", "extentZ")
-    Q_CLASSINFO("Title", "the outer radius of the domain in the z direction")
-    Q_CLASSINFO("Quantity", "length")
-    Q_CLASSINFO("MinValue", "0")
 
     //============= Construction - Setup - Destruction =============
 
@@ -104,27 +88,6 @@ public:
         */
     Q_INVOKABLE int multiplierIndex() const;
 
-    /** Sets the outer radius of the domain in the X direction. The total size of the domain in
-        this direction is twice as large. */
-    Q_INVOKABLE void setExtentX(double value);
-
-    /** Returns the outer radius of the domain in the X direction. */
-    Q_INVOKABLE double extentX() const;
-
-    /** Sets the outer radius of the domain in the Y direction. The total size of the domain in
-        this direction is twice as large. */
-    Q_INVOKABLE void setExtentY(double value);
-
-    /** Returns the outer radius of the domain in the Y direction. */
-    Q_INVOKABLE double extentY() const;
-
-    /** Sets the outer radius of the domain in the Z direction. The total size of the domain in
-        this direction is twice as large. */
-    Q_INVOKABLE void setExtentZ(double value);
-
-    /** Returns the outer radius of the domain in the Z direction. */
-    Q_INVOKABLE double extentZ() const;
-
     //======================== Other Functions =======================
 
 public:
@@ -167,9 +130,6 @@ private:
     AdaptiveMeshFile* _meshfile;
     int _densityIndex;
     int _multiplierIndex;
-    double _xmax;
-    double _ymax;
-    double _zmax;
 
     // other data members
     AdaptiveMesh* _mesh;

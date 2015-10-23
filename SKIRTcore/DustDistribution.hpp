@@ -17,7 +17,7 @@ class DustMix;
     distribution. This implies a full description of the amount, spatial distribution and optical
     properties of arbitrary dust mixtures. The difference with the DustSystem class is that a dust
     distribution just represents the theoretical distribution, whereas a dust system represents the
-    discretized representation on a grid structure. */
+    discretized representation on a dust grid. */
 class DustDistribution : public SimulationItem
 {
     Q_OBJECT

@@ -14,16 +14,16 @@ class Box;
 
 //////////////////////////////////////////////////////////////////////
 
-/** A DustGridPath object contains the details of a path through a dust grid structure. Given a
-    dust grid structure, i.e. an object of a DustGridStucture subclass, a starting position
-    \f${\bf{r}}\f$ and a propagation direction \f${\bf{k}}\f$, one can calculate the path through
-    the dust grid structure. A DustGridPath object keeps record of all the cells that are crossed
-    by this path, together with the physical path length \f$\Delta s\f$ covered within each cell,
-    and the path length \f$s\f$ covered along the entire path up to the end of the cell. Given
-    additional information about the dust properties in each cell (at a particular wavelength), one
-    can also calculate optical depth information for the path. A DustGridPath object keeps record
-    of the optical depth \f$\Delta\tau\f$ along the path segment within each cell, and the optical
-    depth \f$\tau\f$ along the entire path up to the end of the cell. */
+/** A DustGridPath object contains the details of a path through a dust grid. Given a dust grid,
+    i.e. an object of a DustGrid subclass, a starting position \f${\bf{r}}\f$ and a propagation
+    direction \f${\bf{k}}\f$, one can calculate the path through the dust grid. A DustGridPath
+    object keeps record of all the cells that are crossed by this path, together with the physical
+    path length \f$\Delta s\f$ covered within each cell, and the path length \f$s\f$ covered along
+    the entire path up to the end of the cell. Given additional information about the dust
+    properties in each cell (at a particular wavelength), one can also calculate optical depth
+    information for the path. A DustGridPath object keeps record of the optical depth
+    \f$\Delta\tau\f$ along the path segment within each cell, and the optical depth \f$\tau\f$
+    along the entire path up to the end of the cell. */
 class DustGridPath
 {
 public:
@@ -77,8 +77,8 @@ public:
     /** This function returns the cell number \f$m\f$ for segment \f$i\f$ in the path. */
     int m(int i) const { return _v[i].m; }
 
-    /** This function returns the path length covered within the cell in segment \f$i\f$ in the path.
-        */
+    /** This function returns the path length covered within the cell in segment \f$i\f$ in the
+        path. */
     double ds(int i) const { return _v[i].ds; }
 
     /** This function returns the path length covered from the initial position of the path until
@@ -112,8 +112,8 @@ public:
         (\Delta\tau)_j,\f] using the path segment lengths \f$\Delta s_i\f$ already stored within
         the path object, and the multiplication factors \f$(\kappa\rho)_{m_i}\f$ provided by the
         caller through a call-back function, where \f$m_i\f$ is the number of the dust cell being
-        crossed in path segment \f$i\f$. The call-back function must have the signature
-        "double kapparho(int m)". */
+        crossed in path segment \f$i\f$. The call-back function must have the signature "double
+        kapparho(int m)". */
     template<typename Functor> inline void fillOpticalDepth(Functor kapparho)
     {
         int N = _v.size();

@@ -12,21 +12,21 @@
     mathematical special functions such as the gamma function and elliptic integrals, but also a
     number of specific functions that often occur in the program. Many functions are copied or
     adapted from the famous Numerical Recipes books. The version used is the second edition of
-    Numerical Recipes in C++ (Press et al. 2002). Other functions are taken from the web or are just
-    implemented ad hoc. */
+    Numerical Recipes in C++ (Press et al. 2002). Other functions are taken from the web or are
+    just implemented ad hoc. */
 namespace SpecialFunctions
 {
     /** This function returns the logarithm of the Gamma function, i.e. \f$\ln\Gamma(a)\f$. The
         implementation is taken from the Numerical Recipes book. */
-    double lngamma(const double a);
+    double lngamma(double a);
 
     /** This function returns the Gamma function \f$\Gamma(a)\f$. */
-    double gamma(const double a);
+    double gamma(double a);
 
     /** This function returns the (regularized) incomplete gamma function \f[ P(a,x) =
         \frac{\gamma(a,x)}{\Gamma(a)} = \frac{1}{\Gamma(a)} \int_0^x {\text{e}}^{-t}\, t^{a-1}\,
         {\text{d}}t. \f] The implementation is adapted from the Numerical Recipes book. */
-    double incompletegamma(const double a, const double x);
+    double incompletegamma(double a, double x);
 
     /** This function returns the regularized incomplete Beta function \f$I_x(a,b)\f$, defined as
         \f[ I_x(a,b) = \frac{B_x(a,b)}{B(a,b)} = \frac{1}{B(a,b)} \int_0^x
@@ -34,64 +34,64 @@ namespace SpecialFunctions
         and the argument \f$x\f$ between 0 and 1. The implementation uses the representation of
         this function in terms of continued fractions, and is adapted from the Numerical Recipes
         book. */
-    double betaregularized(const double x, const double a, const double b);
+    double betaregularized(double x, double a, double b);
 
     /** This function returns the complete Beta function \f$B(a,b)\f$, defined as \f[ B(a,b) =
         \int_0^1 t^{a-1}\,(1-t)^{b-1}\,dt, \f] with the two parameters \f$a\f$ and \f$b\f$ positive
         real numbers. The implementation is the trivial translation of the formula \f[ B(a,b) =
         \dfrac{\Gamma(a)\,\Gamma(b)}{\Gamma(a+b)} \f] */
-    double beta(const double a, const double b);
+    double beta(double a, double b);
 
     /** This function returns the incomplete Beta function \f$B_x(a,b)\f$, defined as \f[ B_x(a,b)
         = \int_0^x t^{a-1}\,(1-t)^{b-1}\,dt, \f] with the parameters \f$a\f$ and \f$b\f$ positive
         real numbers and the argument \f$x\f$ between 0 and 1. */
-    double beta(const double x, const double a, const double b);
+    double beta(double x, double a, double b);
 
     /** This function returns the modified Bessel function \f$I_1(x)\f$ of the first kind of
         integer order 1. The implementation is based on a polynomial approximation for small
         \f$x\f$ and the product of a polynomial approximation and the exponential factor at large
         \f$x\f$. The implementation is adapted from Numerical Recipes. */
-    double bessi1(const double x);
+    double bessi1(double x);
 
     /** This function returns the modified Bessel function \f$K_1(x)\f$ of the second kind of
         integer order 1. The implementation is based on a polynomial approximation for small
         \f$x\f$ and the product of a polynomial approximation and the exponential factor at large
         \f$x\f$. The implementation is adapted from Numerical Recipes. */
-    double bessk1(const double x);
+    double bessk1(double x);
 
     /** Dawson's integral, defined as \f[ D(x) = \exp(-x^2)\int_0^x \exp(t^2)\,dt.\f] The
         implementation is based on the series \f[ D(x) = \lim_{h\rightarrow0} \frac{1}{\sqrt{\pi}}
         \sum_{\text{$n$ odd}} \frac{e^{-(x-nh)^2}}{n}, \f] which guarantees an exponential increase
         in accuracy. The implementation is adapted from Numerical Recipes, where additional tricks
         are included to make the computation even faster. */
-    double dawson(const double x);
+    double dawson(double x);
 
     /** This function returns Carlson's elliptic integral \f$R_F\f$, defined as \f[ R_F(x,y,z) =
         \frac{1}{2} \int_0^\infty\frac{dt}{\sqrt{(t+x)(t+y)(t+z)}}. \f] The three arguments
         \f$x\f$, \f$y\f$ and \f$z\f$ must be nonnegative and at most one of them is zero. The
         implementation of this function is based on the duplication theorem and is taken from
         Numerical Recipes. */
-    double rf(const double x, const double y, const double z);
+    double rf(double x, double y, double z);
 
     /** This function returns Carlson's elliptic integral \f$R_D\f$, defined as \f[ R_D(x,y,z) =
         \frac{3}{2} \int_0^\infty \frac{dt}{\sqrt{(t+x)(t+y)(t+z)^3}}. \f] The first two arguments
         \f$x\f$ and \f$y\f$ must be nonnegative and at most one of them is zero, whereas the last
         argument \f$z\f$ must be positive. The implementation, based on the duplication theorem, is
         taken from Numerical Recipes. */
-    double rd(const double x, const double y, const double z);
+    double rd(double x, double y, double z);
 
     /** This function returns Carlson's elliptic integral \f$R_J\f$, defined as \f[ R_J(x,y,z,p) =
         \frac{3}{2} \int_0^\infty \frac{dt}{(t+p)\sqrt{(t+x)(t+y)(t+z)}}. \f] The first three
         arguments \f$x\f$, \f$y\f$ and \f$z\f$ must be nonnegative and at most one of them is zero,
         whereas the last argument \f$p\f$ must be nonzero. The implementation, based on the
         duplication theorem, is taken from Numerical Recipes. */
-    double rj(const double x, const double y, const double z, const double p);
+    double rj(double x, double y, double z, double p);
 
     /** This function returns Carlson's degenerate elliptic integral \f$R_C\f$, defined as \f[
         R_C(x,y) = \frac{1}{2} \int_0^\infty \frac{dt}{(t+y)\sqrt{t+x}}. \f] Here \f$x\f$ must be
         nonnegative and \f$y\f$ must be nonzero. The implementation, based on the duplication
         theorem, is taken from Numerical Recipes. */
-    double rc(const double x, const double y);
+    double rc(double x, double y);
 
     /** This function returns the incomplete elliptic integral of the first kind, defined as \f[
         F(x,k) = \int_0^x \frac{dt}{\sqrt{(1-t^2)(1-k^2t^2)} }. \f] The arguments must satisfy
@@ -103,13 +103,13 @@ namespace SpecialFunctions
         For the second parameter, one can use the modulus \f$k\f$ (used in SKIRT), the parameter
         \f$m\f$ or the modular angle \f$\alpha\f$. These are related through
         \f$m=k^2=\sin^2\alpha\f$. We use the conventions adopted in Maple. */
-    double EllipticF(const double x, const double k);
+    double EllipticF(double x, double k);
 
     /** This function returns the complete elliptic integral of the first kind, defined as \f[ K(k)
         = \int_0^1 \frac{dt}{ \sqrt{(1-t^2)(1-k^2t^2)} }, \f] where \f$0\leq k\leq 1\f$. The
         function is no more than a function call to the incomplete elliptic integral of the first
         kind \f$F(x,k)\f$ with \f$x=1\f$. See also the note about argument conventions there. */
-    double EllipticK(const double k);
+    double EllipticK(double k);
 
     /** This function returns the incomplete elliptic integral of the second kind, defined as \f[
         E(x,k) = \int_0^x \frac{\sqrt{1-k^2t^2}\, dt}{ \sqrt{1-t^2} }. \f] The arguments must
@@ -122,14 +122,14 @@ namespace SpecialFunctions
         can use the modulus \f$k\f$ (used in SKIRT), the parameter \f$m\f$ or the modular angle
         \f$\alpha\f$. These are related through \f$m=k^2=\sin^2\alpha\f$. We use the conventions
         adopted in Maple. */
-    double EllipticE(const double x, const double k);
+    double EllipticE(double x, double k);
 
     /** This function returns the complete elliptic integral of the second kind, defined as \f[
         E(k) = \int_0^1 \frac{\sqrt{1-k^2t^2}\, dt}{ \sqrt{1-t^2} },\f] where \f$0\leq k\leq 1\f$.
         The function is no more than a function call to the incomplete elliptic integral of the
         second kind \f$E(x,k)\f$ with \f$x=1\f$. See also the note about argument conventions
         there. */
-    double EllipticE(const double k);
+    double EllipticE(double k);
 
     /** This function returns the incomplete elliptic integral of the third kind, defined as \f[
         \Pi(x,\nu,k) = \int_0^x \frac{dt}{(1-\nu t^2) \sqrt{(1-t^2) (1-k^2t^2)} }. \f] The
@@ -144,21 +144,21 @@ namespace SpecialFunctions
         through \f$m=k^2=\sin^2\alpha\f$. Finally, there are different sign conventions for the
         characteristic \f$\nu\f$, which is sometimes defined with a different signature (e.g.
         Abramowitz & Stegun 1965). We use the conventions adopted in Maple. */
-    double EllipticPi(const double x, const double nu, const double k);
+    double EllipticPi(double x, double nu, double k);
 
     /** This function returns the complete elliptic integral of the third kind, defined as \f[
         \Pi(\nu,k) = \int_0^1 \frac{dt}{(1-\nu t^2) \sqrt{(1-t^2) (1-k^2t^2)} },\f] where \f$0\leq
         k\leq 1\f$. The function is no more than a function call to the incomplete elliptic
         integral of the third kind \f$\Pi(x,\nu,k)\f$ with \f$x=1\f$. See also the note about
         argument conventions there. */
-    double EllipticPi(const double nu, const double k);
+    double EllipticPi(double nu, double k);
 
     /** This function returns the value of the function defined as \f[ X(s) = \begin{cases} \;
         \dfrac{1}{\sqrt{1-s^2}}\, \text{arccosh} \left(\dfrac{1}{s}\right) & \qquad\text{if
         $0<s<1$,} \\ \; \dfrac{1}{\sqrt{s^2-1}}\, \text{arccos} \left(\dfrac{1}{s}\right) &
         \qquad\text{if $s>1$.} \end{cases} \f] This function is completely smooth (it is the same
         function if one considers it in the complex plane). */
-    double functionX(const double s);
+    double functionX(double s);
 
     /** This function is the Lambert \f$W\f$ function, also known as the product log function for
         the principle branch. The Lambert \f$W\f$ function is generally defined as the inverse of
@@ -172,7 +172,7 @@ namespace SpecialFunctions
         function \f$W_0(z)\f$ is a combination of the C-code available from the homepage of <a
         href="http://members.lycos.co.uk/keithmbriggs">Keith Briggs</a> and the code from the GNU
         scientific library <a href="http://sources.redhat.com/gsl">GSL</a>. */
-    double LambertW(const double z);
+    double LambertW(double z);
 
     /** This function is the Lambert \f$W\f$ function, also known as the product log function, for
         the branch \f$-1\f$. The Lambert \f$W\f$ function is generally defined as the inverse of
@@ -191,14 +191,13 @@ namespace SpecialFunctions
         from the Maple function yields identical values. Only for values of \f$z\f$ extremely close
         to the limiting value zero, we get some minor discrepancies, e.g. the difference between
         the two results is 0.015% for \f$z=-10^{-9}\f$. */
-    double LambertW1(const double z);
+    double LambertW1(double z);
 
     /** This function returns the Debye function of order \f$n\f$, defined as \f[ D_n(x) =
         \frac{n}{x^n} \int_0^x \frac{t^n\,{\text{d}}t}{{\text{e}}^t-1}. \f] The order \f$n\f$
         should be an integer number between 1 and 20; the argument \f$x\f$ is a positive real
-        number. The implementation is adapted from Richard Mathar's website at MPIA Heidelberg.
-        */
-    double DebyeD(const int n, const double x);
+        number. The implementation is adapted from Richard Mathar's website at MPIA Heidelberg. */
+    double DebyeD(int n, double x);
 
     /** This function returns a generalized logarithmic function \f${\text{gln}}(p,x)\f$, defined
         as \f[ {\text{gln}}(p,x) = \int_1^x t^{-p}\,{\text{d}}t = \begin{cases} \;
@@ -207,24 +206,30 @@ namespace SpecialFunctions
         functions because the power law expression diverges as \f$p\f$ approaches 1. In that case
         we can use the expansion \f[ {\text{gln}}(p,x) \approx \ln x + \frac12\,(1-p)\ln^2x +
         \frac16\,(1-p)^2 \ln^3x + \frac{1}{24}\,(1-p)^3\ln^4x + \ldots \f] */
-    double gln(const double p, const double x);
+    double gln(double p, double x);
 
     /** This function returns the difference between two values of the generalized logarithmic
         function \f${\text{gln}}(p,x)\f$ with the same exponent \f$p\f$. Compared to simply
         subtracting the two generalized logarithms, this function achieves much better accuracy for
         large arguments \f$x_1\f$ and \f$x_2\f$ by using the identity \f[ {\text{gln2}}(p,x_1,x_2)
-        = {\text{gln}}(p,x_1) - {\text{gln}}(p,x_2) = (x_2)^{1-p} \, {\text{gln}}(p,\frac{x_1}{x_2}).
-        \f] */
-    double gln2(const double p, const double x1, const double x2);
+        = {\text{gln}}(p,x_1) - {\text{gln}}(p,x_2) = (x_2)^{1-p} \,
+        {\text{gln}}(p,\frac{x_1}{x_2}). \f] */
+    double gln2(double p, double x1, double x2);
 
     /** This function returns a generalized exponential function \f${\text{gexp}}(p,x)\f$, defined
         as the inverse of the function gln. In formula it is defined as \f[ {\text{gexp}}(p,x) =
         \begin{cases} \; ((1-p)\,x+1)^{\frac{1}{1-p}} & p\ne1 \\ \; {\text{e}}^p & p=1. \end{cases}
         \f] Both \f$x\f$ and \f$p\f$ should be positive real numbers. When \f$p\f$ approaches 1, we
         use the expansion \f[ {\text{gexp}}(p,x) \approx {\text{e}}^x\left[ 1 - \frac12\,(1-p)\,x^2
-        + \frac{1}{24}\, (1-p)^2\, (3x+8)\,x^3 - \frac{1}{48}\, (1-p)^3\, (x^2+8x+12)\, x^4 + \ldots
-        \right] \f] */
-    double gexp(const double p, const double x);
+        + \frac{1}{24}\, (1-p)^2\, (3x+8)\,x^3 - \frac{1}{48}\, (1-p)^3\, (x^2+8x+12)\, x^4 +
+        \ldots \right] \f] */
+    double gexp(double p, double x);
+
+    /** This function returns an approximation for the Voigt-Hjerting function \f[ H(a,x) =
+        \frac{a}{\pi} \int_{-\infty}^\infty \frac{ {\text{e}}^{-y^2}\,{\text{d}}y }{ (x-y)^2+a^2 }
+        \f] Both \f$a\f$ and \f$x\f$ are positive real numbers. We use the approximation presented
+        by ... */
+    double voigthjerting(double a, double x);
 }
 
 ////////////////////////////////////////////////////////////////////

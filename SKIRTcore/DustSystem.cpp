@@ -8,7 +8,7 @@
 #include "DustDistribution.hpp"
 #include "DustGridDensityInterface.hpp"
 #include "DustGridPath.hpp"
-#include "DustGridStructure.hpp"
+#include "DustGrid.hpp"
 #include "DustMix.hpp"
 #include "DustSystem.hpp"
 #include "DustSystemDensityCalculator.hpp"
@@ -52,7 +52,7 @@ void DustSystem::setupSelfBefore()
 
     if (_Nrandom < 1) throw FATALERROR("Number of random samples must be at least 1");
     if (!_dd) throw FATALERROR("Dust distribution was not set");
-    if (!_grid) throw FATALERROR("Dust grid structure was not set");
+    if (!_grid) throw FATALERROR("Dust grid was not set");
 
     // If no assigner was set, use a StaggeredAssigner as default
     if (!_assigner) setAssigner(new StaggeredAssigner(this));
@@ -82,7 +82,7 @@ void DustSystem::setupSelfAfter()
 
     // Copy some basic properties
     _Ncomp = _dd->Ncomp();
-    _Ncells = _grid->Ncells();
+    _Ncells = _grid->numCells();
 
     // Resize the tables that hold essential dust cell properties
     _volumev.resize(_Ncells);
@@ -143,7 +143,7 @@ void DustSystem::setupSelfAfter()
 // parallelized body used above
 void DustSystem::setVolumeBody(size_t m)
 {
-    _volumev[m] = _grid->weight(m) > 0 ? _grid->volume(m) : 0;
+    _volumev[m] = (_grid->weight(m) > 0) ? _grid->volume(m) : 0;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -343,11 +343,11 @@ namespace
         // data members initialized in constructor
         const DustSystem* _ds;
         DustDistribution* _dd;
-        DustGridStructure* _grid;
+        DustGrid* _grid;
         Units* _units;
         FilePaths* _paths;
         Log* _log;
-        double xbase, ybase, zbase, xres, yres, zres;
+        double xbase, ybase, zbase, xpsize, ypsize, zpsize, xcenter, ycenter, zcenter;
 
         // data members initialized in setup()
         bool xd, yd, zd; // direction of coordinate plane (110, 101, 011)
@@ -360,20 +360,22 @@ namespace
         {
             _ds = ds;
             _dd = ds->dustDistribution();
-            _grid = ds->dustGridStructure();
+            _grid = ds->dustGrid();
             _units = ds->find<Units>();
             _log = ds->find<Log>();
             _paths = ds->find<FilePaths>();
 
-            double xmax = _grid->xmax();
-            double ymax = _grid->ymax();
-            double zmax = _grid->zmax();
-            xres = 2.0*xmax/Np;
-            yres = 2.0*ymax/Np;
-            zres = 2.0*zmax/Np;
-            xbase = -xmax + 0.5*xres;
-            ybase = -ymax + 0.5*yres;
-            zbase = -zmax + 0.5*zres;
+            double xmin, ymin, zmin, xmax, ymax, zmax;
+            _grid->boundingbox().extent(xmin,ymin,zmin,xmax,ymax,zmax);
+            xpsize = (xmax-xmin)/Np;
+            ypsize = (ymax-ymin)/Np;
+            zpsize = (zmax-zmin)/Np;
+            xbase = xmin + 0.5*xpsize;
+            ybase = ymin + 0.5*ypsize;
+            zbase = zmin + 0.5*zpsize;
+            xcenter = (xmin+xmax)/2.0;
+            ycenter = (ymin+ymax)/2.0;
+            zcenter = (zmin+zmax)/2.0;
         }
 
         // setup for calculating a specific coordinate plane
@@ -392,12 +394,12 @@ namespace
         // the parallized loop body; calculates the results for a single line in the images
         void body(size_t j)
         {
-            double z = zd ? (zbase + j*zres) : 0.;
+            double z = zd ? (zbase + j*zpsize) : 0.;
             for (int i=0; i<Np; i++)
             {
                 int l = i + Np*j;
-                double x = xd ? (xbase + i*xres) : 0.;
-                double y = yd ? (ybase + (zd ? i : j)*yres) : 0.;
+                double x = xd ? (xbase + i*xpsize) : 0.;
+                double y = yd ? (ybase + (zd ? i : j)*ypsize) : 0.;
                 Position bfr(x,y,z);
                 trhov[l] = _units->omassvolumedensity(_dd->density(bfr));
                 int m = _grid->whichcell(bfr);
@@ -419,7 +421,8 @@ namespace
         void write(const Array& rhov, QString label, QString prefix)
         {
             QString filename = prefix + plane;
-            Image image(_ds, Np, Np, 1, xd?xres:yres, zd?zres:yres, "massvolumedensity");
+            Image image(_ds, Np, Np, 1, xd?xpsize:ypsize, zd?zpsize:ypsize,
+                        xd?xcenter:ycenter, zd?zcenter:ycenter, "massvolumedensity");
             image.saveto(_ds, rhov, filename, label + " density");
         }
     };
@@ -514,7 +517,7 @@ namespace
 
         // data members initialized in constructor
         const DustSystem* _ds;
-        DustGridStructure* _grid;
+        DustGrid* _grid;
         FilePaths* _paths;
         Log* _log;
         int _ell;
@@ -525,7 +528,7 @@ namespace
             : tauv(Npx*Npy)
         {
             _ds = ds;
-            _grid = ds->dustGridStructure();
+            _grid = ds->dustGrid();
             _log = ds->find<Log>();
             _paths = ds->find<FilePaths>();
             _log->info("Calculating optical depth map viewed from the center...");
@@ -717,7 +720,7 @@ DustDistribution* DustSystem::dustDistribution() const
 
 ////////////////////////////////////////////////////////////////////
 
-void DustSystem::setDustGridStructure(DustGridStructure* value)
+void DustSystem::setDustGrid(DustGrid* value)
 {
     if (_grid) delete _grid;
     _grid = value;
@@ -726,7 +729,7 @@ void DustSystem::setDustGridStructure(DustGridStructure* value)
 
 ////////////////////////////////////////////////////////////////////
 
-DustGridStructure* DustSystem::dustGridStructure() const
+DustGrid* DustSystem::dustGrid() const
 {
     return _grid;
 }

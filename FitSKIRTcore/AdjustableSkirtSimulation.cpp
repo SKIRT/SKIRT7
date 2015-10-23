@@ -95,8 +95,8 @@ void AdjustableSkirtSimulation::setupSelfBefore()
     find<Log>()->info("Number of stellar components in this simulation: " + QString::number(_ncomponents));
     find<Log>()->info("Instrument name is : " + _instrname);
     foreach (InstrumentFrame* insFrame, multiframe->frames()){
-        _xpress.append(2.00*insFrame->extentX()*(insFrame->pixelsX()-1));
-        _ypress.append(2.00*insFrame->extentY()*(insFrame->pixelsY()-1));
+        _xpress.append(insFrame->fieldOfViewX()/insFrame->pixelsX());
+        _ypress.append(insFrame->fieldOfViewY()/insFrame->pixelsY());
     }    // steal the frames and instrument name from the simulation
 }
 

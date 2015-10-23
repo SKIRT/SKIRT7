@@ -4,7 +4,6 @@
 ///////////////////////////////////////////////////////////////// */
 
 #include "DustDistribution.hpp"
-#include "DustGridStructure.hpp"
 #include "DustMix.hpp"
 #include "DustSystem.hpp"
 #include "FatalError.hpp"
@@ -31,8 +30,7 @@ using namespace std;
 
 MonteCarloSimulation::MonteCarloSimulation()
     : _is(0), _packages(0), _minWeightReduction(0),
-      _minfsref(0), _lambdafsref(0), _xi(0),
-      _continuousScattering(false), _assigner(0),
+      _minfs(0), _xi(0), _continuousScattering(false), _assigner(0),
       _lambdagrid(0), _ss(0), _ds(0)
 {
 }
@@ -50,11 +48,9 @@ void MonteCarloSimulation::setupSelfBefore()
         throw FATALERROR("Number of photon packages is larger than implementation limit of 1e15");
     if (_minWeightReduction < 1e3)
         throw FATALERROR("The minimum weight reduction factor should be larger than 1000");
-    if (_minWeightReduction > 1e9)
-        throw FATALERROR("The minimum weight reduction factor should be smaller than 1e9");
-    if (_minfsref < 0)
+    if (_minfs < 0)
         throw FATALERROR("The minimum number of scattering events is negative");
-    if (_minfsref > 1000)
+    if (_minfs > 1000)
         throw FATALERROR("The minimum number of scattering events should be smaller than 1000");
     if (_xi < 0 || _xi > 1)
         throw FATALERROR("The scattering bias should be between 0 and 1");
@@ -68,40 +64,6 @@ void MonteCarloSimulation::setupSelfBefore()
 
     // If no assigner was set, use an IdenticalAssigner as default
     if (!_assigner) setAssigner(new IdenticalAssigner(this));
-}
-
-////////////////////////////////////////////////////////////////////
-
-void MonteCarloSimulation::setupSelfAfter()
-{
-    Simulation::setupSelfAfter();
-
-    // Calculate the minimum number of scatterings for each wavelength bin
-    int Nlambda = _lambdagrid->Nlambda();
-    _minfsv.resize(Nlambda);
-    if (_ds && _minfsref > 0)
-    {
-        _log->info("Calculating the number of forced scatterings for each wavelength bin");
-        int Ncomp = _ds->Ncomp();
-        double kapparef = 0;
-        for (int h=0; h<Ncomp; h++)
-            kapparef += _ds->mix(h)->kappaext(_lambdafsref) * _ds->dustDistribution()->mass(h);
-        for (int ell=0; ell<Nlambda; ell++)
-        {
-            double kappa = 0.0;
-            for (int h=0; h<_ds->Ncomp(); h++)
-                kappa += _ds->mix(h)->kappaext(ell) * _ds->dustDistribution()->mass(h);
-            _minfsv[ell] = std::max(1, static_cast<int>((_minfsref*kappa/kapparef)+0.5));
-        }
-
-        // Output the minimum number of forced scatterings to a text file
-        Units* units = find<Units>();
-        TextOutFile file(this, "mc_minfs", "minimum number of forced scatterings");
-        file.addColumn("lambda (" + units->uwavelength() + ")");
-        file.addColumn("minimum number of forced scatterings", 'd');
-        for (int ell=0; ell<Nlambda; ell++)
-            file.writeRow(QList<double>() << units->owavelength(_lambdagrid->lambda(ell)) << _minfsv[ell]);
-    }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -189,28 +151,14 @@ double MonteCarloSimulation::minWeightReduction() const
 
 void MonteCarloSimulation::setMinScattEvents(double value)
 {
-    _minfsref = value;
+    _minfs = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
 double MonteCarloSimulation::minScattEvents() const
 {
-    return _minfsref;
-}
-
-////////////////////////////////////////////////////////////////////
-
-void MonteCarloSimulation::setScattWavelength(double value)
-{
-    _lambdafsref = value;
-}
-
-////////////////////////////////////////////////////////////////////
-
-double MonteCarloSimulation::scattWavelength() const
-{
-    return _lambdafsref;
+    return _minfs;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -262,13 +210,6 @@ ProcessAssigner* MonteCarloSimulation::assigner() const
 int MonteCarloSimulation::dimension() const
 {
     return qMax(_ss->dimension(), _ds ? _ds->dimension() : 1);
-}
-
-////////////////////////////////////////////////////////////////////
-
-int MonteCarloSimulation::minfs(int ell) const
-{
-    return _minfsv[ell];
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -345,7 +286,7 @@ void MonteCarloSimulation::dostellaremissionchunk(size_t index)
                     simulateescapeandabsorption(&pp,_ds->dustemission());
                     double L = pp.luminosity();
                     if (L==0.0) break;
-                    if (L<=Lthreshold && pp.nScatt()>=minfs(ell)) break;
+                    if (L<=Lthreshold && pp.nScatt()>=_minfs) break;
                     simulatepropagation(&pp);
                     if (!_continuousScattering) peeloffscattering(&pp,&ppp);
                     simulatescattering(&pp);

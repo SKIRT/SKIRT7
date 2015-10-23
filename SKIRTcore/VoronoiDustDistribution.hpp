@@ -7,7 +7,7 @@
 #define VORONOIDUSTDISTRIBUTION_HPP
 
 #include "Array.hpp"
-#include "DustDistribution.hpp"
+#include "BoxDustDistribution.hpp"
 #include "DustParticleInterface.hpp"
 #include "VoronoiMeshInterface.hpp"
 class MeshDustComponent;
@@ -15,16 +15,15 @@ class VoronoiMeshFile;
 
 ////////////////////////////////////////////////////////////////////
 
-/** The VoronoiDustDistribution class represents a dust distribution imported from a Voronoi
-    mesh data file. The data file must have one of the supported formats; refer to the
-    VoronoiMeshFile class and its subclasses. Since the Voronoi mesh data format does not specify
-    the size of the domain, this information must be provided as properties of this class. The
-    domain size is assumed to be symmetrical relative to the origin. This class supports multiple
-    dust components, as long as the dust density distributions for all components are defined on
-    the same mesh in the same Voronoi mesh data file. Each dust component is represented by an
-    instance of the MeshDustComponent class, which specifies the data column index defining
+/** The VoronoiDustDistribution class represents a dust distribution imported from a Voronoi mesh
+    data file. The data file must have one of the supported formats; refer to the VoronoiMeshFile
+    class and its subclasses. Since the Voronoi mesh data format does not specify the size of the
+    domain, this information must be provided as properties of this class. This class supports
+    multiple dust components, as long as the dust density distributions for all components are
+    defined on the same mesh in the same Voronoi mesh data file. Each dust component is represented
+    by an instance of the MeshDustComponent class, which specifies the data column index defining
     the dust density distribution for the component and the corresponding dust mix. */
-class VoronoiDustDistribution : public DustDistribution, public VoronoiMeshInterface, public DustParticleInterface
+class VoronoiDustDistribution : public BoxDustDistribution, public VoronoiMeshInterface, public DustParticleInterface
 {
     Q_OBJECT
     Q_CLASSINFO("Title", "a dust distribution imported from a Voronoi mesh data file")
@@ -38,21 +37,6 @@ class VoronoiDustDistribution : public DustDistribution, public VoronoiMeshInter
     Q_CLASSINFO("Quantity", "massvolumedensity")
     Q_CLASSINFO("MinValue", "0")
     Q_CLASSINFO("Default", "1 Msun/pc3")
-
-    Q_CLASSINFO("Property", "extentX")
-    Q_CLASSINFO("Title", "the outer radius of the domain in the x direction")
-    Q_CLASSINFO("Quantity", "length")
-    Q_CLASSINFO("MinValue", "0")
-
-    Q_CLASSINFO("Property", "extentY")
-    Q_CLASSINFO("Title", "the outer radius of the domain in the y direction")
-    Q_CLASSINFO("Quantity", "length")
-    Q_CLASSINFO("MinValue", "0")
-
-    Q_CLASSINFO("Property", "extentZ")
-    Q_CLASSINFO("Title", "the outer radius of the domain in the z direction")
-    Q_CLASSINFO("Quantity", "length")
-    Q_CLASSINFO("MinValue", "0")
 
     Q_CLASSINFO("Property", "components")
     Q_CLASSINFO("Title", "the dust components")
@@ -89,27 +73,6 @@ public:
 
     /** Returns the units in which the file specifies density values. */
     Q_INVOKABLE double densityUnits() const;
-
-    /** Sets the outer radius of the domain in the X direction. The total size of the domain in
-        this direction is twice as large. */
-    Q_INVOKABLE void setExtentX(double value);
-
-    /** Returns the outer radius of the domain in the X direction. */
-    Q_INVOKABLE double extentX() const;
-
-    /** Sets the outer radius of the domain in the Y direction. The total size of the domain in
-        this direction is twice as large. */
-    Q_INVOKABLE void setExtentY(double value);
-
-    /** Returns the outer radius of the domain in the Y direction. */
-    Q_INVOKABLE double extentY() const;
-
-    /** Sets the outer radius of the domain in the Z direction. The total size of the domain in
-        this direction is twice as large. */
-    Q_INVOKABLE void setExtentZ(double value);
-
-    /** Returns the outer radius of the domain in the Z direction. */
-    Q_INVOKABLE double extentZ() const;
 
     /** This function inserts a dust component into the distribution at the specified index. */
     Q_INVOKABLE void insertComponent(int index, MeshDustComponent* value);
@@ -193,9 +156,6 @@ private:
     // discoverable attributes
     VoronoiMeshFile* _meshfile;
     double _densityUnits;
-    double _xmax;
-    double _ymax;
-    double _zmax;
     QList<MeshDustComponent*> _dcv;
 
     // other data members

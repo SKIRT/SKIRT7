@@ -109,6 +109,9 @@ public:
     /** This function returns the bolometric luminosity of the Sun. */
     static double Lsun();
 
+    /** This function returns the central wavelength of the hydrogen Lyα transition. */
+    static double lambdaLya();
+
     /** This function returns the wavelength of the center of the optical V band. */
     static double lambdaV();
 

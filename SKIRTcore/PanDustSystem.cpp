@@ -6,7 +6,7 @@
 #include <cmath>
 #include "ArrayTable.hpp"
 #include "DustEmissivity.hpp"
-#include "DustGridStructure.hpp"
+#include "DustGrid.hpp"
 #include "DustLib.hpp"
 #include "DustMix.hpp"
 #include "FatalError.hpp"
@@ -32,7 +32,7 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////
 
 PanDustSystem::PanDustSystem()
-    : _dustemissivity(0), _dustlib(0), _emissionBoost(1), _selfabsorption(true), _writeEmissivity(false),
+    : _dustemissivity(0), _dustlib(0), _emissionBias(0), _emissionBoost(1), _selfabsorption(true), _writeEmissivity(false),
       _writeTemp(true), _writeISRF(true), _cycles(0), _Nlambda(0), _haveLabsstel(false), _haveLabsdust(false)
 {
 }
@@ -48,9 +48,9 @@ void PanDustSystem::setupSelfBefore()
     {
         setDustLib(0);
         setSelfAbsorption(false);
+        setWriteEmissivity(false);
         setWriteTemperature(false);
         setWriteISRF(false);
-        setWriteEmissivity(false);
     }
     // if there is dust emission, make sure that there is a dust library as well
     else
@@ -189,16 +189,30 @@ DustLib* PanDustSystem::dustLib() const
 
 ////////////////////////////////////////////////////////////////////
 
-void PanDustSystem::setEmissionBoost(int value)
+void PanDustSystem::setEmissionBias(double value)
+{
+    _emissionBias = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+double PanDustSystem::emissionBias() const
+{
+    return _emissionBias;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void PanDustSystem::setEmissionBoost(double value)
 {
     _emissionBoost = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-int PanDustSystem::emissionBoost() const
+double PanDustSystem::emissionBoost() const
 {
-    return _dustemissivity ? _emissionBoost : 1;
+    return _emissionBoost;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -213,6 +227,20 @@ void PanDustSystem::setSelfAbsorption(bool value)
 bool PanDustSystem::selfAbsorption() const
 {
     return _dustemissivity && _selfabsorption;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void PanDustSystem::setCycles(int value)
+{
+    _cycles = value;
+}
+
+////////////////////////////////////////////////////////////////////
+
+int PanDustSystem::cycles() const
+{
+    return _cycles;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -255,20 +283,6 @@ void PanDustSystem::setWriteISRF(bool value)
 bool PanDustSystem::writeISRF() const
 {
     return _dustemissivity && _writeISRF;
-}
-
-////////////////////////////////////////////////////////////////////
-
-void PanDustSystem::setCycles(int value)
-{
-    _cycles = value;
-}
-
-////////////////////////////////////////////////////////////////////
-
-int PanDustSystem::cycles() const
-{
-    return _cycles;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -426,10 +440,10 @@ namespace
     private:
         // cached values initialized in constructor
         const PanDustSystem* _ds;
-        DustGridStructure* _grid;
+        DustGrid* _grid;
         Units* _units;
         Log* _log;
-        double xbase, ybase, zbase, xres, yres, zres;
+        double xbase, ybase, zbase, xpsize, ypsize, zpsize, xcenter, ycenter, zcenter;
         int Nmaps;
 
         // data members initialized in setup()
@@ -444,19 +458,22 @@ namespace
         WriteTempCut(const PanDustSystem* ds)
         {
             _ds = ds;
-            _grid = ds->dustGridStructure();
+            _grid = ds->dustGrid();
             _units = ds->find<Units>();
             _log = ds->find<Log>();
 
-            double xmax = _grid->xmax();
-            double ymax = _grid->ymax();
-            double zmax = _grid->zmax();
-            xres = 2.0*xmax/Np;
-            yres = 2.0*ymax/Np;
-            zres = 2.0*zmax/Np;
-            xbase = -xmax + 0.5*xres;
-            ybase = -ymax + 0.5*yres;
-            zbase = -zmax + 0.5*zres;
+            double xmin, ymin, zmin, xmax, ymax, zmax;
+            _grid->boundingbox().extent(xmin,ymin,zmin,xmax,ymax,zmax);
+            xpsize = (xmax-xmin)/Np;
+            ypsize = (ymax-ymin)/Np;
+            zpsize = (zmax-zmin)/Np;
+            xbase = xmin + 0.5*xpsize;
+            ybase = ymin + 0.5*ypsize;
+            zbase = zmin + 0.5*zpsize;
+            xcenter = (xmin+xmax)/2.0;
+            ycenter = (ymin+ymax)/2.0;
+            zcenter = (zmin+zmax)/2.0;
+
             Nmaps = 0;
             for (int h=0; h<_ds->Ncomp(); h++) Nmaps += _ds->mix(h)->Npop();
 
@@ -481,11 +498,11 @@ namespace
         // the parallized loop body; calculates the results for a single line in the images
         void body(size_t j)
         {
-            double z = zd ? (zbase + j*zres) : 0.;
+            double z = zd ? (zbase + j*zpsize) : 0.;
             for (int i=0; i<Np; i++)
             {
-                double x = xd ? (xbase + i*xres) : 0.;
-                double y = yd ? (ybase + (zd ? i : j)*yres) : 0.;
+                double x = xd ? (xbase + i*xpsize) : 0.;
+                double y = yd ? (ybase + (zd ? i : j)*ypsize) : 0.;
                 Position bfr(x,y,z);
                 int m = _grid->whichcell(bfr);
                 if (m!=-1 && _ds->Labs(m)>0.0)
@@ -515,7 +532,8 @@ namespace
         void write()
         {
             QString filename = "ds_temp" + plane;
-            Image image(_ds, Np, Np, Nmaps, xd?xres:yres, zd?zres:yres, "temperature");
+            Image image(_ds, Np, Np, Nmaps, xd?xpsize:ypsize, zd?zpsize:ypsize,
+                        xd?xcenter:ycenter, zd?zcenter:ycenter, "temperature");
             image.saveto(_ds, tempv, filename, "dust temperatures");
         }
     };
@@ -531,7 +549,7 @@ namespace
     private:
         // cached values initialized in constructor
         const PanDustSystem* _ds;
-        DustGridStructure* _grid;
+        DustGrid* _grid;
         Units* _units;
         int _Ncells;
 
@@ -543,7 +561,7 @@ namespace
         WriteTempData(const PanDustSystem* ds)
         {
             _ds = ds;
-            _grid = ds->dustGridStructure();
+            _grid = ds->dustGrid();
             _units = ds->find<Units>();
             _Ncells = ds->Ncells();
             _Mv.resize(_Ncells);

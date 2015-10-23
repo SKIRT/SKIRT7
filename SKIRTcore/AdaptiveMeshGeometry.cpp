@@ -16,7 +16,7 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////
 
 AdaptiveMeshGeometry::AdaptiveMeshGeometry()
-    : _meshfile(0), _densityIndex(-1), _multiplierIndex(-1), _xmax(0), _ymax(0), _zmax(0), _mesh(0)
+    : _meshfile(0), _densityIndex(-1), _multiplierIndex(-1), _mesh(0)
 {
 }
 
@@ -31,15 +31,14 @@ AdaptiveMeshGeometry::~AdaptiveMeshGeometry()
 
 void AdaptiveMeshGeometry::setupSelfBefore()
 {
-    GenGeometry::setupSelfBefore();
+    BoxGeometry::setupSelfBefore();
 
     // verify property values
-    if (_xmax <= 0 || _ymax <= 0 || _zmax <= 0) throw FATALERROR("Domain size should be positive");
     if (_densityIndex < 0) throw FATALERROR("Column index for density must be specified");
 
     // import the adaptive mesh
     _mesh = new AdaptiveMesh(_meshfile, QList<int>() << _densityIndex << _multiplierIndex,
-                             Box(-_xmax,-_ymax,-_zmax, _xmax,_ymax,_zmax), find<Log>());
+                             extent(), find<Log>());
     _mesh->addDensityDistribution(_densityIndex, _multiplierIndex);
     find<Log>()->info("Adaptive mesh data was successfully imported: " + QString::number(_mesh->Ncells()) + " cells.");
 
@@ -89,48 +88,6 @@ void AdaptiveMeshGeometry::setMultiplierIndex(int value)
 int AdaptiveMeshGeometry::multiplierIndex() const
 {
     return _multiplierIndex;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void AdaptiveMeshGeometry::setExtentX(double value)
-{
-    _xmax = value;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double AdaptiveMeshGeometry::extentX() const
-{
-    return _xmax;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void AdaptiveMeshGeometry::setExtentY(double value)
-{
-    _ymax = value;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double AdaptiveMeshGeometry::extentY() const
-{
-    return _ymax;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void AdaptiveMeshGeometry::setExtentZ(double value)
-{
-    _zmax = value;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-double AdaptiveMeshGeometry::extentZ() const
-{
-    return _zmax;
 }
 
 //////////////////////////////////////////////////////////////////////

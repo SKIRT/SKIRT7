@@ -5,50 +5,50 @@
 \section ParallelizationThreads_intro Parallelization scheme
 
 In <tt>SKIRT</tt>, oligochromatic as well as panchromatic simulations are parallelized by means of multithreading. This means that a single <tt>SKIRT</tt>
-simulation can be executed by multiple processors, sharing the memory and thus the program state.  The parallelization of both types of simulations is designed in the same way. 
-The number of photon packages to be simulated for each wavelength is specified by the user, take \f$N\f$. 
-This number is subdivided in so-called <em>chunks</em>, which are the basic unit of parallelization in <tt>SKIRT</tt>. 
-The amount of chunks \f$N_C\f$ is determined by \f$N\f$ and the number of parallel threads \f$T\f$. 
+simulation can be executed by multiple processors, sharing the memory and thus the program state.  The parallelization of both types of simulations is designed in the same way.
+The number of photon packages to be simulated for each wavelength is specified by the user, take \f$N\f$.
+This number is subdivided in so-called <em>chunks</em>, which are the basic unit of parallelization in <tt>SKIRT</tt>.
+The amount of chunks \f$N_C\f$ is determined by \f$N\f$ and the number of parallel threads \f$T\f$.
 If the number of photon packages \f$N\f$ is zero, the number of chunks \f$N_C\f$ is obviously also zero. If \f$N\f$ is nonzero, a dinstinction is made between two cases:
 
- - 	\f$T=1\f$: In this case, <tt>SKIRT</tt> is run as a serial program. Put \f$N_C=1\f$. 
+ - 	\f$T=1\f$: In this case, <tt>SKIRT</tt> is run as a serial program. Put \f$N_C=1\f$.
     One chunk represents all photon packages to be launched for a certain wavelength. Each chunk (each wavelength) is simulated sequentially.
- - 	\f$T>1\f$: In this case, different threads will simulate photon packages in parallel. 
-    The determination of the number of chunks per wavelength \f$N_C\f$ is a combination of <em>load balancing</em> of the different threads and setting 
-    upper and lower boundaries on the size of the chunks. If the chunks are too large, the load imbalance can still be large (involving a large number of photon packages), 
-    and if they are too small, dealing with the large number of chunks can produce a significant overhead. 
+ - 	\f$T>1\f$: In this case, different threads will simulate photon packages in parallel.
+    The determination of the number of chunks per wavelength \f$N_C\f$ is a combination of <em>load balancing</em> of the different threads and setting
+    upper and lower boundaries on the size of the chunks. If the chunks are too large, the load imbalance can still be large (involving a large number of photon packages),
+    and if they are too small, dealing with the large number of chunks can produce a significant overhead.
     To be specific, the number of chunks per wavelength obeys the following rules:
     \f[ \frac{N}{10^7} < N_C < \frac{N}{2 \times 10^4} \f]
     \f[N_C > 10 \times \frac{T}{N_{\lambda}} \f]
     If we call \f$C=N/N_C\f$ the <em>size of the chunks</em>, this is equivalent to:
     \f[2 \times 10^4 < C < 10^7 \f]
     \f[\frac{N_C \times N_{\lambda}}{T} < 10 \f]
-    As \f$N_C \times N_{\lambda}\f$ represents the total number of chunks over all wavelengths, the last condition makes sure that 
-    <em>at least 10 chunks of photon packages are simulated by each thread</em> (on average). 
-    By dividing the work that has to be done by each thread into 10 smaller bits or more, 
-    combined with the fact that the threads dynamically assign themselves to these bits of work as they are available, 
-    one prevents the situation where one thread spends significantly more time on its work than others do on theirs.  
-    
-After the number of chunks has been determined, the size of the chunks \f$C\f$ is calculated by dividing the number of photon packages per 
+    As \f$N_C \times N_{\lambda}\f$ represents the total number of chunks over all wavelengths, the last condition makes sure that
+    <em>at least 10 chunks of photon packages are simulated by each thread</em> (on average).
+    By dividing the work that has to be done by each thread into 10 smaller bits or more,
+    combined with the fact that the threads dynamically assign themselves to these bits of work as they are available,
+    one prevents the situation where one thread spends significantly more time on its work than others do on theirs.
+
+After the number of chunks has been determined, the size of the chunks \f$C\f$ is calculated by dividing the number of photon packages per
 wavelength \f$N\f$ by the number of chunks per wavelength \f$N_C\f$.
 
-The \f$N_C \times N_{\lambda}\f$ chunks of photon packages that have to be simulated are executed in parallel by the different threads, 
+The \f$N_C \times N_{\lambda}\f$ chunks of photon packages that have to be simulated are executed in parallel by the different threads,
 which pick the next chunk in row whenever they become available. This procedure is explained more in detail in the next section.
 
 \section ParallelizationThreads_implementation Implementation
 
 \subsection ParallelizationThreads_classes The ParallelFactory and Parallel class
 
-The methods necessary for the multithreading capabilities of <tt>SKIRT</tt> are provided by two classes: ParallelFactory and Parallel. Another (small abstract) class, ParallelTarget, 
+The methods necessary for the multithreading capabilities of <tt>SKIRT</tt> are provided by two classes: ParallelFactory and Parallel. Another (small abstract) class, ParallelTarget,
 is also present which serves as an interface for objects that can be used as the body of a parallelized loop. The Parallel class can be seen as an abstraction of such a parallel loop.
 In other words, the main purpose of Parallel is implementing a method for distributing the multiple iterations of a loop across different parallel threads. A ParallelFactory object
 is used for creating instances of Parallel so that the methods of the latter can be applied. In each situation where some procedure in <tt>SKIRT</tt> is parallelizable, the "request" for this
-feature is thus (in programming code) written as a call to ParallelFactory::parallel(), which returns an instance of the Parallel class. This instance is characterized by a certain number of threads. 
-The number of threads depends on whether the \c parallel function is called with or without an argument. If a value of \f$n\f$ is passed to this function, a Parallel object with \f$n\f$ threads is returned. 
+feature is thus (in programming code) written as a call to ParallelFactory::parallel(), which returns an instance of the Parallel class. This instance is characterized by a certain number of threads.
+The number of threads depends on whether the \c parallel function is called with or without an argument. If a value of \f$n\f$ is passed to this function, a Parallel object with \f$n\f$ threads is returned.
 If called without arguments, the Parallel object obtains the maximum number of threads.
 
 The maximum number of threads is typically specified when launching <tt>SKIRT</tt> from the command line. The syntax is "-t n", where \f$n\f$ is the desired number of threads for the simulation. If the
-"-t n" command is omitted, <tt>SKIRT</tt> automatically detects the number of logical cores on the system and uses that value as the maximum thread count. Thus, when <tt>SKIRT</tt> is started on a system 
+"-t n" command is omitted, <tt>SKIRT</tt> automatically detects the number of logical cores on the system and uses that value as the maximum thread count. Thus, when <tt>SKIRT</tt> is started on a system
 with 16 logical cores, without specifying a number of threads, the execution will automatically be parallelized between 16 threads in those places in the code where the ParallelFactory::parallel() is invoked
 without arguments (see \ref ParallelizationThreads_parts).
 
@@ -59,28 +59,28 @@ created when the \c skirt command is invoked, with the name of a valid \em ski f
 constructs an instance of either the OligoMonteCarloSimulation or PanMonteCarloSimulation class. Both classes inherit from MonteCarloSimulation, which in turn is a derived class of Simulation.
 The Simulation object, either of the "oligo" or "pan" type, represents the root of the <tt>SKIRT</tt> simulation hierarchy. All the other properties specified in the \em ski file are created as
 children of the Simulation object (or children of its children). After the hierarchy has been constructed, the simulation is started by invoking the \c setupandrun function of the Simulation class. This function first calls
-Simulation::setup and then Simulation::run. 
+Simulation::setup and then Simulation::run.
 
-The <em>setup</em> of the simulation is the phase where all objects in the simulation hierarchy are initialized so that they can be used later on. One of the steps in the setup of 
+The <em>setup</em> of the simulation is the phase where all objects in the simulation hierarchy are initialized so that they can be used later on. One of the steps in the setup of
 the simulation that is important regarding parallelization is the construction of the dust grid. The construction of most dust grids is trivial (for example all grids possessing a certain symmetry)
-and does not require much computation time. The dust grids of the type TreeDustGridStructure, on the contrary, often require a significant fraction of computation time to construct. 
-The TreeDustGridStructure class has two subclasses, BinTreeDustGridStructure and OctTreeDustGridStructure. Both kinds are constructed in a similar way; by starting with one large cuboidal cell,
-which is iteratively subdivided into smaller cuboidal cells until a certain resolution is achieved. The difference between BinTreeDustGridStructure and OctTreeDustGridStructure is that the former
-subdivides each parent node in 2 nodes and the latter creates 8 new nodes during each subdivision. The subdivision, implemented in the TreeDustGridStructure base class, is to a certain extent
-parallelized by means of multithreading. The \c subdivide function, which takes a pointer to a parent node (of type TreeNode) as an argument, distinguishes between two cases: 
+and does not require much computation time. The dust grids of the type TreeDustGrid, on the contrary, often require a significant fraction of computation time to construct.
+The TreeDustGrid class has two subclasses, BinTreeDustGrid and OctTreeDustGrid. Both kinds are constructed in a similar way; by starting with one large cuboidal cell,
+which is iteratively subdivided into smaller cuboidal cells until a certain resolution is achieved. The difference between BinTreeDustGrid and OctTreeDustGrid is that the former
+subdivides each parent node in 2 nodes and the latter creates 8 new nodes during each subdivision. The subdivision, implemented in the TreeDustGrid base class, is to a certain extent
+parallelized by means of multithreading. The \c subdivide function, which takes a pointer to a parent node (of type TreeNode) as an argument, distinguishes between two cases:
 
  - If the parent node is below a certain minimum level in the tree, this node is always subdivided. The appropriate number of children is thus created, added to the tree and the \c subdivide function
    is called for each of these children.
  - If the level of the parent node is beyond the minimum level but smaller than a certain maximum value, the node is subdivided on the condition that the dispersion of the density within that node
    exceeds a certain value (set in the \em ski file). Therefore, the condition of subdivision depends on the calculation of the density within that node, for a large enough number of random locations
-   in that cell. 
+   in that cell.
 
-The calculation of the density in the nodes of a TreeDustGridStructure object is parallelized in the sense that the different threads each pick out some random locations in the node
+The calculation of the density in the nodes of a TreeDustGrid object is parallelized in the sense that the different threads each pick out some random locations in the node
 and calculate the density in these locations. The unit of parallelization is thus the calculation of the density at one particular location in a certain node in the tree. The threads always
 work on the \em same node in parallel. The actual calculation is implemented in a helper class called TreeNodeSampleDensityCalculator. An instance of this class is created for each time
-a parent node is considered for subdivision. Among other things, the constructor of the TreeNodeSampleDensityCalculator class takes the number of random density samples \f$N_r\f$ to be taken as 
-an argument. This class contains a function named \c body, which as an argument takes a value between zero and \f$N_r-1\f$. The loop over the different density samples is executed by an 
-instance of the Parallel class, \c _parallel. The \c _parallel object is created during the setup of the TreeDustGridStructure class, by calling the \c parallel function of ParallelFactory.
+a parent node is considered for subdivision. Among other things, the constructor of the TreeNodeSampleDensityCalculator class takes the number of random density samples \f$N_r\f$ to be taken as
+an argument. This class contains a function named \c body, which as an argument takes a value between zero and \f$N_r-1\f$. The loop over the different density samples is executed by an
+instance of the Parallel class, \c _parallel. The \c _parallel object is created during the setup of the TreeDustGrid class, by calling the \c parallel function of ParallelFactory.
 The number of threads for this Parallel instance is never greater than 4, regardless of the number of threads specified when launching <tt>SKIRT</tt> with the "-t" command line option. The reason
 is that performance issues may be encountered if the number of threads is higher in this phase of the simulation. If the number of desired density samples per tree node is 100, for example,
 each thread will calculate on average 25 densities in each node. The exact number depends of course on the amount of time spent by each thread on the individual samples. The load balancing
@@ -92,7 +92,7 @@ The density of a dust cell is calculated by either the DustSystem::setGridDensit
 on a cell structure (such as the SPHDustDistribution) that allows the dust grid to use the same structure. In the latter case, the calculation of the density in a dust cell is much quicker, since this density is
 readily calculated from the total mass in that dust cell, which in turn can be obtained from the list of particles in the corresponding cell of the dust distribution. Just as the setVolumeBody function,
 the setGridDensityBody and setGridDensityBody function take only one argument, which is the index \f$m\f$ of the dust cell. The loop over each of these three functions, for all dust cells, is parallelized with help
-of the Parallel class. The number of threads used here is the maximum number of threads passed with the "-t" argument. 
+of the Parallel class. The number of threads used here is the maximum number of threads passed with the "-t" argument.
 
 Next in the setup of the DustSystem class are some calls to functions which write out information about the dust system to file. These include:
 
@@ -101,17 +101,17 @@ Next in the setup of the DustSystem class are some calls to functions which writ
  - DustSystem::writedepthmap(), which outputs optical depth map as seen from the center.
  - DustSystem::writequality(), which calculates and outputs some quality metrics for the dust grid.
  - DustSystem::writecellproperties(), which output properties for all cells in the dust grid.
- 
+
  The execution of each of these functions is optional, and can be specified in the \em ski file of the simulation. Three of the functions above have been implemented with a parallelized loop.
  These include \c writedensity, \c writedepthmap and \c writequality. For \c writedensity and \c writedepthmap, the unit of parallelization is writing resp. the density and optical depth in
  one single row of the output image (FITS file). The \c writequality function consists of two loops. The first loop calculates the statistics (mean, deviation) of the absolute differences \f$|\rho_{g}-\rho_{t}|\f$ between the
  theoretical and grid density for a certain number of randomly chosen points. The second one calculates the statistics of the absolute differences \f$|\tau_{g}-\tau_{t}|\f$ between the theoretical and
  grid optical depth for a large number of line segments with random end points. The unit of parallelization for these loops is the calculation of the statistics for a certain subset of respectively random points or
- random line segments. 
+ random line segments.
 
 After the setup, the \c run function of Simulation is called, and the simulation enters first the <em>stellar emission</em> phase (for oligochromatic and panchromatic simulations)
-and then the <em>dust selfabsorption</em> and <em>dust emission</em> phases (only for panchromatic simulations). In general, the parallelization of these phases follows the mechanism 
-explained in the previous section, \ref ParallelizationThreads_intro. 
+and then the <em>dust selfabsorption</em> and <em>dust emission</em> phases (only for panchromatic simulations). In general, the parallelization of these phases follows the mechanism
+explained in the previous section, \ref ParallelizationThreads_intro.
 
 \subsection ParallelizationThreads_random Randomness
 

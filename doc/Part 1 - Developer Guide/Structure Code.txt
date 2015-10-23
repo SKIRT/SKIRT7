@@ -102,7 +102,7 @@ digraph runtime {
       OligoDustSystem [label="OligoDustSystem" URL="\ref OligoDustSystem"];
         SPHDustDistribution [label="SPHDustDistribution" URL="\ref SPHDustDistribution"];
           InterstellarDustMix [label="InterstellarDustMix" URL="\ref InterstellarDustMix"];
-        OctTreeDustGridStructure [label="OctTreeDustGridStructure" URL="\ref OctTreeDustGridStructure"];
+        OctTreeDustGrid [label="OctTreeDustGrid" URL="\ref OctTreeDustGrid"];
       InstrumentSystem [label="InstrumentSystem" URL="\ref InstrumentSystem"];
         SimpleInstrument_1 [label="SimpleInstrument_1" URL="\ref SimpleInstrument"];
         SimpleInstrument_2 [label="SimpleInstrument_2" URL="\ref SimpleInstrument"];
@@ -119,7 +119,7 @@ digraph runtime {
       OligoMonteCarloSimulation -> OligoDustSystem;
         OligoDustSystem -> SPHDustDistribution;
           SPHDustDistribution -> InterstellarDustMix;
-        OligoDustSystem -> OctTreeDustGridStructure;
+        OligoDustSystem -> OctTreeDustGrid;
       OligoMonteCarloSimulation -> InstrumentSystem;
         InstrumentSystem -> SimpleInstrument_1;
         InstrumentSystem -> SimpleInstrument_2;
@@ -130,7 +130,7 @@ digraph runtime {
 A run-time simulation hierarchy includes the following information:
   - the configuration of the simulation, including all parameters, represented by a combination of:
       - the structural makeup of the hierarchy
-      - the selection of the type of simulation items actually included (e.g. OctTreeDustGridStructure rather than
+      - the selection of the type of simulation items actually included (e.g. OctTreeDustGrid rather than
         another type of dust grid)
       - the properties of the various simulation items (not shown in the diagram)
   - the functionality needed to perform the simulation and output the results, embodied in the code associated with
