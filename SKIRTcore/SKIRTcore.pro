@@ -302,7 +302,8 @@ HEADERS += \
     LogMesh.hpp \
     BoxGeometry.hpp \
     BoxDustDistribution.hpp \
-    BoxStellarComp.hpp
+    BoxStellarComp.hpp \
+    BrokenExpDiskGeometry.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -563,4 +564,5 @@ SOURCES += \
     LogMesh.cpp \
     BoxGeometry.cpp \
     BoxDustDistribution.cpp \
-    BoxStellarComp.cpp
+    BoxStellarComp.cpp \
+    BrokenExpDiskGeometry.cpp
