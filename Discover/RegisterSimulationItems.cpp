@@ -23,6 +23,7 @@
 #include "BlackBodySED.hpp"
 #include "BolLuminosityStellarCompNormalization.hpp"
 #include "BoxDustGrid.hpp"
+#include "BrokenExpDiskGeometry.hpp"
 #include "BruzualCharlotSED.hpp"
 #include "BruzualCharlotSEDFamily.hpp"
 #include "CartesianDustGrid.hpp"
@@ -252,6 +253,7 @@ void RegisterSimulationItems::registerAll()
     add<ShellGeometry>();
     add<AxGeometry>(false);
     add<ExpDiskGeometry>();
+    add<BrokenExpDiskGeometry>();
     add<MGEGeometry>();
     add<TTauriDiskGeometry>();
     add<RingGeometry>();
