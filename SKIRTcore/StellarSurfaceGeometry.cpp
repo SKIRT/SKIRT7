@@ -5,7 +5,6 @@
 
 #include <cmath>
 #include <limits>
-#include <iostream>
 #include "FatalError.hpp"
 #include "Random.hpp"
 #include "StellarSurfaceGeometry.hpp"
