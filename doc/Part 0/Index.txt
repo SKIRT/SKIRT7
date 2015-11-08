@@ -21,6 +21,7 @@ The <tt>SKIRT</tt> manual is structured as follows:
 
   - \ref Parallelization explains in detail how <tt>SKIRT</tt> is adapted for parallel computing.
   - \ref DustProp describes how <tt>SKIRT</tt> deals with optical and calorimetric dust properties.
+  - \ref SpatialGrids introduces the spatial grids used for discretizing the dusty medium in <tt>SKIRT</tt>.
   - \ref PerInstr provides details on <tt>SKIRT</tt>'s perspective instrument, used mostly for making movies.
   - \ref Cfitsio introduces the library included with <tt>SKIRT</tt> to read and write FITS files.
   - \ref voro introduces the library included with <tt>SKIRT</tt> to construct Voronoi tesselations.

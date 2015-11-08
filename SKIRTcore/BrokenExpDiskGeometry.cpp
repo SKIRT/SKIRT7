@@ -10,7 +10,6 @@
 #include "NR.hpp"
 #include "SpecialFunctions.hpp"
 #include "Units.hpp"
-#include <iostream>
 using namespace std;
 
 
@@ -51,7 +50,6 @@ void BrokenExpDiskGeometry::setupSelfBefore()
     for (int i=0; i<Ninn; i++) _Rv[i] = i*dRinn;
     double dRout = 10*_hout/Nout;
     for (int i=Ninn; i<=N; i++) _Rv[i] = _Rb + (i-Ninn)*dRout;
-    for (int i=0; i<=N; i++) cout << "R[" << i << "] = " << _Rv[i]/find<Units>()->pc() << endl;
     _Xv[0] = 0.0;
     double intprev = 0.0;
     for (int i=1; i<=N; i++)
