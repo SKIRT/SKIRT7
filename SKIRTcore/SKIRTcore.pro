@@ -30,6 +30,9 @@ unix: PRE_TARGETDEPS += $$OUT_PWD/../Fundamentals/libfundamentals.a \
                         $$OUT_PWD/../Voro/libvoro.a \
                         $$OUT_PWD/../MPIsupport/libmpisupport.a
 
+# Enable 'Memory-enabled' compilation of SKIRT subprojects
+include(../BuildUtils/EnableMemory.pri)
+
 #--------------------------------------------------
 # source and header files: maintained by Qt creator
 #--------------------------------------------------

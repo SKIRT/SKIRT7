@@ -6,11 +6,48 @@
 #ifndef ARRAY_HPP
 #define ARRAY_HPP
 
+#ifdef BUILDING_MEMORY
+#include <QDateTime>
+#include <iostream>
+//#include <fstream>
+#include "ProcessManager.hpp"
+#endif
+
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <functional>
 #include <numeric>
+
+////////////////////////////////////////////////////////////////////
+
+#ifdef BUILDING_MEMORY
+//#include <QFile>
+//#include <QTextStream>
+//#include "ProcessManager.hpp"
+
+//static QFile _file;
+//static QTextStream _out;
+//static QString filepath;
+
+//if (ProcessManager::isRoot())
+//{
+//    filepath = "memory.txt");
+//}
+//else
+//{
+//    process_name = QString("P%1").arg(ProcessManager::rank(), 3, 10, QChar('0'));
+//    filepath = "memory_" + process_name + ".txt");
+//}
+
+//_file.setFileName(filepath);
+
+//if (!_file.open(QIODevice::WriteOnly | QIODevice::Text))
+//    throw FATALERROR("Could not open the log file " + filepath);
+
+//_out.setDevice(&_file);
+//_out.setCodec("UTF-8");
+#endif
 
 ////////////////////////////////////////////////////////////////////
 
@@ -841,6 +878,31 @@ inline
 void
 Array::resize_noclear(size_t _n)
 {
+    #ifdef BUILDING_MEMORY
+    std::string timestamp = QDateTime::currentDateTime().toString("dd/MM/yyyy hh:mm:ss.zzz").toStdString();
+    std::string process_id;
+
+    if (!ProcessManager::finalized() && ProcessManager::isMultiProc())
+    {
+        QString processname = "[" + QString("P%1").arg(ProcessManager::rank(), 3, 10, QChar('0')) + "] ";
+        process_id = processname.toStdString();
+    }
+    else process_id = "";
+
+    // Calculate the change in memory (in GB)
+    double delta;
+    if (size() < _n) delta = (_n - size()) * 8 * 1e-9;
+    else if (size() > _n) delta = (size() - _n) * 8 * 1e-9;
+    else delta = 0;
+
+    // Log the amount of gained or released memory to the console, if larger than a certain threshold
+    if (delta > 1e-6)
+    {
+        if (size() < _n) std::cout << timestamp << "   " << process_id << "+" << delta << " GB" << std::endl;
+        else if (size() > _n) std::cout << timestamp << "   " << process_id << "-" << delta << " GB" << std::endl;
+    }
+    #endif
+
     if (size() != _n)
     {
         if (_begin_ != 0)

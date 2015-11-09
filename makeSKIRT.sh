@@ -77,5 +77,8 @@ echo Using qmake in $QMAKEPATH
 fi
 
 # Create the make file and perform the build
+#$QMAKEPATH SkirtMemory/SkirtMemory.pro -o ../release/SkirtMemory/Makefile CONFIG+=release
+#make -j ${1:-5} -w -C ../release/SkirtMemory
+
 $QMAKEPATH BuildSKIRT.pro -o ../release/Makefile CONFIG+=release
 make -j ${1:-5} -w -C ../release
