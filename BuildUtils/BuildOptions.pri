@@ -14,6 +14,3 @@ macx:CONFIG *= BUILDING_GUI
 
 # to build without MPI support even on systems that offer MPI, precede this line with a # comment character
 CONFIG *= BUILDING_WITH_MPI
-
-# to build the SKIRT Memory console application (which is still experimental), remove the # character from the next line
-CONFIG *= BUILDING_MEMORY

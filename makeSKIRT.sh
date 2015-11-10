@@ -77,8 +77,24 @@ echo Using qmake in $QMAKEPATH
 fi
 
 # Create the make file and perform the build
-#$QMAKEPATH SkirtMemory/SkirtMemory.pro -o ../release/SkirtMemory/Makefile CONFIG+=release
-#make -j ${1:-5} -w -C ../release/SkirtMemory
+if [ "$1" == "--memory" ]
+then
+    echo "Compiling the SKIRT Memory console application"
+    
+    # Compile SKIRT with the BUILDING_MEMORY flag to provide diagnostic output statements concerning the memory usage
+    $QMAKEPATH BuildSKIRT.pro -o ../.release-memory/Makefile CONFIG+=BUILDING_MEMORY
+    make -j ${2:-5} -w -C ../.release-memory
+    
+    # Move the newly compiled SkirtMemory directory to the release folder
+    
+    
+    # Build SKIRT, FitSKIRT and SkirtMakeUp
+    $QMAKEPATH BuildSKIRT.pro -o ../release/Makefile CONFIG+=release
+    make -j ${2:-5} -w -C ../release
+else
 
+# Build SKIRT, FitSKIRT and SkirtMakeUp
 $QMAKEPATH BuildSKIRT.pro -o ../release/Makefile CONFIG+=release
 make -j ${1:-5} -w -C ../release
+
+fi
