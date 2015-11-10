@@ -9,7 +9,6 @@
 #ifdef BUILDING_MEMORY
 #include <QDateTime>
 #include <iostream>
-//#include <fstream>
 #include "ProcessManager.hpp"
 #endif
 
@@ -18,36 +17,6 @@
 #include <cstdlib>
 #include <functional>
 #include <numeric>
-
-////////////////////////////////////////////////////////////////////
-
-#ifdef BUILDING_MEMORY
-//#include <QFile>
-//#include <QTextStream>
-//#include "ProcessManager.hpp"
-
-//static QFile _file;
-//static QTextStream _out;
-//static QString filepath;
-
-//if (ProcessManager::isRoot())
-//{
-//    filepath = "memory.txt");
-//}
-//else
-//{
-//    process_name = QString("P%1").arg(ProcessManager::rank(), 3, 10, QChar('0'));
-//    filepath = "memory_" + process_name + ".txt");
-//}
-
-//_file.setFileName(filepath);
-
-//if (!_file.open(QIODevice::WriteOnly | QIODevice::Text))
-//    throw FATALERROR("Could not open the log file " + filepath);
-
-//_out.setDevice(&_file);
-//_out.setCodec("UTF-8");
-#endif
 
 ////////////////////////////////////////////////////////////////////
 
