@@ -18,10 +18,12 @@ SUBDIRS += \
     Fundamentals \
     MPIsupport \
     SKIRTcore \
-    SKIRTmain \
     SkirtMemory \
     Voro
-    
+
+# set the appropriate flag for the other SKIRT subprojects
+CONFIG += BUILDING_MEMORY
+
 # define dependencies between subprojects
 Fundamentals.depends   = MPIsupport
 FFTConvolution.depends = Fundamentals MPIsupport

@@ -45,14 +45,19 @@ exists ('$$(HOME)/FFTW/include/fftw3.h'){
     INCLUDEPATH += $$(HOME)/FFTW/include
 }
 
-# include libraries internal to the project
-INCLUDEPATH += $$PWD/../MPIsupport
-DEPENDPATH += $$PWD/../MPIsupport
-unix: LIBS += -L$$OUT_PWD/../MPIsupport/ -lmpisupport
-unix: PRE_TARGETDEPS += $$OUT_PWD/../MPIsupport/libmpisupport.a
+# include the MPI library if we are building the SkirtMemory application
+# and set the appropriate compiler flag for enabling memory diagnostic output
+BUILDING_MEMORY
+{
+    # Include libraries internal to the project
+    INCLUDEPATH += $$PWD/../MPIsupport
+    DEPENDPATH += $$PWD/../MPIsupport
+    unix: LIBS += -L$$OUT_PWD/../MPIsupport/ -lmpisupport
+    unix: PRE_TARGETDEPS += $$OUT_PWD/../MPIsupport/libmpisupport.a
 
-# Enable 'Memory-enabled' compilation of SKIRT subprojects
-include(../BuildUtils/EnableMemory.pri)
+    # Enable 'Memory-enabled' compilation of this SKIRT subproject
+    include(../BuildUtils/EnableMemory.pri)
+}
 
 #--------------------------------------------------
 # source and header files: maintained by Qt creator

@@ -12,7 +12,8 @@
 include(BuildOptions.pri)
 
 # Add BUILDING_MEMORY flag
-BUILDING_MEMORY {
+BUILDING_MEMORY
+{
     message (compiling with BUILDING_MEMORY flag for the SKIRT memory application)
     QMAKE_CXXFLAGS += -DBUILDING_MEMORY
     QMAKE_CXXFLAGS_RELEASE = $$QMAKE_CXXFLAGS

@@ -82,11 +82,12 @@ then
     echo "Compiling the SKIRT Memory console application"
     
     # Compile SKIRT with the BUILDING_MEMORY flag to provide diagnostic output statements concerning the memory usage
-    $QMAKEPATH BuildSKIRT.pro -o ../.release-memory/Makefile CONFIG+=BUILDING_MEMORY
+    $QMAKEPATH BuildSkirtMemory.pro -o ../.release-memory/Makefile
     make -j ${2:-5} -w -C ../.release-memory
     
-    # Move the newly compiled SkirtMemory directory to the release folder
-    
+    # Move the skirtmem executable to the release/SkirtMemory directory
+    mkdir -p ../release/SkirtMemory
+    cp ../.release-memory/SkirtMemory/skirtmem ../release/SkirtMemory/skirtmem
     
     # Build SKIRT, FitSKIRT and SkirtMakeUp
     $QMAKEPATH BuildSKIRT.pro -o ../release/Makefile CONFIG+=release
