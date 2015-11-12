@@ -37,6 +37,7 @@ void StaggeredAssigner::setupSelfBefore()
 void StaggeredAssigner::assign(size_t size, size_t blocks)
 {
     _blocksize = size;
+    _valuesInBlock = 0;
 
     for (size_t i = 0; i < size; i++)
     {
@@ -58,7 +59,7 @@ size_t StaggeredAssigner::absoluteIndex(size_t relativeIndex)
     relativeIndex = relativeIndex - block*_valuesInBlock;
 
     // Return the absolute index
-    return (_comm->rank() + relativeIndex * _comm->size());
+    return block*_blocksize + _comm->rank() + relativeIndex*_comm->size();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -71,7 +72,7 @@ size_t StaggeredAssigner::relativeIndex(size_t absoluteIndex)
     absoluteIndex = absoluteIndex - block*_blocksize;
 
     // Return the relative index
-    return ((absoluteIndex - _comm->rank()) / _comm->size());
+    return ((absoluteIndex - _comm->rank()) / _comm->size()) + block*_valuesInBlock;
 }
 
 ////////////////////////////////////////////////////////////////////

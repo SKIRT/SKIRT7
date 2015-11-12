@@ -41,7 +41,9 @@ void RandomAssigner::setupSelfBefore()
 void RandomAssigner::assign(size_t size, size_t blocks)
 {
     _blocksize = size;
+    _assignment.clear();
     _assignment.resize(size);
+    _values.clear();
     _values.reserve(1.2*size/_comm->size());
 
     // For each value in a certain subset of 'size', let this process determine a random process rank
@@ -49,7 +51,7 @@ void RandomAssigner::assign(size_t size, size_t blocks)
     helpassigner->assign(size);
     for (size_t i = 0; i < helpassigner->nvalues(); i++)
     {
-        int rank = round(_random->uniform() * _comm->size());
+        int rank = floor(_random->uniform() * _comm->size());
         _assignment[helpassigner->absoluteIndex(i)] = rank;
     }
 
@@ -80,7 +82,7 @@ size_t RandomAssigner::absoluteIndex(size_t relativeIndex)
     size_t block = relativeIndex / _valuesInBlock;
     relativeIndex = relativeIndex - block*_valuesInBlock;
 
-    return _values[relativeIndex];
+    return _values[relativeIndex] + _blocksize*block;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -92,7 +94,8 @@ size_t RandomAssigner::relativeIndex(size_t absoluteIndex)
     size_t block = absoluteIndex / _blocksize;
     absoluteIndex = absoluteIndex - block*_blocksize;
 
-    return std::find(_values.begin(), _values.end(), absoluteIndex) - _values.begin();
+    size_t relativeIndexInBlock = std::find(_values.begin(), _values.end(), absoluteIndex) - _values.begin();
+    return relativeIndexInBlock + block*_valuesInBlock;
 }
 
 ////////////////////////////////////////////////////////////////////
