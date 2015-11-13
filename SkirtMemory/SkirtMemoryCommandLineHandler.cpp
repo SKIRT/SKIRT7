@@ -248,6 +248,7 @@ void SkirtMemoryCommandLineHandler::doSimulation()
         log->setup();
         log->info(QCoreApplication::applicationName() + " " + QCoreApplication::applicationVersion());
         log->info("Running on " + _hostname + " for " + _username);
+        _console.info("Emulating the simulation steps and monitoring memory usage...");
         simulation->setupAndRun();
 
         // Report memory statistics in the simulation's log file

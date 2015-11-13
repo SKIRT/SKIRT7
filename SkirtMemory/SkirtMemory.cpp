@@ -26,7 +26,7 @@ int main(int argc, char** argv)
     // construct application object for argument parsing and such,
     // but don't run the event loop because we don't need it
     QCoreApplication app(argc, argv);
-    app.setApplicationName("SKIRT");
+    app.setApplicationName("SkirtMemory");
     app.setApplicationVersion("v7 (git " + QString(git_version).simplified() +
                               " built on " + QString(__DATE__).simplified() + " at "  __TIME__ ")");
 

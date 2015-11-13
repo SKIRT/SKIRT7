@@ -49,11 +49,11 @@ void ArrayMemory::initialize(QString prefix, QString path)
     QString filepath;
     if (ProcessManager::isRoot())
     {
-        filepath = outFilePath("log.txt");
+        filepath = outFilePath("memory.txt");
     }
     else
     {
-        filepath = outFilePath( "log" + _procNameShort + ".txt");
+        filepath = outFilePath( "memory" + _procNameShort + ".txt");
     }
 
     _file.setFileName(filepath);
