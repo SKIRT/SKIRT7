@@ -6,7 +6,6 @@
 #ifndef ARRAYMEMORY_HPP
 #define ARRAYMEMORY_HPP
 
-//#include <mutex>
 #include <QFile>
 #include <QTextStream>
 
@@ -28,7 +27,7 @@ public:
     static void finalize();
 
     /** This static function ... */
-    static QString log_resize(size_t oldsize, size_t newsize);
+    static void log_resize(size_t oldsize, size_t newsize);
 
 private:
     /** This private static function ... */
@@ -53,10 +52,9 @@ private:
     static QString _procNameShort;
     static QString _procNameLong;
 
-    // For
-    //std::mutex _mutex;   // mutex to guard the input/output operations
-    QFile _file;
-    QTextStream _out;
+    // Objects used for writing to file
+    static QFile _file;
+    static QTextStream _out;
 };
 
 #endif // ARRAYMEMORY_HPP

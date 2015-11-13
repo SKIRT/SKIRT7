@@ -5,8 +5,10 @@
 
 #ifdef BUILDING_MEMORY
 #include <QDateTime>
+#include <QFileInfo>
 #include "ArrayMemory.hpp"
 #include "MemoryStatistics.hpp"
+#include "ProcessManager.hpp"
 #endif
 
 ////////////////////////////////////////////////////////////////////
@@ -16,6 +18,8 @@ QString ArrayMemory::_outputPath("");
 QString ArrayMemory::_outputPrefix("");
 QString ArrayMemory::_procNameShort("");
 QString ArrayMemory::_procNameLong("");
+QFile ArrayMemory::_file;
+QTextStream ArrayMemory::_out;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -26,22 +30,18 @@ void ArrayMemory::initialize(QString prefix, QString path)
     _outputPrefix = prefix;
 
     // Set the output path
-    if (value.isEmpty()) _outputPath = "";
+    if (path.isEmpty()) _outputPath = "";
     else
     {
         QFileInfo test(path);
-        if (!test.isDir()) throw std::runtime_error("Output path does not exist or is not a directory: " + path);
+        if (!test.isDir()) throw std::runtime_error("Output path does not exist or is not a directory: " + path.toStdString());
         _outputPath = test.canonicalFilePath() + "/";
     }
 
     // Set the process name
     if (ProcessManager::isMultiProc())
     {
-        // Get the process rank
-        rank = ProcessManager::rank();
-
-        // Set the process name
-        _procNameShort = QString("P%1").arg(rank, 3, 10, QChar('0'));
+        _procNameShort = QString("P%1").arg(ProcessManager::rank(), 3, 10, QChar('0'));
         _procNameLong = "[" + _procNameShort + "] ";
     }
 
@@ -58,7 +58,7 @@ void ArrayMemory::initialize(QString prefix, QString path)
 
     _file.setFileName(filepath);
     if (!_file.open(QIODevice::WriteOnly | QIODevice::Text))
-        throw std::runtime_error("Could not open the log file " + filepath);
+        throw std::runtime_error("Could not open the log file " + filepath.toStdString());
 
     _out.setDevice(&_file);
     _out.setCodec("UTF-8");
@@ -90,7 +90,7 @@ QString ArrayMemory::outFilePath(QString name)
 //////////////////////////////////////////////////////////////////////
 
 #ifdef BUILDING_MEMORY
-QString ArrayMemory::log_resize(size_t oldsize, size_t newsize)
+void ArrayMemory::log_resize(size_t oldsize, size_t newsize)
 {
     // Calculate the change in memory (in GB)
     double delta;
@@ -117,7 +117,7 @@ void ArrayMemory::log(QString message)
     QString memory = "";
 
     // Output the message
-    if (Info >= _lowestLevel) output(timestamp() + "   " + _procNameLong + memory + message);
+    output(timestamp() + "   " + _procNameLong + memory + message);
 }
 #endif
 

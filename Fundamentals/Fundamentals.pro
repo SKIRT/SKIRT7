@@ -48,11 +48,12 @@ HEADERS += \
     LockFree.hpp \
     MemoryStatistics.hpp
 
-BUILDING_MEMORY
-{
-HEADERS += ArrayMemory.hpp
-}
-
 SOURCES += \
     CommandLineArguments.cpp \
     MemoryStatistics.cpp
+
+BUILDING_MEMORY
+{
+    HEADERS += ArrayMemory.hpp
+    SOURCES += ArrayMemory.cpp
+}
