@@ -9,6 +9,7 @@
 #include <QFileInfo>
 #include <QSharedPointer>
 #include <QHostInfo>
+#include "ArrayMemory.hpp"
 #include "CommandLineArguments.hpp"
 #include "Console.hpp"
 #include "ConsoleHierarchyCreator.hpp"
@@ -53,8 +54,8 @@ SkirtMemoryCommandLineHandler::SkirtMemoryCommandLineHandler(QStringList cmdline
     if (_username.isEmpty()) _username = "unknown user";
 
     // issue welcome message
-    //_console.info("Welcome to " + QCoreApplication::applicationName() + " " + QCoreApplication::applicationVersion());
-    //_console.info("Running on " + _hostname + " for " + _username);
+    _console.info("Welcome to " + QCoreApplication::applicationName() + " " + QCoreApplication::applicationVersion());
+    _console.info("Running on " + _hostname + " for " + _username);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -81,21 +82,24 @@ int SkirtMemoryCommandLineHandler::perform()
 
 int SkirtMemoryCommandLineHandler::doBatch()
 {
+    QStringList skifiles;
+
     // build a list of filenames for existing ski files
     _hasError = false;
-    foreach (QString filepath, _args.filepaths()) _skifiles << skifilesFor(filepath);
+    foreach (QString filepath, _args.filepaths()) skifiles << skifilesFor(filepath);
 
     // exit if there were any problems with the file paths
-    if (_hasError || _skifiles.isEmpty())
+    if (_hasError || skifiles.isEmpty())
     {
         printHelp();
         return EXIT_FAILURE;
     }
 
     // if there is only one ski file, simply perform the single simulation
-    if (_skifiles.size() == 1)
+    if (skifiles.size() == 1)
     {
-        doSimulation(0); // memory statistics are reported in doSimulation()
+        _skifilename = skifiles[0];
+        doSimulation(); // memory statistics are reported in doSimulation()
     }
     // The SKIRT memory application should only be used for one ski file at a time
     else throw FATALERROR("You cannot run different simulations in parallel with the SKIRT memory application.");
@@ -178,16 +182,19 @@ QStringList SkirtMemoryCommandLineHandler::skifilesFor(const QDir& dir, QString 
 
 ////////////////////////////////////////////////////////////////////
 
-void SkirtMemoryCommandLineHandler::doSimulation(size_t index)
+void SkirtMemoryCommandLineHandler::doSimulation()
 {
-    QString filename = _skifiles[index];
-    if (_skifiles.size() > 1) _console.warning("Performing simulation #" + QString::number(index+1) +
-                                               " of " + QString::number(_skifiles.size()));
-    //_console.info("Constructing a simulation from ski file '" + filename + "'...");
+    _console.info("Constructing a simulation from ski file '" + _skifilename + "'...");
+
+    QFileInfo skiinfo(_skifilename);
+    QString base = _args.isPresent("-k") ? skiinfo.absolutePath() : QDir::currentPath();
+
+    // Setup the ArrayMemory class
+    ArrayMemory::initialize(skiinfo.completeBaseName(), (_args.value("-o").startsWith('/') ? "" : base + "/") + _args.value("-o"));
 
     // Construct the simulation from the ski file; use shared pointer for automatic clean-up
     XmlHierarchyCreator creator;
-    QSharedPointer<MonteCarloSimulation> simulation( creator.createHierarchy<MonteCarloSimulation>(filename) );
+    QSharedPointer<MonteCarloSimulation> simulation(creator.createHierarchy<MonteCarloSimulation>(_skifilename));
 
     // Change the number of photon packages to 1 (we don't care about actually performing it)
     simulation->setPackages(1);
@@ -202,15 +209,13 @@ void SkirtMemoryCommandLineHandler::doSimulation(size_t index)
     // Limit the number of self-absorption cycles to avoid the convergence loop
     //try
     //{
-    //simulation->find<PanDustSystem>(false)->setCycles(2);
+    //simulation->find<PanDustSystem>(false)->setCycles(1);
     //}
     //catch (FatalError&) {}
 
     // Set up any simulation attributes that are not loaded from the ski file:
     //  - the paths for input and output files
-    QFileInfo skiinfo(filename);
     simulation->filePaths()->setOutputPrefix(skiinfo.completeBaseName());
-    QString base = _args.isPresent("-k") ? skiinfo.absolutePath() : QDir::currentPath();
     simulation->filePaths()->setInputPath((_args.value("-i").startsWith('/') ? "" : base + "/") + _args.value("-i"));
     simulation->filePaths()->setOutputPath((_args.value("-o").startsWith('/') ? "" : base + "/") + _args.value("-o"));
 

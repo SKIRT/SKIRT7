@@ -43,9 +43,8 @@ private:
         recursive descent by calling itself recursively for each subdirectory. */
     QStringList skifilesFor(const QDir& dir, QString name);
 
-    /** This function actually performs a single simulation constructed from the ski file at the
-        specified index. */
-    void doSimulation(size_t index);
+    /** This function actually performs the simulation constructed from the ski file. */
+    void doSimulation();
 
     /** This function prints a brief help message to the console. */
     void printHelp();
@@ -54,7 +53,7 @@ private:
     // data members
     CommandLineArguments _args;
     Console _console;
-    QStringList _skifiles;
+    QString _skifilename;
     bool _hasError;
     QString _hostname;
     QString _username;
