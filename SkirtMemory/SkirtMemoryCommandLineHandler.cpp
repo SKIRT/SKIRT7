@@ -36,7 +36,7 @@
 namespace
 {
     // the allowed options list, in the format consumed by the CommandLineArguments constructor
-    static const char* allowedOptions = "-i* -o* -k -r";
+    static const char* allowedOptions = "-i* -o* -k -r -l*";
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -191,7 +191,9 @@ void SkirtMemoryCommandLineHandler::doSimulation()
     QString base = _args.isPresent("-k") ? skiinfo.absolutePath() : QDir::currentPath();
 
     // Setup the ArrayMemory class
-    ArrayMemory::initialize(skiinfo.completeBaseName(), (_args.value("-o").startsWith('/') ? "" : base + "/") + _args.value("-o"));
+    QString outputpath = (_args.value("-o").startsWith('/') ? "" : base + "/") + _args.value("-o");
+    double lowerlimit = _args.isPresent("-l") ? _args.doubleValue("-l") : 1e-5;
+    ArrayMemory::initialize(skiinfo.completeBaseName(), outputpath, lowerlimit);
 
     // Construct the simulation from the ski file; use shared pointer for automatic clean-up
     XmlHierarchyCreator creator;

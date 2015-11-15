@@ -19,14 +19,18 @@ QString ArrayMemory::_procNameShort("");
 QString ArrayMemory::_procNameLong("");
 QFile ArrayMemory::_file;
 QTextStream ArrayMemory::_out;
+double ArrayMemory::_limit;
 
 //////////////////////////////////////////////////////////////////////
 
 #ifdef BUILDING_MEMORY
-void ArrayMemory::initialize(QString prefix, QString path)
+void ArrayMemory::initialize(QString prefix, QString path, double limit)
 {
     // Set the output prefix
     _outputPrefix = prefix;
+
+    // Set the lower memory limit
+    _limit = limit;
 
     // Set the output path
     if (path.isEmpty()) _outputPath = "";
@@ -98,7 +102,7 @@ void ArrayMemory::log_resize(size_t oldsize, size_t newsize)
     else delta = 0;
 
     // Log the amount of gained or released memory to the console, if larger than a certain threshold
-    if (delta > 1e-5)
+    if (delta > _limit)
     {
         if (oldsize < newsize) log("+" + QString::number(delta) + " GB");
         else if (oldsize > newsize) log("-" + QString::number(delta) + " GB");

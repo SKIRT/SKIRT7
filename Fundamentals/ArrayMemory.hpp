@@ -24,7 +24,7 @@ public:
 #ifdef BUILDING_MEMORY
     /** This static function initializes the data members of this class. Most importantly, it opens
         the output file. */
-    static void initialize(QString prefix, QString path);
+    static void initialize(QString prefix, QString path, double limit);
 
     /** This static function closes the output file. */
     static void finalize();
@@ -61,6 +61,9 @@ private:
     // Objects used for writing to file
     static QFile _file;
     static QTextStream _out;
+
+    // The lowest amount of memory (in GB) to be reported
+    static double _limit;
 };
 
 #endif // ARRAYMEMORY_HPP
