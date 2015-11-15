@@ -13,7 +13,7 @@ class QDir;
 
 ////////////////////////////////////////////////////////////////////
 
-/** This class process the command line arguments for the SKIRT memory console application. */
+/** This class process the command line arguments for the SkirtMemory console application. */
 class SkirtMemoryCommandLineHandler
 {
 public:

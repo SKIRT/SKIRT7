@@ -52,6 +52,7 @@ SOURCES += \
     CommandLineArguments.cpp \
     MemoryStatistics.cpp
 
+# include files only used when compiling the SkirtMemory application
 BUILDING_MEMORY
 {
     HEADERS += ArrayMemory.hpp

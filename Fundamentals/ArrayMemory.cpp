@@ -7,7 +7,6 @@
 #include <QDateTime>
 #include <QFileInfo>
 #include "ArrayMemory.hpp"
-#include "MemoryStatistics.hpp"
 #include "ProcessManager.hpp"
 #endif
 
@@ -112,12 +111,7 @@ void ArrayMemory::log_resize(size_t oldsize, size_t newsize)
 #ifdef BUILDING_MEMORY
 void ArrayMemory::log(QString message)
 {
-    // Obtain a string denoting the amount of used memory
-    //QString memory = "(" + MemoryStatistics::reportCurrent() + ") ";
-    QString memory = "";
-
-    // Output the message
-    output(timestamp() + "   " + _procNameLong + memory + message);
+    output(timestamp() + "   " + _procNameLong + message);
 }
 #endif
 

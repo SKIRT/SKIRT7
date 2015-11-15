@@ -184,6 +184,7 @@ QStringList SkirtMemoryCommandLineHandler::skifilesFor(const QDir& dir, QString 
 
 void SkirtMemoryCommandLineHandler::doSimulation()
 {
+    // Inform the user about the simulation that will be run
     _console.info("Constructing a simulation from ski file '" + _skifilename + "'...");
 
     QFileInfo skiinfo(_skifilename);
