@@ -48,22 +48,6 @@ private:
     /** This private static function generates a timestamp. */
     static QString timestamp();
 #endif
-
-private:
-    // Output prefix and path
-    static QString _outputPath;
-    static QString _outputPrefix;
-
-    // Strings identifying the process
-    static QString _procNameShort;
-    static QString _procNameLong;
-
-    // Objects used for writing to file
-    static QFile _file;
-    static QTextStream _out;
-
-    // The lowest amount of memory (in GB) to be reported
-    static double _limit;
 };
 
 #endif // ARRAYMEMORY_HPP

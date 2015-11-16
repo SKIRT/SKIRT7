@@ -12,14 +12,29 @@
 
 ////////////////////////////////////////////////////////////////////
 
-// Initialize static data members
-QString ArrayMemory::_outputPath("");
-QString ArrayMemory::_outputPrefix("");
-QString ArrayMemory::_procNameShort("");
-QString ArrayMemory::_procNameLong("");
-QFile ArrayMemory::_file;
-QTextStream ArrayMemory::_out;
-double ArrayMemory::_limit;
+#ifdef BUILDING_MEMORY
+// Declare variables in an anonymous namespace
+namespace
+{
+    // A flag indicating whether the initialize() function has been called
+    bool _initialized(false);
+
+    // Output prefix and path
+    QString _outputPath("");
+    QString _outputPrefix("");
+
+    // Strings identifying the process
+    QString _procNameShort("");
+    QString _procNameLong("");
+
+    // Objects used for writing to file
+    QFile _file;
+    QTextStream _out;
+
+    // The lowest amount of memory (in GB) to be reported
+    double _limit;
+}
+#endif
 
 //////////////////////////////////////////////////////////////////////
 
@@ -65,6 +80,9 @@ void ArrayMemory::initialize(QString prefix, QString path, double limit)
 
     _out.setDevice(&_file);
     _out.setCodec("UTF-8");
+
+    // If everything went well, set the _initialized flag
+    _initialized = true;
 }
 #endif
 
@@ -95,6 +113,9 @@ QString ArrayMemory::outFilePath(QString name)
 #ifdef BUILDING_MEMORY
 void ArrayMemory::log_resize(size_t oldsize, size_t newsize, void* ptr)
 {
+    // Return immediately if the initialize() function was not called
+    if (!_initialized) return;
+
     // Calculate the change in memory (in GB)
     double delta;
     if (oldsize < newsize) delta = (newsize - oldsize) * 8 * 1e-9;
