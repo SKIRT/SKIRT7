@@ -16,4 +16,4 @@ macx:CONFIG *= BUILDING_GUI
 CONFIG *= BUILDING_WITH_MPI
 
 # to build the SkirtMemory subproject, remove the # character from the following line
-CONFIG *= BUILDING_MEMORY
+#CONFIG *= BUILDING_MEMORY
