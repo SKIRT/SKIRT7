@@ -274,6 +274,7 @@ void SkirtMemoryCommandLineHandler::printHelp()
     _console.warning("  memskirt [-k] [-i <dirpath>] [-o <dirpath>]");
     _console.warning("           [-r] {<filepath>}*");
     _console.warning("");
+    _console.warning("  -l <limit> : the lower limit of memory (de)allocation to be logged (in GB)");
     _console.warning("  -k : makes the input/output paths relative to the ski file being processed");
     _console.warning("  -i <dirpath> : the relative or absolute path for simulation input files");
     _console.warning("  -o <dirpath> : the relative or absolute path for simulation output files");
