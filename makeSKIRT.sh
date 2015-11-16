@@ -76,26 +76,6 @@ else
 echo Using qmake in $QMAKEPATH
 fi
 
-# Create the make file and perform the build
-if [ "$1" == "--memory" ]
-then
-    echo "Compiling the SKIRT Memory console application"
-    
-    # Compile SKIRT with the BUILDING_MEMORY flag to provide diagnostic output statements concerning the memory usage
-    $QMAKEPATH BuildSkirtMemory.pro -o ../.release-memory/Makefile
-    make -j ${2:-5} -w -C ../.release-memory
-    
-    # Move the skirtmem executable to the release/SkirtMemory directory
-    mkdir -p ../release/SkirtMemory
-    cp ../.release-memory/SkirtMemory/skirtmem ../release/SkirtMemory/skirtmem
-    
-    # Build SKIRT, FitSKIRT and SkirtMakeUp
-    $QMAKEPATH BuildSKIRT.pro -o ../release/Makefile CONFIG+=release
-    make -j ${2:-5} -w -C ../release
-else
-
-# Build SKIRT, FitSKIRT and SkirtMakeUp
+# Build SKIRT, FitSKIRT, SkirtMemory and SkirtMakeUp
 $QMAKEPATH BuildSKIRT.pro -o ../release/Makefile CONFIG+=release
 make -j ${1:-5} -w -C ../release
-
-fi
