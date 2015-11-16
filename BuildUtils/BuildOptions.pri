@@ -14,3 +14,6 @@ macx:CONFIG *= BUILDING_GUI
 
 # to build without MPI support even on systems that offer MPI, precede this line with a # comment character
 CONFIG *= BUILDING_WITH_MPI
+
+# to build the SkirtMemory subproject, remove the # character from the following line
+CONFIG *= BUILDING_MEMORY
