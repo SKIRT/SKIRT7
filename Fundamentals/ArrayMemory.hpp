@@ -31,7 +31,7 @@ public:
 
     /** This static function writes a log message stating the amount of memory acquired or released
         during a resize operation of an Array instance. */
-    static void log_resize(size_t oldsize, size_t newsize);
+    static void log_resize(size_t oldsize, size_t newsize, void* ptr);
 
 private:
     /** This private static function returns the full path of an output file with a certain name. The

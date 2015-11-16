@@ -93,7 +93,7 @@ QString ArrayMemory::outFilePath(QString name)
 //////////////////////////////////////////////////////////////////////
 
 #ifdef BUILDING_MEMORY
-void ArrayMemory::log_resize(size_t oldsize, size_t newsize)
+void ArrayMemory::log_resize(size_t oldsize, size_t newsize, void* ptr)
 {
     // Calculate the change in memory (in GB)
     double delta;
@@ -101,11 +101,14 @@ void ArrayMemory::log_resize(size_t oldsize, size_t newsize)
     else if (oldsize > newsize) delta = (oldsize - newsize) * 8 * 1e-9;
     else delta = 0;
 
+    // Convert the pointer to a unique string
+    QString address = QString("0x%1").arg((quintptr)ptr, QT_POINTER_SIZE * 2, 16, QChar('0'));
+
     // Log the amount of gained or released memory to the console, if larger than a certain threshold
     if (delta > _limit)
     {
-        if (oldsize < newsize) log("+" + QString::number(delta) + " GB");
-        else if (oldsize > newsize) log("-" + QString::number(delta) + " GB");
+        if (oldsize < newsize) log("+" + QString::number(delta) + " GB at " + address);
+        else if (oldsize > newsize) log("-" + QString::number(delta) + " GB at " + address);
     }
 }
 #endif

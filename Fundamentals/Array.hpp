@@ -359,6 +359,9 @@ public:
     Array(const Array& _v);
     ~Array();
 
+    // check whether the Array contains non-zero values
+    bool non_zero() const;
+
     // assignment:
     Array& operator=(const Array& _v);
     Array& operator=(const double& _x);
@@ -614,6 +617,17 @@ Array::~Array()
 }
 
 inline
+bool
+Array::non_zero() const
+{
+    for (size_t i = 0; i < size(); i++)
+    {
+        if (operator[](i) != 0.0) return true;
+    }
+    return false;
+}
+
+inline
 Array&
 Array::operator=(const Array& _v)
 {
@@ -846,7 +860,7 @@ void
 Array::resize_noclear(size_t _n)
 {
     #ifdef BUILDING_MEMORY
-    ArrayMemory::log_resize(size(), _n);
+    ArrayMemory::log_resize(size(), _n, this);
     #endif
 
     if (size() != _n)
