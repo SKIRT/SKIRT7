@@ -17,4 +17,4 @@ CONFIG *= BUILDING_WITH_MPI
 
 # the following flag enables memory (de)allocation logging for SKIRT (which is only invoked when using the
 # "-l <limit>" flag). To disable this functionality, precede the following line with a # character
-CONFIG *= BUILDING_MEMORY
+#CONFIG *= BUILDING_MEMORY

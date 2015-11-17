@@ -103,7 +103,7 @@ void FileLog::memory(size_t oldsize, size_t newsize, void *ptr)
     QString address = QString("0x%1").arg((quintptr)ptr, QT_POINTER_SIZE * 2, 16, QChar('0'));
 
     // Log the amount of gained or released memory to the console, if larger than a certain threshold
-    if (delta > _limit)
+    if (delta >= _limit)
     {
         if (oldsize < newsize) info("+" + QString::number(delta) + " GB at " + address);
         else if (oldsize > newsize) info("-" + QString::number(delta) + " GB at " + address);
