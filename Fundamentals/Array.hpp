@@ -7,7 +7,7 @@
 #define ARRAY_HPP
 
 #ifdef BUILDING_MEMORY
-#include "ArrayMemory.hpp"
+#include "MemoryLogger.hpp"
 #endif
 
 #include <algorithm>
@@ -351,6 +351,9 @@ public:
 private:
     double* _begin_;
     double* _end_;
+    #ifdef BUILDING_MEMORY
+    static MemoryLogger* _log;
+    #endif
 
 public:
     // construct/destroy:
@@ -361,6 +364,11 @@ public:
 
     // check whether the Array contains non-zero values
     bool non_zero() const;
+
+    #ifdef BUILDING_MEMORY
+    // set the memory logger
+    static void setLogger(MemoryLogger* logger);
+    #endif
 
     // assignment:
     Array& operator=(const Array& _v);
@@ -627,6 +635,15 @@ Array::non_zero() const
     return false;
 }
 
+#ifdef BUILDING_MEMORY
+inline
+void
+Array::setLogger(MemoryLogger *logger)
+{
+    _log = logger;
+}
+#endif
+
 inline
 Array&
 Array::operator=(const Array& _v)
@@ -860,7 +877,7 @@ void
 Array::resize_noclear(size_t _n)
 {
     #ifdef BUILDING_MEMORY
-    ArrayMemory::log_resize(size(), _n, this);
+    if (_log != nullptr) _log->memory(size(), _n, this);
     #endif
 
     if (size() != _n)

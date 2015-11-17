@@ -34,6 +34,12 @@ unix: PRE_TARGETDEPS += $$OUT_PWD/../Fundamentals/libfundamentals.a \
                         $$OUT_PWD/../MPIsupport/libmpisupport.a \
                         $$OUT_PWD/../FFTConvolution/libfftconvolution.a
 
+# set the appropriate compiler flag for enabling memory diagnostic output
+#BUILDING_MEMORY {
+#    message (compiling $$TARGET with memory (de)allocation diagnostic output enabled)
+#    include(../BuildUtils/EnableMemory.pri)
+#}
+
 #--------------------------------------------------
 # source and header files: maintained by Qt creator
 #--------------------------------------------------

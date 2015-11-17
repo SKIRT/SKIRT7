@@ -11,10 +11,8 @@
 
 include(BuildOptions.pri)
 
-# Add BUILDING_MEMORY flag
-BUILDING_MEMORY
-{
-    message (compiling with BUILDING_MEMORY flag for the SKIRT memory application)
+BUILDING_MEMORY {
+    message (compiling $$TARGET with memory (de)allocation diagnostic output enabled)
     QMAKE_CXXFLAGS += -DBUILDING_MEMORY
     QMAKE_CXXFLAGS_RELEASE = $$QMAKE_CXXFLAGS
     QMAKE_CXXFLAGS_DEBUG = $$QMAKE_CXXFLAGS

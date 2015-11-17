@@ -28,16 +28,9 @@ SUBDIRS += \
 # conditionally add other subproject subdirectories
 include(BuildUtils/BuildOptions.pri)
 BUILDING_GUI:SUBDIRS += SkirtMakeUp
-BUILDING_MEMORY:SUBDIRS += SkirtMemory
 
 # define dependencies between subprojects
-BUILDING_MEMORY {
-    Fundamentals.depends   = MPIsupport
-    FFTConvolution.depends = Fundamentals MPIsupport
-    SkirtMemory.depends    = Cfitsio Voro Fundamentals MPIsupport SKIRTcore Discover
-} else {
-    FFTConvolution.depends = Fundamentals
-}
+FFTConvolution.depends = Fundamentals
 SKIRTcore.depends      = Cfitsio Voro Fundamentals MPIsupport
 Discover.depends       = Cfitsio Voro Fundamentals MPIsupport SKIRTcore
 SKIRTmain.depends      = Cfitsio Voro Fundamentals MPIsupport SKIRTcore Discover
