@@ -286,7 +286,7 @@ void SkirtCommandLineHandler::doSimulation(size_t index)
     // Check whether memory (de)allocation logging is enabled
     bool memoryalloc = _args.isPresent("-l");
     #ifndef BUILDING_MEMORY
-    throw FATALERROR("To use the -l flag for memory (de)allocation logging, enable BUILDING_MEMORY in the build options");
+    if (memoryalloc) throw FATALERROR("To use the -l flag for memory (de)allocation logging, enable BUILDING_MEMORY in the build options");
     #endif
 
     // Set up any simulation attributes that are not loaded from the ski file:
@@ -316,6 +316,7 @@ void SkirtCommandLineHandler::doSimulation(size_t index)
     simulation->log()->setMemoryLogging(_args.isPresent("-m"));
     if (emulation) simulation->log()->setLowestLevel(Log::Error); // in emulation mode, only log error messags to the console
     if (_parallelSims > 1 || _args.isPresent("-b")) simulation->log()->setLowestLevel(Log::Success);
+    #ifdef BULDING_MEMORY
     if (memoryalloc)
     {
         // enable memory logging for each log message when memory (de)allocation logging is enabled
@@ -324,6 +325,7 @@ void SkirtCommandLineHandler::doSimulation(size_t index)
         log->setLimit(_args.doubleValue("-l"));
         Array::setLogger(log);
     }
+    #endif
 
     // Output a ski file and a latex file reflecting this simulation for later reference
     if (comm->isRoot())
@@ -347,8 +349,10 @@ void SkirtCommandLineHandler::doSimulation(size_t index)
         if (_skifiles.size() == 1 || (_parallelSims==1 && index==0))
             log->info(MemoryStatistics::reportAvailable(true) + " -- " + MemoryStatistics::reportPeak(true));
 
+        #ifdef BUILDING_MEMORY
         // disable memory (de)allocation logging after the simulation finished
         if (memoryalloc) Array::setLogger(nullptr);
+        #endif
     }
     catch (FatalError& error)
     {

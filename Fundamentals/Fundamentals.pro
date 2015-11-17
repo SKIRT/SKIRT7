@@ -39,6 +39,9 @@ HEADERS += \
     MemoryLogger.hpp
 
 SOURCES += \
-    Array.cpp \
     CommandLineArguments.cpp \
     MemoryStatistics.cpp
+
+BUILDING_MEMORY {
+    SOURCES += Array.cpp
+}
