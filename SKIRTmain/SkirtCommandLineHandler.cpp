@@ -316,7 +316,7 @@ void SkirtCommandLineHandler::doSimulation(size_t index)
     simulation->log()->setMemoryLogging(_args.isPresent("-m"));
     if (emulation) simulation->log()->setLowestLevel(Log::Error); // in emulation mode, only log error messags to the console
     if (_parallelSims > 1 || _args.isPresent("-b")) simulation->log()->setLowestLevel(Log::Success);
-    #ifdef BULDING_MEMORY
+    #ifdef BUILDING_MEMORY
     if (memoryalloc)
     {
         // enable memory logging for each log message when memory (de)allocation logging is enabled
