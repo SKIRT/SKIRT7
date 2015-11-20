@@ -56,6 +56,12 @@ public:
         unambiguous. */
     int intValue(QString option) const;
 
+    /** Returns the value of the specified option converted to a double value, or -1 if the option is
+        not present or if the value can't be converted to a double. If the command line is invalid,
+        this function always returns -1. Since an option value string can't start with a dash, it's
+        impossible to represent negative doubles, thus an error return value of -1 is unambiguous. */
+    double doubleValue(QString option) const;
+
     /** Returns true if there is at least one filepath argument, or false if not. If the command
         line is invalid, this function always returns false. */
     bool hasFilepaths() const;

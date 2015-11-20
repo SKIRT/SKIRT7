@@ -19,6 +19,9 @@ CONFIG *= staticlib create_prl thread c++11
 QMAKE_CXXFLAGS_RELEASE -= -O2
 QMAKE_CXXFLAGS_RELEASE += -O3
 
+# Enable memory (de)allocation compilation if required
+include(../BuildUtils/EnableMemory.pri)
+
 #--------------------------------------------------
 # source and header files: maintained by Qt creator
 #--------------------------------------------------
@@ -32,8 +35,13 @@ HEADERS += \
     Table.hpp \
     Vec.hpp \
     LockFree.hpp \
-    MemoryStatistics.hpp
+    MemoryStatistics.hpp \
+    MemoryLogger.hpp
 
 SOURCES += \
     CommandLineArguments.cpp \
     MemoryStatistics.cpp
+
+BUILDING_MEMORY {
+    SOURCES += Array.cpp
+}
