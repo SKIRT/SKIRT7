@@ -99,15 +99,6 @@ public:
         root during the communication. */
     static void broadcast(int* value, int root);
 
-    /** This function returns the integer that describes the rank of the calling process. */
-    static int rank();
-
-    /** This function returns whether the MPI environmnent has been initialized or not. */
-    static bool initialized();
-
-    /** This function returns whether the MPI environment has been finalized or not. */
-    static bool finalized();
-
     /** This function returns a boolean indicating whether the process is assigned as root or not.
         The rank of the process is always the 'true' rank, irrespective of whether the object that
         calls this function has acquired the MPI resource or not. */
@@ -121,6 +112,7 @@ public:
 
 private:
     static std::atomic<int> requests;   // This atomic integer is used to store the number of active requests for MPI
+
 };
 
 #endif // PROCESSMANAGER_HPP

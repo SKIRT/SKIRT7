@@ -4,9 +4,9 @@
 #-------------------------------------------------
 
 #-------------------------------------------------------------------------
-# This qmake include file enables the MPI compiler/linker for the project,
-# assuming that the BUILDING_WITH_MPI configuration flag is turned on,
-# and that the MPI compiler/linker can be located on the host system.
+# This qmake include file enables memory (de)allocation logging for the
+# project (which is only invoked when using the "-l <limit>" flag),
+# assuming that the BUILDING_MEMORY configuration flag is turned on.
 #-------------------------------------------------------------------------
 
 include(BuildOptions.pri)

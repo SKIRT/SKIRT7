@@ -286,7 +286,7 @@ void SkirtCommandLineHandler::doSimulation(size_t index)
     // Check whether memory (de)allocation logging is enabled
     bool memoryalloc = _args.isPresent("-l");
     #ifndef BUILDING_MEMORY
-    if (memoryalloc) throw FATALERROR("To use the -l flag for memory (de)allocation logging, enable BUILDING_MEMORY in the build options");
+    if (memoryalloc) throw FATALERROR("Enable BUILDING_MEMORY in the build options to use the -l option");
     #endif
 
     // Set up any simulation attributes that are not loaded from the ski file:
@@ -314,7 +314,7 @@ void SkirtCommandLineHandler::doSimulation(size_t index)
     simulation->log()->setLinkedLog(log);
     simulation->log()->setVerbose(_args.isPresent("-v"));
     simulation->log()->setMemoryLogging(_args.isPresent("-m"));
-    if (emulation) simulation->log()->setLowestLevel(Log::Error); // in emulation mode, only log error messags to the console
+    if (emulation) simulation->log()->setLowestLevel(Log::Error); // in emulation mode, only log errors to the console
     if (_parallelSims > 1 || _args.isPresent("-b")) simulation->log()->setLowestLevel(Log::Success);
     #ifdef BUILDING_MEMORY
     if (memoryalloc)
@@ -377,8 +377,7 @@ void SkirtCommandLineHandler::printHelp()
     _console.warning("  -v : forces verbose logging");
     _console.warning("  -m : state the amount of used memory at the start of each log message");
     _console.warning("  -l <limit> : enable memory (de)allocation logging (lower limit in GB)");
-    _console.warning("  -e : runs the simulation in 'emulation' mode (computations are kept to a minimum) to get "
-                            "an estimate of the memory consumption");
+    _console.warning("  -e : runs the simulation in 'emulation' mode to get an estimate of the memory consumption");
     _console.warning("  -s <simulations> : the number of parallel simulations per process");
     _console.warning("  -t <threads> : the number of parallel threads for each simulation");
     _console.warning("  -k : makes the input/output paths relative to the ski file being processed");

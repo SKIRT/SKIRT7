@@ -362,9 +362,6 @@ public:
     Array(const Array& _v);
     ~Array();
 
-    // check whether the Array contains non-zero values
-    bool non_zero() const;
-
     #ifdef BUILDING_MEMORY
     // set the memory logger
     static void setLogger(MemoryLogger* logger);
@@ -622,17 +619,6 @@ inline
 Array::~Array()
 {
     resize_noclear(0);
-}
-
-inline
-bool
-Array::non_zero() const
-{
-    for (size_t i = 0; i < size(); i++)
-    {
-        if (operator[](i) != 0.0) return true;
-    }
-    return false;
 }
 
 #ifdef BUILDING_MEMORY

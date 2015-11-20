@@ -76,6 +76,6 @@ else
 echo Using qmake in $QMAKEPATH
 fi
 
-# Build SKIRT, FitSKIRT, SkirtMemory and SkirtMakeUp
+# Create the make file and perform the build
 $QMAKEPATH BuildSKIRT.pro -o ../release/Makefile CONFIG+=release
 make -j ${1:-5} -w -C ../release

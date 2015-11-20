@@ -40,8 +40,5 @@ HEADERS += \
 
 SOURCES += \
     CommandLineArguments.cpp \
-    MemoryStatistics.cpp
-
-BUILDING_MEMORY {
-    SOURCES += Array.cpp
-}
+    MemoryStatistics.cpp \
+    Array.cpp

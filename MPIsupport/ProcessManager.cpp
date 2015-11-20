@@ -163,45 +163,6 @@ void ProcessManager::broadcast(int* value, int root)
 
 //////////////////////////////////////////////////////////////////////
 
-int ProcessManager::rank()
-{
-#ifdef BUILDING_WITH_MPI
-    int rank;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    return rank;
-#else
-    return 0;
-#endif
-}
-
-//////////////////////////////////////////////////////////////////////
-
-bool ProcessManager::initialized()
-{
-#ifdef BUILDING_WITH_MPI
-    int initialized;
-    MPI_Initialized(&initialized);
-    return initialized;
-#else
-    return true;
-#endif
-}
-
-//////////////////////////////////////////////////////////////////////
-
-bool ProcessManager::finalized()
-{
-#ifdef BUILDING_WITH_MPI
-    int finalized;
-    MPI_Finalized(&finalized);
-    return finalized;
-#else
-    return true;
-#endif
-}
-
-//////////////////////////////////////////////////////////////////////
-
 bool ProcessManager::isRoot()
 {
 #ifdef BUILDING_WITH_MPI

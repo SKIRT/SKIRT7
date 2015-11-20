@@ -6,8 +6,7 @@
 #ifndef MEMORYLOGGER_HPP
 #define MEMORYLOGGER_HPP
 
-#include <QFile>
-#include <QTextStream>
+#include <cstddef>
 
 ////////////////////////////////////////////////////////////////////
 
