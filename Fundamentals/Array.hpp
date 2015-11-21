@@ -6,6 +6,10 @@
 #ifndef ARRAY_HPP
 #define ARRAY_HPP
 
+#ifdef BUILDING_MEMORY
+#include "MemoryLogger.hpp"
+#endif
+
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
@@ -347,6 +351,9 @@ public:
 private:
     double* _begin_;
     double* _end_;
+    #ifdef BUILDING_MEMORY
+    static MemoryLogger* _log;
+    #endif
 
 public:
     // construct/destroy:
@@ -354,6 +361,11 @@ public:
     explicit Array(size_t _n);
     Array(const Array& _v);
     ~Array();
+
+    #ifdef BUILDING_MEMORY
+    // set the memory logger
+    static void setLogger(MemoryLogger* logger);
+    #endif
 
     // assignment:
     Array& operator=(const Array& _v);
@@ -609,6 +621,15 @@ Array::~Array()
     resize_noclear(0);
 }
 
+#ifdef BUILDING_MEMORY
+inline
+void
+Array::setLogger(MemoryLogger *logger)
+{
+    _log = logger;
+}
+#endif
+
 inline
 Array&
 Array::operator=(const Array& _v)
@@ -841,6 +862,10 @@ inline
 void
 Array::resize_noclear(size_t _n)
 {
+    #ifdef BUILDING_MEMORY
+    if (_log != nullptr) _log->memory(size(), _n, this);
+    #endif
+
     if (size() != _n)
     {
         if (_begin_ != 0)

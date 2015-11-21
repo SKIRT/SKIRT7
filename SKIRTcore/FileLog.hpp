@@ -10,6 +10,7 @@
 #include <QFile>
 #include <QTextStream>
 #include "Log.hpp"
+#include "MemoryLogger.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
@@ -17,7 +18,7 @@
     name <tt>prefix_log.txt</tt> and is placed in the output filepath provided by the FilePaths
     instance attached to the simulation hierarchy at setup time. The log text is written in UTF-8
     encoding. All functions in this class are re-entrant; the output() function is thread-safe. */
-class FileLog : public Log
+class FileLog : public Log, public MemoryLogger
 {
     Q_OBJECT
 
@@ -29,6 +30,13 @@ public:
 
     /** The destructor closes the log file, if it is open. */
     ~FileLog();
+
+    /** Setter for the _limit attribute. */
+    void setLimit(double value);
+
+    /** This function writes a log message stating the amount of memory acquired or released during
+        a resize operation of an Array instance. */
+    void memory(size_t oldsize, size_t newsize, void *ptr);
 
 protected:
     /** This function constructs the filename and opens the log file, overwriting any existing file
@@ -53,6 +61,7 @@ private:
     std::mutex _mutex;   // mutex to guard the input/output operations
     QFile _file;
     QTextStream _out;
+    double _limit;      // the lower limit for memory (de)allocation logging
 };
 
 ////////////////////////////////////////////////////////////////////

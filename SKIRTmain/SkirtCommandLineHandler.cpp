@@ -9,6 +9,7 @@
 #include <QFileInfo>
 #include <QSharedPointer>
 #include <QHostInfo>
+#include "Array.hpp"
 #include "CommandLineArguments.hpp"
 #include "Console.hpp"
 #include "ConsoleHierarchyCreator.hpp"
@@ -17,6 +18,8 @@
 #include "FilePaths.hpp"
 #include "LatexHierarchyWriter.hpp"
 #include "MemoryStatistics.hpp"
+#include "MonteCarloSimulation.hpp"
+#include "PanDustSystem.hpp"
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
 #include "PeerToPeerCommunicator.hpp"
@@ -35,7 +38,7 @@
 namespace
 {
     // the allowed options list, in the format consumed by the CommandLineArguments constructor
-    static const char* allowedOptions = "-t* -s* -b -v -m -i* -o* -k -r -x";
+    static const char* allowedOptions = "-t* -s* -b -v -m -l* -e -i* -o* -k -r -x";
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -264,6 +267,28 @@ void SkirtCommandLineHandler::doSimulation(size_t index)
     XmlHierarchyCreator creator;
     QSharedPointer<Simulation> simulation( creator.createHierarchy<Simulation>(filename) );
 
+    // Check whether emulation mode if enabled
+    bool emulation = _args.isPresent("-e");
+    if (emulation)
+    {
+        // Change the number of photon packages to 1 (we don't care about actually performing it)
+        simulation->find<MonteCarloSimulation>(false)->setPackages(1);
+
+        // Disable dust self-absorption (does not lead to additional memory usage, would not converge anyway)
+        try {simulation->find<PanDustSystem>(false)->setSelfAbsorption(false);}
+        catch (FatalError&) {}
+
+        // Limit the number of self-absorption cycles to avoid the convergence loop (does not work?)
+        //try {simulation->find<PanDustSystem>(false)->setCycles(1);}
+        //catch (FatalError&) {}
+    }
+
+    // Check whether memory (de)allocation logging is enabled
+    bool memoryalloc = _args.isPresent("-l");
+    #ifndef BUILDING_MEMORY
+    if (memoryalloc) throw FATALERROR("Enable BUILDING_MEMORY in the build options to use the -l option");
+    #endif
+
     // Set up any simulation attributes that are not loaded from the ski file:
     //  - the paths for input and output files
     QFileInfo skiinfo(filename);
@@ -274,17 +299,33 @@ void SkirtCommandLineHandler::doSimulation(size_t index)
 
     //  - the number of parallel threads
     if (_args.intValue("-t") > 0) simulation->parallelFactory()->setMaxThreadCount(_args.intValue("-t"));
+    if (memoryalloc)
+        if (_args.intValue("-t") > 0)
+            simulation->log()->warning("You cannot use multiple threads when logging memory (de)allocation. Setting "
+                                       "the number of threads to 1.");
+        simulation->parallelFactory()->setMaxThreadCount(1); // memory (de)allocation logging requires singlethreading
 
     //  - the multiprocessing environment
     PeerToPeerCommunicator* comm = simulation->communicator();
     comm->setup();
 
-    //  - the console and the file log
+    //  - the console and the file log (and memory (de)allocation logging)
     FileLog* log = new FileLog();
     simulation->log()->setLinkedLog(log);
     simulation->log()->setVerbose(_args.isPresent("-v"));
     simulation->log()->setMemoryLogging(_args.isPresent("-m"));
+    if (emulation) simulation->log()->setLowestLevel(Log::Error); // in emulation mode, only log errors to the console
     if (_parallelSims > 1 || _args.isPresent("-b")) simulation->log()->setLowestLevel(Log::Success);
+    #ifdef BUILDING_MEMORY
+    if (memoryalloc)
+    {
+        // enable memory logging for each log message when memory (de)allocation logging is enabled
+        simulation->log()->setMemoryLogging(true);
+        // set the lower limit for memory (de)allocation logging
+        log->setLimit(_args.doubleValue("-l"));
+        Array::setLogger(log);
+    }
+    #endif
 
     // Output a ski file and a latex file reflecting this simulation for later reference
     if (comm->isRoot())
@@ -301,11 +342,17 @@ void SkirtCommandLineHandler::doSimulation(size_t index)
         log->setup();
         log->info(QCoreApplication::applicationName() + " " + QCoreApplication::applicationVersion());
         log->info("Running on " + _hostname + " for " + _username);
+        if (emulation) _console.info("Emulating the simulation steps and monitoring memory usage...");
         simulation->setupAndRun();
 
         // if this is the only or first simulation in the run, report memory statistics in the simulation's log file
         if (_skifiles.size() == 1 || (_parallelSims==1 && index==0))
             log->info(MemoryStatistics::reportAvailable(true) + " -- " + MemoryStatistics::reportPeak(true));
+
+        #ifdef BUILDING_MEMORY
+        // disable memory (de)allocation logging after the simulation finished
+        if (memoryalloc) Array::setLogger(nullptr);
+        #endif
     }
     catch (FatalError& error)
     {
@@ -329,6 +376,8 @@ void SkirtCommandLineHandler::printHelp()
     _console.warning("  -b : forces brief console logging");
     _console.warning("  -v : forces verbose logging");
     _console.warning("  -m : state the amount of used memory at the start of each log message");
+    _console.warning("  -l <limit> : enable memory (de)allocation logging (lower limit in GB)");
+    _console.warning("  -e : runs the simulation in 'emulation' mode to get an estimate of the memory consumption");
     _console.warning("  -s <simulations> : the number of parallel simulations per process");
     _console.warning("  -t <threads> : the number of parallel threads for each simulation");
     _console.warning("  -k : makes the input/output paths relative to the ski file being processed");

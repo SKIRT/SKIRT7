@@ -39,6 +39,9 @@ unix: PRE_TARGETDEPS += $$OUT_PWD/../Fundamentals/libfundamentals.a \
 # Enable MPI compilation if required
 include(../BuildUtils/EnableMPI.pri)
 
+# Enable memory (de)allocation compilation if required
+include(../BuildUtils/EnableMemory.pri)
+
 # create a header file containing a reasonably unique description of the git version and
 # ensure that SkirtMain.cpp gets recompiled to update the version number and time stamp
 A_QUOTE = "\'\"\'"
