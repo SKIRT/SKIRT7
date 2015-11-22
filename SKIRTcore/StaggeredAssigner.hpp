@@ -53,6 +53,11 @@ public:
         class. If it was not, a FatalError is thrown. */
     void setupSelfBefore();
 
+    StaggeredAssigner* clone();
+
+protected:
+    void copyFrom(const StaggeredAssigner* from);
+
     //======================== Other Functions =======================
 
 public:
@@ -67,6 +72,8 @@ public:
         as: \f[ t \bmod{N_P} = i \f] where \f$N_P\f$ is the number of processes and \f$i\f$ is the rank
         of the process. If \c blocks > 1, the above assignment scheme is repeated \c blocks times. */
     void assign(size_t size, size_t blocks = 1);
+
+    void setBlocks(size_t blocks);
 
     /** This function takes the relative index of a certain part of the work assigned to this process
         as an argument and returns the absolute index of that part, a value from zero to the total
@@ -98,7 +105,6 @@ public:
     //======================== Data Members ========================
 
 protected:
-    size_t _blocksize;      // the number of parts of work per block
     size_t _valuesInBlock;  // the number of parts of work in a block assigned to this process
 };
 

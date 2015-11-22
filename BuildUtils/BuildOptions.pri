@@ -10,7 +10,7 @@
 
 # to skip building the GUI, precede this line with a # comment character
 # to build the GUI on systems other than Mac OS X, remove the "macx:" prefix from this line
-macx:CONFIG *= BUILDING_GUI
+CONFIG *= BUILDING_GUI
 
 # to build without MPI support even on systems that offer MPI, precede this line with a # comment character
 CONFIG *= BUILDING_WITH_MPI

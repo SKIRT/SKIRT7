@@ -119,6 +119,31 @@ void ProcessManager::receiveByteBuffer(QByteArray &buffer, int sender, int& tag)
 
 //////////////////////////////////////////////////////////////////////
 
+void ProcessManager::sendDouble(double& buffer, int receiver, int tag)
+{
+#ifdef BUILDING_WITH_MPI
+    //MPI_Request req;
+    MPI_Send(&buffer, 1, MPI_DOUBLE, receiver, tag, MPI_COMM_WORLD);
+#else
+    Q_UNUSED(buffer) Q_UNUSED(receiver) Q_UNUSED(tag)
+#endif
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void ProcessManager::receiveDouble(double& buffer, int sender, int tag)
+{
+#ifdef BUILDING_WITH_MPI
+    // nog niet zeker wat ik met request moet doen
+    MPI_Status st;
+    MPI_Recv(&buffer, 1, MPI_DOUBLE, sender, tag, MPI_COMM_WORLD, &st);
+#else
+    Q_UNUSED(buffer) Q_UNUSED(receiver) Q_UNUSED(tag)
+#endif
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void ProcessManager::sum(double* my_array, double* result_array, int nvalues, int root)
 {
 #ifdef BUILDING_WITH_MPI

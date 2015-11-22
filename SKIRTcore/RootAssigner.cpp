@@ -23,18 +23,42 @@ RootAssigner::RootAssigner(SimulationItem *parent)
 
 ////////////////////////////////////////////////////////////////////
 
+RootAssigner* RootAssigner::clone()
+{
+    RootAssigner* cl = new RootAssigner(this);
+    cl->copyFrom(this);
+    return cl;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void RootAssigner::copyFrom(const RootAssigner *from)
+{
+    ProcessAssigner::copyFrom(from);
+}
+
+////////////////////////////////////////////////////////////////////
+
 void RootAssigner::assign(size_t size, size_t blocks)
 {
     if (_comm)
     {
         // Set the number of values assigned to this process
-        _nvalues = _comm->isRoot() ? size*blocks : 0;
+        _nvalues = _comm->isRoot() ? size : 0;
     }
     else
     {
         // Set the number of values assigned to this process
-        _nvalues = size*blocks;
+        _nvalues = size;
     }
+    setBlocks(blocks);
+}
+
+////////////////////////////////////////////////////////////////////
+
+void RootAssigner::setBlocks(size_t blocks)
+{
+    _nvalues = _blocksize*blocks;
 }
 
 ////////////////////////////////////////////////////////////////////

@@ -44,6 +44,11 @@ public:
         of type PeerToPeerCommunicator that is found in the simulation hierarchy. */
     explicit RootAssigner(SimulationItem* parent);
 
+    RootAssigner* clone();
+
+protected:
+    void copyFrom(const RootAssigner* from);
+
     //======================== Other Functions =======================
 
 public:
@@ -56,6 +61,8 @@ public:
         parts). If this communicator was not provided, a process is assigned to all parts of work
         regardless of its rank in a multiprocessing environment to which it belongs (if any). */
     void assign(size_t size, size_t blocks = 1);
+
+    void setBlocks(size_t blocks);
 
     /** This function takes the relative index of a certain part of the work assigned to this process
         as an argument and returns the absolute index of that part, a value from zero to the total

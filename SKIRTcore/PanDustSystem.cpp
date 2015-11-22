@@ -12,16 +12,19 @@
 #include "FatalError.hpp"
 #include "FITSInOut.hpp"
 #include "FilePaths.hpp"
+#include "IdenticalAssigner.hpp"
 #include "Image.hpp"
 #include "ISRF.hpp"
 #include "LockFree.hpp"
 #include "Log.hpp"
+#include "MonteCarloSimulation.hpp"
 #include "NR.hpp"
 #include "PanDustSystem.hpp"
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
 #include "PeerToPeerCommunicator.hpp"
 #include "RootAssigner.hpp"
+#include "StaggeredAssigner.hpp"
 #include "TextOutFile.hpp"
 #include "TimeLogger.hpp"
 #include "Units.hpp"
@@ -65,6 +68,10 @@ void PanDustSystem::setupSelfBefore()
 
     // cache size of wavelength grid
     _Nlambda = lambdagrid->Nlambda();
+    // get a pointer to the wavelength assigner
+    _lambdaAssigner = lambdagrid->assigner();
+    // and one to the dustcells assigner
+    _cellAssigner = assigner();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -112,6 +119,10 @@ void PanDustSystem::setupSelfAfter()
 {
     DustSystem::setupSelfAfter();
 
+    // these determine the size of the (newly added) reduced arrays
+    _NmyLambda = _lambdaAssigner->nvalues();
+    _NmyCells = _cellAssigner->nvalues();
+
     // resize the tables that hold the absorbed energies for each dust cell and wavelength
     // - absorbed stellar emission is relevant for calculating dust emission
     // - absorbed dust emission is relevant for calculating dust self-absorption
@@ -120,10 +131,18 @@ void PanDustSystem::setupSelfAfter()
     if (dustemission())
     {
         _Labsstelvv.resize(_Ncells,_Nlambda);
+        _myLambdaLabsstelvv.resize(_Ncells, _NmyLambda);
+        _myCellsLabsstelvv.resize(_NmyCells, _Nlambda);
+        printf("\nnew stellarabs tables resized to (%d,%d) and (%d,%d)\n",
+               _Ncells, _NmyLambda, _NmyCells, _Nlambda);
         _haveLabsstel = true;
         if (selfAbsorption())
         {
             _Labsdustvv.resize(_Ncells,_Nlambda);
+            _myLambdaLabsdustvv.resize(_Ncells, _NmyLambda);
+            _myCellsLabsdustvv.resize(_NmyCells, _Nlambda);
+            printf("\nnew dustabs tables resized to (%d,%d) and (%d,%d)\n",
+                   _Ncells, _NmyLambda, _NmyCells, _Nlambda);
             _haveLabsdust = true;
         }
     }
@@ -296,15 +315,19 @@ bool PanDustSystem::dustemission() const
 
 void PanDustSystem::absorb(int m, int ell, double DeltaL, bool ynstellar)
 {
+    int myEll = _lambdaAssigner->relativeIndex(ell);
+
     if (ynstellar)
     {
         if (!_haveLabsstel) throw FATALERROR("This dust system does not support absorption of stellar emission");
         LockFree::add(_Labsstelvv(m,ell), DeltaL);
+        LockFree::add(_myLambdaLabsstelvv(m,myEll), DeltaL);
     }
     else
     {
         if (!_haveLabsdust) throw FATALERROR("This dust system does not support absorption of dust emission");
         LockFree::add(_Labsdustvv(m,ell), DeltaL);
+        LockFree::add(_myLambdaLabsdustvv(m,myEll), DeltaL);
     }
 }
 
@@ -313,15 +336,21 @@ void PanDustSystem::absorb(int m, int ell, double DeltaL, bool ynstellar)
 void PanDustSystem::rebootLabsdust()
 {
     _Labsdustvv.clear();
+    _myLambdaLabsdustvv.clear();
 }
 
 //////////////////////////////////////////////////////////////////////
 
 double PanDustSystem::Labs(int m, int ell) const
 {
+    //int myM = _cellAssigner->relativeIndex(m);
     double sum = 0;
     if (_haveLabsstel) sum += _Labsstelvv(m,ell);
+    // when we make sure that Labs is called on the right m after communication and only by DustLib,
+    // then we can use the following
+    // if (_haveLabsstel) sum += _myCellsLabsstelvv(myM,ell);
     if (_haveLabsdust) sum += _Labsdustvv(m,ell);
+    // if (_haveLabsdust) sum += _myCellsLabsdustvv(myM,ell);
     return sum;
 }
 
@@ -329,6 +358,7 @@ double PanDustSystem::Labs(int m, int ell) const
 
 double PanDustSystem::Labs(int m) const
 {
+    // this will no longer work with the new arrays
     double sum = 0;
     if (_haveLabsstel)
         for (int ell=0; ell<_Nlambda; ell++)
@@ -417,6 +447,54 @@ void PanDustSystem::sumResults(bool ynstellar)
 
     // Sum the array of luminosities across all processes
     comm->sum_all(ynstellar ? _Labsstelvv.getArray() : _Labsdustvv.getArray());
+    // This will need to be replaced by the communication between the two arrays
+    if (_lambdaAssigner->parallel())
+    {
+        if (ynstellar)
+        {
+            comm->col_to_row_distributed(_myLambdaLabsstelvv,_lambdaAssigner,
+                                         _myCellsLabsstelvv,_cellAssigner,
+                                         _Ncells, _Nlambda);
+            // Print to compare
+            TextOutFile original(this, "originalstellar", "Labsstellarvv");
+            TextOutFile newarray(this, "newarraystellar", "myCellsLabsstellvv");
+
+            for (int m = 0; m < _NmyCells; m++)
+            {
+                QString oss1;
+                QString oss2;
+                for(int ell = 0; ell < _Nlambda; ell++)
+                {
+                    oss1 += QString::number(_Labsstelvv(_cellAssigner->absoluteIndex(m) % _Ncells, ell)) + ' ';
+                    oss2 += QString::number(_myCellsLabsstelvv(m,ell)) + ' ';
+                }
+                original.writeLine(oss1);
+                newarray.writeLine(oss2);
+            }
+        }
+        else
+        {
+            comm->col_to_row_distributed(_myLambdaLabsdustvv,_lambdaAssigner,
+                                         _myCellsLabsdustvv,_cellAssigner,
+                                         _Ncells, _Nlambda);
+            // Print to compare
+            TextOutFile original(this, "originaldust", "Labsdustvv");
+            TextOutFile newarray(this, "newarraydust", "myCellsLabsdustvv");
+
+            for (int m = 0; m < _NmyCells; m++)
+            {
+                QString oss1;
+                QString oss2;
+                for(int ell = 0; ell < _Nlambda; ell++)
+                {
+                    oss1 += QString::number(_Labsdustvv(_cellAssigner->absoluteIndex(m) % _Ncells, ell)) + ' ';
+                    oss2 += QString::number(_myCellsLabsdustvv(m,ell)) + ' ';
+                }
+                original.writeLine(oss1);
+                newarray.writeLine(oss2);
+            }
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////////

@@ -9,7 +9,7 @@
 ////////////////////////////////////////////////////////////////////
 
 ProcessAssigner::ProcessAssigner()
-    : _comm(0), _nvalues(0)
+    : _comm(0), _nvalues(0), _blocksize(0)
 {
 }
 
@@ -37,7 +37,16 @@ void ProcessAssigner::setupSelfBefore()
 
 ////////////////////////////////////////////////////////////////////
 
-size_t ProcessAssigner::nvalues()
+void ProcessAssigner::copyFrom(const ProcessAssigner *from)
+{
+    _comm = from->_comm;
+    _nvalues = from->_nvalues;
+    _blocksize = from->_blocksize;
+}
+
+////////////////////////////////////////////////////////////////////
+
+size_t ProcessAssigner::nvalues() const
 {
     return _nvalues;
 }

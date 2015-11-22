@@ -70,6 +70,10 @@ public:
         receiving process calls this function. */
     static void receiveByteBuffer(QByteArray& buffer, int sender, int& tag);
 
+    static void sendDouble(double& buffer, int receiver, int tag);
+
+    static void receiveDouble(double& buffer, int sender, int tag);
+
     /** The purpose of this function is to sum a particular array of double values element-wise
         across the different processes. The resulting values are stored in the array passed as the
         second argument 'result_array', only on the process that is assigned as root. The rank of

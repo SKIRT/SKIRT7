@@ -37,12 +37,17 @@ protected:
         PeerToPeerCommunicator object of the simulation hierarchy. */
     void setupSelfBefore();
 
+public:
+    virtual ProcessAssigner* clone() = 0;
+protected:
+    void copyFrom(const ProcessAssigner* from);
+
     //======================== Other Functions =======================
 
 public:
     /** This function returns the number of values (or the number of parts of the total work) that are
         assigned to the calling process. This number is stored in the _nvalues data member. */
-    size_t nvalues();
+    size_t nvalues() const;
 
     /** This function invokes the assignment procedure. As a first argument, it takes the number of
         parts of work that need to be performed. As a second optional argument, it takes the number of
@@ -57,6 +62,8 @@ public:
         there are blocks, if \c blocks > 1 (although the IdenticalAssigner subclass deviates from this
         behaviour). */
     virtual void assign(size_t size, size_t blocks = 1) = 0;
+
+    virtual void setBlocks(size_t blocks) = 0;
 
     /** This purely virtual function must be implemented in each of the ProcessAssigner subclasses. As
         an argument, it can take any value between zero and the number of values assigned to the
@@ -94,6 +101,7 @@ public:
 protected:
     PeerToPeerCommunicator* _comm;  // cached pointer to the peer-to-peer communicator of the simulation
     size_t _nvalues;                // the number of values assigned to this process
+    size_t _blocksize;
 };
 
 #endif // PROCESSASSIGNER_HPP

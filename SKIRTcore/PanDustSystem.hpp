@@ -9,6 +9,7 @@
 #include "DustSystem.hpp"
 class DustEmissivity;
 class DustLib;
+class ProcessAssigner;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -280,8 +281,16 @@ private:
 
     // data members initialized during setup
     int _Nlambda;
+    ProcessAssigner* _lambdaAssigner; // determines which wavelengths absorption will be recorded for
+    int _NmyLambda;
+    ProcessAssigner* _cellAssigner; // determines which cells will be given to the DustLib via _myCellsLabs*
+    int _NmyCells;
     Table<2> _Labsstelvv;   // absorbed stellar emission for each cell and each wavelength (indexed on m,ell)
+    Table<2> _myLambdaLabsstelvv; // absorbed stellar emission for each cell and my wavelengths (indexed on m,myEll)
+    Table<2> _myCellsLabsstelvv; // absorbed stellar emission for my cells and each wavelength (indexed on myM,ell)
     Table<2> _Labsdustvv;   // absorbed dust emission for each cell and each wavelength (indexed on m,ell)
+    Table<2> _myLambdaLabsdustvv;   // absorbed dust emission for each cell and my wavelengths (indexed on m,myEll)
+    Table<2> _myCellsLabsdustvv;   // absorbed dust emission for my cells and each wavelength (indexed on myM,ell)
     bool _haveLabsstel;     // true if absorbed stellar emission is relevant for this simulation
     bool _haveLabsdust;     // true if absorbed dust emission is relevant for this simulation
 };

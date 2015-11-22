@@ -12,14 +12,14 @@
 ////////////////////////////////////////////////////////////////////
 
 RandomAssigner::RandomAssigner()
-    : _blocksize(0), _valuesInBlock(0)
+    : _valuesInBlock(0)
 {
 }
 
 ////////////////////////////////////////////////////////////////////
 
 RandomAssigner::RandomAssigner(SimulationItem *parent)
-    : _blocksize(0), _valuesInBlock(0)
+    : _valuesInBlock(0)
 {
     setParent(parent);
     setup();
@@ -34,6 +34,26 @@ void RandomAssigner::setupSelfBefore()
     if (!_comm) throw FATALERROR("Could not find an object of type PeerToPeerCommunicator in the simulation hierarchy");
 
     _random = find<Random>();
+}
+
+////////////////////////////////////////////////////////////////////
+
+RandomAssigner* RandomAssigner::clone()
+{
+    RandomAssigner* cl = new RandomAssigner(this);
+    cl->copyFrom(this);
+    return cl;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void RandomAssigner::copyFrom(const RandomAssigner *from)
+{
+    ProcessAssigner::copyFrom(from);
+    _random = from->_random;
+    _assignment = from->_assignment;
+    _values = from->_values;
+    _valuesInBlock = from->_valuesInBlock;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -70,6 +90,13 @@ void RandomAssigner::assign(size_t size, size_t blocks)
 
     // Set the number of values assigned to this process
     _valuesInBlock = _values.size();
+    setBlocks(blocks);
+}
+
+////////////////////////////////////////////////////////////////////
+
+void RandomAssigner::setBlocks(size_t blocks)
+{
     _nvalues = _values.size()*blocks;
 }
 

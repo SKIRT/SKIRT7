@@ -10,14 +10,14 @@
 ////////////////////////////////////////////////////////////////////
 
 StaggeredAssigner::StaggeredAssigner()
-    : _blocksize(0), _valuesInBlock(0)
+    : _valuesInBlock(0)
 {
 }
 
 ////////////////////////////////////////////////////////////////////
 
 StaggeredAssigner::StaggeredAssigner(SimulationItem *parent)
-    : _blocksize(0), _valuesInBlock(0)
+    : _valuesInBlock(0)
 {
     setParent(parent);
     setup();
@@ -34,6 +34,22 @@ void StaggeredAssigner::setupSelfBefore()
 
 ////////////////////////////////////////////////////////////////////
 
+StaggeredAssigner* StaggeredAssigner::clone()
+{
+    StaggeredAssigner* cl = new StaggeredAssigner(this);
+    cl->copyFrom(this);
+    return cl;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void StaggeredAssigner::copyFrom(const StaggeredAssigner *from)
+{
+    ProcessAssigner::copyFrom(from);
+    _valuesInBlock = from->_valuesInBlock;
+}
+
+////////////////////////////////////////////////////////////////////
 void StaggeredAssigner::assign(size_t size, size_t blocks)
 {
     _blocksize = size;
@@ -46,6 +62,13 @@ void StaggeredAssigner::assign(size_t size, size_t blocks)
     }
 
     // Calculate the total number of assigned values (the pattern is repeated for each block)
+    setBlocks(blocks);
+}
+
+////////////////////////////////////////////////////////////////////
+
+void StaggeredAssigner::setBlocks(size_t blocks)
+{
     _nvalues = _valuesInBlock * blocks;
 }
 

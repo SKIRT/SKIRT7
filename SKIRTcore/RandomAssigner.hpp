@@ -47,6 +47,11 @@ public:
         FatalError is thrown. */
     void setupSelfBefore();
 
+    RandomAssigner* clone();
+
+protected:
+    void copyFrom(const RandomAssigner* from);
+
     //======================== Other Functions =======================
 
 public:
@@ -62,6 +67,8 @@ public:
         sets the _blockSize, _valuesInBlock and _nvlaues attributes.
         If \c blocks > 1, the assignment scheme is repeated \c blocks times. */
     void assign(size_t size, size_t blocks = 1);
+
+    void setBlocks(size_t blocks);
 
     /** This function takes the relative index of a certain part of the work assigned to this process
         as an argument and returns the absolute index of that part, a value from zero to the total
@@ -92,7 +99,6 @@ protected:
     Random* _random;                // a pointer to the Random object of the simulation
     std::vector<int> _assignment;   // for each value, this vector defines the rank of the assigned process
     std::vector<size_t> _values;    // a list of the values assigned to this process
-    size_t _blocksize;              // the number of parts of work per block
     size_t _valuesInBlock;          // the number of parts of work in a block assigned to this process
 };
 

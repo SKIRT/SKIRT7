@@ -65,12 +65,6 @@ class MonteCarloSimulation : public Simulation
     Q_CLASSINFO("Default", "no")
     Q_CLASSINFO("Silent", "true")
 
-    Q_CLASSINFO("Property", "assigner")
-    Q_CLASSINFO("Title", "the assignment scheme that assigns the wavelengths to the different parallel processes")
-    Q_CLASSINFO("Default", "IdenticalAssigner")
-    Q_CLASSINFO("Optional", "true")
-    Q_CLASSINFO("Silent", "true")
-
     //============= Construction - Setup - Destruction =============
 
 protected:
@@ -175,21 +169,8 @@ public:
     /** Returns the flag that indicates whether continuous scattering should be used. */
     Q_INVOKABLE bool continuousScattering() const;
 
-    /** This function sets the process assigner for the Monte Carlo simulation. The process assigner is
-        the object that assigns different wavelengths to different processes, to parallelize the photon
-        shooting algorithm. The ProcessAssigner class is the abstract class that represents different
-        types of assigners; different subclass implement the assignment in different ways. The default
-        assigner that is used for the Monte Carlo simulation is an IdenticalAssigner, which assigns
-        each process to all of the wavelengths to obtain the best load balancing. Another option would
-        be to use a StaggeredAssigner, which would hand out the wavelengths to the different processes
-        in a staggered way, also minimizing load imbalance but most importantly reducing the
-        communication overhead after the emission stages (but this more efficient communication has not
-        been implemented yet). Using a SequentialAssigner for this purpose would not be recommended due
-        to very poor load balancing. */
-    Q_INVOKABLE void setAssigner(ProcessAssigner* value);
-
     /** Returns the process assigner for this Monte Carlo simulation. */
-    Q_INVOKABLE ProcessAssigner* assigner() const;
+    ProcessAssigner* assigner() const;
 
     //======================== Other Functions =======================
 
@@ -405,7 +386,7 @@ private:
     int _minfs;                 // the minimum number of scattering events
     double _xi;                 // the scattering bias
     bool _continuousScattering; // true if continuous scattering should be used
-    ProcessAssigner* _assigner; // determines which wavelengths are assigned to this process
+    ProcessAssigner* _assigner; // determines which wavelengths/chunks are assigned to this process
 
 protected:
     // *** discoverable attributes to be setup by a subclass ***

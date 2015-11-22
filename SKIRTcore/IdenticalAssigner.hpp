@@ -7,6 +7,7 @@
 #define IDENTICALASSIGNER_HPP
 
 #include "ProcessAssigner.hpp"
+#include "SequentialAssigner.hpp"
 
 //////////////////////////////////////////////////////////////////////
 
@@ -64,6 +65,11 @@ public:
         class. If it was not, a FatalError is thrown. */
     void setupSelfBefore();
 
+    IdenticalAssigner* clone();
+
+protected:
+    void copyFrom(const IdenticalAssigner* from);
+
     //======================== Other Functions =======================
 
 public:
@@ -79,6 +85,8 @@ public:
         assignment of these blocks to the different processes is directed by an instance of the
         SequentialAssigner class. */
     void assign(size_t size, size_t blocks = 1);
+
+    void setBlocks(size_t blocks);
 
     /** This function takes the relative index of a certain part of the work assigned to this process
         as an argument and returns the absolute index of that part, a value from zero to the total
@@ -115,7 +123,8 @@ public:
 
 protected:
     size_t _start;                   // the index of the first value assigned to this process (zero if blocks = 1)
-    ProcessAssigner* _blockassigner; // the assigner that is used to assign the different blocks (if multiple are used)
+    SequentialAssigner* _blockassigner; // the assigner that is used to assign the different blocks (if multiple are used)
+    size_t _nblocks;
 };
 
 ////////////////////////////////////////////////////////////////////

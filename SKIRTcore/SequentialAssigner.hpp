@@ -49,6 +49,11 @@ public:
         class. If it was not, a FatalError is thrown. */
     void setupSelfBefore();
 
+    SequentialAssigner* clone();
+
+protected:
+    void copyFrom(const SequentialAssigner* from);
+
     //======================== Other Functions =======================
 
 public:
@@ -83,6 +88,8 @@ public:
         absoluteIndex() function. If \c blocks > 1, the above assignment scheme is repeated \c blocks
         times. */
     void assign(size_t size, size_t blocks = 1);
+
+    void setBlocks(size_t blocks);
 
     /** This function takes the relative index of a certain part of the work assigned to this process
         as an argument and returns the absolute index of that part, a value from zero to the total
@@ -120,7 +127,6 @@ protected:
     size_t _start;          // the index of the first value assigned to this process
     size_t _quotient;       // the quotient
     size_t _remainder;      // the remainder
-    size_t _blocksize;      // the number of parts of work per block
     size_t _valuesInBlock;  // the number of parts of work in a block assigned to this process
 };
 

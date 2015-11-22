@@ -10,14 +10,14 @@
 ////////////////////////////////////////////////////////////////////
 
 IdenticalAssigner::IdenticalAssigner()
-    : _blockassigner(0)
+    : _blockassigner(0), _nblocks(1)
 {
 }
 
 ////////////////////////////////////////////////////////////////////
 
 IdenticalAssigner::IdenticalAssigner(SimulationItem *parent)
-    : _blockassigner(0)
+    : _blockassigner(0), _nblocks(1)
 {
     setParent(parent);
     setup();
@@ -34,11 +34,38 @@ void IdenticalAssigner::setupSelfBefore()
 
 ////////////////////////////////////////////////////////////////////
 
+IdenticalAssigner* IdenticalAssigner::clone()
+{
+    IdenticalAssigner* cl = new IdenticalAssigner(this);
+    cl->copyFrom(this);
+    return cl;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void IdenticalAssigner::copyFrom(const IdenticalAssigner* from)
+{
+    ProcessAssigner::copyFrom(from);
+    _start = from->_start;
+    _nblocks = from->_nblocks;
+    // use the clone function of SequentialAssigner
+    if (!from->_blockassigner) _blockassigner = 0;
+    else _blockassigner = from->_blockassigner->clone();
+}
+
+////////////////////////////////////////////////////////////////////
+
 void IdenticalAssigner::assign(size_t size, size_t blocks)
 {
-    _nvalues = size;
+    _blocksize = size;
     _start = 0;
+    setBlocks(blocks);
+}
 
+////////////////////////////////////////////////////////////////////
+
+void IdenticalAssigner::setBlocks(size_t blocks)
+{
     if (blocks > 1)
     {
         // Create a SequentialAssigner to assign the blocks
@@ -46,14 +73,16 @@ void IdenticalAssigner::assign(size_t size, size_t blocks)
         _blockassigner->assign(blocks);
 
         // Set the number of values for this process and the starting index
-        _nvalues = _blockassigner->nvalues() * size;
-        _start = _blockassigner->absoluteIndex(0) * size;
+        _nvalues = _blockassigner->nvalues() * _blocksize;
+        _start = _blockassigner->absoluteIndex(0) * _blocksize;
     }
     else
     {
         delete _blockassigner;
         _blockassigner = 0;
+        _nvalues = _blocksize*blocks;
     }
+    _nblocks = blocks;
 }
 
 ////////////////////////////////////////////////////////////////////

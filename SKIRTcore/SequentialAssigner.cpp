@@ -10,14 +10,14 @@
 ////////////////////////////////////////////////////////////////////
 
 SequentialAssigner::SequentialAssigner()
-    : _start(0), _quotient(0), _remainder(0), _blocksize(0), _valuesInBlock(0)
+    : _start(0), _quotient(0), _remainder(0), _valuesInBlock(0)
 {
 }
 
 ////////////////////////////////////////////////////////////////////
 
 SequentialAssigner::SequentialAssigner(SimulationItem *parent)
-    : _start(0), _quotient(0), _remainder(0), _blocksize(0), _valuesInBlock(0)
+    : _start(0), _quotient(0), _remainder(0), _valuesInBlock(0)
 {
     setParent(parent);
     setup();
@@ -34,6 +34,26 @@ void SequentialAssigner::setupSelfBefore()
 
 ////////////////////////////////////////////////////////////////////
 
+SequentialAssigner* SequentialAssigner::clone()
+{
+    SequentialAssigner* cl = new SequentialAssigner(this);
+    cl->copyFrom(this);
+    return cl;
+}
+
+////////////////////////////////////////////////////////////////////
+
+void SequentialAssigner::copyFrom(const SequentialAssigner *from)
+{
+    ProcessAssigner::copyFrom(from);
+    _start = from->_start;
+    _quotient = from->_quotient;
+    _remainder = from->_remainder;
+    _valuesInBlock = from->_valuesInBlock;
+}
+
+////////////////////////////////////////////////////////////////////
+
 void SequentialAssigner::assign(size_t size, size_t blocks)
 {
     int nprocs = _comm->size();   // The number of processes
@@ -45,7 +65,7 @@ void SequentialAssigner::assign(size_t size, size_t blocks)
 
     // Calculate the number of values assigned to this process (in one block and in total)
     _valuesInBlock = ((size_t)rank < _remainder) ? _quotient + 1 : _quotient;
-    _nvalues = _valuesInBlock * blocks;
+    setBlocks(blocks);
 
     // Determine the index of the first value assigned to this process
     if ((size_t)rank < _remainder)
@@ -56,6 +76,13 @@ void SequentialAssigner::assign(size_t size, size_t blocks)
     {
         _start = _remainder * (_quotient + 1) + (rank - _remainder) * _quotient;
     }
+}
+
+////////////////////////////////////////////////////////////////////
+
+void SequentialAssigner::setBlocks(size_t blocks)
+{
+    _nvalues = _valuesInBlock * blocks;
 }
 
 ////////////////////////////////////////////////////////////////////

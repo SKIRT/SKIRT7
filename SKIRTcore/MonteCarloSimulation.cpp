@@ -18,6 +18,8 @@
 #include "PeerToPeerCommunicator.hpp"
 #include "PhotonPackage.hpp"
 #include "Random.hpp"
+#include "RandomAssigner.hpp"
+#include "StaggeredAssigner.hpp"
 #include "StellarSystem.hpp"
 #include "TextOutFile.hpp"
 #include "TimeLogger.hpp"
@@ -62,8 +64,8 @@ void MonteCarloSimulation::setupSelfBefore()
         throw FATALERROR("Instrument system was not set");
     // dust system is optional; nr of packages has a valid default
 
-    // If no assigner was set, use an IdenticalAssigner as default
-    if (!_assigner) setAssigner(new IdenticalAssigner(this));
+    // If no assigner was set, use an IdenticalAssigner as default (changed to Staggered for new method)
+    //if (!_assigner) setAssigner(new IdenticalAssigner(this));
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -72,6 +74,7 @@ void MonteCarloSimulation::setChunkParams(double packages)
 {
     // Cache the number of wavelengths
     _Nlambda = _lambdagrid->Nlambda();
+    if(!_assigner) _assigner = _lambdagrid->assigner()->clone();
 
     // Determine the number of chunks and the corresponding chunk size
     if (packages <= 0)
@@ -100,7 +103,7 @@ void MonteCarloSimulation::setChunkParams(double packages)
     _logchunksize = _continuousScattering ? 5000 : 50000;
 
     // Assign the _Nlambda x _Nchunks different chunks to the different parallel processes
-    _assigner->assign(_Nlambda, _Nchunks);
+    _assigner->setBlocks(_Nchunks);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -187,15 +190,6 @@ void MonteCarloSimulation::setContinuousScattering(bool value)
 bool MonteCarloSimulation::continuousScattering() const
 {
     return _continuousScattering;
-}
-
-////////////////////////////////////////////////////////////////////
-
-void MonteCarloSimulation::setAssigner(ProcessAssigner* value)
-{
-    if (_assigner) delete _assigner;
-    _assigner = value;
-    if (_assigner) _assigner->setParent(this);
 }
 
 ////////////////////////////////////////////////////////////////////
