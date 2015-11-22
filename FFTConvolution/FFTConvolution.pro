@@ -45,6 +45,9 @@ exists ('$$(HOME)/FFTW/include/fftw3.h'){
     INCLUDEPATH += $$(HOME)/FFTW/include
 }
 
+# Enable memory (de)allocation compilation if required
+include(../BuildUtils/EnableMemory.pri)
+
 #--------------------------------------------------
 # source and header files: maintained by Qt creator
 #--------------------------------------------------

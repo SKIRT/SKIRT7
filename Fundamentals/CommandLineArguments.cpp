@@ -96,6 +96,19 @@ int CommandLineArguments::intValue(QString option) const
 
 ////////////////////////////////////////////////////////////////////
 
+double CommandLineArguments::doubleValue(QString option) const
+{
+    if (_valid && !_options.value(option).isEmpty())
+    {
+        bool ok;
+        double result = _options.value(option).toDouble(&ok);
+        if (ok) return result;
+    }
+    return -1;
+}
+
+////////////////////////////////////////////////////////////////////
+
 bool CommandLineArguments::hasFilepaths() const
 {
     return _valid && !_filepaths.isEmpty();

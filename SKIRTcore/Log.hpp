@@ -80,20 +80,24 @@ public:
     //======================== Other Functions =======================
 
 public:
-    /** Logs an informational message (i.e. at level Info). In multiprocessing mode, only the info messages of the root processes are actually logged. When compiled in debug mode,
+    /** Logs an informational message (i.e. at level Info). In multiprocessing mode, only the info
+        messages of the root processes are actually logged. If verbose mode is enabled, however,
         all processes log and the process name is attached to the info message. */
     void info(QString message);
 
-    /** Logs a warning message (i.e. at level Warning). Each warning message is logged, irrespective of the which process invokes this function. The warning message is
-        prefixed with the process name, if multiprocessing mode is used. */
+    /** Logs a warning message (i.e. at level Warning). Each warning message is logged,
+        irrespective of the which process invokes this function. The warning message is prefixed
+        with the process name, if multiprocessing mode is used. */
     void warning(QString message);
 
-    /** Logs an informational message (i.e. at level Success). In multiprocessing mode, only the success messages of the root processes are actually logged. When compiled in debug mode,
-        all processes log and the process name is attached to the success message. */
+    /** Logs an informational message (i.e. at level Success). In multiprocessing mode, only the
+        success messages of the root processes are actually logged. If verbose mode is enabled,
+        however, all processes log and the process name is attached to the success message. */
     void success(QString message);
 
-    /** Logs an informational message (i.e. at level Error). Each error message is logged, irrespective of which process invokes this function. The error message is
-        prefixed with the process name, if multiprocessing mode is used. */
+    /** Logs an informational message (i.e. at level Error). Each error message is logged, irrespective
+        of which process invokes this function. The error message is prefixed with the process name, if
+        multiprocessing mode is used. */
     void error(QString message);
 
 protected:

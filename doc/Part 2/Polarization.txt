@@ -1,0 +1,443 @@
+/**
+
+\page Polarization Polarization in SKIRT
+
+\section PolIntro Introduction
+
+For dust mixes that provide the appropriate dust properties, SKIRT supports polarized scattering of radiation
+off spherical dust grains. The current version of SKIRT always emits unpolarized light from sources, and does not
+support polarization caused by an absorbing medium.
+
+To enable polarization support, simply equip your dust components with DustMix instances that offer polarization
+properties (recognizable because their names include the word "Polarization"), and use the FullInstrument which will
+automatically detect the presence of these dust mixes and adjust appropriately to record and output the Stokes vector
+components.
+
+In this text we present the methods used to implement polarized random walk scattering and peel-off in SKIRT. We
+orient the Stokes parameters with a coordinate system that flies along the photon package and use a vector-based
+approach to calculate angles and directions. Thus we can circumvent numerical exceptions that arise in other codes.
+
+
+\section PolForm Formulas relevant for polarization
+
+In this section we present our choices of coordinate systems and the basics of the Stokes formalism.
+
+\subsection PolFormOrientation Orientation basics
+
+In this document we use three reference frames. The first one is the one describing the grid in which the simulation is
+set up, the laboratory frame in cartesian coordinates, \f[{\Sigma_{L}} =
+(\mathbf{e}_{x},\mathbf{e}_{y},\mathbf{e}_{z})\ .\f]
+
+The second frame is the beam frame, which describes a right handed orthonormal coordinate system that flies with a beam
+of photons. The \f$z\f$-axis of this coordinate system is along the propagation direction \f$\mathbf{k}\f$ of the beam.
+The \f$x\f$-axis is the vector \f${\mathbf{d}_{s}}\f$ along which the Stokes parameters (see below) are defined. The
+\f$y\f$-axis of this system is \f${\mathbf{n}_{s}}\f$, the normal to \f$\mathbf{k}\f$ and \f${\mathbf{d}_{s}}\f$. For
+practical reasons, we will use \f${\mathbf{n}_{s}}\f$ for most of the calculations. Since the coordinate system is
+orthonormal, using \f$\mathbf{k}\f$ and \f${\mathbf{n}_{s}}\f$ also determines \f${\mathbf{d}_{s}}\f$.
+\f[{\Sigma_{B}}=({\mathbf{d}_{s}}, {\mathbf{n}_{s}}, \mathbf{k})\f]
+
+The third reference frame is the observer frame, which is used by the observing instrument, with its \f$x\f$- and
+\f$y\f$-axis (\f$\mathbf{k}_\text{x} \perp \mathbf{k}_\text{y}\f$) determined from the set up of the simulation and its
+\f$z\f$-axis is pointing from the simulation towards the observer, \f$\mathbf{k}_\text{obs}\f$. Since the
+FullInstrument uses parallel projection, the direction to the observer is perpendicular to the \f$x\f$- and the
+\f$y\f$-axis, making the system orthonormal. \f[{\Sigma_{O}}=(\mathbf{k}_\text{x},
+\mathbf{k}_\text{y},\mathbf{k}_\text{obs})\f]
+
+(Because of the orthonormality requirement of the observer frame as defined above, the PerspectiveInstrument cannot be
+extended to support polarization).
+
+\subsection PolFormStokes The Stokes parameters
+
+Consider a beam of radiation traveling through space in the beam reference frame \f${\Sigma_{B}}\f$. The polarization
+status of the radiation beam is characterized by the Stokes vector \f[ \mathbf{S} = \left(\begin{array}{c} I\\ Q\\ U\\
+V \end{array}\right) \f] where \f$I\f$ denotes the total intensity, \f$Q\f$ and \f$U\f$ describe the linear
+polarization state relative to \f${\mathbf{d}_{s}}\f$ (the \f$x\f$-axis of the beam reference system), and \f$V\f$ is
+the degree of circular polarization. The Stokes vector spans the space of unpolarized, partially polarized and fully
+polarized light (they do not form a preferred basis for this space, but are useful because they can be easily measured
+and calculated).
+
+Useful quantities that can be derived from the Stokes parameters include the degree of linear polarization, \f[
+P_{\text{L}} = \frac{\sqrt{Q^2+U^2}}{I}\leq 1, \f] and the direction of linear polarization \f$\gamma\f$, often
+depicted as \f[ \gamma = \frac12\arctan\left(\frac{U}{Q}\right). \f] (In order to conserve the quadrant, the \em atan2
+function should be used to calculate \f$\gamma\f$). The degree of total polarization \f[ P = \frac{\sqrt{Q^2 +
+U^2+V^2}}{I} \f] can be calculated from the Stokes parameters as well. These definitions imply that \f$\gamma\f$ is the
+angle, measured clockwise while looking along \f$\mathbf{k}\f$, between the Stokes vector direction
+\f${\mathbf{d}_{s}}\f$ and the major axis of the polarization ellipse. For linearly polarized radiation (\f$V=0\f$),
+the polarization ellipse is a line along \f${\mathbf{d}_{s}}\f$ for \f$Q>0\f$ and \f$U=0\f$ and \f$45^\circ\f$ from
+\f${\mathbf{d}_{s}}\f$ for \f$Q=0\f$ and \f$U>0\f$.
+
+The relation between the Stokes parameters and the parameters of the polarization ellipse can be presented by
+considering a 3D space, and looking at the vector with 3D Cartesian coordinates \f$(Q,U,V)\f$, \f[ \begin{split} Q &= I
+P\cos2\gamma \cos2\chi \\ U &= I P\sin2\gamma \cos2\chi \\ V &= I P\sin2\chi \end{split} \f] with the shape parameter
+\f$\chi\f$ of the polarization ellipse. In other words, \f$IP\f$, \f$2\gamma\f$ and \f$2\chi\f$ are the spherical
+coordinates of the 3D vector of Cartesian coordinates \f$(Q,U,V)\f$. The factor 2 in front of \f$\gamma\f$ accounts for
+the fact that a polarization ellipse remains invariant for rotation by 180\f$^\circ\f$, whereas the factor 2 in front
+of \f$\chi\f$ indicates that the polarization ellipse is invariant if we swap the lengths of the axes and
+simultaneously apply a rotation of 90\f$^\circ\f$.
+
+Combining the latter equations with the formula for the degree of linear polarization we can write \anchor polar \f[
+\begin{split} Q &= I P_{\text{L}} \cos2\gamma \\ U &= I P_{\text{L}} \sin2\gamma \ . \end{split} \f]
+
+\subsection PolFormRota Rotating the reference vector of the Stokes parameters
+
+The Stokes parameters are defined with respect to the choice of \f${\mathbf{d}_{s}}\f$ and \f${\mathbf{n}_{s}}\f$ in
+the plane perpendicular to the propagation direction. If we rotate the photon coordinate system around its
+\f$z\f$-axis, the Stokes parameters will also alter. The total intensity \f$I\f$ and the parameter \f$V\f$ are
+invariant for such a rotation, but \f$Q\f$ and \f$U\f$ are not (logical, as they are defined with respect to
+\f${\mathbf{d}_{s}}\f$). If we rotate the axes \f${\mathbf{d}_{s}}\f$ and \f${\mathbf{n}_{s}}\f$ clockwise about
+\f$\mathbf{k}\f$ over an angle \f$\phi\f$, while looking towards the propagation destination, and we denote the Stokes
+vector in the new coordinate systems as \f$\mathbf{S}'\f$, then \f[ \mathbf{S}' = {\bf{R}}(\phi)\,\mathbf{S} \f] or \f[
+\left(\begin{array}{c} I\\ Q\\ U\\ V \end{array}\right) = \left(\begin{array}{cccc} 1 & 0 & 0 & 0 \\ 0 & \cos2\phi &
+\sin2\phi & 0 \\ 0 & -\sin2\phi & \cos2\phi & 0 \\ 0 & 0 & 0 & 1 \end{array}\right) \left(\begin{array}{c} I\\ Q\\ U\\
+V \end{array}\right) \f] Note the appearance of the factor 2 which is a logical consequence of the choice of the Stokes
+parameters as a basis for the space of polarised radiation.
+
+\subsection PolFormSca Scattering in the Stokes formalism
+
+When a radiation beam scatters, it changes direction and polarization status. Assume that the propagation direction
+before the scattering is denoted as \f$\mathbf{k}\f$ and the one after the scattering as \f$\mathbf{k}'\f$, with
+\f$\theta\f$ the actual scattering angle, \f[ \cos\theta = \mathbf{k} \cdot \mathbf{k}'. \f] The change of the Stokes
+vector during a scattering event is described by Mueller matrices. These are defined with the Stokes vector direction
+\f${\mathbf{d}_{s}}\f$ in the scattering plane (and thus \f${\mathbf{n}_{s}}\f$ being the normal of the scattering
+plane). In general these matrices are \f[ {\bf{M}}(\theta) = \frac{1}{k^{2}r^{2}} \left(\begin{array}{cccc} S_{11} &
+S_{12} & S_{13} & S_{14} \\ S_{21} & S_{22} & S_{23} & S_{24} \\ S_{31} & S_{32} & S_{33} & S_{34} \\ S_{41} & S_{42} &
+S_{43} & S_{44} \end{array}\right) \f] and each of the elements of the Mueller matrix depends on the scattering angle
+\f$\theta\f$. For MC simulations the factor \f$\frac{1}{k^{2}r^{2}}\f$ is dropped, as the path of one photon package is
+followed (Bianchi et al. 1996).
+
+Since there are multiple restrictions on Stokes vectors (like \f$I^{2} \geq Q^{2}+U^{2}+V^{2}\f$), there are at most
+seven independent variables (Kruegel 2002). For example for scattering at a sphere the formula above reduces to
+\anchor eqSphereScattering \f[ {\bf{M}}(\theta) = \left(\begin{array}{cccc} S_{11} & S_{12} & 0 & 0 \\ S_{12} & S_{11}
+ & 0 & 0 \\ 0 & 0 & S_{33} & S_{34} \\ 0 & 0 & -S_{34} & S_{33} \end{array}\right)\ . \f] The Stokes vector after
+scattering \f$\mathbf{S}'\f$ is calculated by multiplying the Stokes vector with the Mueller Matrix, \f[ \mathbf{S}' =
+\bf{M}\,\mathbf{S} \f]
+
+\section PolImpl Implementation of the Scattering formalism
+
+In this section we expound the steps that are necessary for a correct implementation of the scattering formalism in a
+3D-MC radiative transfer code. First we explain our choice coordinate system. After this we describe how to obtain a
+new propagation direction when scattering. For this we need to calculate the phase function \f$\Phi\f$, which we use to
+sample the angles \f$(\theta,\varphi)\f$. The state of the Stokes vector after scattering is derived by this pair of
+angles. The new propagation and reference directions are derived from the angles as well, with an explanation of the
+special case of peel-off photons towards the observer.
+
+\subsection PolImplOrientation Orientation of the Stokes parameters
+
+There are two different approaches/conventions to implement orientating Stokes parameters in between scatterings.
+
+\subsubsection PolImplOrientationMeridional Orientation w.r.t. the meridional plane
+
+Compare the scattering geometry as used in Code and Whitney (1995),
+\image html polarization/ScatteringGeometry-CodeWhitney.png
+\image latex polarization/ScatteringGeometry-CodeWhitney.png
+as used in Bianchi et al (1996),
+\image html polarization/ScatteringGeometry-Bianchi.png
+\image latex polarization/ScatteringGeometry-Bianchi.png
+and the one we are using in SKIRT,
+\image html polarization/ScatteringGeometry-Baes.png
+\image latex polarization/ScatteringGeometry-Baes.png
+
+Note that the angle \f$i_{2}\f$ in the first illustration is dubiously oriented, it should probably be on the opposite
+side of the meridian.
+
+The first option is to follow the original framework of Chandrasekhar (1960), as is also done by, for example, Code and
+Whitney (1995) and Gordon et al. (2001). They use a coordinate system where the orientation of the polarization ellipse
+is always stored with the direction along the meridional plane as the reference direction \f${\mathbf{n}_{s}}\f$. In
+this case, the simulation of a scattering event consists of three consecutive operations. The first one is a rotation
+of the reference system so that the Stokes vector refers to the direction parallel to the scattering plane. The second
+step is the actual scattering by applying the Mueller matrix. The last step is to rotate the Stokes vector again so it
+refers to the direction along the meridional plane. This requires another rotation. In total we hence obtain \f[
+\mathbf{S}' = \bf{R}(i_2-\pi) \, \bf{M}(\theta) \, \bf{R}(i_1)\,\mathbf{S} \f] (There is a sign difference to the book,
+as our rotation direction convention is different)
+
+The same framework with a different notation is that of Bianchi et al. (1996). The reference \f${\mathbf{n}_{s}}\f$ is
+first rotated by an angle \f$\phi\f$, then the photon scatters and afterwards the reference frame is rotated back
+by \f$-\gamma\f$. Comparing the first two pictures of this section, one can make the connection \f$\phi = i_1\f$ and
+\f$\gamma = \pi - i_2\f$. Applying this connection, the two formulas are equivalent.
+
+\subsubsection PolImplOrientationPrevPlane Orientation w.r.t. the previous scattering plane
+
+The Chandrasekhar (1960) framework explained above has two drawbacks. On the one hand, there is a problem if the
+scattering occurs in the direction of the poles, as one cannot define the meridian in this case. A second problem is
+one of redundancy: for every scattering event, there are three operations that need to be performed: a rotation by
+\f$i_1\f$ to go to the scattering plane, an actual scattering in the scattering plane, and a rotation by \f$i_2-\pi\f$
+to go back to the meridional frame. If several scattering events are chained, this means that we have two rotations in
+a row between each actual scattering: a first one by an angle \f$i_2^{(1)}-\pi\f$ at the end of scattering event \#1,
+and a second one by an angle \f$i_1^{(2)}\f$ at the start of scattering event \#2. Rather than executing these two
+rotations, it makes more sense to apply a single rotation over the angle \f[ \varphi \equiv i_2^{(1)}-\pi+i_1^{(2)}.
+\f] The angle \f$\varphi\f$ is also the angle between the scattering planes corresponding to the two scattering events.
+So a scattering event is characterized as \anchor convention2 \f[ \mathbf{S}' = \bf{M}(\theta) \, \bf{R}(\varphi) \,
+\mathbf{S} \f] This essentially comes down to a different convention: rather than always using Stokes parameters that
+are defined with respect to the meridional plane, we just use Stokes vectors that are defined with respect to the
+previous scattering plane. This is the convention applied by Fischer et al. (1994) and Goosmann & Gaskell (2007), and
+we also apply it in SKIRT.
+
+One special case is the first scattering, as there is not yet a previous scattering plane in this case. But this does
+not really matter: since the radiation is unpolarized before the first interaction, \f$Q_{\text{in}} = U_{\text{in}} =
+V_{\text{in}} = 0\f$ and the rotation operator \f${\bf{R}}(\varphi)\f$ is irrelevant.
+
+\subsection PolImplRWSca Scattering in a random walk
+
+Assume we want to simulate a scattering event in a Monte Carlo random walk step at a given location. We know the
+propagation direction of the photon package before the scattering event \f$\mathbf{k}\f$, the reference direction
+\f${\mathbf{n}_{s}}\f$ and the Stokes vector \f$\mathbf{S}\f$. We want to generate a random new direction of the photon
+package, \f$\mathbf{k}'\f$, with a new reference direction \f${\mathbf{n}_{s}}'\f$ and the new Stokes vector
+\f$\mathbf{S}'\f$. The information which new direction has which probability to occur is represented by the phase
+function \f$\Phi\f$.
+
+Contrary to unpolarized radiation, where the phase function only depends on the scattering angle \f$\theta\f$, it is
+more complicated in the case of polarized radiation, as it depends on both \f$\theta\f$, the azimuth \f$\varphi\f$ and
+on the polarization status of the incoming photon package. To sample \f$\theta\f$ and \f$\varphi\f$, we follow the
+steps:
+
+ - Calculate the phase function \f$\Phi(\theta,\varphi)\f$
+ - Normalize the phase function
+ - Sample the scattering angle \f$\theta\f$
+ - Sample the azimuth angle \f$\varphi\f$
+
+\subsubsection PolImplRWScaPhaFu Calculating the phase function
+
+The phase function is proportional to the intensity of the beam after the scattering event, \f$I_{\text{out}}\f$
+divided by the intensity \f$I_{\text{in}}\f$ before the event. \f[ \Phi(\theta,\varphi) \propto
+\frac{I_{\text{out}}}{I_{\text{in}}} \f] The intensity after the scattering event can be calculated using \ref
+convention2 "multiplying the Stokes vector with the Mueller matrix" for all tuples \f$(\theta,\varphi)\f$. Assuming the
+simplified Mueller matrix for \ref eqSphereScattering "scattering at a sphere", the first Stokes parameter after
+scattering is \f[ I_{\text{out}} = I_{\text{in}} S_{11} + S_{12} \left(
+Q_{\text{in}}\cos2\varphi+U_{\text{in}}\sin2\varphi \right) \f] therefore \f[ \Phi(\theta,\varphi) \propto S_{11} +
+S_{12}\left( \frac{Q_{\text{in}}}{I_{\text{in}}}\cos2\varphi+\frac{U_{\text{in}}}{I_{\text{in}}}\sin2\varphi \right) \
+\ , \f] Using \ref polar "the equation for the degree of linear Polarization", we find \f[ \Phi(\theta,\varphi) \propto
+S_{11} + P_{\text{L,in}}\,S_{12}\cos2(\varphi - \gamma_{\text{in}}) \f] After normalization of the right side, both
+sides are equal.
+
+\subsubsection PolImplRWScaPhaFuNorm Normalizing the phase function
+
+There are different normalization conventions. We choose the Integral of the phase function over over the unit sphere
+to be normalized to \f$4\pi\f$ sr. Another convention would be to normalize it to one. Depending on the implementation
+in the code, the normalization constant \f$N\f$ needs to be adjusted. To normalize the phase function to \f$4 \pi\f$,
+we divide \f$4 \pi\f$ by the integral over the unit sphere, \f[ \begin{split} N&=\frac{4 \pi}{ \int_0^{2\pi}
+\int_0^{\pi} \left(S_{11}(\theta) + P_{\text{L,in}}S_{12}(\theta)\cos2(\varphi - \gamma_{\text{in}})\right)\sin\theta\,
+\text{d}\theta\, \text{d}\varphi }\\ &=\frac{2}{\int_0^\pi S_{11}(\theta)\sin\theta\, \text{d}\theta} \ . \end{split}
+\f] We can write the properly normalized phase function as \f[ \Phi(\theta,\varphi) = N\,S_{11}(\theta)
+\left[ 1 + P_{\text{L,in}}\,\frac{S_{12}(\theta)}{S_{11}(\theta)}\cos2(\varphi - \gamma_{\text{in}}) \right] \f]
+
+\subsubsection PolImplRWScaSamTheta Sampling the scattering angle
+
+In order to sample a random angle from the distribution function, we use the conditional probability technique. For
+this we reduce the phase function to the marginal distribution \f$\Phi(\theta)\f$ \f[ \Phi(\theta) = \int_0^{2\pi}
+\Phi(\theta,\varphi)\,\text{d}\varphi = 2\pi\ N\,S_{11}(\theta) \f] Sampling a random \f$\theta\f$ from this
+distribution can be done using a numerical inversion, i.e. by solving the equation \f[ {\cal{X}} =\frac{2\pi\,N
+\int_0^\theta S_{11}(\theta')\sin\theta'\,\text{d}\theta'}{4\pi} \f] for \f$\theta\f$, where \f${\cal{X}}\f$ is a
+uniform deviate, a random number between \f$0\f$ and \f$1\f$ with a uniform distribution function.
+
+\subsubsection PolImplRWScaSamPhi Sampling the azimuth angle
+
+Once we know the scattering angle \f$\theta\f$ with which we will scatter, we determine the random azimuth angle
+\f$\varphi\f$ from the normalized conditional distribution \f[ \Phi_\theta(\varphi) =
+\frac{\Phi(\theta,\varphi)}{\int_0^{2\pi} \Phi(\theta,\varphi')\,\text{d}\varphi'} = \frac{1}{2\pi}\left[1+
+P_{\text{L,in}}\,\frac{S_{12}(\theta)}{S_{11}(\theta)}\cos 2(\varphi - \gamma_{\text{in}})\right] \f] This can again be
+done using numerical inversion, so by solving the equation \anchor eqVarphiSampling \f[ \begin{split} {\cal{X}} &=
+\frac{\int_{0}^{\varphi}\Phi_{\theta}(\varphi')\,\text{d}\varphi'}{2\pi} \\ &= \frac{1}{2\pi} \left[ \varphi +
+P_{\text{L,in}}\,\frac{S_{12}(\theta)}{S_{11}(\theta)} \sin\varphi \cos(\varphi - 2\gamma_{\text{in}})\right]
+\end{split} \f] for \f$\varphi\f$ with \f${\cal{X}}\f$ a new uniform deviate. Once this random value for \f$\varphi\f$
+has been obtained, we have the tuple \f$(\theta,\varphi)\f$ with which we will scatter. For a photon package with no
+linear polarization (\f$P_{\text{L,in}} = 0\f$) all \f$\varphi\f$ have the same probability.
+
+\subsection PolImplNewDir New propagation direction
+
+Now that we know the scattering angle tuple \f$(\theta,\varphi)\f$, we need to calculate the new direction of the
+photon package. For this we use the propagation direction \f$\mathbf{k}\f$, the reference direction
+\f${\mathbf{n}_{s}}\f$ and \em Rodrigues' \em rotation \em formula. It describes how any vector \f$\vec{v}\f$ can be
+rotated around any axis \f$\vec{a}\f$ by any angle \f$\beta\f$ (clockwise while looking along \f$\vec{a}\f$), with the
+formula \anchor RodriguesRotation \f[ \vec{v}' = \vec{v} \cos\beta+ (\vec{a} \times \vec{v})\sin\beta+\vec{a}(\vec{a}
+\cdot \vec{v})(1-\cos\beta) \f] This formula is used to first calculate the new reference direction and then to
+calculate the new propagation direction.
+
+\subsubsection PolImplNewDirFirst Possible calculation of first reference direction
+
+In case there is no reference direction \f${\mathbf{n}_{s}}\f$ (usually because it is the first scattering event), it
+must be generated. There are \f$2 \pi\f$ directions that are perpendicular to the propagation direction
+\f$\mathbf{k}\f$. One could assume the choice of the reference direction could influence the randomness of the random
+walk. Luckily, if there is no reference direction \f${\mathbf{n}_{s}}\f$, there is also no Stokes vector direction
+\f${\mathbf{d}_{s}}\f$ (otherwise \f${\mathbf{n}_{s}} = \mathbf{k} \times {\mathbf{d}_{s}}\f$) and the linear
+polarization degree \f$P_{\text{L,in}}\f$ is zero (\f$Q\f$ and \f$U\f$ are only meaningful with a direction
+\f${\mathbf{d}_{s}}\f$). Applying this to \ref eqVarphiSampling "the sampling of the azimuth" results in a uniform
+probability distribution for the azimuth \f$\varphi\f$. Our choice of the reference direction is therefore completely
+randomized when the azimuth is applied to generate the new direction.
+
+We calculate a reference \f${\mathbf{n}_{s}} = ({\mathbf{n}_{s}}_{x},{\mathbf{n}_{s}}_{y},{\mathbf{n}_{s}}_{z})\f$ that
+is perpendicular to the current direction of flight \f$\mathbf{k} = (\mathbf{k}_{x},\mathbf{k}_{y},\mathbf{k}_{z})\f$,
+\f[ \begin{split} {\mathbf{n}_{s}}_{x} &= -\mathbf{k}_{x}\mathbf{k}_{z}/\sqrt[]{1-\mathbf{k}_z^{2}}\\
+{\mathbf{n}_{s}}_{y} &= -\mathbf{k}_{y}\mathbf{k}_{z}/\sqrt[]{1-\mathbf{k}_z^{2}}\\ {\mathbf{n}_{s}}_{z} &=
+\sqrt[]{1-\mathbf{k}_z^{2}} \end{split} \f] these formulas are adapted from Bianchi et al. (1996) for an angle of
+\f$90^\circ\f$ towards the direction of flight. In case \f$\mathbf{k}\f$ is towards \f$\pm \mathbf{e}_{z}\f$, the root
+degenerates and the reference direction \f${\mathbf{n}_{s}} = \mathbf{e}_{x}\f$ is chosen instead.
+
+\subsubsection PolImplNewDirNewRef Calculating the new reference direction
+
+\image html polarization/RotationMethod.png
+\image latex polarization/RotationMethod.png
+Depiction of the vectors and planes used here.
+
+To calculate the new reference direction \f${\mathbf{n}_{s}}'\f$, we use the physical meaning of the azimuth
+\f$\varphi\f$. It describes the angle between the scattering planes, the angle around which the Stokes parameters are
+rotated so they are referring to an axis inside the scattering plane. As the reference direction \f${\mathbf{n}_{s}}\f$
+is perpendicular to the Stokes vector direction and the propagation direction \f$\mathbf{k}\f$, it is perpendicular to
+the past scattering plane. For it to be perpendicular to the current scattering plane, it needs to be rotated by
+\f$\varphi\f$ with the propagation direction as the rotation axis. The resulting vector is the new reference direction
+\f${\mathbf{n}_{s}}'\f$. This rotation is calculated by using \ref RodriguesRotation "Rodrigues' Rotation formula", \f[
+{\mathbf{n}_{s}}' = {\mathbf{n}_{s}} \cos\varphi+ (\mathbf{k} \times
+{\mathbf{n}_{s}})\sin\varphi+\mathbf{k}(\mathbf{k}\cdot{\mathbf{n}_{s}})(1-\cos\varphi) \f] As \f${\mathbf{n}_{s}}\f$
+is perpendicular to \f$\mathbf{k}\f$, the third term is zero, \f[ {\mathbf{n}_{s}}' = {\mathbf{n}_{s}} \cos\varphi+
+(\mathbf{k} \times {\mathbf{n}_{s}})\sin\varphi \f] and \f${\mathbf{n}_{s}}'\f$ is the normal of the current scattering
+plane.
+
+\subsubsection PolImplNewDirNewDir Calculating the new propagation direction
+
+The second step is to rotate the current propagation direction \f$\mathbf{k}\f$ around the normal vector of the current
+scattering plane \f${\mathbf{n}_{s}}'\f$ by \f$\theta\f$. The resulting vector is the new propagation direction
+\f$\mathbf{k}'\f$. This is implemented the same way, using \ref RodriguesRotation "Rodrigues' Rotation formula" and
+again the third term is zero, \f[ \mathbf{k}' = \mathbf{k} \cos\theta+ ({\mathbf{n}_{s}} \times \mathbf{k})\sin\theta \
+. \f] Thus we obtain the new propagation direction \f$\mathbf{k}'\f$ and the new reference direction
+\f${\mathbf{n}_{s}}'\f$.
+
+\subsection PolImplSPeel Scattering peel-off
+
+Depending on the code there are photons peeled off towards the observer(s) whenever the photon package scatters (and in
+SKIRT this is the case). These photons need to convey the correct Stokes parameters to the observer. In contrast to
+random walk scattering the future direction is known, it is \f$\mathbf{k}_\text{obs}\f$, while the scattering angles
+\f$(\theta_\text{obs},\varphi_\text{obs})\f$ are unknown. After calculating the direction towards the observer, the
+Stokes reference direction must be rotated so it refers to the \f$x\f$-axis of the observer frame,
+\f$\mathbf{k}_\text{x}\f$.
+
+\subsubsection PolImplSPeeltp Determining the direction angles towards the observer
+
+The scattering angle \f$\theta_\text{obs}\f$ is easily determined through the cosine of the peel-off scattering angle,
+\f[ \cos\theta_\text{obs} = \mathbf{k} \cdot \mathbf{k}_\text{obs} \f] as the scattering angle runs from \f$0\f$ to
+\f$\pi\f$, this relation is bijective and the \f$\arccos\f$ can be used.
+
+To compute \f$\varphi_\text{obs}\f$, recall that it is the angle between the previous scattering plane and the current
+scattering plane, or equivalently, the angle between the normal vectors to these scattering planes. The normal of the
+last scattering plane is \f${\mathbf{n}_{s}}\f$ (which might need to be generated, if it is the first scattering, using
+\ref PolImplNewDirNewRef ). The normal of the current scattering plane \f$\mathbf{n}\f$ can be calculated using the
+current propagation direction \f$\mathbf{k}\f$ and the direction towards the observer \f$\mathbf{k}_\text{obs}\f$, \f[
+\mathbf{n} = \frac{\mathbf{k} \times \mathbf{k}_\text{obs}} {||\mathbf{k} \times \mathbf{k}_\text{obs}||} \f] Thus we
+have \f[ \cos\varphi_\text{obs} = {\mathbf{n}_{s}} \cdot \mathbf{n} \f] But since \f$\varphi_\text{obs}\f$ can run from
+\f$0\f$ to \f$2 \pi\f$, the relation is not bijective. We need the sine of \f$\varphi_\text{obs}\f$ as well. Since
+\f$\mathbf{k}\f$ is perpendicular to both \f${\mathbf{n}_{s}}\f$ and \f$\mathbf{n}\f$, the relation \f[
+\sin\varphi_\text{obs} \,\mathbf{k}= {\mathbf{n}_{s}} \times \mathbf{n} \f] holds. Or, after projecting both sides of
+the equation on \f$\mathbf{k}\f$, \f[ \sin\varphi_\text{obs} = ({\mathbf{n}_{s}} \times \mathbf{n}) \cdot \mathbf{k}
+\f] so that \f$\varphi_\text{obs}\f$ is fully defined. Once the angles are determined, the Stokes parameters are
+rotated by \f$\varphi_\text{obs}\f$ (which updates \f${\mathbf{n}_{s}}\f$ to \f${\mathbf{n}_{s}}'\f$ as well). The
+Mueller matrix is applied with the scattering angle \f$\theta_\text{obs}\f$ (and \f$\mathbf{k}\f$ updated to
+\f$\mathbf{k}'=\mathbf{k}_\text{obs}\f$).
+
+Calculating the normal of the current scattering plane for \f$\mathbf{n}\f$ will cause an exception if the peel off is
+completely forwards or backwards, but in this case setting \f$\varphi_\text{obs} = 0\f$ is reasonable, as the
+scattering plane does not need to be updated when scattering forwards or backwards.
+
+\subsubsection PolImplSPeela Determining the orientation angle at the observer
+
+Once the photon is oriented towards the observer, the Stokes vector reference direction must be oriented so the Stokes
+parameters refer to the \f$x\f$-axis of the observer frame, \f$\mathbf{k}_\text{x}\f$, as their reference axis. This is
+equivalent to the reference direction after peeling off, \f${\mathbf{n}_{s}}'\f$, being oriented towards
+\f$\mathbf{k}_\text{y}\f$. The angle between \f${\mathbf{n}_{s}}'\f$ and \f$\mathbf{k}_\text{y}\f$ can be determined
+equivalently to the determination of \f$\varphi_\text{obs}\f$, using \f[ \cos\alpha_\text{obs} = {\mathbf{n}_{s}}'
+\cdot \mathbf{k}_\text{y} \f] and \f[ \sin\alpha_\text{obs} = ({\mathbf{n}_{s}}' \times \mathbf{k}_\text{y}) \cdot
+\mathbf{k}' \f] with which \f$\alpha_\text{obs}\f$ is fully defined.
+
+\section PolTesting Testing the simulation
+
+\image html polarization/TestGeometry.png
+\image latex polarization/TestGeometry.png
+A simple geometry to test the polarization method. A single point like source shines on thin slabs of electrons. In the
+tests \ref PolTestingRW "for random walk" and \ref PolTestingSPR "for scattering plane rotation" the star is replaced
+with a single cell of electrons that is illuminated from different angles and is the first position of scattering.
+
+In this section we show test cases to ensure the correct functionality of the implementation. They are designed to
+gradually use more of the routines so the incorrect implementation can be identified.
+
+A very simple case of polarization arises from Thomson scattering of light at electrons. It is wavelength independent
+and the light cannot be absorbed. Only the direction and polarization state are changed. The simplified Mueller matrix
+for \ref eqSphereScattering "spheres" is further reduced to \f[ {\bf{M}_{Th}}(\theta) = \left(\begin{array}{cccc}
+\frac{\cos^{2}\theta + 1}{2} & \frac{\cos^{2}\theta - 1}{2} & 0 & 0 \\ \frac{\cos^{2}\theta - 1}{2} &
+\frac{\cos^{2}\theta + 1}{2} & 0 & 0 \\ 0 & 0 & \cos\theta & 0 \\ 0 & 0 & 0 & \cos\theta \end{array}\right)\ . \f]
+Together with simple 2D-geometries like in \ref PolTesting "the figure above", the resulting polarization state can be
+calculated analytically and compared to the output generated by SKIRT.
+
+\subsection PolTestingFlux Testing the conservation of flux
+
+\image html polarization/FluxDependency.png
+\image latex polarization/FluxDependency.png
+Flux levels for different wavelengths and different optical depths of a ball of electrons around a central star.
+The flux is normalized to the original flux of the star.
+
+If the implementation of the polarization routines is incorrect, photons might get lost or their intensity get changed.
+This can be tested by putting a star in an optically thick ball of electrons and checking whether the flux differs from
+a star without electrons around it. \ref PolTestingFlux "The figure above" depicts the dependency of the total flux on
+the optical thickness \f$\tau\f$. To better visualize it, the flux is normalized to the level of a simulation with no
+electrons around the star. As can be seen, the flux remains within 1 \% of the original flux up to an optical thickness
+\f$\tau=30\f$. As in this simulation there are only 50x50x50 grid cells in the whole simulation, the radius has around
+25 cells for the optical thickness. Thus it seems that the optical thickness of a cell should not exceed unity,
+otherwise the flux starts to increase (to 105\% at \f$\tau_{\text{box}}=4\f$). Indeed, replications with a finer grid
+reveal that the flux is conserved better when using more cells.
+
+\subsection PolTestingPO Testing polarized peel off
+
+\image html polarization/TC1-Result.png
+\image latex polarization/TC1-Result.png
+Polarized peel off test. Comparison of the analytical result (blue) and the simulation with SKIRT (red).
+
+Unpolarized light from a point-like source at \f$P_{\star}\f$ shines onto thin slabs of electrons and is peeled off
+towards the observer (see \ref PolTesting "Figure"). As the slabs are very thin (optically and physically), the light
+is scattered only once and the observer can deduce the scattering angle \f$\theta\f$ from the position \f$x\f$ of the
+pixel. Easily compared are the degree of linear polarization \f$P_{\text{L}}\f$, the direction of the polarization
+\f$\gamma\f$ and the relative curve of the intensity \f$I_\text{rel}\f$. For the calculation of \f$I_\text{rel}\f$, the
+path length \f$l\f$ to the slab must be taken into account as well. (Not from the slab to the observer, as the observer
+is at an `infinite' distance and thus all distances towards the observer are equal.)
+
+For a position \f$x \in [-x_{max}, x_{max}]\f$ at the observer, the angle \f$\theta\f$ the photon was peeled off with
+at the slab can be deduced by geometrical reasoning to be \f[ \begin{split} \theta &= \frac{\pi}{2} \pm
+\arctan(x_{max}/|x| - 1) \end{split} \f] with the plus sign right of the origin and the minus sign left of it. The
+resulting curves are depicted in \ref PolTestingPO "the figure above". SKIRT shows excellent agreement with the
+analytical solution. The intensity has some noise, but this seems to be noise rather than an error.
+
+\subsection PolTestingRW Testing the random walk routine
+
+\image html polarization/TC2-Result.png
+\image latex polarization/TC2-Result.png
+Test of the functionality of the random walk routine (see \ref PolTestingRW ). The source illuminating the central
+electrons (see \ref PolTesting "Figure") is pointing towards \f$45^\circ\f$ from the \f$x\f$-axis (to the bottom right).
+
+The \ref PolTesting "easy geometry" can be used to check the functionality of the random walk routine as well. For this
+the central star is replaced with an electron cell in the center of the simulation. It is illuminated by a source that
+is placed in the plane of the slabs. To prevent the source from illuminating the slabs directly, the source's photons
+are all pointed towards the center. This way the light does a random walk scattering at the central object and the
+light is already polarized when it hits the electron slabs. As all components are in the same plane (e.g. \f$z \equiv
+0\f$), the scattering plane is always the \f$xy\f$-plane and thus this test does not rely on the functionality of the
+routines rotating the scattering plane. (This is not completely correct, as the orientation of the scattering plane
+will flip from \f$+z\f$ to \f$-z\f$ or vice versa for about half the pixels and it needs the implementation to
+determine the first reference direction \f${\mathbf{n}_{s}}\f$. Nevertheless, this only relies on a fraction of the
+routines and only on the most basic cases. A flip by \f$180^\circ\f$ does not change the Stokes parameters.) The two
+angles \f$(\theta_1,\theta_2)\f$ a photon takes to the observer are \f[ \begin{split} \theta_1 &=\theta_2 \pm
+(-45^\circ)\\ \theta_2 &= 90^{\circ} \pm \arctan(x_{max}/|x| - 1) \end{split} \f] with the plus signs right of the
+origin and the minus signs left of it. As can be seen in \ref PolTestingRW "the figure above", the results of the
+analytical solution and SKIRT are equal (save some noise).
+
+\subsection PolTestingSPR Testing the scattering plane rotation
+
+\image html polarization/TC3-Result.png
+\image latex polarization/TC3-Result.png
+Test of the scattering plane rotation routine. The source illuminating the central electrons (see \ref PolTesting
+"Figure") is pointing towards \f$15^\circ\f$ from the zenith (+\f$z\f$-axis) and \f$60^\circ\f$ from the \f$y\f$-axis
+(towards the top right).
+
+By moving the source from the previous test out of the \f$z=0\f$-plane of the slabs, we can test the scattering plane
+rotation routines. The normal of the first scattering plane is tilted versus the \f$z\f$-axis, while the normal of the
+second is aligned with the \f$z\f$-axis. This makes a scattering plane rotation necessary.
+
+As in this case obtaining the angles from geometrical reasoning is nearly impossible, the `expected' curves in \ref
+PolTestingSPR "the figure above" are actually calculated using the three steps a photon takes to get to the observer
+(to the central source, to the slabs, to the observer) as vectors. The angles are determined from the vectors and the
+Stokes parameters are manipulated accordingly. This is similar to how SKIRT calculates some of the angles.
+
+*/

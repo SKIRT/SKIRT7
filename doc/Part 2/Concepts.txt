@@ -9,6 +9,7 @@ or more of these topics will certainly provide a useful foundation.
   - \subpage Parallelization explains in detail how <tt>SKIRT</tt> is adapted for parallel computing.
   - \subpage DustProp describes how <tt>SKIRT</tt> deals with optical and calorimetric dust properties.
   - \subpage SpatialGrids introduces the spatial grids used for discretizing the dusty medium in <tt>SKIRT</tt>.
+  - \subpage Polarization describes the implementation of polarized radiation transfer in <tt>SKIRT</tt>.
   - \subpage PerInstr provides details on <tt>SKIRT</tt>'s perspective instrument, used mostly for making movies.
   - \subpage Cfitsio introduces the library included with <tt>SKIRT</tt> to read and write FITS files.
   - \subpage voro introduces the library included with <tt>SKIRT</tt> to construct Voronoi tesselations.

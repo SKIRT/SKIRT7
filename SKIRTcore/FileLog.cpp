@@ -11,6 +11,7 @@
 ////////////////////////////////////////////////////////////////////
 
 FileLog::FileLog()
+    : _limit(0)
 {
 }
 
@@ -23,6 +24,13 @@ FileLog::~FileLog()
         _out.flush();
         _file.close();
     }
+}
+
+////////////////////////////////////////////////////////////////////
+
+void FileLog::setLimit(double value)
+{
+    _limit = value;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -78,6 +86,26 @@ void FileLog::output(QString message, Log::Level level)
     {
         std::unique_lock<std::mutex> lock(_mutex);
         _out << message << endl;
+    }
+}
+
+////////////////////////////////////////////////////////////////////
+
+void FileLog::memory(size_t oldsize, size_t newsize, void *ptr)
+{
+    // Calculate the change in memory (in GB)
+    double delta = 0;
+    if (oldsize < newsize) delta = (newsize - oldsize) * 8 * 1e-9;
+    else if (oldsize > newsize) delta = (oldsize - newsize) * 8 * 1e-9;
+
+    // Log the amount of gained or released memory to the console, if larger than a certain threshold
+    if (delta >= _limit)
+    {
+        // Convert the pointer to a unique string
+        QString address = QString("0x%1").arg((quintptr)ptr, QT_POINTER_SIZE * 2, 16, QChar('0'));
+
+        if (oldsize < newsize) info("+" + QString::number(delta) + " GB for " + address);
+        else if (oldsize > newsize) info("-" + QString::number(delta) + " GB for " + address);
     }
 }
 
