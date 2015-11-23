@@ -303,7 +303,8 @@ HEADERS += \
     BoxGeometry.hpp \
     BoxDustDistribution.hpp \
     BoxStellarComp.hpp \
-    BrokenExpDiskGeometry.hpp
+    BrokenExpDiskGeometry.hpp \
+    TrustPolarizedMeanDustMix.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -565,4 +566,5 @@ SOURCES += \
     BoxGeometry.cpp \
     BoxDustDistribution.cpp \
     BoxStellarComp.cpp \
-    BrokenExpDiskGeometry.cpp
+    BrokenExpDiskGeometry.cpp \
+    TrustPolarizedMeanDustMix.cpp

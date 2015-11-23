@@ -167,6 +167,7 @@
 #include "TrustGraphiteGrainComposition.hpp"
 #include "TrustMeanDustMix.hpp"
 #include "TrustNeutralPAHGrainComposition.hpp"
+#include "TrustPolarizedMeanDustMix.hpp"
 #include "TrustSilicateGrainComposition.hpp"
 #include "TwoPhaseDustGrid.hpp"
 #include "UniformCuboidGeometry.hpp"
@@ -366,6 +367,7 @@ void RegisterSimulationItems::registerAll()
     add<Benchmark1DDustMix>();
     add<Benchmark2DDustMix>();
     add<TrustMeanDustMix>();
+    add<TrustPolarizedMeanDustMix>();
     add<MRNDustMix>();
     add<WeingartnerDraineDustMix>();
     add<ZubkoDustMix>();

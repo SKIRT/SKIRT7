@@ -342,6 +342,11 @@ void DustMix::addpolarization(const Table<2>& S11vv, const Table<2>& S12vv,
         S11vv.size(1)!=(unsigned)_Ntheta || S12vv.size(1)!=(unsigned)_Ntheta ||
         S33vv.size(1)!=(unsigned)_Ntheta || S34vv.size(1)!=(unsigned)_Ntheta)
     {
+        find<Log>()->info("S11vv.size(0) = " + QString::number(S11vv.size(0)));
+        find<Log>()->info("_Nlambda = " + QString::number(_Nlambda));
+        find<Log>()->info("S11vv.size(1) = " + QString::number(S11vv.size(1)));
+        find<Log>()->info("_Ntheta = " + QString::number(_Ntheta));
+
         throw FATALERROR("Mueller tables must have same size as simulation's lambda grid");
     }
 
