@@ -30,7 +30,6 @@ void BrokenExpDiskGeometry::setupSelfBefore()
     // verify property values
     if (_hinn <= 0) throw FATALERROR("The inner scale length should be positive");
     if (_hout <= 0) throw FATALERROR("The outer scale length should be positive");
-    if (_hout>_hinn) throw FATALERROR("The outer scale length should be smaller than the inner one");
     if (_hz <= 0) throw FATALERROR("The axial scale height should be positive");
     if (_Rb <= 0) throw FATALERROR("The break radius should be positive");
     if (_s <= 0) throw FATALERROR("The sharpness should be positive");
