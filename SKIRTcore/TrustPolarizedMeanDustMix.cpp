@@ -52,14 +52,12 @@ void TrustPolarizedMeanDustMix::setupSelfBefore()
     file.close();
     find<Log>()->info("File " + filename + " closed.");
 
-    // the following mimics the behaviour of the ElectronDustMix.cpp class
-    int Ntheta = 181;
-
     // for resampling: get the simulation's wavelength grid and its length
     const Array& lambdagridv = this->simlambdav();
     int SimNlambda = lambdagridv.size();
 
     // create temporary vectors and tables with the appropriate size
+    int Ntheta = 181;
     Array S11v(Nlambda), S12v(Nlambda), S33v(Nlambda), S34v(Nlambda);
     Array S11RSv(SimNlambda), S12RSv(SimNlambda), S33RSv(SimNlambda), S34RSv(SimNlambda);
     Table<2> S11vv(SimNlambda,Ntheta), S12vv(SimNlambda,Ntheta), S33vv(SimNlambda,Ntheta), S34vv(SimNlambda,Ntheta);
@@ -67,10 +65,10 @@ void TrustPolarizedMeanDustMix::setupSelfBefore()
     // read the Mueller matrix components
     // hierarchy: 181 files by angles, 1201 lines by wavelengths
     QString fileN = QString("DustMix/TrustMDMScatMatrix/ZDA_BARE_GR_S_ESM_%1deg.dat");
-    find<Log>()->info("Mueller Matrix components from file " + fileN.arg("xxx") + "...");
+    find<Log>()->info("Reading Mueller Matrix components from file " + fileN.arg("xxx") + "...");
     for (int t=0; t<Ntheta; t++)
     {
-        QString filename = FilePaths::resource(fileN.arg(QString::number(t),3,QLatin1Char( '0' )));
+        QString filename = FilePaths::resource(fileN.arg(QString::number(t),3,'0'));
         ifstream file(filename.toLocal8Bit().constData());
         if (!file.is_open()) throw FATALERROR("Could not open the data file " + filename);
 
@@ -101,7 +99,6 @@ void TrustPolarizedMeanDustMix::setupSelfBefore()
             S33vv(k,t) = S33RSv[k];
             S34vv(k,t) = S34RSv[k];
         }
-
     }
 
     file.close();

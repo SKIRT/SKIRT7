@@ -342,11 +342,6 @@ void DustMix::addpolarization(const Table<2>& S11vv, const Table<2>& S12vv,
         S11vv.size(1)!=(unsigned)_Ntheta || S12vv.size(1)!=(unsigned)_Ntheta ||
         S33vv.size(1)!=(unsigned)_Ntheta || S34vv.size(1)!=(unsigned)_Ntheta)
     {
-        find<Log>()->info("S11vv.size(0) = " + QString::number(S11vv.size(0)));
-        find<Log>()->info("_Nlambda = " + QString::number(_Nlambda));
-        find<Log>()->info("S11vv.size(1) = " + QString::number(S11vv.size(1)));
-        find<Log>()->info("_Ntheta = " + QString::number(_Ntheta));
-
         throw FATALERROR("Mueller tables must have same size as simulation's lambda grid");
     }
 
@@ -572,19 +567,15 @@ namespace
     }
 
     // This helper function returns the angle alpha between the reference axis in the peel-off scattering plane
-    // and the x-axis of the instrument frame, given the current propagation direction of the photon package,
-    // the new peel-off direction towards the instrument, and the direction of the instrument frame's x- and y-axes
+    // and the x-axis of the instrument frame, given the normal to the peel-off scattering plane,
+    // the new peel-off direction towards the instrument, and the direction of the instrument frame y-axis
     // expressed in model coordinates.
-    // It returns a zero angle when the peel-off scattering event is completely forward or backward,
-    // because then the scattering plane is ill-defined; and when the peel-off scattering plane is parallel to
-    // the instrument plane (which means there can't be any detection).
-    double angleBetweenScatteringAndInstrumentReference(Direction kn, Direction ky, Direction knew)
+    double angleBetweenScatteringAndInstrumentReference(Direction n, Direction knew, Direction ky)
     {
-        double cosalpha = Vec::dot(kn,ky);
-        double sinalpha = Vec::dot(Vec::cross(kn,ky), knew);
+        double cosalpha = Vec::dot(n,ky);
+        double sinalpha = Vec::dot(Vec::cross(n,ky), knew);
         double alpha = atan2(sinalpha,cosalpha);
-        if (isfinite(alpha)) return alpha;
-        return 0;
+        return alpha;
     }
 }
 
@@ -626,7 +617,7 @@ Direction DustMix::scatteringDirectionAndPolarization(StokesVector* out, const P
 ////////////////////////////////////////////////////////////////////
 
 void DustMix::scatteringPeelOffPolarization(StokesVector* out, const PhotonPackage* pp, Direction bfknew,
-                                            Direction bfkx, Direction bfky)
+                                            Direction /*bfkx*/, Direction bfky)
 {
     if (_polarization)
     {
@@ -646,7 +637,7 @@ void DustMix::scatteringPeelOffPolarization(StokesVector* out, const PhotonPacka
 
         // rotate over the angle between the reference axis in the peel-off scattering plane
         // and the x-axis in the instrument frame
-        double alpha = angleBetweenScatteringAndInstrumentReference(out->normal(), bfky, bfknew);
+        double alpha = angleBetweenScatteringAndInstrumentReference(out->normal(), bfknew, bfky);
         if (alpha) out->rotateStokes(alpha, pp->direction());
     }
 }
