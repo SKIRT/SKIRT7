@@ -342,6 +342,11 @@ void DustMix::addpolarization(const Table<2>& S11vv, const Table<2>& S12vv,
         S11vv.size(1)!=(unsigned)_Ntheta || S12vv.size(1)!=(unsigned)_Ntheta ||
         S33vv.size(1)!=(unsigned)_Ntheta || S34vv.size(1)!=(unsigned)_Ntheta)
     {
+        find<Log>()->info("S11vv.size(0) = " + QString::number(S11vv.size(0)));
+        find<Log>()->info("_Nlambda = " + QString::number(_Nlambda));
+        find<Log>()->info("S11vv.size(1) = " + QString::number(S11vv.size(1)));
+        find<Log>()->info("_Ntheta = " + QString::number(_Ntheta));
+
         throw FATALERROR("Mueller tables must have same size as simulation's lambda grid");
     }
 
@@ -573,13 +578,10 @@ namespace
     // It returns a zero angle when the peel-off scattering event is completely forward or backward,
     // because then the scattering plane is ill-defined; and when the peel-off scattering plane is parallel to
     // the instrument plane (which means there can't be any detection).
-    double angleBetweenScatteringAndInstrumentReference(Direction kc, Direction kn, Direction kx, Direction ky)
+    double angleBetweenScatteringAndInstrumentReference(Direction kn, Direction ky, Direction knew)
     {
-        Vec nobs = Vec::cross(kx,ky);
-        Vec ks = Vec::cross(Vec::cross(kc,kn), nobs);
-        ks /= ks.norm();
-        double cosalpha = Vec::dot(ks,kx);
-        double sinalpha = Vec::dot(Vec::cross(ks,kx), nobs);
+        double cosalpha = Vec::dot(kn,ky);
+        double sinalpha = Vec::dot(Vec::cross(kn,ky), knew);
         double alpha = atan2(sinalpha,cosalpha);
         if (isfinite(alpha)) return alpha;
         return 0;
@@ -644,7 +646,7 @@ void DustMix::scatteringPeelOffPolarization(StokesVector* out, const PhotonPacka
 
         // rotate over the angle between the reference axis in the peel-off scattering plane
         // and the x-axis in the instrument frame
-        double alpha = angleBetweenScatteringAndInstrumentReference(pp->direction(), bfknew, bfkx, bfky);
+        double alpha = angleBetweenScatteringAndInstrumentReference(out->normal(), bfky, bfknew);
         if (alpha) out->rotateStokes(alpha, pp->direction());
     }
 }
