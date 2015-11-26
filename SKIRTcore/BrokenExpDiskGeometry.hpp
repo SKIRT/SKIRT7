@@ -17,7 +17,7 @@
     profile with scale length \f$h_{R,{\text{inn}}}\f$ and an outer exponential profile with scale
     length \f$h_{R,{\text{out}}}\f$. There is no limitation in the nature of the break: the inner
     profile can be shallower than the outer one (\f$h_{R,{\text{out}}} < h_{R,{\text{inn}}}\f$) or
-    steeper (\f$h_{R,{\text{out}}} < h_{R,{\text{inn}}}\f$). These two asymptotic profiles are
+    steeper (\f$h_{R,{\text{out}}} > h_{R,{\text{inn}}}\f$). These two asymptotic profiles are
     joined smoothly at a break radius \f$R_{\text{b}}\f$, with a dimensionless parameter \f$s\f$
     that sets the smoothness of the transition between these two regimes. For large values of the
     smoothness parameter, \f$s\gg1\f$, the transition is sharp, whereas for small values,
