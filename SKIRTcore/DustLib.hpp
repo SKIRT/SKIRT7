@@ -6,8 +6,9 @@
 #ifndef DUSTLIB_HPP
 #define DUSTLIB_HPP
 
-#include "ArrayTable.hpp"
+#include "DistMemTable.hpp"
 #include "SimulationItem.hpp"
+
 class ProcessAssigner;
 
 //////////////////////////////////////////////////////////////////////
@@ -28,12 +29,6 @@ class DustLib : public SimulationItem
     Q_OBJECT
     Q_CLASSINFO("Title", "a dust library")
 
-    Q_CLASSINFO("Property", "assigner")
-    Q_CLASSINFO("Title", "the parallel process assignment scheme")
-    Q_CLASSINFO("Default", "SequentialAssigner")
-    Q_CLASSINFO("Optional", "true")
-    Q_CLASSINFO("Silent", "true")
-
     //============= Construction - Setup - Destruction =============
 
 protected:
@@ -43,23 +38,6 @@ protected:
     /** This function creates a default assigner if no assigner has been set during construction
         (which can happen since the assigner property is silent and optional). */
     void setupSelfBefore();
-
-    //======== Setters & Getters for Discoverable Attributes =======
-
-public:
-    /** This function sets the process assigner for this dust library. The process assigner is the
-         object that assigns different library entries to different processes, to parallelize the
-         calculation of the dust emission SEDs. The ProcessAssigner class is the abstract class that
-         represents different types of assigners; different subclass implement the assignment in
-         different ways. While the most straightforward types of process assigners are used to assign
-         each library entry to a different process to speed up the calculation, one ProcessAssigner
-         subclass lets all processes calculate the dust SEDs for all dust cells. This can be useful if
-         the calculation itsself, perhaps by using a lower-dimensional library mechanism, is not CPU
-         expensive but the subsequent communication between processes proves to be time consuming. */
-    Q_INVOKABLE void setAssigner(ProcessAssigner* value);
-
-    /** Returns the process assigner for this dust library. */
-    Q_INVOKABLE ProcessAssigner* assigner() const;
 
     //======================== Other Functions =======================
 
@@ -147,8 +125,11 @@ protected:
 private:
     // results of calculate(), used by luminosity()
     std::vector<int> _nv;        // library index for each cell or -1, indexed on m
-    ArrayTable<2> _Lvv;          // luminosities indexed on m or n and ell
-    ProcessAssigner* _assigner;  // the process assigner; determines which library entries are assigned to this process
+    DistMemTable _distLvv;
+
+protected:
+    ProcessAssigner* _cellAssigner;
+    ProcessAssigner* _lambdaAssigner;
 };
 
 ////////////////////////////////////////////////////////////////////

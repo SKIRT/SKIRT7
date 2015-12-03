@@ -53,6 +53,7 @@ void StaggeredAssigner::copyFrom(const StaggeredAssigner *from)
 void StaggeredAssigner::assign(size_t size, size_t blocks)
 {
     _blocksize = size;
+    _nblocks = blocks;
     _valuesInBlock = 0;
 
     for (size_t i = 0; i < size; i++)

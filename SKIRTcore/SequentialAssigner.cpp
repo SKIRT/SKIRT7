@@ -62,6 +62,7 @@ void SequentialAssigner::assign(size_t size, size_t blocks)
     _quotient = size / nprocs;
     _remainder = size % nprocs;
     _blocksize = size;
+    _nblocks = blocks;
 
     // Calculate the number of values assigned to this process (in one block and in total)
     _valuesInBlock = ((size_t)rank < _remainder) ? _quotient + 1 : _quotient;

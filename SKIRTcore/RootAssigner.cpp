@@ -41,6 +41,8 @@ void RootAssigner::copyFrom(const RootAssigner *from)
 
 void RootAssigner::assign(size_t size, size_t blocks)
 {
+    _blocksize = size;
+    _nblocks = blocks;
     if (_comm)
     {
         // Set the number of values assigned to this process

@@ -49,6 +49,8 @@ public:
         assigned to the calling process. This number is stored in the _nvalues data member. */
     size_t nvalues() const;
 
+    size_t total() const;
+
     /** This function invokes the assignment procedure. As a first argument, it takes the number of
         parts of work that need to be performed. As a second optional argument, it takes the number of
         blocks; which represents the number of times a set of \c size parts is encountered in the
@@ -96,12 +98,15 @@ public:
         Except for the IdenticalAssigner class, each subclass always returns true. */
     virtual bool parallel() const = 0;
 
+    bool validIndex(size_t absoluteIndex) const;
+
     //======================== Data Members ========================
 
 protected:
     PeerToPeerCommunicator* _comm;  // cached pointer to the peer-to-peer communicator of the simulation
     size_t _nvalues;                // the number of values assigned to this process
     size_t _blocksize;
+    size_t _nblocks;
 };
 
 #endif // PROCESSASSIGNER_HPP

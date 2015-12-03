@@ -58,6 +58,7 @@ void IdenticalAssigner::copyFrom(const IdenticalAssigner* from)
 void IdenticalAssigner::assign(size_t size, size_t blocks)
 {
     _blocksize = size;
+    _nblocks = blocks;
     _start = 0;
     setBlocks(blocks);
 }

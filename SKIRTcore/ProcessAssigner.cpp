@@ -52,3 +52,15 @@ size_t ProcessAssigner::nvalues() const
 }
 
 ////////////////////////////////////////////////////////////////////
+
+size_t ProcessAssigner::total() const
+{
+    return _blocksize;
+}
+
+////////////////////////////////////////////////////////////////////
+
+bool ProcessAssigner::validIndex(size_t absoluteIndex) const
+{
+    return _comm->rank() == rankForIndex(absoluteIndex);
+}

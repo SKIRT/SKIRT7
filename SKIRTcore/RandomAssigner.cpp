@@ -61,6 +61,7 @@ void RandomAssigner::copyFrom(const RandomAssigner *from)
 void RandomAssigner::assign(size_t size, size_t blocks)
 {
     _blocksize = size;
+    _nblocks = blocks;
     _assignment.clear();
     _assignment.resize(size);
     _values.clear();

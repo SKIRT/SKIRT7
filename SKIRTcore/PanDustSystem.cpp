@@ -5,6 +5,7 @@
 
 #include <cmath>
 #include "ArrayTable.hpp"
+#include "DistMemTable.hpp"
 #include "DustEmissivity.hpp"
 #include "DustGrid.hpp"
 #include "DustLib.hpp"
@@ -131,16 +132,14 @@ void PanDustSystem::setupSelfAfter()
     if (dustemission())
     {
         _Labsstelvv.resize(_Ncells,_Nlambda);
-        _myLambdaLabsstelvv.resize(_Ncells, _NmyLambda);
-        _myCellsLabsstelvv.resize(_NmyCells, _Nlambda);
+        _distLabsstelvv = DistMemTable("Absorbed Stellar Luminosity",_lambdaAssigner,_cellAssigner,COLUMN);
         printf("\nnew stellarabs tables resized to (%d,%d) and (%d,%d)\n",
                _Ncells, _NmyLambda, _NmyCells, _Nlambda);
         _haveLabsstel = true;
         if (selfAbsorption())
         {
             _Labsdustvv.resize(_Ncells,_Nlambda);
-            _myLambdaLabsdustvv.resize(_Ncells, _NmyLambda);
-            _myCellsLabsdustvv.resize(_NmyCells, _Nlambda);
+            _distLabsdustvv = DistMemTable("Absorbed Dust Luminosity",_lambdaAssigner,_cellAssigner,COLUMN);
             printf("\nnew dustabs tables resized to (%d,%d) and (%d,%d)\n",
                    _Ncells, _NmyLambda, _NmyCells, _Nlambda);
             _haveLabsdust = true;
@@ -315,19 +314,17 @@ bool PanDustSystem::dustemission() const
 
 void PanDustSystem::absorb(int m, int ell, double DeltaL, bool ynstellar)
 {
-    int myEll = _lambdaAssigner->relativeIndex(ell);
-
     if (ynstellar)
     {
         if (!_haveLabsstel) throw FATALERROR("This dust system does not support absorption of stellar emission");
         LockFree::add(_Labsstelvv(m,ell), DeltaL);
-        LockFree::add(_myLambdaLabsstelvv(m,myEll), DeltaL);
+        LockFree::add(_distLabsstelvv(m,ell), DeltaL);
     }
     else
     {
         if (!_haveLabsdust) throw FATALERROR("This dust system does not support absorption of dust emission");
         LockFree::add(_Labsdustvv(m,ell), DeltaL);
-        LockFree::add(_myLambdaLabsdustvv(m,myEll), DeltaL);
+        LockFree::add(_distLabsdustvv(m,ell), DeltaL);
     }
 }
 
@@ -336,21 +333,20 @@ void PanDustSystem::absorb(int m, int ell, double DeltaL, bool ynstellar)
 void PanDustSystem::rebootLabsdust()
 {
     _Labsdustvv.clear();
-    _myLambdaLabsdustvv.clear();
+    _distLabsdustvv.clear();
 }
 
 //////////////////////////////////////////////////////////////////////
 
 double PanDustSystem::Labs(int m, int ell) const
 {
-    //int myM = _cellAssigner->relativeIndex(m);
+    // will not work in one of the write functions (they need all cells and wavelengths)
+    // only callable after syncing the DistMemTables!
     double sum = 0;
-    if (_haveLabsstel) sum += _Labsstelvv(m,ell);
-    // when we make sure that Labs is called on the right m after communication and only by DustLib,
-    // then we can use the following
-    // if (_haveLabsstel) sum += _myCellsLabsstelvv(myM,ell);
-    if (_haveLabsdust) sum += _Labsdustvv(m,ell);
-    // if (_haveLabsdust) sum += _myCellsLabsdustvv(myM,ell);
+    // if (_haveLabsstel) sum += _Labsstelvv(m,ell);
+    // if (_haveLabsdust) sum += _Labsdustvv(m,ell);
+    if (_haveLabsstel) sum += _distLabsstelvv(m,ell);
+    if (_haveLabsdust) sum += _distLabsdustvv(m,ell);
     return sum;
 }
 
@@ -358,7 +354,7 @@ double PanDustSystem::Labs(int m, int ell) const
 
 double PanDustSystem::Labs(int m) const
 {
-    // this will no longer work with the new arrays
+    // needs to work on all absolute m (for monte carlo and writing)
     double sum = 0;
     if (_haveLabsstel)
         for (int ell=0; ell<_Nlambda; ell++)
@@ -388,7 +384,7 @@ double PanDustSystem::Labsdusttot() const
     double sum = 0;
     if (_haveLabsdust)
         for (int m=0; m<_Ncells; m++)
-            for (int ell=0; ell<_Nlambda; ell++)
+            for (int ell=0; ell<_NmyLambda; ell++)
                 sum += _Labsdustvv(m,ell);
 
     PeerToPeerCommunicator * comm = find<PeerToPeerCommunicator>();
@@ -452,9 +448,8 @@ void PanDustSystem::sumResults(bool ynstellar)
     {
         if (ynstellar)
         {
-            comm->col_to_row_distributed(_myLambdaLabsstelvv,_lambdaAssigner,
-                                         _myCellsLabsstelvv,_cellAssigner,
-                                         _Ncells, _Nlambda);
+            _distLabsstelvv.sync();
+/*
             // Print to compare
             TextOutFile original(this, "originalstellar", "Labsstellarvv");
             TextOutFile newarray(this, "newarraystellar", "myCellsLabsstellvv");
@@ -471,12 +466,12 @@ void PanDustSystem::sumResults(bool ynstellar)
                 original.writeLine(oss1);
                 newarray.writeLine(oss2);
             }
+*/
         }
         else
         {
-            comm->col_to_row_distributed(_myLambdaLabsdustvv,_lambdaAssigner,
-                                         _myCellsLabsdustvv,_cellAssigner,
-                                         _Ncells, _Nlambda);
+            _distLabsdustvv.sync();
+/*
             // Print to compare
             TextOutFile original(this, "originaldust", "Labsdustvv");
             TextOutFile newarray(this, "newarraydust", "myCellsLabsdustvv");
@@ -493,6 +488,7 @@ void PanDustSystem::sumResults(bool ynstellar)
                 original.writeLine(oss1);
                 newarray.writeLine(oss2);
             }
+*/
         }
     }
 }

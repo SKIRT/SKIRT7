@@ -5,8 +5,10 @@
 
 #include <QMultiHash>
 #include <QTime>
+#include "DistMemTable.hpp"
 #include "DustLib.hpp"
 #include "DustEmissivity.hpp"
+#include "IdenticalAssigner.hpp"
 #include "Log.hpp"
 #include "NR.hpp"
 #include "PanDustSystem.hpp"
@@ -14,6 +16,7 @@
 #include "ParallelFactory.hpp"
 #include "PeerToPeerCommunicator.hpp"
 #include "StaggeredAssigner.hpp"
+#include "TextOutFile.hpp"
 #include "TimeLogger.hpp"
 #include "WavelengthGrid.hpp"
 
@@ -22,7 +25,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////
 
 DustLib::DustLib()
-    : _assigner(0)
+    : _cellAssigner(0), _lambdaAssigner(0)
 {
 }
 
@@ -32,24 +35,11 @@ void DustLib::setupSelfBefore()
 {
     SimulationItem::setupSelfBefore();
 
-    // If no assigner was set, use a StaggeredAssigner as default
-    if (!_assigner) setAssigner(new StaggeredAssigner(this));
-}
+    WavelengthGrid* lambdagrid = find<WavelengthGrid>();
+    _lambdaAssigner = lambdagrid->assigner();
+    PanDustSystem* dustsystem = find<PanDustSystem>();
+    _cellAssigner = dustsystem->assigner();
 
-////////////////////////////////////////////////////////////////////
-
-void DustLib::setAssigner(ProcessAssigner* value)
-{
-    if (_assigner) delete _assigner;
-    _assigner = value;
-    if (_assigner) _assigner->setParent(this);
-}
-
-////////////////////////////////////////////////////////////////////
-
-ProcessAssigner* DustLib::assigner() const
-{
-    return _assigner;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -60,7 +50,7 @@ namespace
     {
     private:
         // data members initialized in constructor
-        ArrayTable<2>& _Lvv;        // output luminosities indexed on m or n and ell (writable reference)
+        DistMemTable& _distLvv;     // output luminosities indexed on m or n and ell (writable reference)
         QMultiHash<int,int> _mh;    // hash map <n,m> of cells for each library entry
         Log* _log;
         PanDustSystem* _ds;
@@ -70,10 +60,14 @@ namespace
         int _Ncomp;
         QTime _timer;           // measures the time elapsed since the most recent log message
 
+        // new stuff
+        bool _dataparallel;
+        ProcessAssigner* _cellAssigner;
+
     public:
         // constructor
-        EmissionCalculator(ArrayTable<2>& Lvv, vector<int>& nv, int Nlib, SimulationItem* item)
-            : _Lvv(Lvv)
+        EmissionCalculator(DistMemTable distLvv, vector<int>& nv, int Nlib, SimulationItem* item)
+            : _distLvv(distLvv)
         {
             // get basic information about the wavelength grid and the dust system
             _log = item->find<Log>();
@@ -83,20 +77,18 @@ namespace
             _Nlambda = _lambdagrid->Nlambda();
             _Ncomp = _ds->Ncomp();
 
+            // new stuff
+            _cellAssigner = _ds->assigner();
+
             // invert mapping vector into a temporary hash map
             int Ncells = nv.size();
             _mh.reserve(Ncells);
-            for (int m=0; m<Ncells; m++) if (nv[m] >= 0) _mh.insert(nv[m],m);
+            for (int m=0; m<Ncells; m++) if (nv[m] >= 0) _mh.insert(nv[m],_cellAssigner->absoluteIndex(m));
 
             // log usage statistics
             int Nused = _mh.uniqueKeys().size();
             _log->info("Library entries in use: " + QString::number(Nused) +
                                        " out of " + QString::number(Nlib) + ".");
-
-            // resize result vectors appropriately (for every cell or for every library entry)
-            // If there are multiple dust components, the _Lvv vector is indexed on m (the dust cells)
-            int Nout = _Ncomp>1 ? Ncells : Nlib;
-            _Lvv.resize(Nout,_Nlambda);  // also sets all values to zero
 
             // start the logging timer
             _timer.start();
@@ -105,7 +97,7 @@ namespace
         // the parallized loop body; calculates the emission for a single library entry
         void body(size_t n)
         {
-            // get the list of dust cells that map to this library entry
+            // get the list of dust cells that map to this library entry (absolute indices)
             QList<int> mv = _mh.values(n);
             int Nmapped = mv.size();
 
@@ -129,7 +121,7 @@ namespace
                 Jv /= Nmapped;
 
                 // multiple dust components: calculate emission for each dust cell separately
-                if (_Ncomp > 1)
+                if (true)//_Ncomp > 1)
                 {
                     // get emissivity for each dust component (i.e. for the corresponding dust mix)
                     ArrayTable<2> evv(_Ncomp,0);
@@ -139,10 +131,11 @@ namespace
                     foreach (int m, mv)
                     {
                         // get a reference to the output array for this dust cell
-                        Array& Lv = _Lvv[m];
+                        Array& Lv = _distLvv[m];
 
                         // calculate the emission for this cell
-                        for (int h=0; h<_Ncomp; h++) Lv += evv[h] * _ds->density(m,h);
+                        double density = _ds->density(m);
+                        for (int h=0; h<_Ncomp; h++) Lv += evv[h] * density;
 
                         // convert to luminosities and normalize the result
                         Lv *= _lambdagrid->dlambdav();
@@ -150,9 +143,9 @@ namespace
                         if (total>0) Lv /= total;
                     }
                 }
-
+/*
                 // single dust component: remember just the libary template, which serves for all mapped cells
-                else
+                else // not used anymore
                 {
                     // get a reference to the output array for this library entry
                     Array& Lv = _Lvv[n];
@@ -165,6 +158,7 @@ namespace
                     double total = Lv.sum();
                     if (total>0) Lv /= total;
                 }
+*/
             }
         }
     };
@@ -174,30 +168,35 @@ namespace
 
 void DustLib::calculate()
 {
+    _distLvv = DistMemTable("Dust Emission",_lambdaAssigner,_cellAssigner,ROW);
     // get mapping from cells to library entries
     int Nlib = entries();
     _nv = mapping();
 
-    // assign each process to a set of library entries
-    _assigner->assign(Nlib);
+    // if data is distributed: each process has its own dustlibrary and calculates all entries of it => Identical
+    // if data is not distributed: divide calculation over processes => Staggered
+    ProcessAssigner* helpAssigner;
+    if (_distLvv.distributed()) helpAssigner = new IdenticalAssigner(this);
+    else helpAssigner = new StaggeredAssigner(this);
+    helpAssigner->assign(Nlib);
 
-    // calculate the emissivity for each library entry assigned to this process
-    EmissionCalculator calc(_Lvv, _nv, Nlib, this);
+    // calculate the emissivity for each library entry
+    EmissionCalculator calc(_distLvv, _nv, Nlib, this);
     Parallel* parallel = find<ParallelFactory>()->parallel();
-    parallel->call(&calc, _assigner);
+    parallel->call(&calc, helpAssigner);
 
     // Wait for the other processes to reach this point
     PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
     comm->wait("the emission spectra calculation");
 
-    // assemble _Lvv from the information stored at different processes, if the work is done in parallel processes
-    if (_assigner->parallel()) assemble();
+    assemble();
 }
 
 ////////////////////////////////////////////////////////////////////
 
 double DustLib::luminosity(int m, int ell) const
 {
+/*
     size_t Ncells = _nv.size();
     if (_Lvv.size(0) == Ncells)     // _Lvv is indexed on m, the index of the dust cells
     {
@@ -208,41 +207,14 @@ double DustLib::luminosity(int m, int ell) const
         int n = _nv[m];
         return n>=0 ? _Lvv[n][ell] : 0.;
     }
+*/
+    // This function will be called on all cells, but only the wavelengths for this process
+    return _distLvv(m,ell);
 }
 
 ////////////////////////////////////////////////////////////////////
 
 void DustLib::assemble()
 {
-    // Get a pointer to the PeerToPeerCommunicator of this simulation
-    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
-
-    Log* log = find<Log>();
-    TimeLogger logger(log->verbose() && comm->isMultiProc() ? log : 0, "communication of the dust emission spectra");
-
-    size_t Ncells = _nv.size();
-    if (_Lvv.size(0) == Ncells)     // _Lvv is indexed on m, the index of the dust cells
-    {
-        for (size_t m = 0; m < Ncells; m++) // for each dust cell
-        {
-            size_t n = _nv[m];                      // get the library index for this dust cell ..
-            int rank = _assigner->rankForIndex(n);    // .. to determine which process calculated the emission SED
-
-            // finally, broadcast the emission SED from that process to all the other processes
-            comm->broadcast(_Lvv[m],rank);
-        }
-
-    }
-    else    // _Lvv is indexed on n, the library entry index
-    {
-        for (size_t n = 0; n < _Lvv.size(0); n++)   // for each library entry
-        {
-            int rank = _assigner->rankForIndex(n);    // determine which process calculated the emission SED of this entry
-
-            // broadcast the emission SED from that process to all the other processes
-            comm->broadcast(_Lvv[n],rank);
-        }
-    }
+    _distLvv.sync();
 }
-
-////////////////////////////////////////////////////////////////////
