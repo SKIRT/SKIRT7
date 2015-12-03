@@ -196,7 +196,7 @@ Array MappingsSEDFamily::luminosities_generic(const Array& params, int skipvals,
 
 double MappingsSEDFamily::mass_generic(const Array& params, int skipvals) const
 {
-    return params[skipvals] * 1e7;    // assume constant SFR over 10 Myr
+    return params[skipvals] * 1e8;    // assume constant SFR over 100 Myr
 }
 
 //////////////////////////////////////////////////////////////////////
