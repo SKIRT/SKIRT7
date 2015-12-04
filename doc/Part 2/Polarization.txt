@@ -127,15 +127,12 @@ There are two different approaches/conventions to implement orientating Stokes p
 
 \subsubsection PolImplOrientationMeridional Orientation w.r.t. the meridional plane
 
-Compare the scattering geometry as used in Code and Whitney (1995),
+Consider the scattering geometry as used in Code and Whitney (1995),
 \image html polarization/ScatteringGeometry-CodeWhitney.png
 \image latex polarization/ScatteringGeometry-CodeWhitney.png
-as used in Bianchi et al (1996),
+and the one used in Bianchi et al (1996),
 \image html polarization/ScatteringGeometry-Bianchi.png
 \image latex polarization/ScatteringGeometry-Bianchi.png
-and the one we are using in SKIRT,
-\image html polarization/ScatteringGeometry-Baes.png
-\image latex polarization/ScatteringGeometry-Baes.png
 
 Note that the angle \f$i_{2}\f$ in the first illustration is dubiously oriented, it should probably be on the opposite
 side of the meridian.
@@ -156,6 +153,10 @@ by \f$-\gamma\f$. Comparing the first two pictures of this section, one can make
 \f$\gamma = \pi - i_2\f$. Applying this connection, the two formulas are equivalent.
 
 \subsubsection PolImplOrientationPrevPlane Orientation w.r.t. the previous scattering plane
+
+The scattering geometry as used in SKIRT:
+\image html polarization/ScatteringGeometry-SKIRT.png
+\image latex polarization/ScatteringGeometry-SKIRT.png
 
 The Chandrasekhar (1960) framework explained above has two drawbacks. On the one hand, there is a problem if the
 scattering occurs in the direction of the poles, as one cannot define the meridian in this case. A second problem is
@@ -246,11 +247,11 @@ linear polarization (\f$P_{\text{L,in}} = 0\f$) all \f$\varphi\f$ have the same 
 
 Now that we know the scattering angle tuple \f$(\theta,\varphi)\f$, we need to calculate the new direction of the
 photon package. For this we use the propagation direction \f$\mathbf{k}\f$, the reference direction
-\f${\mathbf{n}_{s}}\f$ and \em Rodrigues' \em rotation \em formula. It describes how any vector \f$\vec{v}\f$ can be
-rotated around any axis \f$\vec{a}\f$ by any angle \f$\beta\f$ (clockwise while looking along \f$\vec{a}\f$), with the
-formula \anchor RodriguesRotation \f[ \vec{v}' = \vec{v} \cos\beta+ (\vec{a} \times \vec{v})\sin\beta+\vec{a}(\vec{a}
-\cdot \vec{v})(1-\cos\beta) \f] This formula is used to first calculate the new reference direction and then to
-calculate the new propagation direction.
+\f${\mathbf{n}_{s}}\f$ and \em Rodrigues' \em rotation \em formula. It describes how any vector \f$\mathbf{v}\f$ can be
+rotated around any axis \f$\mathbf{a}\f$ by any angle \f$\beta\f$ (clockwise while looking along \f$\mathbf{a}\f$),
+with the formula \anchor RodriguesRotation \f[ \mathbf{v}' = \mathbf{v} \cos\beta+ (\mathbf{a} \times
+\mathbf{v})\sin\beta+\mathbf{a}(\mathbf{a} \cdot \mathbf{v})(1-\cos\beta) \f] This formula is used to first calculate
+the new reference direction and then to calculate the new propagation direction.
 
 \subsubsection PolImplNewDirFirst Possible calculation of first reference direction
 
@@ -378,7 +379,7 @@ the optical thickness \f$\tau\f$. To better visualize it, the flux is normalized
 electrons around the star. As can be seen, the flux remains within 1 \% of the original flux up to an optical thickness
 \f$\tau=30\f$. As in this simulation there are only 50x50x50 grid cells in the whole simulation, the radius has around
 25 cells for the optical thickness. Thus it seems that the optical thickness of a cell should not exceed unity,
-otherwise the flux starts to increase (to 105\% at \f$\tau_{\text{box}}=4\f$). Indeed, replications with a finer grid
+otherwise the flux starts to increase (to 105\% at \f$\tau_{\text{cell}}=4\f$). Indeed, replications with a finer grid
 reveal that the flux is conserved better when using more cells.
 
 \subsection PolTestingPO Testing polarized peel off
@@ -406,13 +407,13 @@ analytical solution. The intensity has some noise, but this seems to be noise ra
 \image html polarization/TC2-Result.png
 \image latex polarization/TC2-Result.png
 Test of the functionality of the random walk routine (see \ref PolTestingRW ). The source illuminating the central
-electrons (see \ref PolTesting "Figure") is pointing towards \f$45^\circ\f$ from the \f$x\f$-axis (to the bottom right).
+electrons (see \ref PolTesting "Figure") is pointing towards \f$45^\circ\f$ south of the \f$x\f$-axis (to the bottom right).
 
-The \ref PolTesting "easy geometry" can be used to check the functionality of the random walk routine as well. For this
+The \ref PolTesting "simple geometry" can be used to check the functionality of the random walk routine as well. For this
 the central star is replaced with an electron cell in the center of the simulation. It is illuminated by a source that
 is placed in the plane of the slabs. To prevent the source from illuminating the slabs directly, the source's photons
 are all pointed towards the center. This way the light does a random walk scattering at the central object and the
-light is already polarized when it hits the electron slabs. As all components are in the same plane (e.g. \f$z \equiv
+light is already polarized when it hits the electron slabs. As all components are in the same plane (\f$z \equiv
 0\f$), the scattering plane is always the \f$xy\f$-plane and thus this test does not rely on the functionality of the
 routines rotating the scattering plane. (This is not completely correct, as the orientation of the scattering plane
 will flip from \f$+z\f$ to \f$-z\f$ or vice versa for about half the pixels and it needs the implementation to
