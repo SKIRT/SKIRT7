@@ -43,16 +43,7 @@ void RootAssigner::assign(size_t size, size_t blocks)
 {
     _blocksize = size;
     _nblocks = blocks;
-    if (_comm)
-    {
-        // Set the number of values assigned to this process
-        _nvalues = _comm->isRoot() ? size : 0;
-    }
-    else
-    {
-        // Set the number of values assigned to this process
-        _nvalues = size;
-    }
+
     setBlocks(blocks);
 }
 
@@ -60,7 +51,16 @@ void RootAssigner::assign(size_t size, size_t blocks)
 
 void RootAssigner::setBlocks(size_t blocks)
 {
-    _nvalues = _blocksize*blocks;
+    if (_comm)
+    {
+        // Set the number of values assigned to this process
+        _nvalues = _comm->isRoot() ? _blocksize*blocks : 0;
+    }
+    else
+    {
+        // Set the number of values assigned to this process
+        _nvalues = _blocksize*blocks;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////

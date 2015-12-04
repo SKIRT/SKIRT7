@@ -283,8 +283,6 @@ private:
 
     // data members initialized during setup
     int _Nlambda;
-    int _NmyLambda;
-    int _NmyCells;
     Table<2> _Labsstelvv;   // absorbed stellar emission for each cell and each wavelength (indexed on m,ell)
     Table<2> _Labsdustvv;   // absorbed dust emission for each cell and each wavelength (indexed on m,ell)
     ProcessAssigner* _lambdaAssigner; // determines which wavelengths absorption will be recorded for

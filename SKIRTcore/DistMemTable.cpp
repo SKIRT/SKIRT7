@@ -6,31 +6,46 @@
 #include "TimeLogger.hpp"
 
 DistMemTable::DistMemTable()
-    : _name(""), _colAssigner(0), _rowAssigner(0), _dist(false), _synced(false), _comm(0)
+    : _name(""), _colAssigner(0), _rowAssigner(0), _dist(false), _synced(false), _initialized(false), _comm(0)
 {
 }
 
-DistMemTable::DistMemTable(QString name, ProcessAssigner *colAssigner, ProcessAssigner *rowAssigner, writeState writeOn)
-    : _name(name), _colAssigner(colAssigner), _rowAssigner(rowAssigner), _writeOn(writeOn), _synced(false), _comm(0)
+////////////////////////////////////////////////////////////////////
+
+void DistMemTable::initialize(QString name, ProcessAssigner *colAssigner, ProcessAssigner *rowAssigner, writeState writeOn)
 {
+    _name = name;
+    _colAssigner = colAssigner;
+    _rowAssigner = rowAssigner;
+    _writeOn = writeOn;
+    _synced = true;
     _comm = colAssigner->find<PeerToPeerCommunicator>();
 
-    int rows = rowAssigner->total();
-    int cols = colAssigner->total();
+    int rows = _rowAssigner->total();
+    int cols = _colAssigner->total();
+
+    printf("initializing %s Table, sizes are (allrows:%d,%d) and (allcols:%d,%d)\n",_name.toStdString().c_str(),
+           rows,_colAssigner->nvalues(),
+           _rowAssigner->nvalues(),cols);
 
     // distributed memory
     if (colAssigner->parallel() && rowAssigner->parallel() && _comm->isMultiProc()) {
         _dist = true;
         _colDist.resize(rows,colAssigner->nvalues());
         _rowDist.resize(rowAssigner->nvalues(),cols);
+        printf("(made dist)\n");
     }
     // not distributed
     else
     {
         _dist = false;
         _notDist.resize(rows,cols);
+        printf("(made notdist)\n");
     }
+    _initialized = true;
 }
+
+////////////////////////////////////////////////////////////////////
 
 void DistMemTable::sync()
 {
@@ -45,6 +60,8 @@ void DistMemTable::sync()
     _synced = true;
 }
 
+////////////////////////////////////////////////////////////////////
+
 void DistMemTable::clear()
 {
     if (_dist)
@@ -55,6 +72,8 @@ void DistMemTable::clear()
     else for (size_t i=0; i<_notDist.size(0); i++) _notDist[i] *= 0;
     _synced = true;
 }
+
+////////////////////////////////////////////////////////////////////
 
 const double& DistMemTable::operator()(size_t i, size_t j) const
 {
@@ -77,6 +96,8 @@ double& DistMemTable::operator()(size_t i, size_t j)
     else // if (_writeOn == ROW) return writable reference from column representation
         return fetchRowDist(i,j);
 }
+
+////////////////////////////////////////////////////////////////////
 
 Array& DistMemTable::operator[](size_t i)
 {
@@ -106,7 +127,7 @@ const Array& DistMemTable::operator[](size_t i) const
     else throw FATALERROR("DistMemTable row representation not readable");
 }
 
-/////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
 
 const double& DistMemTable::fetchRowDist(size_t i, size_t j) const
 {
@@ -152,6 +173,8 @@ double& DistMemTable::fetchColDist(size_t i, size_t j)
     }
 }
 
+////////////////////////////////////////////////////////////////////
+
 void DistMemTable::sum_all_notDist()
 {
     for (size_t i=0; i<_notDist.size(0); i++)
@@ -160,6 +183,8 @@ void DistMemTable::sum_all_notDist()
         _comm->sum_all(arr);
     }
 }
+
+////////////////////////////////////////////////////////////////////
 
 void DistMemTable::col_to_row()
 {
@@ -186,8 +211,10 @@ void DistMemTable::col_to_row()
                 _comm->receiveDouble(recvbuf,srcRank,tag);
             }
         }
-    _comm->wait("syncing" + _name);
+    _comm->wait("syncing " + _name);
 }
+
+////////////////////////////////////////////////////////////////////
 
 void DistMemTable::row_to_col()
 {
@@ -216,7 +243,16 @@ void DistMemTable::row_to_col()
     _comm->wait("syncing DistMemTable");
 }
 
+////////////////////////////////////////////////////////////////////
+
 bool DistMemTable::distributed()
 {
     return _dist;
+}
+
+////////////////////////////////////////////////////////////////////
+
+bool DistMemTable::initialized()
+{
+    return _initialized;
 }

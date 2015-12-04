@@ -66,7 +66,7 @@ namespace
 
     public:
         // constructor
-        EmissionCalculator(DistMemTable distLvv, vector<int>& nv, int Nlib, SimulationItem* item)
+        EmissionCalculator(DistMemTable& distLvv, vector<int>& nv, int Nlib, SimulationItem* item)
             : _distLvv(distLvv)
         {
             // get basic information about the wavelength grid and the dust system
@@ -117,7 +117,10 @@ namespace
 
                 // calculate the average ISRF for this library entry from the ISRF of all dust cells that map to it
                 Array Jv(_Nlambda);
-                foreach (int m, mv) Jv += _ds->meanintensityv(m);
+                foreach (int m, mv)
+                {
+                    Jv += _ds->meanintensityv(m);
+                }
                 Jv /= Nmapped;
 
                 // multiple dust components: calculate emission for each dust cell separately
@@ -168,7 +171,7 @@ namespace
 
 void DustLib::calculate()
 {
-    _distLvv = DistMemTable("Dust Emission",_lambdaAssigner,_cellAssigner,ROW);
+    if (!_distLvv.initialized()) _distLvv.initialize("Dust Emission",_lambdaAssigner,_cellAssigner,ROW);
     // get mapping from cells to library entries
     int Nlib = entries();
     _nv = mapping();
@@ -189,26 +192,13 @@ void DustLib::calculate()
     PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
     comm->wait("the emission spectra calculation");
 
-    assemble();
+    _distLvv.sync();
 }
 
 ////////////////////////////////////////////////////////////////////
 
 double DustLib::luminosity(int m, int ell) const
 {
-/*
-    size_t Ncells = _nv.size();
-    if (_Lvv.size(0) == Ncells)     // _Lvv is indexed on m, the index of the dust cells
-    {
-        return _Lvv[m][ell];
-    }
-    else    // _Lvv is indexed on n, the library entry index
-    {
-        int n = _nv[m];
-        return n>=0 ? _Lvv[n][ell] : 0.;
-    }
-*/
-    // This function will be called on all cells, but only the wavelengths for this process
     return _distLvv(m,ell);
 }
 
@@ -216,5 +206,5 @@ double DustLib::luminosity(int m, int ell) const
 
 void DustLib::assemble()
 {
-    _distLvv.sync();
 }
+

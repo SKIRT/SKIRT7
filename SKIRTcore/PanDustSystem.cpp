@@ -120,10 +120,6 @@ void PanDustSystem::setupSelfAfter()
 {
     DustSystem::setupSelfAfter();
 
-    // these determine the size of the (newly added) reduced arrays
-    _NmyLambda = _lambdaAssigner->nvalues();
-    _NmyCells = _cellAssigner->nvalues();
-
     // resize the tables that hold the absorbed energies for each dust cell and wavelength
     // - absorbed stellar emission is relevant for calculating dust emission
     // - absorbed dust emission is relevant for calculating dust self-absorption
@@ -132,16 +128,12 @@ void PanDustSystem::setupSelfAfter()
     if (dustemission())
     {
         _Labsstelvv.resize(_Ncells,_Nlambda);
-        _distLabsstelvv = DistMemTable("Absorbed Stellar Luminosity",_lambdaAssigner,_cellAssigner,COLUMN);
-        printf("\nnew stellarabs tables resized to (%d,%d) and (%d,%d)\n",
-               _Ncells, _NmyLambda, _NmyCells, _Nlambda);
+        _distLabsstelvv.initialize("Absorbed Stellar Luminosity",_lambdaAssigner,_cellAssigner,COLUMN);
         _haveLabsstel = true;
         if (selfAbsorption())
         {
             _Labsdustvv.resize(_Ncells,_Nlambda);
-            _distLabsdustvv = DistMemTable("Absorbed Dust Luminosity",_lambdaAssigner,_cellAssigner,COLUMN);
-            printf("\nnew dustabs tables resized to (%d,%d) and (%d,%d)\n",
-                   _Ncells, _NmyLambda, _NmyCells, _Nlambda);
+            _distLabsdustvv.initialize("Absorbed Dust Luminosity",_lambdaAssigner,_cellAssigner,COLUMN);
             _haveLabsdust = true;
         }
     }
@@ -384,7 +376,7 @@ double PanDustSystem::Labsdusttot() const
     double sum = 0;
     if (_haveLabsdust)
         for (int m=0; m<_Ncells; m++)
-            for (int ell=0; ell<_NmyLambda; ell++)
+            for (int ell=0; ell<_Nlambda; ell++)
                 sum += _Labsdustvv(m,ell);
 
     PeerToPeerCommunicator * comm = find<PeerToPeerCommunicator>();

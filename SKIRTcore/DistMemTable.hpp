@@ -17,7 +17,8 @@ class DistMemTable
 public:
     // Constructor
     DistMemTable();
-    DistMemTable(QString name, ProcessAssigner* colAssigner, ProcessAssigner* rowAssigner, writeState writeOn);
+
+    void initialize(QString name, ProcessAssigner* colAssigner, ProcessAssigner* rowAssigner, writeState writeOn);
 
     // Public methods
     const double& operator()(size_t i, size_t j) const; // read operator
@@ -29,6 +30,7 @@ public:
     void clear(); // reset contents to zeros
 
     bool distributed();
+    bool initialized();
 
 private:
     // Private methods
@@ -52,6 +54,7 @@ private:
 
     bool _dist; // false if memory is not distributed
     bool _synced; // true if the writable table has not changed since the last sync
+    bool _initialized;
 
     Table<2> _colDist; // the values distributed over processes column wise
     ArrayTable<2> _rowDist; // the values distributed over processes row wise

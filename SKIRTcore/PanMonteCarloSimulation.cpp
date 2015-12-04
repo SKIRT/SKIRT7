@@ -194,9 +194,7 @@ void PanMonteCarloSimulation::dodustselfabsorptionchunk(size_t index)
     for (int m=0; m<_Ncells; m++)
     {
         double Labsbol = _Labsbolv[m];
-        printf("trying dustluminosity(%d,%d)\n",m,ell);
         if (Labsbol>0.0) Lv[m] = Labsbol * _pds->dustluminosity(m,ell);
-        printf("successful dustluminosity(%d,%d)\n",m,ell);
     }
     double Ltot = Lv.sum();
 
