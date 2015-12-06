@@ -26,11 +26,13 @@ public:
     Array& operator[](size_t i);
     const Array& operator[](size_t i) const;
 
+    const double& read(size_t i, size_t j) const;
+
     void sync(); // communicates between processes to sync _colDist with _rowDist or vice versa
     void clear(); // reset contents to zeros
 
-    bool distributed();
-    bool initialized();
+    bool distributed() const;
+    bool initialized() const;
 
 private:
     // Private methods

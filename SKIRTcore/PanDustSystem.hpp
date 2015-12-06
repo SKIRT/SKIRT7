@@ -199,13 +199,16 @@ public:
         number \f$m\f$. It is calculated by summing the absorbed luminosity at all the wavelength indices. */
     double Labs(int m) const;
 
+    /** This function returns a vector with the total (bolometric) absorbed luminosity in each dust cell. */
+    Array Labsbolv() const;
+
     /** This function returns the total (bolometric) absorbed dust luminosity in the entire dust system.
         It is calculated by summing the absorbed stellar luminosity of all the cells. */
     double Labsstellartot() const;
 
     /** This function returns the total (bolometric) absorbed luminosity in the entire dust system.
         It is calculated by summing the absorbed dust luminosity of all the cells. */
-    double Labsdusttot() const;
+    double Labsdusttot();
 
     /** This function returns a vector with the mean radiation field \f$J_{\ell,m}\f$ at all
         wavelength indices in the dust cell with cell number \f$m\f$. It is calculated as \f[
@@ -266,6 +269,8 @@ public:
         above) averaged over all dust populations (weighed by mass in the dust mix) and all dust
         components (weighed by density in the dust cell). */
     void write() const;
+
+    void syncLabsTables();
 
     //======================== Data Members ========================
 

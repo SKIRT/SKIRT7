@@ -49,10 +49,11 @@ void DistMemTable::initialize(QString name, ProcessAssigner *colAssigner, Proces
 
 void DistMemTable::sync()
 {
-    Log* log = _colAssigner->find<Log>();
-    TimeLogger logger(log->verbose() && _comm->isMultiProc() ? log : 0, "communication of " + _name);
     if(!_synced)
     {
+        Log* log = _colAssigner->find<Log>();
+        TimeLogger logger(log->verbose() && _comm->isMultiProc() ? log : 0, "communication of " + _name);
+
         if (!_dist) sum_all_notDist();
         else if (_writeOn == COLUMN) col_to_row();
         else if (_writeOn == ROW) row_to_col();
@@ -77,7 +78,7 @@ void DistMemTable::clear()
 
 const double& DistMemTable::operator()(size_t i, size_t j) const
 {
-    if (!_synced) throw FATALERROR("DistMemTable::sync() must be called before using the read operator");
+    if (!_synced) throw FATALERROR(_name + " says: sync() must be called before using the read operator");
 
     if (!_dist) return _notDist(i,j);
     else if (_writeOn == COLUMN) // read from row representation
@@ -107,24 +108,31 @@ Array& DistMemTable::operator[](size_t i)
     else if (_writeOn == ROW) // return writable reference to a row
     {
         if (!_rowAssigner->validIndex(i))
-            throw FATALERROR("Row of DistMemTable not available on this process");
+            throw FATALERROR(_name + " says: Row of DistMemTable not available on this process");
         else return _rowDist[_rowAssigner->relativeIndex(i)];
     }
-    else throw FATALERROR("DistMemTable row representation not writable");
+    else throw FATALERROR(_name + " says: DistMemTable row representation not writable");
 }
 
 const Array& DistMemTable::operator[](size_t i) const
 {
-    if (!_synced) throw FATALERROR("DistMemTable::sync() must be called before asking a read only reference");
+    if (!_synced) throw FATALERROR(_name + " says: sync() must be called before asking a read reference");
 
     if (!_dist) return _notDist[i];
     else if(_writeOn == COLUMN) // return read only reference to a row
     {
         if (!_rowAssigner->validIndex(i))
-            throw FATALERROR("Row of DistMemTable not available on this process");
+            throw FATALERROR(_name + " says: Row of DistMemTable not available on this process");
         else return _rowDist[_rowAssigner->relativeIndex(i)];
     }
-    else throw FATALERROR("DistMemTable row representation not readable");
+    else throw FATALERROR(_name + " says: DistMemTable row representation not readable");
+}
+
+////////////////////////////////////////////////////////////////////
+
+const double& DistMemTable::read(size_t i, size_t j) const
+{
+    return (*this)(i,j);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -132,7 +140,18 @@ const Array& DistMemTable::operator[](size_t i) const
 const double& DistMemTable::fetchRowDist(size_t i, size_t j) const
 {
     if (!_rowAssigner->validIndex(i))
-        throw FATALERROR("Row of DistMemTable not available on this process");
+        throw FATALERROR(_name + " says: Row of DistMemTable not available on this process");
+    else
+    {
+        size_t iRel = _rowAssigner->relativeIndex(i);
+        return _rowDist(iRel,j);
+    }
+}
+
+double& DistMemTable::fetchRowDist(size_t i, size_t j)
+{
+    if (!_rowAssigner->validIndex(i))
+        throw FATALERROR(_name + " says: Row of DistMemTable not available on this process");
     else
     {
         size_t iRel = _rowAssigner->relativeIndex(i);
@@ -143,7 +162,7 @@ const double& DistMemTable::fetchRowDist(size_t i, size_t j) const
 const double& DistMemTable::fetchColDist(size_t i, size_t j) const
 {
     if (!_colAssigner->validIndex(j))
-        throw FATALERROR("Column of DistMemTable not available on this process");
+        throw FATALERROR(_name + " says: Column of DistMemTable not available on this process");
     else
     {
         size_t jRel = _colAssigner->relativeIndex(j);
@@ -151,21 +170,10 @@ const double& DistMemTable::fetchColDist(size_t i, size_t j) const
     }
 }
 
-double& DistMemTable::fetchRowDist(size_t i, size_t j)
-{
-    if (!_rowAssigner->validIndex(i))
-        throw FATALERROR("Row of DistMemTable not available on this process");
-    else
-    {
-        size_t iRel = _rowAssigner->relativeIndex(i);
-        return _rowDist(iRel,j);
-    }
-}
-
 double& DistMemTable::fetchColDist(size_t i, size_t j)
 {
     if (!_colAssigner->validIndex(j))
-        throw FATALERROR("Column of DistMemTable not available on this process");
+        throw FATALERROR(_name + " says: Column of DistMemTable not available on this process");
     else
     {
         size_t jRel = _colAssigner->relativeIndex(j);
@@ -245,14 +253,14 @@ void DistMemTable::row_to_col()
 
 ////////////////////////////////////////////////////////////////////
 
-bool DistMemTable::distributed()
+bool DistMemTable::distributed() const
 {
     return _dist;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-bool DistMemTable::initialized()
+bool DistMemTable::initialized() const
 {
     return _initialized;
 }

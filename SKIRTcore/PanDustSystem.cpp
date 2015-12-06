@@ -346,15 +346,37 @@ double PanDustSystem::Labs(int m, int ell) const
 
 double PanDustSystem::Labs(int m) const
 {
-    // needs to work on all absolute m (for monte carlo and writing)
+    // Return zero when this cell is not assigned to this process
+    if (!_cellAssigner->validIndex(m))
+        return 0;
+
     double sum = 0;
     if (_haveLabsstel)
         for (int ell=0; ell<_Nlambda; ell++)
-            sum += _Labsstelvv(m,ell);
+            sum += _distLabsstelvv(m,ell);
     if (_haveLabsdust)
         for (int ell=0; ell<_Nlambda; ell++)
-            sum += _Labsdustvv(m,ell);
+            sum += _distLabsdustvv(m,ell);
+
     return sum;
+}
+
+Array PanDustSystem::Labsbolv() const
+{
+    Array Labsbolv(_Ncells);
+
+    for (int m=0; m<_Ncells; m++)
+        Labsbolv[m] = Labs(m);
+
+    // If the tables are distributed over the different processes, there are still some zeroes in the Array.
+    // Therefore the Array is summed. If the tables are not distributed, all data is already here.
+    if (_distLabsdustvv.distributed())
+    {
+        PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+        comm->sum_all(Labsbolv);
+    }
+
+    return Labsbolv;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -363,30 +385,57 @@ double PanDustSystem::Labsstellartot() const
 {
     double sum = 0;
     if (_haveLabsstel)
-        for (int m=0; m<_Ncells; m++)
-            for (int ell=0; ell<_Nlambda; ell++)
-                sum += _Labsstelvv(m,ell);
+    {
+        for (size_t m=0; m<_cellAssigner->nvalues(); m++) // sum over this subset of cells
+        {
+            int mAbsolute = _cellAssigner->absoluteIndex(m);
+
+            for (int ell=0; ell<_Nlambda; ell++) // over all wavelengths
+                sum += _distLabsstelvv(mAbsolute,ell);
+        }
+
+        if(_distLabsstelvv.distributed())
+        {
+            PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+
+            Array arr(1);
+
+            arr[0] = sum;
+            comm->sum_all(arr);
+            sum = arr[0];
+        }
+    }
     return sum;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double PanDustSystem::Labsdusttot() const
+double PanDustSystem::Labsdusttot()
 {
     double sum = 0;
     if (_haveLabsdust)
-        for (int m=0; m<_Ncells; m++)
+    {
+        _distLabsdustvv.sync(); // this function is called right after the emission.
+        for (size_t m=0; m<_cellAssigner->nvalues(); m++)
+        {
+            int mAbsolute = _cellAssigner->absoluteIndex(m);
+
             for (int ell=0; ell<_Nlambda; ell++)
-                sum += _Labsdustvv(m,ell);
+                sum += _distLabsdustvv.read(mAbsolute,ell);
+        }
 
-    PeerToPeerCommunicator * comm = find<PeerToPeerCommunicator>();
+        if (_distLabsdustvv.distributed())
+        {
+            PeerToPeerCommunicator * comm = find<PeerToPeerCommunicator>();
 
-    Array arr(1);
-    arr[0] = sum;
+            Array arr(1);
 
-    comm->sum_all(arr);
-
-    return arr[0];
+            arr[0] = sum;
+            comm->sum_all(arr);
+            sum = arr[0];
+        }
+    }
+    return sum;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -441,46 +490,46 @@ void PanDustSystem::sumResults(bool ynstellar)
         if (ynstellar)
         {
             _distLabsstelvv.sync();
-/*
+
             // Print to compare
             TextOutFile original(this, "originalstellar", "Labsstellarvv");
-            TextOutFile newarray(this, "newarraystellar", "myCellsLabsstellvv");
+            TextOutFile newarray(this, "newarraystellar", "distLabsstellvv");
 
-            for (int m = 0; m < _NmyCells; m++)
+            for (size_t m=0; m<_cellAssigner->nvalues(); m++)
             {
                 QString oss1;
                 QString oss2;
                 for(int ell = 0; ell < _Nlambda; ell++)
                 {
-                    oss1 += QString::number(_Labsstelvv(_cellAssigner->absoluteIndex(m) % _Ncells, ell)) + ' ';
-                    oss2 += QString::number(_myCellsLabsstelvv(m,ell)) + ' ';
+                    oss1 += QString::number(_Labsstelvv(_cellAssigner->absoluteIndex(m), ell)) + ' ';
+                    oss2 += QString::number(_distLabsstelvv.read(_cellAssigner->absoluteIndex(m),ell)) + ' ';
                 }
                 original.writeLine(oss1);
                 newarray.writeLine(oss2);
             }
-*/
+
         }
         else
         {
             _distLabsdustvv.sync();
-/*
+
             // Print to compare
             TextOutFile original(this, "originaldust", "Labsdustvv");
-            TextOutFile newarray(this, "newarraydust", "myCellsLabsdustvv");
+            TextOutFile newarray(this, "newarraydust", "distLabsdustvv");
 
-            for (int m = 0; m < _NmyCells; m++)
+            for (int m = 0; m < _cellAssigner->nvalues(); m++)
             {
                 QString oss1;
                 QString oss2;
                 for(int ell = 0; ell < _Nlambda; ell++)
                 {
-                    oss1 += QString::number(_Labsdustvv(_cellAssigner->absoluteIndex(m) % _Ncells, ell)) + ' ';
-                    oss2 += QString::number(_myCellsLabsdustvv(m,ell)) + ' ';
+                    oss1 += QString::number(_Labsdustvv(_cellAssigner->absoluteIndex(m), ell)) + ' ';
+                    oss2 += QString::number(_distLabsdustvv.read(_cellAssigner->absoluteIndex(m),ell)) + ' ';
                 }
                 original.writeLine(oss1);
                 newarray.writeLine(oss2);
             }
-*/
+
         }
     }
 }
@@ -787,3 +836,4 @@ void PanDustSystem::write() const
 }
 
 //////////////////////////////////////////////////////////////////////
+

@@ -132,9 +132,8 @@ void PanMonteCarloSimulation::rundustselfabsorption()
             _log->info("Dust emission spectra calculated.");
 
             // Determine the bolometric luminosity that is absorbed in every cell (and that will hence be re-emitted).
-            for (int m=0; m<_Ncells; m++)
-                _Labsbolv[m] = _pds->Labs(m);
-
+            _Labsbolv = _pds->Labsbolv();
+            printf("_labsbolv samples %f %f %f %f\n", _Labsbolv[1000], _Labsbolv[1001], _Labsbolv[3000], _Labsbolv[3001]);
             // Set the absorbed dust luminosity to zero in all cells
             _pds->rebootLabsdust();
 
@@ -251,8 +250,7 @@ void PanMonteCarloSimulation::rundustemission()
     _log->info("Dust emission spectra calculated.");
 
     // Determine the bolometric luminosity that is absorbed in every cell (and that will hence be re-emitted).
-    for (int m=0; m<_Ncells; m++)
-        _Labsbolv[m] = _pds->Labs(m);
+    _Labsbolv = _pds->Labsbolv();
 
     // Perform the actual dust emission, possibly using more photon packages to obtain decent resolution
     setChunkParams(packages()*_pds->emissionBoost());
