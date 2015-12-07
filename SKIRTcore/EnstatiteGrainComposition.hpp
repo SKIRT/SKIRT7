@@ -41,10 +41,17 @@ public:
     /** The default constructor. */
     Q_INVOKABLE EnstatiteGrainComposition();
 
+    /** This constructor can be invoked by dust mix classes that wish to hard-code the creation of
+        a new grain composition object of this type (as opposed to creation through the ski file).
+        Before the constructor returns, the newly created object is hooked up as a child to the
+        specified parent in the simulation hierarchy (so it will automatically be deleted), and
+        its setup() function has been called. */
+    explicit EnstatiteGrainComposition(SimulationItem* parent, QString type);
+
 protected:
     /** This function reads the raw optical and calorimetric data from resource files, and sets the
-        bulk mass density to the value of 2800 kg/m\f$^3\f$ specified by Min for crystalline Enstatite
-        and 1600 kg/m\f$^3\f$ specified by Köhler for amorphous Enstatite. */
+        bulk mass density to the value of 2800 kg m\f$^{-3}\f$ specified by Min for crystalline enstatite
+        and 1600 kg m\f$^{-3}\f$ specified by Köhler for amorphous enstatite. */
     void setupSelfBefore();
 
     //======== Setters & Getters for Discoverable Attributes =======
