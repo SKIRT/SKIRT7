@@ -41,12 +41,16 @@ public:
     /** The default constructor. */
     Q_INVOKABLE EnstatiteGrainComposition();
 
+    /** The enumeration type indicating the type of Enstatite grains. */
+    Q_ENUMS(GrainType)
+    enum GrainType { Crystalline, Amorphous };
+
     /** This constructor can be invoked by dust mix classes that wish to hard-code the creation of
         a new grain composition object of this type (as opposed to creation through the ski file).
         Before the constructor returns, the newly created object is hooked up as a child to the
         specified parent in the simulation hierarchy (so it will automatically be deleted), and
         its setup() function has been called. */
-    explicit EnstatiteGrainComposition(SimulationItem* parent, QString type);
+    explicit EnstatiteGrainComposition(SimulationItem* parent, GrainType type);
 
 protected:
     /** This function reads the raw optical and calorimetric data from resource files, and sets the
@@ -57,10 +61,6 @@ protected:
     //======== Setters & Getters for Discoverable Attributes =======
 
 public:
-    /** The enumeration type indicating the type of Enstatite grains. */
-    Q_ENUMS(GrainType)
-    enum GrainType { Crystalline, Amorphous };
-
     /** Sets the enumeration value indicating the type of Enstatite grains to be used. */
     Q_INVOKABLE void setType(GrainType value);
 

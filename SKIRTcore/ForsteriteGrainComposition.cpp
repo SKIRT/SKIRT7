@@ -15,15 +15,10 @@ ForsteriteGrainComposition::ForsteriteGrainComposition()
 
 //////////////////////////////////////////////////////////////////////
 
-ForsteriteGrainComposition::ForsteriteGrainComposition(SimulationItem *parent, QString type)
+ForsteriteGrainComposition::ForsteriteGrainComposition(SimulationItem *parent, GrainType type)
 {
-    if (type == "Crystalline")
-        _type = Crystalline;
-    else if (type == "Amorphous")
-        _type = Amorphous;
-    else
-        throw FATALERROR("Unknown forsterite grain type");
     setParent(parent);
+    setType(type);
     setup();
 }
 

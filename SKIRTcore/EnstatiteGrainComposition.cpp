@@ -15,15 +15,10 @@ EnstatiteGrainComposition::EnstatiteGrainComposition()
 
 //////////////////////////////////////////////////////////////////////
 
-EnstatiteGrainComposition::EnstatiteGrainComposition(SimulationItem *parent, QString type)
+EnstatiteGrainComposition::EnstatiteGrainComposition(SimulationItem *parent, GrainType type)
 {
-    if (type == "Crystalline")
-        _type = Crystalline;
-    else if (type == "Amorphous")
-        _type = Amorphous;
-    else
-        throw FATALERROR("Unknown enstatite grain type");
     setParent(parent);
+    setType(type);
     setup();
 }
 

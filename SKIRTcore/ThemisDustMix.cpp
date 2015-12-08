@@ -67,8 +67,8 @@ void ThemisDustMix::setupSelfBefore()
     MultiGrainDustMix::setupSelfBefore();
 
     AmHydrocarbonGrainComposition* ahcgc = new AmHydrocarbonGrainComposition(this);
-    EnstatiteGrainComposition* ensgc = new EnstatiteGrainComposition(this,"Amorphous");
-    ForsteriteGrainComposition* forgc = new ForsteriteGrainComposition(this,"Amorphous");
+    EnstatiteGrainComposition* ensgc = new EnstatiteGrainComposition(this, EnstatiteGrainComposition::Amorphous);
+    ForsteriteGrainComposition* forgc = new ForsteriteGrainComposition(this, ForsteriteGrainComposition::Amorphous);
 
     addpopulations(ahcgc, aminh, amax, &dndah, _Nahc);
     addpopulations(ensgc, amins, amax, &dndas, _Nens);
