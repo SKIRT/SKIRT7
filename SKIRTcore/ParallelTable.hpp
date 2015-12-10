@@ -6,17 +6,16 @@
 #include "ArrayTable.hpp"
 #include "Table.hpp"
 
-
 class ProcessAssigner;
 class PeerToPeerCommunicator;
 
 enum writeState { COLUMN, ROW };
 
-class DistMemTable
+class ParallelTable
 {
 public:
     // Constructor
-    DistMemTable();
+    ParallelTable();
 
     void initialize(QString name, ProcessAssigner* colAssigner, ProcessAssigner* rowAssigner, writeState writeOn);
 
@@ -26,7 +25,9 @@ public:
     Array& operator[](size_t i);
     const Array& operator[](size_t i) const;
 
+    // Some extra stuff
     const double& read(size_t i, size_t j) const;
+    double& write(size_t i, size_t j);
 
     void sync(); // communicates between processes to sync _colDist with _rowDist or vice versa
     void clear(); // reset contents to zeros
@@ -38,13 +39,13 @@ private:
     // Private methods
 
     // Read only references (called if member function is const)
-    const double& fetchRowDist(size_t i, size_t j) const;
-    const double& fetchColDist(size_t i, size_t j) const;
+    const double& getFromRows(size_t i, size_t j) const;
+    const double& getFromColumns(size_t i, size_t j) const;
     // Writable refenences (called if member function is not const)
-    double& fetchRowDist(size_t i, size_t j);
-    double& fetchColDist(size_t i, size_t j);
+    double& getFromRows(size_t i, size_t j);
+    double& getFromColumns(size_t i, size_t j);
 
-    void sum_all_notDist();
+    void sum_all();
     void col_to_row();
     void row_to_col();
 
@@ -58,9 +59,8 @@ private:
     bool _synced; // true if the writable table has not changed since the last sync
     bool _initialized;
 
-    Table<2> _colDist; // the values distributed over processes column wise
-    ArrayTable<2> _rowDist; // the values distributed over processes row wise
-    ArrayTable<2> _notDist; // will be used for both reading and writing if not _dist
+    Table<2> _columns; // the values distributed over processes column wise
+    ArrayTable<2> _rows; // the values distributed over processes row wise
 
     PeerToPeerCommunicator* _comm; // communicator used for synchronizing
 };

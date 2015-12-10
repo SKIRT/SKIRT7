@@ -5,7 +5,7 @@
 
 #include <cmath>
 #include "ArrayTable.hpp"
-#include "DistMemTable.hpp"
+#include "ParallelTable.hpp"
 #include "DustEmissivity.hpp"
 #include "DustGrid.hpp"
 #include "DustLib.hpp"
@@ -127,12 +127,12 @@ void PanDustSystem::setupSelfAfter()
     _haveLabsdust = false;
     if (dustemission())
     {
-        _Labsstelvv.resize(_Ncells,_Nlambda);
+        //_Labsstelvv.resize(_Ncells,_Nlambda);
         _distLabsstelvv.initialize("Absorbed Stellar Luminosity",_lambdaAssigner,_cellAssigner,COLUMN);
         _haveLabsstel = true;
         if (selfAbsorption())
         {
-            _Labsdustvv.resize(_Ncells,_Nlambda);
+            //_Labsdustvv.resize(_Ncells,_Nlambda);
             _distLabsdustvv.initialize("Absorbed Dust Luminosity",_lambdaAssigner,_cellAssigner,COLUMN);
             _haveLabsdust = true;
         }
@@ -309,13 +309,13 @@ void PanDustSystem::absorb(int m, int ell, double DeltaL, bool ynstellar)
     if (ynstellar)
     {
         if (!_haveLabsstel) throw FATALERROR("This dust system does not support absorption of stellar emission");
-        LockFree::add(_Labsstelvv(m,ell), DeltaL);
+        //LockFree::add(_Labsstelvv(m,ell), DeltaL);
         LockFree::add(_distLabsstelvv(m,ell), DeltaL);
     }
     else
     {
         if (!_haveLabsdust) throw FATALERROR("This dust system does not support absorption of dust emission");
-        LockFree::add(_Labsdustvv(m,ell), DeltaL);
+        //LockFree::add(_Labsdustvv(m,ell), DeltaL);
         LockFree::add(_distLabsdustvv(m,ell), DeltaL);
     }
 }
@@ -324,7 +324,7 @@ void PanDustSystem::absorb(int m, int ell, double DeltaL, bool ynstellar)
 
 void PanDustSystem::rebootLabsdust()
 {
-    _Labsdustvv.clear();
+    //_Labsdustvv.clear();
     _distLabsdustvv.clear();
 }
 
@@ -477,20 +477,18 @@ void PanDustSystem::calculatedustemission(bool ynstellar)
 void PanDustSystem::sumResults(bool ynstellar)
 {
     // Get a pointer to the PeerToPeerCommunicator of this simulation
-    PeerToPeerCommunicator * comm = find<PeerToPeerCommunicator>();
+    //PeerToPeerCommunicator * comm = find<PeerToPeerCommunicator>();
 
-    Log* log = find<Log>();
-    TimeLogger logger(log->verbose() && comm->isMultiProc() ? log : 0, "communication of the absorbed luminosities");
+    //Log* log = find<Log>();
+    //TimeLogger logger(log->verbose() && comm->isMultiProc() ? log : 0, "communication of the absorbed luminosities");
 
     // Sum the array of luminosities across all processes
-    comm->sum_all(ynstellar ? _Labsstelvv.getArray() : _Labsdustvv.getArray());
+    //comm->sum_all(ynstellar ? _Labsstelvv.getArray() : _Labsdustvv.getArray());
     // This will need to be replaced by the communication between the two arrays
-    if (_lambdaAssigner->parallel())
+    if (ynstellar)
     {
-        if (ynstellar)
-        {
-            _distLabsstelvv.sync();
-
+        _distLabsstelvv.sync();
+/*
             // Print to compare
             TextOutFile original(this, "originalstellar", "Labsstellarvv");
             TextOutFile newarray(this, "newarraystellar", "distLabsstellvv");
@@ -507,12 +505,12 @@ void PanDustSystem::sumResults(bool ynstellar)
                 original.writeLine(oss1);
                 newarray.writeLine(oss2);
             }
-
-        }
-        else
-        {
-            _distLabsdustvv.sync();
-
+*/
+    }
+    else
+    {
+        _distLabsdustvv.sync();
+/*
             // Print to compare
             TextOutFile original(this, "originaldust", "Labsdustvv");
             TextOutFile newarray(this, "newarraydust", "distLabsdustvv");
@@ -529,8 +527,7 @@ void PanDustSystem::sumResults(bool ynstellar)
                 original.writeLine(oss1);
                 newarray.writeLine(oss2);
             }
-
-        }
+*/
     }
 }
 

@@ -5,7 +5,7 @@
 
 #include <QMultiHash>
 #include <QTime>
-#include "DistMemTable.hpp"
+#include "ParallelTable.hpp"
 #include "DustLib.hpp"
 #include "DustEmissivity.hpp"
 #include "IdenticalAssigner.hpp"
@@ -50,7 +50,7 @@ namespace
     {
     private:
         // data members initialized in constructor
-        DistMemTable& _distLvv;     // output luminosities indexed on m or n and ell (writable reference)
+        ParallelTable& _distLvv;     // output luminosities indexed on m or n and ell (writable reference)
         QMultiHash<int,int> _mh;    // hash map <n,m> of cells for each library entry
         Log* _log;
         PanDustSystem* _ds;
@@ -66,7 +66,7 @@ namespace
 
     public:
         // constructor
-        EmissionCalculator(DistMemTable& distLvv, vector<int>& nv, int Nlib, SimulationItem* item)
+        EmissionCalculator(ParallelTable& distLvv, vector<int>& nv, int Nlib, SimulationItem* item)
             : _distLvv(distLvv)
         {
             // get basic information about the wavelength grid and the dust system

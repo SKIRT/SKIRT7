@@ -6,7 +6,7 @@
 #ifndef DUSTLIB_HPP
 #define DUSTLIB_HPP
 
-#include "DistMemTable.hpp"
+#include "ParallelTable.hpp"
 #include "SimulationItem.hpp"
 
 class ProcessAssigner;
@@ -125,7 +125,7 @@ protected:
 private:
     // results of calculate(), used by luminosity()
     std::vector<int> _nv;        // library index for each cell or -1, indexed on m
-    DistMemTable _distLvv;
+    ParallelTable _distLvv;
 
 protected:
     ProcessAssigner* _cellAssigner;
