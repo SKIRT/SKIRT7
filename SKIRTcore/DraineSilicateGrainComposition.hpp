@@ -28,7 +28,7 @@ public:
         a new grain composition object of this type (as opposed to creation through the ski file).
         Before the constructor returns, the newly created object is hooked up as a child to the
         specified parent in the simulation hierarchy (so it will automatically be deleted), and
-        it's setup() function has been called. */
+        its setup() function has been called. */
     explicit DraineSilicateGrainComposition(SimulationItem* parent);
 
     /** This static function calculates and returns the specific enthalpy of silicate according to
@@ -41,7 +41,7 @@ public:
 protected:
     /** This function reads the raw optical property data from a resource file, calculates the
         enthalpy data using the analytical function for silicate derived in Draine & Li 2001, and
-        sets the bulk mass density to the standard value of 3000 kg/m\f$^3\f$ for silicate grains.
+        sets the bulk mass density to the standard value of 3000 kg m\f$^{-3}\f$ for silicate grains.
         */
     void setupSelfBefore();
 

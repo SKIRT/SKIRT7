@@ -19,8 +19,7 @@ CubBackgroundGeometry::CubBackgroundGeometry()
 
 //////////////////////////////////////////////////////////////////////
 
-void
-CubBackgroundGeometry::setupSelfBefore()
+void CubBackgroundGeometry::setupSelfBefore()
 {
     Geometry::setupSelfBefore();
     // verify property values
@@ -30,35 +29,28 @@ CubBackgroundGeometry::setupSelfBefore()
 
 //////////////////////////////////////////////////////////////////////
 
-int
-CubBackgroundGeometry::dimension()
-const
+int CubBackgroundGeometry::dimension() const
 {
     return 3;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void
-CubBackgroundGeometry::setExtent(double value)
+void CubBackgroundGeometry::setExtent(double value)
 {
     _h = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double
-CubBackgroundGeometry::extent()
-const
+double CubBackgroundGeometry::extent() const
 {
     return _h;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double
-CubBackgroundGeometry::density(Position bfr)
-const
+double CubBackgroundGeometry::density(Position bfr) const
 {
     double x, y, z;
     bfr.cartesian(x,y,z);
@@ -73,9 +65,7 @@ const
 
 //////////////////////////////////////////////////////////////////////
 
-Position
-CubBackgroundGeometry::generatePosition()
-const
+Position CubBackgroundGeometry::generatePosition() const
 {
     double t1 = _h*(2.0*_random->uniform()-1.0);
     double t2 = _h*(2.0*_random->uniform()-1.0);
@@ -96,36 +86,28 @@ const
 
 //////////////////////////////////////////////////////////////////////
 
-double
-CubBackgroundGeometry::SigmaX()
-const
+double CubBackgroundGeometry::SigmaX() const
 {
     return 1.0/(12.0*_h*_h);
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double
-CubBackgroundGeometry::SigmaY()
-const
+double CubBackgroundGeometry::SigmaY() const
 {
     return 1.0/(12.0*_h*_h);
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double
-CubBackgroundGeometry::SigmaZ()
-const
+double CubBackgroundGeometry::SigmaZ() const
 {
     return 1.0/(12.0*_h*_h);
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double
-CubBackgroundGeometry::probabilityForDirection(int /*ell*/, Position bfr, Direction bfk)
-const
+double CubBackgroundGeometry::probabilityForDirection(int /*ell*/, Position bfr, Direction bfk) const
 {
     double eps = 1e-8;
     double x, y, z;
@@ -157,9 +139,7 @@ const
 
 //////////////////////////////////////////////////////////////////////
 
-Direction
-CubBackgroundGeometry::generateDirection(int /*ell*/, Position bfr)
-const
+Direction CubBackgroundGeometry::generateDirection(int /*ell*/, Position bfr) const
 {
     // picking a random (theta',phi')
     double thetap = M_PI-acos(sqrt(_random->uniform()));

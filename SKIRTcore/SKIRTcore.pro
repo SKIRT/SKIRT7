@@ -308,8 +308,12 @@ HEADERS += \
     BoxStellarComp.hpp \
     BrokenExpDiskGeometry.hpp \
     TrustPolarizedMeanDustMix.hpp \
+<<<<<<< HEAD
     ParallelTable \
     ParallelTable.hpp
+=======
+    ThemisDustMix.hpp
+>>>>>>> ab8303ffea5638f21a05881c3924ff9d184f2af1
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -573,4 +577,8 @@ SOURCES += \
     BoxStellarComp.cpp \
     BrokenExpDiskGeometry.cpp \
     TrustPolarizedMeanDustMix.cpp \
+<<<<<<< HEAD
     ParallelTable.cpp
+=======
+    ThemisDustMix.cpp
+>>>>>>> ab8303ffea5638f21a05881c3924ff9d184f2af1

@@ -154,6 +154,7 @@
 #include "SunSED.hpp"
 #include "SymPowMesh.hpp"
 #include "TTauriDiskGeometry.hpp"
+#include "ThemisDustMix.hpp"
 #include "TorusGeometry.hpp"
 #include "TransientDustEmissivity.hpp"
 #include "TreeDustGrid.hpp"
@@ -372,6 +373,7 @@ void RegisterSimulationItems::registerAll()
     add<WeingartnerDraineDustMix>();
     add<ZubkoDustMix>();
     add<TrustDustMix>();
+    add<ThemisDustMix>();
     add<ConfigurableDustMix>();
     add<ElectronDustMix>();
 

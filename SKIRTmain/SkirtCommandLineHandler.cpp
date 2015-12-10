@@ -300,10 +300,12 @@ void SkirtCommandLineHandler::doSimulation(size_t index)
     //  - the number of parallel threads
     if (_args.intValue("-t") > 0) simulation->parallelFactory()->setMaxThreadCount(_args.intValue("-t"));
     if (memoryalloc)
+    {
         if (_args.intValue("-t") > 0)
             simulation->log()->warning("You cannot use multiple threads when logging memory (de)allocation. Setting "
                                        "the number of threads to 1.");
         simulation->parallelFactory()->setMaxThreadCount(1); // memory (de)allocation logging requires singlethreading
+    }
 
     //  - the multiprocessing environment
     PeerToPeerCommunicator* comm = simulation->communicator();

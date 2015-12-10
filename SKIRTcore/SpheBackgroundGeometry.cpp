@@ -19,8 +19,7 @@ SpheBackgroundGeometry::SpheBackgroundGeometry()
 
 //////////////////////////////////////////////////////////////////////
 
-void
-SpheBackgroundGeometry::setupSelfBefore()
+void SpheBackgroundGeometry::setupSelfBefore()
 {
     Geometry::setupSelfBefore();
     // verify property values
@@ -30,35 +29,28 @@ SpheBackgroundGeometry::setupSelfBefore()
 
 //////////////////////////////////////////////////////////////////////
 
-int
-SpheBackgroundGeometry::dimension()
-const
+int SpheBackgroundGeometry::dimension() const
 {
     return 1;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void
-SpheBackgroundGeometry::setRadius(double value)
+void SpheBackgroundGeometry::setRadius(double value)
 {
     _rbg = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double
-SpheBackgroundGeometry::radius()
-const
+double SpheBackgroundGeometry::radius() const
 {
     return _rbg;
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double
-SpheBackgroundGeometry::density(Position bfr)
-const
+double SpheBackgroundGeometry::density(Position bfr) const
 {
     return (bfr.radius() == _rbg) ?
                 numeric_limits<double>::infinity() : 0.0;
@@ -66,45 +58,35 @@ const
 
 //////////////////////////////////////////////////////////////////////
 
-Position
-SpheBackgroundGeometry::generatePosition()
-const
+Position SpheBackgroundGeometry::generatePosition() const
 {
     return Position(_rbg,_random->direction());
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double
-SpheBackgroundGeometry::SigmaX()
-const
+double SpheBackgroundGeometry::SigmaX() const
 {
     return 1.0/(2.0*M_PI*_rbg*_rbg);
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double
-SpheBackgroundGeometry::SigmaY()
-const
+double SpheBackgroundGeometry::SigmaY() const
 {
     return 1.0/(2.0*M_PI*_rbg*_rbg);
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double
-SpheBackgroundGeometry::SigmaZ()
-const
+double SpheBackgroundGeometry::SigmaZ() const
 {
     return 1.0/(2.0*M_PI*_rbg*_rbg);
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double
-SpheBackgroundGeometry::probabilityForDirection(int /*ell*/, Position bfr, Direction bfk)
-const
+double SpheBackgroundGeometry::probabilityForDirection(int /*ell*/, Position bfr, Direction bfk) const
 {
     if (fabs(bfr.radius()/_rbg-1.0) > 1e-8)
         throw FATALERROR("the directional probability function is not defined for positions not on the background sphere");
@@ -117,9 +99,7 @@ const
 
 //////////////////////////////////////////////////////////////////////
 
-Direction
-SpheBackgroundGeometry::generateDirection(int /*ell*/, Position bfr)
-const
+Direction SpheBackgroundGeometry::generateDirection(int /*ell*/, Position bfr) const
 {
     if (fabs(bfr.radius()/_rbg-1.0) > 1e-8)
         throw FATALERROR("cannot generate directions for positions not on the SpheBackground sphere");
