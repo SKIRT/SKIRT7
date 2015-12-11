@@ -94,10 +94,10 @@ const double& ParallelTable::operator()(size_t i, size_t j) const
     }
     else // read from the table that was resized in the constructor
     {
-        if(_writeOn == COLUMN)
-            return getFromColumns(i,j);
+        if (_writeOn == COLUMN)
+            return _columns(i,j);
         else
-            return getFromRows(i,j);
+            return _rows(i,j);
     }
 }
 
@@ -264,7 +264,7 @@ void ParallelTable::row_to_col()
                 _comm->receiveDouble(recvbuf,srcRank,tag);
             }
         }
-    _comm->wait("syncing ParallelTable");
+    _comm->wait("syncing" + _name);
 }
 
 ////////////////////////////////////////////////////////////////////

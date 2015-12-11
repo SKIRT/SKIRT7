@@ -347,8 +347,8 @@ double PanDustSystem::Labs(int m, int ell) const
 double PanDustSystem::Labs(int m) const
 {
     // Return zero when this cell is not assigned to this process
-    if (!_cellAssigner->validIndex(m))
-        return 0;
+    //
+    //    return 0;
 
     double sum = 0;
     if (_haveLabsstel)
@@ -366,7 +366,8 @@ Array PanDustSystem::Labsbolv() const
     Array Labsbolv(_Ncells);
 
     for (int m=0; m<_Ncells; m++)
-        Labsbolv[m] = Labs(m);
+        if (_cellAssigner->validIndex(m))
+            Labsbolv[m] = Labs(m);
 
     // If the tables are distributed over the different processes, there are still some zeroes in the Array.
     // Therefore the Array is summed. If the tables are not distributed, all data is already here.
@@ -375,7 +376,6 @@ Array PanDustSystem::Labsbolv() const
         PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
         comm->sum_all(Labsbolv);
     }
-
     return Labsbolv;
 }
 

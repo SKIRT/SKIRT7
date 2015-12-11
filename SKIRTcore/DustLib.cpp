@@ -192,7 +192,33 @@ void DustLib::calculate()
     PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
     comm->wait("the emission spectra calculation");
 
+    // Print to compare
+    /*
+    TextOutFile original(this, "before_sync", "_Lvv");
+    for (size_t m=0; m<_cellAssigner->nvalues(); m++)
+    {
+        QString oss1;
+        for(int ell=0; ell<_lambdaAssigner->total(); ell++)
+        {
+            oss1 += QString::number(_distLvv.write(_cellAssigner->absoluteIndex(m), ell)) + ' ';
+        }
+        original.writeLine(oss1);
+    }
+    */
+
     _distLvv.sync();
+    /*
+    TextOutFile after(this, "after_sync", "_Lvv");
+    for (size_t m=0; m<_cellAssigner->total(); m++)
+    {
+        QString oss2;
+        for(int ell=0; ell<_lambdaAssigner->nvalues(); ell++)
+        {
+            oss2 += QString::number(_distLvv.read(m,_lambdaAssigner->absoluteIndex(ell))) + ' ';
+        }
+        after.writeLine(oss2);
+    }
+    */
 }
 
 ////////////////////////////////////////////////////////////////////
