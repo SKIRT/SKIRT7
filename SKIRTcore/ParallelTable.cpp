@@ -31,7 +31,7 @@ void ParallelTable::initialize(QString name, ProcessAssigner *colAssigner, Proce
     if (colAssigner->parallel() && rowAssigner->parallel() && _comm->isMultiProc())
     {
         _dist = true;
-
+        printf("ParallelTable is distributed.");
         _columns.resize(Nrows,colAssigner->nvalues());
         _rows.resize(rowAssigner->nvalues(),Ncols);
     }
@@ -64,6 +64,7 @@ void ParallelTable::sync()
         else if (_writeOn == COLUMN)
             col_to_row();
         else if (_writeOn == ROW)
+            printf("calling row_to_col\n");
             row_to_col();
     }
     _synced = true;

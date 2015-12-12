@@ -83,7 +83,13 @@ namespace
             // invert mapping vector into a temporary hash map
             int Ncells = nv.size();
             _mh.reserve(Ncells);
-            for (int m=0; m<Ncells; m++) if (nv[m] >= 0) _mh.insert(nv[m],_cellAssigner->absoluteIndex(m));
+            // for all relative cell indexes, insert the absolute cell index at the corresponding library key
+            for (int mRel=0; mRel<Ncells; mRel++)
+            {
+                int key = nv[mRel];
+                int value = _cellAssigner->absoluteIndex(mRel);
+                if (key >= 0) _mh.insert(key,value); // key == nv[mRel] == -1 if cell mRel has no emission
+            }
 
             // log usage statistics
             int Nused = _mh.uniqueKeys().size();
@@ -118,9 +124,7 @@ namespace
                 // calculate the average ISRF for this library entry from the ISRF of all dust cells that map to it
                 Array Jv(_Nlambda);
                 foreach (int m, mv)
-                {
                     Jv += _ds->meanintensityv(m);
-                }
                 Jv /= Nmapped;
 
                 // multiple dust components: calculate emission for each dust cell separately
@@ -138,7 +142,7 @@ namespace
 
                         // calculate the emission for this cell
                         double density = _ds->density(m);
-                        for (int h=0; h<_Ncomp; h++) Lv += evv[h] * density;
+                        for (int h=0; h<_Ncomp; h++) Lv += evv[h];// * density;
 
                         // convert to luminosities and normalize the result
                         Lv *= _lambdagrid->dlambdav();
@@ -178,22 +182,27 @@ void DustLib::calculate()
 
     // if data is distributed: each process has its own dustlibrary and calculates all entries of it => Identical
     // if data is not distributed: divide calculation over processes => Staggered
-    ProcessAssigner* helpAssigner;
-    if (_distLvv.distributed()) helpAssigner = new IdenticalAssigner(this);
-    else helpAssigner = new StaggeredAssigner(this);
-    helpAssigner->assign(Nlib);
+
+    //ProcessAssigner* helpAssigner;
+    //if (_distLvv.distributed()) helpAssigner = new IdenticalAssigner(this);
+    //else helpAssigner = new StaggeredAssigner(this);
+    //helpAssigner->assign(Nlib);
 
     // calculate the emissivity for each library entry
     EmissionCalculator calc(_distLvv, _nv, Nlib, this);
-    Parallel* parallel = find<ParallelFactory>()->parallel();
-    parallel->call(&calc, helpAssigner);
+
+    // Parallel* parallel = find<ParallelFactory>()->parallel();
+    // parallel->call(&calc, helpAssigner);
+
+    // for loop for debugging purposes
+    for (int n=0; n<Nlib; n++) calc.body(n);
 
     // Wait for the other processes to reach this point
     PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
     comm->wait("the emission spectra calculation");
 
     // Print to compare
-    /*
+
     TextOutFile original(this, "before_sync", "_Lvv");
     for (size_t m=0; m<_cellAssigner->nvalues(); m++)
     {
@@ -204,10 +213,9 @@ void DustLib::calculate()
         }
         original.writeLine(oss1);
     }
-    */
 
     _distLvv.sync();
-    /*
+
     TextOutFile after(this, "after_sync", "_Lvv");
     for (size_t m=0; m<_cellAssigner->total(); m++)
     {
@@ -218,7 +226,7 @@ void DustLib::calculate()
         }
         after.writeLine(oss2);
     }
-    */
+
 }
 
 ////////////////////////////////////////////////////////////////////
