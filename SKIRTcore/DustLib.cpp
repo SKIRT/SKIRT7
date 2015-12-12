@@ -130,7 +130,7 @@ namespace
                 Jv /= Nmapped;
 
                 // multiple dust components: calculate emission for each dust cell separately
-                if (_Ncomp > 1)
+                if (true)//_Ncomp > 1)
                 {
                     // get emissivity for each dust component (i.e. for the corresponding dust mix)
                     ArrayTable<2> evv(_Ncomp,0);
@@ -143,7 +143,12 @@ namespace
                         Array& Lv = _Lvv[m];
 
                         // calculate the emission for this cell
-                        for (int h=0; h<_Ncomp; h++) Lv += evv[h] * _ds->density(m,h);
+                        for (int h=0; h<_Ncomp; h++)
+                        {
+                            Lv += evv[h] * _ds->density(m,h);
+                            if (m % 100 == 0) _log->info("density("+QString::number(m)+",0) == "
+                                                         +QString::number(_ds->density(m,h)));
+                        }
 
                         // convert to luminosities and normalize the result
                         Lv *= _lambdagrid->dlambdav();
