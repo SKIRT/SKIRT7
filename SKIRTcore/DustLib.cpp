@@ -120,7 +120,7 @@ namespace
                     if (_timer.elapsed() > 5000)
                     {
                         _timer.restart();
-                        _log->info("Calculating emission for library entry " + QString::number(n+1) + "...");x
+                        _log->info("Calculating emission for library entry " + QString::number(n+1) + "...");
                     }
                 }
 
@@ -128,7 +128,6 @@ namespace
                 Array Jv(_Nlambda);
                 foreach (int m, mv) Jv += _ds->meanintensityv(m);
                 Jv /= Nmapped;
-                printf("meanintensityv = Jv[80]: %f\n", Jv[80]);
 
                 // multiple dust components: calculate emission for each dust cell separately
                 if (_Ncomp > 1)
@@ -195,7 +194,6 @@ void DustLib::calculate()
     // assemble _Lvv from the information stored at different processes, if the work is done in parallel processes
     if (_assigner->parallel()) assemble();
 
-    TextOutFile out;
 }
 
 ////////////////////////////////////////////////////////////////////

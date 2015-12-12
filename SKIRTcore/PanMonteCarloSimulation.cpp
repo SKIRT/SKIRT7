@@ -133,11 +133,7 @@ void PanMonteCarloSimulation::rundustselfabsorption()
 
             // Determine the bolometric luminosity that is absorbed in every cell (and that will hence be re-emitted).
             for (int m=0; m<_Ncells; m++)
-            {
                 _Labsbolv[m] = _pds->Labs(m);
-                printf(" %f ", _Labsbolv[m]);
-            }
-            printf("\n");
 
             // Set the absorbed dust luminosity to zero in all cells
             _pds->rebootLabsdust();
