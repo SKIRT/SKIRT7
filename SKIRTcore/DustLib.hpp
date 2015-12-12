@@ -125,7 +125,7 @@ protected:
 private:
     // results of calculate(), used by luminosity()
     std::vector<int> _nv;        // library index for each cell or -1, indexed on m
-    ParallelTable _distLvv;
+    ParallelTable _Lvv;
 
 protected:
     ProcessAssigner* _cellAssigner;

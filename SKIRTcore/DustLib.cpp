@@ -50,7 +50,7 @@ namespace
     {
     private:
         // data members initialized in constructor
-        ParallelTable& _distLvv;     // output luminosities indexed on m or n and ell (writable reference)
+        ParallelTable& _Lvv;     // output luminosities indexed on m or n and ell (writable reference)
         QMultiHash<int,int> _mh;    // hash map <n,m> of cells for each library entry
         Log* _log;
         PanDustSystem* _ds;
@@ -66,8 +66,8 @@ namespace
 
     public:
         // constructor
-        EmissionCalculator(ParallelTable& distLvv, vector<int>& nv, int Nlib, SimulationItem* item)
-            : _distLvv(distLvv)
+        EmissionCalculator(ParallelTable& Lvv, vector<int>& nv, int Nlib, SimulationItem* item)
+            : _Lvv(Lvv)
         {
             // get basic information about the wavelength grid and the dust system
             _log = item->find<Log>();
@@ -138,11 +138,10 @@ namespace
                     foreach (int m, mv)
                     {
                         // get a reference to the output array for this dust cell
-                        Array& Lv = _distLvv[m];
+                        Array& Lv = _Lvv[m];
 
                         // calculate the emission for this cell
-                        double density = _ds->density(m);
-                        for (int h=0; h<_Ncomp; h++) Lv += evv[h];// * density;
+                        for (int h=0; h<_Ncomp; h++) Lv += evv[h] * _ds->density(m,h);
 
                         // convert to luminosities and normalize the result
                         Lv *= _lambdagrid->dlambdav();
@@ -175,7 +174,9 @@ namespace
 
 void DustLib::calculate()
 {
-    if (!_distLvv.initialized()) _distLvv.initialize("Dust Emission",_lambdaAssigner,_cellAssigner,ROW);
+    if (!_Lvv.initialized()) _Lvv.initialize("Dust Emission",_lambdaAssigner,_cellAssigner,ROW);
+    else _Lvv.clear();
+
     // get mapping from cells to library entries
     int Nlib = entries();
     _nv = mapping();
@@ -189,7 +190,7 @@ void DustLib::calculate()
     //helpAssigner->assign(Nlib);
 
     // calculate the emissivity for each library entry
-    EmissionCalculator calc(_distLvv, _nv, Nlib, this);
+    EmissionCalculator calc(_Lvv, _nv, Nlib, this);
 
     // Parallel* parallel = find<ParallelFactory>()->parallel();
     // parallel->call(&calc, helpAssigner);
@@ -202,7 +203,7 @@ void DustLib::calculate()
     comm->wait("the emission spectra calculation");
 
     // Print to compare
-
+/*
     TextOutFile original(this, "before_sync", "_Lvv");
     for (size_t m=0; m<_cellAssigner->nvalues(); m++)
     {
@@ -213,9 +214,9 @@ void DustLib::calculate()
         }
         original.writeLine(oss1);
     }
-
-    _distLvv.sync();
-
+*/
+    _Lvv.sync();
+/*
     TextOutFile after(this, "after_sync", "_Lvv");
     for (size_t m=0; m<_cellAssigner->total(); m++)
     {
@@ -226,14 +227,14 @@ void DustLib::calculate()
         }
         after.writeLine(oss2);
     }
-
+*/
 }
 
 ////////////////////////////////////////////////////////////////////
 
 double DustLib::luminosity(int m, int ell) const
 {
-    return _distLvv(m,ell);
+    return _Lvv(m,ell);
 }
 
 ////////////////////////////////////////////////////////////////////

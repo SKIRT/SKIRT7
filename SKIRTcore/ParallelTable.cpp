@@ -64,7 +64,6 @@ void ParallelTable::sync()
         else if (_writeOn == COLUMN)
             col_to_row();
         else if (_writeOn == ROW)
-            printf("calling row_to_col\n");
             row_to_col();
     }
     _synced = true;
@@ -106,10 +105,20 @@ double& ParallelTable::operator()(size_t i, size_t j)
 {
     _synced = false;
 
-    if (_writeOn == COLUMN)    // return writable reference to _rows
-        return getFromColumns(i,j);
-    else                            // return writable reference to _columns
-        return getFromRows(i,j);
+    if (_dist)
+    {
+        if (_writeOn == COLUMN)    // return writable reference to _rows
+            return getFromColumns(i,j);
+        else                            // return writable reference to _columns
+            return getFromRows(i,j);
+    }
+    else
+    {
+        if (_writeOn == COLUMN)
+            return _columns(i,j);
+        else
+            return _rows(i,j);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -171,6 +180,8 @@ double& ParallelTable::getFromRows(size_t i, size_t j)
     size_t iRel = _rowAssigner->relativeIndex(i);
     return _rows(iRel,j);
 }
+
+////////////////////////////////////////////////////////////////////
 
 const double& ParallelTable::getFromColumns(size_t i, size_t j) const
 {
@@ -265,7 +276,7 @@ void ParallelTable::row_to_col()
                 _comm->receiveDouble(recvbuf,srcRank,tag);
             }
         }
-    _comm->wait("syncing" + _name);
+    _comm->wait("syncing " + _name);
 }
 
 ////////////////////////////////////////////////////////////////////
