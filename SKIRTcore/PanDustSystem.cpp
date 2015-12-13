@@ -292,6 +292,13 @@ bool PanDustSystem::dustemission() const
     return _dustemissivity!=0;
 }
 
+////////////////////////////////////////////////////////////////////
+
+bool PanDustSystem::storeabsorptionrates() const
+{
+    return dustemission();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void PanDustSystem::absorb(int m, int ell, double DeltaL, bool ynstellar)
@@ -310,19 +317,19 @@ void PanDustSystem::absorb(int m, int ell, double DeltaL, bool ynstellar)
 
 //////////////////////////////////////////////////////////////////////
 
-void PanDustSystem::rebootLabsdust()
-{
-    _Labsdustvv.clear();
-}
-
-//////////////////////////////////////////////////////////////////////
-
 double PanDustSystem::Labs(int m, int ell) const
 {
     double sum = 0;
     if (_haveLabsstel) sum += _Labsstelvv(m,ell);
     if (_haveLabsdust) sum += _Labsdustvv(m,ell);
     return sum;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void PanDustSystem::rebootLabsdust()
+{
+    _Labsdustvv.clear();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -369,29 +376,6 @@ double PanDustSystem::Labsdusttot() const
     comm->sum_all(arr);
 
     return arr[0];
-}
-
-//////////////////////////////////////////////////////////////////////
-
-Array PanDustSystem::meanintensityv(int m) const
-{
-    WavelengthGrid* lambdagrid = find<WavelengthGrid>();
-    Array Jv(lambdagrid->Nlambda());
-    double fac = 4.0*M_PI*volume(m);
-    for (int ell=0; ell<lambdagrid->Nlambda(); ell++)
-    {
-        double kappaabsrho = 0.0;
-        for (int h=0; h<_Ncomp; h++)
-        {
-            double kappaabs = mix(h)->kappaabs(ell);
-            double rho = density(m,h);
-            kappaabsrho += kappaabs*rho;
-        }
-        double J = Labs(m,ell) / (kappaabsrho*fac) / lambdagrid->dlambda(ell);
-        // guard against (rare) situations where both Labs and kappa*fac are zero
-        Jv[ell] = std::isfinite(J) ? J : 0.0;
-    }
-    return Jv;
 }
 
 ////////////////////////////////////////////////////////////////////

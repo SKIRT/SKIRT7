@@ -932,6 +932,30 @@ double DustSystem::density(int m) const
 
 //////////////////////////////////////////////////////////////////////
 
+Array DustSystem::meanintensityv(int m) const
+{
+    WavelengthGrid* lambdagrid = find<WavelengthGrid>();
+    int Nlambda = lambdagrid->Nlambda();
+    Array Jv(Nlambda);
+    double fac = 4.0*M_PI*volume(m);
+    for (int ell=0; ell<Nlambda; ell++)
+    {
+        double kappaabsrho = 0.0;
+        for (int h=0; h<_Ncomp; h++)
+        {
+            double kappaabs = mix(h)->kappaabs(ell);
+            double rho = density(m,h);
+            kappaabsrho += kappaabs*rho;
+        }
+        double J = Labs(m,ell) / (kappaabsrho*fac) / lambdagrid->dlambda(ell);
+        // guard against (rare) situations where both Labs and kappa*fac are zero
+        Jv[ell] = std::isfinite(J) ? J : 0.0;
+    }
+    return Jv;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void DustSystem::fillOpticalDepth(PhotonPackage* pp)
 {
     // determine the path and store the geometric details in the photon package
