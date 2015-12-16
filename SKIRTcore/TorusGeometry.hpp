@@ -71,7 +71,7 @@ class TorusGeometry : public AxGeometry
     Q_CLASSINFO("MinValue", "0")
 
     Q_CLASSINFO("Property", "anisoRadius")
-    Q_CLASSINFO("Title", "the anisotropic inner radius")
+    Q_CLASSINFO("Title", "reshape the inner radius according to the Netzer luminosity profile")
     Q_CLASSINFO("Default", "no")
 
     Q_CLASSINFO("Property", "cutRadius")
