@@ -223,6 +223,7 @@ private:
     double _smin;
     double _sdiff;
     double _A;
+    double _beta;
 };
 
 ////////////////////////////////////////////////////////////////////
