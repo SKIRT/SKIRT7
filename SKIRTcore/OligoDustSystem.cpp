@@ -23,7 +23,7 @@
 //////////////////////////////////////////////////////////////////////
 
 OligoDustSystem::OligoDustSystem()
-    : _writeMeanIntensity(true), _Nlambda(0)
+    : _writeMeanIntensity(false), _Nlambda(0)
 {
 }
 

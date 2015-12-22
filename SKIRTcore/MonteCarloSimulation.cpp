@@ -29,8 +29,8 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////
 
 MonteCarloSimulation::MonteCarloSimulation()
-    : _is(0), _packages(0), _minWeightReduction(0),
-      _minfs(0), _xi(0), _continuousScattering(false), _assigner(0),
+    : _is(0), _packages(0), _minWeightReduction(1e4),
+      _minfs(0), _xi(0.5), _continuousScattering(false), _assigner(0),
       _lambdagrid(0), _ss(0), _ds(0)
 {
 }

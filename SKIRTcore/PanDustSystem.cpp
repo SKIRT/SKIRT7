@@ -32,8 +32,8 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////
 
 PanDustSystem::PanDustSystem()
-    : _dustemissivity(0), _dustlib(0), _emissionBias(0), _emissionBoost(1), _selfabsorption(true), _writeEmissivity(false),
-      _writeTemp(true), _writeISRF(true), _cycles(0), _Nlambda(0), _haveLabsstel(false), _haveLabsdust(false)
+    : _dustemissivity(0), _dustlib(0), _emissionBias(0.5), _emissionBoost(1), _selfabsorption(false), _writeEmissivity(false),
+      _writeTemp(true), _writeISRF(false), _cycles(0), _Nlambda(0), _haveLabsstel(false), _haveLabsdust(false)
 {
 }
 

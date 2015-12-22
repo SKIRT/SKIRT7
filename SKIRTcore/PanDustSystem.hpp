@@ -76,7 +76,6 @@ class PanDustSystem : public DustSystem
     Q_CLASSINFO("Property", "writeISRF")
     Q_CLASSINFO("Title", "output a data file describing the interstellar radiation field")
     Q_CLASSINFO("Default", "no")
-    Q_CLASSINFO("Silent", "true")
     Q_CLASSINFO("RelevantIf", "dustEmissivity")
 
     //============= Construction - Setup - Destruction =============

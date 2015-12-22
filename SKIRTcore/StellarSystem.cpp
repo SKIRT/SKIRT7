@@ -13,7 +13,7 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////
 
 StellarSystem::StellarSystem()
-    : _emissionBias(0), _random(0)
+    : _emissionBias(0.5), _random(0)
 {
 }
 
