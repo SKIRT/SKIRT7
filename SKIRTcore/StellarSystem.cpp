@@ -115,25 +115,42 @@ int StellarSystem::Ncomp() const
 
 void StellarSystem::launch(PhotonPackage* pp, int ell, double L) const
 {
-    int h = 0;
+    // if there is only one component, simply launch from it
     int N = Ncomp();
-    double Lmean = _Lv[ell]/N; // the mean luminosity emitted from each stellar component
-    double X = _random->uniform();
-    if (X<_emissionBias)
+    if (N == 1)
     {
-        // rescale the deviate from [0,_emissionBias[ to [0,N[
-        h = max(0,min(N-1,static_cast<int>(N*X/_emissionBias)));
+        _scv[0]->launch(pp,ell,L);
+        pp->setStellarOrigin(0);
     }
+    // otherwise select a component using the appriopriate biased distribution
     else
     {
-        // rescale the deviate from [_emissionBias,1[ to [0,1[
-        h = NR::locate_clip(_Xvv[ell],(X-_emissionBias)/(1.0-_emissionBias));
+        int h = 0;
+        double X = _random->uniform();
+        if (X<_emissionBias)
+        {
+            // select component from uniform distribution
+            // rescale the deviate from [0,_emissionBias[ to [0,N[
+            h = max(0,min(N-1,static_cast<int>(N*X/_emissionBias)));
+        }
+        else
+        {
+            // select component based on luminosity distribution
+            // rescale the deviate from [_emissionBias,1[ to [0,1[
+            h = NR::locate_clip(_Xvv[ell],(X-_emissionBias)/(1.0-_emissionBias));
+        }
+        StellarComp* sc = _scv[h];
+
+        // launch a photon package only when the selected component has a nonzero luminosity for this wavelength
+        double Lh = sc->luminosity(ell);
+        if (Lh > 0)
+        {
+            double Lmean = _Lv[ell]/N; // the mean luminosity emitted from each stellar component
+            double weight = 1.0/(1.0-_emissionBias+_emissionBias*Lmean/Lh);
+            sc->launch(pp,ell,L*weight);
+            pp->setStellarOrigin(h);
+        }
     }
-    StellarComp* sc = _scv[h];
-    double Lh = sc->luminosity(ell);
-    double weight = 1.0/(1.0-_emissionBias+_emissionBias*Lmean/Lh);
-    sc->launch(pp,ell,L*weight);
-    pp->setStellarOrigin(h);
 }
 
 //////////////////////////////////////////////////////////////////////
