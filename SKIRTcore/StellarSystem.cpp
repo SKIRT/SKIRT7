@@ -141,15 +141,19 @@ void StellarSystem::launch(PhotonPackage* pp, int ell, double L) const
         }
         StellarComp* sc = _scv[h];
 
-        // launch a photon package only when the selected component has a nonzero luminosity for this wavelength
+        // launch a photon package from the selected component only if it has a nonzero luminosity for this wavelength
         double Lh = sc->luminosity(ell);
         if (Lh > 0)
         {
             double Lmean = _Lv[ell]/N; // the mean luminosity emitted from each stellar component
             double weight = 1.0/(1.0-_emissionBias+_emissionBias*Lmean/Lh);
             sc->launch(pp,ell,L*weight);
-            pp->setStellarOrigin(h);
         }
+        else
+        {
+            pp->launch(0., ell, Position(), Direction());
+        }
+        pp->setStellarOrigin(h);
     }
 }
 
