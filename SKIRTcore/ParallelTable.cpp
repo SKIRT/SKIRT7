@@ -228,8 +228,8 @@ void ParallelTable::col_to_row()
     int totalCols = _rows.size(1);
     int thisRank = _comm->rank();
 
-    for (int j=0; j<totalCols; j++) // for each possible column of the big array
-        for (int i=0; i<totalRows; i++) // for each possible row of the big array
+    for (int i=0; i<totalRows; i++) // for each possible row of the big array (determines receiver)
+        for (int j=0; j<totalCols; j++) // for each possible column of the big array (determines sender)
         {
             int tgtRank = _rowAssigner->rankForIndex(i); // the rank where target has row i in it
             int srcRank = _colAssigner->rankForIndex(j); // the rank where the source has col j in it
@@ -258,8 +258,8 @@ void ParallelTable::row_to_col()
     int totalCols = _rows.size(1);
     int thisRank = _comm->rank();
 
-    for (int j=0; j<totalCols; j++)
-        for (int i=0; i<totalRows; i++)
+    for (int j=0; j<totalCols; j++) // for each column (determines receiver)
+        for (int i=0; i<totalRows; i++) // for each row (determines sender)
         {
             int tgtRank = _colAssigner->rankForIndex(j);
             int srcRank = _rowAssigner->rankForIndex(i);
