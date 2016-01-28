@@ -402,7 +402,7 @@ public:
 
     /** This function returns a vector with the mean radiation field \f$J_{\ell,m}\f$ at all
         wavelength indices in the dust cell with cell number \f$m\f$. It is calculated as \f[
-        J_{\ell,m} = \frac{ L_{\ell,m}^{\text{abs}} }{ 4\pi\, V_m\, \sum_h
+        J_{\ell,m} = \frac{ L_{\ell,m}^{\text{abs}} }{ 4\pi\, V_m\, (\Delta\lambda)_\ell \sum_h
         \kappa_{\ell,h}^{\text{abs}}\, \rho_{m,h} } \f] with \f$L_{\ell,m}^{\text{abs}}\f$ the
         absorbed luminosity, \f$\kappa_{\ell,h}^{\text{abs}}\f$ the absorption coefficient
         corresponding to the \f$h\f$'th dust component, \f$\rho_{m,h}\f$ the dust density
