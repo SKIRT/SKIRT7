@@ -5,10 +5,9 @@
 \section UserCLIOver Overview
 
 The <tt>SKIRT</tt> code is exposed to the user as a command line application to be executed in a Terminal window.
-At this time, there exists no graphical user interface (GUI) for <tt>SKIRT</tt> .
 
 The options defining a single, complete <tt>SKIRT</tt> simulation are stored in a <tt>SKIRT</tt> parameter file with the
-filename extension ".ski". Such a parameter file is customary called "a \em ski file".
+filename extension ".ski". Such a parameter file is customary called "a ski file".
 The data format of \em ski files allows efficient manipulation by computers, while being sufficiently transparent
 for viewing and editing by humans. The \em ski file format is further discussed in \ref UserParamFile.
 
@@ -94,7 +93,7 @@ $
 <tt>SKIRT</tt> can perform multiple simulations in one go, and also supports a number of command line options
 according to the following syntax:
 \verbatim
- skirt [-b] [-s <simulations>] [-t <threads>]
+ skirt [-b] [-v] [-m] [-s <simulations>] [-t <threads>]
        [-k] [-i <dirpath>] [-o <dirpath>]
        [-r] {<filepath>}*
 \endverbatim
@@ -104,6 +103,11 @@ messages. If there are multiple parallel simulations (see the -s option), the -b
 to avoid a plethora of randomly intermixing messages. If there is only one simulation at a time, the console shows
 all messages unless the -b option is present. In any case, the complete log output for each simulation is always
 written to a file in the output directory.
+
+- The -v option enables verbose logging for simulations running under MPI, causing each process to create its own
+log file (rather than relying on the root process to log all relevant information).
+
+- The -m option causes information on current memory usage to be included in each log message.
 
 - The -s option specifies the number of simulations to be executed in parallel. The default value is one.
 
@@ -160,6 +164,47 @@ Three "standard" files are always generated for every simulation (assuming a ski
    corresponding to the simulation. Using a regular TeX installation, this file can be easily processed into
    a nicely formatted document.
 
-Many of the other output files are described in the tutorials later in this chapter.
+Many of the other output files are described in the tutorials elsewhere in this chapter.
+
+\section UserCLIEmul Emulation mode
+
+To get an estimate of the amount of memory will be required for a particular SKIRT simulation, SKIRT can be executed in
+'emulation' mode. In this mode, SKIRT will limit the amount of computation while still traversing all relevant
+simulation steps. At the end, an estimate of the amount of required memory will be stated. Emulation mode can
+be evoked by passing the '-e' command line option to the SKIRT executable.
+
+\verbatim
+skirt -e example.ski
+\endverbatim
+
+The behaviour of the other command-line arguments is unchanged when using the emulation option. Using multiprocessing is
+also supported, which is important since in the future, the memory consumption may scale more favorably with the number
+of processes. Right now, a slight overhead is expected on the required memory on top of the linear scaling of memory
+consumption versus process count. To invoke emulation mode with multiple processes, use:
+
+\verbatim
+mpirun -np 2 skirt -e example.ski
+\endverbatim
+
+Note that the amount of memory stated at the end of the console output applies to only one process. The memory
+requirements are expected to be symmetrical with regards to the different processes.
+
+\section UserCLIMemLog Memory allocation logging
+
+To get a deeper insight in the memory requirements of SKIRT or to pinpoint memory leakage problems, a rather advanced
+logging mode has been added. When this logging mode is enabled, SKIRT will log the amount of memory that is
+allocated or deallocated for instances of the class Array. This class is used throughout the entire SKIRT code to
+represent all structured data blocks (such as the dust system) and thus represents the bulk of SKIRT's memory
+requirements. Each resize, construction or destruction operation of such an Array will be reported in the SKIRT console
+output and log file. If verbose logging is also enabled and multiple processes are
+used, each process will log its own (de)allocation information independently.
+
+To enable memory allocation logging mode, add the "-l <limit>" command line option, where the value specifies
+the smallest memory block size (in GB) for which (de)allocation should be logged. Specifying a relevant size
+stops neglegibly small Arrays from cluttering the log output. For example, one might use:
+
+\verbatim
+skirt -l 1e-5 example.ski
+\endverbatim
 
 */

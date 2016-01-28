@@ -6,6 +6,7 @@
 #include <cmath>
 #include "FatalError.hpp"
 #include "Random.hpp"
+#include "RotateGeometryDecorator.hpp"
 #include "SpecialFunctions.hpp"
 #include "TorusGeometry.hpp"
 
@@ -15,7 +16,7 @@ using namespace std;
 
 TorusGeometry::TorusGeometry()
     : _p(0), _q(0), _Delta(0), _rmin(0), _rmax(0), _rani(false), _rcut(0),
-      _sinDelta(0), _smin(0), _sdiff(0), _A(0)
+      _sinDelta(0), _smin(0), _sdiff(0), _A(0), _beta(0)
 {
 }
 
@@ -43,6 +44,14 @@ void TorusGeometry::setupSelfBefore()
         _A = _q * 0.25/M_PI / _sdiff / (1.0-exp(-_q*_sinDelta));
     else
         _A = 0.25/M_PI / _sdiff / _sinDelta;
+
+    // if we are decorated by a rotation, retrieve the Euler beta angle
+    try
+    {
+        auto rotator = find<RotateGeometryDecorator>(false);
+        if (rotator->geometry() == this) _beta = rotator->eulerbeta();
+    }
+    catch (FatalError) { }
 }
 
 ////////////////////////////////////////////////////////////////////

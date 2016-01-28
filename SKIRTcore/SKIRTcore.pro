@@ -308,7 +308,8 @@ HEADERS += \
     BoxStellarComp.hpp \
     BrokenExpDiskGeometry.hpp \
     TrustPolarizedMeanDustMix.hpp \
-    ThemisDustMix.hpp
+    ThemisDustMix.hpp \
+    SimpleOligoDustMix.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -572,4 +573,5 @@ SOURCES += \
     BoxStellarComp.cpp \
     BrokenExpDiskGeometry.cpp \
     TrustPolarizedMeanDustMix.cpp \
-    ThemisDustMix.cpp
+    ThemisDustMix.cpp \
+    SimpleOligoDustMix.cpp

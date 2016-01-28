@@ -134,6 +134,7 @@
 #include "SersicGeometry.hpp"
 #include "ShellGeometry.hpp"
 #include "SimpleInstrument.hpp"
+#include "SimpleOligoDustMix.hpp"
 #include "SingleGrainSizeDistribution.hpp"
 #include "SmoothingKernel.hpp"
 #include "SpectralLuminosityStellarCompNormalization.hpp"
@@ -365,6 +366,7 @@ void RegisterSimulationItems::registerAll()
     add<InterstellarDustMix>();
     add<DraineLiDustMix>();
     add<MeanZubkoDustMix>();
+    add<SimpleOligoDustMix>();
     add<Benchmark1DDustMix>();
     add<Benchmark2DDustMix>();
     add<TrustMeanDustMix>();

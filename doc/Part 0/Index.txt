@@ -36,8 +36,7 @@ The <tt>SKIRT</tt> manual is structured as follows:
     for classes alphabetically. The "Class Hierarchy" subtab brings you to a graphical representation of the relations between all classes.
     The "Class Members" subtab provides a list of all member functions.
 
-The <tt>SKIRT</tt> website can be found at <a href="http://www.skirt.ugent.be">www.skirt.ugent.be</a>. This manual
-is also available in PDF format from <a href="http://www.skirt.ugent.be/downloads">www.skirt.ugent.be/downloads</a>.
+The <tt>SKIRT</tt> website can be found at <a href="http://www.skirt.ugent.be">www.skirt.ugent.be</a>.
 
 Access the \ref LegalInfo page for licensing information, a list of <tt>SKIRT</tt> publications and contact information.
 

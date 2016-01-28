@@ -46,7 +46,7 @@ class FullInstrument : public SingleFrameInstrument
     Q_CLASSINFO("Property", "scatteringLevels")
     Q_CLASSINFO("Title", "the number of scattering levels to be recorded individually")
     Q_CLASSINFO("MinValue", "0")
-    Q_CLASSINFO("MaxValue", "25")
+    Q_CLASSINFO("MaxValue", "100")
     Q_CLASSINFO("Default", "0")
 
     //============= Construction - Setup - Destruction =============

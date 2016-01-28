@@ -28,8 +28,8 @@ class ProcessAssigner;
     subclasses for use with oligochromatic and panchromatic simulations respectively. A DustSystem
     object contains a vector of dust cells, each of which contain all useful information on the
     dust within that particular piece of the configuration space. Furthermore, a DustSystem object
-    contains pointers a DustDistribution object and to a DustGrid object). A subclass may
-    of course maintain additional information depending on its needs. */
+    contains pointers a DustDistribution object and to a DustGrid object). A subclass may of course
+    maintain additional information depending on its needs. */
 class DustSystem : public SimulationItem
 {
     Q_OBJECT
@@ -64,14 +64,17 @@ class DustSystem : public SimulationItem
     Q_CLASSINFO("Property", "writeQuality")
     Q_CLASSINFO("Title", "calculate and output quality metrics for the dust grid")
     Q_CLASSINFO("Default", "no")
+    Q_CLASSINFO("Silent", "true")
 
     Q_CLASSINFO("Property", "writeCellProperties")
     Q_CLASSINFO("Title", "output a data file with relevant properties for all dust cells")
     Q_CLASSINFO("Default", "no")
+    Q_CLASSINFO("Silent", "true")
 
     Q_CLASSINFO("Property", "writeCellsCrossed")
     Q_CLASSINFO("Title", "output statistics on the number of cells crossed per path")
     Q_CLASSINFO("Default", "no")
+    Q_CLASSINFO("Silent", "true")
 
     Q_CLASSINFO("Property", "assigner")
     Q_CLASSINFO("Title", "the parallel process assignment scheme")
@@ -329,13 +332,13 @@ public:
         \f${\boldsymbol{r}}\f$ into the direction \f${\boldsymbol{k}}\f$, where \f$\ell\f$,
         \f${\boldsymbol{r}}\f$ and \f${\boldsymbol{k}}\f$ are obtained from the specified
         PhotonPackage object, and it stores the resulting details back into the photon package
-        object. The hard work is done by calling the DustGrid::path() function which
-        stores the geometrical information on the path through the dust grid into the photon
-        package: the cell numbers \f$m\f$ of the cells that are crossed by the path, the pathlength
-        \f$(\Delta s)_m\f$ covered in that particular cell and a total path length counter
-        \f$s_m\f$ that gives the total path length covered between the starting point
-        \f${\boldsymbol{r}}\f$ and the boundary of the cell. With this information given, the
-        calculation of the optical depth is rather straightforward: it is calculated as \f[
+        object. The hard work is done by calling the DustGrid::path() function which stores the
+        geometrical information on the path through the dust grid into the photon package: the cell
+        numbers \f$m\f$ of the cells that are crossed by the path, the pathlength \f$(\Delta
+        s)_m\f$ covered in that particular cell and a total path length counter \f$s_m\f$ that
+        gives the total path length covered between the starting point \f${\boldsymbol{r}}\f$ and
+        the boundary of the cell. With this information given, the calculation of the optical depth
+        is rather straightforward: it is calculated as \f[
         \tau_{\ell,{\text{path}}}({\boldsymbol{r}},{\boldsymbol{k}}) = \sum_m (\Delta s)_m \sum_h
         \kappa_{\ell,h}^{\text{ext}}\, \rho_m, \f] where \f$\kappa_{\ell,h}^{\text{abs}}\f$ is the
         extinction coefficient corresponding to the \f$h\f$'th dust component at wavelength index
@@ -379,12 +382,32 @@ public:
         from the general MonteCarloSimulation class. */
     virtual bool dustemission() const = 0;
 
+    /** This pure virtual function must be implemented in each subclass to indicate whether the
+        absorption rates in each cell need to be stored for this dust system. This is needed if
+        dust emission is turned on, but it can also be chosen if the user wants to study the mean
+        intensity of the radiation field. It is provided in this base class because it is invoked
+        from the general MonteCarloSimulation class. */
+    virtual bool storeabsorptionrates() const = 0;
+
     /** This pure virtual function must be implemented in each subclass to simulate absorption of
         of a monochromatic luminosity package in the specified dust cell. The function should be
         called only if dustemission() returns true. It is provided in this base class because it is
         referenced from the general MonteCarloSimulation class (although it is actually invoked
         only for panchromatic simulations). */
     virtual void absorb(int m, int ell, double DeltaL, bool ynstellar) = 0;
+
+    /** This pure virtual function returns the absorbed luminosity \f$L_{\ell,m}\f$ at wavelength index
+        \f$\ell\f$ in the dust cell with cell number \f$m\f$. */
+    virtual double Labs(int m, int ell) const = 0;
+
+    /** This function returns a vector with the mean radiation field \f$J_{\ell,m}\f$ at all
+        wavelength indices in the dust cell with cell number \f$m\f$. It is calculated as \f[
+        J_{\ell,m} = \frac{ L_{\ell,m}^{\text{abs}} }{ 4\pi\, V_m\, (\Delta\lambda)_\ell \sum_h
+        \kappa_{\ell,h}^{\text{abs}}\, \rho_{m,h} } \f] with \f$L_{\ell,m}^{\text{abs}}\f$ the
+        absorbed luminosity, \f$\kappa_{\ell,h}^{\text{abs}}\f$ the absorption coefficient
+        corresponding to the \f$h\f$'th dust component, \f$\rho_{m,h}\f$ the dust density
+        corresponding to the \f$h\f$'th dust component, and \f$V_m\f$ the volume of the cell. */
+    Array meanintensityv(int m) const;
 
     //======================== Data Members ========================
 

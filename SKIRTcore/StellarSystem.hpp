@@ -29,6 +29,13 @@ class StellarSystem : public SimulationItem
     Q_CLASSINFO("Title", "the stellar components")
     Q_CLASSINFO("Default", "GeometricStellarComp")
 
+    Q_CLASSINFO("Property", "emissionBias")
+    Q_CLASSINFO("Title", "the stellar emission bias")
+    Q_CLASSINFO("MinValue", "0")
+    Q_CLASSINFO("MaxValue", "1")
+    Q_CLASSINFO("Default", "0.5")
+    Q_CLASSINFO("Silent", "true")
+
     //============= Construction - Setup - Destruction =============
 
 public:
@@ -54,6 +61,13 @@ public:
 
     /** This function returns the list of stellar components in the system. */
     Q_INVOKABLE QList<StellarComp*> components() const;
+
+    /** Sets the emission bias, i.e. the fraction of components selected for emission from a
+        uniform distribution rather than a distribution weighted according to the total luminosity. */
+    Q_INVOKABLE void setEmissionBias(double value);
+
+    /** Returns the emission bias. */
+    Q_INVOKABLE double emissionBias() const;
 
     //======================== Other Functions =======================
 
@@ -82,6 +96,7 @@ public:
     //======================== Data Members ========================
 
 private:
+    double _emissionBias;
     QList<StellarComp*> _scv;
     Array _Lv;
     ArrayTable<2> _Xvv;
