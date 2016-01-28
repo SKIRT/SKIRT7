@@ -309,7 +309,8 @@ HEADERS += \
     BrokenExpDiskGeometry.hpp \
     TrustPolarizedMeanDustMix.hpp \
     ThemisDustMix.hpp \
-    SimpleOligoDustMix.hpp
+    SimpleOligoDustMix.hpp \
+    SpheCropGeometryDecorator.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -574,4 +575,5 @@ SOURCES += \
     BrokenExpDiskGeometry.cpp \
     TrustPolarizedMeanDustMix.cpp \
     ThemisDustMix.cpp \
-    SimpleOligoDustMix.cpp
+    SimpleOligoDustMix.cpp \
+    SpheCropGeometryDecorator.cpp

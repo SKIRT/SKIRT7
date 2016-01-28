@@ -139,6 +139,7 @@
 #include "SmoothingKernel.hpp"
 #include "SpectralLuminosityStellarCompNormalization.hpp"
 #include "SpheBackgroundGeometry.hpp"
+#include "SpheCropGeometryDecorator.hpp"
 #include "SpheGeometry.hpp"
 #include "Sphere1DDustGrid.hpp"
 #include "Sphere2DDustGrid.hpp"
@@ -296,6 +297,7 @@ void RegisterSimulationItems::registerAll()
     add<ClumpyGeometryDecorator>();
     add<CombineGeometryDecorator>();
     add<FoamGeometryDecorator>();
+    add<SpheCropGeometryDecorator>();
 
     // smoothing kernels
     add<SmoothingKernel>(false);
