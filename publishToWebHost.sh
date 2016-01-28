@@ -15,7 +15,6 @@ mount_smbfs smb://pcamps@webhost.ugent.be/_skirt ../webhost
 
 # copy the downloadable documentation
 mkdir -p ../webhost/WWW/downloads
-cp -v ../doc/SKIRT.pdf ../webhost/WWW/downloads/
 cp -v ../doc/SKIRT.qch ../webhost/WWW/downloads/
 
 # copy the online html documentation

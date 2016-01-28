@@ -310,7 +310,8 @@ HEADERS += \
     TrustPolarizedMeanDustMix.hpp \
     ParallelTable.hpp \
     ParallelTable \
-    ThemisDustMix.hpp
+    ThemisDustMix.hpp \
+    SimpleOligoDustMix.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -575,4 +576,5 @@ SOURCES += \
     BrokenExpDiskGeometry.cpp \
     TrustPolarizedMeanDustMix.cpp \
     ParallelTable.cpp \
-    ThemisDustMix.cpp
+    ThemisDustMix.cpp \
+    SimpleOligoDustMix.cpp

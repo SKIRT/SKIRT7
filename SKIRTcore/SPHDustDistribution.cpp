@@ -184,7 +184,7 @@ double SPHDustDistribution::density(Position bfr) const
     for (int i=0; i<n; i++)
         sum += particles[i]->metalDensity(bfr);  // sum contains the total density in metals
     sum *= _fdust;    // sum now contains the total density in metals locked up in dust grains
-    return sum;
+    return max(sum,0.);  // guard against negative dust masses
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -218,7 +218,7 @@ double SPHDustDistribution::massInBox(const Box& box) const
     for (int i=0; i<n; i++)
         sum += particles[i]->metalMassInBox(box);  // total mass in metals
     sum *= _fdust;    // total mass in metals locked up in dust grains
-    return sum;
+    return max(sum,0.);  // guard against negative dust masses
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -238,7 +238,7 @@ double SPHDustDistribution::mass() const
     for (int i=0; i<n; i++)
         sum += _pv[i].metalMass();  // sum contains the total mass in metals
     sum *= _fdust;    // sum now contains the total mass in metals locked up in dust grains
-    return sum;
+    return max(sum,0.);  // guard against negative dust masses
 }
 
 //////////////////////////////////////////////////////////////////////

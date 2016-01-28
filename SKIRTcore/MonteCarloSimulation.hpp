@@ -57,8 +57,8 @@ class MonteCarloSimulation : public Simulation
     Q_CLASSINFO("Title", "the scattering bias")
     Q_CLASSINFO("MinValue", "0")
     Q_CLASSINFO("MaxValue", "1")
-    Q_CLASSINFO("Default", "0")
-    Q_CLASSINFO("Silent","true")
+    Q_CLASSINFO("Default", "0.5")
+    Q_CLASSINFO("Silent", "true")
 
     Q_CLASSINFO("Property", "continuousScattering")
     Q_CLASSINFO("Title", "use continuous scattering")
@@ -290,17 +290,20 @@ protected:
         that is absorbed in a dust cell along the path. The part that scatters is the actual part
         of the photon package that survives and continues in the photon package's life cycle. So we
         alter the luminosity of the photon package from \f$L_\ell\f$ to \f$L_\ell^{\text{sca}}\f$.
-        If dust emission is not considered in the simulation, that is also the only part that
-        matters. On the other hand, if dust emission is taken into account in the simulation, we
-        have to simulate the absorption of the fractions \f$L_{\ell,n}^{\text{abs}}\f$ by the
-        appropriate dust cells. It is obviously crucial to have expressions for
-        \f$L_\ell^{\text{sca}}\f$ and \f$L_{\ell,n}^{\text{abs}}\f$ (and \f$L_\ell^{\text{esc}}\f$,
-        but this does not really matter...). If we denote the total optical depth along the path of
-        the photon package as \f$\tau_{\ell,\text{path}}\f$ (this quantity is stored in the
-        PhotonPackage object provided as an input parameter of this function), the fraction
-        of the luminosity that escapes from the system without any interaction is \f[
-        L_\ell^{\text{esc}} = L_\ell\, {\text{e}}^{-\tau_{\ell,\text{path}}}. \f] Remains to
-        subdivide the remainder of the initial luminosity, \f[ L_\ell \left( 1 -
+        If the absorption rates are not considered in the simulation, that is also the only part
+        that matters.
+
+        On the other hand, if the absorption rates need to be taken into account in the simulation
+        (if dust emission is included in the simulation, or the mean radiation field is
+        calculated), we have to simulate the absorption of the fractions
+        \f$L_{\ell,n}^{\text{abs}}\f$ by the appropriate dust cells. It is obviously crucial to
+        have expressions for \f$L_\ell^{\text{sca}}\f$ and \f$L_{\ell,n}^{\text{abs}}\f$ (and
+        \f$L_\ell^{\text{esc}}\f$, but this does not really matter...). If we denote the total
+        optical depth along the path of the photon package as \f$\tau_{\ell,\text{path}}\f$ (this
+        quantity is stored in the PhotonPackage object provided as an input parameter of this
+        function), the fraction of the luminosity that escapes from the system without any
+        interaction is \f[ L_\ell^{\text{esc}} = L_\ell\, {\text{e}}^{-\tau_{\ell,\text{path}}}.
+        \f] Remains to subdivide the remainder of the initial luminosity, \f[ L_\ell \left( 1 -
         {\text{e}}^{-\tau_{\ell,\text{path}}} \right), \f] between the scattered fraction
         \f$L_\ell^{\text{sca}}\f$ and the \f$N\f$ absorbed fractions \f$L_{\ell,n}^{\text{abs}}\f$.
         When there is only one single dust component, the optical properties of the dust are the
@@ -311,8 +314,8 @@ protected:
         {\text{e}}^{-\tau_{\ell,n-1}} - {\text{e}}^{-\tau_{\ell,n}} \right), \f] with
         \f$\tau_{\ell,n}\f$ the optical depth measured from the initial position of the path until
         the exit point of the \f$n\f$'th dust cell along the path (this quantity is also stored in
-        the PhotonPackage object). It is straightforward to check that the sum of escaped, scattered
-        and absorbed luminosities is \f[ L_\ell^{\text{esc}} + L_\ell^{\text{sca}} +
+        the PhotonPackage object). It is straightforward to check that the sum of escaped,
+        scattered and absorbed luminosities is \f[ L_\ell^{\text{esc}} + L_\ell^{\text{sca}} +
         \sum_{n=0}^{N-1} L_{\ell,n}^{\text{abs}} = L_\ell, \f] as desired. When there is more than
         one dust component, the dust properties are no longer uniform in every cell and things
         become a bit more messy. The expression for \f$L_{\ell,n}^{\text{abs}}\f$ can be readily
@@ -329,7 +332,7 @@ protected:
         {\text{e}}^{-\tau_{\ell,n-1}} - {\text{e}}^{-\tau_{\ell,n}} \right). \f] Also in this case,
         it is easy to see that \f[ L_\ell^{\text{esc}} + L_\ell^{\text{sca}} + \sum_{n=0}^{N-1}
         L_{\ell,n}^{\text{abs}} = L_\ell. \f] */
-    void simulateescapeandabsorption(PhotonPackage* pp, bool dustemission);
+    void simulateescapeandabsorption(PhotonPackage* pp, bool storeabsorptionrates);
 
     /** This function determines the next scattering location of a photon package and the simulates
         the propagation to this position. Given the total optical depth along the path of the

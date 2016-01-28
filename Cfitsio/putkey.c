@@ -23,7 +23,7 @@ int ffcrim(fitsfile *fptr,      /* I - FITS file pointer           */
   create an IMAGE extension following the current HDU. If the
   current HDU is empty (contains no header keywords), then simply
   write the required image (or primary array) keywords to the current
-  HDU. 
+  HDU.
 */
 {
     if (*status > 0)
@@ -51,7 +51,7 @@ int ffcrimll(fitsfile *fptr,    /* I - FITS file pointer           */
   create an IMAGE extension following the current HDU. If the
   current HDU is empty (contains no header keywords), then simply
   write the required image (or primary array) keywords to the current
-  HDU. 
+  HDU.
 */
 {
     if (*status > 0)
@@ -80,7 +80,7 @@ int ffcrtb(fitsfile *fptr,  /* I - FITS file pointer                        */
            const char *extnm, /* I - value of EXTNAME keyword, if any         */
            int *status)     /* IO - error status                            */
 /*
-  Create a table extension in a FITS file. 
+  Create a table extension in a FITS file.
 */
 {
     LONGLONG naxis1 = 0;
@@ -101,7 +101,7 @@ int ffcrtb(fitsfile *fptr,  /* I - FITS file pointer                        */
        ffcrim(fptr, 16, 0, tbcol, status);
        ffcrhd(fptr, status);
     }
-    
+
     if (tbltype == BINARY_TBL)
     {
       /* write the required header keywords. This will write PCOUNT = 0 */
@@ -136,12 +136,12 @@ int ffpktp(fitsfile *fptr,       /* I - FITS file pointer       */
     if (*status > 0)           /* inherit input status value if > 0 */
         return(*status);
 
-    diskfile = fopen(filename,"r"); 
+    diskfile = fopen(filename,"r");
     if (!diskfile)          /* couldn't open file */
     {
             ffpmsg("ffpktp could not open the following template file:");
             ffpmsg(filename);
-            return(*status = FILE_NOT_OPENED); 
+            return(*status = FILE_NOT_OPENED);
     }
 
     while (fgets(template, 160, diskfile) )  /* get next template line */
@@ -161,7 +161,7 @@ int ffpktp(fitsfile *fptr,       /* I - FITS file pointer       */
          strncpy(newname, &card[40], 8);
          newname[8] = '\0';
 
-         ffmnam(fptr, keyname, newname, status); 
+         ffmnam(fptr, keyname, newname, status);
       }
       else if (keytype == -1)      /* delete the card */
       {
@@ -177,7 +177,7 @@ int ffpktp(fitsfile *fptr,       /* I - FITS file pointer       */
       }
       else    /* END card; stop here */
       {
-         break; 
+         break;
       }
     }
 
@@ -271,7 +271,7 @@ int ffpky( fitsfile *fptr,     /* I - FITS file pointer        */
     }
 
     return(*status);
-} 
+}
 /*-------------------------------------------------------------------------*/
 int ffprec(fitsfile *fptr,     /* I - FITS file pointer        */
            const char *card,   /* I - string to be written     */
@@ -294,7 +294,7 @@ int ffprec(fitsfile *fptr,     /* I - FITS file pointer        */
     {
         nblocks = 1;
         if (ffiblk(fptr, nblocks, 0, status) > 0) /* insert 2880-byte block */
-            return(*status);  
+            return(*status);
     }
 
     strncpy(tcard,card,80);
@@ -303,7 +303,7 @@ int ffprec(fitsfile *fptr,     /* I - FITS file pointer        */
     len = strlen(tcard);
 
     /* silently replace any illegal characters with a space */
-    for (ii=0; ii < len; ii++)   
+    for (ii=0; ii < len; ii++)
         if (tcard[ii] < ' ' || tcard[ii] > 126) tcard[ii] = ' ';
 
     for (ii=len; ii < 80; ii++)    /* fill card with spaces if necessary */
@@ -332,7 +332,7 @@ int ffpkyu( fitsfile *fptr,     /* I - FITS file pointer        */
             const char *comm,   /* I - keyword comment          */
             int  *status)       /* IO - error status            */
 /*
-  Write (put) a null-valued keyword and comment into the FITS header.  
+  Write (put) a null-valued keyword and comment into the FITS header.
 */
 {
     char valstring[FLEN_VALUE];
@@ -395,7 +395,7 @@ int ffpkls( fitsfile *fptr,     /* I - FITS file pointer        */
     if (*status > 0)           /* inherit input status value if > 0 */
         return(*status);
 
-    remain = maxvalue(strlen(value), 1); /* no. of chars to write (at least 1) */    
+    remain = maxvalue(strlen(value), 1); /* no. of chars to write (at least 1) */
     /* count the number of single quote characters are in the string */
     tstring[0] = '\0';
     strncat(tstring, value, 68); /* copy 1st part of string to temp buff */
@@ -410,7 +410,7 @@ int ffpkls( fitsfile *fptr,     /* I - FITS file pointer        */
 
     strncpy(tmpkeyname, keyname, 80);
     tmpkeyname[80] = '\0';
-    
+
     cptr = tmpkeyname;
     while(*cptr == ' ')   /* skip over leading spaces in name */
         cptr++;
@@ -427,7 +427,7 @@ int ffpkls( fitsfile *fptr,     /* I - FITS file pointer        */
     else
     {
         /* This a HIERARCH keyword */
-        if (FSTRNCMP(cptr, "HIERARCH ", 9) && 
+        if (FSTRNCMP(cptr, "HIERARCH ", 9) &&
             FSTRNCMP(cptr, "hierarch ", 9))
             nchar = 66 - nquote - namelen;
         else
@@ -474,7 +474,7 @@ int ffpkls( fitsfile *fptr,     /* I - FITS file pointer        */
         remain -= nchar;
         next  += nchar;
 
-        if (remain > 0) 
+        if (remain > 0)
         {
            /* count the number of single quote characters in next section */
            tstring[0] = '\0';
@@ -513,7 +513,7 @@ int ffplsw( fitsfile *fptr,     /* I - FITS file pointer  */
     if (ffgkys(fptr, "LONGSTRN", valstring, comm, &tstatus) == 0)
         return(*status);     /* keyword already exists, so just return */
 
-    ffpkys(fptr, "LONGSTRN", "OGIP 1.0", 
+    ffpkys(fptr, "LONGSTRN", "OGIP 1.0",
        "The HEASARC Long String Convention may be used.", status);
 
     ffpcom(fptr,
@@ -908,9 +908,9 @@ int ffpdat( fitsfile *fptr,      /* I - FITS file pointer  */
     ffgstm(date, &timeref, status);
 
     if (timeref)           /* GMT not available on this machine */
-        strcpy(tmzone, " Local");    
+        strcpy(tmzone, " Local");
     else
-        strcpy(tmzone, " UT");    
+        strcpy(tmzone, " UT");
 
     strcpy(card, "DATE    = '");
     strcat(card, date);
@@ -933,27 +933,27 @@ int ffverifydate(int year,          /* I - year (0 - 9999)           */
 {
     int ndays[] = {0,31,28,31,30,31,30,31,31,30,31,30,31};
     char errmsg[81];
-    
+
 
     if (year < 0 || year > 9999)
     {
-       sprintf(errmsg, 
+       sprintf(errmsg,
        "input year value = %d is out of range 0 - 9999", year);
        ffpmsg(errmsg);
        return(*status = BAD_DATE);
     }
     else if (month < 1 || month > 12)
     {
-       sprintf(errmsg, 
+       sprintf(errmsg,
        "input month value = %d is out of range 1 - 12", month);
        ffpmsg(errmsg);
        return(*status = BAD_DATE);
     }
-    
+
     if (ndays[month] == 31) {
         if (day < 1 || day > 31)
         {
-           sprintf(errmsg, 
+           sprintf(errmsg,
            "input day value = %d is out of range 1 - 31 for month %d", day, month);
            ffpmsg(errmsg);
            return(*status = BAD_DATE);
@@ -961,7 +961,7 @@ int ffverifydate(int year,          /* I - year (0 - 9999)           */
     } else if (ndays[month] == 30) {
         if (day < 1 || day > 30)
         {
-           sprintf(errmsg, 
+           sprintf(errmsg,
            "input day value = %d is out of range 1 - 30 for month %d", day, month);
            ffpmsg(errmsg);
            return(*status = BAD_DATE);
@@ -971,21 +971,21 @@ int ffverifydate(int year,          /* I - year (0 - 9999)           */
         {
             if (day == 29)
             {
-	      /* year is a leap year if it is divisible by 4 but not by 100,
-	         except years divisible by 400 are leap years
-	      */
-	        if ((year % 4 == 0 && year % 100 != 0 ) || year % 400 == 0)
-		   return (*status);
-		   
- 	        sprintf(errmsg, 
+          /* year is a leap year if it is divisible by 4 but not by 100,
+             except years divisible by 400 are leap years
+          */
+            if ((year % 4 == 0 && year % 100 != 0 ) || year % 400 == 0)
+           return (*status);
+
+            sprintf(errmsg,
            "input day value = %d is out of range 1 - 28 for February %d (not leap year)", day, year);
                 ffpmsg(errmsg);
-	    } else {
-                sprintf(errmsg, 
+        } else {
+                sprintf(errmsg,
                 "input day value = %d is out of range 1 - 28 (or 29) for February", day);
                 ffpmsg(errmsg);
-	    }
-	    
+        }
+
             return(*status = BAD_DATE);
         }
     }
@@ -1017,7 +1017,7 @@ int ffgstm( char *timestr,   /* O  - returned system date and time string  */
     }
 
     if (!ptr)                  /* GMT not available on this machine */
-        ptr = localtime(&tp); 
+        ptr = localtime(&tp);
 
     strftime(timestr, 25, "%Y-%m-%dT%H:%M:%S", ptr);
 
@@ -1037,7 +1037,7 @@ int ffdt2s(int year,          /* I - year (0 - 9999)           */
         return(*status);
 
     *datestr = '\0';
-    
+
     if (ffverifydate(year, month, day, status) > 0)
     {
         ffpmsg("invalid date (ffdt2s)");
@@ -1091,8 +1091,8 @@ int ffs2dt(char *datestr,   /* I - date string: "YYYY-MM-DD" or "dd/mm/yy" */
             /* this is an old format string: "dd/mm/yy" */
             lyear  = atoi(&datestr[6]) + 1900;
             lmonth = atoi(&datestr[3]);
-	    lday   = atoi(datestr);
-	    
+        lday   = atoi(datestr);
+
             if (year)
                 *year = lyear;
             if (month)
@@ -1179,9 +1179,9 @@ int fftm2s(int year,          /* I - year (0 - 9999)           */
     *datestr='\0';
 
     if (year != 0 || month != 0 || day !=0)
-    { 
+    {
         if (ffverifydate(year, month, day, status) > 0)
-	{
+    {
             ffpmsg("invalid date (fftm2s)");
             return(*status);
         }
@@ -1189,28 +1189,28 @@ int fftm2s(int year,          /* I - year (0 - 9999)           */
 
     if (hour < 0 || hour > 23)
     {
-       sprintf(errmsg, 
+       sprintf(errmsg,
        "input hour value is out of range 0 - 23: %d (fftm2s)", hour);
        ffpmsg(errmsg);
        return(*status = BAD_DATE);
     }
     else if (minute < 0 || minute > 59)
     {
-       sprintf(errmsg, 
+       sprintf(errmsg,
        "input minute value is out of range 0 - 59: %d (fftm2s)", minute);
        ffpmsg(errmsg);
        return(*status = BAD_DATE);
     }
     else if (second < 0. || second >= 61)
     {
-       sprintf(errmsg, 
+       sprintf(errmsg,
        "input second value is out of range 0 - 60.999: %f (fftm2s)", second);
        ffpmsg(errmsg);
        return(*status = BAD_DATE);
     }
     else if (decimals > 25)
     {
-       sprintf(errmsg, 
+       sprintf(errmsg,
        "input decimals value is out of range 0 - 25: %d (fftm2s)", decimals);
        ffpmsg(errmsg);
        return(*status = BAD_DATE);
@@ -1289,7 +1289,7 @@ int ffs2tm(char *datestr,     /* I - date string: "YYYY-MM-DD"    */
         slen = strlen(datestr);
         if (slen == 8 || slen == 10)
             return(*status);               /* OK, no time fields */
-        else if (slen < 19) 
+        else if (slen < 19)
         {
             ffpmsg("input date string has illegal format:");
             ffpmsg(datestr);
@@ -1366,7 +1366,7 @@ int ffs2tm(char *datestr,     /* I - date string: "YYYY-MM-DD"    */
     if (hour)
        if (*hour < 0 || *hour > 23)
        {
-          sprintf(errmsg, 
+          sprintf(errmsg,
           "hour value is out of range 0 - 23: %d (ffs2tm)", *hour);
           ffpmsg(errmsg);
           return(*status = BAD_DATE);
@@ -1375,7 +1375,7 @@ int ffs2tm(char *datestr,     /* I - date string: "YYYY-MM-DD"    */
     if (minute)
        if (*minute < 0 || *minute > 59)
        {
-          sprintf(errmsg, 
+          sprintf(errmsg,
           "minute value is out of range 0 - 59: %d (ffs2tm)", *minute);
           ffpmsg(errmsg);
           return(*status = BAD_DATE);
@@ -1384,7 +1384,7 @@ int ffs2tm(char *datestr,     /* I - date string: "YYYY-MM-DD"    */
     if (second)
        if (*second < 0 || *second >= 61.)
        {
-          sprintf(errmsg, 
+          sprintf(errmsg,
           "second value is out of range 0 - 60.9999: %f (ffs2tm)", *second);
           ffpmsg(errmsg);
           return(*status = BAD_DATE);
@@ -1394,7 +1394,7 @@ int ffs2tm(char *datestr,     /* I - date string: "YYYY-MM-DD"    */
 }
 /*--------------------------------------------------------------------------*/
 int ffgsdt( int *day, int *month, int *year, int *status )
-{  
+{
 /*
       This routine is included for backward compatibility
             with the Fortran FITSIO library.
@@ -1418,7 +1418,7 @@ int ffgsdt( int *day, int *month, int *year, int *status )
 
    if (!date)                  /* GMT not available on this machine */
    {
-       date = localtime(&now); 
+       date = localtime(&now);
    }
 
    *day = date->tm_mday;
@@ -1944,7 +1944,7 @@ int ffptdm( fitsfile *fptr, /* I - FITS file pointer                        */
        return(*status = NOT_BTABLE);
     }
 
-    strcpy(tdimstr, "(");            /* start constructing the TDIM value */   
+    strcpy(tdimstr, "(");            /* start constructing the TDIM value */
 
     for (ii = 0; ii < naxis; ii++)
     {
@@ -2038,7 +2038,7 @@ int ffptdmll( fitsfile *fptr, /* I - FITS file pointer                      */
        return(*status = NOT_BTABLE);
     }
 
-    strcpy(tdimstr, "(");            /* start constructing the TDIM value */   
+    strcpy(tdimstr, "(");            /* start constructing the TDIM value */
 
     for (ii = 0; ii < naxis; ii++)
     {
@@ -2143,7 +2143,7 @@ int ffphpr( fitsfile *fptr, /* I - FITS file pointer                        */
 {
     int ii;
     LONGLONG naxesll[20];
-   
+
     for (ii = 0; (ii < naxis) && (ii < 20); ii++)
        naxesll[ii] = naxes[ii];
 
@@ -2183,15 +2183,15 @@ int ffphprll( fitsfile *fptr, /* I - FITS file pointer                        */
     {
       if ( (fptr->Fptr)->request_compress_type )
       {
-      
+
        for (ii = 0; ii < naxis; ii++)
            tnaxes[ii] = (long) naxes[ii];
-	   
+
         /* write header for a compressed image */
         imcomp_init_table(fptr, bitpix, naxis, tnaxes, 1, status);
         return(*status);
       }
-    }  
+    }
 
     if ((fptr->Fptr)->curhdu == 0)
     {                /* write primary array header */
@@ -2218,7 +2218,7 @@ int ffphprll( fitsfile *fptr, /* I - FITS file pointer                        */
     else if (longbitpix == SBYTE_IMG)
         longbitpix = BYTE_IMG;
 
-    if (longbitpix != BYTE_IMG && longbitpix != SHORT_IMG && 
+    if (longbitpix != BYTE_IMG && longbitpix != SHORT_IMG &&
         longbitpix != LONG_IMG && longbitpix != LONGLONG_IMG &&
         longbitpix != FLOAT_IMG && longbitpix != DOUBLE_IMG)
     {
@@ -2288,7 +2288,7 @@ int ffphprll( fitsfile *fptr, /* I - FITS file pointer                        */
 
             strcpy(comm, "number of random group parameters");
             ffpkyj(fptr, "PCOUNT", pcount, comm, status);
-  
+
             strcpy(comm, "number of random groups");
             ffpkyj(fptr, "GCOUNT", gcount, comm, status);
         }
@@ -2321,7 +2321,7 @@ int ffphprll( fitsfile *fptr, /* I - FITS file pointer                        */
         {
             strcpy(comm, "required keyword; must = 0");
             ffpkyj(fptr, "PCOUNT", 0, comm, status);
-  
+
             strcpy(comm, "required keyword; must = 1");
             ffpkyj(fptr, "GCOUNT", 1, comm, status);
         }
@@ -2383,7 +2383,7 @@ int ffphtb(fitsfile *fptr,  /* I - FITS file pointer                        */
         return(*status = NEG_ROWS);
     else if (tfields < 0 || tfields > 999)
         return(*status = BAD_TFIELDS);
-    
+
     extnm[0] = '\0';
     if (extnmx)
         strncat(extnm, extnmx, FLEN_VALUE-1);
@@ -2458,7 +2458,7 @@ int ffphtb(fitsfile *fptr,  /* I - FITS file pointer                        */
         ffpmsg("Failed to write ASCII table header keywords (ffphtb)");
 
     if (gotmem)
-        free(tbcol); 
+        free(tbcol);
 
     return(*status);
 }
@@ -2572,7 +2572,7 @@ int ffphbn(fitsfile *fptr,  /* I - FITS file pointer                        */
             if (cptr)
                iread = sscanf(cptr,"%ld", &width);
 
-            if (iread == 1 && (width > repeat)) 
+            if (iread == 1 && (width > repeat))
             {
               if (repeat == 1)
                 strcpy(comm, "ERROR??  USING ASCII TABLE SYNTAX BY MISTAKE??");
@@ -2611,7 +2611,7 @@ int ffphbn(fitsfile *fptr,  /* I - FITS file pointer                        */
         {
            /* Replace the 'S' with an 'B' in the TFORMn code */
            cptr = tfmt;
-           while (*cptr != 'S') 
+           while (*cptr != 'S')
               cptr++;
 
            *cptr = 'B';
@@ -2627,11 +2627,11 @@ int ffphbn(fitsfile *fptr,  /* I - FITS file pointer                        */
            strcpy(comm, "data are not scaled");
            ffpkyg(fptr, name, 1., 0, comm, status);
         }
-        else if (abs(datatype) == TUSHORT) 
+        else if (abs(datatype) == TUSHORT)
         {
            /* Replace the 'U' with an 'I' in the TFORMn code */
            cptr = tfmt;
-           while (*cptr != 'U') 
+           while (*cptr != 'U')
               cptr++;
 
            *cptr = 'I';
@@ -2647,11 +2647,11 @@ int ffphbn(fitsfile *fptr,  /* I - FITS file pointer                        */
            strcpy(comm, "data are not scaled");
            ffpkyg(fptr, name, 1., 0, comm, status);
         }
-        else if (abs(datatype) == TULONG) 
+        else if (abs(datatype) == TULONG)
         {
            /* Replace the 'V' with an 'J' in the TFORMn code */
            cptr = tfmt;
-           while (*cptr != 'V') 
+           while (*cptr != 'V')
               cptr++;
 
            *cptr = 'J';
@@ -2710,7 +2710,7 @@ int ffphext(fitsfile *fptr,  /* I - FITS file pointer                       */
 {
     char message[FLEN_ERRMSG],comm[81], name[20], xtension[FLEN_VALUE];
     int ii;
- 
+
     if (fptr->HDUposition != (fptr->Fptr)->curhdu)
         ffmahd(fptr, (fptr->HDUposition) + 1, NULL, status);
 
@@ -2812,8 +2812,8 @@ int ffs2c(const char *instr, /* I - null terminated input string  */
           char *outstr,      /* O - null terminated quoted output string */
           int *status)       /* IO - error status */
 /*
-  convert an input string to a quoted string. Leading spaces 
-  are significant.  FITS string keyword values must be at least 
+  convert an input string to a quoted string. Leading spaces
+  are significant.  FITS string keyword values must be at least
   8 chars long so pad out string with spaces if necessary.
       Example:   km/s ==> 'km/s    '
   Single quote characters in the input string will be replace by
@@ -2870,7 +2870,7 @@ int ffr2f(float fval,   /* I - value to be converted to a string */
 */
 {
     char *cptr;
-        
+
     if (*status > 0)           /* inherit input status value if > 0 */
         return(*status);
 
@@ -2935,7 +2935,7 @@ int ffr2e(float fval,  /* I - value to be converted to a string */
                     *status = BAD_F2C;
                 }
 
-                return(*status);  
+                return(*status);
             }
         }
     }
@@ -3043,7 +3043,7 @@ int ffd2e(double dval,  /* I - value to be converted to a string */
                     *status = BAD_F2C;
                 }
 
-                return(*status);  
+                return(*status);
             }
         }
     }

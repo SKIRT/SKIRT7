@@ -31,8 +31,8 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////
 
 MonteCarloSimulation::MonteCarloSimulation()
-    : _is(0), _packages(0), _minWeightReduction(0),
-      _minfs(0), _xi(0), _continuousScattering(false), _assigner(0),
+    : _is(0), _packages(0), _minWeightReduction(1e4),
+      _minfs(0), _xi(0.5), _continuousScattering(false), _assigner(0),
       _lambdagrid(0), _ss(0), _ds(0)
 {
 }
@@ -277,7 +277,7 @@ void MonteCarloSimulation::dostellaremissionchunk(size_t index)
                 {
                     _ds->fillOpticalDepth(&pp);
                     if (_continuousScattering) continuouspeeloffscattering(&pp,&ppp);
-                    simulateescapeandabsorption(&pp,_ds->dustemission());
+                    simulateescapeandabsorption(&pp,_ds->storeabsorptionrates());
                     double L = pp.luminosity();
                     if (L==0.0) break;
                     if (L<=Lthreshold && pp.nScatt()>=_minfs) break;
@@ -428,7 +428,7 @@ void MonteCarloSimulation::continuouspeeloffscattering(PhotonPackage *pp, Photon
 
 ////////////////////////////////////////////////////////////////////
 
-void MonteCarloSimulation::simulateescapeandabsorption(PhotonPackage* pp, bool dustemission)
+void MonteCarloSimulation::simulateescapeandabsorption(PhotonPackage* pp, bool storeabsorptionrates)
 {
     double taupath = pp->tau();
     int ell = pp->ell();
@@ -441,7 +441,7 @@ void MonteCarloSimulation::simulateescapeandabsorption(PhotonPackage* pp, bool d
     {
         double albedo = _ds->mix(0)->albedo(ell);
         double expfactor = -expm1(-taupath);
-        if (dustemission)
+        if (storeabsorptionrates)
         {
             int Ncells = pp->size();
             for (int n=0; n<Ncells; n++)
@@ -496,7 +496,7 @@ void MonteCarloSimulation::simulateescapeandabsorption(PhotonPackage* pp, bool d
                 double Lintm = L * exp(-taustart) * expfactorm;
                 double Lscam = albedo * Lintm;
                 Lsca += Lscam;
-                if (dustemission)
+                if (storeabsorptionrates)
                 {
                     double Labsm = (1.0-albedo) * Lintm;
                     _ds->absorb(m,ell,Labsm,ynstellar);

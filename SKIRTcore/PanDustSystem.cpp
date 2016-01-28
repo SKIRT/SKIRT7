@@ -36,8 +36,8 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////
 
 PanDustSystem::PanDustSystem()
-    : _dustemissivity(0), _dustlib(0), _emissionBias(0), _emissionBoost(1), _selfabsorption(true), _writeEmissivity(false),
-      _writeTemp(true), _writeISRF(true), _cycles(0), _Nlambda(0), _haveLabsstel(false), _haveLabsdust(false)
+    : _dustemissivity(0), _dustlib(0), _emissionBias(0.5), _emissionBoost(1), _selfabsorption(false), _writeEmissivity(false),
+      _writeTemp(true), _writeISRF(false), _cycles(0), _Nlambda(0), _haveLabsstel(false), _haveLabsdust(false)
 {
 }
 
@@ -302,6 +302,13 @@ bool PanDustSystem::dustemission() const
     return _dustemissivity!=0;
 }
 
+////////////////////////////////////////////////////////////////////
+
+bool PanDustSystem::storeabsorptionrates() const
+{
+    return dustemission();
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void PanDustSystem::absorb(int m, int ell, double DeltaL, bool ynstellar)
@@ -322,14 +329,6 @@ void PanDustSystem::absorb(int m, int ell, double DeltaL, bool ynstellar)
 
 //////////////////////////////////////////////////////////////////////
 
-void PanDustSystem::rebootLabsdust()
-{
-    //_Labsdustvv.clear();
-    _distLabsdustvv.clear();
-}
-
-//////////////////////////////////////////////////////////////////////
-
 double PanDustSystem::Labs(int m, int ell) const
 {
     // will not work in one of the write functions (they need all cells and wavelengths)
@@ -340,6 +339,13 @@ double PanDustSystem::Labs(int m, int ell) const
     if (_haveLabsstel) sum += _distLabsstelvv(m,ell);
     if (_haveLabsdust) sum += _distLabsdustvv(m,ell);
     return sum;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void PanDustSystem::rebootLabsdust()
+{
+    _distLabsdustvv.clear();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -359,6 +365,8 @@ double PanDustSystem::Labs(int m) const
             sum += _distLabsdustvv(m,ell);
 
     return sum;
+
+    // TODO replace by function of ParallelTable: sum over column index
 }
 
 Array PanDustSystem::Labsbolv() const
@@ -377,6 +385,8 @@ Array PanDustSystem::Labsbolv() const
         comm->sum_all(Labsbolv);
     }
     return Labsbolv;
+
+    // TODO replace by function of paralleltable: all columns stack
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -394,7 +404,7 @@ double PanDustSystem::Labsstellartot() const
                 sum += _distLabsstelvv(mAbsolute,ell);
         }
 
-        if(_distLabsstelvv.distributed())
+        if(_distLabsstelvv.distributed()) // combine all cell subsets -> sum over processes
         {
             PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
 
@@ -406,6 +416,8 @@ double PanDustSystem::Labsstellartot() const
         }
     }
     return sum;
+
+    // TODO replace by function of paralleltable: total sum
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -415,7 +427,6 @@ double PanDustSystem::Labsdusttot()
     double sum = 0;
     if (_haveLabsdust)
     {
-        _distLabsdustvv.sync(); // this function is called right after the emission.
         for (size_t m=0; m<_cellAssigner->nvalues(); m++)
         {
             int mAbsolute = _cellAssigner->absoluteIndex(m);
@@ -436,29 +447,8 @@ double PanDustSystem::Labsdusttot()
         }
     }
     return sum;
-}
 
-//////////////////////////////////////////////////////////////////////
-
-Array PanDustSystem::meanintensityv(int m) const
-{
-    WavelengthGrid* lambdagrid = find<WavelengthGrid>();
-    Array Jv(lambdagrid->Nlambda());
-    double fac = 4.0*M_PI*volume(m);
-    for (int ell=0; ell<lambdagrid->Nlambda(); ell++)
-    {
-        double kappaabsrho = 0.0;
-        for (int h=0; h<_Ncomp; h++)
-        {
-            double kappaabs = mix(h)->kappaabs(ell);
-            double rho = density(m,h);
-            kappaabsrho += kappaabs*rho;
-        }
-        double J = Labs(m,ell) / (kappaabsrho*fac) / lambdagrid->dlambda(ell);
-        // guard against (rare) situations where both Labs and kappa*fac are zero
-        Jv[ell] = std::isfinite(J) ? J : 0.0;
-    }
-    return Jv;
+    // TODO replace by function of paralleltable: total sum
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -530,6 +520,15 @@ void PanDustSystem::sumResults(bool ynstellar)
 */
     }
 }
+
+////////////////////////////////////////////////////////////////////
+
+void PanDustSystem::syncLabsTables()
+{
+    _distLabsstelvv.sync();
+    _distLabsdustvv.sync();
+}
+
 
 ////////////////////////////////////////////////////////////////////
 

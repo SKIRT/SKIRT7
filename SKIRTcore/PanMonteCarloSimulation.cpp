@@ -133,7 +133,6 @@ void PanMonteCarloSimulation::rundustselfabsorption()
 
             // Determine the bolometric luminosity that is absorbed in every cell (and that will hence be re-emitted).
             _Labsbolv = _pds->Labsbolv();
-            // printf("_labsbolv samples %f %f %f %f\n", _Labsbolv[1000], _Labsbolv[1001], _Labsbolv[3000], _Labsbolv[3001]);
             // Set the absorbed dust luminosity to zero in all cells
             _pds->rebootLabsdust();
 
@@ -142,6 +141,7 @@ void PanMonteCarloSimulation::rundustselfabsorption()
             initprogress(QString(stage_name[stage]) + " dust self-absorption cycle " + QString::number(cycle));
             Parallel* parallel = find<ParallelFactory>()->parallel();
             parallel->call(this, &PanMonteCarloSimulation::dodustselfabsorptionchunk, assigner());
+            _pds->syncLabsTables();
 
             // Wait for the other processes to reach this point
             _comm->wait("this self-absorption cycle");
