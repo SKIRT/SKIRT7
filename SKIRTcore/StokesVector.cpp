@@ -74,14 +74,16 @@ void StokesVector::rotateStokes(double phi, Direction k)
         }
         _polarized = true;
     }
-
-    // rotate the Q and U in the new reference frame
-    double cos2phi = cos(2.0*phi);
-    double sin2phi = sin(2.0*phi);
-    double Q =  cos2phi*_Q + sin2phi*_U;
-    double U = -sin2phi*_Q + cos2phi*_U;
-    _Q = Q;
-    _U = U;
+    else
+    {
+        // rotate the Q and U in the new reference frame
+        double cos2phi = cos(2.0*phi);
+        double sin2phi = sin(2.0*phi);
+        double Q =  cos2phi*_Q + sin2phi*_U;
+        double U = -sin2phi*_Q + cos2phi*_U;
+        _Q = Q;
+        _U = U;
+    }
 
     // rotate the stored scattering plane to obtain the new scattering plane
     // using Rodrigues' rotation formula
