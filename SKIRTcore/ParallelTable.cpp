@@ -81,6 +81,99 @@ void ParallelTable::clear()
 
 ////////////////////////////////////////////////////////////////////
 
+double ParallelTable::sumRow(size_t i) const
+{
+    if (!_synced) throw FATALERROR(_name + " says: sync() must be called before using summation functions");
+
+    double sum = 0;
+    if (_dist)
+    {
+        if (_rowAssigner->validIndex(i)) // we have the whole row
+            return _rows[_rowAssigner->relativeIndex(i)].sum();
+        else throw FATALERROR(_name + " says: sumRow(index) called on wrong index");
+    }
+    else // not distributed -> everything available, so straightforward
+    {
+        for (size_t j=0; j<_colAssigner->total(); j++)
+            sum += (*this)(i,j);
+        return sum;
+    }
+}
+
+double ParallelTable::sumColumn(size_t j) const
+{
+    if (!_synced) throw FATALERROR(_name + " says: sync() must be called before using summation functions");
+
+    double sum = 0;
+    if (_dist)
+    {
+        if(_colAssigner->validIndex(j)) // we have the whole column
+            for (size_t i=0; i<_columns.size(0); i++)
+                sum += _columns(i,_colAssigner->relativeIndex(j));
+        else throw FATALERROR(_name + " says: sumColumn(index) called on wrong index");
+    }
+    else // not distributed
+    {
+        for (size_t i=0; i<_rowAssigner->total(); i++)
+            sum += (*this)(i,j);
+    }
+    return sum;
+}
+
+Array ParallelTable::stackColumns() const
+{
+    if (!_synced) throw FATALERROR(_name + " says: sync() must be called before using summation functions");
+
+    Array result(_rowAssigner->total());
+
+    if(_dist)
+    {
+        // fastest way: sum only the values in _rows, then do one big sum over the processes
+        for (size_t iRel=0; iRel<_rows.size(0); iRel++)
+            result[_rowAssigner->absoluteIndex(iRel)] = _rows[iRel].sum();
+        _comm->sum_all(result);
+    }
+    else
+    {
+        for (size_t i=0; i<_rowAssigner->total(); i++)
+            result[i] = sumRow(i);
+    }
+    return result;
+}
+
+Array ParallelTable::stackRows() const
+{
+    if (!_synced) throw FATALERROR(_name + " says: sync() must be called before using summation functions");
+
+    Array result(_colAssigner->total());
+
+    if(_dist)
+    {
+        for (size_t jRel=0; jRel<_columns.size(1); jRel++)
+        {
+            size_t j = _colAssigner->absoluteIndex(jRel);
+            for (size_t i=0; i<_columns.size(0); i++)
+                result[j] += _columns(i,jRel);
+        }
+        _comm->sum_all(result);
+    }
+    else
+    {
+        for (size_t j=0; j<_colAssigner->total(); j++)
+            result[j] = sumColumn(j);
+    }
+    return result;
+}
+
+double ParallelTable::sumEverything() const
+{
+    if (!_synced) throw FATALERROR(_name + " says: sync() must be called before using summation functions");
+
+    return stackColumns().sum();
+}
+
+////////////////////////////////////////////////////////////////////
+
 const double& ParallelTable::operator()(size_t i, size_t j) const
 {
     if (!_synced) throw FATALERROR(_name + " says: sync() must be called before using the read operator");

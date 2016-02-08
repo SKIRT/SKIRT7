@@ -128,12 +128,12 @@ void PanDustSystem::setupSelfAfter()
     if (dustemission())
     {
         //_Labsstelvv.resize(_Ncells,_Nlambda);
-        _distLabsstelvv.initialize("Absorbed Stellar Luminosity",_lambdaAssigner,_cellAssigner,COLUMN);
+        _Labsstelvv.initialize("Absorbed Stellar Luminosity",_lambdaAssigner,_cellAssigner,COLUMN);
         _haveLabsstel = true;
         if (selfAbsorption())
         {
             //_Labsdustvv.resize(_Ncells,_Nlambda);
-            _distLabsdustvv.initialize("Absorbed Dust Luminosity",_lambdaAssigner,_cellAssigner,COLUMN);
+            _Labsdustvv.initialize("Absorbed Dust Luminosity",_lambdaAssigner,_cellAssigner,COLUMN);
             _haveLabsdust = true;
         }
     }
@@ -316,14 +316,12 @@ void PanDustSystem::absorb(int m, int ell, double DeltaL, bool ynstellar)
     if (ynstellar)
     {
         if (!_haveLabsstel) throw FATALERROR("This dust system does not support absorption of stellar emission");
-        //LockFree::add(_Labsstelvv(m,ell), DeltaL);
-        LockFree::add(_distLabsstelvv(m,ell), DeltaL);
+        LockFree::add(_Labsstelvv(m,ell), DeltaL);
     }
     else
     {
         if (!_haveLabsdust) throw FATALERROR("This dust system does not support absorption of dust emission");
-        //LockFree::add(_Labsdustvv(m,ell), DeltaL);
-        LockFree::add(_distLabsdustvv(m,ell), DeltaL);
+        LockFree::add(_Labsdustvv(m,ell), DeltaL);
     }
 }
 
@@ -332,12 +330,10 @@ void PanDustSystem::absorb(int m, int ell, double DeltaL, bool ynstellar)
 double PanDustSystem::Labs(int m, int ell) const
 {
     // will not work in one of the write functions (they need all cells and wavelengths)
-    // only callable after syncing the DistMemTables!
+    // only callable after syncing the ParallelTables!
     double sum = 0;
-    // if (_haveLabsstel) sum += _Labsstelvv(m,ell);
-    // if (_haveLabsdust) sum += _Labsdustvv(m,ell);
-    if (_haveLabsstel) sum += _distLabsstelvv(m,ell);
-    if (_haveLabsdust) sum += _distLabsdustvv(m,ell);
+    if (_haveLabsstel) sum += _Labsstelvv(m,ell);
+    if (_haveLabsdust) sum += _Labsdustvv(m,ell);
     return sum;
 }
 
@@ -345,55 +341,63 @@ double PanDustSystem::Labs(int m, int ell) const
 
 void PanDustSystem::rebootLabsdust()
 {
-    _distLabsdustvv.clear();
+    _Labsdustvv.clear();
 }
 
 //////////////////////////////////////////////////////////////////////
 
 double PanDustSystem::Labs(int m) const
 {
-    // Return zero when this cell is not assigned to this process
-    //
-    //    return 0;
+//    double sum = 0;
+//    if (_haveLabsstel)
+//        for (int ell=0; ell<_Nlambda; ell++)
+//            sum += _distLabsstelvv(m,ell);
+//    if (_haveLabsdust)
+//        for (int ell=0; ell<_Nlambda; ell++)
+//            sum += _distLabsdustvv(m,ell);
 
+//    return sum;
     double sum = 0;
+
     if (_haveLabsstel)
-        for (int ell=0; ell<_Nlambda; ell++)
-            sum += _distLabsstelvv(m,ell);
+        sum += _Labsstelvv.sumRow(m);
     if (_haveLabsdust)
-        for (int ell=0; ell<_Nlambda; ell++)
-            sum += _distLabsdustvv(m,ell);
+        sum += _Labsdustvv.sumRow(m);
 
     return sum;
-
-    // TODO replace by function of ParallelTable: sum over column index
 }
 
 Array PanDustSystem::Labsbolv() const
 {
-    Array Labsbolv(_Ncells);
+//    Array Labsbolv(_Ncells);
 
-    for (int m=0; m<_Ncells; m++)
-        if (_cellAssigner->validIndex(m))
-            Labsbolv[m] = Labs(m);
+//    for (int m=0; m<_Ncells; m++)
+//        if (_cellAssigner->validIndex(m))
+//            Labsbolv[m] = Labs(m);
 
-    // If the tables are distributed over the different processes, there are still some zeroes in the Array.
-    // Therefore the Array is summed. If the tables are not distributed, all data is already here.
-    if (_distLabsdustvv.distributed())
-    {
-        PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
-        comm->sum_all(Labsbolv);
-    }
-    return Labsbolv;
+//    // If the tables are distributed over the different processes, there are still some zeroes in the Array.
+//    // Therefore the Array is summed. If the tables are not distributed, all data is already here.
+//    if (_distLabsdustvv.distributed())
+//    {
+//        PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+//        comm->sum_all(Labsbolv);
+//    }
+//    return Labsbolv;
+    Array sum(_Ncells);
 
-    // TODO replace by function of paralleltable: all columns stack
+    if (_haveLabsstel)
+        sum += _Labsstelvv.stackColumns();
+    if (_haveLabsdust)
+        sum += _Labsdustvv.stackColumns();
+
+    return sum;
 }
 
 //////////////////////////////////////////////////////////////////////
 
 double PanDustSystem::Labsstellartot() const
 {
-    double sum = 0;
+    /*double sum = 0;
     if (_haveLabsstel)
     {
         for (size_t m=0; m<_cellAssigner->nvalues(); m++) // sum over this subset of cells
@@ -415,40 +419,38 @@ double PanDustSystem::Labsstellartot() const
             sum = arr[0];
         }
     }
-    return sum;
-
-    // TODO replace by function of paralleltable: total sum
+    return sum*/
+    return _Labsstelvv.sumEverything();
 }
 
 //////////////////////////////////////////////////////////////////////
 
-double PanDustSystem::Labsdusttot()
+double PanDustSystem::Labsdusttot() const
 {
-    double sum = 0;
-    if (_haveLabsdust)
-    {
-        for (size_t m=0; m<_cellAssigner->nvalues(); m++)
-        {
-            int mAbsolute = _cellAssigner->absoluteIndex(m);
+//    double sum = 0;
+//    if (_haveLabsdust)
+//    {
+//        for (size_t m=0; m<_cellAssigner->nvalues(); m++)
+//        {
+//            int mAbsolute = _cellAssigner->absoluteIndex(m);
 
-            for (int ell=0; ell<_Nlambda; ell++)
-                sum += _distLabsdustvv.read(mAbsolute,ell);
-        }
+//            for (int ell=0; ell<_Nlambda; ell++)
+//                sum += _distLabsdustvv.read(mAbsolute,ell);
+//        }
 
-        if (_distLabsdustvv.distributed())
-        {
-            PeerToPeerCommunicator * comm = find<PeerToPeerCommunicator>();
+//        if (_distLabsdustvv.distributed())
+//        {
+//            PeerToPeerCommunicator * comm = find<PeerToPeerCommunicator>();
 
-            Array arr(1);
+//            Array arr(1);
 
-            arr[0] = sum;
-            comm->sum_all(arr);
-            sum = arr[0];
-        }
-    }
-    return sum;
-
-    // TODO replace by function of paralleltable: total sum
+//            arr[0] = sum;
+//            comm->sum_all(arr);
+//            sum = arr[0];
+//        }
+//    }
+//    return sum;
+    return _Labsdustvv.sumEverything();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -476,30 +478,10 @@ void PanDustSystem::sumResults(bool ynstellar)
     //comm->sum_all(ynstellar ? _Labsstelvv.getArray() : _Labsdustvv.getArray());
     // This will need to be replaced by the communication between the two arrays
     if (ynstellar)
-    {
-        _distLabsstelvv.sync();
-/*
-            // Print to compare
-            TextOutFile original(this, "originalstellar", "Labsstellarvv");
-            TextOutFile newarray(this, "newarraystellar", "distLabsstellvv");
-
-            for (size_t m=0; m<_cellAssigner->nvalues(); m++)
-            {
-                QString oss1;
-                QString oss2;
-                for(int ell = 0; ell < _Nlambda; ell++)
-                {
-                    oss1 += QString::number(_Labsstelvv(_cellAssigner->absoluteIndex(m), ell)) + ' ';
-                    oss2 += QString::number(_distLabsstelvv.read(_cellAssigner->absoluteIndex(m),ell)) + ' ';
-                }
-                original.writeLine(oss1);
-                newarray.writeLine(oss2);
-            }
-*/
-    }
+        _Labsstelvv.sync();
     else
     {
-        _distLabsdustvv.sync();
+        _Labsdustvv.sync();
 /*
             // Print to compare
             TextOutFile original(this, "originaldust", "Labsdustvv");
@@ -525,10 +507,9 @@ void PanDustSystem::sumResults(bool ynstellar)
 
 void PanDustSystem::syncLabsTables()
 {
-    _distLabsstelvv.sync();
-    _distLabsdustvv.sync();
+    _Labsstelvv.sync();
+    _Labsdustvv.sync();
 }
-
 
 ////////////////////////////////////////////////////////////////////
 

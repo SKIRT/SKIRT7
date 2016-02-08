@@ -42,6 +42,8 @@ public:
         on all processes in the communicator. */
     void sum_all(Array& arr);
 
+    void sum_all(double&);
+
     /** This function is used for broadcasting the values in an Array from one particular process to
         all other processes in this communicator. The rank of the sending process is indicated with the
         second argument. */

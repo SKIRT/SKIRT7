@@ -71,16 +71,9 @@ public:
         store the library templates and have luminosity() perform the mapping from dust cell to library
         entry. For each dust cell (or library entry in the latter case), the emissivities are converted
         to luminosities, yielding an emission spectrum or emission SED. After each process has
-        calculated these SEDs for the library entries (and mapped dust cells) it was assigned to, each
-        process must assemble the SEDs for each of these entries (or dust cells) at one place,
-        requiring the information stored at all other processes. This is done by calling the assemble
-        function. Of course, this procedure only has to be performed when the processes have indeed
-        performed the calculation in parallel. This depends on which ProcessAssigner subclass has been
-        chosen by the user. If a 'parallel' ProcessAssigner has been chosen, assembly and thus
-        communication between the processes is required. Another ProcessAssigner can be chosen which
-        assigns each process to the same library entries, avoiding the need for communication
-        afterwards. Whether or not the assemble function has to be called is determined by the parallel
-        function of the ProcessAssigner. */
+        calculated these SEDs for the library entries (and mapped dust cells) it was assigned to, the
+        necessary communications are performed by calling the sync function on the table containing the
+        results.*/
     void calculate();
 
     /** This function returns the luminosity fraction \f$L_\ell\f$ at the wavelength index
@@ -88,26 +81,6 @@ public:
         dust cell number \f$m\f$. The function simply looks up the appropriate value in the cached
         results produced by calculate(). */
     double luminosity(int m, int ell) const;
-
-private:
-    /** This function is used to assemble the list of luminosities with the information contained at
-        different processes. When a ProcessAssigner subclass is used which distributes the calculation
-        of the dust emission spectra amongst the different parallel processes, each process contains
-        only the emission luminosities for a particular set of library entries or dust cells (depending
-        on which DustLib subclass is used and whether or not multiple dust components are present). In
-        order to perform the simulation of thermal photon packages, each process needs the emission %SED
-        for all dust cells (or all library entries). This function uses the PeerToPeerCommunicator to
-        broadcast the SEDs of the dust cells (or library entries) assigned to a particular process to
-        all other processes and storing them in the appropriate place in the list. This is implemented
-        as a loop over all dust cells (or all library entries), where for each dust cell (library
-        entry) the ProcessAssigner is called to determine which process was assigned to it. Next, the
-        broadcast function of the PeerToPeerCommunicator class is called, passing the %SED of that dust
-        cell (library entry) and rank of that process as arguments. Only for that process, the %SED
-        contains actual luminosities, whereas for the other processes the %SED is zero. When the
-        broadcast function returns, the luminosities from the former process have been copied in the
-        memory of the other processes. When this is done for each dust cell (library entry), the
-        assembly is complete. */
-    void assemble();
 
 protected:
     /** This function returns the number of entries in the library. It must be implemented by each

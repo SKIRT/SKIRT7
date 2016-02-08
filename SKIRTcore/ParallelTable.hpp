@@ -17,21 +17,29 @@ public:
     // Constructor
     ParallelTable();
 
+    // Initialization
     void initialize(QString name, ProcessAssigner* colAssigner, ProcessAssigner* rowAssigner, writeState writeOn);
 
-    // Public methods
+    // Reading and writing operators
     const double& operator()(size_t i, size_t j) const; // read operator
     double& operator()(size_t i, size_t j); // write operator
-    Array& operator[](size_t i);
-    const Array& operator[](size_t i) const;
+    Array& operator[](size_t i); // write column
+    const Array& operator[](size_t i) const; // read column
+
+    // Basic operations
+    void sync(); // communicates between processes to synchronize _colDist with _rowDist or vice versa
+    void clear(); // reset contents to zeros
+
+    // Different kinds of summations
+    double sumRow(size_t i) const; // sum of the values in a row
+    double sumColumn(size_t j) const; // sum of the values in a column
+    Array stackColumns() const; // sum of al the columns: each element is a row sum
+    Array stackRows() const; // sum of al the rows: each elements is a column sum
+    double sumEverything() const;
 
     // Some extra stuff
     const double& read(size_t i, size_t j) const;
     double& write(size_t i, size_t j);
-
-    void sync(); // communicates between processes to sync _colDist with _rowDist or vice versa
-    void clear(); // reset contents to zeros
-
     bool distributed() const;
     bool initialized() const;
 

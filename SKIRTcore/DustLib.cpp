@@ -37,6 +37,7 @@ void DustLib::setupSelfBefore()
 
     WavelengthGrid* lambdagrid = find<WavelengthGrid>();
     _lambdaAssigner = lambdagrid->assigner();
+
     PanDustSystem* dustsystem = find<PanDustSystem>();
     _cellAssigner = dustsystem->assigner();
 
@@ -61,7 +62,6 @@ namespace
         QTime _timer;           // measures the time elapsed since the most recent log message
 
         // new stuff
-        bool _dataparallel;
         ProcessAssigner* _cellAssigner;
 
     public:
@@ -181,42 +181,31 @@ void DustLib::calculate()
     int Nlib = entries();
     _nv = mapping();
 
-    // if data is distributed: each process has its own dustlibrary and calculates all entries of it => Identical
-    // if data is not distributed: divide calculation over processes => Staggered
+    ProcessAssigner* helpAssigner;
+    // if data is distributed: each process has its own dust library, corresponding to different cells for each process
+    // => need to calculate for all the indices => Identical
+    if (_Lvv.distributed()) helpAssigner = new IdenticalAssigner(this);
 
-    //ProcessAssigner* helpAssigner;
-    //if (_distLvv.distributed()) helpAssigner = new IdenticalAssigner(this);
-    //else helpAssigner = new StaggeredAssigner(this);
-    //helpAssigner->assign(Nlib);
+    // if data is not distributed: each process has the same dust library
+    // => divide the work => Staggered
+    else helpAssigner = new StaggeredAssigner(this);
+
+    helpAssigner->assign(Nlib);
 
     // calculate the emissivity for each library entry
     EmissionCalculator calc(_Lvv, _nv, Nlib, this);
-
-    // Parallel* parallel = find<ParallelFactory>()->parallel();
-    // parallel->call(&calc, helpAssigner);
+    Parallel* parallel = find<ParallelFactory>()->parallel();
+    parallel->call(&calc, helpAssigner);
 
     // for loop for debugging purposes
-    for (int n=0; n<Nlib; n++) calc.body(n);
+    // for (int n=0; n<Nlib; n++) calc.body(n);
 
     // Wait for the other processes to reach this point
     PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
     comm->wait("the emission spectra calculation");
 
-    // Print to compare
-/*
-    TextOutFile original(this, "before_sync", "_Lvv");
-    for (size_t m=0; m<_cellAssigner->nvalues(); m++)
-    {
-        QString oss1;
-        for(int ell=0; ell<_lambdaAssigner->total(); ell++)
-        {
-            oss1 += QString::number(_distLvv.write(_cellAssigner->absoluteIndex(m), ell)) + ' ';
-        }
-        original.writeLine(oss1);
-    }
-*/
     _Lvv.sync();
-/*
+/*  print text file
     TextOutFile after(this, "after_sync", "_Lvv");
     for (size_t m=0; m<_cellAssigner->total(); m++)
     {
@@ -238,8 +227,3 @@ double DustLib::luminosity(int m, int ell) const
 }
 
 ////////////////////////////////////////////////////////////////////
-
-void DustLib::assemble()
-{
-}
-

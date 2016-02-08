@@ -219,7 +219,7 @@ public:
 
     /** This function returns the total (bolometric) absorbed luminosity in the entire dust system.
         It is calculated by summing the absorbed dust luminosity of all the cells. */
-    double Labsdusttot();
+    double Labsdusttot() const;
 
     /** This function (re-)calculates the relevant dust emission spectra for the dust system, based
         on the absorption data currently stored in the dust cells, and internally caches the
@@ -298,8 +298,8 @@ private:
     //Table<2> _Labsdustvv;   // absorbed dust emission for each cell and each wavelength (indexed on m,ell)
     ProcessAssigner* _lambdaAssigner; // determines which wavelengths absorption will be recorded for
     ProcessAssigner* _cellAssigner; // determines which cells will be given to the DustLib via
-    ParallelTable _distLabsstelvv;
-    ParallelTable _distLabsdustvv;
+    ParallelTable _Labsstelvv;
+    ParallelTable _Labsdustvv;
     bool _haveLabsstel;     // true if absorbed stellar emission is relevant for this simulation
     bool _haveLabsdust;     // true if absorbed dust emission is relevant for this simulation
 };
