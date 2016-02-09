@@ -200,6 +200,19 @@ public:
         is thrown. */
     Vec particleCenter(int index) const;
 
+    /** This function is used by the interface() template function in the SimulationItem class. It
+        returns a list of simulation items that should be considered in the search for an item that
+        implements the requested interface. The implementation in this class returns the default
+        list (i.e. the receiving object) except in the following case. If the requested interface
+        is DustMassInBoxInterface (which is implemented by this class) and one or more of the
+        imported SPH particles have a negative mass, the returned list is empty. We avoid using the
+        (faster) mass-in-box calculation when there are negative masses because the result can be
+        inconsistent with the densities sampled over random points throughout the volume. This
+        inconsistency is caused by the fact that the sampled densities are individually clipped to
+        zero, while the mass-in-box is only clipped to zero after the integration/summation has
+        been performed. */
+    QList<SimulationItem*> interfaceCandidates(const std::type_info& interfaceTypeInfo);
+
     //======================== Data Members ========================
 
 private:
@@ -212,7 +225,8 @@ private:
     // the SPH particles
     std::vector<SPHGasParticle> _pv;  // the particles in the order read from the file
     const SPHGasParticleGrid* _grid;  // a list of particles overlapping each grid cell
-    Array _cumrhov;   // cumulative density distribution for particles in pv
+    Array _cumrhov;         // cumulative density distribution for particles in pv
+    bool _negativeMasses;   // true if at least one of the imported particles has a negative mass
 };
 
 ////////////////////////////////////////////////////////////////////
