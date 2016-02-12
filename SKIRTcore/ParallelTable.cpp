@@ -351,8 +351,8 @@ void ParallelTable::row_to_col()
     int totalCols = _rows.size(1);
     int thisRank = _comm->rank();
 
-    for (int j=0; j<totalCols; j++) // for each column (determines receiver)
-        for (int i=0; i<totalRows; i++) // for each row (determines sender)
+    for (int i=0; i<totalRows; i++) // for each row (determines sender)
+        for (int j=0; j<totalCols; j++) // for each column (determines receiver)
         {
             int tgtRank = _colAssigner->rankForIndex(j);
             int srcRank = _rowAssigner->rankForIndex(i);
