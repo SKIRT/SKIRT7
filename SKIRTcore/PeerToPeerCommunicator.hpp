@@ -58,6 +58,8 @@ public:
 
     void receiveDouble(double& buffer, int sender, int tag);
 
+    void finishRequests();
+
     /** This function returns the rank of the root process. */
     int root();
 

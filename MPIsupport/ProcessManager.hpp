@@ -9,6 +9,8 @@
 #include <atomic>
 #include <QDataStream>
 
+#include <mpi.h>
+
 ////////////////////////////////////////////////////////////////////
 
 /** The ProcessManager class is an interface to the MPI library, and is the only place in the SKIRT
@@ -74,6 +76,8 @@ public:
 
     static void receiveDouble(double& buffer, int sender, int tag);
 
+    static void wait_all();
+
     /** The purpose of this function is to sum a particular array of double values element-wise
         across the different processes. The resulting values are stored in the array passed as the
         second argument 'result_array', only on the process that is assigned as root. The rank of
@@ -116,7 +120,7 @@ public:
 
 private:
     static std::atomic<int> requests;   // This atomic integer is used to store the number of active requests for MPI
-
+    static std::vector<MPI_Request> pendingrequests;
 };
 
 #endif // PROCESSMANAGER_HPP

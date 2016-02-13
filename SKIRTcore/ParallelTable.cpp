@@ -24,14 +24,14 @@ void ParallelTable::initialize(QString name, ProcessAssigner *colAssigner, Proce
     int Nrows = _rowAssigner->total();
     int Ncols = _colAssigner->total();
 
-    printf("initializing %s Table, sizes are (allrows:%d,%d) and (allcols:%d,%d\n",
+    printf("initializing %s Table, sizes are (allrows:%d,%d) and (allcols:%d,%d)\n",
            _name.toStdString().c_str(), Nrows, _colAssigner->nvalues(), _rowAssigner->nvalues(), Ncols);
 
     // distributed memory
     if (colAssigner->parallel() && rowAssigner->parallel() && _comm->isMultiProc())
     {
         _dist = true;
-        printf("ParallelTable is distributed.");
+        printf("ParallelTable is distributed.\n");
         _columns.resize(Nrows,colAssigner->nvalues());
         _rows.resize(rowAssigner->nvalues(),Ncols);
     }
@@ -321,26 +321,47 @@ void ParallelTable::col_to_row()
     int totalCols = _rows.size(1);
     int thisRank = _comm->rank();
 
+    int sendCount = 0;
+    int N = 750;
+
     for (int i=0; i<totalRows; i++) // for each possible row of the big array (determines receiver)
+    {
+        int tgtRank = _rowAssigner->rankForIndex(i); // the rank where target has row i in it
+
+        // post some receives
         for (int j=0; j<totalCols; j++) // for each possible column of the big array (determines sender)
         {
-            int tgtRank = _rowAssigner->rankForIndex(i); // the rank where target has row i in it
             int srcRank = _colAssigner->rankForIndex(j); // the rank where the source has col j in it
             int tag = i*totalCols + j; // unique for each position in the big array
-            if (thisRank == srcRank) // if this process has column j, do send
-            {
-                double& sendbuf = _columns(i,_colAssigner->relativeIndex(j));
-                // copy it if my target has row i, else send it
-                if (thisRank == tgtRank) _rows(_rowAssigner->relativeIndex(i), j) = sendbuf;
-                else _comm->sendDouble(sendbuf,tgtRank,tag);
-            }
-            else if (thisRank == tgtRank) // receive if target needs i
+
+            if (thisRank!= srcRank && thisRank == tgtRank) // receive if target needs row i
             {
                 double& recvbuf = _rows(_rowAssigner->relativeIndex(i),j);
                 _comm->receiveDouble(recvbuf,srcRank,tag);
             }
         }
-    _comm->wait("syncing " + _name);
+        // post some sends
+        for (int j=0; j<totalCols; j++) // for each possible column of the big array (determines sender)
+        {
+            int srcRank = _colAssigner->rankForIndex(j); // the rank where the source has col j in it
+            int tag = i*totalCols + j; // unique for each position in the big array
+
+            if (thisRank == srcRank) // if this process has column j, do send
+            {
+                double& sendbuf = _columns(i,_colAssigner->relativeIndex(j));
+                if (thisRank == tgtRank) _rows(_rowAssigner->relativeIndex(i), j) = sendbuf;
+                else _comm->sendDouble(sendbuf,tgtRank,tag);
+            }
+            sendCount++;
+        }
+        // clear the request vector every N
+        if (sendCount > N)
+        {
+            _comm->finishRequests();
+            sendCount = 0;
+        }
+    }
+    _comm->finishRequests();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -351,25 +372,47 @@ void ParallelTable::row_to_col()
     int totalCols = _rows.size(1);
     int thisRank = _comm->rank();
 
+    int sendCount = 0;
+    int N = 750;
+
     for (int i=0; i<totalRows; i++) // for each row (determines sender)
+    {
+        int srcRank = _rowAssigner->rankForIndex(i);
+
+        // post some receives
         for (int j=0; j<totalCols; j++) // for each column (determines receiver)
         {
             int tgtRank = _colAssigner->rankForIndex(j);
-            int srcRank = _rowAssigner->rankForIndex(i);
             int tag = i*totalCols + j;
+
+            if (thisRank != srcRank && thisRank == tgtRank)
+            {
+                double& recvbuf = _columns(i,_colAssigner->relativeIndex(j));
+                _comm->receiveDouble(recvbuf,srcRank,tag);
+            }
+        }
+        // post some sends
+        for (int j=0; j<totalCols; j++) // for each column (determines receiver)
+        {
+            int tgtRank = _colAssigner->rankForIndex(j);
+            int tag = i*totalCols + j;
+
             if (thisRank == srcRank)
             {
                 double& sendbuf = _rows(_rowAssigner->relativeIndex(i),j);
                 if (thisRank == tgtRank) _columns(i,_colAssigner->relativeIndex(j)) = sendbuf;
                 else _comm->sendDouble(sendbuf,tgtRank,tag);
             }
-            else if (thisRank == tgtRank)
-            {
-                double& recvbuf = _columns(i,_colAssigner->relativeIndex(j));
-                _comm->receiveDouble(recvbuf,srcRank,tag);
-            }
+            sendCount++;
         }
-    _comm->wait("syncing " + _name);
+        // clear the request vector every N
+        if (sendCount > N)
+        {
+            _comm->finishRequests();
+            sendCount = 0;
+        }
+    }
+    _comm->finishRequests();
 }
 
 ////////////////////////////////////////////////////////////////////

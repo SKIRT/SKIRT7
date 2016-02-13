@@ -13,6 +13,7 @@
 ////////////////////////////////////////////////////////////////////
 
 std::atomic<int> ProcessManager::requests(0);
+std::vector<MPI_Request> ProcessManager::pendingrequests;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -122,8 +123,13 @@ void ProcessManager::receiveByteBuffer(QByteArray &buffer, int sender, int& tag)
 void ProcessManager::sendDouble(double& buffer, int receiver, int tag)
 {
 #ifdef BUILDING_WITH_MPI
-    //MPI_Request req;
-    MPI_Send(&buffer, 1, MPI_DOUBLE, receiver, tag, MPI_COMM_WORLD);
+
+    //MPI_Send(&buffer, 1, MPI_DOUBLE, receiver, tag, MPI_COMM_WORLD);
+
+    MPI_Request request;
+    MPI_Isend(&buffer, 1, MPI_DOUBLE, receiver, tag, MPI_COMM_WORLD, &request);
+    ProcessManager::pendingrequests.push_back(request);
+
 #else
     Q_UNUSED(buffer) Q_UNUSED(receiver) Q_UNUSED(tag)
 #endif
@@ -134,11 +140,29 @@ void ProcessManager::sendDouble(double& buffer, int receiver, int tag)
 void ProcessManager::receiveDouble(double& buffer, int sender, int tag)
 {
 #ifdef BUILDING_WITH_MPI
-    // nog niet zeker wat ik met request moet doen
-    MPI_Status st;
-    MPI_Recv(&buffer, 1, MPI_DOUBLE, sender, tag, MPI_COMM_WORLD, &st);
+
+    //MPI_Recv(&buffer, 1, MPI_DOUBLE, sender, tag, MPI_COMM_WORLD, &st);
+
+    MPI_Request request;
+    MPI_Irecv(&buffer, 1, MPI_DOUBLE, sender, tag, MPI_COMM_WORLD, &request);
+    ProcessManager::pendingrequests.push_back(request);
+
 #else
     Q_UNUSED(buffer) Q_UNUSED(receiver) Q_UNUSED(tag)
+#endif
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void ProcessManager::wait_all()
+{
+#ifdef BUILDING_WITH_MPI
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Status statuses[ProcessManager::pendingrequests.size()];
+    MPI_Waitall(ProcessManager::pendingrequests.size(), &ProcessManager::pendingrequests[0], &statuses[0]);
+    ProcessManager::pendingrequests.clear();
+
 #endif
 }
 

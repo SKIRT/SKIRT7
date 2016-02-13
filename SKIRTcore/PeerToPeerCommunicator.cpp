@@ -77,6 +77,13 @@ void PeerToPeerCommunicator::receiveDouble(double& buffer, int sender, int tag)
     ProcessManager::receiveDouble(buffer,sender,tag);
 }
 
+void PeerToPeerCommunicator::finishRequests()
+{
+    if (!isMultiProc()) return;
+
+    ProcessManager::wait_all();
+}
+
 ////////////////////////////////////////////////////////////////////
 
 int PeerToPeerCommunicator::root()
