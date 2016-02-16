@@ -624,9 +624,10 @@ void DustMix::scatteringPeelOffPolarization(StokesVector* out, const PhotonPacka
         // copy the polarization state
         *out = *pp;
 
+        // this generates a normal if it is the first scattering event. Otherwise it won't change anything.
+        out->rotateStokes(0, pp->direction());
         // rotate over the angle between scattering planes
-        double phi = angleBetweenScatteringPlanes(pp->normal(), pp->direction(), bfknew);
-        // we always have to rotate, so the StokesVektor knows the reference
+        double phi = angleBetweenScatteringPlanes(out->normal(), pp->direction(), bfknew);
         out->rotateStokes(phi, pp->direction());
 
         // apply the Mueller matrix
@@ -638,7 +639,7 @@ void DustMix::scatteringPeelOffPolarization(StokesVector* out, const PhotonPacka
         // rotate over the angle between the reference axis in the peel-off scattering plane
         // and the x-axis in the instrument frame
         double alpha = angleBetweenScatteringAndInstrumentReference(out->normal(), bfknew, bfky);
-        if (alpha) out->rotateStokes(alpha, pp->direction());
+        out->rotateStokes(alpha, pp->direction());
     }
 }
 

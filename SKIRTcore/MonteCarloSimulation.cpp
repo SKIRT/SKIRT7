@@ -278,18 +278,19 @@ void MonteCarloSimulation::dostellaremissionchunk(size_t index)
             for (quint64 i=0; i<count; i++)
             {
                 _ss->launch(&pp,ell,L);
-                peeloffemission(&pp,&ppp);
-                if (_ds) while (true)
+                if (pp.luminosity()>0)
                 {
-                    _ds->fillOpticalDepth(&pp);
-                    if (_continuousScattering) continuouspeeloffscattering(&pp,&ppp);
-                    simulateescapeandabsorption(&pp,_ds->storeabsorptionrates());
-                    double L = pp.luminosity();
-                    if (L==0.0) break;
-                    if (L<=Lthreshold && pp.nScatt()>=_minfs) break;
-                    simulatepropagation(&pp);
-                    if (!_continuousScattering) peeloffscattering(&pp,&ppp);
-                    simulatescattering(&pp);
+                    peeloffemission(&pp,&ppp);
+                    if (_ds) while (true)
+                    {
+                        _ds->fillOpticalDepth(&pp);
+                        if (_continuousScattering) continuouspeeloffscattering(&pp,&ppp);
+                        simulateescapeandabsorption(&pp,_ds->storeabsorptionrates());
+                        if (pp.luminosity()<=0 || (pp.luminosity()<=Lthreshold && pp.nScatt()>=_minfs)) break;
+                        simulatepropagation(&pp);
+                        if (!_continuousScattering) peeloffscattering(&pp,&ppp);
+                        simulatescattering(&pp);
+                    }
                 }
             }
             logprogress(count);

@@ -18,8 +18,7 @@ mkdir -p ../webhost/WWW/downloads
 cp -v ../doc/SKIRT.qch ../webhost/WWW/downloads/
 
 # copy the online html documentation
-rm -rf ../webhost/WWW/skirt
-cp -Rv ../html ../webhost/WWW/skirt
+rsync -rhtv --delete ../html/ ../webhost/WWW/skirt
 
 # unmount the webhost and remove the mount point
 umount ../webhost

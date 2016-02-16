@@ -21,7 +21,7 @@ using namespace std;
 
 
 SPHDustDistribution::SPHDustDistribution()
-    : _fdust(0), _Tmax(0), _mix(0), _grid(0)
+    : _fdust(0), _Tmax(0), _mix(0), _grid(0), _negativeMasses(false)
 {
 }
 
@@ -64,6 +64,9 @@ void SPHDustDistribution::setupSelfBefore()
             _pv.push_back(SPHGasParticle(Vec(x, y,z)*pc, h*pc, M*Msun, Z));
             Mtot += M;
             Mmetal += M * Z;
+
+            // remember whether there are any negative masses
+            if (M<0) _negativeMasses = true;
         }
     }
     find<Log>()->info("  Number of high-temperature particles ignored: " + QString::number(Nignored));
@@ -301,6 +304,15 @@ Vec SPHDustDistribution::particleCenter(int index) const
     if (index<0 || index>=n) throw FATALERROR("Particle index out of range: " + QString::number(index));
 
     return _pv[index].center();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+QList<SimulationItem*> SPHDustDistribution::interfaceCandidates(const type_info& interfaceTypeInfo)
+{
+    if (interfaceTypeInfo == typeid(DustMassInBoxInterface) && _negativeMasses)
+        return QList<SimulationItem*>();
+    return DustDistribution::interfaceCandidates(interfaceTypeInfo);
 }
 
 //////////////////////////////////////////////////////////////////////
