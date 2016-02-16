@@ -68,9 +68,9 @@ void ParallelTable::sync()
         if (!_dist)
             sum_all();
         else if (_writeOn == COLUMN)
-            experimental_col_to_row(); //col_to_row();
+            experimental_col_to_row();
         else if (_writeOn == ROW)
-            row_to_col();
+            experimental_row_to_col();
     }
     _synced = true;
 }
