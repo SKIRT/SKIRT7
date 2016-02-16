@@ -60,6 +60,10 @@ public:
 
     void finishRequests();
 
+    /** This function gathers doubles sent by all processes into displaced positions at the receiving process */
+    void gatherw(double* sendBuffer, int sendCount,
+                 double* recvBuffer, int receiver, std::vector<std::vector<int>>& recvDisplacements);
+
     /** This function returns the rank of the root process. */
     int root();
 

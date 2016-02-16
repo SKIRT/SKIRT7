@@ -14,7 +14,7 @@
 
 std::atomic<int> ProcessManager::requests(0);
 std::vector<MPI_Request> ProcessManager::pendingrequests;
-
+//MPI_Type_create_indexed_block(1,1, const int array_of_displacements[], MPI_DOUBLE, MPI_Datatype *newtype)
 //////////////////////////////////////////////////////////////////////
 
 void ProcessManager::initialize(int *argc, char ***argv)
@@ -149,6 +149,51 @@ void ProcessManager::receiveDouble(double& buffer, int sender, int tag)
 
 #else
     Q_UNUSED(buffer) Q_UNUSED(receiver) Q_UNUSED(tag)
+#endif
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void ProcessManager::gatherw(double* sendBuffer, int sendCount,
+                             double* recvBuffer, int receiver, std::vector<std::vector<int>>& recvDisplacements)
+{
+#ifdef BUILDING_WITH_MPI
+    int size;
+    int rank;
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    // parameters for the senders
+    std::vector<int> sendcnts(size, 0);                     // every process sends
+    sendcnts[receiver] = sendCount;                         // but only send to 'receiver'
+    std::vector<int> sdispls(size, 0);                      // starting from sendBuffer + 0
+    std::vector<MPI_Datatype> sendtypes(size, MPI_DOUBLE);  // all doubles
+
+    // parameters on the receiving end
+    std::vector<int> recvcnts;
+    if (rank != receiver) recvcnts.resize(size, 0); // no process receives data
+    else recvcnts.resize(size, 1);                  // except the receiver
+    std::vector<int> rdispls(size, 0);              // displacements will be contained in the datatypes
+    std::vector<MPI_Datatype> recvtypes;            // we will construct derived datatypes for receiving from each process
+    recvtypes.reserve(size);
+
+    for (int rank=0; rank<size; rank++)
+    {
+        int count = recvDisplacements[rank].size(); // number of blocks (of size 1)
+        int* disp = &recvDisplacements[rank][0];    // pointer to displacement array
+        MPI_Datatype newtype;                       // create derived type
+        MPI_Type_create_indexed_block(count, 1, disp, MPI_DOUBLE, &newtype);
+        MPI_Type_commit(&newtype);
+        recvtypes.push_back(newtype);
+    }
+
+    MPI_Alltoallw(sendBuffer, &sendcnts[0], &sdispls[0], &sendtypes[0],
+                  recvBuffer, &recvcnts[0], &rdispls[0], &recvtypes[0],
+                  MPI_COMM_WORLD);
+
+    for (int rank=0; rank<size; rank++) MPI_Type_free(&recvtypes[rank]);
+#else
+    Q_UNUSED(sendBuffer) Q_UNUSED(sendCount) Q_UNUSED(recvBuffer) Q_UNUSED(receiver) Q_UNUSED(recvDisplacements)
 #endif
 }
 

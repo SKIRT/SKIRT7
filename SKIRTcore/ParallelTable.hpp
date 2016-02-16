@@ -59,18 +59,31 @@ private:
 
     // Members
     QString _name;
-    ProcessAssigner* _colAssigner; // the distribution scheme for the columns
-    ProcessAssigner* _rowAssigner; // the distribution scheme for the rows
-    writeState _writeOn; // determines which table will be writable, and which one will be readable
+    ProcessAssigner* _colAssigner;  // the distribution scheme for the columns
+    ProcessAssigner* _rowAssigner;  // the distribution scheme for the rows
+    writeState _writeOn;            // determines which table will be writable, and which one will be readable
 
-    bool _dist; // false if memory is not distributed
-    bool _synced; // true if the writable table has not changed since the last sync
+    bool _dist;     // false if memory is not distributed
+    bool _synced;   // true if the writable table has not changed since the last sync
     bool _initialized;
 
-    Table<2> _columns; // the values distributed over processes column wise
-    ArrayTable<2> _rows; // the values distributed over processes row wise
+    int _totalRows;
+    int _totalCols;
+
+    Table<2> _columns;  // the values distributed over processes column wise
+    ArrayTable<2> _rows;// the values distributed over processes row wise
 
     PeerToPeerCommunicator* _comm; // communicator used for synchronizing
+
+    // For experimental functions
+    std::vector<std::vector<int>> _displacementvv;  // A list of absolute indices for each process.
+                                                    // This way the receival positions in the receivebuffer _rows[i] can
+                                                    // be dependent on the sending process.
+                                                    // An array of MPI_Datatype's will be constructed using the array
+                                                    // of displacements.
+
+    void experimental_col_to_row();
+
 };
 
 #endif // DISTMEMTABLE_HPP

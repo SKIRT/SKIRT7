@@ -64,3 +64,18 @@ bool ProcessAssigner::validIndex(size_t absoluteIndex) const
 {
     return _comm->rank() == rankForIndex(absoluteIndex);
 }
+
+////////////////////////////////////////////////////////////////////
+
+std::vector<int> ProcessAssigner::indicesForRank(size_t rank) const
+{
+    std::vector<int> result;
+    result.reserve(_nvalues);
+
+    // add all the absolute indices that correspond to the given rank
+    for (int absoluteIndex=0; absoluteIndex<total(); absoluteIndex++)
+        if (rank == rankForIndex(absoluteIndex))
+            result.push_back(absoluteIndex);
+
+    return result;
+}

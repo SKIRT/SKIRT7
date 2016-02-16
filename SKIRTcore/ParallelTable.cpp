@@ -21,19 +21,25 @@ void ParallelTable::initialize(QString name, ProcessAssigner *colAssigner, Proce
     _synced = true;
     _comm = colAssigner->find<PeerToPeerCommunicator>();
 
-    int Nrows = _rowAssigner->total();
-    int Ncols = _colAssigner->total();
+    _totalRows = _rowAssigner->total();
+    _totalCols = _colAssigner->total();
 
     printf("initializing %s Table, sizes are (allrows:%d,%d) and (allcols:%d,%d)\n",
-           _name.toStdString().c_str(), Nrows, _colAssigner->nvalues(), _rowAssigner->nvalues(), Ncols);
+           _name.toStdString().c_str(), _totalRows, _colAssigner->nvalues(), _rowAssigner->nvalues(), _totalCols);
 
     // distributed memory
     if (colAssigner->parallel() && rowAssigner->parallel() && _comm->isMultiProc())
     {
         _dist = true;
-        printf("ParallelTable is distributed.\n");
-        _columns.resize(Nrows,colAssigner->nvalues());
-        _rows.resize(rowAssigner->nvalues(),Ncols);
+
+        _columns.resize(_totalRows,colAssigner->nvalues());
+        _rows.resize(rowAssigner->nvalues(),_totalCols);
+
+        int Nprocs = _comm->size();
+
+        _displacementvv.reserve(Nprocs);
+        for (int r=0; r<Nprocs; r++)
+            _displacementvv.push_back(_colAssigner->indicesForRank(r));
     }
     // not distributed
     else
@@ -41,9 +47,9 @@ void ParallelTable::initialize(QString name, ProcessAssigner *colAssigner, Proce
         _dist = false;
 
         if (writeOn == COLUMN)
-            _columns.resize(Nrows,Ncols);
+            _columns.resize(_totalRows,_totalCols);
         else if (writeOn == ROW)
-            _rows.resize(Nrows,Ncols);
+            _rows.resize(_totalRows,_totalCols);
         else
             throw FATALERROR("Invalid writeState for ParallelTable");
     }
@@ -62,7 +68,7 @@ void ParallelTable::sync()
         if (!_dist)
             sum_all();
         else if (_writeOn == COLUMN)
-            col_to_row();
+            experimental_col_to_row(); //col_to_row();
         else if (_writeOn == ROW)
             row_to_col();
     }
@@ -94,7 +100,7 @@ double ParallelTable::sumRow(size_t i) const
     }
     else // not distributed -> everything available, so straightforward
     {
-        for (size_t j=0; j<_colAssigner->total(); j++)
+        for (int j=0; j<_totalCols; j++)
             sum += (*this)(i,j);
         return sum;
     }
@@ -108,13 +114,13 @@ double ParallelTable::sumColumn(size_t j) const
     if (_dist)
     {
         if(_colAssigner->validIndex(j)) // we have the whole column
-            for (size_t i=0; i<_columns.size(0); i++)
+            for (int i=0; i<_totalRows; i++)
                 sum += _columns(i,_colAssigner->relativeIndex(j));
         else throw FATALERROR(_name + " says: sumColumn(index) called on wrong index");
     }
     else // not distributed
     {
-        for (size_t i=0; i<_rowAssigner->total(); i++)
+        for (int i=0; i<_totalRows; i++)
             sum += (*this)(i,j);
     }
     return sum;
@@ -124,7 +130,7 @@ Array ParallelTable::stackColumns() const
 {
     if (!_synced) throw FATALERROR(_name + " says: sync() must be called before using summation functions");
 
-    Array result(_rowAssigner->total());
+    Array result(_totalRows);
 
     if(_dist)
     {
@@ -145,7 +151,7 @@ Array ParallelTable::stackRows() const
 {
     if (!_synced) throw FATALERROR(_name + " says: sync() must be called before using summation functions");
 
-    Array result(_colAssigner->total());
+    Array result(_totalCols);
 
     if(_dist)
     {
@@ -159,7 +165,7 @@ Array ParallelTable::stackRows() const
     }
     else
     {
-        for (size_t j=0; j<_colAssigner->total(); j++)
+        for (int j=0; j<_totalCols; j++)
             result[j] = sumColumn(j);
     }
     return result;
@@ -249,10 +255,27 @@ const double& ParallelTable::read(size_t i, size_t j) const
     return (*this)(i,j);
 }
 
+////////////////////////////////////////////////////////////////////
+
 double& ParallelTable::write(size_t i, size_t j)
 {
     return (*this)(i,j);
 }
+
+////////////////////////////////////////////////////////////////////
+
+bool ParallelTable::distributed() const
+{
+    return _dist;
+}
+
+////////////////////////////////////////////////////////////////////
+
+bool ParallelTable::initialized() const
+{
+    return _initialized;
+}
+
 
 ////////////////////////////////////////////////////////////////////
 
@@ -317,22 +340,20 @@ void ParallelTable::sum_all()
 
 void ParallelTable::col_to_row()
 {
-    int totalRows = _columns.size(0);
-    int totalCols = _rows.size(1);
     int thisRank = _comm->rank();
 
     int sendCount = 0;
     int N = 750;
 
-    for (int i=0; i<totalRows; i++) // for each possible row of the big array (determines receiver)
+    for (int i=0; i<_totalRows; i++) // for each possible row of the big array (determines receiver)
     {
         int tgtRank = _rowAssigner->rankForIndex(i); // the rank where target has row i in it
 
         // post some receives
-        for (int j=0; j<totalCols; j++) // for each possible column of the big array (determines sender)
+        for (int j=0; j<_totalCols; j++) // for each possible column of the big array (determines sender)
         {
             int srcRank = _colAssigner->rankForIndex(j); // the rank where the source has col j in it
-            int tag = i*totalCols + j; // unique for each position in the big array
+            int tag = i*_totalCols + j; // unique for each position in the big array
 
             if (thisRank!= srcRank && thisRank == tgtRank) // receive if target needs row i
             {
@@ -341,10 +362,10 @@ void ParallelTable::col_to_row()
             }
         }
         // post some sends
-        for (int j=0; j<totalCols; j++) // for each possible column of the big array (determines sender)
+        for (int j=0; j<_totalCols; j++) // for each possible column of the big array (determines sender)
         {
             int srcRank = _colAssigner->rankForIndex(j); // the rank where the source has col j in it
-            int tag = i*totalCols + j; // unique for each position in the big array
+            int tag = i*_totalCols + j; // unique for each position in the big array
 
             if (thisRank == srcRank) // if this process has column j, do send
             {
@@ -368,22 +389,20 @@ void ParallelTable::col_to_row()
 
 void ParallelTable::row_to_col()
 {
-    int totalRows = _columns.size(0);
-    int totalCols = _rows.size(1);
     int thisRank = _comm->rank();
 
     int sendCount = 0;
     int N = 750;
 
-    for (int i=0; i<totalRows; i++) // for each row (determines sender)
+    for (int i=0; i<_totalRows; i++) // for each row (determines sender)
     {
         int srcRank = _rowAssigner->rankForIndex(i);
 
         // post some receives
-        for (int j=0; j<totalCols; j++) // for each column (determines receiver)
+        for (int j=0; j<_totalCols; j++) // for each column (determines receiver)
         {
             int tgtRank = _colAssigner->rankForIndex(j);
-            int tag = i*totalCols + j;
+            int tag = i*_totalCols + j;
 
             if (thisRank != srcRank && thisRank == tgtRank)
             {
@@ -392,10 +411,10 @@ void ParallelTable::row_to_col()
             }
         }
         // post some sends
-        for (int j=0; j<totalCols; j++) // for each column (determines receiver)
+        for (int j=0; j<_totalCols; j++) // for each column (determines receiver)
         {
             int tgtRank = _colAssigner->rankForIndex(j);
-            int tag = i*totalCols + j;
+            int tag = i*_totalCols + j;
 
             if (thisRank == srcRank)
             {
@@ -415,16 +434,17 @@ void ParallelTable::row_to_col()
     _comm->finishRequests();
 }
 
-////////////////////////////////////////////////////////////////////
-
-bool ParallelTable::distributed() const
+void ParallelTable::experimental_col_to_row()
 {
-    return _dist;
-}
-
-////////////////////////////////////////////////////////////////////
-
-bool ParallelTable::initialized() const
-{
-    return _initialized;
+    // for each row
+    for (int i=0; i<_totalRows; i++)
+    {
+        double* sendBuffer = &_columns(i,0);
+        double* recvBuffer = _rowAssigner->validIndex(i) ? &_rows(_rowAssigner->relativeIndex(i),0) :  0; // hmmm
+        int recvRank = _rowAssigner->rankForIndex(i);
+        _comm->gatherw(sendBuffer, _columns.size(1), recvBuffer, recvRank, _displacementvv);
+        // met de recvBuffer mag er niets gebeuren als thisRank != recvRank
+        // Dit zal verzekerd worden door de recvcount van MPI_alltoallw correct in te stellen,
+        // afhankelijk van de waarde van recvRank, waar er dus gegatherd wordt.
+    }
 }
