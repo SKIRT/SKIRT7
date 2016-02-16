@@ -200,8 +200,6 @@ void PanMonteCarloSimulation::dodustselfabsorptionchunk(size_t index)
         labsbolSum += _Labsbolv[m];
     }
     double Ltot = Lv.sum();
-    // if (ell == 26) _log->info("dustlumSum: " + QString::number(dustlumSum));
-    // if (ell == 26) _log->info("labsbolSum: " + QString::number(labsbolSum));
 
     // Emit photon packages
     if (Ltot > 0)
