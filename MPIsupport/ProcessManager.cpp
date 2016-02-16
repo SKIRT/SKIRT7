@@ -223,17 +223,18 @@ void ProcessManager::scatterw(double *sendBuffer, int sendRank, std::vector<std:
     else sendcnts.resize(size, 1);                      // I am sender: send 1 to each process
     std::vector<int> sdispls(size, 0);                  // displacements in buffer will be contained in datatypes
     std::vector<MPI_Datatype> sendtypes;                // these will be constructed for sending to each process
+    sendtypes.reserve(size);
 
     for (int rank=0; rank<size; rank++)
     {
-        MPI_Datatype newtype;                       // create derived type
+        MPI_Datatype newtype;
         createDisplacedDoublesDatatype(sendDisplacements[rank], &newtype);
         sendtypes.push_back(newtype);
     }
 
     // parameters for the receivers
-    std::vector<int> recvcnts(size, 0);             // each process will receive nothing from all processes
-    recvcnts[sendRank] = recvCount;                 // except from the sender
+    std::vector<int> recvcnts(size, 0);                     // each process will receive nothing from all processes
+    recvcnts[sendRank] = recvCount;                         // except from the sender
     std::vector<int> rdispls(size, 0);                      // starting from recvBuffer + 0
     std::vector<MPI_Datatype> recvtypes(size, MPI_DOUBLE);  // all doubles
     recvtypes.reserve(size);
