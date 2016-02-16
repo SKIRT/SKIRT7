@@ -440,11 +440,23 @@ void ParallelTable::experimental_col_to_row()
     for (int i=0; i<_totalRows; i++)
     {
         double* sendBuffer = &_columns(i,0);
-        double* recvBuffer = _rowAssigner->validIndex(i) ? &_rows(_rowAssigner->relativeIndex(i),0) :  0; // hmmm
+        double* recvBuffer = _rowAssigner->validIndex(i) ? &_rows(_rowAssigner->relativeIndex(i),0) : 0;
         int recvRank = _rowAssigner->rankForIndex(i);
         _comm->gatherw(sendBuffer, _columns.size(1), recvBuffer, recvRank, _displacementvv);
-        // met de recvBuffer mag er niets gebeuren als thisRank != recvRank
-        // Dit zal verzekerd worden door de recvcount van MPI_alltoallw correct in te stellen,
-        // afhankelijk van de waarde van recvRank, waar er dus gegatherd wordt.
+        // Elk proces i zendt vanuit sendBuffer, _columns.size(1) doubles naar recvBuffer op recvRank in de vorm
+        // van datatype i bepaald door _displacementvv[i].
+    }
+}
+
+void ParallelTable::experimental_row_to_col()
+{
+    for (int i=0; i<_totalRows; i++)
+    {
+        double* sendBuffer = _rowAssigner->validIndex(i) ? &_rows(_rowAssigner->relativeIndex(i),0) : 0;
+        double* recvBuffer = &_columns(i,0);
+        int sendRank = _rowAssigner->rankForIndex(i);
+        _comm->scatterw(sendBuffer, sendRank, _displacementvv, recvBuffer, _columns.size(1));
+        // Proces sendRank zendt vanuit sendBuffer een aantal doubles in de vorm van datatype i bepaald door
+        // _displacementvv[i] naar recvBuffer op rank i.
     }
 }

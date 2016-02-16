@@ -81,9 +81,8 @@ private:
                                                     // be dependent on the sending process.
                                                     // An array of MPI_Datatype's will be constructed using the array
                                                     // of displacements.
-
     void experimental_col_to_row();
-
+    void experimental_row_to_col();
 };
 
 #endif // DISTMEMTABLE_HPP

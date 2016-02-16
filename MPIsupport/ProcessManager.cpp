@@ -12,9 +12,13 @@
 
 ////////////////////////////////////////////////////////////////////
 
+namespace
+{
+    std::vector<MPI_Request> pendingrequests;
+}
+
 std::atomic<int> ProcessManager::requests(0);
-std::vector<MPI_Request> ProcessManager::pendingrequests;
-//MPI_Type_create_indexed_block(1,1, const int array_of_displacements[], MPI_DOUBLE, MPI_Datatype *newtype)
+
 //////////////////////////////////////////////////////////////////////
 
 void ProcessManager::initialize(int *argc, char ***argv)
@@ -128,7 +132,7 @@ void ProcessManager::sendDouble(double& buffer, int receiver, int tag)
 
     MPI_Request request;
     MPI_Isend(&buffer, 1, MPI_DOUBLE, receiver, tag, MPI_COMM_WORLD, &request);
-    ProcessManager::pendingrequests.push_back(request);
+    pendingrequests.push_back(request);
 
 #else
     Q_UNUSED(buffer) Q_UNUSED(receiver) Q_UNUSED(tag)
@@ -145,7 +149,7 @@ void ProcessManager::receiveDouble(double& buffer, int sender, int tag)
 
     MPI_Request request;
     MPI_Irecv(&buffer, 1, MPI_DOUBLE, sender, tag, MPI_COMM_WORLD, &request);
-    ProcessManager::pendingrequests.push_back(request);
+    pendingrequests.push_back(request);
 
 #else
     Q_UNUSED(buffer) Q_UNUSED(receiver) Q_UNUSED(tag)
@@ -155,7 +159,7 @@ void ProcessManager::receiveDouble(double& buffer, int sender, int tag)
 //////////////////////////////////////////////////////////////////////
 
 void ProcessManager::gatherw(double* sendBuffer, int sendCount,
-                             double* recvBuffer, int receiver, std::vector<std::vector<int>>& recvDisplacements)
+                             double* recvBuffer, int recvRank, std::vector<std::vector<int>>& recvDisplacements)
 {
 #ifdef BUILDING_WITH_MPI
     int size;
@@ -165,13 +169,13 @@ void ProcessManager::gatherw(double* sendBuffer, int sendCount,
 
     // parameters for the senders
     std::vector<int> sendcnts(size, 0);                     // every process sends
-    sendcnts[receiver] = sendCount;                         // but only send to 'receiver'
+    sendcnts[recvRank] = sendCount;                         // but only send to 'receiver'
     std::vector<int> sdispls(size, 0);                      // starting from sendBuffer + 0
     std::vector<MPI_Datatype> sendtypes(size, MPI_DOUBLE);  // all doubles
 
     // parameters on the receiving end
     std::vector<int> recvcnts;
-    if (rank != receiver) recvcnts.resize(size, 0); // no process receives data
+    if (rank != recvRank) recvcnts.resize(size, 0); // no process receives data
     else recvcnts.resize(size, 1);                  // except the receiver
     std::vector<int> rdispls(size, 0);              // displacements will be contained in the datatypes
     std::vector<MPI_Datatype> recvtypes;            // we will construct derived datatypes for receiving from each process
@@ -193,8 +197,14 @@ void ProcessManager::gatherw(double* sendBuffer, int sendCount,
 
     for (int rank=0; rank<size; rank++) MPI_Type_free(&recvtypes[rank]);
 #else
-    Q_UNUSED(sendBuffer) Q_UNUSED(sendCount) Q_UNUSED(recvBuffer) Q_UNUSED(receiver) Q_UNUSED(recvDisplacements)
+    Q_UNUSED(sendBuffer) Q_UNUSED(sendCount) Q_UNUSED(recvBuffer) Q_UNUSED(recvRank) Q_UNUSED(recvDisplacements)
 #endif
+}
+
+void ProcessManager::scatterw(double *sendBuffer, int sendRank, std::vector<std::vector<int> > &sendDisplacements,
+                              double *recvBuffer, int recvCount)
+{
+
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -204,9 +214,9 @@ void ProcessManager::wait_all()
 #ifdef BUILDING_WITH_MPI
 
     MPI_Barrier(MPI_COMM_WORLD);
-    MPI_Status statuses[ProcessManager::pendingrequests.size()];
-    MPI_Waitall(ProcessManager::pendingrequests.size(), &ProcessManager::pendingrequests[0], &statuses[0]);
-    ProcessManager::pendingrequests.clear();
+    MPI_Status statuses[pendingrequests.size()];
+    MPI_Waitall(pendingrequests.size(), &pendingrequests[0], &statuses[0]);
+    pendingrequests.clear();
 
 #endif
 }

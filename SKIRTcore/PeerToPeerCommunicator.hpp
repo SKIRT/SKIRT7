@@ -62,7 +62,10 @@ public:
 
     /** This function gathers doubles sent by all processes into displaced positions at the receiving process */
     void gatherw(double* sendBuffer, int sendCount,
-                 double* recvBuffer, int receiver, std::vector<std::vector<int>>& recvDisplacements);
+                 double* recvBuffer, int recvRank, std::vector<std::vector<int>>& recvDisplacements);
+
+    void scatterw(double* sendBuffer, int sendRank, std::vector<std::vector<int>>& sendDisplacements,
+                  double* recvBuffer, int recvCount);
 
     /** This function returns the rank of the root process. */
     int root();
