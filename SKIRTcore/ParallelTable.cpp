@@ -106,6 +106,8 @@ double ParallelTable::sumRow(size_t i) const
     }
 }
 
+////////////////////////////////////////////////////////////////////
+
 double ParallelTable::sumColumn(size_t j) const
 {
     if (!_synced) throw FATALERROR(_name + " says: sync() must be called before using summation functions");
@@ -125,6 +127,8 @@ double ParallelTable::sumColumn(size_t j) const
     }
     return sum;
 }
+
+////////////////////////////////////////////////////////////////////
 
 Array ParallelTable::stackColumns() const
 {
@@ -146,6 +150,8 @@ Array ParallelTable::stackColumns() const
     }
     return result;
 }
+
+////////////////////////////////////////////////////////////////////
 
 Array ParallelTable::stackRows() const
 {
@@ -170,6 +176,8 @@ Array ParallelTable::stackRows() const
     }
     return result;
 }
+
+////////////////////////////////////////////////////////////////////
 
 double ParallelTable::sumEverything() const
 {
@@ -275,7 +283,6 @@ bool ParallelTable::initialized() const
 {
     return _initialized;
 }
-
 
 ////////////////////////////////////////////////////////////////////
 
@@ -434,6 +441,8 @@ void ParallelTable::row_to_col()
     _comm->finishRequests();
 }
 
+////////////////////////////////////////////////////////////////////
+
 void ParallelTable::experimental_col_to_row()
 {
     // for each row
@@ -447,6 +456,8 @@ void ParallelTable::experimental_col_to_row()
         // van datatype i bepaald door _displacementvv[i].
     }
 }
+
+////////////////////////////////////////////////////////////////////
 
 void ParallelTable::experimental_row_to_col()
 {

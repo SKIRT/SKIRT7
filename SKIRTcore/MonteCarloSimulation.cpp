@@ -74,6 +74,7 @@ void MonteCarloSimulation::setChunkParams(double packages)
 {
     // Cache the number of wavelengths
     _Nlambda = _lambdagrid->Nlambda();
+    // Copy the assignment scheme of the wavelength assigner, so we can safely change the number of chunks (= blocks).
     if(!_assigner) _assigner = _lambdagrid->assigner()->clone();
 
     // Determine the number of chunks and the corresponding chunk size

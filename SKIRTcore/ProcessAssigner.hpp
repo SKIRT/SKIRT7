@@ -102,7 +102,7 @@ public:
     bool validIndex(size_t absoluteIndex) const;
 
     /** Returns a vector containing all the absolute work indices assigned to a given process rank. */
-    std::vector<int> indicesForRank(size_t rank) const;
+    std::vector<int> indicesForRank(int rank) const;
 
     //======================== Data Members ========================
 
