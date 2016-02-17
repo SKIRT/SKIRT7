@@ -80,8 +80,6 @@ protected:
         wavelength grid points. */
     int entries() const;
 
-    int myEntries() const;
-
     /** This function returns a vector \em nv with length \f$N_{\text{cells}}\f$ that maps each
         cell \f$m\f$ to the corresponding library entry \f$n_m\f$. In this class the function loops
         over all dust cells and calculates \f${\bar{T}}_m\f$ and \f${\bar{\lambda}}_m\f$ for each
@@ -97,8 +95,6 @@ protected:
         j=0,\ldots,N_{\bar{\lambda}}. \f] The function then calculates for each cell \f$m\f$ its
         library entry \f$n \equiv (i,j)\f$. */
     std::vector<int> mapping() const;
-
-    std::vector<int> myMapping() const;
 
     //======================== Data Members ========================
 

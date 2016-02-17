@@ -123,8 +123,7 @@ namespace
 
                 // calculate the average ISRF for this library entry from the ISRF of all dust cells that map to it
                 Array Jv(_Nlambda);
-                foreach (int m, mv)
-                    Jv += _ds->meanintensityv(m);
+                foreach (int mAbs, mv) Jv += _ds->meanintensityv(mAbs);
                 Jv /= Nmapped;
 
                 // multiple dust components: calculate emission for each dust cell separately

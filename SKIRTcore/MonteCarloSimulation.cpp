@@ -18,8 +18,6 @@
 #include "PeerToPeerCommunicator.hpp"
 #include "PhotonPackage.hpp"
 #include "Random.hpp"
-#include "RandomAssigner.hpp"
-#include "StaggeredAssigner.hpp"
 #include "StellarSystem.hpp"
 #include "TextOutFile.hpp"
 #include "TimeLogger.hpp"
@@ -63,9 +61,6 @@ void MonteCarloSimulation::setupSelfBefore()
     if (!_is)
         throw FATALERROR("Instrument system was not set");
     // dust system is optional; nr of packages has a valid default
-
-    // If no assigner was set, use an IdenticalAssigner as default (changed to Staggered for new method)
-    //if (!_assigner) setAssigner(new IdenticalAssigner(this));
 }
 
 ////////////////////////////////////////////////////////////////////

@@ -192,14 +192,24 @@ const double& ParallelTable::operator()(size_t i, size_t j) const
 {
     if (!_synced) throw FATALERROR(_name + " says: sync() must be called before using the read operator");
 
-    if (_dist) // read from the table we are NOT writing on
+    // WORKING DISTRIBUTED: Read from the table opposite to the table we _writeOn.
+    if (_dist)
     {
-        if (_writeOn == COLUMN)    // read from _rows
-            return getFromRows(i,j);
-        else                            // read from _columns
-            return getFromColumns(i,j);
+        if (_writeOn == COLUMN) // read from _rows
+        {
+            if (!_rowAssigner->validIndex(i))
+                throw FATALERROR(_name + " says: Row of ParallelTable not available on this process");
+            return _rows(_rowAssigner->relativeIndex(i),j);
+        }
+        else                    // read from _columns
+        {
+            if (!_colAssigner->validIndex(j))
+                throw FATALERROR(_name + " says: Column of ParallelTable not available on this process");
+            return _columns(i,_colAssigner->relativeIndex(j));
+        }
     }
-    else // read from the table that was resized in the constructor
+    // WORKING NON-DISTRIBUTED: Reading and writing happens in the same table.
+    else
     {
         if (_writeOn == COLUMN)
             return _columns(i,j);
@@ -212,13 +222,23 @@ double& ParallelTable::operator()(size_t i, size_t j)
 {
     _synced = false;
 
+    // WORKING DISTRIBUTED: Writable reference to the table we _writeOn.
     if (_dist)
     {
-        if (_writeOn == COLUMN)    // return writable reference to _rows
-            return getFromColumns(i,j);
-        else                            // return writable reference to _columns
-            return getFromRows(i,j);
+        if (_writeOn == COLUMN) // Write on _columns
+        {
+            if (!_colAssigner->validIndex(j))
+                throw FATALERROR(_name + " says: Column of ParallelTable not available on this process");
+            return _columns(i,_colAssigner->relativeIndex(j));
+        }
+        else                    // Write on _rows
+        {
+            if (!_rowAssigner->validIndex(i))
+                throw FATALERROR(_name + " says: Row of ParallelTable not available on this process");
+            return _rows(_rowAssigner->relativeIndex(i),j);
+        }
     }
+    // WORKING NON-DISTRIBUTED: Reading and writing happens in the same table.
     else
     {
         if (_writeOn == COLUMN)
@@ -282,46 +302,6 @@ bool ParallelTable::distributed() const
 bool ParallelTable::initialized() const
 {
     return _initialized;
-}
-
-////////////////////////////////////////////////////////////////////
-
-const double& ParallelTable::getFromRows(size_t i, size_t j) const
-{
-    if (!_rowAssigner->validIndex(i))
-        throw FATALERROR(_name + " says: Row of ParallelTable not available on this process");
-
-    size_t iRel = _rowAssigner->relativeIndex(i);
-    return _rows(iRel,j);
-}
-
-double& ParallelTable::getFromRows(size_t i, size_t j)
-{
-    if (!_rowAssigner->validIndex(i))
-        throw FATALERROR(_name + " says: Row of ParallelTable not available on this process");
-
-    size_t iRel = _rowAssigner->relativeIndex(i);
-    return _rows(iRel,j);
-}
-
-////////////////////////////////////////////////////////////////////
-
-const double& ParallelTable::getFromColumns(size_t i, size_t j) const
-{
-    if (!_colAssigner->validIndex(j))
-        throw FATALERROR(_name + " says: Column of ParallelTable not available on this process");
-
-    size_t jRel = _colAssigner->relativeIndex(j);
-    return _columns(i,jRel);
-}
-
-double& ParallelTable::getFromColumns(size_t i, size_t j)
-{
-    if (!_colAssigner->validIndex(j))
-        throw FATALERROR(_name + " says: Column of ParallelTable not available on this process");
-
-    size_t jRel = _colAssigner->relativeIndex(j);
-    return _columns(i,jRel);
 }
 
 ////////////////////////////////////////////////////////////////////

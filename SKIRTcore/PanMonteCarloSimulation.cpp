@@ -297,45 +297,43 @@ void PanMonteCarloSimulation::dodustemissionchunk(size_t index)
         double Lthreshold = Lem / minWeightReduction();
 
         quint64 remaining = _chunksize;
+        while (remaining > 0)
         {
-            while (remaining > 0)
+            quint64 count = qMin(remaining, _logchunksize);
+            for (quint64 i=0; i<count; i++)
             {
-                quint64 count = qMin(remaining, _logchunksize);
-                for (quint64 i=0; i<count; i++)
+                int m;
+                double X = _random->uniform();
+                if (X<xi)
                 {
-                    int m;
-                    double X = _random->uniform();
-                    if (X<xi)
-                    {
-                        // rescale the deviate from [0,xi[ to [0,Ncells[
-                        m = max(0,min(_Ncells-1,static_cast<int>(_Ncells*X/xi)));
-                    }
-                    else
-                    {
-                        // rescale the deviate from [xi,1[ to [0,1[
-                        m = NR::locate_clip(cumLv,(X-xi)/(1-xi));
-                    }
-                    double weight = 1.0/(1-xi+xi*Lmean/Lv[m]);
-                    Position bfr = _pds->randomPositionInCell(m);
-                    Direction bfk = _random->direction();
-                    pp.launch(Lem*weight,ell,bfr,bfk);
-                    peeloffemission(&pp,&ppp);
-                    while (true)
-                    {
-                        _pds->fillOpticalDepth(&pp);
-                        if (continuousScattering()) continuouspeeloffscattering(&pp,&ppp);
-                        simulateescapeandabsorption(&pp,false);
-                        double L = pp.luminosity();
-                        if (L==0.0) break;
-                        if (L<=Lthreshold && pp.nScatt()>=minScattEvents()) break;
-                        simulatepropagation(&pp);
-                        if (!continuousScattering()) peeloffscattering(&pp,&ppp);
-                        simulatescattering(&pp);
-                    }
+                    // rescale the deviate from [0,xi[ to [0,Ncells[
+                    m = max(0,min(_Ncells-1,static_cast<int>(_Ncells*X/xi)));
                 }
-                logprogress(count);
-                remaining -= count;
+                else
+                {
+                    // rescale the deviate from [xi,1[ to [0,1[
+                    m = NR::locate_clip(cumLv,(X-xi)/(1-xi));
+                }
+                double weight = 1.0/(1-xi+xi*Lmean/Lv[m]);
+                Position bfr = _pds->randomPositionInCell(m);
+                Direction bfk = _random->direction();
+                pp.launch(Lem*weight,ell,bfr,bfk);
+                peeloffemission(&pp,&ppp);
+                while (true)
+                {
+                    _pds->fillOpticalDepth(&pp);
+                    if (continuousScattering()) continuouspeeloffscattering(&pp,&ppp);
+                    simulateescapeandabsorption(&pp,false);
+                    double L = pp.luminosity();
+                    if (L==0.0) break;
+                    if (L<=Lthreshold && pp.nScatt()>=minScattEvents()) break;
+                    simulatepropagation(&pp);
+                    if (!continuousScattering()) peeloffscattering(&pp,&ppp);
+                    simulatescattering(&pp);
+                }
             }
+            logprogress(count);
+            remaining -= count;
         }
     }
     else logprogress(_chunksize);

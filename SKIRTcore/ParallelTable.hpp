@@ -45,14 +45,6 @@ public:
 
 private:
     // Private methods
-
-    // Read only references (called if member function is const)
-    const double& getFromRows(size_t i, size_t j) const;
-    const double& getFromColumns(size_t i, size_t j) const;
-    // Writable refenences (called if member function is not const)
-    double& getFromRows(size_t i, size_t j);
-    double& getFromColumns(size_t i, size_t j);
-
     void sum_all();
     void col_to_row();
     void row_to_col();
