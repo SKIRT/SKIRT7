@@ -19,6 +19,7 @@
 #include "TextOutFile.hpp"
 #include "TimeLogger.hpp"
 #include "WavelengthGrid.hpp"
+#include "TextOutFile.hpp"
 
 using namespace std;
 
@@ -141,7 +142,12 @@ namespace
                         Array& Lv = _Lvv[m];
 
                         // calculate the emission for this cell
-                        for (int h=0; h<_Ncomp; h++) Lv += evv[h] * _ds->density(m,h);
+                        for (int h=0; h<_Ncomp; h++)
+                        {
+                            Lv += evv[h] * _ds->density(m,h);
+                            if (m % 100 == 0) _log->info("density("+QString::number(m)+",0) == "
+                                                         +QString::number(_ds->density(m,h)));
+                        }
 
                         // convert to luminosities and normalize the result
                         Lv *= _lambdagrid->dlambdav();
