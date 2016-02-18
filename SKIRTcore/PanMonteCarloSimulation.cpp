@@ -139,6 +139,7 @@ void PanMonteCarloSimulation::rundustselfabsorption()
             // Perform dust self-absorption, using the appropriate number of packages for the current stage
             setChunkParams(packages()*stage_factor[stage]);
             initprogress(QString(stage_name[stage]) + " dust self-absorption cycle " + QString::number(cycle));
+
             Parallel* parallel = find<ParallelFactory>()->parallel();
             parallel->call(this, &PanMonteCarloSimulation::dodustselfabsorptionchunk, assigner());
             _pds->syncLabsTables();

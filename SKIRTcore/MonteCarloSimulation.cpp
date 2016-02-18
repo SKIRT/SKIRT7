@@ -98,6 +98,13 @@ void MonteCarloSimulation::setChunkParams(double packages)
     // Determine the log frequency; continuous scattering is much slower!
     _logchunksize = _continuousScattering ? 5000 : 50000;
 
+    // tijdelijke override:
+    _Nchunks = 1;
+    _Npp = packages;
+    _chunksize = packages;
+    if (_assigner->nvalues() >= _Nlambda) _chunksize /= _comm->size();
+    // sluwe manier om het aan te passen voor een Identicalassigner (enkel nodig indien nchunks = 1)
+
     // Assign the _Nlambda x _Nchunks different chunks to the different parallel processes
     _assigner->setBlocks(_Nchunks);
 }

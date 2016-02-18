@@ -234,7 +234,6 @@ public:
         object, which is found with the discovery mechanism. */
     void sumResults(bool ynstellar);
 
-    /** Replaces sumResults ... work in progress ... */
     void syncLabsTables();
 
     /** This function returns the luminosity \f$L_\ell\f$ at the wavelength index \f$\ell\f$ in the
