@@ -30,6 +30,7 @@ void ParallelTable::initialize(QString name, ProcessAssigner *colAssigner, Proce
     // distributed memory
     if (colAssigner->parallel() && rowAssigner->parallel() && _comm->isMultiProc())
     {
+        printf("Running distributed");
         _dist = true;
 
         _columns.resize(_totalRows,colAssigner->nvalues());
@@ -44,6 +45,7 @@ void ParallelTable::initialize(QString name, ProcessAssigner *colAssigner, Proce
     // not distributed
     else
     {
+        printf("Running non-distributed\n");
         _dist = false;
 
         if (writeOn == COLUMN)
@@ -258,7 +260,7 @@ Array& ParallelTable::operator[](size_t i)
     {
         if (!_rowAssigner->validIndex(i))
             throw FATALERROR(_name + " says: Row of ParallelTable not available on this process");
-        else return _rows[_rowAssigner->relativeIndex(i)];
+        else return _rows[_dist ? _rowAssigner->relativeIndex(i) : i];
     }
     else throw FATALERROR(_name + " says: This ParallelTable does not have writable rows.");
 }
@@ -271,7 +273,7 @@ const Array& ParallelTable::operator[](size_t i) const
     {
         if (!_rowAssigner->validIndex(i))
             throw FATALERROR(_name + " says: Row of ParallelTable not available on this process");
-        else return _rows[_rowAssigner->relativeIndex(i)];
+        else return _rows[_dist ? _rowAssigner->relativeIndex(i) : i];
     }
     else throw FATALERROR(_name + " says: This ParallelTable does not have readable rows.");
 }
@@ -315,7 +317,7 @@ void ParallelTable::sum_all()
     }
     else
     {
-        for (size_t i=0; i<_rows.size(0); i++)
+        for (int i=0; i<_totalRows; i++)
         {
             Array& arr = _rows[i];
             _comm->sum_all(arr);

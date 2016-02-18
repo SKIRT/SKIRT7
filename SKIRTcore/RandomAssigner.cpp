@@ -99,6 +99,7 @@ void RandomAssigner::assign(size_t size, size_t blocks)
 void RandomAssigner::setBlocks(size_t blocks)
 {
     _nvalues = _values.size()*blocks;
+    _nblocks = blocks;
 }
 
 ////////////////////////////////////////////////////////////////////

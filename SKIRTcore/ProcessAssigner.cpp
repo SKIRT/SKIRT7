@@ -9,7 +9,7 @@
 ////////////////////////////////////////////////////////////////////
 
 ProcessAssigner::ProcessAssigner()
-    : _comm(0), _nvalues(0), _blocksize(0)
+    : _comm(0), _nvalues(0), _blocksize(0), _nblocks(1)
 {
 }
 
@@ -55,7 +55,7 @@ size_t ProcessAssigner::nvalues() const
 
 size_t ProcessAssigner::total() const
 {
-    return _blocksize;
+    return _blocksize*_nblocks;
 }
 
 ////////////////////////////////////////////////////////////////////

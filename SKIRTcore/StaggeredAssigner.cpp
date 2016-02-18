@@ -71,6 +71,7 @@ void StaggeredAssigner::assign(size_t size, size_t blocks)
 void StaggeredAssigner::setBlocks(size_t blocks)
 {
     _nvalues = _valuesInBlock * blocks;
+    _nblocks = blocks;
 }
 
 ////////////////////////////////////////////////////////////////////

@@ -173,31 +173,30 @@ namespace
 
 void DustLib::calculate()
 {
+    // initialize/clear the ParallelTable that stores and communicates the results
     if (!_Lvv.initialized()) _Lvv.initialize("Dust Emission",_lambdaAssigner,_cellAssigner,ROW);
     else _Lvv.clear();
 
-    // get mapping from cells to library entries
+    // get mapping from cells to library entries.
     int Nlib = entries();
     _nv = mapping();
 
-    ProcessAssigner* helpAssigner;
-    // if data is distributed: each process has its own dust library, corresponding to different cells for each process
-    // => need to calculate for all the indices => Identical
-    if (_Lvv.distributed()) helpAssigner = new IdenticalAssigner(this);
-
-    // if data is not distributed: each process has the same dust library
-    // => divide the work => Staggered
-    else helpAssigner = new StaggeredAssigner(this);
-
-    helpAssigner->assign(Nlib);
-
     // calculate the emissivity for each library entry
     EmissionCalculator calc(_Lvv, _nv, Nlib, this);
+
+    // Each process now has its own library over a subset of dustcells.
+    // The EmissionCalculator object has constructed a map, containing for each library entry (key) a list of
+    // indices (values) pointing to cells of the dust grid.
+    // We use an IdenticalAssigner, to divide the work in the same way as the data: each process will calculate all the
+    // library entries, because the different processes/libraries treat different disjunct subsets of the dustgrid.
+    // Therefore, in this case, the Nlib given to the ProcessAssigner can be different on each process!
+    // The only reason we still use an assigner is to enable multithreading! (a different assigner than the Identical
+    // one would give unexpected behaviour)
+    ProcessAssigner* helpAssigner = new IdenticalAssigner(this);
+    helpAssigner->assign(Nlib);
+
     Parallel* parallel = find<ParallelFactory>()->parallel();
     parallel->call(&calc, helpAssigner);
-
-    // for loop for debugging purposes
-    // for (int n=0; n<Nlib; n++) calc.body(n);
 
     // Wait for the other processes to reach this point
     PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
