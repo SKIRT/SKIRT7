@@ -18,8 +18,6 @@
 #include "PeerToPeerCommunicator.hpp"
 #include "PhotonPackage.hpp"
 #include "Random.hpp"
-#include "RandomAssigner.hpp"
-#include "StaggeredAssigner.hpp"
 #include "StellarSystem.hpp"
 #include "TextOutFile.hpp"
 #include "TimeLogger.hpp"
@@ -63,9 +61,6 @@ void MonteCarloSimulation::setupSelfBefore()
     if (!_is)
         throw FATALERROR("Instrument system was not set");
     // dust system is optional; nr of packages has a valid default
-
-    // If no assigner was set, use an IdenticalAssigner as default (changed to Staggered for new method)
-    //if (!_assigner) setAssigner(new IdenticalAssigner(this));
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -74,6 +69,7 @@ void MonteCarloSimulation::setChunkParams(double packages)
 {
     // Cache the number of wavelengths
     _Nlambda = _lambdagrid->Nlambda();
+    // Copy the assignment scheme of the wavelength assigner, so we can safely change the number of chunks (= blocks).
     if(!_assigner) _assigner = _lambdagrid->assigner()->clone();
 
     // Determine the number of chunks and the corresponding chunk size
@@ -101,6 +97,13 @@ void MonteCarloSimulation::setChunkParams(double packages)
 
     // Determine the log frequency; continuous scattering is much slower!
     _logchunksize = _continuousScattering ? 5000 : 50000;
+
+    // tijdelijke override:
+    _Nchunks = 1;
+    _Npp = packages;
+    _chunksize = packages;
+    if (_assigner->nvalues() >= _Nlambda) _chunksize /= _comm->size();
+    // sluwe manier om het aan te passen voor een Identicalassigner (enkel nodig indien nchunks = 1)
 
     // Assign the _Nlambda x _Nchunks different chunks to the different parallel processes
     _assigner->setBlocks(_Nchunks);

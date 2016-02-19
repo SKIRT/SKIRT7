@@ -169,12 +169,13 @@ public:
     /** Returns the flag that indicates whether continuous scattering should be used. */
     Q_INVOKABLE bool continuousScattering() const;
 
-    /** Returns the process assigner for this Monte Carlo simulation. */
-    ProcessAssigner* assigner() const;
 
     //======================== Other Functions =======================
 
 public:
+    /** Returns the process assigner for this Monte Carlo simulation. */
+    ProcessAssigner* assigner() const;
+
     /** This function returns the dimension of the simulation, which depends on the (lack of)
         symmetry in the stellar and dust geometries. A value of 1 means spherical symmetry, 2 means
         axial symmetry and 3 means none of these symmetries. The stellar or dust component with the

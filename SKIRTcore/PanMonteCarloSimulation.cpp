@@ -139,6 +139,7 @@ void PanMonteCarloSimulation::rundustselfabsorption()
             // Perform dust self-absorption, using the appropriate number of packages for the current stage
             setChunkParams(packages()*stage_factor[stage]);
             initprogress(QString(stage_name[stage]) + " dust self-absorption cycle " + QString::number(cycle));
+
             Parallel* parallel = find<ParallelFactory>()->parallel();
             parallel->call(this, &PanMonteCarloSimulation::dodustselfabsorptionchunk, assigner());
             _pds->syncLabsTables();
@@ -190,18 +191,12 @@ void PanMonteCarloSimulation::dodustselfabsorptionchunk(size_t index)
 
     // Determine the luminosity to be emitted at this wavelength index
     Array Lv(_Ncells);
-    double dustlumSum = 0.;
-    double labsbolSum = 0.;
     for (int m=0; m<_Ncells; m++)
     {
         double Labsbol = _Labsbolv[m];
         if (Labsbol>0.0) Lv[m] = Labsbol * _pds->dustluminosity(m,ell);
-        dustlumSum += _pds->dustluminosity(m,ell);
-        labsbolSum += _Labsbolv[m];
     }
     double Ltot = Lv.sum();
-    // if (ell == 26) _log->info("dustlumSum: " + QString::number(dustlumSum));
-    // if (ell == 26) _log->info("labsbolSum: " + QString::number(labsbolSum));
 
     // Emit photon packages
     if (Ltot > 0)

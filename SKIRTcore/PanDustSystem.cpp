@@ -5,7 +5,6 @@
 
 #include <cmath>
 #include "ArrayTable.hpp"
-#include "ParallelTable.hpp"
 #include "DustEmissivity.hpp"
 #include "DustGrid.hpp"
 #include "DustLib.hpp"
@@ -13,7 +12,6 @@
 #include "FatalError.hpp"
 #include "FITSInOut.hpp"
 #include "FilePaths.hpp"
-#include "IdenticalAssigner.hpp"
 #include "Image.hpp"
 #include "ISRF.hpp"
 #include "LockFree.hpp"
@@ -23,11 +21,9 @@
 #include "PanDustSystem.hpp"
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
-#include "PeerToPeerCommunicator.hpp"
+#include "ParallelTable.hpp"
 #include "RootAssigner.hpp"
-#include "StaggeredAssigner.hpp"
 #include "TextOutFile.hpp"
-#include "TimeLogger.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
 
@@ -813,4 +809,3 @@ void PanDustSystem::write() const
 }
 
 //////////////////////////////////////////////////////////////////////
-

@@ -12,6 +12,19 @@
 
 ////////////////////////////////////////////////////////////////////
 
+namespace
+{
+    std::vector<MPI_Request> pendingrequests;
+
+    void createDisplacedDoublesDatatype(std::vector<int>& displacements, MPI_Datatype* newtype)
+    {
+        int count = displacements.size();           // number of blocks (of size 1)
+        int* disp = &displacements[0];              // pointer to displacement array
+        MPI_Type_create_indexed_block(count, 1, disp, MPI_DOUBLE, newtype);
+        MPI_Type_commit(newtype);
+    }
+}
+
 std::atomic<int> ProcessManager::requests(0);
 
 //////////////////////////////////////////////////////////////////////
@@ -122,8 +135,13 @@ void ProcessManager::receiveByteBuffer(QByteArray &buffer, int sender, int& tag)
 void ProcessManager::sendDouble(double& buffer, int receiver, int tag)
 {
 #ifdef BUILDING_WITH_MPI
-    //MPI_Request req;
-    MPI_Send(&buffer, 1, MPI_DOUBLE, receiver, tag, MPI_COMM_WORLD);
+
+    //MPI_Send(&buffer, 1, MPI_DOUBLE, receiver, tag, MPI_COMM_WORLD);
+
+    MPI_Request request;
+    MPI_Isend(&buffer, 1, MPI_DOUBLE, receiver, tag, MPI_COMM_WORLD, &request);
+    pendingrequests.push_back(request);
+
 #else
     Q_UNUSED(buffer) Q_UNUSED(receiver) Q_UNUSED(tag)
 #endif
@@ -134,11 +152,115 @@ void ProcessManager::sendDouble(double& buffer, int receiver, int tag)
 void ProcessManager::receiveDouble(double& buffer, int sender, int tag)
 {
 #ifdef BUILDING_WITH_MPI
-    // nog niet zeker wat ik met request moet doen
-    MPI_Status st;
-    MPI_Recv(&buffer, 1, MPI_DOUBLE, sender, tag, MPI_COMM_WORLD, &st);
+
+    //MPI_Recv(&buffer, 1, MPI_DOUBLE, sender, tag, MPI_COMM_WORLD, &st);
+
+    MPI_Request request;
+    MPI_Irecv(&buffer, 1, MPI_DOUBLE, sender, tag, MPI_COMM_WORLD, &request);
+    pendingrequests.push_back(request);
+
 #else
     Q_UNUSED(buffer) Q_UNUSED(receiver) Q_UNUSED(tag)
+#endif
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void ProcessManager::gatherw(double* sendBuffer, int sendCount,
+                             double* recvBuffer, int recvRank, std::vector<std::vector<int>>& recvDisplacements)
+{
+#ifdef BUILDING_WITH_MPI
+    int size;
+    int rank;
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    // parameters for the senders
+    std::vector<int> sendcnts(size, 0);                     // every process sends nothing to all processes
+    sendcnts[recvRank] = sendCount;                         // except to the receiver
+    std::vector<int> sdispls(size, 0);                      // starting from sendBuffer + 0
+    std::vector<MPI_Datatype> sendtypes(size, MPI_DOUBLE);  // all doubles
+
+    // parameters on the receiving end
+    std::vector<int> recvcnts;
+    if (rank != recvRank) recvcnts.resize(size, 0); // I am not receiver: receive nothing from every process
+    else recvcnts.resize(size, 1);                  // I am receiver: receive 1 from every process
+    std::vector<int> rdispls(size, 0);              // displacements will be contained in the datatypes
+    std::vector<MPI_Datatype> recvtypes;            // we will construct derived datatypes for receiving from each process
+    recvtypes.reserve(size);
+
+    for (int rank=0; rank<size; rank++)
+    {
+        MPI_Datatype newtype;
+        createDisplacedDoublesDatatype(recvDisplacements[rank], &newtype);
+        recvtypes.push_back(newtype);
+    }
+
+    MPI_Alltoallw(sendBuffer, &sendcnts[0], &sdispls[0], &sendtypes[0],
+                  recvBuffer, &recvcnts[0], &rdispls[0], &recvtypes[0],
+                  MPI_COMM_WORLD);
+
+    for (int rank=0; rank<size; rank++) MPI_Type_free(&recvtypes[rank]);
+#else
+    Q_UNUSED(sendBuffer) Q_UNUSED(sendCount) Q_UNUSED(recvBuffer) Q_UNUSED(recvRank) Q_UNUSED(recvDisplacements)
+#endif
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void ProcessManager::scatterw(double *sendBuffer, int sendRank, std::vector<std::vector<int> > &sendDisplacements,
+                              double *recvBuffer, int recvCount)
+{
+#ifdef BUILDING_WITH_MPI
+    int size;
+    int rank;
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    // parameters for the sender
+    std::vector<int> sendcnts;
+    if (rank != sendRank) sendcnts.resize(size, 0);     // I am not sender: send nothing to every process
+    else sendcnts.resize(size, 1);                      // I am sender: send 1 to each process
+    std::vector<int> sdispls(size, 0);                  // displacements in buffer will be contained in datatypes
+    std::vector<MPI_Datatype> sendtypes;                // these will be constructed for sending to each process
+    sendtypes.reserve(size);
+
+    for (int rank=0; rank<size; rank++)
+    {
+        MPI_Datatype newtype;
+        createDisplacedDoublesDatatype(sendDisplacements[rank], &newtype);
+        sendtypes.push_back(newtype);
+    }
+
+    // parameters for the receivers
+    std::vector<int> recvcnts(size, 0);                     // each process will receive nothing from all processes
+    recvcnts[sendRank] = recvCount;                         // except from the sender
+    std::vector<int> rdispls(size, 0);                      // starting from recvBuffer + 0
+    std::vector<MPI_Datatype> recvtypes(size, MPI_DOUBLE);  // all doubles
+    recvtypes.reserve(size);
+
+    MPI_Alltoallw(sendBuffer, &sendcnts[0], &sdispls[0], &sendtypes[0],
+                  recvBuffer, &recvcnts[0], &rdispls[0], &recvtypes[0],
+                  MPI_COMM_WORLD);
+
+    for (int rank=0; rank<size; rank++) MPI_Type_free(&sendtypes[rank]);
+#else
+    Q_UNUSED(sendBuffer) Q_UNUSED(sendRank) Q_UNUSED(sendDisplacements) Q_UNUSED(recvBuffer) Q_UNUSED(recvCount)
+#endif
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void ProcessManager::wait_all()
+{
+#ifdef BUILDING_WITH_MPI
+
+    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Status statuses[pendingrequests.size()];
+    MPI_Waitall(pendingrequests.size(), &pendingrequests[0], &statuses[0]);
+    pendingrequests.clear();
+
 #endif
 }
 

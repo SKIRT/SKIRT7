@@ -74,6 +74,14 @@ public:
 
     static void receiveDouble(double& buffer, int sender, int tag);
 
+    static void wait_all();
+
+    static void gatherw(double* sendBuffer, int sendCount,
+                        double* recvBuffer, int recvRank, std::vector<std::vector<int> >& recvDisplacements);
+
+    static void scatterw(double* sendBuffer, int sendRank, std::vector<std::vector<int>>& sendDisplacements,
+                         double* recvBuffer, int recvCount);
+
     /** The purpose of this function is to sum a particular array of double values element-wise
         across the different processes. The resulting values are stored in the array passed as the
         second argument 'result_array', only on the process that is assigned as root. The rank of
@@ -116,7 +124,6 @@ public:
 
 private:
     static std::atomic<int> requests;   // This atomic integer is used to store the number of active requests for MPI
-
 };
 
 #endif // PROCESSMANAGER_HPP

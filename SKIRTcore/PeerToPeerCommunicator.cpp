@@ -79,6 +79,35 @@ void PeerToPeerCommunicator::receiveDouble(double& buffer, int sender, int tag)
 
 ////////////////////////////////////////////////////////////////////
 
+void PeerToPeerCommunicator::finishRequests()
+{
+    if (!isMultiProc()) return;
+
+    ProcessManager::wait_all();
+}
+
+////////////////////////////////////////////////////////////////////
+
+void PeerToPeerCommunicator::gatherw(double* sendBuffer, int sendCount,
+                                     double* recvBuffer, int recvRank,
+                                     std::vector<std::vector<int>>& recvDisplacements)
+{
+    if(!isMultiProc()) return;
+
+    ProcessManager::gatherw(sendBuffer, sendCount, recvBuffer, recvRank, recvDisplacements);
+}
+
+void PeerToPeerCommunicator::scatterw(double* sendBuffer, int sendRank,
+                                      std::vector<std::vector<int>>& sendDisplacements,
+                                      double* recvBuffer, int recvCount)
+{
+    if(!isMultiProc()) return;
+
+    ProcessManager::scatterw(sendBuffer, sendRank, sendDisplacements, recvBuffer, recvCount);
+}
+
+////////////////////////////////////////////////////////////////////
+
 int PeerToPeerCommunicator::root()
 {
     return ROOT;
