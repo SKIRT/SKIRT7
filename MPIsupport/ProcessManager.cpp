@@ -16,12 +16,15 @@ namespace
 {
     std::vector<MPI_Request> pendingrequests;
 
-    void createDisplacedDoublesDatatype(std::vector<int>& displacements, MPI_Datatype* newtype)
+    void createDisplacedDoubleBlocks(int blocklength, std::vector<int>& displacements, MPI_Datatype* newtype)
     {
-        int count = displacements.size();           // number of blocks (of size 1)
-        int* disp = &displacements[0];              // pointer to displacement array
-        MPI_Type_create_indexed_block(count, 1, disp, MPI_DOUBLE, newtype);
-        MPI_Type_commit(newtype);
+        int count = displacements.size();               // number of blocks
+
+        std::vector<int> multiplied_disp;
+        multiplied_disp.reserve(count);
+        for(auto i: displacements) multiplied_disp.push_back(blocklength*i); // list of displacements in doubles as unit
+
+        MPI_Type_create_indexed_block(count, blocklength, &multiplied_disp[0], MPI_DOUBLE, newtype);
     }
 }
 
@@ -167,7 +170,7 @@ void ProcessManager::receiveDouble(double& buffer, int sender, int tag)
 //////////////////////////////////////////////////////////////////////
 
 void ProcessManager::gatherw(double* sendBuffer, int sendCount,
-                             double* recvBuffer, int recvRank, std::vector<std::vector<int>>& recvDisplacements)
+                             double* recvBuffer, int recvRank, int recvLength, std::vector<std::vector<int>>& recvDisplacements)
 {
 #ifdef BUILDING_WITH_MPI
     int size;
@@ -192,7 +195,8 @@ void ProcessManager::gatherw(double* sendBuffer, int sendCount,
     for (int rank=0; rank<size; rank++)
     {
         MPI_Datatype newtype;
-        createDisplacedDoublesDatatype(recvDisplacements[rank], &newtype);
+        createDisplacedDoubleBlocks(recvLength, recvDisplacements[rank], &newtype);
+        MPI_Type_commit(&newtype);
         recvtypes.push_back(newtype);
     }
 
@@ -208,7 +212,7 @@ void ProcessManager::gatherw(double* sendBuffer, int sendCount,
 
 //////////////////////////////////////////////////////////////////////
 
-void ProcessManager::scatterw(double *sendBuffer, int sendRank, std::vector<std::vector<int> > &sendDisplacements,
+void ProcessManager::scatterw(double *sendBuffer, int sendRank, int sendLength, std::vector<std::vector<int> > &sendDisplacements,
                               double *recvBuffer, int recvCount)
 {
 #ifdef BUILDING_WITH_MPI
@@ -228,7 +232,8 @@ void ProcessManager::scatterw(double *sendBuffer, int sendRank, std::vector<std:
     for (int rank=0; rank<size; rank++)
     {
         MPI_Datatype newtype;
-        createDisplacedDoublesDatatype(sendDisplacements[rank], &newtype);
+        createDisplacedDoubleBlocks(sendLength, sendDisplacements[rank], &newtype);
+        MPI_Type_commit(&newtype);
         sendtypes.push_back(newtype);
     }
 

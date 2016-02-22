@@ -60,6 +60,110 @@ void ParallelTable::initialize(QString name, ProcessAssigner *colAssigner, Proce
 
 ////////////////////////////////////////////////////////////////////
 
+const double& ParallelTable::operator()(size_t i, size_t j) const
+{
+    if (!_synced) throw FATALERROR(_name + " says: sync() must be called before using the read operator");
+
+    // WORKING DISTRIBUTED: Read from the table opposite to the table we _writeOn.
+    if (_dist)
+    {
+        if (_writeOn == COLUMN) // read from _rows
+        {
+            if (!_rowAssigner->validIndex(i))
+                throw FATALERROR(_name + " says: Row of ParallelTable not available on this process");
+            return _rows(_rowAssigner->relativeIndex(i),j);
+        }
+        else                    // read from _columns
+        {
+            if (!_colAssigner->validIndex(j))
+                throw FATALERROR(_name + " says: Column of ParallelTable not available on this process");
+            return _columns(i,_colAssigner->relativeIndex(j));
+        }
+    }
+    // WORKING NON-DISTRIBUTED: Reading and writing happens in the same table.
+    else
+    {
+        if (_writeOn == COLUMN)
+            return _columns(i,j);
+        else
+            return _rows(i,j);
+    }
+}
+
+double& ParallelTable::operator()(size_t i, size_t j)
+{
+    _synced = false;
+
+    // WORKING DISTRIBUTED: Writable reference to the table we _writeOn.
+    if (_dist)
+    {
+        if (_writeOn == COLUMN) // Write on _columns
+        {
+            if (!_colAssigner->validIndex(j))
+                throw FATALERROR(_name + " says: Column of ParallelTable not available on this process");
+            return _columns(i,_colAssigner->relativeIndex(j));
+        }
+        else                    // Write on _rows
+        {
+            if (!_rowAssigner->validIndex(i))
+                throw FATALERROR(_name + " says: Row of ParallelTable not available on this process");
+            return _rows(_rowAssigner->relativeIndex(i),j);
+        }
+    }
+    // WORKING NON-DISTRIBUTED: Reading and writing happens in the same table.
+    else
+    {
+        if (_writeOn == COLUMN)
+            return _columns(i,j);
+        else
+            return _rows(i,j);
+    }
+}
+
+////////////////////////////////////////////////////////////////////
+
+Array& ParallelTable::operator[](size_t i)
+{
+    _synced = false;
+
+    if (_writeOn == ROW) // return writable reference to a complete row
+    {
+        if (!_rowAssigner->validIndex(i))
+            throw FATALERROR(_name + " says: Row of ParallelTable not available on this process");
+        else return _rows[_dist ? _rowAssigner->relativeIndex(i) : i];
+    }
+    else throw FATALERROR(_name + " says: This ParallelTable does not have writable rows.");
+}
+
+const Array& ParallelTable::operator[](size_t i) const
+{
+    if (!_synced) throw FATALERROR(_name + " says: sync() must be called before asking a read reference");
+
+    if (_writeOn == COLUMN) // return read only reference to a complete row
+    {
+        if (!_rowAssigner->validIndex(i))
+            throw FATALERROR(_name + " says: Row of ParallelTable not available on this process");
+        else return _rows[_dist ? _rowAssigner->relativeIndex(i) : i];
+    }
+    else throw FATALERROR(_name + " says: This ParallelTable does not have readable rows.");
+}
+
+////////////////////////////////////////////////////////////////////
+
+const double& ParallelTable::read(size_t i, size_t j) const
+{
+    return (*this)(i,j);
+}
+
+////////////////////////////////////////////////////////////////////
+
+double& ParallelTable::write(size_t i, size_t j)
+{
+    return (*this)(i,j);
+}
+
+////////////////////////////////////////////////////////////////////
+
 void ParallelTable::sync()
 {
     if (!_synced)
@@ -189,108 +293,6 @@ double ParallelTable::sumEverything() const
 }
 
 ////////////////////////////////////////////////////////////////////
-
-const double& ParallelTable::operator()(size_t i, size_t j) const
-{
-    if (!_synced) throw FATALERROR(_name + " says: sync() must be called before using the read operator");
-
-    // WORKING DISTRIBUTED: Read from the table opposite to the table we _writeOn.
-    if (_dist)
-    {
-        if (_writeOn == COLUMN) // read from _rows
-        {
-            if (!_rowAssigner->validIndex(i))
-                throw FATALERROR(_name + " says: Row of ParallelTable not available on this process");
-            return _rows(_rowAssigner->relativeIndex(i),j);
-        }
-        else                    // read from _columns
-        {
-            if (!_colAssigner->validIndex(j))
-                throw FATALERROR(_name + " says: Column of ParallelTable not available on this process");
-            return _columns(i,_colAssigner->relativeIndex(j));
-        }
-    }
-    // WORKING NON-DISTRIBUTED: Reading and writing happens in the same table.
-    else
-    {
-        if (_writeOn == COLUMN)
-            return _columns(i,j);
-        else
-            return _rows(i,j);
-    }
-}
-
-double& ParallelTable::operator()(size_t i, size_t j)
-{
-    _synced = false;
-
-    // WORKING DISTRIBUTED: Writable reference to the table we _writeOn.
-    if (_dist)
-    {
-        if (_writeOn == COLUMN) // Write on _columns
-        {
-            if (!_colAssigner->validIndex(j))
-                throw FATALERROR(_name + " says: Column of ParallelTable not available on this process");
-            return _columns(i,_colAssigner->relativeIndex(j));
-        }
-        else                    // Write on _rows
-        {
-            if (!_rowAssigner->validIndex(i))
-                throw FATALERROR(_name + " says: Row of ParallelTable not available on this process");
-            return _rows(_rowAssigner->relativeIndex(i),j);
-        }
-    }
-    // WORKING NON-DISTRIBUTED: Reading and writing happens in the same table.
-    else
-    {
-        if (_writeOn == COLUMN)
-            return _columns(i,j);
-        else
-            return _rows(i,j);
-    }
-}
-
-////////////////////////////////////////////////////////////////////
-
-Array& ParallelTable::operator[](size_t i)
-{
-    _synced = false;
-
-    if (_writeOn == ROW) // return writable reference to a complete row
-    {
-        if (!_rowAssigner->validIndex(i))
-            throw FATALERROR(_name + " says: Row of ParallelTable not available on this process");
-        else return _rows[_dist ? _rowAssigner->relativeIndex(i) : i];
-    }
-    else throw FATALERROR(_name + " says: This ParallelTable does not have writable rows.");
-}
-
-const Array& ParallelTable::operator[](size_t i) const
-{
-    if (!_synced) throw FATALERROR(_name + " says: sync() must be called before asking a read reference");
-
-    if (_writeOn == COLUMN) // return read only reference to a complete row
-    {
-        if (!_rowAssigner->validIndex(i))
-            throw FATALERROR(_name + " says: Row of ParallelTable not available on this process");
-        else return _rows[_dist ? _rowAssigner->relativeIndex(i) : i];
-    }
-    else throw FATALERROR(_name + " says: This ParallelTable does not have readable rows.");
-}
-
-////////////////////////////////////////////////////////////////////
-
-const double& ParallelTable::read(size_t i, size_t j) const
-{
-    return (*this)(i,j);
-}
-
-////////////////////////////////////////////////////////////////////
-
-double& ParallelTable::write(size_t i, size_t j)
-{
-    return (*this)(i,j);
-}
 
 ////////////////////////////////////////////////////////////////////
 
@@ -433,9 +435,9 @@ void ParallelTable::experimental_col_to_row()
         double* sendBuffer = &_columns(i,0);
         double* recvBuffer = _rowAssigner->validIndex(i) ? &_rows(_rowAssigner->relativeIndex(i),0) : 0;
         int recvRank = _rowAssigner->rankForIndex(i);
-        _comm->gatherw(sendBuffer, _columns.size(1), recvBuffer, recvRank, _displacementvv);
+        _comm->gatherw(sendBuffer, _columns.size(1), recvBuffer, recvRank, 1, _displacementvv);
         // Elk proces i zendt vanuit sendBuffer, _columns.size(1) doubles naar recvBuffer op recvRank in de vorm
-        // van datatype i bepaald door _displacementvv[i].
+        // van datatype i bepaald door blocksize 1 en _displacementvv[i].
     }
 }
 
@@ -448,8 +450,10 @@ void ParallelTable::experimental_row_to_col()
         double* sendBuffer = _rowAssigner->validIndex(i) ? &_rows(_rowAssigner->relativeIndex(i),0) : 0;
         double* recvBuffer = &_columns(i,0);
         int sendRank = _rowAssigner->rankForIndex(i);
-        _comm->scatterw(sendBuffer, sendRank, _displacementvv, recvBuffer, _columns.size(1));
+        _comm->scatterw(sendBuffer, sendRank, 1, _displacementvv, recvBuffer, _columns.size(1));
         // Proces sendRank zendt vanuit sendBuffer een aantal doubles in de vorm van datatype i bepaald door
         // _displacementvv[i] naar recvBuffer op rank i.
     }
 }
+
+////////////////////////////////////////////////////////////////////

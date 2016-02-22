@@ -1,3 +1,8 @@
+/*//////////////////////////////////////////////////////////////////
+////       SKIRT -- an advanced radiative transfer code         ////
+////       © Astronomical Observatory, Ghent University         ////
+///////////////////////////////////////////////////////////////// */
+
 #ifndef DISTMEMTABLE_HPP
 #define DISTMEMTABLE_HPP
 
@@ -5,20 +10,25 @@
 
 #include "ArrayTable.hpp"
 #include "Table.hpp"
-
 class ProcessAssigner;
 class PeerToPeerCommunicator;
 
+////////////////////////////////////////////////////////////////////
+
 enum writeState { COLUMN, ROW };
+
+////////////////////////////////////////////////////////////////////
 
 class ParallelTable
 {
+    //============= Construction - Setup - Destruction =============
+
 public:
-    // Constructor
     ParallelTable();
 
-    // Initialization
     void initialize(QString name, ProcessAssigner* colAssigner, ProcessAssigner* rowAssigner, writeState writeOn);
+
+    //======================== Other Functions =======================
 
     // Reading and writing operators
     const double& operator()(size_t i, size_t j) const; // read operator
@@ -49,7 +59,8 @@ private:
     void col_to_row();
     void row_to_col();
 
-    // Members
+    //======================== Data Members ========================
+
     QString _name;
     ProcessAssigner* _colAssigner;  // the distribution scheme for the columns
     ProcessAssigner* _rowAssigner;  // the distribution scheme for the rows
@@ -77,4 +88,6 @@ private:
     void experimental_row_to_col();
 };
 
-#endif // DISTMEMTABLE_HPP
+////////////////////////////////////////////////////////////////////
+
+#endif // PARALLELTABLE_HPP

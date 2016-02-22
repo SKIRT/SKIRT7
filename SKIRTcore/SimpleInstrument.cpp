@@ -23,9 +23,13 @@ void SimpleInstrument::setupSelfBefore()
 {
     SingleFrameInstrument::setupSelfBefore();
 
-    int Nlambda = find<WavelengthGrid>()->Nlambda();
+    WavelengthGrid* wavelengthGrid = find<WavelengthGrid>();
+    int Nlambda = wavelengthGrid->Nlambda();
+    ProcessAssigner* wavelengthAssigner = wavelengthGrid->assigner();
+
     _ftotv.resize(Nlambda*_Nframep);
     _Ftotv.resize(Nlambda);
+    _distftotv.initialize(wavelengthAssigner, _Nframep);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -45,6 +49,7 @@ SimpleInstrument::detect(PhotonPackage* pp)
     {
         size_t m = l + ell*_Nframep;
         LockFree::add(_ftotv[m], Lextf);
+        LockFree::add(_distftotv(ell,l), Lextf);
     }
 }
 
@@ -64,6 +69,10 @@ SimpleInstrument::write()
     // Sum the flux arrays element-wise across the different processes
     sumResults(farrays);
     sumResults(Farrays);
+
+    std::shared_ptr<Array> completeCube = _distftotv.constructCompleteCube();
+    farrays << completeCube.get();
+    fnames << "new cube";
 
     // calibrate and output the arrays
     calibrateAndWriteDataCubes(farrays, fnames);

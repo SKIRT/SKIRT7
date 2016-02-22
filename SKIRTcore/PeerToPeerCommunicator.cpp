@@ -89,21 +89,21 @@ void PeerToPeerCommunicator::finishRequests()
 ////////////////////////////////////////////////////////////////////
 
 void PeerToPeerCommunicator::gatherw(double* sendBuffer, int sendCount,
-                                     double* recvBuffer, int recvRank,
+                                     double* recvBuffer, int recvRank, int recvLength,
                                      std::vector<std::vector<int>>& recvDisplacements)
 {
     if(!isMultiProc()) return;
 
-    ProcessManager::gatherw(sendBuffer, sendCount, recvBuffer, recvRank, recvDisplacements);
+    ProcessManager::gatherw(sendBuffer, sendCount, recvBuffer, recvRank, recvLength, recvDisplacements);
 }
 
-void PeerToPeerCommunicator::scatterw(double* sendBuffer, int sendRank,
+void PeerToPeerCommunicator::scatterw(double* sendBuffer, int sendRank, int sendLength,
                                       std::vector<std::vector<int>>& sendDisplacements,
                                       double* recvBuffer, int recvCount)
 {
     if(!isMultiProc()) return;
 
-    ProcessManager::scatterw(sendBuffer, sendRank, sendDisplacements, recvBuffer, recvCount);
+    ProcessManager::scatterw(sendBuffer, sendRank, sendLength, sendDisplacements, recvBuffer, recvCount);
 }
 
 ////////////////////////////////////////////////////////////////////

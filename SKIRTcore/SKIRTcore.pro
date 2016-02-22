@@ -311,7 +311,8 @@ HEADERS += \
     ParallelTable.hpp \
     ParallelTable \
     ThemisDustMix.hpp \
-    SimpleOligoDustMix.hpp
+    SimpleOligoDustMix.hpp \
+    ParallelDataCube.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -577,4 +578,5 @@ SOURCES += \
     TrustPolarizedMeanDustMix.cpp \
     ParallelTable.cpp \
     ThemisDustMix.cpp \
-    SimpleOligoDustMix.cpp
+    SimpleOligoDustMix.cpp \
+    ParallelDataCube.cpp

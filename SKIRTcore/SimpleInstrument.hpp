@@ -6,6 +6,7 @@
 #ifndef SIMPLEINSTRUMENT_HPP
 #define SIMPLEINSTRUMENT_HPP
 
+#include "ParallelDataCube.hpp"
 #include "SingleFrameInstrument.hpp"
 
 ////////////////////////////////////////////////////////////////////
@@ -64,6 +65,7 @@ protected:
 private:
     Array _ftotv;
     Array _Ftotv;
+    ParallelDataCube _distftotv;
 };
 
 ////////////////////////////////////////////////////////////////////
