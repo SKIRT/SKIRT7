@@ -10,7 +10,7 @@
 
 ////////////////////////////////////////////////////////////////////
 
-ParallelDataCube::ParallelDataCube() : _wavelengthAssigner(0), _Nframep(0), _partialCube(new Array)
+ParallelDataCube::ParallelDataCube() : _wavelengthAssigner(0), _comm(0), _Nframep(0), _partialCube(new Array)
 {
 }
 
@@ -23,14 +23,14 @@ void ParallelDataCube::initialize(ProcessAssigner *wavelengthAssigner, size_t Nf
     _Nlambda = _wavelengthAssigner->nvalues();
 
     _partialCube->resize(_Nlambda*_Nframep);
+
+    _comm = _wavelengthAssigner->find<PeerToPeerCommunicator>();
 }
 
 ////////////////////////////////////////////////////////////////////
 
 std::shared_ptr<Array> ParallelDataCube::constructCompleteCube()
 {
-    PeerToPeerCommunicator* _comm = _wavelengthAssigner->find<PeerToPeerCommunicator>();
-
     if (!_wavelengthAssigner->parallel() || !_comm->isMultiProc()) // partial cube of equal size as total cube
     {
         _comm->sum(*_partialCube); // sum the data to root

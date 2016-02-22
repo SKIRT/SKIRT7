@@ -9,6 +9,7 @@
 #include <memory>
 
 #include "Array.hpp"
+#include "PeerToPeerCommunicator.hpp"
 class ProcessAssigner;
 
 ////////////////////////////////////////////////////////////////////
@@ -35,6 +36,7 @@ public:
 
 private:
     ProcessAssigner* _wavelengthAssigner;
+    PeerToPeerCommunicator* _comm;
     int _Nlambda;
     size_t _Nframep;
 

@@ -3,6 +3,8 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
+#include <memory>
+
 #include "FatalError.hpp"
 #include "FrameInstrument.hpp"
 #include "LockFree.hpp"
@@ -23,8 +25,10 @@ void FrameInstrument::setupSelfBefore()
 {
     SingleFrameInstrument::setupSelfBefore();
 
-    int Nlambda = find<WavelengthGrid>()->Nlambda();
+    WavelengthGrid* wavelengthGrid = find<WavelengthGrid>();
+    int Nlambda = wavelengthGrid->Nlambda();
     _ftotv.resize(Nlambda*_Nframep);
+    _distftotv.initialize(wavelengthGrid->assigner(), _Nframep);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -43,6 +47,7 @@ FrameInstrument::detect(PhotonPackage* pp)
         double Lextf = L*extf;
 
         LockFree::add(_ftotv[m], Lextf);
+        LockFree::add(_distftotv(ell,l), Lextf);
     }
 }
 
@@ -59,6 +64,10 @@ FrameInstrument::write()
 
     // Sum the flux arrays element-wise across the different processes
     sumResults(farrays);
+
+    std::shared_ptr<Array> completeCube = _distftotv.constructCompleteCube();
+    farrays << completeCube.get();
+    fnames << "new total";
 
     // calibrate and output the arrays
     calibrateAndWriteDataCubes(farrays, fnames);

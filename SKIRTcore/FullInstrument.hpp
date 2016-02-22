@@ -7,6 +7,7 @@
 #define FULLINSTRUMENT_HPP
 
 #include "ArrayTable.hpp"
+#include "ParallelDataCube.hpp"
 #include "SingleFrameInstrument.hpp"
 
 ////////////////////////////////////////////////////////////////////
@@ -135,6 +136,16 @@ private:
     Array _ftotQv;
     Array _ftotUv;
     Array _ftotVv;
+
+    ParallelDataCube _distftrav;
+    ParallelDataCube _distfstrdirv;
+    ParallelDataCube _distfstrscav;
+    ParallelDataCube _distfdusdirv;
+    ParallelDataCube _distfdusscav;
+    std::vector<ParallelDataCube> _distfstrscavv;
+    ParallelDataCube _distftotQv;
+    ParallelDataCube _distftotUv;
+    ParallelDataCube _distftotVv;
 
     // detector arrays (SEDs)
     Array _Ftrav;

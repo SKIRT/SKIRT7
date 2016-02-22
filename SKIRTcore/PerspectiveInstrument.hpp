@@ -9,6 +9,7 @@
 #include "Array.hpp"
 #include "HomogeneousTransform.hpp"
 #include "Instrument.hpp"
+#include "ParallelDataCube.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
@@ -225,6 +226,7 @@ private:
 
     // data cube
     Array _ftotv;
+    ParallelDataCube _distftotv;
 };
 
 ////////////////////////////////////////////////////////////////////

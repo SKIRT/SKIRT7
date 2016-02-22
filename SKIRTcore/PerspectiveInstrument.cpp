@@ -103,8 +103,10 @@ void PerspectiveInstrument::setupSelfBefore()
     _transform.translate(_Nx/2., _Ny/2., 0);
 
     // the data cube
-    int Nlambda = find<WavelengthGrid>()->Nlambda();
+    WavelengthGrid* wavelengthGrid = find<WavelengthGrid>();
+    int Nlambda = wavelengthGrid->Nlambda();
     _ftotv.resize(Nlambda*_Nx*_Ny);
+    _distftotv.initialize(wavelengthGrid->assigner(), _Nx*_Ny);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -351,8 +353,10 @@ void PerspectiveInstrument::detect(PhotonPackage* pp)
 
         // add the adjusted luminosity to the appropriate pixel in the data cube
         int ell = pp->ell();
-        int m = i + _Nx*j + _Nx*_Ny*ell;
+        int l = i + _Nx*j;
+        int m = l + _Nx*_Ny*ell;
         LockFree::add(_ftotv[m], L);
+        LockFree::add(_distftotv(ell,l), L);
     }
 }
 
@@ -371,6 +375,9 @@ void PerspectiveInstrument::write()
     // Sum the flux arrays element-wise across the different processes
     sumResults(farrays);
 
+    // Collect the partial data cubes into one big cube at process 0
+    Array completeCube = *_distftotv.constructCompleteCube();
+
     // Multiply each sample by lambda/dlamdba and by the constant factor 1/(4 pi s^2)
     // to obtain the surface brightness and convert to output units (such as W/m2/arcsec2)
 
@@ -385,6 +392,7 @@ void PerspectiveInstrument::write()
             {
                 int m = i + _Nx*j + _Nx*_Ny*ell;
                 _ftotv[m] = units->osurfacebrightness(lambda, _ftotv[m]*front/dlambda);
+                completeCube[m] = units->osurfacebrightness(lambda, completeCube[m]*front/dlambda);
             }
         }
     }
@@ -394,6 +402,10 @@ void PerspectiveInstrument::write()
     QString filename = _instrumentname + "_total";
     Image image(this, _Nx, _Ny, Nlambda, _s, _s, "surfacebrightness");
     image.saveto(this, _ftotv, filename, "total flux");
+
+    QString newfilename = _instrumentname + "_newcube_total";
+    Image newimage(this, _Nx, _Ny, Nlambda, _s, _s, "surfacebrightness");
+    newimage.saveto(this, completeCube, newfilename, "new total flux");
 }
 
 ////////////////////////////////////////////////////////////////////
