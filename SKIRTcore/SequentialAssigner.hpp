@@ -96,14 +96,14 @@ public:
         amount of parts that need to be executed in the simulation. In the case that \c blocks = 1,
         this is done by adding the relative index to the index of the starting value for this process,
         stored in the \c _start member. If \c blocks > 1, the calculation is more complicated. */
-    size_t absoluteIndex(size_t relativeIndex);
+    size_t absoluteIndex(size_t relativeIndex) const;
 
     /** This function takes the absolute index of a certain part of the work as an argument and returns
         the relative index of that part, a value from zero to the number of parts that were assigned to
         this process, \c _nvalues. In the case that \c blocks = 1, this is done by subtracting the
         index of the starting value for this process, _start, from the absolute index. If \c blocks >
         1, the calculation is more complicated. */
-    size_t relativeIndex(size_t absoluteIndex);
+    size_t relativeIndex(size_t absoluteIndex) const;
 
     /** This function returns the rank of the process that is assigned to a certain part of the work.
         This part is identified by its absolute index, passed to this function as an argument. The

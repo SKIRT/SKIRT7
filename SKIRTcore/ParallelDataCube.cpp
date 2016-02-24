@@ -16,7 +16,7 @@ ParallelDataCube::ParallelDataCube() : _wavelengthAssigner(0), _comm(0), _Nframe
 
 ////////////////////////////////////////////////////////////////////
 
-void ParallelDataCube::initialize(ProcessAssigner *wavelengthAssigner, size_t Nframep)
+void ParallelDataCube::initialize(const ProcessAssigner *wavelengthAssigner, size_t Nframep)
 {
     _wavelengthAssigner = wavelengthAssigner;
     _Nframep = Nframep;

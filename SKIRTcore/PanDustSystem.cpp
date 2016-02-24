@@ -124,7 +124,7 @@ void PanDustSystem::setupSelfAfter()
     if (dustemission())
     {
         //_Labsstelvv.resize(_Ncells,_Nlambda);
-        _Labsstelvv.initialize("Absorbed Stellar Luminosity",_lambdaAssigner,_cellAssigner,COLUMN);
+        _Labsstelvv.initialize("Absorbed Stellar Luminosity Table",_lambdaAssigner,_cellAssigner,COLUMN);
         _haveLabsstel = true;
         if (selfAbsorption())
         {

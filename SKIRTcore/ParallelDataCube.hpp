@@ -21,7 +21,7 @@ class ParallelDataCube
 public:
     ParallelDataCube();
 
-    void initialize(ProcessAssigner* wavelengthAssigner, size_t Nframep);
+    void initialize(const ProcessAssigner* wavelengthAssigner, size_t Nframep);
 
     //======================== Other Methods =======================
 
@@ -35,7 +35,7 @@ public:
     //======================== Data Members ========================
 
 private:
-    ProcessAssigner* _wavelengthAssigner;
+    const ProcessAssigner* _wavelengthAssigner;
     PeerToPeerCommunicator* _comm;
     int _Nlambda;
     size_t _Nframep;

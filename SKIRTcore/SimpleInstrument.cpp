@@ -25,11 +25,10 @@ void SimpleInstrument::setupSelfBefore()
 
     WavelengthGrid* wavelengthGrid = find<WavelengthGrid>();
     int Nlambda = wavelengthGrid->Nlambda();
-    ProcessAssigner* wavelengthAssigner = wavelengthGrid->assigner();
 
     _ftotv.resize(Nlambda*_Nframep);
     _Ftotv.resize(Nlambda);
-    _distftotv.initialize(wavelengthAssigner, _Nframep);
+    _distftotv.initialize(wavelengthGrid->assigner(), _Nframep);
 }
 
 ////////////////////////////////////////////////////////////////////

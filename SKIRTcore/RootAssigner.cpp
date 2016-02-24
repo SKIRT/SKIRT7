@@ -65,7 +65,7 @@ void RootAssigner::setBlocks(size_t blocks)
 
 ////////////////////////////////////////////////////////////////////
 
-size_t RootAssigner::absoluteIndex(size_t relativeIndex)
+size_t RootAssigner::absoluteIndex(size_t relativeIndex) const
 {
     if (_comm && !_comm->isRoot())
         throw FATALERROR("This function should not be called from any process other than the root");
@@ -75,7 +75,7 @@ size_t RootAssigner::absoluteIndex(size_t relativeIndex)
 
 ////////////////////////////////////////////////////////////////////
 
-size_t RootAssigner::relativeIndex(size_t absoluteIndex)
+size_t RootAssigner::relativeIndex(size_t absoluteIndex) const
 {
     if (_comm && !_comm->isRoot())
         throw FATALERROR("This function should not be called from any process other than the root");

@@ -74,7 +74,7 @@ public:
         index corresponding with that part of work, a value between zero and the size argument passed
         to the assign function. According to their assignment procedure, each ProcessAssigner subclass
         defines this function in a different way. */
-    virtual size_t absoluteIndex(size_t relativeIndex) = 0;
+    virtual size_t absoluteIndex(size_t relativeIndex) const = 0;
 
     /** This purely virtual function must be implemented in each of the ProcessAssigner subclasses. As
         an argument, it takes a value from zero to the number of parts of work that is used for the
@@ -83,7 +83,7 @@ public:
         this process, a value between zero and the number of values assigned to this process, _nvalues.
         According to their assignment procedure, each ProcessAssigner subclass defines this function in
         a different way. */
-    virtual size_t relativeIndex(size_t absoluteIndex) = 0;
+    virtual size_t relativeIndex(size_t absoluteIndex) const = 0;
 
     /** This purely virtual function can be called to determine which process is assigned to a certain
         part of work. The index argument passed to this function is the absolute index of that part,
@@ -99,10 +99,13 @@ public:
     virtual bool parallel() const = 0;
 
     /** Returns true if this process was assigned to the given index. */
-    bool validIndex(size_t absoluteIndex) const;
+    virtual bool validIndex(size_t absoluteIndex) const;
 
     /** Returns a vector containing all the absolute work indices assigned to a given process rank. */
     std::vector<int> indicesForRank(int rank) const;
+
+    size_t nvaluesForRank(int rank) const;
+
 
     //======================== Data Members ========================
 

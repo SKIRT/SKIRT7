@@ -93,14 +93,14 @@ public:
         amount of parts that need to be executed in the simulation. When \c blocks = 1, this function
         simply returns the argument. For \c blocks > 1, the relative index depends on which blocks were
         assigned to the process that calls it. */
-    size_t absoluteIndex(size_t relativeIndex);
+    size_t absoluteIndex(size_t relativeIndex) const;
 
     /** This function takes the absolute index of a certain part of the work as an argument and returns
         the relative index of that part, a value from zero to the number of parts that were assigned to
         this process, \c _nvalues. When \c blocks = 1, this function simply returns the argument. For
         \c blocks > 1, the absolute index depends on which blocks were assigned to the process that
         calls it. */
-    size_t relativeIndex(size_t absoluteIndex);
+    size_t relativeIndex(size_t absoluteIndex) const;
 
     /** This function which must be implemented in each subclass of ProcessAssigner, returns the rank
         assigned to a certain part of the work. In this class however, if \c blocks = 1, each process
@@ -118,6 +118,8 @@ public:
         is not allowed. If the assignment was performed with \c blocks > 1, this function returns true
         since each process was assigned to a different set of blocks. */
     bool parallel() const;
+
+    bool validIndex(size_t absoluteIndex) const;
 
     //======================== Data Members ========================
 

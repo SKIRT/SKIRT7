@@ -69,13 +69,13 @@ public:
         amount of parts that need to be executed in the simulation. If a PeerToPeerCommunicator is
         available and the calling process is not the root, a fatal error is thrown. Otherwise, the
         argument is returned. */
-    size_t absoluteIndex(size_t relativeIndex);
+    size_t absoluteIndex(size_t relativeIndex) const;
 
     /** This function takes the absolute index of a certain part of the work as an argument and returns
         the relative index of that part, a value from zero to the number of parts that were assigned to
         this process, _nvalues. If a PeerToPeerCommunicator is available and the calling process is not
         the root, a fatal error is thrown. Otherwise, the argument is returned. */
-    size_t relativeIndex(size_t absoluteIndex);
+    size_t relativeIndex(size_t absoluteIndex) const;
 
     /** This function which must be implemented in each subclass of ProcessAssigner, returns the rank
         assigned to a certain part of the work. In this class, it returns the rank of the root as

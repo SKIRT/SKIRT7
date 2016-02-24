@@ -16,7 +16,7 @@ namespace
 {
     std::vector<MPI_Request> pendingrequests;
 
-    void createDisplacedDoubleBlocks(int blocklength, std::vector<int>& displacements, MPI_Datatype* newtype)
+    void createDisplacedDoubleBlocks(int blocklength, const std::vector<int>& displacements, MPI_Datatype* newtype)
     {
         int count = displacements.size();               // number of blocks
 
@@ -170,7 +170,7 @@ void ProcessManager::receiveDouble(double& buffer, int sender, int tag)
 //////////////////////////////////////////////////////////////////////
 
 void ProcessManager::gatherw(double* sendBuffer, int sendCount,
-                             double* recvBuffer, int recvRank, int recvLength, std::vector<std::vector<int>>& recvDisplacements)
+                             double* recvBuffer, int recvRank, int recvLength, const std::vector<std::vector<int>>& recvDisplacements)
 {
 #ifdef BUILDING_WITH_MPI
     int size;
@@ -212,7 +212,7 @@ void ProcessManager::gatherw(double* sendBuffer, int sendCount,
 
 //////////////////////////////////////////////////////////////////////
 
-void ProcessManager::scatterw(double *sendBuffer, int sendRank, int sendLength, std::vector<std::vector<int> > &sendDisplacements,
+void ProcessManager::scatterw(double *sendBuffer, int sendRank, int sendLength, const std::vector<std::vector<int> > &sendDisplacements,
                               double *recvBuffer, int recvCount)
 {
 #ifdef BUILDING_WITH_MPI

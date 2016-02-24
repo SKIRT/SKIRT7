@@ -104,7 +104,7 @@ void RandomAssigner::setBlocks(size_t blocks)
 
 ////////////////////////////////////////////////////////////////////
 
-size_t RandomAssigner::absoluteIndex(size_t relativeIndex)
+size_t RandomAssigner::absoluteIndex(size_t relativeIndex) const
 {
     // Calculate the index of the block corresponding to this relativeIndex and the corresponding
     // relativeIndex in the first block
@@ -116,7 +116,7 @@ size_t RandomAssigner::absoluteIndex(size_t relativeIndex)
 
 ////////////////////////////////////////////////////////////////////
 
-size_t RandomAssigner::relativeIndex(size_t absoluteIndex)
+size_t RandomAssigner::relativeIndex(size_t absoluteIndex) const
 {
     // Calculate the index of the block corresponding to this absoluteIndex and the corresponding
     // absoluteIndex in the first block

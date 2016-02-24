@@ -293,10 +293,8 @@ private:
 
     // data members initialized during setup
     int _Nlambda;
-    //Table<2> _Labsstelvv;   // absorbed stellar emission for each cell and each wavelength (indexed on m,ell)
-    //Table<2> _Labsdustvv;   // absorbed dust emission for each cell and each wavelength (indexed on m,ell)
-    ProcessAssigner* _lambdaAssigner; // determines which wavelengths absorption will be recorded for
-    ProcessAssigner* _cellAssigner; // determines which cells will be given to the DustLib via
+    const ProcessAssigner* _lambdaAssigner; // determines which wavelengths absorption will be recorded for
+    const ProcessAssigner* _cellAssigner; // determines which cells will be given to the DustLib via
     ParallelTable _Labsstelvv;
     ParallelTable _Labsdustvv;
     bool _haveLabsstel;     // true if absorbed stellar emission is relevant for this simulation

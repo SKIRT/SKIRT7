@@ -9,6 +9,7 @@
 #include <QString>
 
 #include "ArrayTable.hpp"
+#include "Log.hpp"
 #include "Table.hpp"
 class ProcessAssigner;
 class PeerToPeerCommunicator;
@@ -26,7 +27,7 @@ class ParallelTable
 public:
     ParallelTable();
 
-    void initialize(QString name, ProcessAssigner* colAssigner, ProcessAssigner* rowAssigner, writeState writeOn);
+    void initialize(QString name, const ProcessAssigner* colAssigner, const ProcessAssigner* rowAssigner, writeState writeOn);
 
     //======================== Other Functions =======================
 
@@ -47,9 +48,6 @@ public:
     Array stackRows() const; // sum of al the rows: each elements is a column sum
     double sumEverything() const;
 
-    // Some extra stuff
-    const double& read(size_t i, size_t j) const;
-    double& write(size_t i, size_t j);
     bool distributed() const;
     bool initialized() const;
 
@@ -58,12 +56,14 @@ private:
     void sum_all();
     void col_to_row();
     void row_to_col();
+    void experimental_col_to_row();
+    void experimental_row_to_col();
 
     //======================== Data Members ========================
 
     QString _name;
-    ProcessAssigner* _colAssigner;  // the distribution scheme for the columns
-    ProcessAssigner* _rowAssigner;  // the distribution scheme for the rows
+    const ProcessAssigner* _colAssigner;  // the distribution scheme for the columns
+    const ProcessAssigner* _rowAssigner;  // the distribution scheme for the rows
     writeState _writeOn;            // determines which table will be writable, and which one will be readable
 
     bool _dist;     // false if memory is not distributed
@@ -77,15 +77,13 @@ private:
     ArrayTable<2> _rows;// the values distributed over processes row wise
 
     PeerToPeerCommunicator* _comm; // communicator used for synchronizing
+    Log* _log;
 
-    // For experimental functions
     std::vector<std::vector<int>> _displacementvv;  // A list of absolute indices for each process.
                                                     // This way the receival positions in the receivebuffer _rows[i] can
                                                     // be dependent on the sending process.
                                                     // An array of MPI_Datatype's will be constructed using the array
                                                     // of displacements.
-    void experimental_col_to_row();
-    void experimental_row_to_col();
 };
 
 ////////////////////////////////////////////////////////////////////

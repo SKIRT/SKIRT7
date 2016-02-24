@@ -56,7 +56,7 @@ void FullInstrument::setupSelfBefore()
 
     // resize the detector arrays only when meaningful
     WavelengthGrid* wavelengthGrid = find<WavelengthGrid>();
-    ProcessAssigner* wavelengthAssigner = wavelengthGrid->assigner();
+    const ProcessAssigner* wavelengthAssigner = wavelengthGrid->assigner();
     int Nlambda = wavelengthGrid->Nlambda();
 
     _ftrav.resize(Nlambda*_Nframep);

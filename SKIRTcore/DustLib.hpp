@@ -101,8 +101,8 @@ private:
     ParallelTable _Lvv;
 
 protected:
-    ProcessAssigner* _cellAssigner;
-    ProcessAssigner* _lambdaAssigner;
+    const ProcessAssigner* _cellAssigner;
+    const ProcessAssigner* _lambdaAssigner;
 };
 
 ////////////////////////////////////////////////////////////////////

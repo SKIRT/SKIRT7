@@ -88,7 +88,7 @@ void SequentialAssigner::setBlocks(size_t blocks)
 
 ////////////////////////////////////////////////////////////////////
 
-size_t SequentialAssigner::absoluteIndex(size_t relativeIndex)
+size_t SequentialAssigner::absoluteIndex(size_t relativeIndex) const
 {
     // Calculate the index of the block corresponding to this relativeIndex and its position
     // within the corresponding block
@@ -101,7 +101,7 @@ size_t SequentialAssigner::absoluteIndex(size_t relativeIndex)
 
 ////////////////////////////////////////////////////////////////////
 
-size_t SequentialAssigner::relativeIndex(size_t absoluteIndex)
+size_t SequentialAssigner::relativeIndex(size_t absoluteIndex) const
 {
     // Calculate the index of the block corresponding to this absoluteIndex and its position
     // within the corresponding block

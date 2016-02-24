@@ -175,7 +175,7 @@ namespace
 void DustLib::calculate()
 {
     // initialize/clear the ParallelTable that stores and communicates the results
-    if (!_Lvv.initialized()) _Lvv.initialize("Dust Emission",_lambdaAssigner,_cellAssigner,ROW);
+    if (!_Lvv.initialized()) _Lvv.initialize("Dust Emission Spectra Table",_lambdaAssigner,_cellAssigner,ROW);
     else _Lvv.clear();
 
     // get mapping from cells to library entries.

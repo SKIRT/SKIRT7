@@ -77,9 +77,9 @@ public:
     static void wait_all();
 
     static void gatherw(double* sendBuffer, int sendCount,
-                        double* recvBuffer, int recvRank, int recvLength, std::vector<std::vector<int> >& recvDisplacements);
+                        double* recvBuffer, int recvRank, int recvLength, const std::vector<std::vector<int> >& recvDisplacements);
 
-    static void scatterw(double* sendBuffer, int sendRank, int sendLength, std::vector<std::vector<int>>& sendDisplacements,
+    static void scatterw(double* sendBuffer, int sendRank, int sendLength, const std::vector<std::vector<int>>& sendDisplacements,
                          double* recvBuffer, int recvCount);
 
     /** The purpose of this function is to sum a particular array of double values element-wise

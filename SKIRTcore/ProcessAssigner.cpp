@@ -79,3 +79,14 @@ std::vector<int> ProcessAssigner::indicesForRank(int rank) const
 
     return result;
 }
+
+////////////////////////////////////////////////////////////////////
+
+size_t ProcessAssigner::nvaluesForRank(int rank) const
+{
+    size_t result = 0;
+
+    for (size_t absoluteIndex=0; absoluteIndex<total(); absoluteIndex++)
+        if (rank == rankForIndex(absoluteIndex)) result++;
+    return result;
+}

@@ -1,61 +1,60 @@
 #include "ParallelTable.hpp"
 #include "FatalError.hpp"
-#include "Log.hpp"
 #include "PeerToPeerCommunicator.hpp"
 #include "ProcessAssigner.hpp"
 #include "TimeLogger.hpp"
 
 ParallelTable::ParallelTable()
-    : _name(""), _colAssigner(0), _rowAssigner(0), _dist(false), _synced(false), _initialized(false), _comm(0)
+    : _name(""), _colAssigner(0), _rowAssigner(0), _dist(false), _synced(false), _initialized(false), _comm(0), _log(0)
 {
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void ParallelTable::initialize(QString name, ProcessAssigner *colAssigner, ProcessAssigner *rowAssigner, writeState writeOn)
+void ParallelTable::initialize(QString name, const ProcessAssigner *colAssigner, const ProcessAssigner *rowAssigner, writeState writeOn)
 {
     _name = name;
     _colAssigner = colAssigner;
     _rowAssigner = rowAssigner;
     _writeOn = writeOn;
-    _synced = true;
+
     _comm = colAssigner->find<PeerToPeerCommunicator>();
+    _log = colAssigner->find<Log>();
 
     _totalRows = _rowAssigner->total();
     _totalCols = _colAssigner->total();
 
-    printf("initializing %s Table, sizes are (allrows:%d,%d) and (allcols:%d,%d)\n",
-           _name.toStdString().c_str(), _totalRows, _colAssigner->nvalues(), _rowAssigner->nvalues(), _totalCols);
-
-    // distributed memory
+    // Use the distributed memory scheme
     if (colAssigner->parallel() && rowAssigner->parallel() && _comm->isMultiProc())
     {
-        printf("Running distributed");
-        _dist = true;
+        _log->info(_name + " is distributed. Sizes of local tables are ("
+                   + QString::number(_totalRows) + "," + QString::number(_colAssigner->nvalues())
+                   + ") and ("
+                   + QString::number(_rowAssigner->nvalues()) + "," + QString::number(_totalCols) + ")"
+                   );
 
+        _dist = true;
         _columns.resize(_totalRows,colAssigner->nvalues());
         _rows.resize(rowAssigner->nvalues(),_totalCols);
 
         int Nprocs = _comm->size();
-
         _displacementvv.reserve(Nprocs);
-        for (int r=0; r<Nprocs; r++)
-            _displacementvv.push_back(_colAssigner->indicesForRank(r));
+        for (int r=0; r<Nprocs; r++) _displacementvv.push_back(_colAssigner->indicesForRank(r));
     }
     // not distributed
     else
     {
-        printf("Running non-distributed\n");
-        _dist = false;
+        _log->info(_name + " is not distributed. Size is ("
+                    + QString::number(_totalRows) + "," + QString::number(_totalCols) + ")"
+                   );
 
-        if (writeOn == COLUMN)
-            _columns.resize(_totalRows,_totalCols);
-        else if (writeOn == ROW)
-            _rows.resize(_totalRows,_totalCols);
-        else
-            throw FATALERROR("Invalid writeState for ParallelTable");
+        _dist = false;
+        if (writeOn == COLUMN) _columns.resize(_totalRows,_totalCols);
+        else if (writeOn == ROW) _rows.resize(_totalRows,_totalCols);
+        else throw FATALERROR("Invalid writeState for ParallelTable");
     }
     _initialized = true;
+    _synced = true;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -89,6 +88,8 @@ const double& ParallelTable::operator()(size_t i, size_t j) const
             return _rows(i,j);
     }
 }
+
+////////////////////////////////////////////////////////////////////
 
 double& ParallelTable::operator()(size_t i, size_t j)
 {
@@ -135,6 +136,8 @@ Array& ParallelTable::operator[](size_t i)
     else throw FATALERROR(_name + " says: This ParallelTable does not have writable rows.");
 }
 
+////////////////////////////////////////////////////////////////////
+
 const Array& ParallelTable::operator[](size_t i) const
 {
     if (!_synced) throw FATALERROR(_name + " says: sync() must be called before asking a read reference");
@@ -150,33 +153,15 @@ const Array& ParallelTable::operator[](size_t i) const
 
 ////////////////////////////////////////////////////////////////////
 
-const double& ParallelTable::read(size_t i, size_t j) const
-{
-    return (*this)(i,j);
-}
-
-////////////////////////////////////////////////////////////////////
-
-double& ParallelTable::write(size_t i, size_t j)
-{
-    return (*this)(i,j);
-}
-
-////////////////////////////////////////////////////////////////////
-
 void ParallelTable::sync()
 {
     if (!_synced)
     {
-        Log* log = _colAssigner->find<Log>();
-        TimeLogger logger(log->verbose() && _comm->isMultiProc() ? log : 0, "communication of " + _name);
+        TimeLogger logger(_log->verbose() && _comm->isMultiProc() ? _log : 0, "communication of " + _name);
 
-        if (!_dist)
-            sum_all();
-        else if (_writeOn == COLUMN)
-            experimental_col_to_row();
-        else if (_writeOn == ROW)
-            experimental_row_to_col();
+        if (!_dist) sum_all();
+        else if (_writeOn == COLUMN) experimental_col_to_row();
+        else if (_writeOn == ROW) experimental_row_to_col();
     }
     _synced = true;
 }
@@ -247,6 +232,9 @@ Array ParallelTable::stackColumns() const
         // fastest way: sum only the values in _rows, then do one big sum over the processes
         for (size_t iRel=0; iRel<_rows.size(0); iRel++)
             result[_rowAssigner->absoluteIndex(iRel)] = _rows[iRel].sum();
+
+        TimeLogger logger(_log->verbose() ? _log : 0, "summing columns in " + _name);
+
         _comm->sum_all(result);
     }
     else
@@ -273,6 +261,9 @@ Array ParallelTable::stackRows() const
             for (size_t i=0; i<_columns.size(0); i++)
                 result[j] += _columns(i,jRel);
         }
+
+        TimeLogger logger(_log->verbose() ? _log : 0, "summing rows in " + _name);
+
         _comm->sum_all(result);
     }
     else
@@ -291,8 +282,6 @@ double ParallelTable::sumEverything() const
 
     return stackColumns().sum();
 }
-
-////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////
 

@@ -86,9 +86,36 @@ void MonteCarloSimulation::setChunkParams(double packages)
         int Nthreads = _parfac->maxThreadCount();
 
         // Set the number of chunks per wavelength, depending on the parallelization mode
-        if (Nprocs * Nthreads == 1) _Nchunks = 1;
-        else if (Nprocs == 1) _Nchunks = ceil( std::max({packages/1e7, 10.*Nthreads/_Nlambda}));
-        else _Nchunks = ceil( std::max({10.*Nprocs, packages/1e7, 10.*Nthreads*Nprocs/_Nlambda}));
+//        if (Nprocs * Nthreads == 1) _Nchunks = 1;
+//        else if (Nprocs == 1) _Nchunks = ceil( std::max({packages/1e7, 10.*Nthreads/_Nlambda}));
+//        else _Nchunks = ceil( std::max({10.*Nprocs, packages/1e7, 10.*Nthreads*Nprocs/_Nlambda}));
+
+        // Bepaal het minimaal aantal golflengten per proces
+        size_t minNlambda = _Nlambda;
+        for (int r=0; r<Nprocs; r++)
+            minNlambda = std::min(minNlambda, _lambdagrid->assigner()->nvaluesForRank(r));
+
+        printf("minNlambda %d\n", minNlambda);
+
+        // THREAD CRITERION
+        // single thread
+        if (Nthreads == 1) _Nchunks = 1;
+        // multithread: Hoe meer threads, hoe meer chunks. Hoe meer golflengten, hoe minder chunks.
+        else _Nchunks = ceil(10*double(Nthreads)/minNlambda);
+
+        // MULTIPROCESSING
+        // all wavelengths
+        // If each process does all the wavelengths, round up to a multiple of Nprocs, so each process is assigned
+        // an equal of chunks (see IdenticalAssigner)
+        if (minNlambda == _Nlambda)
+        {
+            int remainder = _Nchunks % Nprocs;
+            if (remainder)
+                _Nchunks += Nprocs - remainder;
+        }
+        // divided wavelengths
+        // When the wavelengths are divided, each process does its own subset of all the chunks, therefore the number
+        // of chunks per process will always be the same. No further adaptation of Nchunks is needed.
 
         // Calculate the size of the chunks and the definitive number of photon packages per wavelength
         _chunksize = ceil(packages/_Nchunks);
@@ -98,14 +125,8 @@ void MonteCarloSimulation::setChunkParams(double packages)
     // Determine the log frequency; continuous scattering is much slower!
     _logchunksize = _continuousScattering ? 5000 : 50000;
 
-    // tijdelijke override:
-    _Nchunks = 1;
-    _Npp = packages;
-    _chunksize = packages;
-    if (_assigner->nvalues() >= _Nlambda) _chunksize /= _comm->size();
-    // sluwe manier om het aan te passen voor een Identicalassigner (enkel nodig indien nchunks = 1)
-
     // Assign the _Nlambda x _Nchunks different chunks to the different parallel processes
+    printf("Nchunks = %d\n", _Nchunks);
     _assigner->setBlocks(_Nchunks);
 }
 

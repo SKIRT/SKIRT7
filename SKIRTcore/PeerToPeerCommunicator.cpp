@@ -90,7 +90,7 @@ void PeerToPeerCommunicator::finishRequests()
 
 void PeerToPeerCommunicator::gatherw(double* sendBuffer, int sendCount,
                                      double* recvBuffer, int recvRank, int recvLength,
-                                     std::vector<std::vector<int>>& recvDisplacements)
+                                     const std::vector<std::vector<int>>& recvDisplacements)
 {
     if(!isMultiProc()) return;
 
@@ -98,7 +98,7 @@ void PeerToPeerCommunicator::gatherw(double* sendBuffer, int sendCount,
 }
 
 void PeerToPeerCommunicator::scatterw(double* sendBuffer, int sendRank, int sendLength,
-                                      std::vector<std::vector<int>>& sendDisplacements,
+                                      const std::vector<std::vector<int>>& sendDisplacements,
                                       double* recvBuffer, int recvCount)
 {
     if(!isMultiProc()) return;

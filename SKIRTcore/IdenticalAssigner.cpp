@@ -88,14 +88,14 @@ void IdenticalAssigner::setBlocks(size_t blocks)
 
 ////////////////////////////////////////////////////////////////////
 
-size_t IdenticalAssigner::absoluteIndex(size_t relativeIndex)
+size_t IdenticalAssigner::absoluteIndex(size_t relativeIndex) const
 {
     return (_start + relativeIndex);
 }
 
 ////////////////////////////////////////////////////////////////////
 
-size_t IdenticalAssigner::relativeIndex(size_t absoluteIndex)
+size_t IdenticalAssigner::relativeIndex(size_t absoluteIndex) const
 {
     return (absoluteIndex - _start);
 }
@@ -120,3 +120,10 @@ bool IdenticalAssigner::parallel() const
 }
 
 ////////////////////////////////////////////////////////////////////
+
+bool IdenticalAssigner::validIndex(size_t absoluteIndex) const
+{
+    if (_nblocks < 1) return false;
+    else if (_nblocks == 1) return true;
+    else return _comm->rank() == rankForIndex(absoluteIndex);
+}

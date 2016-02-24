@@ -74,14 +74,14 @@ public:
         as an argument and returns the absolute index of that part, a value from zero to the total
         amount of parts that need to be executed in the simulation. This is done by simply looking up
         the value in the _values list. */
-    size_t absoluteIndex(size_t relativeIndex);
+    size_t absoluteIndex(size_t relativeIndex) const;
 
     /** This function takes the absolute index of a certain part of the work as an argument and returns
         the relative index of that part, a value from zero to the number of parts that were assigned to
         this process, _nvalues. This is done by performing a search through the _values list for the
         value that matches the absoluteIndex. The relative index that is returned corresponds to the
         index of that value in the _values list. */
-    size_t relativeIndex(size_t absoluteIndex);
+    size_t relativeIndex(size_t absoluteIndex) const;
 
     /** This function returns the rank of the process that is assigned to a certain part of the work.
         This part is identified by its absolute index, passed to this function as an argument. This is
