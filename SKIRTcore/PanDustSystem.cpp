@@ -12,6 +12,7 @@
 #include "FatalError.hpp"
 #include "FITSInOut.hpp"
 #include "FilePaths.hpp"
+#include "IdenticalAssigner.hpp"
 #include "Image.hpp"
 #include "ISRF.hpp"
 #include "LockFree.hpp"
@@ -307,6 +308,13 @@ bool PanDustSystem::storeabsorptionrates() const
 
 //////////////////////////////////////////////////////////////////////
 
+bool PanDustSystem::distributedabsorptiondata() const
+{
+    return _Labsstelvv.distributed() || _Labsdustvv.distributed();
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void PanDustSystem::absorb(int m, int ell, double DeltaL, bool ynstellar)
 {
     if (ynstellar)
@@ -325,8 +333,7 @@ void PanDustSystem::absorb(int m, int ell, double DeltaL, bool ynstellar)
 
 double PanDustSystem::Labs(int m, int ell) const
 {
-    // will not work in one of the write functions (they need all cells and wavelengths)
-    // only callable after syncing the ParallelTables!
+    // ParallelTables must be synced. Only callable on cells assigned to this process.
     double sum = 0;
     if (_haveLabsstel) sum += _Labsstelvv(m,ell);
     if (_haveLabsdust) sum += _Labsdustvv(m,ell);
@@ -344,15 +351,7 @@ void PanDustSystem::rebootLabsdust()
 
 double PanDustSystem::Labs(int m) const
 {
-//    double sum = 0;
-//    if (_haveLabsstel)
-//        for (int ell=0; ell<_Nlambda; ell++)
-//            sum += _distLabsstelvv(m,ell);
-//    if (_haveLabsdust)
-//        for (int ell=0; ell<_Nlambda; ell++)
-//            sum += _distLabsdustvv(m,ell);
-
-//    return sum;
+    // ParallelTables must be synced. Only callable on cells assigned to this process.
     double sum = 0;
 
     if (_haveLabsstel)
@@ -365,20 +364,7 @@ double PanDustSystem::Labs(int m) const
 
 Array PanDustSystem::Labsbolv() const
 {
-//    Array Labsbolv(_Ncells);
-
-//    for (int m=0; m<_Ncells; m++)
-//        if (_cellAssigner->validIndex(m))
-//            Labsbolv[m] = Labs(m);
-
-//    // If the tables are distributed over the different processes, there are still some zeroes in the Array.
-//    // Therefore the Array is summed. If the tables are not distributed, all data is already here.
-//    if (_distLabsdustvv.distributed())
-//    {
-//        PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
-//        comm->sum_all(Labsbolv);
-//    }
-//    return Labsbolv;
+    // ParallelTables must be synced.
     Array sum(_Ncells);
 
     if (_haveLabsstel)
@@ -393,29 +379,6 @@ Array PanDustSystem::Labsbolv() const
 
 double PanDustSystem::Labsstellartot() const
 {
-    /*double sum = 0;
-    if (_haveLabsstel)
-    {
-        for (size_t m=0; m<_cellAssigner->nvalues(); m++) // sum over this subset of cells
-        {
-            int mAbsolute = _cellAssigner->absoluteIndex(m);
-
-            for (int ell=0; ell<_Nlambda; ell++) // over all wavelengths
-                sum += _distLabsstelvv(mAbsolute,ell);
-        }
-
-        if(_distLabsstelvv.distributed()) // combine all cell subsets -> sum over processes
-        {
-            PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
-
-            Array arr(1);
-
-            arr[0] = sum;
-            comm->sum_all(arr);
-            sum = arr[0];
-        }
-    }
-    return sum*/
     return _Labsstelvv.sumEverything();
 }
 
@@ -423,29 +386,6 @@ double PanDustSystem::Labsstellartot() const
 
 double PanDustSystem::Labsdusttot() const
 {
-//    double sum = 0;
-//    if (_haveLabsdust)
-//    {
-//        for (size_t m=0; m<_cellAssigner->nvalues(); m++)
-//        {
-//            int mAbsolute = _cellAssigner->absoluteIndex(m);
-
-//            for (int ell=0; ell<_Nlambda; ell++)
-//                sum += _distLabsdustvv.read(mAbsolute,ell);
-//        }
-
-//        if (_distLabsdustvv.distributed())
-//        {
-//            PeerToPeerCommunicator * comm = find<PeerToPeerCommunicator>();
-
-//            Array arr(1);
-
-//            arr[0] = sum;
-//            comm->sum_all(arr);
-//            sum = arr[0];
-//        }
-//    }
-//    return sum;
     return _Labsdustvv.sumEverything();
 }
 
@@ -464,53 +404,17 @@ void PanDustSystem::calculatedustemission(bool ynstellar)
 
 void PanDustSystem::sumResults(bool ynstellar)
 {
-    // Get a pointer to the PeerToPeerCommunicator of this simulation
-    //PeerToPeerCommunicator * comm = find<PeerToPeerCommunicator>();
-
-    //Log* log = find<Log>();
-    //TimeLogger logger(log->verbose() && comm->isMultiProc() ? log : 0, "communication of the absorbed luminosities");
-
-    // Sum the array of luminosities across all processes
-    //comm->sum_all(ynstellar ? _Labsstelvv.getArray() : _Labsdustvv.getArray());
-    // This will need to be replaced by the communication between the two arrays
     if (ynstellar)
         _Labsstelvv.sync();
     else
-    {
         _Labsdustvv.sync();
-/*
-            // Print to compare
-            TextOutFile original(this, "originaldust", "Labsdustvv");
-            TextOutFile newarray(this, "newarraydust", "distLabsdustvv");
-
-            for (int m = 0; m < _cellAssigner->nvalues(); m++)
-            {
-                QString oss1;
-                QString oss2;
-                for(int ell = 0; ell < _Nlambda; ell++)
-                {
-                    oss1 += QString::number(_Labsdustvv(_cellAssigner->absoluteIndex(m), ell)) + ' ';
-                    oss2 += QString::number(_distLabsdustvv.read(_cellAssigner->absoluteIndex(m),ell)) + ' ';
-                }
-                original.writeLine(oss1);
-                newarray.writeLine(oss2);
-            }
-*/
-    }
-}
-
-////////////////////////////////////////////////////////////////////
-
-void PanDustSystem::syncLabsTables()
-{
-    _Labsstelvv.sync();
-    _Labsdustvv.sync();
 }
 
 ////////////////////////////////////////////////////////////////////
 
 double PanDustSystem::dustluminosity(int m, int ell) const
 {
+    // Only callable on wavelengths assigned to this process.
     return _dustemissivity ? _dustlib->luminosity(m,ell) : 0.;
 }
 
@@ -528,9 +432,12 @@ namespace
     private:
         // cached values initialized in constructor
         const PanDustSystem* _ds;
+        bool _distributed;
+        ProcessAssigner* _cellAssigner;
         DustGrid* _grid;
         Units* _units;
         Log* _log;
+        PeerToPeerCommunicator* _comm;
         double xbase, ybase, zbase, xpsize, ypsize, zpsize, xcenter, ycenter, zcenter;
         int Nmaps;
 
@@ -546,9 +453,12 @@ namespace
         WriteTempCut(const PanDustSystem* ds)
         {
             _ds = ds;
+            _distributed = ds->distributedabsorptiondata();
+            _cellAssigner = ds->assigner();
             _grid = ds->dustGrid();
             _units = ds->find<Units>();
             _log = ds->find<Log>();
+            _comm = ds->find<PeerToPeerCommunicator>();
 
             double xmin, ymin, zmin, xmax, ymax, zmax;
             _grid->boundingbox().extent(xmin,ymin,zmin,xmax,ymax,zmax);
@@ -593,7 +503,9 @@ namespace
                 double y = yd ? (ybase + (zd ? i : j)*ypsize) : 0.;
                 Position bfr(x,y,z);
                 int m = _grid->whichcell(bfr);
-                if (m!=-1 && _ds->Labs(m)>0.0)
+
+                bool m_is_available = !_distributed || _cellAssigner->validIndex(m);
+                if (m_is_available && m!=-1 && _ds->Labs(m)>0.0)
                 {
                     const Array& Jv = _ds->meanintensityv(m);
                     int p = 0;
@@ -619,6 +531,9 @@ namespace
         // Write the results to a FITS file with an appropriate name
         void write()
         {
+            // If we didn't have all the cells, sum the results first
+            if (_distributed) _comm->sum(tempv);
+
             QString filename = "ds_temp" + plane;
             Image image(_ds, Np, Np, Nmaps, xd?xpsize:ypsize, zd?zpsize:ypsize,
                         xd?xcenter:ycenter, zd?zcenter:ycenter, "temperature");
@@ -698,6 +613,14 @@ namespace
         // Write the results to a text file with an appropriate name
         void write()
         {
+            // Sum the calculated results if necessary
+            if (_ds->distributedabsorptiondata())
+            {
+                PeerToPeerCommunicator* comm = _ds->find<PeerToPeerCommunicator>();
+                comm->sum(_Tv);
+                comm->sum(_Mv);
+            }
+
             // Create a text file
             TextOutFile file(_ds, "ds_celltemps", "dust cell temperatures");
 
@@ -716,7 +639,7 @@ namespace
 
 ////////////////////////////////////////////////////////////////////
 
-void PanDustSystem::write() const
+void PanDustSystem::write()
 {
     DustSystem::write();
 
@@ -743,14 +666,38 @@ void PanDustSystem::write() const
         // Write one line for each dust cell with nonzero absorption
         for (int m=0; m<_Ncells; m++)
         {
-            double Ltotm = Labs(m);
-            if (Ltotm>0.0)
+            if (!distributedabsorptiondata())
+            {
+                double Ltotm = Labs(m);
+                if (Ltotm>0.0)
+                {
+                    QList<double> values;
+                    Position bfr = _grid->centralPositionInCell(m);
+                    values << m << units->olength(bfr.x()) << units->olength(bfr.y()) << units->olength(bfr.z());
+
+                    for (auto J : meanintensityv(m)) values << J;
+                    file.writeRow(values);
+                }
+            }
+            else // nieuw
             {
                 QList<double> values;
                 Position bfr = _grid->centralPositionInCell(m);
                 values << m << units->olength(bfr.x()) << units->olength(bfr.y()) << units->olength(bfr.z());
-                for (auto J : meanintensityv(m)) values << J;
-                file.writeRow(values);
+
+                // the correct process gets Jv
+                Array Jv(_Nlambda);
+                if (_cellAssigner->validIndex(m)) Jv = meanintensityv(m);
+
+                // and broadcasts it
+                int sender = _cellAssigner->rankForIndex(m);
+                find<PeerToPeerCommunicator>()->broadcast(Jv,sender);
+
+                if (Jv.sum()>0)
+                {
+                    for (auto J : Jv) values << J;
+                    file.writeRow(values);
+                }
             }
         }
     }
@@ -758,10 +705,12 @@ void PanDustSystem::write() const
     // If requested, output temperature map(s) along coordinate axes and temperature data for each dust cell
     if (_writeTemp)
     {
-        // Get the parallel engine and construct an assigner that assigns all the work to the root process
+        // Get the parallel engine and construct an assigner that assigns the work to all the processes
+        // They will try to calculate every line and skip the pixels that correspond to unavailable cells
+        // The results will be summed at root (if necessary) in wt.write() to complete the picture
         Parallel* parallel = find<ParallelFactory>()->parallel();
-        RootAssigner assigner(0);
-        assigner.assign(Np);
+        IdenticalAssigner helpAssigner(this);
+        helpAssigner.assign(Np);
 
         // Output temperature map(s) along coordinate axes
         {
@@ -774,7 +723,7 @@ void PanDustSystem::write() const
             // For the xy plane (always)
             {
                 wt.setup(1,1,0);
-                parallel->call(&wt, &assigner);
+                parallel->call(&wt, &helpAssigner);
                 wt.write();
             }
 
@@ -782,7 +731,7 @@ void PanDustSystem::write() const
             if (dimDust >= 2)
             {
                 wt.setup(1,0,1);
-                parallel->call(&wt, &assigner);
+                parallel->call(&wt, &helpAssigner);
                 wt.write();
             }
 
@@ -790,7 +739,7 @@ void PanDustSystem::write() const
             if (dimDust == 3)
             {
                 wt.setup(0,1,1);
-                parallel->call(&wt, &assigner);
+                parallel->call(&wt, &helpAssigner);
                 wt.write();
             }
         }
@@ -801,8 +750,9 @@ void PanDustSystem::write() const
 
             // Construct a private class instance to do the work (parallelized)
             WriteTempData wt(this);
-            assigner.assign(_Ncells);
-            parallel->call(&wt, &assigner);
+            helpAssigner.assign(_Ncells);
+            // Call the body on the right cells. If all cells are available, no unnessecary communication will be done.
+            parallel->call(&wt, distributedabsorptiondata() ? _cellAssigner : &helpAssigner);
             wt.write();
         }
     }

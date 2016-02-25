@@ -127,3 +127,15 @@ bool IdenticalAssigner::validIndex(size_t absoluteIndex) const
     else if (_nblocks == 1) return true;
     else return _comm->rank() == rankForIndex(absoluteIndex);
 }
+
+////////////////////////////////////////////////////////////////////
+
+size_t IdenticalAssigner::nvaluesForRank(int rank) const
+{
+    if (_nblocks > 1)
+        return _blockassigner->nvaluesForRank(rank) * _blocksize;
+    else
+        return _nvalues;
+}
+
+////////////////////////////////////////////////////////////////////

@@ -88,14 +88,14 @@ public:
         assigner, which is also passed to this function. While the values assigned to a particular
         process are fixed at the moment this function is called, the work will be distributed over the
         parallel threads in an unpredicable manner. */
-    void call(ParallelTarget* target, ProcessAssigner* assigner);
+    void call(ParallelTarget* target, const ProcessAssigner* assigner);
 
     /** Calls the specified member function for the specified target object a certain number of times,
         with the \em index argument of that function taking values that are determined by the \em
         assigner, which is also passed to this function. While the values assigned to a particular
         process are fixed at the moment this function is called, the work will be distributed over the
         parallel threads in an unpredicable manner. */
-    template<class T> void call(T* targetObject, void (T::*targetMember)(size_t index), ProcessAssigner* assigner);
+    template<class T> void call(T* targetObject, void (T::*targetMember)(size_t index), const ProcessAssigner* assigner);
 
 private:
     /** The function that gets executed inside each of the parallel threads. */
@@ -155,7 +155,7 @@ private:
 
     // data members shared by all threads; changes are protected by a mutex
     ParallelTarget* _target;    // the target to be called
-    ProcessAssigner* _assigner; // the process assigner
+    const ProcessAssigner* _assigner; // the process assigner
     size_t _limit;              // the limit of the for loop being implemented
     std::vector<bool> _active;  // flag for each parallel thread (other than the parent thread)
                                 // ... that indicates whether the thread is currently active
@@ -170,7 +170,7 @@ private:
 ////////////////////////////////////////////////////////////////////
 
 // outermost portion of the call() template function implementation
-template<class T> void Parallel::call(T* targetObject, void (T::*targetMember)(size_t index), ProcessAssigner* assigner)
+template<class T> void Parallel::call(T* targetObject, void (T::*targetMember)(size_t index), const ProcessAssigner* assigner)
 {
     Target<T> target(targetObject, targetMember);
     call(&target, assigner);

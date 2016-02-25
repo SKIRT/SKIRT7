@@ -374,7 +374,7 @@ public:
         overridden in a subclass to write out additional results of the simulation stored in the
         dust system. In that case, the overriding function must also call the implementation in
         this base class. */
-    virtual void write() const;
+    virtual void write();
 
     /** This pure virtual function must be implemented in each subclass to indicate whether dust
         emission is turned on for this dust system. The function returns true if dust emission is

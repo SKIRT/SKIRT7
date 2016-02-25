@@ -79,7 +79,7 @@ public:
         written, for axial symmetry the intersections with the xy and xz planes are written, and
         for general geometries all three intersections are written. Each FITS file is a data cube,
         where a map is created for each wavelength in the global wavelength grid. */
-    void write() const;
+    void write();
 
     //======================== Data Members ========================
 

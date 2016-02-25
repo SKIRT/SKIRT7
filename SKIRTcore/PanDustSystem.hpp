@@ -188,6 +188,8 @@ public:
         calculated if dust emission is turned on. */
     bool storeabsorptionrates() const;
 
+    bool distributedabsorptiondata() const;
+
     /** The function simulates the absorption of a monochromatic luminosity package in the dust
         cell with cell number \f$m\f$, i.e. it adds a fraction \f$\Delta L\f$ to the already
         absorbed luminosity at wavelength index \f$\ell\f$. The function adds the absorbed
@@ -234,8 +236,6 @@ public:
         object, which is found with the discovery mechanism. */
     void sumResults(bool ynstellar);
 
-    void syncLabsTables();
-
     /** This function returns the luminosity \f$L_\ell\f$ at the wavelength index \f$\ell\f$ in the
         normalized dust emission SED corresponding to the dust cell with dust cell number \f$m\f$.
         It just looks up the appropriate value in the cached results produced by calculate(). If
@@ -273,7 +273,7 @@ public:
         indicative dust temperature is defined as the mean temperature (calculated as described above)
         averaged over all dust populations (weighed by mass in the dust mix) and all dust components
         (weighed by density in the dust cell). */
-    void write() const;
+    void write();
 
 
 

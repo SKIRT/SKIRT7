@@ -104,7 +104,7 @@ public:
     /** Returns a vector containing all the absolute work indices assigned to a given process rank. */
     std::vector<int> indicesForRank(int rank) const;
 
-    size_t nvaluesForRank(int rank) const;
+    virtual size_t nvaluesForRank(int rank) const;
 
 
     //======================== Data Members ========================

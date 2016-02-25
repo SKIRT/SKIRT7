@@ -73,7 +73,7 @@ int Parallel::threadCount() const
 
 ////////////////////////////////////////////////////////////////////
 
-void Parallel::call(ParallelTarget* target, ProcessAssigner* assigner)
+void Parallel::call(ParallelTarget* target, const ProcessAssigner* assigner)
 {
     // Verify that we're being called from our parent thread
     if (std::this_thread::get_id() != _parentThread)

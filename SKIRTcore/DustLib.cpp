@@ -127,44 +127,24 @@ namespace
                 foreach (int mAbs, mv) Jv += _ds->meanintensityv(mAbs);
                 Jv /= Nmapped;
 
-                // multiple dust components: calculate emission for each dust cell separately
-                if (true)//_Ncomp > 1)
+                // get emissivity for each dust component (i.e. for the corresponding dust mix)
+                ArrayTable<2> evv(_Ncomp,0);
+                for (int h=0; h<_Ncomp; h++) evv[h] = _de->emissivity(_ds->mix(h),Jv);
+
+                // combine emissivities into SED for each dust cell, and store the normalized SEDs
+                foreach (int m, mv)
                 {
-                    // get emissivity for each dust component (i.e. for the corresponding dust mix)
-                    ArrayTable<2> evv(_Ncomp,0);
-                    for (int h=0; h<_Ncomp; h++) evv[h] = _de->emissivity(_ds->mix(h),Jv);
+                    // get a reference to the output array for this dust cell
+                    Array& Lv = _Lvv[m];
 
-                    // combine emissivities into SED for each dust cell, and store the normalized SEDs
-                    foreach (int m, mv)
-                    {
-                        // get a reference to the output array for this dust cell
-                        Array& Lv = _Lvv[m];
-
-                        // calculate the emission for this cell
-                        for (int h=0; h<_Ncomp; h++) Lv += evv[h] * _ds->density(m,h);
-
-                        // convert to luminosities and normalize the result
-                        Lv *= _lambdagrid->dlambdav();
-                        double total = Lv.sum();
-                        if (total>0) Lv /= total;
-                    }
-                }
-/*
-                // single dust component: remember just the libary template, which serves for all mapped cells
-                else // not used anymore
-                {
-                    // get a reference to the output array for this library entry
-                    Array& Lv = _Lvv[n];
-
-                    // get the emissivity of the library entry
-                    Lv = _de->emissivity(_ds->mix(0),Jv);
+                    // calculate the emission for this cell
+                    for (int h=0; h<_Ncomp; h++) Lv += evv[h] * _ds->density(m,h);
 
                     // convert to luminosities and normalize the result
                     Lv *= _lambdagrid->dlambdav();
                     double total = Lv.sum();
                     if (total>0) Lv /= total;
                 }
-*/
             }
         }
     };
@@ -204,18 +184,6 @@ void DustLib::calculate()
     comm->wait("the emission spectra calculation");
 
     _Lvv.sync();
-/*  print text file
-    TextOutFile after(this, "after_sync", "_Lvv");
-    for (size_t m=0; m<_cellAssigner->total(); m++)
-    {
-        QString oss2;
-        for(int ell=0; ell<_lambdaAssigner->nvalues(); ell++)
-        {
-            oss2 += QString::number(_distLvv.read(m,_lambdaAssigner->absoluteIndex(ell))) + ' ';
-        }
-        after.writeLine(oss2);
-    }
-*/
 }
 
 ////////////////////////////////////////////////////////////////////

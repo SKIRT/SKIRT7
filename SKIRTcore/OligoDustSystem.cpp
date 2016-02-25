@@ -189,7 +189,7 @@ namespace
 
 ////////////////////////////////////////////////////////////////////
 
-void OligoDustSystem::write() const
+void OligoDustSystem::write()
 {
     DustSystem::write();
 

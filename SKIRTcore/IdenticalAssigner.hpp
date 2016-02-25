@@ -121,6 +121,8 @@ public:
 
     bool validIndex(size_t absoluteIndex) const;
 
+    size_t nvaluesForRank(int rank) const;
+
     //======================== Data Members ========================
 
 protected:

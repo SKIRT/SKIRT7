@@ -144,7 +144,7 @@ void PanMonteCarloSimulation::rundustselfabsorption()
             parallel->call(this, &PanMonteCarloSimulation::dodustselfabsorptionchunk, assigner());
             // Wait for the other processes to reach this point
             _comm->wait("this self-absorption cycle");
-            _pds->syncLabsTables();
+            _pds->sumResults(false);
 
 
             // Determine and log the total absorbed luminosity in the vector Labstotv.
