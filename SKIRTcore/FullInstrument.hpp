@@ -127,15 +127,15 @@ private:
     bool _polarization;
 
     // detector arrays (frames)
-    Array _ftrav;
-    Array _fstrdirv;
-    Array _fstrscav;
-    Array _fdusdirv;
-    Array _fdusscav;
-    ArrayTable<2> _fstrscavv;
-    Array _ftotQv;
-    Array _ftotUv;
-    Array _ftotVv;
+//    Array _ftrav;
+//    Array _fstrdirv;
+//    Array _fstrscav;
+//    Array _fdusdirv;
+//    Array _fdusscav;
+//    ArrayTable<2> _fstrscavv;
+//    Array _ftotQv;
+//    Array _ftotUv;
+//    Array _ftotVv;
 
     ParallelDataCube _distftrav;
     ParallelDataCube _distfstrdirv;

@@ -225,7 +225,7 @@ private:
     HomogeneousTransform _transform;    // transform from world to pixel coordinates
 
     // data cube
-    Array _ftotv;
+    //Array _ftotv;
     ParallelDataCube _distftotv;
 };
 

@@ -26,7 +26,7 @@ void SimpleInstrument::setupSelfBefore()
     WavelengthGrid* wavelengthGrid = find<WavelengthGrid>();
     int Nlambda = wavelengthGrid->Nlambda();
 
-    _ftotv.resize(Nlambda*_Nframep);
+    //_ftotv.resize(Nlambda*_Nframep);
     _Ftotv.resize(Nlambda);
     _distftotv.initialize(wavelengthGrid->assigner(), _Nframep);
 }
@@ -46,8 +46,8 @@ SimpleInstrument::detect(PhotonPackage* pp)
     LockFree::add(_Ftotv[ell], Lextf);
     if (l>=0)
     {
-        size_t m = l + ell*_Nframep;
-        LockFree::add(_ftotv[m], Lextf);
+        //size_t m = l + ell*_Nframep;
+        //LockFree::add(_ftotv[m], Lextf);
         LockFree::add(_distftotv(ell,l), Lextf);
     }
 }
@@ -60,18 +60,18 @@ SimpleInstrument::write()
     // lists of f-array and F-array pointers, and the corresponding file and column names
     QList< Array* > farrays, Farrays;
     QStringList fnames, Fnames;
-    farrays << &_ftotv;
+    //farrays << &_ftotv;
     Farrays << &_Ftotv;
-    fnames << "total";
+    //fnames << "total";
     Fnames << "total flux";
 
     // Sum the flux arrays element-wise across the different processes
-    sumResults(farrays);
+    // sumResults(farrays);
     sumResults(Farrays);
 
     std::shared_ptr<Array> completeCube = _distftotv.constructCompleteCube();
     farrays << completeCube.get();
-    fnames << "new cube";
+    fnames << "total";
 
     // calibrate and output the arrays
     calibrateAndWriteDataCubes(farrays, fnames);
