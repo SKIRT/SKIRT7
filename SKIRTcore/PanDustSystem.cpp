@@ -705,12 +705,18 @@ void PanDustSystem::write()
     // If requested, output temperature map(s) along coordinate axes and temperature data for each dust cell
     if (_writeTemp)
     {
+        Parallel* parallel = find<ParallelFactory>()->parallel();
+
+        ProcessAssigner* helpAssigner = 0;
+        if (distributedabsorptiondata()) helpAssigner = new IdenticalAssigner(this);
         // Get the parallel engine and construct an assigner that assigns the work to all the processes
         // They will try to calculate every line and skip the pixels that correspond to unavailable cells
         // The results will be summed at root (if necessary) in wt.write() to complete the picture
-        Parallel* parallel = find<ParallelFactory>()->parallel();
-        IdenticalAssigner helpAssigner(this);
-        helpAssigner.assign(Np);
+
+        else helpAssigner = new RootAssigner(0);
+        // Else root can do everything
+
+        helpAssigner->assign(Np);
 
         // Output temperature map(s) along coordinate axes
         {
@@ -723,7 +729,7 @@ void PanDustSystem::write()
             // For the xy plane (always)
             {
                 wt.setup(1,1,0);
-                parallel->call(&wt, &helpAssigner);
+                parallel->call(&wt, helpAssigner);
                 wt.write();
             }
 
@@ -731,7 +737,7 @@ void PanDustSystem::write()
             if (dimDust >= 2)
             {
                 wt.setup(1,0,1);
-                parallel->call(&wt, &helpAssigner);
+                parallel->call(&wt, helpAssigner);
                 wt.write();
             }
 
@@ -739,7 +745,7 @@ void PanDustSystem::write()
             if (dimDust == 3)
             {
                 wt.setup(0,1,1);
-                parallel->call(&wt, &helpAssigner);
+                parallel->call(&wt, helpAssigner);
                 wt.write();
             }
         }
@@ -750,11 +756,12 @@ void PanDustSystem::write()
 
             // Construct a private class instance to do the work (parallelized)
             WriteTempData wt(this);
-            helpAssigner.assign(_Ncells);
-            // Call the body on the right cells. If all cells are available, no unnessecary communication will be done.
-            parallel->call(&wt, distributedabsorptiondata() ? _cellAssigner : &helpAssigner);
+            helpAssigner->assign(_Ncells);
+            // Call the body on the right cells. If all everything is available, no unnessecary communication will be done.
+            parallel->call(&wt, distributedabsorptiondata() ? _cellAssigner : helpAssigner);
             wt.write();
         }
+        delete helpAssigner;
     }
 }
 
