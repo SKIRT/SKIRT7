@@ -37,7 +37,7 @@ public:
 private:
     const ProcessAssigner* _wavelengthAssigner;
     PeerToPeerCommunicator* _comm;
-    int _Nlambda;
+    size_t _Nlambda;
     size_t _Nframep;
 
     std::shared_ptr<Array> _partialCube;

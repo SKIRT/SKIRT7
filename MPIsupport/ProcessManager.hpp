@@ -82,6 +82,12 @@ public:
     static void scatterw(double* sendBuffer, int sendRank, int sendLength, const std::vector<std::vector<int>>& sendDisplacements,
                          double* recvBuffer, int recvCount);
 
+    static void presetGatherw(double* sendBuffer, int sendCount, double* recvBuffer, int recvRank);
+    static void presetScatterw(double* sendBuffer, int sendRank, double* recvBuffer, int recvCount);
+
+    static void presetConfigure(int length, const std::vector<std::vector<int>>& displacements);
+    static void presetClear();
+
     /** The purpose of this function is to sum a particular array of double values element-wise
         across the different processes. The resulting values are stored in the array passed as the
         second argument 'result_array', only on the process that is assigned as root. The rank of

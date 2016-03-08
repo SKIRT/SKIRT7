@@ -67,6 +67,12 @@ public:
     void scatterw(double* sendBuffer, int sendRank, int sendLength, const std::vector<std::vector<int>>& sendDisplacements,
                   double* recvBuffer, int recvCount);
 
+    void presetGatherw(double* sendBuffer, int sendCount, double* recvBuffer, int recvRank);
+    void presetScatterw(double* sendBuffer, int sendRank, double* recvBuffer, int recvCount);
+
+    void presetConfigure(int length, const std::vector<std::vector<int>>& displacements);
+    void presetClear();
+
     /** This function returns the rank of the root process. */
     int root();
 

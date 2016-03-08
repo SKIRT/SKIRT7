@@ -5,7 +5,7 @@
 #include "TimeLogger.hpp"
 
 ParallelTable::ParallelTable()
-    : _name(""), _colAssigner(0), _rowAssigner(0), _dist(false), _synced(false), _initialized(false), _comm(0), _log(0)
+    : _name(""), _colAssigner(0), _rowAssigner(0), _distributed(false), _synced(false), _initialized(false), _comm(0), _log(0)
 {
 }
 
@@ -33,7 +33,7 @@ void ParallelTable::initialize(QString name, const ProcessAssigner *colAssigner,
                    + QString::number(_rowAssigner->nvalues()) + "," + QString::number(_totalCols) + ")"
                    );
 
-        _dist = true;
+        _distributed = true;
         _columns.resize(_totalRows,colAssigner->nvalues());
         _rows.resize(rowAssigner->nvalues(),_totalCols);
 
@@ -48,7 +48,7 @@ void ParallelTable::initialize(QString name, const ProcessAssigner *colAssigner,
                     + QString::number(_totalRows) + "," + QString::number(_totalCols) + ")"
                    );
 
-        _dist = false;
+        _distributed = false;
         if (writeOn == COLUMN) _columns.resize(_totalRows,_totalCols);
         else if (writeOn == ROW) _rows.resize(_totalRows,_totalCols);
         else throw FATALERROR("Invalid writeState for ParallelTable");
@@ -64,7 +64,7 @@ const double& ParallelTable::operator()(size_t i, size_t j) const
     if (!_synced) throw FATALERROR(_name + " says: sync() must be called before using the read operator");
 
     // WORKING DISTRIBUTED: Read from the table opposite to the table we _writeOn.
-    if (_dist)
+    if (_distributed)
     {
         if (_writeOn == COLUMN) // read from _rows
         {
@@ -96,7 +96,7 @@ double& ParallelTable::operator()(size_t i, size_t j)
     _synced = false;
 
     // WORKING DISTRIBUTED: Writable reference to the table we _writeOn.
-    if (_dist)
+    if (_distributed)
     {
         if (_writeOn == COLUMN) // Write on _columns
         {
@@ -131,7 +131,7 @@ Array& ParallelTable::operator[](size_t i)
     {
         if (!_rowAssigner->validIndex(i))
             throw FATALERROR(_name + " says: Row of ParallelTable not available on this process");
-        else return _rows[_dist ? _rowAssigner->relativeIndex(i) : i];
+        else return _rows[_distributed ? _rowAssigner->relativeIndex(i) : i];
     }
     else throw FATALERROR(_name + " says: This ParallelTable does not have writable rows.");
 }
@@ -142,11 +142,11 @@ const Array& ParallelTable::operator[](size_t i) const
 {
     if (!_synced) throw FATALERROR(_name + " says: sync() must be called before asking a read reference");
 
-    if (_writeOn == COLUMN) // return read only reference to a complete row
+    if (_distributed && _writeOn == COLUMN) // return read only reference to a complete row
     {
         if (!_rowAssigner->validIndex(i))
             throw FATALERROR(_name + " says: Row of ParallelTable not available on this process");
-        else return _rows[_dist ? _rowAssigner->relativeIndex(i) : i];
+        else return _rows[_rowAssigner->relativeIndex(i)];
     }
     else throw FATALERROR(_name + " says: This ParallelTable does not have readable rows.");
 }
@@ -159,7 +159,7 @@ void ParallelTable::sync()
     {
         TimeLogger logger(_log->verbose() && _comm->isMultiProc() ? _log : 0, "communication of " + _name);
 
-        if (!_dist) sum_all();
+        if (!_distributed) sum_all();
         else if (_writeOn == COLUMN) experimental_col_to_row();
         else if (_writeOn == ROW) experimental_row_to_col();
     }
@@ -183,7 +183,7 @@ double ParallelTable::sumRow(size_t i) const
     if (!_synced) throw FATALERROR(_name + " says: sync() must be called before using summation functions");
 
     double sum = 0;
-    if (_dist)
+    if (_distributed)
     {
         if (_rowAssigner->validIndex(i)) // we have the whole row
             return _rows[_rowAssigner->relativeIndex(i)].sum();
@@ -204,7 +204,7 @@ double ParallelTable::sumColumn(size_t j) const
     if (!_synced) throw FATALERROR(_name + " says: sync() must be called before using summation functions");
 
     double sum = 0;
-    if (_dist)
+    if (_distributed)
     {
         if(_colAssigner->validIndex(j)) // we have the whole column
             for (int i=0; i<_totalRows; i++)
@@ -227,7 +227,7 @@ Array ParallelTable::stackColumns() const
 
     Array result(_totalRows);
 
-    if(_dist)
+    if(_distributed)
     {
         // fastest way: sum only the values in _rows, then do one big sum over the processes
         for (size_t iRel=0; iRel<_rows.size(0); iRel++)
@@ -253,7 +253,7 @@ Array ParallelTable::stackRows() const
 
     Array result(_totalCols);
 
-    if(_dist)
+    if(_distributed)
     {
         for (size_t jRel=0; jRel<_columns.size(1); jRel++)
         {
@@ -287,7 +287,7 @@ double ParallelTable::sumEverything() const
 
 bool ParallelTable::distributed() const
 {
-    return _dist;
+    return _distributed;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -418,31 +418,48 @@ void ParallelTable::row_to_col()
 
 void ParallelTable::experimental_col_to_row()
 {
+    // prepare to receive using doubles according to the given displacements for each process
+    _comm->presetConfigure(1,_displacementvv);
+
     // for each row
     for (int i=0; i<_totalRows; i++)
     {
         double* sendBuffer = &_columns(i,0);
         double* recvBuffer = _rowAssigner->validIndex(i) ? &_rows(_rowAssigner->relativeIndex(i),0) : 0;
         int recvRank = _rowAssigner->rankForIndex(i);
-        _comm->gatherw(sendBuffer, _columns.size(1), recvBuffer, recvRank, 1, _displacementvv);
+
+        _comm->presetGatherw(sendBuffer, _columns.size(1), recvBuffer, recvRank);
+
+        //_comm->gatherw(sendBuffer, _columns.size(1), recvBuffer, recvRank, 1, _displacementvv);
         // Elk proces i zendt vanuit sendBuffer, _columns.size(1) doubles naar recvBuffer op recvRank in de vorm
         // van datatype i bepaald door blocksize 1 en _displacementvv[i].
     }
+
+    // free the memory taken by the datatypes
+    _comm->presetClear();
 }
 
 ////////////////////////////////////////////////////////////////////
 
 void ParallelTable::experimental_row_to_col()
 {
+    // prepare to send using doubles according to the given displacements for each process
+    _comm->presetConfigure(1,_displacementvv);
+
     for (int i=0; i<_totalRows; i++)
     {
         double* sendBuffer = _rowAssigner->validIndex(i) ? &_rows(_rowAssigner->relativeIndex(i),0) : 0;
         double* recvBuffer = &_columns(i,0);
         int sendRank = _rowAssigner->rankForIndex(i);
-        _comm->scatterw(sendBuffer, sendRank, 1, _displacementvv, recvBuffer, _columns.size(1));
+
+        _comm->presetScatterw(sendBuffer, sendRank, recvBuffer, _columns.size(1));
+
+        //_comm->scatterw(sendBuffer, sendRank, 1, _displacementvv, recvBuffer, _columns.size(1));
         // Proces sendRank zendt vanuit sendBuffer een aantal doubles in de vorm van datatype i bepaald door
         // _displacementvv[i] naar recvBuffer op rank i.
     }
+
+    _comm->presetClear();
 }
 
 ////////////////////////////////////////////////////////////////////

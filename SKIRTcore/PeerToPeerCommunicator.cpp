@@ -108,6 +108,42 @@ void PeerToPeerCommunicator::scatterw(double* sendBuffer, int sendRank, int send
 
 ////////////////////////////////////////////////////////////////////
 
+void PeerToPeerCommunicator::presetGatherw(double *sendBuffer, int sendCount, double *recvBuffer, int recvRank)
+{
+    if(!isMultiProc()) return;
+
+    ProcessManager::presetGatherw(sendBuffer, sendCount, recvBuffer, recvRank);
+}
+
+////////////////////////////////////////////////////////////////////
+
+void PeerToPeerCommunicator::presetScatterw(double *sendBuffer, int sendRank, double *recvBuffer, int recvCount)
+{
+    if(!isMultiProc()) return;
+
+    ProcessManager::presetScatterw(sendBuffer, sendRank, recvBuffer, recvCount);
+}
+
+////////////////////////////////////////////////////////////////////
+
+void PeerToPeerCommunicator::presetConfigure(int length, const std::vector<std::vector<int> > &displacements)
+{
+    if(!isMultiProc()) return;
+
+    ProcessManager::presetConfigure(length,displacements);
+}
+
+////////////////////////////////////////////////////////////////////
+
+void PeerToPeerCommunicator::presetClear()
+{
+    if(!isMultiProc()) return;
+
+    ProcessManager::presetClear();
+}
+
+////////////////////////////////////////////////////////////////////
+
 int PeerToPeerCommunicator::root()
 {
     return ROOT;
