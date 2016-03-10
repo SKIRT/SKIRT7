@@ -154,6 +154,8 @@ namespace
 
 void DustLib::calculate()
 {
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+
     // initialize/clear the ParallelTable that stores and communicates the results
     if (!_Lvv.initialized()) _Lvv.initialize("Dust Emission Spectra Table",_lambdaAssigner,_cellAssigner,ROW);
     else _Lvv.clear();
@@ -166,21 +168,11 @@ void DustLib::calculate()
     EmissionCalculator calc(_Lvv, _nv, Nlib, this);
 
     // Each process now has its own library over a subset of dustcells.
-    // The EmissionCalculator object has constructed a map, containing for each library entry (key) a list of
-    // indices (values) pointing to cells of the dust grid.
-    // We use an IdenticalAssigner, to divide the work in the same way as the data: each process will calculate all the
-    // library entries, because the different processes/libraries treat different disjunct subsets of the dustgrid.
-    // Therefore, in this case, the Nlib given to the ProcessAssigner can be different on each process!
-    // The only reason we still use an assigner is to enable multithreading! (a different assigner than the Identical
-    // one would give unexpected behaviour)
-    ProcessAssigner* helpAssigner = new IdenticalAssigner(this);
-    helpAssigner->assign(Nlib);
-
+    // Use the alternate version of the call() function, which acts as a multi threaded for-loop
     Parallel* parallel = find<ParallelFactory>()->parallel();
-    parallel->call(&calc, helpAssigner);
+    parallel->call(&calc, Nlib);
 
     // Wait for the other processes to reach this point
-    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
     comm->wait("the emission spectra calculation");
 
     _Lvv.sync();

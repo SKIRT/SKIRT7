@@ -116,6 +116,49 @@ void Parallel::call(ParallelTarget* target, const ProcessAssigner* assigner)
 
 ////////////////////////////////////////////////////////////////////
 
+void Parallel::call(ParallelTarget* target, size_t maxIndex)
+{
+    // Verify that we're being called from our parent thread
+    if (std::this_thread::get_id() != _parentThread)
+        throw FATALERROR("Parallel call not invoked from thread that constructed this object");
+
+    // Initialize shared data members and activate threads in a critical section
+    {
+        std::unique_lock<std::mutex> lock(_mutex);
+
+        // Copy the arguments so they can be used from any of the threads
+        _target = target;
+        _assigner = nullptr;
+        _limit = maxIndex;
+
+        // Initialize the number of active threads (i.e. not waiting for new work)
+        _active.assign(_threadCount, true);
+
+        // Clear the exception pointer
+        _exception = 0;
+
+        // Initialize the loop variable
+        _next = 0;
+
+        // Wake all parallel threads
+        _conditionExtra.notify_all();
+    }
+
+    // Do some work ourselves as well
+    doWork();
+
+    // Wait until all parallel threads are done
+    waitForThreads();
+
+    // Check for and process the exception, if any
+    if (_exception)
+    {
+        throw *_exception;  // throw by value (the memory for the heap-allocated exception is leaked)
+    }
+}
+
+////////////////////////////////////////////////////////////////////
+
 void Parallel::run(int threadIndex)
 {
     while (true)
@@ -160,8 +203,11 @@ void Parallel::doWork()
             size_t index = _next++;                  // get the next index atomically
             if (index >= _limit) break;              // break if no more are available
 
+            // Convert the index if using an assigner
+            if (_assigner) index = _assigner->absoluteIndex(index);
+
             // Execute the body
-            _target->body(_assigner->absoluteIndex(index));
+            _target->body(index);
         }
     }
     catch (FatalError& error)

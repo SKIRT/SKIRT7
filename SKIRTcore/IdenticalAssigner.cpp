@@ -108,7 +108,7 @@ int IdenticalAssigner::rankForIndex(size_t index) const
 
     // Calculate the block to which the index corresponds and subsequently get the assigned process from
     // the _blockassigner object
-    size_t block = index / (_nvalues/_blockassigner->nvalues());
+    size_t block = index / _blocksize;
     return _blockassigner->rankForIndex(block);
 }
 

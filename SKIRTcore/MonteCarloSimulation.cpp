@@ -100,22 +100,17 @@ void MonteCarloSimulation::setChunkParams(double packages)
         // THREAD CRITERION
         // single thread
         if (Nthreads == 1) _Nchunks = 1;
-        // multithread: Hoe meer threads, hoe meer chunks. Hoe meer golflengten, hoe minder chunks.
+        // multithread: more threads means more chunks, more wavelengths means less chunks. This way the amount of work
+        // units (nchunks * nlambda) == (10*nthreads)
         else _Nchunks = ceil(10*double(Nthreads)/minNlambda);
 
         // MULTIPROCESSING
-        // all wavelengths
-        // If each process does all the wavelengths, round up to a multiple of Nprocs, so each process is assigned
-        // an equal of chunks (see IdenticalAssigner)
-        if (minNlambda == _Nlambda)
-        {
-            int remainder = _Nchunks % Nprocs;
-            if (remainder)
-                _Nchunks += Nprocs - remainder;
-        }
-        // divided wavelengths
-        // When the wavelengths are divided, each process does its own subset of all the chunks, therefore the number
-        // of chunks per process will always be the same. No further adaptation of Nchunks is needed.
+        // all wavelengths = each process does some chunks:
+        // If each process does all the wavelengths, multiply by nprocs, because the chunks will be divided.
+        if (minNlambda == _Nlambda) _Nchunks *= Nprocs;
+
+        // divided wavelengths = each process does all chunks:
+        // only nthreads matters, so the current value for nchunks is ok
 
         // Calculate the size of the chunks and the definitive number of photon packages per wavelength
         _chunksize = ceil(packages/_Nchunks);
