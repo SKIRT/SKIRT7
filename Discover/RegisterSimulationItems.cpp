@@ -22,6 +22,7 @@
 #include "BinTreeDustGrid.hpp"
 #include "BlackBodySED.hpp"
 #include "BolLuminosityStellarCompNormalization.hpp"
+#include "BoxClipGeometryDecorator.hpp"
 #include "BoxDustGrid.hpp"
 #include "BrokenExpDiskGeometry.hpp"
 #include "BruzualCharlotSED.hpp"
@@ -32,12 +33,11 @@
 #include "CompDustDistribution.hpp"
 #include "ConfigurableDustMix.hpp"
 #include "ConicalShellGeometry.hpp"
-#include "CropGeometryDecorator.hpp"
 #include "CubBackgroundGeometry.hpp"
 #include "CubicSplineSmoothingKernel.hpp"
 #include "Cylinder2DDustGrid.hpp"
 #include "CylinderDustGrid.hpp"
-#include "CylindricalCavityGeometryDecorator.hpp"
+#include "CylindricalClipGeometryDecorator.hpp"
 #include "Dim1DustLib.hpp"
 #include "Dim2DustLib.hpp"
 #include "DraineGraphiteGrainComposition.hpp"
@@ -139,13 +139,12 @@
 #include "SmoothingKernel.hpp"
 #include "SpectralLuminosityStellarCompNormalization.hpp"
 #include "SpheBackgroundGeometry.hpp"
-#include "SpheCropGeometryDecorator.hpp"
 #include "SpheGeometry.hpp"
 #include "Sphere1DDustGrid.hpp"
 #include "Sphere2DDustGrid.hpp"
 #include "SphereDustGrid.hpp"
 #include "SphericalAdaptiveMeshDustDistribution.hpp"
-#include "SphericalCavityGeometryDecorator.hpp"
+#include "SphericalClipGeometryDecorator.hpp"
 #include "SpheroidalGeometryDecorator.hpp"
 #include "SpiralStructureGeometryDecorator.hpp"
 #include "StaggeredAssigner.hpp"
@@ -290,14 +289,13 @@ void RegisterSimulationItems::registerAll()
     add<RotateGeometryDecorator>();
     add<SpheroidalGeometryDecorator>();
     add<TriaxialGeometryDecorator>();
-    add<SphericalCavityGeometryDecorator>();
-    add<CylindricalCavityGeometryDecorator>();
-    add<CropGeometryDecorator>();
+    add<SphericalClipGeometryDecorator>();
+    add<CylindricalClipGeometryDecorator>();
+    add<BoxClipGeometryDecorator>();
     add<SpiralStructureGeometryDecorator>();
     add<ClumpyGeometryDecorator>();
     add<CombineGeometryDecorator>();
     add<FoamGeometryDecorator>();
-    add<SpheCropGeometryDecorator>();
 
     // smoothing kernels
     add<SmoothingKernel>(false);

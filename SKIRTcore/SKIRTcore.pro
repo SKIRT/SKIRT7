@@ -70,12 +70,10 @@ HEADERS += \
     ConfigurableDustMix.hpp \
     ConicalShellGeometry.hpp \
     Console.hpp \
-    CropGeometryDecorator.hpp \
     CubBackgroundGeometry.hpp \
     CubicSplineSmoothingKernel.hpp \
     Cylinder2DDustGrid.hpp \
     CylinderDustGrid.hpp \
-    CylindricalCavityGeometryDecorator.hpp \
     Dim1DustLib.hpp \
     Dim2DustLib.hpp \
     Direction.hpp \
@@ -242,7 +240,6 @@ HEADERS += \
     SphereDustGrid.hpp \
     SphericalAdaptiveMesh.hpp \
     SphericalAdaptiveMeshDustDistribution.hpp \
-    SphericalCavityGeometryDecorator.hpp \
     SpheroidalGeometryDecorator.hpp \
     SpiralStructureGeometryDecorator.hpp \
     StaggeredAssigner.hpp \
@@ -310,7 +307,10 @@ HEADERS += \
     TrustPolarizedMeanDustMix.hpp \
     ThemisDustMix.hpp \
     SimpleOligoDustMix.hpp \
-    SpheCropGeometryDecorator.hpp
+    BoxClipGeometryDecorator.hpp \
+    ClipGeometryDecorator.hpp \
+    SphericalClipGeometryDecorator.hpp \
+    CylindricalClipGeometryDecorator.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -343,12 +343,10 @@ SOURCES += \
     ConfigurableDustMix.cpp \
     ConicalShellGeometry.cpp \
     Console.cpp \
-    CropGeometryDecorator.cpp \
     CubBackgroundGeometry.cpp \
     CubicSplineSmoothingKernel.cpp \
     Cylinder2DDustGrid.cpp \
     CylinderDustGrid.cpp \
-    CylindricalCavityGeometryDecorator.cpp \
     Dim1DustLib.cpp \
     Dim2DustLib.cpp \
     Direction.cpp \
@@ -510,7 +508,6 @@ SOURCES += \
     SphereDustGrid.cpp \
     SphericalAdaptiveMesh.cpp \
     SphericalAdaptiveMeshDustDistribution.cpp \
-    SphericalCavityGeometryDecorator.cpp \
     SpheroidalGeometryDecorator.cpp \
     SpiralStructureGeometryDecorator.cpp \
     StaggeredAssigner.cpp \
@@ -576,4 +573,7 @@ SOURCES += \
     TrustPolarizedMeanDustMix.cpp \
     ThemisDustMix.cpp \
     SimpleOligoDustMix.cpp \
-    SpheCropGeometryDecorator.cpp
+    BoxClipGeometryDecorator.cpp \
+    ClipGeometryDecorator.cpp \
+    SphericalClipGeometryDecorator.cpp \
+    CylindricalClipGeometryDecorator.cpp

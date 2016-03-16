@@ -3,34 +3,41 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
-#ifndef CROPGEOMETRYDECORATOR_HPP
-#define CROPGEOMETRYDECORATOR_HPP
+#ifndef CLIPGEOMETRYDECORATOR_HPP
+#define CLIPGEOMETRYDECORATOR_HPP
 
-#include "BoxGeometry.hpp"
+#include "Geometry.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
-/** The CropGeometryDecorator class is a decorator that crops any geometry. It sets the density
-    equal to zero outside a given cuboidal bounding box, and increases the density within this
-    bounding box with a constant factor to ensure that the total mass remains equal to one. */
-class CropGeometryDecorator : public BoxGeometry
+/** The abstract ClipGeometryDecorator class implements a decorator that adjusts another geometry
+    by setting the density equal to zero inside or outside a region defined in a subclass. Each
+    ClipGeometryDecorator subclass must implement the virtual functions dimension() and inside().
+    The decorator increases the density in the remaining region with a constant factor to ensure
+    that the total mass remains equal to one. The current implementation does not properly adjust
+    the surface densities along the coordinate axes for the mass taken away by the cavity. */
+class ClipGeometryDecorator : public Geometry
 {
     Q_OBJECT
-    Q_CLASSINFO("Title", "a decorator that crops any geometry")
+    Q_CLASSINFO("Title", "a decorator that clips another geometry")
 
     Q_CLASSINFO("Property", "geometry")
-    Q_CLASSINFO("Title", "the geometry to be cropped")
+    Q_CLASSINFO("Title", "the geometry to be clipped")
+
+    Q_CLASSINFO("Property", "remove")
+    Q_CLASSINFO("Title", "the region to be removed")
+    Q_CLASSINFO("Inside", "the inner region (creating a cavity)")
+    Q_CLASSINFO("Outside", "the outer region (cropping)")
 
     //============= Construction - Setup - Destruction =============
 
-public:
-    /** The default constructor. */
-    Q_INVOKABLE CropGeometryDecorator();
-
 protected:
+    /** The default constructor. */
+    ClipGeometryDecorator();
+
     /** This function estimates the fraction \f$\chi\f$ of the mass from the original model taken
-        away by the cropping. It samples the density of the geometry being decorated, and counts
-        the number of generated positions that fall outside the bounding box. This value is used to
+        away by the clipping. It samples the density of the geometry being decorated, and counts
+        the number of generated positions that fall in the removed region. This value is used to
         renormalize the decorated density distribution to unity: the factor by which the original
         density has to be multiplied is simply \f$1/(1-\chi)\f$. */
     void setupSelfAfter();
@@ -38,24 +45,35 @@ protected:
     //======== Setters & Getters for Discoverable Attributes =======
 
 public:
-    /** Sets the geometry to be cropped (i.e. the geometry being decorated). */
+    /** Sets the geometry to be clipped (i.e. the geometry being decorated). */
     Q_INVOKABLE void setGeometry(Geometry* value);
 
-    /** Returns the geometry to be cropped (i.e. the geometry being decorated). */
+    /** Returns the geometry to be clipped (i.e. the geometry being decorated). */
     Q_INVOKABLE Geometry* geometry() const;
+
+    /** The enumeration type indicating which region to remove (Inside or Outside). */
+    Q_ENUMS(Remove)
+    enum Remove { Inside, Outside };
+
+    /** Sets the enumeration value indicating which region to remove. */
+    Q_INVOKABLE void setRemove(Remove value);
+
+    /** Returns the enumeration value indicating which region to remove. */
+    Q_INVOKABLE Remove remove() const;
 
     //======================== Other Functions =======================
 
 public:
     /** This function returns the density \f$\rho({\bf{r}})\f$ at the position \f${\bf{r}}\f$. It
-        is zero outside the bounding box, and equal to the density of the geometry being
-        decorated elsewhere, after an adjustment is made to account for the cropping. */
+        is zero in the removed region, and equal to the density of the geometry being decorated
+        elsewhere, after an adjustment is made to account for the clipping. */
     double density(Position bfr) const;
 
     /** This function generates a random position from the geometry, by drawing a random point from
         the three-dimensional probability density \f$p({\bf{r}})\, {\text{d}}{\bf{r}} =
         \rho({\bf{r}})\, {\text{d}}{\bf{r}}\f$. It repeatedly calls the density() function for the
-        geometry being decorated until a position is returned that lies inside the cropped box. */
+        geometry being decorated until a position is returned that does not lie in the removed
+        region. */
     Position generatePosition() const;
 
     /** This function returns the X-axis surface density, i.e. the integration of the density along
@@ -75,26 +93,35 @@ public:
 
     /** This function implements part of the AngularDistribution interface. It returns the
         probability \f$P(\Omega)\f$ for a given direction \f$(\theta,\phi)\f$ at the specified
-        position. For the cavity decorator, this function simply calls the corresponding function
-        for the geometry being decorated. */
+        position. For this decorator, the function simply calls the corresponding function for the
+        geometry being decorated. */
     double probabilityForDirection(int ell, Position bfr, Direction bfk) const;
 
     /** This function implements part of the AngularDistribution interface. It generates a random
         direction \f$(\theta,\phi)\f$ drawn from the probability distribution \f$P(\Omega)
-        \,{\mathrm{d}}\Omega\f$ at the specified position. For the cavity decorator, this function
-        simply calls the corresponding function for the geometry being decorated. */
+        \,{\mathrm{d}}\Omega\f$ at the specified position. For this decorator, the function simply
+        calls the corresponding function for the geometry being decorated. */
     Direction generateDirection(int ell, Position bfr) const;
+
+protected:
+    /** This pure virtual function, to be implemented by a subclass, returns true if the specified
+        position is inside the boundary defined by the subclass, i.e. the point is in the region
+        that would be carved away when creating a cavity, or in the region that would be retained
+        when cropping. */
+    virtual bool inside(Position bfr) const = 0;
 
     //======================== Data Members ========================
 
 private:
     // data members for discoverable attributes
     Geometry* _geometry;
+    Remove _remove;
 
+protected:
     // values initialized during setup
     double _norm;
 };
 
 ////////////////////////////////////////////////////////////////////
 
-#endif // CROPGEOMETRYDECORATOR_HPP
+#endif // CLIPGEOMETRYDECORATOR_HPP
