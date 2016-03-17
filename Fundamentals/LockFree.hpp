@@ -14,14 +14,11 @@
     memory environment. All implementations are provided inline in the header. */
 namespace LockFree
 {
-    /** This function adds the specified \em non-negative double value (which can be an expression)
+    /** This function adds the specified double value (which can be an expression)
         to the specified target variable (passed as a reference to a memory location) in a
         thread-safe manner. The function avoids race conditions between concurrent threads by
         implementing a classical compare and swap (CAS) loop using the corresponding atomic
-        operation on the target memory location. The restriction that the added value must be
-        non-negative is imposed to avoid the ABA problem where two foreign threads concurrently
-        change the target contents from A to B and back to A, confusing the CAS loop in the current
-        thread. */
+        operation on the target memory location. */
     inline void add(double& target, double value)
     {
         // construct an atom over the target location without initialization (this produces no assembly code)
