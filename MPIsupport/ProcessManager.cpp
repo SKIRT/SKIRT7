@@ -246,7 +246,6 @@ void ProcessManager::scatterw(double *sendBuffer, int sendRank, int sendLength,
     recvcnts[sendRank] = recvCount;                         // except from the sender
     std::vector<int> rdispls(size, 0);                      // starting from recvBuffer + 0
     std::vector<MPI_Datatype> recvtypes(size, MPI_DOUBLE);  // all doubles
-    recvtypes.reserve(size);
 
     MPI_Alltoallw(sendBuffer, &sendcnts[0], &sdispls[0], &sendtypes[0],
                   recvBuffer, &recvcnts[0], &rdispls[0], &recvtypes[0],
@@ -311,7 +310,6 @@ void ProcessManager::presetScatterw(double *sendBuffer, int sendRank, double *re
     recvcnts[sendRank] = recvCount;                         // except from the sender
     std::vector<int> rdispls(size, 0);                      // starting from recvBuffer + 0
     std::vector<MPI_Datatype> recvtypes(size, MPI_DOUBLE);  // all doubles
-    recvtypes.reserve(size);
 
     MPI_Alltoallw(sendBuffer, &sendcnts[0], &sdispls[0], &presetDatatypes[0],
                   recvBuffer, &recvcnts[0], &rdispls[0], &recvtypes[0],
