@@ -3,41 +3,41 @@
 ////       © Astronomical Observatory, Ghent University         ////
 ///////////////////////////////////////////////////////////////// */
 
+#include "ClipGeometryDecorator.hpp"
 #include "FatalError.hpp"
-#include "Random.hpp"
-#include "CropGeometryDecorator.hpp"
 
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////
 
-CropGeometryDecorator::CropGeometryDecorator()
-    : _geometry(0)
+ClipGeometryDecorator::ClipGeometryDecorator()
+    : _geometry(0), _remove(Inside)
 {
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void
-CropGeometryDecorator::setupSelfAfter()
+void ClipGeometryDecorator::setupSelfAfter()
 {
-    BoxGeometry::setupSelfAfter();
+    Geometry::setupSelfAfter();
 
-    // estimate the original geometry's mass outside the bounding box
+    // estimate the original geometry's mass in the removed region
     int Nsamples = 10000;
-    int Ncrop = 0;
+    int Ninside = 0;
     for (int k=0; k<Nsamples; k++)
     {
         Position bfr = _geometry->generatePosition();
-        if (!contains(bfr)) Ncrop++;
+        if (inside(bfr)) Ninside++;
     }
-    double chi = Ncrop/(1.0*Nsamples);
+    double chi = Ninside/(1.0*Nsamples);
+    if (_remove==Outside) chi = 1.0-chi;
+    if (chi > 0.9) throw FATALERROR("Clip decorator removes more than 90% of the original mass");
     _norm = 1.0/(1.0-chi);
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void CropGeometryDecorator::setGeometry(Geometry* value)
+void ClipGeometryDecorator::setGeometry(Geometry* value)
 {
     if (_geometry) delete _geometry;
     _geometry = value;
@@ -46,60 +46,78 @@ void CropGeometryDecorator::setGeometry(Geometry* value)
 
 ////////////////////////////////////////////////////////////////////
 
-Geometry* CropGeometryDecorator::geometry() const
+Geometry* ClipGeometryDecorator::geometry() const
 {
     return _geometry;
 }
 
-//////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
 
-double CropGeometryDecorator::density(Position bfr) const
+void ClipGeometryDecorator::setRemove(ClipGeometryDecorator::Remove value)
 {
-    return contains(bfr) ? _geometry->density(bfr) * _norm : 0.0;
+    _remove = value;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-Position CropGeometryDecorator::generatePosition() const
+ClipGeometryDecorator::Remove ClipGeometryDecorator::remove() const
+{
+    return _remove;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+double ClipGeometryDecorator::density(Position bfr) const
+{
+    bool removed = inside(bfr);
+    if (_remove==Outside) removed = !removed;
+    return removed ? 0.0 : _geometry->density(bfr) * _norm;
+}
+
+////////////////////////////////////////////////////////////////////
+
+Position ClipGeometryDecorator::generatePosition() const
 {
     while (true)
     {
         Position bfr = _geometry->generatePosition();
-        if (contains(bfr)) return bfr;
+        bool removed = inside(bfr);
+        if (_remove==Outside) removed = !removed;
+        if (!removed) return bfr;
     }
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double CropGeometryDecorator::SigmaX() const
+double ClipGeometryDecorator::SigmaX() const
 {
     return _geometry->SigmaX();
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double CropGeometryDecorator::SigmaY() const
+double ClipGeometryDecorator::SigmaY() const
 {
     return _geometry->SigmaY();
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double CropGeometryDecorator::SigmaZ() const
+double ClipGeometryDecorator::SigmaZ() const
 {
     return _geometry->SigmaZ();
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double CropGeometryDecorator::probabilityForDirection(int ell, Position bfr, Direction bfk) const
+double ClipGeometryDecorator::probabilityForDirection(int ell, Position bfr, Direction bfk) const
 {
     return _geometry->probabilityForDirection(ell, bfr, bfk);
 }
 
 ////////////////////////////////////////////////////////////////////
 
-Direction CropGeometryDecorator::generateDirection(int ell, Position bfr) const
+Direction ClipGeometryDecorator::generateDirection(int ell, Position bfr) const
 {
     return _geometry->generateDirection(ell, bfr);
 }

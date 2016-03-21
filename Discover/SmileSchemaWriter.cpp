@@ -36,29 +36,20 @@ void SmileSchemaWriter::writeSmileSchema()
     // get the list of all concrete classes, in order of addition to the registry
     QList<QByteArray> concreteTypes = SimulationItemRegistry::concreteItemTypes();
 
-    // build a dictionary with all direct and indirect superclasses used by any of the concrete classes
+    // build a dictionary containing all classes, including the concrete classes
+    // and all direct and indirect superclasses used by any of the concrete classes;
     // the keys in a QMap are ordered alphabetically
-    QMap<QByteArray, const QMetaObject*> abstractTypes;
+    QMap<QByteArray, const QMetaObject*> allTypes;
     foreach (QByteArray type, concreteTypes)
     {
         const QMetaObject* current = SimulationItemRegistry::metaObject(type);
-        while (true)
+        while (current)
         {
+            allTypes.insert(current->className(), current);
             current = current->superClass();
-            if (!current) break;
-            abstractTypes.insert(current->className(), current);
         }
     }
-    abstractTypes.remove("QObject");
-
-    // verify that none of the superclasses are registered as a concrete class
-    foreach (QByteArray type, abstractTypes.keys())
-    {
-        if (concreteTypes.contains(type))
-        {
-            throw FATALERROR("A concrete type can not serve as a base type");
-        }
-    }
+    allTypes.remove("QObject");
 
     // open the file and setup the XML writer
     _file.setFileName("skirt.smile");
@@ -89,22 +80,24 @@ void SmileSchemaWriter::writeSmileSchema()
     // clear the set of physical quantities; it is maintained in visitPropertyHandler(Double[List]PropertyHandler)
     _quantities.clear();
 
-    // write a "Type" element for each concrete class in the registry, in order of addition to the registry
+    // write a full "Type" element (including complete definitions) for each class, in alphabetical order
+    _writer.writeStartElement("allTypes");
+    _writer.writeAttribute("type", "Type");
+    foreach (const QMetaObject* meta, allTypes.values())
+    {
+        writeTypeElement(meta);
+    }
+    _writer.writeEndElement();
+
+    // write a brief "Type" element (just the name) for each concrete class, in order of addition to the registry
     _writer.writeStartElement("concreteTypes");
     _writer.writeAttribute("type", "Type");
     foreach (QByteArray type, concreteTypes)
     {
-        writeTypeElement(SimulationItemRegistry::metaObject(type));
-    }
-    _writer.writeEndElement();
-
-    // write a "Type" element for each abstract class in the registry (the order does not matter)
-    _writer.writeStartElement("abstractTypes");
-    _writer.writeAttribute("type", "Type");
-    foreach (const QMetaObject* meta, abstractTypes.values())
-    {
-        writeTypeElement(meta);
-    }
+        _writer.writeStartElement("Type");
+        _writer.writeAttribute("name", type);
+        _writer.writeEndElement();
+     }
     _writer.writeEndElement();
 
     // write a "Quantity" element for each physical quantity used by any of the properties in the exported schema
@@ -359,7 +352,7 @@ void SmileSchemaWriter::writeQuantityElement(QString quantity)
     {
         _writer.writeStartElement("Unit");
         _writer.writeAttribute("name", unit);
-        _writer.writeAttribute("factor", QString::number(Units::in(quantity, unit), 'e', 13));
+        _writer.writeAttribute("factor", QString::number(Units::in(quantity, unit), 'g', 15));
         _writer.writeEndElement();
     }
     _writer.writeEndElement();
