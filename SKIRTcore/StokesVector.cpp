@@ -95,6 +95,80 @@ void StokesVector::rotateStokes(double phi, Direction k)
 
 //////////////////////////////////////////////////////////////////////
 
+double StokesVector::rotateIntoPlane(Direction k, Direction knew)
+
+{
+    // we want to rotate the reference into the plane. So we rotate the normal to be perpendicular to the plane.
+    // generate the normal we want to rotate into
+    Vec nNew = Vec::cross(k,knew);
+    double nNewNorm = nNew.norm();
+    // if the given directions are nearly parallel, simplify procedure
+    if (nNewNorm < 1e-6)
+    {
+        rotateStokes(0,k);
+        return 0;
+    }
+    nNew /= nNew.norm();
+
+    // if the StokesVector is unpolarized, simplify procedure
+    if (!_polarized)
+    {
+        _normal.set(nNew.x(), nNew.y(), nNew.z());
+        _polarized = true;
+        return 0;
+    }
+
+    // calculate angle phi to rotate around
+    double cosphi = Vec::dot(_normal,nNew);
+    double sinphi = Vec::dot(Vec::cross(_normal,nNew),k);
+    double phi = atan2(sinphi,cosphi);
+
+    // rotate around the angle and return it
+    rotateStokes(phi,k);
+    return phi;
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
+double StokesVector::rotatePerpendicularTo(Direction k, Direction knew)
+
+{
+    // This is the same as rotating into the plane, just pi/2 further.
+    // We could call rotateIntoPlane() and afterwards rotate by pi/2, but in order to not call
+    // rotateStokes() twice, we rewrite it and add pi/2 to phi.
+    // generate the normal we want to rotate into
+    Vec nNew = Vec::cross(k,knew);
+    double nNewNorm = nNew.norm();
+    // if the given directions are nearly parallel, simplify procedure
+    if (nNewNorm < 1e-6)
+    {
+        rotateStokes(0,k);
+        return 0;
+    }
+    nNew /= nNew.norm();
+
+    // if the StokesVector is unpolarized, simplify procedure
+    if (!_polarized)
+    {
+        _normal.set(nNew.x(), nNew.y(), nNew.z());
+        _polarized = true;
+        return 0;
+    }
+
+    // calculate angle phi to rotate around
+    double cosphi = Vec::dot(_normal,nNew);
+    double sinphi = Vec::dot(Vec::cross(_normal,nNew),k);
+    double phi = atan2(sinphi,cosphi) + 1.57079632;
+
+    // rotate around the angle and return it
+    rotateStokes(phi,k);
+    return phi;
+
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void StokesVector::applyMueller(double S11, double S12, double S33, double S34)
 {
     double I =  S11*1. + S12*_Q;
@@ -102,6 +176,17 @@ void StokesVector::applyMueller(double S11, double S12, double S33, double S34)
     double U =  S33*_U + S34*_V;
     double V = -S34*_U + S33*_V;
     setPolarized(I, Q, U, V, _normal);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+Direction StokesVector::scatterToNewDirection(Direction k, double theta)
+{
+    // rotate the propagation direction in the plane
+    Vec newdir = k*cos(theta) + Vec::cross(_normal, k)*sin(theta);
+
+    // normalize direction to prevent degradation
+    return Direction(newdir/newdir.norm());
 }
 
 //////////////////////////////////////////////////////////////////////

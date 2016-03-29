@@ -565,18 +565,6 @@ namespace
         if (isfinite(phi)) return phi;
         return 0;
     }
-
-    // This helper function returns the angle alpha between the reference axis in the peel-off scattering plane
-    // and the x-axis of the instrument frame, given the normal to the peel-off scattering plane,
-    // the new peel-off direction towards the instrument, and the direction of the instrument frame y-axis
-    // expressed in model coordinates.
-    double angleBetweenScatteringAndInstrumentReference(Direction n, Direction knew, Direction ky)
-    {
-        double cosalpha = Vec::dot(n,ky);
-        double sinalpha = Vec::dot(Vec::cross(n,ky), knew);
-        double alpha = atan2(sinalpha,cosalpha);
-        return alpha;
-    }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -617,18 +605,15 @@ Direction DustMix::scatteringDirectionAndPolarization(StokesVector* out, const P
 ////////////////////////////////////////////////////////////////////
 
 void DustMix::scatteringPeelOffPolarization(StokesVector* out, const PhotonPackage* pp, Direction bfknew,
-                                            Direction /*bfkx*/, Direction bfky)
+                                            Direction bfkx, Direction /*bfky*/)
 {
     if (_polarization)
     {
         // copy the polarization state
         *out = *pp;
 
-        // this generates a normal if it is the first scattering event. Otherwise it won't change anything.
-        out->rotateStokes(0, pp->direction());
-        // rotate over the angle between scattering planes
-        double phi = angleBetweenScatteringPlanes(out->normal(), pp->direction(), bfknew);
-        out->rotateStokes(phi, pp->direction());
+        // rotate the Stokes vector reference direction into the scattering plane
+        out->rotateIntoPlane(pp->direction(),bfknew);
 
         // apply the Mueller matrix
         double theta = acos(Vec::dot(pp->direction(),bfknew));
@@ -636,10 +621,10 @@ void DustMix::scatteringPeelOffPolarization(StokesVector* out, const PhotonPacka
         int ell = pp->ell();
         out->applyMueller(_S11vv(ell,t), _S12vv(ell,t), _S33vv(ell,t), _S34vv(ell,t));
 
-        // rotate over the angle between the reference axis in the peel-off scattering plane
-        // and the x-axis in the instrument frame
-        double alpha = angleBetweenScatteringAndInstrumentReference(out->normal(), bfknew, bfky);
-        out->rotateStokes(alpha, pp->direction());
+        // rotate the Stokes vector reference direction parallel to the instrument frame x-axis
+        // it is given bfknew, because the photon is at this point aimed towards the observer,
+        // but the propagation direction has not been updated.
+        out->rotateIntoPlane(bfknew,bfkx);
     }
 }
 
