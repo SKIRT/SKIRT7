@@ -166,11 +166,19 @@ void DustLib::calculate()
 
     // calculate the emissivity for each library entry
     EmissionCalculator calc(_Lvv, _nv, Nlib, this);
+    Parallel* parallel = find<ParallelFactory>()->parallel();
 
     // Each process now has its own library over a subset of dustcells.
     // Use the alternate version of the call() function, which acts as a multi threaded for-loop
-    Parallel* parallel = find<ParallelFactory>()->parallel();
-    parallel->call(&calc, Nlib);
+    if (_cellAssigner->parallel())
+        parallel->call(&calc, Nlib);
+    // Each process has considered all the dust cells and has an identical library
+    // Divide the work over the processes
+    else
+    {
+        StaggeredAssigner* libAssigner = new StaggeredAssigner(this);
+        parallel->call(&calc, libAssigner);
+    }
 
     // Wait for the other processes to reach this point
     comm->wait("the emission spectra calculation");

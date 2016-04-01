@@ -93,7 +93,7 @@ public:
     /** Calls the body() function of the specified specified target object a certain number of times,
         with the \em index argument of that function taking values from 0 to \em maxIndex.
         The work will be distributed over the parallel threads in an unpredicable manner. */
-    void call(ParallelTarget *target, size_t maxIndex);
+    void call(ParallelTarget* target, size_t maxIndex);
 
     /** Calls the specified member function for the specified target object a certain number of times,
         with the \em index argument of that function taking values that are determined by the \em
@@ -102,7 +102,7 @@ public:
         parallel threads in an unpredicable manner. */
     template<class T> void call(T* targetObject, void (T::*targetMember)(size_t index), const ProcessAssigner* assigner);
 
-    /** Calls the body() function of the specified specified target object a certain number of times,
+    /** Calls the specified member function for the specified target object a certain number of times,
         with the \em index argument of that function taking values from 0 to \em maxIndex.
         The work will be distributed over the parallel threads in an unpredicable manner. */
     template<class T> void call(T* targetObject, void (T::*targetMember)(size_t index), size_t maxIndex);

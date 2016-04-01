@@ -90,7 +90,7 @@ void MonteCarloSimulation::setChunkParams(double packages)
 //        else if (Nprocs == 1) _Nchunks = ceil( std::max({packages/1e7, 10.*Nthreads/_Nlambda}));
 //        else _Nchunks = ceil( std::max({10.*Nprocs, packages/1e7, 10.*Nthreads*Nprocs/_Nlambda}));
 
-        // Bepaal het minimaal aantal golflengten per proces
+        // The minimum number of wavelengths assigned to any of the processes
         size_t minNlambda = _Nlambda;
         for (int r=0; r<Nprocs; r++)
             minNlambda = std::min(minNlambda, _lambdagrid->assigner()->nvaluesForRank(r));
