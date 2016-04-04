@@ -79,8 +79,8 @@ void StokesVector::rotateStokes(double phi, Direction k)
         // rotate the Q and U in the new reference frame
         double cos2phi = cos(2.0*phi);
         double sin2phi = sin(2.0*phi);
-        double Q =  cos2phi*_Q + sin2phi*_U;
-        double U = -sin2phi*_Q + cos2phi*_U;
+        double Q = cos2phi*_Q - sin2phi*_U;
+        double U = sin2phi*_Q + cos2phi*_U;
         _Q = Q;
         _U = U;
     }
