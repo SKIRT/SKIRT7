@@ -605,7 +605,7 @@ Direction DustMix::scatteringDirectionAndPolarization(StokesVector* out, const P
 ////////////////////////////////////////////////////////////////////
 
 void DustMix::scatteringPeelOffPolarization(StokesVector* out, const PhotonPackage* pp, Direction bfknew,
-                                            Direction bfkx, Direction /*bfky*/)
+                                            Direction /*bfkx*/, Direction bfky)
 {
     if (_polarization)
     {
@@ -621,10 +621,10 @@ void DustMix::scatteringPeelOffPolarization(StokesVector* out, const PhotonPacka
         int ell = pp->ell();
         out->applyMueller(_S11vv(ell,t), _S12vv(ell,t), _S33vv(ell,t), _S34vv(ell,t));
 
-        // rotate the Stokes vector reference direction parallel to the instrument frame x-axis
+        // rotate the Stokes vector reference direction parallel to the instrument frame y-axis
         // it is given bfknew, because the photon is at this point aimed towards the observer,
         // but the propagation direction has not been updated.
-        out->rotateIntoPlane(bfknew,bfkx);
+        out->rotateIntoPlane(bfknew,bfky);
     }
 }
 
