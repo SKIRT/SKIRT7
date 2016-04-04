@@ -34,11 +34,20 @@ void PeerToPeerCommunicator::sum_all(Array& arr)
     ProcessManager::sum_all(&(arr[0]),arr.size());
 }
 
+////////////////////////////////////////////////////////////////////
+
 void PeerToPeerCommunicator::sum_all(double& dbl)
 {
     if (!isMultiProc()) return;
 
     ProcessManager::sum_all(&dbl,1);
+}
+
+void PeerToPeerCommunicator::and_all(bool& b)
+{
+    if (isMultiProc()) return;
+
+    ProcessManager::and_all(&b);
 }
 
 ////////////////////////////////////////////////////////////////////

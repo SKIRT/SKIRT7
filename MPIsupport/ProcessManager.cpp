@@ -377,6 +377,16 @@ void ProcessManager::sum_all(double* my_array, int nvalues)
 #endif
 }
 
+void ProcessManager::and_all(bool* boolean)
+{
+#ifdef BUILDING_WITH_MPI
+    MPI_Allreduce(MPI_IN_PLACE, boolean, 1, MPI_INT, MPI_LAND, MPI_COMM_WORLD);
+#else
+    Q_UNUSED(my_array) Q_UNUSED(nvalues)
+#endif
+
+}
+
 //////////////////////////////////////////////////////////////////////
 
 void ProcessManager::broadcast(double* my_array, int nvalues, int root)

@@ -38,7 +38,10 @@ std::shared_ptr<Array> ParallelDataCube::constructCompleteCube()
     }
     else // total cube is bigger than partial cube
     {
-        std::shared_ptr<Array> completeCube(new Array(_wavelengthAssigner->total()*_Nframep));
+        std::shared_ptr<Array> completeCube(new Array(0));
+
+        if (_comm->rank()==0)
+            completeCube->resize(_wavelengthAssigner->total()*_Nframep);
 
         // displacements parameters for gatherw
         std::vector<std::vector<int>> displacements;

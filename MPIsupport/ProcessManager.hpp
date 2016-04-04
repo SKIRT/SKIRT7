@@ -101,6 +101,8 @@ public:
         communication to proceed. */
     static void sum_all(double* my_array, int nvalues);
 
+    static void and_all(bool* boolean);
+
     /** This function is used to broadcast an array of double values from one process to all other
         processes. A pointer to the first value is passed as the first argument, the number of
         values as the second and the rank of the sending process as the final argument. All

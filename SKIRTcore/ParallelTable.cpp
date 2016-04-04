@@ -155,6 +155,8 @@ const Array& ParallelTable::operator[](size_t i) const
 
 void ParallelTable::sync()
 {
+    // Get a global value for the synced flag, in case one of the processes never wrote something
+    _comm->and_all(_synced);
     if (!_synced)
     {
         TimeLogger logger(_log->verbose() && _comm->isMultiProc() ? _log : 0, "communication of " + _name);
