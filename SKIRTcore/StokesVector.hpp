@@ -86,21 +86,10 @@ public:
         The function returns the angle by which the reference axis was rotated. */
     double rotateIntoPlane(Direction k, Direction knew);
 
-    /** This function adjusts the stokes vector reference axis so it is perpendicular to the given
-        propagation direction \f$\bf{k}\f$ and to the given second direction \f$\bf{knew}\f$. The
-        stored Stokes parameters are updated and the reference direction created if necessary.
-        The function returns the angle by which the reference axis was rotated. */
-    double rotatePerpendicularTo(Direction k, Direction knew);
-
     /** This function transforms the polarization state described by this Stokes vector by applying
         the Mueller matrix with the specified coefficients (and zero elements elsewhere) to its
         existing state. */
     void applyMueller(double S11, double S12, double S33, double S34);
-
-    /** This function creates a new propagation direction given the current propagation direction
-        \f$\bf{k}\f$ and a scattering angle theta. It rotates \f$\bf{k}\f$ in the plane of the
-        Stokes vector reference direction. It does not update the Stokes vector parameters.*/
-    Direction scatterToNewDirection(Direction k, double theta);
 
 private:
     bool _polarized;
