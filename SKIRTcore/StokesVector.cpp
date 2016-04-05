@@ -79,8 +79,8 @@ void StokesVector::rotateStokes(double phi, Direction k)
         // rotate the Q and U in the new reference frame
         double cos2phi = cos(2.0*phi);
         double sin2phi = sin(2.0*phi);
-        double Q =  cos2phi*_Q + sin2phi*_U;
-        double U = -sin2phi*_Q + cos2phi*_U;
+        double Q = cos2phi*_Q - sin2phi*_U;
+        double U = sin2phi*_Q + cos2phi*_U;
         _Q = Q;
         _U = U;
     }
@@ -91,6 +91,40 @@ void StokesVector::rotateStokes(double phi, Direction k)
 
     // to prevent degradation
     _normal /= _normal.norm();
+}
+
+//////////////////////////////////////////////////////////////////////
+
+double StokesVector::rotateIntoPlane(Direction k, Direction knew)
+{
+    // we want to rotate the reference into the plane. So we rotate the normal to be perpendicular to the plane.
+    // generate the normal we want to rotate into
+    Vec nNew = Vec::cross(k,knew);
+    double nNewNorm = nNew.norm();
+    // if the given directions are nearly parallel, simplify procedure
+    if (nNewNorm < 1e-6)
+    {
+        rotateStokes(0,k);
+        return 0;
+    }
+    nNew /= nNew.norm();
+
+    // if the StokesVector is unpolarized, simplify procedure
+    if (!_polarized)
+    {
+        _normal.set(nNew.x(), nNew.y(), nNew.z());
+        _polarized = true;
+        return 0;
+    }
+
+    // calculate angle phi to rotate around
+    double cosphi = Vec::dot(_normal,nNew);
+    double sinphi = Vec::dot(Vec::cross(_normal,nNew),k);
+    double phi = atan2(sinphi,cosphi);
+
+    // rotate around the angle and return it
+    rotateStokes(phi,k);
+    return phi;
 }
 
 //////////////////////////////////////////////////////////////////////

@@ -12,14 +12,17 @@
 
 /** An object of the StokesVector class describes the polarization state of a photon (package), and
     offers functions to apply certain transformations to it. Specifically, a Stokes vector contains
-    the four Stokes parameters \f$I\f$, \f$Q\f$, \f$U\f$, and \f$V\f$ as well as the normal to the
-    last scattering plane, in which the Stokes vector is defined. The first parameter (\f$I\f$)
-    indicates the total intensity, and the remaining parameters (\f$Q\f$, \f$U\f$, and \f$V\f$)
-    represent various degrees of linear and circular polarization. Stokes parameters have a
-    dimension of intensity. However, in our implementation, the parameters are normalized to
-    dimensionless values through division by \f$I\f$. Consequently \f$I=1\f$ at all times, so that
-    this parameter does not need to be stored. The StokesVector is initialized in an unpolarized
-    state. While unpolarized, the stored normal is the zero vector. */
+    the four Stokes parameters \f$I\f$, \f$Q\f$, \f$U\f$, and \f$V\f$ that are defined with respect
+    to a reference direction. For efficiency reasons we store the normal to the propagation
+    direction of the photon and the Stokes vector reference direction instead of the reference
+    direction itself. The first parameter (\f$I\f$) indicates the total intensity, and the
+    remaining parameters (\f$Q\f$, \f$U\f$, and \f$V\f$) represent various degrees of linear and
+    circular polarization. Stokes parameters have a dimension of intensity. However, in our
+    implementation, the parameters are normalized to dimensionless values through division by
+    \f$I\f$. Consequently \f$I=1\f$ at all times, so that this parameter does not need to be
+    stored. As the StokesVector does not store the propagation direction, it has to be provided
+    for most transformations. The StokesVector is initialized in an unpolarized state. While
+    unpolarized, the stored normal is the zero vector.*/
 class StokesVector
 {
 public:
@@ -54,8 +57,9 @@ public:
     /** This function returns the Stokes parameters in the provided arguments. */
     void stokes(double& I, double& Q, double& U, double& V) { I = 1.; Q = _Q; U = _U; V = _V; }
 
-    /** This function returns the normal to the scattering plane to which the Stokes vector is
-        defined. If the Stokes vector is in an unpolarized state, the zero vector is returned. */
+    /** This function returns the normal to the propagation direction of the photon and the
+        reference direction in which the Stokes vector is defined. If the Stokes vector is in an
+        unpolarized state, the zero vector is returned. */
     Direction normal() const { return _normal; }
 
     // -------- calculated properties -------
@@ -73,11 +77,14 @@ public:
 
     /** This function adjusts the Stokes vector for a rotation of the reference axis about the
         given flight direction \f$\bf{k}\f$ over the specified angle \f$\phi\f$, clockwise when
-        looking along \f$\bf{k}\f$. The stored normal to the scattering plane is updated as well.
-        The given flight direction \f$\bf{k}\f$ must be perpendicular to the stored normal (unless
-        the Stokes vector is in the unpolarized state). If this is not the case, the result of
-        executing this function is undefined. */
+        looking along \f$\bf{k}\f$.*/
     void rotateStokes(double phi, Direction k);
+
+    /** This function adjusts the stokes vector reference axis so it is in the plane of the given
+        propagation direction \f$\bf{k}\f$ and any direction \f$\bf{knew}\f$. The stored Stokes
+        parameters are updated and the reference direction created if necessary.
+        The function returns the angle by which the reference axis was rotated. */
+    double rotateIntoPlane(Direction k, Direction knew);
 
     /** This function transforms the polarization state described by this Stokes vector by applying
         the Mueller matrix with the specified coefficients (and zero elements elsewhere) to its
