@@ -17,17 +17,17 @@
 PATHLIST="$(find $HOME/Qt* -name qmake -type f 2>/dev/null | tr '\n' ' ')"
 
 # Search for qmake in the /usr/local directory
-PATHLIST="$(find /usr/local/Qt* -name qmake -type f 2>/dev/null | tr '\n' ' ') $PATHLIST"
+PATHLIST="$PATHLIST $(find /usr/local/Qt* -name qmake -type f 2>/dev/null | tr '\n' ' ')"
 
 # Search for qmake in the $PATH
-PATHLIST="$(which qmake) $PATHLIST"
+PATHLIST="$PATHLIST $(which qmake)"
 
 # Set the QMAKEPATH to an empty string initially
 QMAKEPATH=""
 
 # This function returns the Qt version associated with a certain qmake executable
 function qt_version {
-    
+
     local VERSION_OUTPUT="$($1 -v | tr '\n' ' ')"
     local VERSION_OUTPUT="$(tr -d ' ' <<< $VERSION_OUTPUT)"
     local SPLITTED="$(sed s/'Qtversion'/' '/g <<< $VERSION_OUTPUT)"
@@ -41,14 +41,14 @@ function qt_version {
 
 # Loop over all the qmake paths
 for path in $PATHLIST; do
-    
+
     # Get the associated Qt version
     VERSION="$(qt_version $path)"
-    
+
     # Check whether the Qt version is supported
     if [[ $VERSION > '5.2.0' ]]
     then
-        
+
         # If another supported qmake was found, check whether this qmake corresponds to
         # a more recent Qt installation
         if [[ ! "$QMAKEPATH" == "" ]]
@@ -58,12 +58,12 @@ for path in $PATHLIST; do
           then
               QMAKEPATH=$path
           fi
-          
+
         # Else, just use this qmake
         else
-          QMAKEPATH=$path  
+          QMAKEPATH=$path
         fi
-    fi 
+    fi
 
 done
 
