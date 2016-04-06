@@ -323,7 +323,7 @@ void ProcessManager::presetScatterw(double *sendBuffer, int sendRank, double *re
 
 void ProcessManager::presetConfigure(int length, const std::vector<std::vector<int>>& displacements)
 {
-    for (int rank=0; rank<displacements.size(); rank++)
+    for (size_t rank=0; rank<displacements.size(); rank++)
     {
         MPI_Datatype newtype;
         createDisplacedDoubleBlocks(length, displacements[rank], &newtype);
@@ -380,7 +380,9 @@ void ProcessManager::sum_all(double* my_array, int nvalues)
 void ProcessManager::and_all(bool* boolean)
 {
 #ifdef BUILDING_WITH_MPI
-    MPI_Allreduce(MPI_IN_PLACE, boolean, 1, MPI_INT, MPI_LAND, MPI_COMM_WORLD);
+    int value = *boolean;
+    MPI_Allreduce(MPI_IN_PLACE, &value, 1, MPI_INT, MPI_LAND, MPI_COMM_WORLD);
+    *boolean = value;
 #else
     Q_UNUSED(my_array) Q_UNUSED(nvalues)
 #endif
