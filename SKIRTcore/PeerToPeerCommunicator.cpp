@@ -45,7 +45,7 @@ void PeerToPeerCommunicator::sum_all(double& dbl)
 
 void PeerToPeerCommunicator::and_all(bool& b)
 {
-    if (isMultiProc()) return;
+    if (!isMultiProc()) return;
 
     ProcessManager::and_all(&b);
 }
