@@ -125,6 +125,8 @@ private:
         locking; callers should lock the shared data members of this class instance. */
     bool threadsActive();
 
+    void prepareAndCall(ParallelTarget* target, const ProcessAssigner* assigner, size_t limit, bool multithread);
+
     //======================== Nested Classes =======================
 
 private:

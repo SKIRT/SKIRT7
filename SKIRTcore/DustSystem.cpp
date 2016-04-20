@@ -40,7 +40,7 @@ using namespace std;
 DustSystem::DustSystem()
     : _dd(0), _grid(0), _gdi(0), _Nrandom(100),
       _writeConvergence(true), _writeDensity(true), _writeDepthMap(false),
-      _writeQuality(false), _writeCellProperties(false), _writeCellsCrossed(false), _assigner(0)
+      _writeQuality(false), _writeCellProperties(false), _writeCellsCrossed(false), _setupAssigner(0)
 {
 }
 
@@ -54,8 +54,8 @@ void DustSystem::setupSelfBefore()
     if (!_dd) throw FATALERROR("Dust distribution was not set");
     if (!_grid) throw FATALERROR("Dust grid was not set");
 
-    // If no assigner was set, use a StaggeredAssigner as default
-    if (!_assigner) setAssigner(new StaggeredAssigner(this));
+    // use a StaggeredAssigner in the setup
+    _setupAssigner = new StaggeredAssigner(this);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -86,8 +86,7 @@ void DustSystem::setupSelfAfter()
     assigner->assign(_Ncells);
     find<ParallelFactory>()->parallel()->call(this, &DustSystem::setVolumeBody, assigner);
 
-    // assign each process to a set of dust cells
-    _assigner->assign(_Ncells);
+    _setupAssigner->assign(_Ncells);
 
     // Calculate and set the density of the cells that are assigned to this process
     _gdi = _grid->interface<DustGridDensityInterface>();
@@ -95,13 +94,13 @@ void DustSystem::setupSelfAfter()
     {
         // if the dust grid offers a special interface, use it
         find<Log>()->info("Setting the value of the density in the cells using grid interface...");
-        find<ParallelFactory>()->parallel()->call(this, &DustSystem::setGridDensityBody, _assigner);
+        find<ParallelFactory>()->parallel()->call(this, &DustSystem::setGridDensityBody, _setupAssigner);
     }
     else
     {
         // otherwise take an average of the density in 100 random positions in the cell (parallelized)
         find<Log>()->info("Setting the value of the density in the cells...");
-        find<ParallelFactory>()->parallel()->call(this, &DustSystem::setSampleDensityBody, _assigner);
+        find<ParallelFactory>()->parallel()->call(this, &DustSystem::setSampleDensityBody, _setupAssigner);
     }
 
     // Wait for the other processes to reach this point
@@ -111,7 +110,7 @@ void DustSystem::setupSelfAfter()
     RootAssigner* writeassigner = new RootAssigner(this);
 
     // Obtain the densities in all dust cells, if the calculation has been performed by parallel processes
-    if (_assigner->parallel()) assemble();
+    if (_setupAssigner->parallel()) assemble();
 
     // Perform a convergence check on the grid.
     if (_writeConvergence) writeconvergence();
@@ -154,7 +153,7 @@ void DustSystem::setSampleDensityBody(size_t m)
     if (m%100000==0)
     {
         find<Log>()->info("  Computing density for cell " + QString::number(m)
-                          + " (" + QString::number(floor(100.*_assigner->relativeIndex(m)/_assigner->nvalues())) + "%)");
+                          + " (" + QString::number(floor(100.*_setupAssigner->relativeIndex(m)/_setupAssigner->nvalues())) + "%)");
     }
     double weight = _grid->weight(m);
     if (weight > 0)
@@ -824,22 +823,6 @@ bool DustSystem::writeCellsCrossed() const
 }
 
 ////////////////////////////////////////////////////////////////////
-
-void DustSystem::setAssigner(ProcessAssigner* value)
-{
-    if (_assigner) delete _assigner;
-    _assigner = value;
-    if (_assigner) _assigner->setParent(this);
-}
-
-////////////////////////////////////////////////////////////////////
-
-ProcessAssigner* DustSystem::assigner() const
-{
-    return _assigner;
-}
-
-//////////////////////////////////////////////////////////////////////
 
 int DustSystem::dimension() const
 {

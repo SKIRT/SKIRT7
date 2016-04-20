@@ -81,6 +81,12 @@ class PanDustSystem : public DustSystem
     Q_CLASSINFO("Default", "no")
     Q_CLASSINFO("RelevantIf", "dustEmissivity")
 
+    Q_CLASSINFO("Property", "assigner")
+    Q_CLASSINFO("Title", "the parallel process assignment scheme")
+    Q_CLASSINFO("Default", "StaggeredAssigner")
+    Q_CLASSINFO("Optional", "true")
+    Q_CLASSINFO("Silent", "true")
+
     //============= Construction - Setup - Destruction =============
 
 public:
@@ -175,6 +181,20 @@ public:
     /** Returns the flag indicating whether to output a data file describing the interstellar
         radiation field. If dust emission is turned off, this function returns false. */
     Q_INVOKABLE bool writeISRF() const;
+
+    /** This function sets the process assigner for this dust system. The process assigner is the
+        object that assigns different dust cells to different processes, to parallelize the
+        calculation and storage of the dust emission. The ProcessAssigner class is the abstract
+        class that represents different types of assigners; different subclass implement the
+        assignment in different ways. While the most straightforward types of process assigners are
+        used to assign each dust cell to a different process to speed up the calculation and reduce
+        memory usage, one ProcessAssigner subclass lets all processes store the emission for all
+        dust cells. This can reduce communication times at the cost of using more memory.
+        */
+    Q_INVOKABLE void setAssigner(ProcessAssigner* value);
+
+    /** Returns the process assigner for this dust system. */
+    Q_INVOKABLE ProcessAssigner* assigner() const;
 
     //======================== Other Functions =======================
 
@@ -276,7 +296,6 @@ public:
     void write();
 
 
-
     //======================== Data Members ========================
 
 private:
@@ -290,11 +309,12 @@ private:
     bool _writeTemp;
     bool _writeISRF;
     int _cycles;
+    ProcessAssigner* _assigner; // determines which cells will be given to the DustLib
 
     // data members initialized during setup
     int _Nlambda;
     const ProcessAssigner* _lambdaAssigner; // determines which wavelengths absorption will be recorded for
-    const ProcessAssigner* _cellAssigner; // determines which cells will be given to the DustLib via
+
     ParallelTable _Labsstelvv;
     ParallelTable _Labsdustvv;
     bool _haveLabsstel;     // true if absorbed stellar emission is relevant for this simulation

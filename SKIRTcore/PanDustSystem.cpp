@@ -24,6 +24,7 @@
 #include "ParallelFactory.hpp"
 #include "ParallelTable.hpp"
 #include "RootAssigner.hpp"
+#include "StaggeredAssigner.hpp"
 #include "TextOutFile.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
@@ -34,7 +35,7 @@ using namespace std;
 
 PanDustSystem::PanDustSystem()
     : _dustemissivity(0), _dustlib(0), _emissionBias(0.5), _emissionBoost(1), _selfabsorption(false), _writeEmissivity(false),
-      _writeTemp(true), _writeISRF(false), _cycles(0), _Nlambda(0), _haveLabsstel(false), _haveLabsdust(false)
+      _writeTemp(true), _writeISRF(false), _cycles(0), _assigner(0), _Nlambda(0), _haveLabsstel(false), _haveLabsdust(false)
 {
 }
 
@@ -68,8 +69,8 @@ void PanDustSystem::setupSelfBefore()
     _Nlambda = lambdagrid->Nlambda();
     // get a pointer to the wavelength assigner
     _lambdaAssigner = lambdagrid->assigner();
-    // and one to the dustcells assigner
-    _cellAssigner = assigner();
+    // and initialize the Q-invokable cell assigner
+    if(!_assigner) _assigner = new StaggeredAssigner(this);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -117,6 +118,9 @@ void PanDustSystem::setupSelfAfter()
 {
     DustSystem::setupSelfAfter();
 
+    // assign this process to work with a subset of dust cells
+    _assigner->assign(_Ncells);
+
     // resize the tables that hold the absorbed energies for each dust cell and wavelength
     // - absorbed stellar emission is relevant for calculating dust emission
     // - absorbed dust emission is relevant for calculating dust self-absorption
@@ -125,12 +129,12 @@ void PanDustSystem::setupSelfAfter()
     if (dustemission())
     {
         //_Labsstelvv.resize(_Ncells,_Nlambda);
-        _Labsstelvv.initialize("Absorbed Stellar Luminosity Table",_lambdaAssigner,_cellAssigner,COLUMN);
+        _Labsstelvv.initialize("Absorbed Stellar Luminosity Table",_lambdaAssigner,_assigner,COLUMN);
         _haveLabsstel = true;
         if (selfAbsorption())
         {
             //_Labsdustvv.resize(_Ncells,_Nlambda);
-            _Labsdustvv.initialize("Absorbed Dust Luminosity",_lambdaAssigner,_cellAssigner,COLUMN);
+            _Labsdustvv.initialize("Absorbed Dust Luminosity",_lambdaAssigner,_assigner,COLUMN);
             _haveLabsdust = true;
         }
     }
@@ -293,6 +297,22 @@ bool PanDustSystem::writeISRF() const
 }
 
 ////////////////////////////////////////////////////////////////////
+
+void PanDustSystem::setAssigner(ProcessAssigner* value)
+{
+    if (_assigner) delete _assigner;
+    _assigner = value;
+    if (_assigner) _assigner->setParent(this);
+}
+
+////////////////////////////////////////////////////////////////////
+
+ProcessAssigner* PanDustSystem::assigner() const
+{
+    return _assigner;
+}
+
+//////////////////////////////////////////////////////////////////////
 
 bool PanDustSystem::dustemission() const
 {
@@ -687,10 +707,10 @@ void PanDustSystem::write()
 
                 // the correct process gets Jv
                 Array Jv(_Nlambda);
-                if (_cellAssigner->validIndex(m)) Jv = meanintensityv(m);
+                if (_assigner->validIndex(m)) Jv = meanintensityv(m);
 
                 // and broadcasts it
-                int sender = _cellAssigner->rankForIndex(m);
+                int sender = _assigner->rankForIndex(m);
                 find<PeerToPeerCommunicator>()->broadcast(Jv,sender);
 
                 if (Jv.sum()>0)
@@ -758,7 +778,7 @@ void PanDustSystem::write()
             WriteTempData wt(this);
             helpAssigner->assign(_Ncells);
             // Call the body on the right cells. If all everything is available, no unnessecary communication will be done.
-            parallel->call(&wt, distributedabsorptiondata() ? _cellAssigner : helpAssigner);
+            parallel->call(&wt, distributedabsorptiondata() ? _assigner : helpAssigner);
             wt.write();
         }
         delete helpAssigner;

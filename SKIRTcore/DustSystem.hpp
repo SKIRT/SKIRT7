@@ -76,12 +76,6 @@ class DustSystem : public SimulationItem
     Q_CLASSINFO("Default", "no")
     Q_CLASSINFO("Silent", "true")
 
-    Q_CLASSINFO("Property", "assigner")
-    Q_CLASSINFO("Title", "the parallel process assignment scheme")
-    Q_CLASSINFO("Default", "StaggeredAssigner")
-    Q_CLASSINFO("Optional", "true")
-    Q_CLASSINFO("Silent", "true")
-
     //============= Construction - Setup - Destruction =============
 
 protected:
@@ -259,21 +253,6 @@ public:
         number of dust grid cells crossed per path calculated through the grid. */
     Q_INVOKABLE bool writeCellsCrossed() const;
 
-    /** This function sets the process assigner for this dust system. The process assigner is the
-        object that assigns different dust cells to different processes, to parallelize the
-        calculation of the dust density in each cell. The ProcessAssigner class is the abstract
-        class that represents different types of assigners; different subclass implement the
-        assignment in different ways. While the most straightforward types of process assigners are
-        used to assign each dust cell to a different process to speed up the calculation, one
-        ProcessAssigner subclass lets all processes calculate the densities for all dust cells.
-        This can be useful if the calculation itsself, perhaps by using an efficient grid density
-        interface, is not CPU expensive but the subsequent communication between processes proves
-        to be time consuming. */
-    Q_INVOKABLE void setAssigner(ProcessAssigner* value);
-
-    /** Returns the process assigner for this dust system. */
-    Q_INVOKABLE ProcessAssigner* assigner() const;
-
     //======================== Other Functions =======================
 
 public:
@@ -424,10 +403,10 @@ protected:
     bool _writeCellProperties;
     bool _writeCellsCrossed;
 
-    // the process assigner; determines which dust cells are assigned to this process
-    ProcessAssigner* _assigner;
+   // data members initialized during setup
 
-    // data members initialized during setup
+    // determines which dust cells are assigned to this process for various calculations in the setup
+    ProcessAssigner* _setupAssigner;
     int _Ncomp;
     int _Ncells;
     Array _volumev;     // volume for each cell (indexed on m)

@@ -34,7 +34,9 @@ std::shared_ptr<Array> ParallelDataCube::constructCompleteCube()
     if (!_wavelengthAssigner->parallel() || !_comm->isMultiProc()) // partial cube of equal size as total cube
     {
         _comm->sum(*_partialCube); // sum the data to root
-        return _partialCube; // give a handle to the summed cube
+        std::shared_ptr<Array> dummy (new Array(0));
+        return _comm->isRoot() ? _partialCube : dummy;
+        // give a handle to the summed cube at the root, and a dummy for the other processes
     }
     else // total cube is bigger than partial cube
     {
