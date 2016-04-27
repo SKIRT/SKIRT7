@@ -162,8 +162,8 @@ void ParallelTable::sync()
         TimeLogger logger(_log->verbose() && _comm->isMultiProc() ? _log : 0, "communication of " + _name);
 
         if (!_distributed) sum_all();
-        else if (_writeOn == COLUMN) experimental_col_to_row();
-        else if (_writeOn == ROW) experimental_row_to_col();
+        else if (_writeOn == COLUMN) col_to_row();
+        else if (_writeOn == ROW) row_to_col();
     }
     _synced = true;
 }
@@ -234,9 +234,6 @@ Array ParallelTable::stackColumns() const
         // fastest way: sum only the values in _rows, then do one big sum over the processes
         for (size_t iRel=0; iRel<_rows.size(0); iRel++)
             result[_rowAssigner->absoluteIndex(iRel)] = _rows[iRel].sum();
-
-        TimeLogger logger(_log->verbose() ? _log : 0, "summing columns in " + _name);
-
         _comm->sum_all(result);
     }
     else
@@ -263,9 +260,6 @@ Array ParallelTable::stackRows() const
             for (size_t i=0; i<_columns.size(0); i++)
                 result[j] += _columns(i,jRel);
         }
-
-        TimeLogger logger(_log->verbose() ? _log : 0, "summing rows in " + _name);
-
         _comm->sum_all(result);
     }
     else
@@ -320,7 +314,7 @@ void ParallelTable::sum_all()
 
 ////////////////////////////////////////////////////////////////////
 
-void ParallelTable::col_to_row()
+void ParallelTable::onebyone_col_to_row()
 {
     int thisRank = _comm->rank();
 
@@ -369,7 +363,7 @@ void ParallelTable::col_to_row()
 
 ////////////////////////////////////////////////////////////////////
 
-void ParallelTable::row_to_col()
+void ParallelTable::onebyone_row_to_col()
 {
     int thisRank = _comm->rank();
 
@@ -418,7 +412,7 @@ void ParallelTable::row_to_col()
 
 ////////////////////////////////////////////////////////////////////
 
-void ParallelTable::experimental_col_to_row()
+void ParallelTable::col_to_row()
 {
     // prepare to receive using doubles according to the given displacements for each process
     _comm->presetConfigure(1,_displacementvv);
@@ -436,14 +430,13 @@ void ParallelTable::experimental_col_to_row()
         // Elk proces i zendt vanuit sendBuffer, _columns.size(1) doubles naar recvBuffer op recvRank in de vorm
         // van datatype i bepaald door blocksize 1 en _displacementvv[i].
     }
-
     // free the memory taken by the datatypes
     _comm->presetClear();
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void ParallelTable::experimental_row_to_col()
+void ParallelTable::row_to_col()
 {
     // prepare to send using doubles according to the given displacements for each process
     _comm->presetConfigure(1,_displacementvv);
@@ -460,7 +453,6 @@ void ParallelTable::experimental_row_to_col()
         // Proces sendRank zendt vanuit sendBuffer een aantal doubles in de vorm van datatype i bepaald door
         // _displacementvv[i] naar recvBuffer op rank i.
     }
-
     _comm->presetClear();
 }
 

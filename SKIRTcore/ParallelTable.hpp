@@ -56,8 +56,8 @@ private:
     void sum_all();
     void col_to_row();
     void row_to_col();
-    void experimental_col_to_row();
-    void experimental_row_to_col();
+    void onebyone_col_to_row();
+    void onebyone_row_to_col();
 
     //======================== Data Members ========================
 
