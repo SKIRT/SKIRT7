@@ -39,9 +39,8 @@ void DustLib::setupSelfBefore()
     WavelengthGrid* lambdagrid = find<WavelengthGrid>();
     _lambdaAssigner = lambdagrid->assigner();
 
-    PanDustSystem* dustsystem = find<PanDustSystem>();
-    _cellAssigner = dustsystem->assigner();
-
+    PanDustSystem* pandustsystem = find<PanDustSystem>();
+    _cellAssigner = pandustsystem->assigner();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -177,6 +176,7 @@ void DustLib::calculate()
     else
     {
         StaggeredAssigner* libAssigner = new StaggeredAssigner(this);
+        libAssigner->assign(Nlib);
         parallel->call(&calc, libAssigner);
     }
 

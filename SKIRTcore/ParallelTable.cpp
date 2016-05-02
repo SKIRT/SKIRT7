@@ -238,7 +238,7 @@ Array ParallelTable::stackColumns() const
     }
     else
     {
-        for (size_t i=0; i<_rowAssigner->total(); i++)
+        for (size_t i=0; i<_totalRows; i++)
             result[i] = sumRow(i);
     }
     return result;
