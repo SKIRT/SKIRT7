@@ -85,12 +85,14 @@ void MonteCarloSimulation::setChunkParams(double packages)
         int Nprocs = _comm->size();
         int Nthreads = _parfac->maxThreadCount();
 
+        // Original algorithm:
         // Set the number of chunks per wavelength, depending on the parallelization mode
 //        if (Nprocs * Nthreads == 1) _Nchunks = 1;
 //        else if (Nprocs == 1) _Nchunks = ceil( std::max({packages/1e7, 10.*Nthreads/_Nlambda}));
 //        else _Nchunks = ceil( std::max({10.*Nprocs, packages/1e7, 10.*Nthreads*Nprocs/_Nlambda}));
 
-        // The minimum number of wavelengths assigned to any of the processes
+        // New algorithm
+        // Find the minimum number of wavelengths assigned to any of the processes
         size_t minNlambda = _Nlambda;
         for (int r=0; r<Nprocs; r++)
             minNlambda = std::min(minNlambda, _lambdagrid->assigner()->nvaluesForRank(r));
@@ -104,13 +106,17 @@ void MonteCarloSimulation::setChunkParams(double packages)
         // units (nchunks * nlambda) == (10*nthreads)
         else _Nchunks = ceil(10*double(Nthreads)/minNlambda);
 
-        // MULTIPROCESSING
-        // all wavelengths = each process does some chunks:
-        // If each process does all the wavelengths, multiply by nprocs, because the chunks will be divided.
+        // MULTIPROCESSING CRITERION
+        // If each process does all the wavelengths, each process will do _Nchunks/Nprocs chunks.
+        // Therefore multiply with Nprocs, so that each process has a suitable number of chunks for its threads
         if (minNlambda == _Nlambda) _Nchunks *= Nprocs;
 
-        // divided wavelengths = each process does all chunks:
-        // only nthreads matters, so the current value for nchunks is ok
+        // If each process does only a small collection of wavelengths within a chunk,
+        // the scheme will simple be repeated _Nchunks times, so the current _Nchunks is ok.
+
+        // For very large numbers of photons, the overhead induces by extra chunks is negligible
+        // Therefore use an extra chunk every 1e7 photon packages
+        _Nchunks += packages/1e7;
 
         // Calculate the size of the chunks and the definitive number of photon packages per wavelength
         _chunksize = ceil(packages/_Nchunks);

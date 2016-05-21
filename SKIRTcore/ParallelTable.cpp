@@ -93,7 +93,7 @@ const double& ParallelTable::operator()(size_t i, size_t j) const
 
 double& ParallelTable::operator()(size_t i, size_t j)
 {
-    _synced = false;
+    if (_synced) _synced = false;
 
     // WORKING DISTRIBUTED: Writable reference to the table we _writeOn.
     if (_distributed)
@@ -125,7 +125,7 @@ double& ParallelTable::operator()(size_t i, size_t j)
 
 Array& ParallelTable::operator[](size_t i)
 {
-    _synced = false;
+    if (_synced) _synced = false;
 
     if (_writeOn == ROW) // return writable reference to a complete row
     {

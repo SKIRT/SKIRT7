@@ -73,7 +73,7 @@ int Random::seed() const
 
 void Random::randomize()
 {
-    find<Log>()->info("Identical wavelengths: setting different seeds for each process.");
+    find<Log>()->info("Setting different seeds for each process.");
     PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
 
     int Nthreads = _parfac->maxThreadCount();
