@@ -30,8 +30,6 @@ public:
     double& operator()(int ell, int pixel);
     const double& operator()(int ell, int pixel) const;
 
-    // operator+ en nog anderen?
-
     //======================== Data Members ========================
 
 private:

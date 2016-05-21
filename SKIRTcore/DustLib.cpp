@@ -8,7 +8,6 @@
 #include "ParallelTable.hpp"
 #include "DustLib.hpp"
 #include "DustEmissivity.hpp"
-#include "IdenticalAssigner.hpp"
 #include "Log.hpp"
 #include "NR.hpp"
 #include "PanDustSystem.hpp"
@@ -16,10 +15,8 @@
 #include "ParallelFactory.hpp"
 #include "PeerToPeerCommunicator.hpp"
 #include "StaggeredAssigner.hpp"
-#include "TextOutFile.hpp"
 #include "TimeLogger.hpp"
 #include "WavelengthGrid.hpp"
-#include "TextOutFile.hpp"
 
 using namespace std;
 
@@ -178,6 +175,7 @@ void DustLib::calculate()
         StaggeredAssigner* libAssigner = new StaggeredAssigner(this);
         libAssigner->assign(Nlib);
         parallel->call(&calc, libAssigner);
+        delete libAssigner;
     }
 
     // Wait for the other processes to reach this point

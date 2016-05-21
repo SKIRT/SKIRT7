@@ -699,7 +699,7 @@ void PanDustSystem::write()
                     file.writeRow(values);
                 }
             }
-            else // nieuw
+            else // new, for distributed mode
             {
                 QList<double> values;
                 Position bfr = _grid->centralPositionInCell(m);
@@ -777,7 +777,7 @@ void PanDustSystem::write()
             // Construct a private class instance to do the work (parallelized)
             WriteTempData wt(this);
             helpAssigner->assign(_Ncells);
-            // Call the body on the right cells. If all everything is available, no unnessecary communication will be done.
+            // Call the body on the right cells. If everything is available, no unnessecary communication will be done.
             parallel->call(&wt, distributedabsorptiondata() ? _assigner : helpAssigner);
             wt.write();
         }
