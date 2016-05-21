@@ -56,8 +56,7 @@ void Simulation::run()
     // verify setup
     if (_state < SetupDone) throw FATALERROR("Simulation has not been setup before being run");
 
-    bool identical = !( find<WavelengthGrid>()->assigner()->parallel() );
-    if (_comm->isMultiProc() && identical) _random->randomize();
+    if (_comm->isMultiProc()) _random->randomize();
 
     TimeLogger logger(_log, "the simulation run");
     runSelf();
