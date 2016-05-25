@@ -37,6 +37,9 @@ void AdaptiveMeshDustGrid::setupSelfBefore()
     // calculate the normalization factor imposed by the dust distribution
     // we need this to directly compute cell densities for the DustGridDensityInterface
     _nf = dd->mass() / _amesh->integratedDensity();
+
+    // cache the random generator
+    _random = find<Random>();
 }
 
 //////////////////////////////////////////////////////////////////////
