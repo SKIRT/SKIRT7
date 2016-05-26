@@ -84,6 +84,11 @@ private:
                                                     // be dependent on the sending process.
                                                     // An array of MPI_Datatype's will be constructed using the array
                                                     // of displacements.
+
+    std::vector<size_t> _relativeRowIndexv; // caches the values of _rowAssigner->relativeIndex(i)
+    std::vector<size_t> _relativeColIndexv; // caches the values of _colAssigner->relativeindex(j)
+    std::vector<bool> _isValidRowv; // caches the values of _rowAssigner->validIndex(i)
+    std::vector<bool> _isValidColv; // caches the values of _colAssigner->validIndex(j)
 };
 
 ////////////////////////////////////////////////////////////////////

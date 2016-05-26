@@ -24,6 +24,11 @@ void ParallelTable::initialize(QString name, const ProcessAssigner *colAssigner,
     _totalRows = _rowAssigner->total();
     _totalCols = _colAssigner->total();
 
+    _isValidRowv.resize(_totalRows, false);
+    _isValidColv.resize(_totalCols, false);
+    for (size_t i=0; i<_totalRows; i++) _isValidRowv[i] = _rowAssigner->validIndex(i);
+    for (size_t j=0; j<_totalCols; j++) _isValidColv[j] = _colAssigner->validIndex(j);
+
     // Use the distributed memory scheme
     if (colAssigner->parallel() && rowAssigner->parallel() && _comm->isMultiProc())
     {
@@ -40,6 +45,11 @@ void ParallelTable::initialize(QString name, const ProcessAssigner *colAssigner,
         int Nprocs = _comm->size();
         _displacementvv.reserve(Nprocs);
         for (int r=0; r<Nprocs; r++) _displacementvv.push_back(_colAssigner->indicesForRank(r));
+
+        _relativeRowIndexv.resize(_totalRows, 0);
+        _relativeColIndexv.resize(_totalCols, 0);
+        for (size_t i=0; i<_totalRows; i++) _relativeRowIndexv[i] = _rowAssigner->relativeIndex(i);
+        for (size_t j=0; j<_totalCols; j++) _relativeColIndexv[j] = _rowAssigner->relativeIndex(j);
     }
     // not distributed
     else
@@ -68,15 +78,15 @@ const double& ParallelTable::operator()(size_t i, size_t j) const
     {
         if (_writeOn == COLUMN) // read from _rows
         {
-            if (!_rowAssigner->validIndex(i))
+            if (!_isValidRowv[i])
                 throw FATALERROR(_name + " says: Row of ParallelTable not available on this process");
-            return _rows(_rowAssigner->relativeIndex(i),j);
+            return _rows(_relativeRowIndexv[i],j);
         }
         else                    // read from _columns
         {
-            if (!_colAssigner->validIndex(j))
+            if (!_isValidColv[j])
                 throw FATALERROR(_name + " says: Column of ParallelTable not available on this process");
-            return _columns(i,_colAssigner->relativeIndex(j));
+            return _columns(i,_relativeColIndexv[j]);
         }
     }
     // WORKING NON-DISTRIBUTED: Reading and writing happens in the same table.
@@ -100,15 +110,15 @@ double& ParallelTable::operator()(size_t i, size_t j)
     {
         if (_writeOn == COLUMN) // Write on _columns
         {
-            if (!_colAssigner->validIndex(j))
+            if (!_isValidColv[j])
                 throw FATALERROR(_name + " says: Column of ParallelTable not available on this process");
-            return _columns(i,_colAssigner->relativeIndex(j));
+            return _columns(i,_relativeColIndexv[j]);
         }
         else                    // Write on _rows
         {
-            if (!_rowAssigner->validIndex(i))
+            if (!_isValidRowv[i])
                 throw FATALERROR(_name + " says: Row of ParallelTable not available on this process");
-            return _rows(_rowAssigner->relativeIndex(i),j);
+            return _rows(_relativeRowIndexv[i],j);
         }
     }
     // WORKING NON-DISTRIBUTED: Reading and writing happens in the same table.
@@ -129,9 +139,9 @@ Array& ParallelTable::operator[](size_t i)
 
     if (_writeOn == ROW) // return writable reference to a complete row
     {
-        if (!_rowAssigner->validIndex(i))
+        if (!_isValidRowv[i])
             throw FATALERROR(_name + " says: Row of ParallelTable not available on this process");
-        else return _rows[_distributed ? _rowAssigner->relativeIndex(i) : i];
+        else return _rows[_distributed ? _relativeRowIndexv[i] : i];
     }
     else throw FATALERROR(_name + " says: This ParallelTable does not have writable rows.");
 }
@@ -144,9 +154,9 @@ const Array& ParallelTable::operator[](size_t i) const
 
     if (_distributed && _writeOn == COLUMN) // return read only reference to a complete row
     {
-        if (!_rowAssigner->validIndex(i))
+        if (!_isValidRowv[i])
             throw FATALERROR(_name + " says: Row of ParallelTable not available on this process");
-        else return _rows[_rowAssigner->relativeIndex(i)];
+        else return _rows[_relativeRowIndexv[i]];
     }
     else throw FATALERROR(_name + " says: This ParallelTable does not have readable rows.");
 }
@@ -187,8 +197,8 @@ double ParallelTable::sumRow(size_t i) const
     double sum = 0;
     if (_distributed)
     {
-        if (_rowAssigner->validIndex(i)) // we have the whole row
-            return _rows[_rowAssigner->relativeIndex(i)].sum();
+        if (_isValidRowv[i]) // we have the whole row
+            return _rows[_relativeRowIndexv[i]].sum();
         else throw FATALERROR(_name + " says: sumRow(index) called on wrong index");
     }
     else // not distributed -> everything available, so straightforward
@@ -208,9 +218,9 @@ double ParallelTable::sumColumn(size_t j) const
     double sum = 0;
     if (_distributed)
     {
-        if(_colAssigner->validIndex(j)) // we have the whole column
+        if(_isValidColv[j]) // we have the whole column
             for (int i=0; i<_totalRows; i++)
-                sum += _columns(i,_colAssigner->relativeIndex(j));
+                sum += _columns(i,_relativeColIndexv[j]);
         else throw FATALERROR(_name + " says: sumColumn(index) called on wrong index");
     }
     else // not distributed
@@ -421,7 +431,7 @@ void ParallelTable::col_to_row()
     for (int i=0; i<_totalRows; i++)
     {
         double* sendBuffer = &_columns(i,0);
-        double* recvBuffer = _rowAssigner->validIndex(i) ? &_rows(_rowAssigner->relativeIndex(i),0) : 0;
+        double* recvBuffer = _isValidRowv[i] ? &_rows(_relativeRowIndexv[i],0) : 0;
         int recvRank = _rowAssigner->rankForIndex(i);
 
         _comm->presetGatherw(sendBuffer, _columns.size(1), recvBuffer, recvRank);
@@ -443,7 +453,7 @@ void ParallelTable::row_to_col()
 
     for (int i=0; i<_totalRows; i++)
     {
-        double* sendBuffer = _rowAssigner->validIndex(i) ? &_rows(_rowAssigner->relativeIndex(i),0) : 0;
+        double* sendBuffer = _isValidRowv[i] ? &_rows(_relativeRowIndexv[i],0) : 0;
         double* recvBuffer = &_columns(i,0);
         int sendRank = _rowAssigner->rankForIndex(i);
 
