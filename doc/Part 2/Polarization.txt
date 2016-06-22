@@ -21,6 +21,7 @@ approach to calculate angles and directions. Thus we can circumvent numerical ex
 \section PolForm Formulas relevant for polarization
 
 In this section we present our choices of coordinate systems and the basics of the Stokes formalism.
+We use the IAU convention for polarization and right-handed coordinate systems.
 
 \subsection PolFormOrientation Orientation basics
 
@@ -307,8 +308,8 @@ Depending on the code there are photons peeled off towards the observer(s) whene
 SKIRT this is the case). These photons need to convey the correct Stokes parameters to the observer. In contrast to
 random walk scattering the future direction is known, it is \f$\mathbf{k}_\text{obs}\f$, while the scattering angles
 \f$(\theta_\text{obs},\varphi_\text{obs})\f$ are unknown. After calculating the direction towards the observer, the
-Stokes reference direction must be rotated so it refers to the \f$x\f$-axis of the observer frame,
-\f$\mathbf{k}_\text{x}\f$.
+Stokes reference direction must be rotated so it refers to the \f$y\f$-axis of the observer frame,
+\f$\mathbf{k}_\text{y}\f$.
 
 \subsubsection PolImplSPeeltp Determining the direction angles towards the observer
 
@@ -339,11 +340,11 @@ scattering plane does not need to be updated when scattering forwards or backwar
 \subsubsection PolImplSPeela Determining the orientation angle at the observer
 
 Once the photon is oriented towards the observer, the Stokes vector reference direction must be oriented so the Stokes
-parameters refer to the \f$x\f$-axis of the observer frame, \f$\mathbf{k}_\text{x}\f$, as their reference axis. This is
+parameters refer to the \f$y\f$-axis of the observer frame, \f$\mathbf{k}_\text{y}\f$, as their reference axis. This is
 equivalent to the reference direction after peeling off, \f${\mathbf{n}_{s}}'\f$, being oriented towards
-\f$\mathbf{k}_\text{y}\f$. The angle between \f${\mathbf{n}_{s}}'\f$ and \f$\mathbf{k}_\text{y}\f$ can be determined
+\f$\mathbf{k}_\text{x}\f$. The angle between \f${\mathbf{n}_{s}}'\f$ and \f$\mathbf{k}_\text{x}\f$ can be determined
 equivalently to the determination of \f$\varphi_\text{obs}\f$, using \f[ \cos\alpha_\text{obs} = {\mathbf{n}_{s}}'
-\cdot \mathbf{k}_\text{y} \f] and \f[ \sin\alpha_\text{obs} = ({\mathbf{n}_{s}}' \times \mathbf{k}_\text{y}) \cdot
+\cdot \mathbf{k}_\text{x} \f] and \f[ \sin\alpha_\text{obs} = ({\mathbf{n}_{s}}' \times \mathbf{k}_\text{x}) \cdot
 \mathbf{k}' \f] with which \f$\alpha_\text{obs}\f$ is fully defined.
 
 \section PolTesting Testing the simulation
