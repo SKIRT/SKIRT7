@@ -47,21 +47,20 @@ protected:
 
     //======== Setters & Getters for Discoverable Attributes =======
 
-    /** This function sets the process assigner for the Monte Carlo simulation. The process assigner is
+    /** This function sets the wavelength assigner for the Monte Carlo simulation. The process assigner is
         the object that assigns different wavelengths to different processes, to parallelize the photon
-        shooting algorithm. The ProcessAssigner class is the abstract class that represents different
-        types of assigners; different subclass implement the assignment in different ways. The default
-        assigner that is used for the Monte Carlo simulation is an IdenticalAssigner, which assigns
+        shooting algorithm, and the data storage. The ProcessAssigner class is the abstract class that
+        represents different types of assigners; different subclass implement the assignment in different ways.
+        The default assigner that is used for the Monte Carlo simulation is an IdenticalAssigner, which assigns
         each process to all of the wavelengths to obtain the best load balancing. Another option would
         be to use a StaggeredAssigner, which would hand out the wavelengths to the different processes
-        in a staggered way, also minimizing load imbalance but most importantly reducing the
-        communication overhead after the emission stages (but this more efficient communication has not
-        been implemented yet). Using a SequentialAssigner for this purpose would not be recommended due
-        to very poor load balancing. */
+        in a staggered way, enabling data parallelization for reduced memory usage.
+        Using a SequentialAssigner for this purpose would
+        not be recommended due to very poor load balancing. */
     Q_INVOKABLE void setAssigner(ProcessAssigner* value);
 
 public:
-    /** Returns the process assigner for this Monte Carlo simulation. */
+    /** Returns the wavelength assigner for this Monte Carlo simulation. */
     Q_INVOKABLE ProcessAssigner* assigner() const;
 
     //======================== Other Functions =======================

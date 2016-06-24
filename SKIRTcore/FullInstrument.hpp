@@ -137,15 +137,15 @@ private:
 //    Array _ftotUv;
 //    Array _ftotVv;
 
-    ParallelDataCube _distftrav;
-    ParallelDataCube _distfstrdirv;
-    ParallelDataCube _distfstrscav;
-    ParallelDataCube _distfdusdirv;
-    ParallelDataCube _distfdusscav;
-    std::vector<ParallelDataCube> _distfstrscavv;
-    ParallelDataCube _distftotQv;
-    ParallelDataCube _distftotUv;
-    ParallelDataCube _distftotVv;
+    ParallelDataCube _ftrav;
+    ParallelDataCube _fstrdirv;
+    ParallelDataCube _fstrscav;
+    ParallelDataCube _fdusdirv;
+    ParallelDataCube _fdusscav;
+    std::vector<ParallelDataCube> _fstrscavv;
+    ParallelDataCube _ftotQv;
+    ParallelDataCube _ftotUv;
+    ParallelDataCube _ftotVv;
 
     // detector arrays (SEDs)
     Array _Ftrav;

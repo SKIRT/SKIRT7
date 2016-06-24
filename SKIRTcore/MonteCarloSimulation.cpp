@@ -97,8 +97,6 @@ void MonteCarloSimulation::setChunkParams(double packages)
         for (int r=0; r<Nprocs; r++)
             minNlambda = std::min(minNlambda, _lambdagrid->assigner()->nvaluesForRank(r));
 
-        printf("minNlambda %d\n", minNlambda);
-
         // THREAD CRITERION
         // single thread
         if (Nthreads == 1) _Nchunks = 1;
@@ -123,7 +121,7 @@ void MonteCarloSimulation::setChunkParams(double packages)
     _logchunksize = _continuousScattering ? 5000 : 50000;
 
     // Assign the _Nlambda x _Nchunks different chunks to the different parallel processes
-    printf("Nchunks = %d\n", _Nchunks);
+    _log->info("Using "+QString::number(_Nchunks)+" chunks.");
     _assigner->setBlocks(_Nchunks);
 }
 

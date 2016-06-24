@@ -146,7 +146,6 @@ void PanMonteCarloSimulation::rundustselfabsorption()
             _comm->wait("this self-absorption cycle");
             _pds->sumResults(false);
 
-
             // Determine and log the total absorbed luminosity in the vector Labstotv.
             double Labsdusttot = _pds->Labsdusttot();
             _log->info("The total absorbed stellar luminosity is "

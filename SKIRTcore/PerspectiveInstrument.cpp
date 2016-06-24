@@ -104,9 +104,7 @@ void PerspectiveInstrument::setupSelfBefore()
 
     // the data cube
     WavelengthGrid* wavelengthGrid = find<WavelengthGrid>();
-    //int Nlambda = wavelengthGrid->Nlambda();
-    //_ftotv.resize(Nlambda*_Nx*_Ny);
-    _distftotv.initialize(wavelengthGrid->assigner(), _Nx*_Ny);
+    _ftotv.initialize(wavelengthGrid->assigner(), _Nx*_Ny);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -354,9 +352,7 @@ void PerspectiveInstrument::detect(PhotonPackage* pp)
         // add the adjusted luminosity to the appropriate pixel in the data cube
         int ell = pp->ell();
         int l = i + _Nx*j;
-        //int m = l + _Nx*_Ny*ell;
-        //LockFree::add(_ftotv[m], L);
-        LockFree::add(_distftotv(ell,l), L);
+        LockFree::add(_ftotv(ell,l), L);
     }
 }
 
@@ -368,15 +364,8 @@ void PerspectiveInstrument::write()
     WavelengthGrid* lambdagrid = find<WavelengthGrid>();
     int Nlambda = find<WavelengthGrid>()->Nlambda();
 
-    // Put the data cube in a list of f-array pointers, as the sumResults function requires
-    // QList< Array* > farrays;
-    // farrays << &_ftotv;
-
-    // Sum the flux arrays element-wise across the different processes
-    //sumResults(farrays);
-
     // Collect the partial data cubes into one big cube at process 0
-    std::shared_ptr<Array> completeCube = _distftotv.constructCompleteCube();
+    std::shared_ptr<Array> completeCube = _ftotv.constructCompleteCube();
 
     // Multiply each sample by lambda/dlamdba and by the constant factor 1/(4 pi s^2)
     // to obtain the surface brightness and convert to output units (such as W/m2/arcsec2)
@@ -391,18 +380,12 @@ void PerspectiveInstrument::write()
             for (int j=0; j<_Ny; j++)
             {
                 int m = i + _Nx*j + _Nx*_Ny*ell;
-                //_ftotv[m] = units->osurfacebrightness(lambda, _ftotv[m]*front/dlambda);
                 (*completeCube)[m] = units->osurfacebrightness(lambda, (*completeCube)[m]*front/dlambda);
             }
         }
     }
 
     // Write a FITS file containing the data cube
-
-    //QString filename = _instrumentname + "_total";
-    //Image image(this, _Nx, _Ny, Nlambda, _s, _s, "surfacebrightness");
-    //image.saveto(this, _ftotv, filename, "total flux");
-
     QString filename = _instrumentname + "_total";
     Image image(this, _Nx, _Ny, Nlambda, _s, _s, "surfacebrightness");
     image.saveto(this, *completeCube, filename, "total flux");

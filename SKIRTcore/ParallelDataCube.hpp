@@ -39,7 +39,6 @@ private:
     size_t _Nframep;
 
     std::shared_ptr<Array> _partialCube;
-
 };
 
 ////////////////////////////////////////////////////////////////////

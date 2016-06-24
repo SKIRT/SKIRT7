@@ -324,6 +324,7 @@ void ParallelTable::sum_all()
 
 ////////////////////////////////////////////////////////////////////
 
+// To be removed
 void ParallelTable::onebyone_col_to_row()
 {
     int thisRank = _comm->rank();
@@ -373,6 +374,7 @@ void ParallelTable::onebyone_col_to_row()
 
 ////////////////////////////////////////////////////////////////////
 
+// To be removed
 void ParallelTable::onebyone_row_to_col()
 {
     int thisRank = _comm->rank();

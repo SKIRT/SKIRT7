@@ -89,7 +89,9 @@ protected:
 
     /** This function returns a vector \em nv with length \f$N_{\text{cells}}\f$ that maps each
         cell \f$m\f$ to the corresponding library entry \f$n_m\f$. A index value of -1 indicates
-        that the cell produces no emission. The function must be implemented by each subclass to
+        that the cell produces no emission. When data parallelization is enabled, only the cells
+        for this process are treated. The cell number \f$m\f$ is in that case a relative cell
+        index. The function must be implemented by each subclass to
         provide this information to the base class. */
     virtual std::vector<int> mapping() const = 0;
 

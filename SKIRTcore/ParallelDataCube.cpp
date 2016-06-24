@@ -51,10 +51,6 @@ std::shared_ptr<Array> ParallelDataCube::constructCompleteCube()
         for (int i=0; i<_comm->size(); i++) displacements.push_back(_wavelengthAssigner->indicesForRank(i));
 
         _comm->gatherw(&(*_partialCube)[0], _Nlambda*_Nframep, &(*completeCube)[0], 0, _Nframep, displacements);
-        // Ieder process stuurt de gehele inhoud van _partialCube naar rank 0. Rank 0 ontvangt de inhoud van process i
-        // in _completecube, met als geheugentemplate i een datatype bestaande uit blokken van grootte _Nframep, met
-        // verplaatsingen gegeven in veelvouden van _Nframep in _displacements[i].
-
         return completeCube;
     }
 }

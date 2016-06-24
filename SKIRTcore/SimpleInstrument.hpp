@@ -63,9 +63,8 @@ protected:
     //======================== Data Members ========================
 
 private:
-    //Array _ftotv;
     Array _Ftotv;
-    ParallelDataCube _distftotv;
+    ParallelDataCube _ftotv;
 };
 
 ////////////////////////////////////////////////////////////////////

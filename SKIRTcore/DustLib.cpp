@@ -73,8 +73,6 @@ namespace
             _lambdagrid = item->find<WavelengthGrid>();
             _Nlambda = _lambdagrid->Nlambda();
             _Ncomp = _ds->Ncomp();
-
-            // new stuff
             _cellAssigner = _ds->assigner();
 
             // invert mapping vector into a temporary hash map

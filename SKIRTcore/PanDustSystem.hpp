@@ -208,6 +208,7 @@ public:
         calculated if dust emission is turned on. */
     bool storeabsorptionrates() const;
 
+    /** This function returns true if data parallelization is activated for one of the absorption tables **/
     bool distributedabsorptiondata() const;
 
     /** The function simulates the absorption of a monochromatic luminosity package in the dust
@@ -248,12 +249,8 @@ public:
         results. If dust emission is turned off, this function does nothing. */
     void calculatedustemission(bool ynstellar);
 
-    /** This function is used to sum the absorbed luminosities in the panchromatic dust system
-        across the different processes in the multiprocessing environment. This function must be
-        provided with a boolean argument, indicating whether the absorbed stellar luminosities (in
-        _Labsstelvv) or the absorbed thermal luminosities (in _Labsdustvv) must be summed. The
-        communication is performed by calling the sum_all() function of the PeerToPeerCommunicator
-        object, which is found with the discovery mechanism. */
+    /** This function synchronizes the results of the absorption by calling the sync() function on the
+        absorption tables. **/
     void sumResults(bool ynstellar);
 
     /** This function returns the luminosity \f$L_\ell\f$ at the wavelength index \f$\ell\f$ in the
