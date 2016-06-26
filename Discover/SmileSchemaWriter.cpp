@@ -140,10 +140,10 @@ void SmileSchemaWriter::writeTypeElement(const QMetaObject* meta)
     _writer.writeStartElement("Type");
     _writer.writeAttribute("name", meta->className());
 
-    // write the "super" attribute (empty string for top-level class)
-    QByteArray super = meta->superClass()->className();
-    if (super == "QObject") super = "";
-    _writer.writeAttribute("super", super);
+    // write the "base" attribute (empty string for top-level class)
+    QByteArray base = meta->superClass()->className();
+    if (base == "QObject") base = "";
+    _writer.writeAttribute("base", base);
 
     // write the "title" attribute, if a title is found for this class
     for (int index = meta->classInfoOffset(); index < meta->classInfoCount(); index++)
@@ -332,6 +332,7 @@ void SmileSchemaWriter::writeCommonPropertyAttributes(PropertyHandler* handler)
 {
     _writer.writeAttribute("name", handler->name());
     _writer.writeAttribute("title", handler->title());
+    if (handler->isSilent()) _writer.writeAttribute("silent", "true");
     if (handler->isOptional()) _writer.writeAttribute("optional", "true");
     QByteArray relevant = handler->isRelevantPropertyName();
     if (!relevant.isEmpty()) _writer.writeAttribute("relevantIf", relevant);
