@@ -36,9 +36,9 @@ HEADERS += \
     Vec.hpp \
     LockFree.hpp \
     MemoryStatistics.hpp \
-    MemoryLogger.hpp 
+    MemoryLogger.hpp
 
 SOURCES += \
     CommandLineArguments.cpp \
     MemoryStatistics.cpp \
-    Array.cpp 
+    Array.cpp
