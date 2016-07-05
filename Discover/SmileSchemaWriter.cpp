@@ -286,6 +286,7 @@ void SmileSchemaWriter::visitPropertyHandler(EnumPropertyHandler* handler)
     _writer.writeStartElement("EnumProperty");
     writeCommonPropertyAttributes(handler);
     if (handler->hasDefaultValue()) _writer.writeAttribute("default", handler->defaultValue());
+    if (!handler->trueIf().isEmpty()) _writer.writeAttribute("trueIf", handler->trueIf());
 
     // write an element for each enumeration value
     _writer.writeStartElement("enumValues");
