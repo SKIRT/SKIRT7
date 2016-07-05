@@ -80,24 +80,21 @@ void SmileSchemaWriter::writeSmileSchema()
     // clear the set of physical quantities; it is maintained in visitPropertyHandler(Double[List]PropertyHandler)
     _quantities.clear();
 
-    // write a full "Type" element (including complete definitions) for each class, in alphabetical order
-    _writer.writeStartElement("allTypes");
+    // write a "Type" element for each class
+    //  - for each non-concrete class, in alphabetical order
+    //  - for each concrete class, in order of addition to the registry
+    _writer.writeStartElement("types");
     _writer.writeAttribute("type", "Type");
-    foreach (const QMetaObject* meta, allTypes.values())
+    _writer.writeComment("Non-concrete types, in alphabetical order");
+    foreach (QByteArray type, allTypes.keys())
     {
-        writeTypeElement(meta);
+        if (!concreteTypes.contains(type)) writeTypeElement(allTypes[type]);
     }
-    _writer.writeEndElement();
-
-    // write a brief "Type" element (just the name) for each concrete class, in order of addition to the registry
-    _writer.writeStartElement("concreteTypes");
-    _writer.writeAttribute("type", "Type");
+    _writer.writeComment("Concrete types, in order of addition to the registry");
     foreach (QByteArray type, concreteTypes)
     {
-        _writer.writeStartElement("Type");
-        _writer.writeAttribute("name", type);
-        _writer.writeEndElement();
-     }
+        writeTypeElement(allTypes[type], true);
+    }
     _writer.writeEndElement();
 
     // write a "Quantity" element for each physical quantity used by any of the properties in the exported schema
@@ -134,11 +131,12 @@ void SmileSchemaWriter::writeSmileSchema()
 
 ////////////////////////////////////////////////////////////////////
 
-void SmileSchemaWriter::writeTypeElement(const QMetaObject* meta)
+void SmileSchemaWriter::writeTypeElement(const QMetaObject* meta, bool concrete)
 {
     // start the "Type" element and write its name attribute
     _writer.writeStartElement("Type");
     _writer.writeAttribute("name", meta->className());
+    if (concrete) _writer.writeAttribute("concrete", "true");
 
     // write the "base" attribute (empty string for top-level class)
     QByteArray base = meta->superClass()->className();

@@ -31,7 +31,7 @@ public:
 
 private:
     /** Writes the (compound) XML element for a single registered class. */
-    void writeTypeElement(const QMetaObject* meta);
+    void writeTypeElement(const QMetaObject* meta, bool concrete=false);
 
     /** Writes the (compound) XML element for a single property of a registered class. */
     void writePropertyElement(const QMetaObject* meta, QByteArray property);
