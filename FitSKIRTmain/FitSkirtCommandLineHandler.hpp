@@ -62,6 +62,9 @@ private:
         returns an appropriate application exit value. */
     int doBatch();
 
+    /** This function exports a smile schema. This is an undocumented option. */
+    int doSmileSchema();
+
     /** This function actually runs a single fit scheme constructed from the specified fski file. */
     void doFitScheme(QString filepath);
 

@@ -17,6 +17,7 @@
 #include "FitScheme.hpp"
 #include "FitSkirtCommandLineHandler.hpp"
 #include "ProcessManager.hpp"
+#include "SmileSchemaWriter.hpp"
 #include "StopWatch.hpp"
 #include "TimeLogger.hpp"
 #include "XmlHierarchyCreator.hpp"
@@ -27,7 +28,7 @@
 namespace
 {
     // the allowed options list, in the format consumed by the CommandLineArguments constructor
-    static const char* allowedOptions = "-t* -s* -i* -o* -k";
+    static const char* allowedOptions = "-t* -s* -i* -o* -k -x";
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -47,9 +48,11 @@ int FitSkirtCommandLineHandler::perform()
     {
         // if there are no arguments at all --> interactive mode
         // if there is at least one file path argument --> batch mode
+        // if the -x option is present --> export smile schema (undocumented option)
         // otherwise --> error
         if (_args.isValid() && !_args.hasOptions() && !_args.hasFilepaths()) return doInteractive();
         if (_args.hasFilepaths()) return doBatch();
+        if (_args.isPresent("-x")) return doSmileSchema();
         _console.error("Invalid command line arguments");
         printHelp();
     }
@@ -142,6 +145,16 @@ int FitSkirtCommandLineHandler::doBatch()
 
     // report stopwatch results, if any
     foreach (QString line, StopWatch::report()) _console.warning(line);
+    return EXIT_SUCCESS;
+}
+
+////////////////////////////////////////////////////////////////////
+
+int FitSkirtCommandLineHandler::doSmileSchema()
+{
+    SmileSchemaWriter writer;
+    writer.writeSmileSchema();
+    _console.info("Successfully created SMILE schema file 'fitskirt.smile'.");
     return EXIT_SUCCESS;
 }
 

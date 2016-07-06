@@ -52,9 +52,10 @@ void SmileSchemaWriter::writeSmileSchema()
     allTypes.remove("QObject");
 
     // open the file and setup the XML writer
-    _file.setFileName("skirt.smile");
+    QString appName = QCoreApplication::applicationName();
+    _file.setFileName(appName.toLower() + ".smile");
     if (!_file.open(QIODevice::WriteOnly | QIODevice::Text))
-        throw FATALERROR("File couldn't be opened for writing XML: skirt.smile");
+        throw FATALERROR("File couldn't be opened for writing XML: " + appName.toLower() + ".smile");
     _writer.setDevice(&_file);
     _writer.setAutoFormatting(true);
 
@@ -64,17 +65,17 @@ void SmileSchemaWriter::writeSmileSchema()
     _writer.writeStartElement("smile-schema");
     _writer.writeAttribute("type", "Schema");
     _writer.writeAttribute("format", "1.1");  // to be adjusted for incompatible changes to the schema language format
-    _writer.writeAttribute("producer", QCoreApplication::applicationName() + " " + QCoreApplication::applicationVersion());
+    _writer.writeAttribute("producer", appName + " " + QCoreApplication::applicationVersion());
     _writer.writeAttribute("time", QDateTime::currentDateTime().toString("yyyy-MM-ddThh:mm:ss"));
 
     // start the "Schema" element
     _writer.writeStartElement("Schema");
-    _writer.writeAttribute("name", "SKIRT");
-    _writer.writeAttribute("title", "SKIRT parameter file");
+    _writer.writeAttribute("name", appName);
+    _writer.writeAttribute("title", "a " + appName + " parameter file");
     _writer.writeAttribute("version", "1.0");  // to be adjusted for incompatible changes to the schema definition
-    _writer.writeAttribute("extension", "ski");
+    _writer.writeAttribute("extension", appName.toLower().startsWith("f") ? "fski" : "ski");
     _writer.writeAttribute("root", "skirt-simulation-hierarchy");
-    _writer.writeAttribute("type", "MonteCarloSimulation");
+    _writer.writeAttribute("type", appName.toLower().startsWith("f") ? "FitScheme" : "MonteCarloSimulation");
     _writer.writeAttribute("format", "6.1");   // to be adjusted for incompatible changes to the SKIRT parameter format
 
     // clear the set of physical quantities; it is maintained in visitPropertyHandler(Double[List]PropertyHandler)
