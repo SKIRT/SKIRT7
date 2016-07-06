@@ -248,7 +248,7 @@ void SmileSchemaWriter::visitPropertyHandler(DoublePropertyHandler* handler)
     _writer.writeStartElement("DoubleProperty");
     writeCommonPropertyAttributes(handler);
     _quantities.insert(handler->quantity(), 0);
-    _writer.writeAttribute("quantity", handler->quantity());
+    _writer.writeAttribute("quantity", handler->quantity(true));
     if (!std::isinf(handler->minValue())) _writer.writeAttribute("min", handler->toString(handler->minValue()));
     if (!std::isinf(handler->maxValue())) _writer.writeAttribute("max", handler->toString(handler->maxValue()));
     if (handler->hasDefaultValue()) _writer.writeAttribute("default", handler->toString(handler->defaultValue()));
