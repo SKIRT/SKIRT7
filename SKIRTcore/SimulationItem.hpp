@@ -20,6 +20,7 @@
 class SimulationItem : public QObject
 {
     Q_OBJECT
+    Q_CLASSINFO("Title", "a simulation item")
 
     //============= Construction - Setup - Destruction =============
 
