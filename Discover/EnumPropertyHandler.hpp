@@ -53,6 +53,10 @@ public:
         the empty string if unavailable. */
     QString defaultValue() const;
 
+    /** Returns the enumeration key corresponding to "TrueIf" attribute for the handled property, or
+        the empty string if unavailable. */
+    QString trueIf() const;
+
     /** Returns true if the handled property has a "TrueIf" attribute, and if that attribute's
         value matches the current property value; otherwise returns false. */
     bool isTrueInCondition() const;

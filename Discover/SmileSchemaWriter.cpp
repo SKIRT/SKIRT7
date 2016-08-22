@@ -52,9 +52,10 @@ void SmileSchemaWriter::writeSmileSchema()
     allTypes.remove("QObject");
 
     // open the file and setup the XML writer
-    _file.setFileName("skirt.smile");
+    QString appName = QCoreApplication::applicationName();
+    _file.setFileName(appName.toLower() + ".smile");
     if (!_file.open(QIODevice::WriteOnly | QIODevice::Text))
-        throw FATALERROR("File couldn't be opened for writing XML: skirt.smile");
+        throw FATALERROR("File couldn't be opened for writing XML: " + appName.toLower() + ".smile");
     _writer.setDevice(&_file);
     _writer.setAutoFormatting(true);
 
@@ -64,40 +65,37 @@ void SmileSchemaWriter::writeSmileSchema()
     _writer.writeStartElement("smile-schema");
     _writer.writeAttribute("type", "Schema");
     _writer.writeAttribute("format", "1.1");  // to be adjusted for incompatible changes to the schema language format
-    _writer.writeAttribute("producer", QCoreApplication::applicationName() + " " + QCoreApplication::applicationVersion());
+    _writer.writeAttribute("producer", appName + " " + QCoreApplication::applicationVersion());
     _writer.writeAttribute("time", QDateTime::currentDateTime().toString("yyyy-MM-ddThh:mm:ss"));
 
     // start the "Schema" element
     _writer.writeStartElement("Schema");
-    _writer.writeAttribute("name", "SKIRT");
-    _writer.writeAttribute("title", "SKIRT parameter file");
+    _writer.writeAttribute("name", appName);
+    _writer.writeAttribute("title", "a " + appName + " parameter file");
     _writer.writeAttribute("version", "1.0");  // to be adjusted for incompatible changes to the schema definition
-    _writer.writeAttribute("extension", "ski");
+    _writer.writeAttribute("extension", appName.toLower().startsWith("f") ? "fski" : "ski");
     _writer.writeAttribute("root", "skirt-simulation-hierarchy");
-    _writer.writeAttribute("type", "MonteCarloSimulation");
+    _writer.writeAttribute("type", appName.toLower().startsWith("f") ? "FitScheme" : "MonteCarloSimulation");
     _writer.writeAttribute("format", "6.1");   // to be adjusted for incompatible changes to the SKIRT parameter format
 
     // clear the set of physical quantities; it is maintained in visitPropertyHandler(Double[List]PropertyHandler)
     _quantities.clear();
 
-    // write a full "Type" element (including complete definitions) for each class, in alphabetical order
-    _writer.writeStartElement("allTypes");
+    // write a "Type" element for each class
+    //  - for each non-concrete class, in alphabetical order
+    //  - for each concrete class, in order of addition to the registry
+    _writer.writeStartElement("types");
     _writer.writeAttribute("type", "Type");
-    foreach (const QMetaObject* meta, allTypes.values())
+    _writer.writeComment("Non-concrete types, in alphabetical order");
+    foreach (QByteArray type, allTypes.keys())
     {
-        writeTypeElement(meta);
+        if (!concreteTypes.contains(type)) writeTypeElement(allTypes[type]);
     }
-    _writer.writeEndElement();
-
-    // write a brief "Type" element (just the name) for each concrete class, in order of addition to the registry
-    _writer.writeStartElement("concreteTypes");
-    _writer.writeAttribute("type", "Type");
+    _writer.writeComment("Concrete types, in order of addition to the registry");
     foreach (QByteArray type, concreteTypes)
     {
-        _writer.writeStartElement("Type");
-        _writer.writeAttribute("name", type);
-        _writer.writeEndElement();
-     }
+        writeTypeElement(allTypes[type], true);
+    }
     _writer.writeEndElement();
 
     // write a "Quantity" element for each physical quantity used by any of the properties in the exported schema
@@ -134,11 +132,12 @@ void SmileSchemaWriter::writeSmileSchema()
 
 ////////////////////////////////////////////////////////////////////
 
-void SmileSchemaWriter::writeTypeElement(const QMetaObject* meta)
+void SmileSchemaWriter::writeTypeElement(const QMetaObject* meta, bool concrete)
 {
     // start the "Type" element and write its name attribute
     _writer.writeStartElement("Type");
     _writer.writeAttribute("name", meta->className());
+    if (concrete) _writer.writeAttribute("concrete", "true");
 
     // write the "base" attribute (empty string for top-level class)
     QByteArray base = meta->superClass()->className();
@@ -249,7 +248,7 @@ void SmileSchemaWriter::visitPropertyHandler(DoublePropertyHandler* handler)
     _writer.writeStartElement("DoubleProperty");
     writeCommonPropertyAttributes(handler);
     _quantities.insert(handler->quantity(), 0);
-    _writer.writeAttribute("quantity", handler->quantity());
+    _writer.writeAttribute("quantity", handler->quantity(true));
     if (!std::isinf(handler->minValue())) _writer.writeAttribute("min", handler->toString(handler->minValue()));
     if (!std::isinf(handler->maxValue())) _writer.writeAttribute("max", handler->toString(handler->maxValue()));
     if (handler->hasDefaultValue()) _writer.writeAttribute("default", handler->toString(handler->defaultValue()));
@@ -286,6 +285,7 @@ void SmileSchemaWriter::visitPropertyHandler(EnumPropertyHandler* handler)
     _writer.writeStartElement("EnumProperty");
     writeCommonPropertyAttributes(handler);
     if (handler->hasDefaultValue()) _writer.writeAttribute("default", handler->defaultValue());
+    if (!handler->trueIf().isEmpty()) _writer.writeAttribute("trueIf", handler->trueIf());
 
     // write an element for each enumeration value
     _writer.writeStartElement("enumValues");

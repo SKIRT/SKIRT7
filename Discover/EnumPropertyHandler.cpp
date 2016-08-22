@@ -93,6 +93,13 @@ QString EnumPropertyHandler::defaultValue() const
 
 ////////////////////////////////////////////////////////////////////
 
+QString EnumPropertyHandler::trueIf() const
+{
+    return _attributes["TrueIf"];
+}
+
+////////////////////////////////////////////////////////////////////
+
 bool EnumPropertyHandler::isTrueInCondition() const
 {
     return _attributes.contains("TrueIf") && _attributes["TrueIf"] == value();

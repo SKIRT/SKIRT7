@@ -44,10 +44,11 @@ public:
     double maxValue() const;
 
     /** Returns the physical quantity name for the handled property, as described in the Units
-        class, or the empty string if the handled property is a dimensionless quantity.
-        If the value of the "quantity" class info attribute starts with an at sign, the quantity
-        is determined instead as the string value of the indicated enumeration property. */
-    QString quantity() const;
+        class, or the empty string if the handled property is a dimensionless quantity. If the \em
+        raw argument is false or missing (i.e. the default behavior), and the value of the
+        "quantity" class info attribute starts with an at sign, the quantity is determined instead
+        as the string value of the indicated enumeration property. */
+    QString quantity(bool raw = false) const;
 
     /** Accepts the specified visitor. This function is part of the "visitor" design pattern
         implementation used to handle properties of various types. */
