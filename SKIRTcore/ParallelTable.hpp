@@ -74,7 +74,7 @@ private:
     int _totalCols;
 
     Table<2> _columns;  // the values distributed over processes column wise
-    ArrayTable<2> _rows;// the values distributed over processes row wise
+    Table<2> _rows;// the values distributed over processes row wise
 
     PeerToPeerCommunicator* _comm; // communicator used for synchronizing
     Log* _log;

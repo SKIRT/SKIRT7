@@ -132,7 +132,7 @@ double& ParallelTable::operator()(size_t i, size_t j)
 }
 
 ////////////////////////////////////////////////////////////////////
-
+/*
 Array& ParallelTable::operator[](size_t i)
 {
     if (_synced) _synced = false;
@@ -160,7 +160,7 @@ const Array& ParallelTable::operator[](size_t i) const
     }
     else throw FATALERROR(_name + " says: This ParallelTable does not have readable rows.");
 }
-
+*/
 ////////////////////////////////////////////////////////////////////
 
 void ParallelTable::sync()
@@ -183,8 +183,8 @@ void ParallelTable::sync()
 void ParallelTable::clear()
 {
     _columns.clear();
-    for (size_t i=0; i<_rows.size(0); i++) _rows[i] *= 0;
-
+    //for (size_t i=0; i<_rows.size(0); i++) _rows[i] *= 0;
+    _rows.clear();
     _synced = true;
 }
 
@@ -198,15 +198,17 @@ double ParallelTable::sumRow(size_t i) const
     if (_distributed)
     {
         if (_isValidRowv[i]) // we have the whole row
-            return _rows[_relativeRowIndexv[i]].sum();
+            //return _rows[_relativeRowIndexv[i]].sum();
+            for (int j=0; j<_totalCols; j++)
+                sum += _rows(_relativeRowIndexv[i],j);
         else throw FATALERROR(_name + " says: sumRow(index) called on wrong index");
     }
     else // not distributed -> everything available, so straightforward
     {
         for (int j=0; j<_totalCols; j++)
             sum += (*this)(i,j);
-        return sum;
     }
+    return sum;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -243,7 +245,8 @@ Array ParallelTable::stackColumns() const
     {
         // fastest way: sum only the values in _rows, then do one big sum over the processes
         for (size_t iRel=0; iRel<_rows.size(0); iRel++)
-            result[_rowAssigner->absoluteIndex(iRel)] = _rows[iRel].sum();
+            for (size_t j=0; j<_totalCols; j++)
+                result[_rowAssigner->absoluteIndex(iRel)] += _rows(iRel,j);
         _comm->sum_all(result);
     }
     else
@@ -314,11 +317,15 @@ void ParallelTable::sum_all()
     }
     else
     {
+        /*
         for (int i=0; i<_totalRows; i++)
         {
             Array& arr = _rows[i];
             _comm->sum_all(arr);
         }
+        */
+        Array& arr = _rows.getArray();
+        _comm->sum_all(arr);
     }
 }
 

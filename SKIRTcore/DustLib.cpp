@@ -131,8 +131,12 @@ namespace
                 foreach (int m, mv)
                 {
                     StopWatch w3;
+                    /*
                     // get a reference to the output array for this dust cell
                     Array& Lv = _Lvv[m];
+                    */
+
+                    Array Lv(_Nlambda);
 
                     // calculate the emission for this cell
                     for (int h=0; h<_Ncomp; h++) Lv += evv[h] * _ds->density(m,h);
@@ -141,6 +145,8 @@ namespace
                     Lv *= _lambdagrid->dlambdav();
                     double total = Lv.sum();
                     if (total>0) Lv /= total;
+
+                    for (int ell=0; ell<_Nlambda; ell++) _Lvv(m,ell) = Lv[ell];
                 }
             }
         }
