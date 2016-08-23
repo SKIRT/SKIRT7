@@ -7,6 +7,7 @@
 #include <cmath>
 #include "DustGridPath.hpp"
 #include "DustParticleInterface.hpp"
+#include "Log.hpp"
 #include "VoronoiMesh.hpp"
 #include "VoronoiMeshFile.hpp"
 #include "FatalError.hpp"
@@ -215,7 +216,7 @@ using namespace VoronoiMesh_Private;
 
 ////////////////////////////////////////////////////////////////////
 
-VoronoiMesh::VoronoiMesh(VoronoiMeshFile* meshfile, QList<int> fieldIndices, const Box& extent)
+VoronoiMesh::VoronoiMesh(VoronoiMeshFile* meshfile, QList<int> fieldIndices, const Box& extent, Log* log)
     : _extent(extent), _eps(1e-12 * extent.widths().norm()),
       _Ndistribs(0), _integratedDensity(0)
 {
@@ -258,22 +259,23 @@ VoronoiMesh::VoronoiMesh(VoronoiMeshFile* meshfile, QList<int> fieldIndices, con
     meshfile->close();
 
     // construct the Voronoi tesselation
-    buildMesh(particles);
+    // do not remove nearby particles because the particle index is also used for field values
+    buildMesh(particles, false, log);
 }
 
 ////////////////////////////////////////////////////////////////////
 
-VoronoiMesh::VoronoiMesh(const std::vector<Vec> &particles, const Box &extent)
+VoronoiMesh::VoronoiMesh(const std::vector<Vec> &particles, const Box &extent, Log* log)
     : _extent(extent), _eps(1e-12 * extent.widths().norm()),
       _Ndistribs(0), _integratedDensity(0)
 {
     // construct the Voronoi tesselation
-    buildMesh(particles);
+    buildMesh(particles, true, log);
 }
 
 ////////////////////////////////////////////////////////////////////
 
-VoronoiMesh::VoronoiMesh(DustParticleInterface *dpi, const Box &extent)
+VoronoiMesh::VoronoiMesh(DustParticleInterface *dpi, const Box &extent, Log* log)
     : _extent(extent), _eps(1e-12 * extent.widths().norm()),
       _Ndistribs(0), _integratedDensity(0)
 {
@@ -287,36 +289,45 @@ VoronoiMesh::VoronoiMesh(DustParticleInterface *dpi, const Box &extent)
     }
 
     // construct the Voronoi tesselation
-    buildMesh(particles);
+    buildMesh(particles, true, log);
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void VoronoiMesh::buildMesh(const std::vector<Vec>& particles)
+void VoronoiMesh::buildMesh(const std::vector<Vec>& particles, bool removeNearby, Log* log)
 {
-    // Sort a list of particle indices on the particle's x coordinate
+    // Create a list of particle indices
     int numParticles =  particles.size();
     vector<int> indices(numParticles);
     for (int i=0; i!=numParticles; ++i) indices[i] = i;
-    std::sort(indices.begin(), indices.end(), [&particles] (int m1, int m2)
+
+    // If requested to remove nearby particles...
+    int numRemoved = 0;
+    if (removeNearby)
+    {
+        // Sort the list of particle indices on the particle's x coordinate
+        std::sort(indices.begin(), indices.end(), [&particles] (int m1, int m2)
         { return particles[m1].x() < particles[m2].x(); });
 
-    // Find particles that lie too close to each other and tag them for removal
-    int numRemoved = 0;
-    for (int i=0; i!=numParticles; ++i)
-    {
-        int j = i+1;
-        while (j < numParticles && particles[indices[j]].x()-particles[indices[i]].x() < _eps)
+        // Find particles that lie too close to each other and tag them for removal
+        for (int i=0; i!=numParticles; ++i)
         {
-            if ((particles[indices[j]]-particles[indices[i]]).norm2() < _eps*_eps)
+            int j = i+1;
+            while (j < numParticles && particles[indices[j]].x()-particles[indices[i]].x() < _eps)
             {
-                indices[i] = -1;
-                numRemoved++;
-                break;
+                if ((particles[indices[j]]-particles[indices[i]]).norm2() < _eps*_eps)
+                {
+                    indices[i] = -1;
+                    numRemoved++;
+                    break;
+                }
+                j++;
             }
-            j++;
         }
     }
+
+    if (numRemoved && log) log->warning("Removed " + QString::number(numRemoved) +
+                                        " Voronoi particles that were too close to other particles");
 
     // Cache some often used values
     _Ncells = numParticles - numRemoved;
@@ -352,9 +363,12 @@ void VoronoiMesh::buildMesh(const std::vector<Vec>& particles)
     //   - extract and copy the relevant information to one of our own cell objects
     //   - store the cell object in the vector indexed on cell number
     //   - add the cell object to the lists for all blocks it overlaps
+    int i = 0;
     voro::c_loop_all loop(con);
     if (loop.start()) do
     {
+        if (log && i%10000==0) log->info("Computing cell " + QString::number(i+1) + "...");
+
         // Compute the cell
         voro::voronoicell_neighbor fullcell;
         bool ok = con.compute_cell(fullcell, loop);
@@ -373,6 +387,7 @@ void VoronoiMesh::buildMesh(const std::vector<Vec>& particles)
             for (int j=j1; j<=j2; j++)
                 for (int k=k1; k<=k2; k++)
                     _blocklists[i*_nb2+j*_nb+k].push_back(loop.pid());
+        i++;
     }
     while (loop.inc());
 
