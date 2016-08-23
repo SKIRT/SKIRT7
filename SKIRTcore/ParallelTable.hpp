@@ -27,15 +27,16 @@ class ParallelTable
 public:
     ParallelTable();
 
-    void initialize(QString name, const ProcessAssigner* colAssigner, const ProcessAssigner* rowAssigner, writeState writeOn);
+    void initialize(QString name, const ProcessAssigner* colAssigner, const ProcessAssigner* rowAssigner,
+                    writeState writeOn);
 
     //======================== Other Functions =======================
 
     // Reading and writing operators
     const double& operator()(size_t i, size_t j) const; // read operator
     double& operator()(size_t i, size_t j); // write operator
-    Array& operator[](size_t i); // write row
-    const Array& operator[](size_t i) const; // read row
+    //Array& operator[](size_t i); // write row
+    //const Array& operator[](size_t i) const; // read row
 
     // Basic operations
     void sync(); // communicates between processes to synchronize _colDist with _rowDist or vice versa
@@ -70,8 +71,8 @@ private:
     bool _synced;   // true if the writable table has not changed since the last sync
     bool _initialized;
 
-    int _totalRows;
-    int _totalCols;
+    size_t _totalRows;
+    size_t _totalCols;
 
     Table<2> _columns;  // the values distributed over processes column wise
     Table<2> _rows;// the values distributed over processes row wise

@@ -99,7 +99,6 @@ namespace
         // the parallized loop body; calculates the emission for a single library entry
         void body(size_t n)
         {
-            StopWatch w2;
             // get the list of dust cells that map to this library entry (absolute indices)
             QList<int> mv = _mh.values(n);
             int Nmapped = mv.size();
@@ -130,12 +129,12 @@ namespace
                 // combine emissivities into SED for each dust cell, and store the normalized SEDs
                 foreach (int m, mv)
                 {
-                    StopWatch w3;
                     /*
                     // get a reference to the output array for this dust cell
                     Array& Lv = _Lvv[m];
                     */
 
+                    // clear the output array
                     Array Lv(_Nlambda);
 
                     // calculate the emission for this cell
@@ -146,7 +145,11 @@ namespace
                     double total = Lv.sum();
                     if (total>0) Lv /= total;
 
-                    for (int ell=0; ell<_Nlambda; ell++) _Lvv(m,ell) = Lv[ell];
+                    {
+                        // copy the output array to the corresponding row of the output table
+                        for (int ell=0; ell<_Nlambda; ell++) _Lvv(m,ell) = Lv[ell];
+                    }
+
                 }
             }
         }
@@ -174,7 +177,6 @@ void DustLib::calculate()
     // Each process now has its own library over a subset of dustcells.
     // Use the alternate version of the call() function, which acts as a multi threaded for-loop
     {
-        StopWatch w1;
 
         if (_cellAssigner->parallel())
             parallel->call(&calc, Nlib);

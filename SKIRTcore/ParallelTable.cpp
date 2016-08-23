@@ -5,13 +5,15 @@
 #include "TimeLogger.hpp"
 
 ParallelTable::ParallelTable()
-    : _name(""), _colAssigner(0), _rowAssigner(0), _distributed(false), _synced(false), _initialized(false), _comm(0), _log(0)
+    : _name(""), _colAssigner(0), _rowAssigner(0), _distributed(false), _synced(false), _initialized(false), _comm(0),
+      _log(0)
 {
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void ParallelTable::initialize(QString name, const ProcessAssigner *colAssigner, const ProcessAssigner *rowAssigner, writeState writeOn)
+void ParallelTable::initialize(QString name, const ProcessAssigner *colAssigner, const ProcessAssigner *rowAssigner,
+                               writeState writeOn)
 {
     _name = name;
     _colAssigner = colAssigner;
@@ -32,10 +34,12 @@ void ParallelTable::initialize(QString name, const ProcessAssigner *colAssigner,
     // Use the distributed memory scheme
     if (colAssigner->parallel() && rowAssigner->parallel() && _comm->isMultiProc())
     {
-        _log->info(_name + " is distributed. Sizes of local tables are ("
+        _log->info(
+                   _name + " is distributed. Sizes of local tables are ("
                    + QString::number(_totalRows) + "," + QString::number(_colAssigner->nvalues())
                    + ") and ("
-                   + QString::number(_rowAssigner->nvalues()) + "," + QString::number(_totalCols) + ")"
+                   + QString::number(_rowAssigner->nvalues()) + "," + QString::number(_totalCols)
+                   + ")"
                    );
 
         _distributed = true;
@@ -199,13 +203,13 @@ double ParallelTable::sumRow(size_t i) const
     {
         if (_isValidRowv[i]) // we have the whole row
             //return _rows[_relativeRowIndexv[i]].sum();
-            for (int j=0; j<_totalCols; j++)
+            for (size_t j=0; j<_totalCols; j++)
                 sum += _rows(_relativeRowIndexv[i],j);
         else throw FATALERROR(_name + " says: sumRow(index) called on wrong index");
     }
     else // not distributed -> everything available, so straightforward
     {
-        for (int j=0; j<_totalCols; j++)
+        for (size_t j=0; j<_totalCols; j++)
             sum += (*this)(i,j);
     }
     return sum;
@@ -221,13 +225,13 @@ double ParallelTable::sumColumn(size_t j) const
     if (_distributed)
     {
         if(_isValidColv[j]) // we have the whole column
-            for (int i=0; i<_totalRows; i++)
+            for (size_t i=0; i<_totalRows; i++)
                 sum += _columns(i,_relativeColIndexv[j]);
         else throw FATALERROR(_name + " says: sumColumn(index) called on wrong index");
     }
     else // not distributed
     {
-        for (int i=0; i<_totalRows; i++)
+        for (size_t i=0; i<_totalRows; i++)
             sum += (*this)(i,j);
     }
     return sum;
@@ -277,7 +281,7 @@ Array ParallelTable::stackRows() const
     }
     else
     {
-        for (int j=0; j<_totalCols; j++)
+        for (size_t j=0; j<_totalCols; j++)
             result[j] = sumColumn(j);
     }
     return result;
@@ -437,7 +441,7 @@ void ParallelTable::col_to_row()
     _comm->presetConfigure(1,_displacementvv);
 
     // for each row
-    for (int i=0; i<_totalRows; i++)
+    for (size_t i=0; i<_totalRows; i++)
     {
         double* sendBuffer = &_columns(i,0);
         double* recvBuffer = _isValidRowv[i] ? &_rows(_relativeRowIndexv[i],0) : 0;
@@ -460,7 +464,7 @@ void ParallelTable::row_to_col()
     // prepare to send using doubles according to the given displacements for each process
     _comm->presetConfigure(1,_displacementvv);
 
-    for (int i=0; i<_totalRows; i++)
+    for (size_t i=0; i<_totalRows; i++)
     {
         double* sendBuffer = _isValidRowv[i] ? &_rows(_relativeRowIndexv[i],0) : 0;
         double* recvBuffer = &_columns(i,0);
