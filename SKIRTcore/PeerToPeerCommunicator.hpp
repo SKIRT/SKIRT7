@@ -63,17 +63,22 @@ public:
     void finishRequests();
 
     /** This function gathers doubles sent by all processes into displaced positions at the receiving process */
-    void gatherw(double* sendBuffer, int sendCount,
-                 double* recvBuffer, int recvRank, int recvLength, const std::vector<std::vector<int>>& recvDisplacements);
+    void gatherw(double* sendBuffer, int sendCount, double* recvBuffer, int recvRank, int recvLength,
+                 const std::vector<std::vector<int>>& recvDisplacements);
 
-    void scatterw(double* sendBuffer, int sendRank, int sendLength, const std::vector<std::vector<int>>& sendDisplacements,
-                  double* recvBuffer, int recvCount);
+    void scatterw(double* sendBuffer, int sendRank, int sendLength,
+                  const std::vector<std::vector<int>>& sendDisplacements, double* recvBuffer, int recvCount);
 
     void presetGatherw(double* sendBuffer, int sendCount, double* recvBuffer, int recvRank);
     void presetScatterw(double* sendBuffer, int sendRank, double* recvBuffer, int recvCount);
 
     void presetConfigure(int length, const std::vector<std::vector<int>>& displacements);
     void presetClear();
+
+    void displacedBlocksAllToAll(double* sendBuffer, int sendCount, std::vector<std::vector<int>>& sendDisplacements,
+                                 int sendLength, int sendExtent,
+                                 double* recvBuffer, int recvCount, std::vector<std::vector<int>>& recvDisplacements,
+                                 int recvLength, int recvExtent);
 
     /** This function returns the rank of the root process. */
     int root();

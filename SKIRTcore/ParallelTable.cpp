@@ -137,7 +137,7 @@ double& ParallelTable::operator()(size_t i, size_t j)
 
 ////////////////////////////////////////////////////////////////////
 /*
-Array& ParallelTable::operator[](size_t i)
+Array& ParallelTable::operator[](_displacementvvsize_t i)
 {
     if (_synced) _synced = false;
 
@@ -169,6 +169,14 @@ const Array& ParallelTable::operator[](size_t i) const
 
 void ParallelTable::sync()
 {
+    if (_comm->rank() == 0)
+    for (int row = 0; row < 10; row++)
+    {
+       for (int column = 0; column < 16; column++)
+           printf(" %1.1e ", _columns(row,column));
+
+       printf("\n");
+    }
     // Get a global value for the synced flag, in case one of the processes never wrote something
     _comm->and_all(_synced);
     if (!_synced)
@@ -176,10 +184,19 @@ void ParallelTable::sync()
         TimeLogger logger(_log->verbose() && _comm->isMultiProc() ? _log : 0, "communication of " + _name);
 
         if (!_distributed) sum_all();
-        else if (_writeOn == COLUMN) col_to_row();
+        else if (_writeOn == COLUMN) allAtOnceCtR();
         else if (_writeOn == ROW) row_to_col();
     }
     _synced = true;
+
+    if (_comm->rank() == 0)
+    for (int row = 0; row < 10; row++)
+    {
+       for (int column = 0; column < 32; column++)
+           printf(" %1.1e ", _rows(row,column));
+
+       printf("\n");
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -480,3 +497,28 @@ void ParallelTable::row_to_col()
 }
 
 ////////////////////////////////////////////////////////////////////
+
+void ParallelTable::allAtOnceCtR()
+{
+
+    int Nprocs = _comm->size();
+
+    double* sendBuffer = &_columns(0,0);
+
+    IntTable sendDispvv;
+    sendDispvv.reserve(Nprocs);
+    for (int r=0; r<Nprocs; r++)
+    {
+        sendDispvv.push_back(_rowAssigner->indicesForRank(r));
+    }
+
+    int sendBlockLength = _columns.size(1);
+    int sendExtent = _totalRows*sendBlockLength;
+
+    double* recvBuffer = &_rows(0,0);
+    int recvCount = _rows.size(0);
+    int recvExtent = _totalCols;
+
+    _comm->displacedBlocksAllToAll(sendBuffer, 1, sendDispvv, sendBlockLength, sendExtent,
+                                   recvBuffer, recvCount, _displacementvv, 1, recvExtent);
+}

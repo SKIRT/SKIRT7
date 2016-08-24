@@ -59,6 +59,8 @@ private:
     void row_to_col();
     void onebyone_col_to_row();
     void onebyone_row_to_col();
+    void allAtOnceCtR();
+    void allAtOnceRtC();
 
     //======================== Data Members ========================
 
@@ -71,6 +73,7 @@ private:
     bool _synced;   // true if the writable table has not changed since the last sync
     bool _initialized;
 
+    // the dimensions of the table represented by this data structure
     size_t _totalRows;
     size_t _totalCols;
 
@@ -80,11 +83,13 @@ private:
     PeerToPeerCommunicator* _comm; // communicator used for synchronizing
     Log* _log;
 
-    std::vector<std::vector<int>> _displacementvv;  // A list of absolute indices for each process.
+    typedef std::vector<std::vector<int>> IntTable;
+    IntTable _displacementvv;  // A list of absolute column indices for each process.
                                                     // This way the receival positions in the receivebuffer _rows[i] can
                                                     // be dependent on the sending process.
                                                     // An array of MPI_Datatype's will be constructed using the array
-                                                    // of displacements.
+                                                    // of displacements. Remains constant throughout the simulation.
+
 
     std::vector<size_t> _relativeRowIndexv; // caches the values of _rowAssigner->relativeIndex(i)
     std::vector<size_t> _relativeColIndexv; // caches the values of _colAssigner->relativeindex(j)

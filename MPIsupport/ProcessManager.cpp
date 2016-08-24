@@ -26,7 +26,10 @@ namespace
         multiplied_disp.reserve(count);
         for(auto i: displacements) multiplied_disp.push_back(blocklength*i); // list of displacements in doubles as unit
 
+
         MPI_Type_create_indexed_block(count, blocklength, &multiplied_disp[0], MPI_DOUBLE, newtype);
+
+
     }
 }
 
@@ -195,10 +198,10 @@ void ProcessManager::gatherw(double* sendBuffer, int sendCount,
     std::vector<MPI_Datatype> recvtypes;            // we will construct derived datatypes for receiving from each process
     recvtypes.reserve(size);
 
-    for (int rank=0; rank<size; rank++)
+    for (int r=0; r<size; r++)
     {
         MPI_Datatype newtype;
-        createDisplacedDoubleBlocks(recvLength, recvDisplacements[rank], &newtype);
+        createDisplacedDoubleBlocks(recvLength, recvDisplacements[r], &newtype);
         MPI_Type_commit(&newtype);
         recvtypes.push_back(newtype);
     }
@@ -233,10 +236,10 @@ void ProcessManager::scatterw(double *sendBuffer, int sendRank, int sendLength,
     std::vector<MPI_Datatype> sendtypes;                // these will be constructed for sending to each process
     sendtypes.reserve(size);
 
-    for (int rank=0; rank<size; rank++)
+    for (int r=0; r<size; r++)
     {
         MPI_Datatype newtype;
-        createDisplacedDoubleBlocks(sendLength, sendDisplacements[rank], &newtype);
+        createDisplacedDoubleBlocks(sendLength, sendDisplacements[r], &newtype);
         MPI_Type_commit(&newtype);
         sendtypes.push_back(newtype);
     }
@@ -339,6 +342,75 @@ void ProcessManager::presetClear()
     for (auto& datatype : presetDatatypes) MPI_Type_free(&datatype);
 
     presetDatatypes.resize(0);
+}
+
+void ProcessManager::displacedBlocksAllToAll(double* sendBuffer, int sendCount,
+                                             std::vector<std::vector<int>>& sendDisplacements, int sendLength,
+                                             int sendExtent, double* recvBuffer, int recvCount,
+                                             std::vector<std::vector<int>>& recvDisplacements, int recvLength,
+                                             int recvExtent)
+{
+#ifdef BUILDING_WITH_MPI
+
+    printf("sendcount %d\n", sendCount);
+    printf("len senddisp[0] %d\n", sendDisplacements[0].size());
+    printf("sendlength %d\n", sendLength);
+
+    printf("recvcount %d\n", recvCount);
+    printf("len recvdisp[0] %d\n", recvDisplacements[0].size());
+    printf("recvlength %d\n", recvLength);
+
+    int size;
+    int rank;
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    std::vector<int> sendcnts(size,sendCount);
+    std::vector<int> sdispls(size, 0);
+    std::vector<MPI_Datatype> sendtypes;
+    sendtypes.reserve(size);
+
+    std::vector<int> recvcnts(size, recvCount);
+    std::vector<int> rdispls(size, 0);
+    std::vector<MPI_Datatype> recvtypes;
+    recvtypes.reserve(size);
+
+    for (int r=0; r<size; r++)
+    {
+        // when using a count argument > 1, it is very important that the datatype used
+        // has the correct extent, therefore padding is added
+
+        MPI_Datatype newtype;
+        MPI_Aint lb;
+        MPI_Aint ex;
+        MPI_Datatype padded;
+
+        createDisplacedDoubleBlocks(sendLength, sendDisplacements[r], &newtype);
+        MPI_Type_get_extent(newtype, &lb, &ex);
+        MPI_Type_create_resized(newtype, lb, sendExtent*sizeof(double), &padded);
+        MPI_Type_commit(&padded);
+        sendtypes.push_back(padded);
+
+        createDisplacedDoubleBlocks(recvLength, recvDisplacements[r], &newtype);
+        MPI_Type_get_extent(newtype, &lb, &ex);
+        MPI_Type_create_resized(newtype, lb, recvExtent*sizeof(double), &padded);
+        MPI_Type_commit(&padded);
+        recvtypes.push_back(padded);
+    }
+
+    MPI_Alltoallw(sendBuffer, &sendcnts[0], &sdispls[0], &sendtypes[0],
+                  recvBuffer, &recvcnts[0], &rdispls[0], &recvtypes[0],
+                  MPI_COMM_WORLD);
+
+    for (int rank=0; rank<size; rank++)
+    {
+        MPI_Type_free(&sendtypes[rank]);
+        MPI_Type_free(&recvtypes[rank]);
+    }
+#else
+    Q_UNUSED(sendBuffer) Q_UNUSED(sendCount) Q_UNUSED(sendDisplacements) Q_UNUSED(sendLength)
+    Q_UNUSED(recvBuffer) Q_UNUSED(recvCount) Q_UNUSED(recvDisplacements) Q_UNUSED(recvLength)
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////

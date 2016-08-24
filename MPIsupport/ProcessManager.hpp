@@ -77,9 +77,11 @@ public:
     static void wait_all();
 
     static void gatherw(double* sendBuffer, int sendCount,
-                        double* recvBuffer, int recvRank, int recvLength, const std::vector<std::vector<int> >& recvDisplacements);
+                        double* recvBuffer, int recvRank, int recvLength,
+                        const std::vector<std::vector<int> >& recvDisplacements);
 
-    static void scatterw(double* sendBuffer, int sendRank, int sendLength, const std::vector<std::vector<int>>& sendDisplacements,
+    static void scatterw(double* sendBuffer, int sendRank, int sendLength,
+                         const std::vector<std::vector<int>>& sendDisplacements,
                          double* recvBuffer, int recvCount);
 
     static void presetGatherw(double* sendBuffer, int sendCount, double* recvBuffer, int recvRank);
@@ -87,6 +89,12 @@ public:
 
     static void presetConfigure(int length, const std::vector<std::vector<int>>& displacements);
     static void presetClear();
+
+    static void displacedBlocksAllToAll(double* sendBuffer, int sendCount,
+                                        std::vector<std::vector<int>>& sendDisplacements, int sendLength,
+                                        int sendExtent, double* recvBuffer, int recvCount,
+                                        std::vector<std::vector<int>>& recvDisplacements, int recvLength,
+                                        int recvExtent);
 
     /** The purpose of this function is to sum a particular array of double values element-wise
         across the different processes. The resulting values are stored in the array passed as the
