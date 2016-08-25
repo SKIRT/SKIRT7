@@ -351,19 +351,8 @@ void ProcessManager::displacedBlocksAllToAll(double* sendBuffer, int sendCount,
                                              int recvExtent)
 {
 #ifdef BUILDING_WITH_MPI
-
-    printf("sendcount %d\n", sendCount);
-    printf("len senddisp[0] %d\n", sendDisplacements[0].size());
-    printf("sendlength %d\n", sendLength);
-
-    printf("recvcount %d\n", recvCount);
-    printf("len recvdisp[0] %d\n", recvDisplacements[0].size());
-    printf("recvlength %d\n", recvLength);
-
     int size;
-    int rank;
     MPI_Comm_size(MPI_COMM_WORLD, &size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     std::vector<int> sendcnts(size,sendCount);
     std::vector<int> sdispls(size, 0);
@@ -389,12 +378,14 @@ void ProcessManager::displacedBlocksAllToAll(double* sendBuffer, int sendCount,
         MPI_Type_get_extent(newtype, &lb, &ex);
         MPI_Type_create_resized(newtype, lb, sendExtent*sizeof(double), &padded);
         MPI_Type_commit(&padded);
+        MPI_Type_free(&newtype);
         sendtypes.push_back(padded);
 
         createDisplacedDoubleBlocks(recvLength, recvDisplacements[r], &newtype);
         MPI_Type_get_extent(newtype, &lb, &ex);
         MPI_Type_create_resized(newtype, lb, recvExtent*sizeof(double), &padded);
         MPI_Type_commit(&padded);
+        MPI_Type_free(&newtype);
         recvtypes.push_back(padded);
     }
 
@@ -402,10 +393,10 @@ void ProcessManager::displacedBlocksAllToAll(double* sendBuffer, int sendCount,
                   recvBuffer, &recvcnts[0], &rdispls[0], &recvtypes[0],
                   MPI_COMM_WORLD);
 
-    for (int rank=0; rank<size; rank++)
+    for (int r=0; r<size; r++)
     {
-        MPI_Type_free(&sendtypes[rank]);
-        MPI_Type_free(&recvtypes[rank]);
+        MPI_Type_free(&sendtypes[r]);
+        MPI_Type_free(&recvtypes[r]);
     }
 #else
     Q_UNUSED(sendBuffer) Q_UNUSED(sendCount) Q_UNUSED(sendDisplacements) Q_UNUSED(sendLength)
