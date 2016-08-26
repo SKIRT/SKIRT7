@@ -35,9 +35,6 @@ public:
     // Reading and writing operators
     const double& operator()(size_t i, size_t j) const; // read operator
     double& operator()(size_t i, size_t j); // write operator
-    //Array& operator[](size_t i); // write row
-    //const Array& operator[](size_t i) const; // read row
-
     // Basic operations
     void sync(); // communicates between processes to synchronize _colDist with _rowDist or vice versa
     void clear(); // reset contents to zeros
@@ -55,12 +52,8 @@ public:
 private:
     // Private methods
     void sum_all();
-    void col_to_row();
-    void row_to_col();
-    void onebyone_col_to_row();
-    void onebyone_row_to_col();
-    void allAtOnceCtR();
-    void allAtOnceRtC();
+    void columsToRows();
+    void rowsToColums();
 
     //======================== Data Members ========================
 
@@ -82,14 +75,6 @@ private:
 
     PeerToPeerCommunicator* _comm; // communicator used for synchronizing
     Log* _log;
-
-    typedef std::vector<std::vector<int>> IntTable;
-    IntTable _displacementvv;  // A list of absolute column indices for each process.
-                                                    // This way the receival positions in the receivebuffer _rows[i] can
-                                                    // be dependent on the sending process.
-                                                    // An array of MPI_Datatype's will be constructed using the array
-                                                    // of displacements. Remains constant throughout the simulation.
-
 
     std::vector<size_t> _relativeRowIndexv; // caches the values of _rowAssigner->relativeIndex(i)
     std::vector<size_t> _relativeColIndexv; // caches the values of _colAssigner->relativeindex(j)

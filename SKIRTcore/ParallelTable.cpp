@@ -4,9 +4,13 @@
 #include "ProcessAssigner.hpp"
 #include "TimeLogger.hpp"
 
+namespace {
+    typedef std::vector<std::vector<int>> IntTable;
+}
+
 ParallelTable::ParallelTable()
-    : _name(""), _colAssigner(0), _rowAssigner(0), _distributed(false), _synced(false), _initialized(false), _comm(0),
-      _log(0)
+    : _name(""), _colAssigner(nullptr), _rowAssigner(nullptr), _distributed(false), _synced(false), _initialized(false),
+      _comm(nullptr), _log(nullptr)
 {
 }
 
@@ -45,10 +49,6 @@ void ParallelTable::initialize(QString name, const ProcessAssigner *colAssigner,
         _distributed = true;
         _columns.resize(_totalRows,colAssigner->nvalues());
         _rows.resize(rowAssigner->nvalues(),_totalCols);
-
-        int Nprocs = _comm->size();
-        _displacementvv.reserve(Nprocs);
-        for (int r=0; r<Nprocs; r++) _displacementvv.push_back(_colAssigner->indicesForRank(r));
 
         _relativeRowIndexv.resize(_totalRows, 0);
         _relativeColIndexv.resize(_totalCols, 0);
@@ -135,38 +135,6 @@ double& ParallelTable::operator()(size_t i, size_t j)
     }
 }
 
-////////////////////////////////////////////////////////////////////
-/*
-Array& ParallelTable::operator[](_displacementvvsize_t i)
-{
-    if (_synced) _synced = false;
-
-    if (_writeOn == ROW) // return writable reference to a complete row
-    {
-        if (!_isValidRowv[i])
-            throw FATALERROR(_name + " says: Row of ParallelTable not available on this process");
-        else return _rows[_distributed ? _relativeRowIndexv[i] : i];
-    }
-    else throw FATALERROR(_name + " says: This ParallelTable does not have writable rows.");
-}
-
-////////////////////////////////////////////////////////////////////
-
-const Array& ParallelTable::operator[](size_t i) const
-{
-    if (!_synced) throw FATALERROR(_name + " says: sync() must be called before asking a read reference");
-
-    if (_distributed && _writeOn == COLUMN) // return read only reference to a complete row
-    {
-        if (!_isValidRowv[i])
-            throw FATALERROR(_name + " says: Row of ParallelTable not available on this process");
-        else return _rows[_relativeRowIndexv[i]];
-    }
-    else throw FATALERROR(_name + " says: This ParallelTable does not have readable rows.");
-}
-*/
-////////////////////////////////////////////////////////////////////
-
 void ParallelTable::sync()
 {
     // Get a global value for the synced flag, in case one of the processes never wrote something
@@ -176,8 +144,8 @@ void ParallelTable::sync()
         TimeLogger logger(_log->verbose() && _comm->isMultiProc() ? _log : 0, "communication of " + _name);
 
         if (!_distributed) sum_all();
-        else if (_writeOn == COLUMN) allAtOnceCtR();
-        else if (_writeOn == ROW) allAtOnceRtC();
+        else if (_writeOn == COLUMN) columsToRows();
+        else if (_writeOn == ROW) rowsToColums();
     }
     _synced = true;
 }
@@ -327,157 +295,13 @@ void ParallelTable::sum_all()
 
 ////////////////////////////////////////////////////////////////////
 
-// To be removed
-void ParallelTable::onebyone_col_to_row()
+void ParallelTable::columsToRows()
 {
-    int thisRank = _comm->rank();
-
-    int sendCount = 0;
-    int N = 750;
-
-    for (int i=0; i<_totalRows; i++) // for each possible row of the big array (determines receiver)
-    {
-        int tgtRank = _rowAssigner->rankForIndex(i); // the rank where target has row i in it
-
-        // post some receives
-        for (int j=0; j<_totalCols; j++) // for each possible column of the big array (determines sender)
-        {
-            int srcRank = _colAssigner->rankForIndex(j); // the rank where the source has col j in it
-            int tag = i*_totalCols + j; // unique for each position in the big array
-
-            if (thisRank!= srcRank && thisRank == tgtRank) // receive if target needs row i
-            {
-                double& recvbuf = _rows(_rowAssigner->relativeIndex(i),j);
-                _comm->receiveDouble(recvbuf,srcRank,tag);
-            }
-        }
-        // post some sends
-        for (int j=0; j<_totalCols; j++) // for each possible column of the big array (determines sender)
-        {
-            int srcRank = _colAssigner->rankForIndex(j); // the rank where the source has col j in it
-            int tag = i*_totalCols + j; // unique for each position in the big array
-
-            if (thisRank == srcRank) // if this process has column j, do send
-            {
-                double& sendbuf = _columns(i,_colAssigner->relativeIndex(j));
-                if (thisRank == tgtRank) _rows(_rowAssigner->relativeIndex(i), j) = sendbuf;
-                else _comm->sendDouble(sendbuf,tgtRank,tag);
-            }
-            sendCount++;
-        }
-        // clear the request vector every N
-        if (sendCount > N)
-        {
-            _comm->finishRequests();
-            sendCount = 0;
-        }
-    }
-    _comm->finishRequests();
-}
-
-////////////////////////////////////////////////////////////////////
-
-// To be removed
-void ParallelTable::onebyone_row_to_col()
-{
-    int thisRank = _comm->rank();
-
-    int sendCount = 0;
-    int N = 750;
-
-    for (int i=0; i<_totalRows; i++) // for each row (determines sender)
-    {
-        int srcRank = _rowAssigner->rankForIndex(i);
-
-        // post some receives
-        for (int j=0; j<_totalCols; j++) // for each column (determines receiver)
-        {
-            int tgtRank = _colAssigner->rankForIndex(j);
-            int tag = i*_totalCols + j;
-
-            if (thisRank != srcRank && thisRank == tgtRank)
-            {
-                double& recvbuf = _columns(i,_colAssigner->relativeIndex(j));
-                _comm->receiveDouble(recvbuf,srcRank,tag);
-            }
-        }
-        // post some sends
-        for (int j=0; j<_totalCols; j++) // for each column (determines receiver)
-        {
-            int tgtRank = _colAssigner->rankForIndex(j);
-            int tag = i*_totalCols + j;
-
-            if (thisRank == srcRank)
-            {
-                double& sendbuf = _rows(_rowAssigner->relativeIndex(i),j);
-                if (thisRank == tgtRank) _columns(i,_colAssigner->relativeIndex(j)) = sendbuf;
-                else _comm->sendDouble(sendbuf,tgtRank,tag);
-            }
-            sendCount++;
-        }
-        // clear the request vector every N
-        if (sendCount > N)
-        {
-            _comm->finishRequests();
-            sendCount = 0;
-        }
-    }
-    _comm->finishRequests();
-}
-
-////////////////////////////////////////////////////////////////////
-
-void ParallelTable::col_to_row()
-{
-    // prepare to receive using doubles according to the given displacements for each process
-    _comm->presetConfigure(1,_displacementvv);
-
-    // for each row
-    for (size_t i=0; i<_totalRows; i++)
-    {
-        double* sendBuffer = &_columns(i,0);
-        double* recvBuffer = _isValidRowv[i] ? &_rows(_relativeRowIndexv[i],0) : 0;
-        int recvRank = _rowAssigner->rankForIndex(i);
-
-        _comm->presetGatherw(sendBuffer, _columns.size(1), recvBuffer, recvRank);
-
-        //_comm->gatherw(sendBuffer, _columns.size(1), recvBuffer, recvRank, 1, _displacementvv);
-        // Elk proces i zendt vanuit sendBuffer, _columns.size(1) doubles naar recvBuffer op recvRank in de vorm
-        // van datatype i bepaald door blocksize 1 en _displacementvv[i].
-    }
-    // free the memory taken by the datatypes
-    _comm->presetClear();
-}
-
-////////////////////////////////////////////////////////////////////
-
-void ParallelTable::row_to_col()
-{
-    // prepare to send using doubles according to the given displacements for each process
-    _comm->presetConfigure(1,_displacementvv);
-
-    for (size_t i=0; i<_totalRows; i++)
-    {
-        double* sendBuffer = _isValidRowv[i] ? &_rows(_relativeRowIndexv[i],0) : 0;
-        double* recvBuffer = &_columns(i,0);
-        int sendRank = _rowAssigner->rankForIndex(i);
-
-        _comm->presetScatterw(sendBuffer, sendRank, recvBuffer, _columns.size(1));
-
-        //_comm->scatterw(sendBuffer, sendRank, 1, _displacementvv, recvBuffer, _columns.size(1));
-        // Proces sendRank zendt vanuit sendBuffer een aantal doubles in de vorm van datatype i bepaald door
-        // _displacementvv[i] naar recvBuffer op rank i.
-    }
-    _comm->presetClear();
-}
-
-////////////////////////////////////////////////////////////////////
-
-void ParallelTable::allAtOnceCtR()
-{
-
     int Nprocs = _comm->size();
 
+    // All the partial rows from _columns are sent in one block per receiving process. Therefore, the sendcount is 1.
+    // The rows to send are indicated by the absolute row-indices assigned to each process. As each block in the send
+    // pattern will represent a single partial row, the blocklength is equal to the width of _columns.
     double* sendBuffer = &_columns(0,0);
     IntTable sendDispvv;
     sendDispvv.reserve(Nprocs);
@@ -485,19 +309,31 @@ void ParallelTable::allAtOnceCtR()
     int sendBlockLength = _columns.size(1);
     int sendExtent = _totalRows*sendBlockLength;
 
+    // All the complete rows stored at a process will be filled up by repeating the pattern used to fill a single one.
+    // The pattern consists of doubles displaced over a distance of their absolute column index. To ensure that the
+    // receive patterns are repeated correctly, the extent of each pattern should be equal to the length of a complete
+    // row, or the width of _rows.
     double* recvBuffer = &_rows(0,0);
+    IntTable recvDispvv;
+    recvDispvv.reserve(Nprocs);
+    for (int r=0; r<Nprocs; r++) recvDispvv.push_back(_colAssigner->indicesForRank(r));
     int recvCount = _rows.size(0);
     int recvExtent = _totalCols;
 
     _comm->displacedBlocksAllToAll(sendBuffer, 1, sendDispvv, sendBlockLength, sendExtent,
-                                   recvBuffer, recvCount, _displacementvv, 1, recvExtent);
+                                   recvBuffer, recvCount, recvDispvv, 1, recvExtent);
 }
 
-void ParallelTable::allAtOnceRtC()
+////////////////////////////////////////////////////////////////////
+
+void ParallelTable::rowsToColums()
 {
     int Nprocs = _comm->size();
 
     double* sendBuffer = &_rows(0,0);
+    IntTable sendDispvv;
+    sendDispvv.reserve(Nprocs);
+    for (int r=0; r<Nprocs; r++) sendDispvv.push_back(_colAssigner->indicesForRank(r));
     int sendCount = _rows.size(0);
     int sendExtent = _totalCols;
 
@@ -508,7 +344,6 @@ void ParallelTable::allAtOnceRtC()
     int recvBlockLength = _columns.size(1);
     int recvExtent = _totalRows*recvBlockLength;
 
-    _comm->displacedBlocksAllToAll(sendBuffer, sendCount, _displacementvv, 1, sendExtent,
+    _comm->displacedBlocksAllToAll(sendBuffer, sendCount, sendDispvv, 1, sendExtent,
                                    recvBuffer, 1, recvDispvv, recvBlockLength, recvExtent);
-
 }

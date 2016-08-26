@@ -70,26 +70,30 @@ public:
         receiving process calls this function. */
     static void receiveByteBuffer(QByteArray& buffer, int sender, int& tag);
 
-    static void sendDouble(double& buffer, int receiver, int tag);
-
-    static void receiveDouble(double& buffer, int sender, int tag);
-
-    static void wait_all();
-
+    /** This function gathers a number of doubles from all processes at a certain receiving rank. The user can specify
+        a pattern that will determine where exactly the received doubles will be placed in the receive buffer. This
+        pattern consists blocks of equal length, placed in certain positions that depend on the process the data was
+        received from. The receival positions per sending process are given through the displacements argument. This
+        argument should contain as many lists as there are processes involved in this communication, and each list
+        should consist of the locations where the blocks should start, in units of the block length. All processes must
+        call this function for the communication to proceed. */
     static void gatherw(double* sendBuffer, int sendCount,
                         double* recvBuffer, int recvRank, int recvLength,
                         const std::vector<std::vector<int> >& recvDisplacements);
 
-    static void scatterw(double* sendBuffer, int sendRank, int sendLength,
-                         const std::vector<std::vector<int>>& sendDisplacements,
-                         double* recvBuffer, int recvCount);
-
-    static void presetGatherw(double* sendBuffer, int sendCount, double* recvBuffer, int recvRank);
-    static void presetScatterw(double* sendBuffer, int sendRank, double* recvBuffer, int recvCount);
-
-    static void presetConfigure(int length, const std::vector<std::vector<int>>& displacements);
-    static void presetClear();
-
+    /** This function lets all processes send and receive an amount of double values. The arguments provide the
+        necessary flexibility to handle non-contiguous data. The user can specify any pattern within the buffers that
+        indicates which data to send to and receive from each process individually. The count arguments determine
+        the number of times the patterns will be repeated. The shape of such a pattern consists of blocks of which the
+        length is determined by the length arguments. The starting point of each block is placed at a multiple of the
+        block length, and the amount empty space between the blocks will therefore also be a multiple of the block length.
+        The exact locations where the blocks need to be placed can be specified using the nested lists of displacements.
+        Each of the two 'displacements' arguments should contain a list of block displacements, in units of the block
+        length, for each process individually. This means that the number of lists should be equal to the number of
+        processes. The last arguments are the extents each of the patterns should have. These are especially important
+        when the corresponding count argument is greater than 1, as then they will determine where the next iteration of
+        a pattern will start. All processes must call this function for the
+        communication to proceed. */
     static void displacedBlocksAllToAll(double* sendBuffer, int sendCount,
                                         std::vector<std::vector<int>>& sendDisplacements, int sendLength,
                                         int sendExtent, double* recvBuffer, int recvCount,
@@ -109,6 +113,9 @@ public:
         communication to proceed. */
     static void sum_all(double* my_array, int nvalues);
 
+    /** This function performs a reduction of a given boolean, by applying the logical AND operator across all
+        processes. The result will overwrite the original boolean to which a pointer was passed. All processes must call
+        this function for the communication to proceed. */
     static void and_all(bool* boolean);
 
     /** This function is used to broadcast an array of double values from one process to all other

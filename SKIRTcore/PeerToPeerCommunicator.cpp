@@ -70,33 +70,6 @@ void PeerToPeerCommunicator::broadcast(int& value, int sender)
 
 ////////////////////////////////////////////////////////////////////
 
-void PeerToPeerCommunicator::sendDouble(double& buffer, int receiver, int tag)
-{
-    if (!isMultiProc()) return;
-
-    ProcessManager::sendDouble(buffer,receiver,tag);
-}
-
-////////////////////////////////////////////////////////////////////
-
-void PeerToPeerCommunicator::receiveDouble(double& buffer, int sender, int tag)
-{
-    if (!isMultiProc()) return;
-
-    ProcessManager::receiveDouble(buffer,sender,tag);
-}
-
-////////////////////////////////////////////////////////////////////
-
-void PeerToPeerCommunicator::finishRequests()
-{
-    if (!isMultiProc()) return;
-
-    ProcessManager::wait_all();
-}
-
-////////////////////////////////////////////////////////////////////
-
 void PeerToPeerCommunicator::gatherw(double* sendBuffer, int sendCount,
                                      double* recvBuffer, int recvRank, int recvLength,
                                      const std::vector<std::vector<int>>& recvDisplacements)
@@ -106,50 +79,7 @@ void PeerToPeerCommunicator::gatherw(double* sendBuffer, int sendCount,
     ProcessManager::gatherw(sendBuffer, sendCount, recvBuffer, recvRank, recvLength, recvDisplacements);
 }
 
-void PeerToPeerCommunicator::scatterw(double* sendBuffer, int sendRank, int sendLength,
-                                      const std::vector<std::vector<int>>& sendDisplacements,
-                                      double* recvBuffer, int recvCount)
-{
-    if(!isMultiProc()) return;
-
-    ProcessManager::scatterw(sendBuffer, sendRank, sendLength, sendDisplacements, recvBuffer, recvCount);
-}
-
 ////////////////////////////////////////////////////////////////////
-
-void PeerToPeerCommunicator::presetGatherw(double *sendBuffer, int sendCount, double *recvBuffer, int recvRank)
-{
-    if(!isMultiProc()) return;
-
-    ProcessManager::presetGatherw(sendBuffer, sendCount, recvBuffer, recvRank);
-}
-
-////////////////////////////////////////////////////////////////////
-
-void PeerToPeerCommunicator::presetScatterw(double *sendBuffer, int sendRank, double *recvBuffer, int recvCount)
-{
-    if(!isMultiProc()) return;
-
-    ProcessManager::presetScatterw(sendBuffer, sendRank, recvBuffer, recvCount);
-}
-
-////////////////////////////////////////////////////////////////////
-
-void PeerToPeerCommunicator::presetConfigure(int length, const std::vector<std::vector<int>>& displacements)
-{
-    if(!isMultiProc()) return;
-
-    ProcessManager::presetConfigure(length,displacements);
-}
-
-////////////////////////////////////////////////////////////////////
-
-void PeerToPeerCommunicator::presetClear()
-{
-    if(!isMultiProc()) return;
-
-    ProcessManager::presetClear();
-}
 
 void PeerToPeerCommunicator::displacedBlocksAllToAll(double* sendBuffer, int sendCount,
                                                      std::vector<std::vector<int>>& sendDisplacements, int sendLength,
