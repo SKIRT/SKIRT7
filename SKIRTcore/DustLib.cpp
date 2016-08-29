@@ -145,11 +145,8 @@ namespace
                     double total = Lv.sum();
                     if (total>0) Lv /= total;
 
-                    {
-                        // copy the output array to the corresponding row of the output table
-                        for (int ell=0; ell<_Nlambda; ell++) _Lvv(m,ell) = Lv[ell];
-                    }
-
+                    // copy the output array to the corresponding row of the output table
+                    for (int ell=0; ell<_Nlambda; ell++) _Lvv(m,ell) = Lv[ell];
                 }
             }
         }
@@ -194,7 +191,7 @@ void DustLib::calculate()
     // Wait for the other processes to reach this point
     comm->wait("the emission spectra calculation");
 
-    _Lvv.sync();
+    _Lvv.switchScheme();
 }
 
 ////////////////////////////////////////////////////////////////////

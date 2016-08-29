@@ -134,7 +134,7 @@ void PanDustSystem::setupSelfAfter()
         if (selfAbsorption())
         {
             //_Labsdustvv.resize(_Ncells,_Nlambda);
-            _Labsdustvv.initialize("Absorbed Dust Luminosity",_lambdaAssigner,_assigner,COLUMN);
+            _Labsdustvv.initialize("Absorbed Dust Luminosity Table",_lambdaAssigner,_assigner,COLUMN);
             _haveLabsdust = true;
         }
     }
@@ -424,10 +424,10 @@ void PanDustSystem::calculatedustemission(bool ynstellar)
 
 void PanDustSystem::sumResults(bool ynstellar)
 {
-    if (ynstellar)
-        _Labsstelvv.sync();
-    else
-        _Labsdustvv.sync();
+    //if (ynstellar)
+        _Labsstelvv.switchScheme();
+    //else
+        _Labsdustvv.switchScheme();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -453,7 +453,7 @@ namespace
         // cached values initialized in constructor
         const PanDustSystem* _ds;
         bool _distributed;
-        ProcessAssigner* _cellAssigner;
+        const ProcessAssigner* _cellAssigner;
         DustGrid* _grid;
         Units* _units;
         Log* _log;

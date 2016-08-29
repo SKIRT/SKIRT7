@@ -36,7 +36,7 @@ public:
     const double& operator()(size_t i, size_t j) const; // read operator
     double& operator()(size_t i, size_t j); // write operator
     // Basic operations
-    void sync(); // communicates between processes to synchronize _colDist with _rowDist or vice versa
+    void switchScheme(); // communicates between processes to synchronize _colDist with _rowDist or vice versa
     void clear(); // reset contents to zeros
 
     // Different kinds of summations
@@ -65,6 +65,7 @@ private:
     bool _distributed;     // false if memory is not distributed
     bool _synced;   // true if the writable table has not changed since the last sync
     bool _initialized;
+    bool _switched;
 
     // the dimensions of the table represented by this data structure
     size_t _totalRows;
