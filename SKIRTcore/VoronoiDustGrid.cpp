@@ -56,7 +56,7 @@ void VoronoiDustGrid::setupSelfBefore()
             }
             log->info("Computing Voronoi tesselation for " + QString::number(_numParticles)
                       + " uniformly distributed random particles...");
-            _mesh = new VoronoiMesh(rv, extent());
+            _mesh = new VoronoiMesh(rv, extent(), log);
             break;
         }
     case CentralPeak:
@@ -81,7 +81,7 @@ void VoronoiDustGrid::setupSelfBefore()
             }
             log->info("Computing Voronoi tesselation for " + QString::number(_numParticles)
                       + " random particles distributed in a central peak...");
-            _mesh = new VoronoiMesh(rv, extent());
+            _mesh = new VoronoiMesh(rv, extent(), log);
             break;
         }
     case DustDensity:
@@ -103,7 +103,7 @@ void VoronoiDustGrid::setupSelfBefore()
             }
             log->info("Computing Voronoi tesselation for " + QString::number(_numParticles)
                       + " random particles distributed according to dust density...");
-            _mesh = new VoronoiMesh(rv, extent());
+            _mesh = new VoronoiMesh(rv, extent(), log);
             break;
         }
     case DustTesselation:
@@ -122,14 +122,14 @@ void VoronoiDustGrid::setupSelfBefore()
             if (!dpi) throw FATALERROR("Can't retrieve particle locations from this dust distribution");
             log->info("Computing Voronoi tesselation for " + QString::number(dpi->numParticles())
                       + " dust distribution particles...");
-            _mesh = new VoronoiMesh(dpi, extent());
+            _mesh = new VoronoiMesh(dpi, extent(), log);
             break;
         }
     case File:
         {
             if (!_meshfile) throw FATALERROR("File containing particle locations is not defined");
             log->info("Computing Voronoi tesselation for particles loaded from file " + _meshfile->filename() + "...");
-            _mesh = new VoronoiMesh(_meshfile, QList<int>(), extent());
+            _mesh = new VoronoiMesh(_meshfile, QList<int>(), extent(), log);
             break;
         }
     default:
