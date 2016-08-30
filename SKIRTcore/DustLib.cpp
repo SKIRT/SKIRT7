@@ -58,9 +58,7 @@ namespace
         int _Nlambda;
         int _Ncomp;
         QTime _timer;           // measures the time elapsed since the most recent log message
-
-        // new stuff
-        ProcessAssigner* _cellAssigner;
+        ProcessAssigner* _cellAssigner; // converts the relative dust cell indices in the mapping to absolute indices
 
     public:
         // constructor
@@ -129,12 +127,6 @@ namespace
                 // combine emissivities into SED for each dust cell, and store the normalized SEDs
                 foreach (int m, mv)
                 {
-                    /*
-                    // get a reference to the output array for this dust cell
-                    Array& Lv = _Lvv[m];
-                    */
-
-                    // clear the output array
                     Array Lv(_Nlambda);
 
                     // calculate the emission for this cell
@@ -161,7 +153,7 @@ void DustLib::calculate()
 
     // initialize/clear the ParallelTable that stores and communicates the results
     if (!_Lvv.initialized()) _Lvv.initialize("Dust Emission Spectra Table",_lambdaAssigner,_cellAssigner,ROW);
-    else _Lvv.clear();
+    else _Lvv.reset();
 
     // get mapping from cells to library entries.
     int Nlib = entries();

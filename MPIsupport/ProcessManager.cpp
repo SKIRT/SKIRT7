@@ -266,10 +266,10 @@ void ProcessManager::sum_all(double* my_array, int nvalues)
 #endif
 }
 
-void ProcessManager::and_all(bool* boolean)
+void ProcessManager::or_all(bool* boolean)
 {
 #ifdef BUILDING_WITH_MPI
-    MPI_Allreduce(MPI_IN_PLACE, boolean, 1, MPI_C_BOOL, MPI_LAND, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, boolean, 1, MPI_C_BOOL, MPI_LOR, MPI_COMM_WORLD);
 #else
     Q_UNUSED(boolean)
 #endif

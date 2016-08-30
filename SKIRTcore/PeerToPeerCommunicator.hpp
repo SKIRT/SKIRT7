@@ -44,7 +44,7 @@ public:
 
     void sum_all(double& dbl);
 
-    void and_all(bool& b);
+    void or_all(bool& b);
 
     /** This function is used for broadcasting the values in an Array from one particular process to
         all other processes in this communicator. The rank of the sending process is indicated with the

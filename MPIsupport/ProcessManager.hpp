@@ -116,7 +116,7 @@ public:
     /** This function performs a reduction of a given boolean, by applying the logical AND operator across all
         processes. The result will overwrite the original boolean to which a pointer was passed. All processes must call
         this function for the communication to proceed. */
-    static void and_all(bool* boolean);
+    static void or_all(bool* boolean);
 
     /** This function is used to broadcast an array of double values from one process to all other
         processes. A pointer to the first value is passed as the first argument, the number of
