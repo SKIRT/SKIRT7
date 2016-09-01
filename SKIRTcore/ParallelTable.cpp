@@ -4,15 +4,24 @@
 #include "ProcessAssigner.hpp"
 #include "TimeLogger.hpp"
 
+namespace {
+    typedef std::vector<std::vector<int>> IntTable;
+}
+
+////////////////////////////////////////////////////////////////////
+
 ParallelTable::ParallelTable()
-    : _name(""), _colAssigner(0), _rowAssigner(0), _distributed(false), _synced(false), _initialized(false), _comm(0), _log(0)
+    : _name(""), _colAssigner(nullptr), _rowAssigner(nullptr), _distributed(false), _modified(false),
+      _initialized(false), _switched(false), _comm(nullptr), _log(nullptr)
 {
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void ParallelTable::initialize(QString name, const ProcessAssigner *colAssigner, const ProcessAssigner *rowAssigner, writeState writeOn)
+void ParallelTable::initialize(QString name, const ProcessAssigner *colAssigner, const ProcessAssigner *rowAssigner,
+                               writeState writeOn)
 {
+    // Fill in some basic data members
     _name = name;
     _colAssigner = colAssigner;
     _rowAssigner = rowAssigner;
@@ -24,54 +33,53 @@ void ParallelTable::initialize(QString name, const ProcessAssigner *colAssigner,
     _totalRows = _rowAssigner->total();
     _totalCols = _colAssigner->total();
 
-    _isValidRowv.resize(_totalRows, false);
-    _isValidColv.resize(_totalCols, false);
-    for (size_t i=0; i<_totalRows; i++) _isValidRowv[i] = _rowAssigner->validIndex(i);
-    for (size_t j=0; j<_totalCols; j++) _isValidColv[j] = _colAssigner->validIndex(j);
-
-    // Use the distributed memory scheme
     if (colAssigner->parallel() && rowAssigner->parallel() && _comm->isMultiProc())
     {
-        _log->info(_name + " is distributed. Sizes of local tables are ("
-                   + QString::number(_totalRows) + "," + QString::number(_colAssigner->nvalues())
-                   + ") and ("
-                   + QString::number(_rowAssigner->nvalues()) + "," + QString::number(_totalCols) + ")"
-                   );
-
+        // Use the distributed memory scheme
         _distributed = true;
-        _columns.resize(_totalRows,colAssigner->nvalues());
-        _rows.resize(rowAssigner->nvalues(),_totalCols);
 
-        int Nprocs = _comm->size();
-        _displacementvv.reserve(Nprocs);
-        for (int r=0; r<Nprocs; r++) _displacementvv.push_back(_colAssigner->indicesForRank(r));
+        // Inform the user about the mode used and the dimensions (N,M) of the locally stored data
+        _log->info(_name + " is distributed. Sizes of local tables are (" + QString::number(_totalRows) + ","
+                   + QString::number(_colAssigner->nvalues()) + ") and (" + QString::number(_rowAssigner->nvalues())
+                   + "," + QString::number(_totalCols) + ")");
 
+        // Set the size of the relevant table
+        if (_writeOn == COLUMN) allocateColumns();
+        else if (_writeOn == ROW) allocateRows();
+        else throw FATALERROR("Invalid writeState for ParallelTable");
+
+        // Cache the outcomes of the following function calls
+        _isValidRowv.resize(_totalRows, false);
+        for (size_t i=0; i<_totalRows; i++) _isValidRowv[i] = _rowAssigner->validIndex(i);
+        _isValidColv.resize(_totalCols, false);
+        for (size_t j=0; j<_totalCols; j++) _isValidColv[j] = _colAssigner->validIndex(j);
         _relativeRowIndexv.resize(_totalRows, 0);
-        _relativeColIndexv.resize(_totalCols, 0);
         for (size_t i=0; i<_totalRows; i++) _relativeRowIndexv[i] = _rowAssigner->relativeIndex(i);
+        _relativeColIndexv.resize(_totalCols, 0);
         for (size_t j=0; j<_totalCols; j++) _relativeColIndexv[j] = _rowAssigner->relativeIndex(j);
     }
-    // not distributed
+
     else
     {
-        _log->info(_name + " is not distributed. Size is ("
-                    + QString::number(_totalRows) + "," + QString::number(_totalCols) + ")"
-                   );
-
+        // Not distributed
         _distributed = false;
+
+        _log->info(_name + " is not distributed. Size is (" + QString::number(_totalRows) + ","
+                   + QString::number(_totalCols) + ")");
+
+        // Set the size of one of the tables. The other one will not be used.
         if (writeOn == COLUMN) _columns.resize(_totalRows,_totalCols);
         else if (writeOn == ROW) _rows.resize(_totalRows,_totalCols);
         else throw FATALERROR("Invalid writeState for ParallelTable");
     }
     _initialized = true;
-    _synced = true;
 }
 
 ////////////////////////////////////////////////////////////////////
 
 const double& ParallelTable::operator()(size_t i, size_t j) const
 {
-    if (!_synced) throw FATALERROR(_name + " says: sync() must be called before using the read operator");
+    if (!_switched) throw FATALERROR(_name + " says: switchScheme() must be called before using the read operator");
 
     // WORKING DISTRIBUTED: Read from the table opposite to the table we _writeOn.
     if (_distributed)
@@ -103,7 +111,7 @@ const double& ParallelTable::operator()(size_t i, size_t j) const
 
 double& ParallelTable::operator()(size_t i, size_t j)
 {
-    if (_synced) _synced = false;
+    if (!_modified) _modified = true;
 
     // WORKING DISTRIBUTED: Writable reference to the table we _writeOn.
     if (_distributed)
@@ -131,101 +139,110 @@ double& ParallelTable::operator()(size_t i, size_t j)
     }
 }
 
-////////////////////////////////////////////////////////////////////
-
-Array& ParallelTable::operator[](size_t i)
+void ParallelTable::switchScheme()
 {
-    if (_synced) _synced = false;
+    // If any of the processes has modified its paralleltable, all of them need to know this to participate in this
+    // global communication
+    _comm->or_all(_modified);
 
-    if (_writeOn == ROW) // return writable reference to a complete row
-    {
-        if (!_isValidRowv[i])
-            throw FATALERROR(_name + " says: Row of ParallelTable not available on this process");
-        else return _rows[_distributed ? _relativeRowIndexv[i] : i];
-    }
-    else throw FATALERROR(_name + " says: This ParallelTable does not have writable rows.");
-}
-
-////////////////////////////////////////////////////////////////////
-
-const Array& ParallelTable::operator[](size_t i) const
-{
-    if (!_synced) throw FATALERROR(_name + " says: sync() must be called before asking a read reference");
-
-    if (_distributed && _writeOn == COLUMN) // return read only reference to a complete row
-    {
-        if (!_isValidRowv[i])
-            throw FATALERROR(_name + " says: Row of ParallelTable not available on this process");
-        else return _rows[_relativeRowIndexv[i]];
-    }
-    else throw FATALERROR(_name + " says: This ParallelTable does not have readable rows.");
-}
-
-////////////////////////////////////////////////////////////////////
-
-void ParallelTable::sync()
-{
-    // Get a global value for the synced flag, in case one of the processes never wrote something
-    _comm->and_all(_synced);
-    if (!_synced)
+    if (!_switched)
     {
         TimeLogger logger(_log->verbose() && _comm->isMultiProc() ? _log : 0, "communication of " + _name);
 
-        if (!_distributed) sum_all();
-        else if (_writeOn == COLUMN) col_to_row();
-        else if (_writeOn == ROW) row_to_col();
+        if (!_distributed)
+        {
+            if (_modified) sum_all();
+        }
+        else if (_writeOn == COLUMN)
+        {
+            allocateRows();
+            if (_modified) columsToRows();
+            destroyColumns();
+        }
+        else if (_writeOn == ROW)
+        {
+            allocateColumns();
+            if (_modified) rowsToColums();
+            destroyRows();
+        }
     }
-    _synced = true;
+    _modified = false;
+    _switched = true;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void ParallelTable::clear()
+void ParallelTable::reset()
 {
-    _columns.clear();
-    for (size_t i=0; i<_rows.size(0); i++) _rows[i] *= 0;
-
-    _synced = true;
+    if (_distributed)
+    {
+        if (_writeOn == COLUMN)
+        {
+            destroyRows();
+            allocateColumns();
+        }
+        else
+        {
+            destroyColumns();
+            allocateRows();
+        }
+    }
+    else
+    {
+        _columns.clear();
+        _rows.clear();
+    }
+    _modified = false;
+    _switched = false;
 }
 
 ////////////////////////////////////////////////////////////////////
 
 double ParallelTable::sumRow(size_t i) const
 {
-    if (!_synced) throw FATALERROR(_name + " says: sync() must be called before using summation functions");
+    if (!_switched) throw FATALERROR(_name + " says: switchScheme() must be called before using summation functions");
+    if (_writeOn == ROW) throw FATALERROR("Not available in ROW mode.");
 
     double sum = 0;
     if (_distributed)
     {
-        if (_isValidRowv[i]) // we have the whole row
-            return _rows[_relativeRowIndexv[i]].sum();
-        else throw FATALERROR(_name + " says: sumRow(index) called on wrong index");
+        if (_writeOn == COLUMN) // read from _rows
+        {
+            if (_isValidRowv[i]) // we have the whole row
+                for (size_t j=0; j<_totalCols; j++)
+                    sum += _rows(_relativeRowIndexv[i],j);
+            else throw FATALERROR("Row not available.");
+        }
     }
     else // not distributed -> everything available, so straightforward
     {
-        for (int j=0; j<_totalCols; j++)
+        for (size_t j=0; j<_totalCols; j++)
             sum += (*this)(i,j);
-        return sum;
     }
+    return sum;
 }
 
 ////////////////////////////////////////////////////////////////////
 
 double ParallelTable::sumColumn(size_t j) const
 {
-    if (!_synced) throw FATALERROR(_name + " says: sync() must be called before using summation functions");
+    if (!_switched) throw FATALERROR(_name + " says: switchScheme() must be called before using summation functions");
+    if (_writeOn == COLUMN) throw FATALERROR("Not available in COLUMN mode.");
 
     double sum = 0;
     if (_distributed)
     {
-        if(_isValidColv[j]) // we have the whole column
-            for (int i=0; i<_totalRows; i++)
-                sum += _columns(i,_relativeColIndexv[j]);
-        else throw FATALERROR(_name + " says: sumColumn(index) called on wrong index");
+        if (_writeOn == ROW) // read from columns
+        {
+            if(_isValidColv[j]) // we have the whole column
+                for (size_t i=0; i<_totalRows; i++)
+                    sum += _columns(i,_relativeColIndexv[j]);
+            else throw FATALERROR("Column not available.");
+        }
     }
     else // not distributed
     {
-        for (int i=0; i<_totalRows; i++)
+        for (size_t i=0; i<_totalRows; i++)
             sum += (*this)(i,j);
     }
     return sum;
@@ -235,15 +252,27 @@ double ParallelTable::sumColumn(size_t j) const
 
 Array ParallelTable::stackColumns() const
 {
-    if (!_synced) throw FATALERROR(_name + " says: sync() must be called before using summation functions");
+    if (!_switched) throw FATALERROR(_name + " says: switchScheme() must be called before using summation functions");
 
     Array result(_totalRows);
 
     if(_distributed)
     {
-        // fastest way: sum only the values in _rows, then do one big sum over the processes
-        for (size_t iRel=0; iRel<_rows.size(0); iRel++)
-            result[_rowAssigner->absoluteIndex(iRel)] = _rows[iRel].sum();
+        if (_writeOn == COLUMN) // use rows to get a part of the stacked column
+        {
+            for (size_t iRel=0; iRel<_rows.size(0); iRel++)
+            {
+                size_t i = _rowAssigner->absoluteIndex(iRel);
+                for (size_t j=0; j<_totalCols; j++)
+                    result[i] += _rows(iRel,j);
+            }
+        }
+        else // sum the local columns
+        {
+            for (size_t i=0; i<_totalRows; i++)
+                for (size_t jRel=0; jRel<_columns.size(1); jRel++)
+                    result[i] += _columns(i,jRel);
+        }
         _comm->sum_all(result);
     }
     else
@@ -258,23 +287,32 @@ Array ParallelTable::stackColumns() const
 
 Array ParallelTable::stackRows() const
 {
-    if (!_synced) throw FATALERROR(_name + " says: sync() must be called before using summation functions");
+    if (!_switched) throw FATALERROR(_name + " says: switchScheme() must be called before using summation functions");
 
     Array result(_totalCols);
 
     if(_distributed)
     {
-        for (size_t jRel=0; jRel<_columns.size(1); jRel++)
+        if (_writeOn == COLUMN) // sum the local rows
         {
-            size_t j = _colAssigner->absoluteIndex(jRel);
-            for (size_t i=0; i<_columns.size(0); i++)
-                result[j] += _columns(i,jRel);
+            for (size_t j=0; j<_totalCols; j++)
+                for (size_t iRel=0; iRel<_rows.size(0); iRel++)
+                    result[j] += _rows(iRel,j);
+        }
+        else // use columns to get a part of the stacked row
+        {
+            for (size_t jRel=0; jRel<_columns.size(1); jRel++)
+            {
+                size_t j = _colAssigner->absoluteIndex(jRel);
+                for (size_t i=0; i<_totalRows; i++)
+                    result[j] += _columns(i,jRel);
+            }
         }
         _comm->sum_all(result);
     }
     else
     {
-        for (int j=0; j<_totalCols; j++)
+        for (size_t j=0; j<_totalCols; j++)
             result[j] = sumColumn(j);
     }
     return result;
@@ -284,7 +322,7 @@ Array ParallelTable::stackRows() const
 
 double ParallelTable::sumEverything() const
 {
-    if (!_synced) throw FATALERROR(_name + " says: sync() must be called before using summation functions");
+    if (!_switched) throw FATALERROR(_name + " says: switchScheme() must be called before using summation functions");
 
     return stackColumns().sum();
 }
@@ -307,16 +345,16 @@ bool ParallelTable::initialized() const
 
 void ParallelTable::sum_all()
 {
-    if (_writeOn == COLUMN)
+    if (_modified)
     {
-        Array& arr = _columns.getArray();
-        _comm->sum_all(arr);
-    }
-    else
-    {
-        for (int i=0; i<_totalRows; i++)
+        if (_writeOn == COLUMN)
         {
-            Array& arr = _rows[i];
+            Array& arr = _columns.getArray();
+            _comm->sum_all(arr);
+        }
+        else
+        {
+            Array& arr = _rows.getArray();
             _comm->sum_all(arr);
         }
     }
@@ -324,148 +362,85 @@ void ParallelTable::sum_all()
 
 ////////////////////////////////////////////////////////////////////
 
-// To be removed
-void ParallelTable::onebyone_col_to_row()
+void ParallelTable::columsToRows()
 {
-    int thisRank = _comm->rank();
+    int Nprocs = _comm->size();
 
-    int sendCount = 0;
-    int N = 750;
+    // All the partial rows from _columns are sent in one block per receiving process. Therefore, the sendcount is 1.
+    // The rows to send are indicated by the absolute row-indices assigned to each process. As each block in the send
+    // pattern will represent a single partial row, the blocklength is equal to the width of _columns.
+    double* sendBuffer = &_columns(0,0);
+    IntTable sendDispvv;
+    sendDispvv.reserve(Nprocs);
+    for (int r=0; r<Nprocs; r++) sendDispvv.push_back(_rowAssigner->indicesForRank(r));
+    int sendBlockLength = _columns.size(1);
+    int sendExtent = _totalRows*sendBlockLength;
 
-    for (int i=0; i<_totalRows; i++) // for each possible row of the big array (determines receiver)
-    {
-        int tgtRank = _rowAssigner->rankForIndex(i); // the rank where target has row i in it
+    // All the complete rows stored at a process will be filled up by repeating the pattern used to fill a single one.
+    // The pattern consists of doubles displaced over a distance of their absolute column index. To ensure that the
+    // receive patterns are repeated correctly, the extent of each pattern should be equal to the length of a complete
+    // row, or the width of _rows.
+    double* recvBuffer = &_rows(0,0);
+    IntTable recvDispvv;
+    recvDispvv.reserve(Nprocs);
+    for (int r=0; r<Nprocs; r++) recvDispvv.push_back(_colAssigner->indicesForRank(r));
+    int recvCount = _rows.size(0);
+    int recvExtent = _totalCols;
 
-        // post some receives
-        for (int j=0; j<_totalCols; j++) // for each possible column of the big array (determines sender)
-        {
-            int srcRank = _colAssigner->rankForIndex(j); // the rank where the source has col j in it
-            int tag = i*_totalCols + j; // unique for each position in the big array
-
-            if (thisRank!= srcRank && thisRank == tgtRank) // receive if target needs row i
-            {
-                double& recvbuf = _rows(_rowAssigner->relativeIndex(i),j);
-                _comm->receiveDouble(recvbuf,srcRank,tag);
-            }
-        }
-        // post some sends
-        for (int j=0; j<_totalCols; j++) // for each possible column of the big array (determines sender)
-        {
-            int srcRank = _colAssigner->rankForIndex(j); // the rank where the source has col j in it
-            int tag = i*_totalCols + j; // unique for each position in the big array
-
-            if (thisRank == srcRank) // if this process has column j, do send
-            {
-                double& sendbuf = _columns(i,_colAssigner->relativeIndex(j));
-                if (thisRank == tgtRank) _rows(_rowAssigner->relativeIndex(i), j) = sendbuf;
-                else _comm->sendDouble(sendbuf,tgtRank,tag);
-            }
-            sendCount++;
-        }
-        // clear the request vector every N
-        if (sendCount > N)
-        {
-            _comm->finishRequests();
-            sendCount = 0;
-        }
-    }
-    _comm->finishRequests();
+    _comm->displacedBlocksAllToAll(sendBuffer, 1, sendDispvv, sendBlockLength, sendExtent,
+                                   recvBuffer, recvCount, recvDispvv, 1, recvExtent);
 }
 
 ////////////////////////////////////////////////////////////////////
 
-// To be removed
-void ParallelTable::onebyone_row_to_col()
+void ParallelTable::rowsToColums()
 {
-    int thisRank = _comm->rank();
+    int Nprocs = _comm->size();
 
-    int sendCount = 0;
-    int N = 750;
+    double* sendBuffer = &_rows(0,0);
+    IntTable sendDispvv;
+    sendDispvv.reserve(Nprocs);
+    for (int r=0; r<Nprocs; r++) sendDispvv.push_back(_colAssigner->indicesForRank(r));
+    int sendCount = _rows.size(0);
+    int sendExtent = _totalCols;
 
-    for (int i=0; i<_totalRows; i++) // for each row (determines sender)
-    {
-        int srcRank = _rowAssigner->rankForIndex(i);
+    double* recvBuffer = &_columns(0,0);
+    IntTable recvDispvv;
+    recvDispvv.reserve(Nprocs);
+    for (int r=0; r<Nprocs; r++) recvDispvv.push_back(_rowAssigner->indicesForRank(r));
+    int recvBlockLength = _columns.size(1);
+    int recvExtent = _totalRows*recvBlockLength;
 
-        // post some receives
-        for (int j=0; j<_totalCols; j++) // for each column (determines receiver)
-        {
-            int tgtRank = _colAssigner->rankForIndex(j);
-            int tag = i*_totalCols + j;
-
-            if (thisRank != srcRank && thisRank == tgtRank)
-            {
-                double& recvbuf = _columns(i,_colAssigner->relativeIndex(j));
-                _comm->receiveDouble(recvbuf,srcRank,tag);
-            }
-        }
-        // post some sends
-        for (int j=0; j<_totalCols; j++) // for each column (determines receiver)
-        {
-            int tgtRank = _colAssigner->rankForIndex(j);
-            int tag = i*_totalCols + j;
-
-            if (thisRank == srcRank)
-            {
-                double& sendbuf = _rows(_rowAssigner->relativeIndex(i),j);
-                if (thisRank == tgtRank) _columns(i,_colAssigner->relativeIndex(j)) = sendbuf;
-                else _comm->sendDouble(sendbuf,tgtRank,tag);
-            }
-            sendCount++;
-        }
-        // clear the request vector every N
-        if (sendCount > N)
-        {
-            _comm->finishRequests();
-            sendCount = 0;
-        }
-    }
-    _comm->finishRequests();
+    _comm->displacedBlocksAllToAll(sendBuffer, sendCount, sendDispvv, 1, sendExtent,
+                                   recvBuffer, 1, recvDispvv, recvBlockLength, recvExtent);
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void ParallelTable::col_to_row()
+void ParallelTable::allocateColumns()
 {
-    // prepare to receive using doubles according to the given displacements for each process
-    _comm->presetConfigure(1,_displacementvv);
-
-    // for each row
-    for (int i=0; i<_totalRows; i++)
-    {
-        double* sendBuffer = &_columns(i,0);
-        double* recvBuffer = _isValidRowv[i] ? &_rows(_relativeRowIndexv[i],0) : 0;
-        int recvRank = _rowAssigner->rankForIndex(i);
-
-        _comm->presetGatherw(sendBuffer, _columns.size(1), recvBuffer, recvRank);
-
-        //_comm->gatherw(sendBuffer, _columns.size(1), recvBuffer, recvRank, 1, _displacementvv);
-        // Elk proces i zendt vanuit sendBuffer, _columns.size(1) doubles naar recvBuffer op recvRank in de vorm
-        // van datatype i bepaald door blocksize 1 en _displacementvv[i].
-    }
-    // free the memory taken by the datatypes
-    _comm->presetClear();
+    _columns.resize(_totalRows, _colAssigner->nvalues());
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void ParallelTable::row_to_col()
+void ParallelTable::destroyColumns()
 {
-    // prepare to send using doubles according to the given displacements for each process
-    _comm->presetConfigure(1,_displacementvv);
+    _columns.resize(0,0);
+}
 
-    for (int i=0; i<_totalRows; i++)
-    {
-        double* sendBuffer = _isValidRowv[i] ? &_rows(_relativeRowIndexv[i],0) : 0;
-        double* recvBuffer = &_columns(i,0);
-        int sendRank = _rowAssigner->rankForIndex(i);
+////////////////////////////////////////////////////////////////////
 
-        _comm->presetScatterw(sendBuffer, sendRank, recvBuffer, _columns.size(1));
+void ParallelTable::allocateRows()
+{
+    _rows.resize(_rowAssigner->nvalues(),_totalCols);
+}
 
-        //_comm->scatterw(sendBuffer, sendRank, 1, _displacementvv, recvBuffer, _columns.size(1));
-        // Proces sendRank zendt vanuit sendBuffer een aantal doubles in de vorm van datatype i bepaald door
-        // _displacementvv[i] naar recvBuffer op rank i.
-    }
-    _comm->presetClear();
+////////////////////////////////////////////////////////////////////
+
+void ParallelTable::destroyRows()
+{
+    _rows.resize(0,0);
 }
 
 ////////////////////////////////////////////////////////////////////

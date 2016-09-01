@@ -182,7 +182,7 @@ int SkirtCommandLineHandler::doSmileSchema()
 {
     SmileSchemaWriter writer;
     writer.writeSmileSchema();
-    _console.info("Successfully created smile schema file 'skirt.smile'.");
+    _console.info("Successfully created SMILE schema file 'skirt.smile'.");
     return EXIT_SUCCESS;
 }
 

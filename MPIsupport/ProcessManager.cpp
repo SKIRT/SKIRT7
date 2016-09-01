@@ -14,19 +14,38 @@
 
 namespace
 {
-    std::vector<MPI_Request> pendingrequests;
-
-    std::vector<MPI_Datatype> presetDatatypes;
-
-    void createDisplacedDoubleBlocks(int blocklength, const std::vector<int>& displacements, MPI_Datatype* newtype)
+    void createDisplacedDoubleBlocks(int blocklength, const std::vector<int>& displacements, MPI_Datatype* newtypeP,
+                                     int extent = -1)
     {
-        int count = displacements.size();               // number of blocks
+        int count = displacements.size();
 
+        // Multiply the displacements by the block length
         std::vector<int> multiplied_disp;
         multiplied_disp.reserve(count);
-        for(auto i: displacements) multiplied_disp.push_back(blocklength*i); // list of displacements in doubles as unit
+        for(auto i: displacements) multiplied_disp.push_back(blocklength*i);
 
-        MPI_Type_create_indexed_block(count, blocklength, &multiplied_disp[0], MPI_DOUBLE, newtype);
+        // Create a datatype representing a structure of displaced blocks of the same size;
+        MPI_Datatype indexedBlock;
+        MPI_Type_create_indexed_block(count, blocklength, &multiplied_disp[0], MPI_DOUBLE, &indexedBlock);
+
+        // Pad this datatype to modify the extent to the requested value
+        MPI_Aint lb;
+        MPI_Aint ex;
+        MPI_Type_get_extent(indexedBlock, &lb, &ex);
+
+        if (extent != -1)
+        {
+            MPI_Type_create_resized(indexedBlock, lb, extent*sizeof(double), newtypeP);
+            // Commit the final type and free the intermediary one
+            MPI_Type_commit(newtypeP);
+            MPI_Type_free(&indexedBlock);
+        }
+        else
+        {
+            // No padding, just store the indexed block
+            *newtypeP = indexedBlock;
+            MPI_Type_commit(newtypeP);
+        }
     }
 }
 
@@ -137,40 +156,6 @@ void ProcessManager::receiveByteBuffer(QByteArray &buffer, int sender, int& tag)
 
 //////////////////////////////////////////////////////////////////////
 
-void ProcessManager::sendDouble(double& buffer, int receiver, int tag)
-{
-#ifdef BUILDING_WITH_MPI
-
-    //MPI_Send(&buffer, 1, MPI_DOUBLE, receiver, tag, MPI_COMM_WORLD);
-
-    MPI_Request request;
-    MPI_Isend(&buffer, 1, MPI_DOUBLE, receiver, tag, MPI_COMM_WORLD, &request);
-    pendingrequests.push_back(request);
-
-#else
-    Q_UNUSED(buffer) Q_UNUSED(receiver) Q_UNUSED(tag)
-#endif
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void ProcessManager::receiveDouble(double& buffer, int sender, int tag)
-{
-#ifdef BUILDING_WITH_MPI
-
-    //MPI_Recv(&buffer, 1, MPI_DOUBLE, sender, tag, MPI_COMM_WORLD, &st);
-
-    MPI_Request request;
-    MPI_Irecv(&buffer, 1, MPI_DOUBLE, sender, tag, MPI_COMM_WORLD, &request);
-    pendingrequests.push_back(request);
-
-#else
-    Q_UNUSED(buffer) Q_UNUSED(receiver) Q_UNUSED(tag)
-#endif
-}
-
-//////////////////////////////////////////////////////////////////////
-
 void ProcessManager::gatherw(double* sendBuffer, int sendCount,
                              double* recvBuffer, int recvRank, int recvLength,
                              const std::vector<std::vector<int>>& recvDisplacements)
@@ -195,11 +180,10 @@ void ProcessManager::gatherw(double* sendBuffer, int sendCount,
     std::vector<MPI_Datatype> recvtypes;            // we will construct derived datatypes for receiving from each process
     recvtypes.reserve(size);
 
-    for (int rank=0; rank<size; rank++)
+    for (int r=0; r<size; r++)
     {
         MPI_Datatype newtype;
-        createDisplacedDoubleBlocks(recvLength, recvDisplacements[rank], &newtype);
-        MPI_Type_commit(&newtype);
+        createDisplacedDoubleBlocks(recvLength, recvDisplacements[r], &newtype);
         recvtypes.push_back(newtype);
     }
 
@@ -215,143 +199,48 @@ void ProcessManager::gatherw(double* sendBuffer, int sendCount,
 
 //////////////////////////////////////////////////////////////////////
 
-void ProcessManager::scatterw(double *sendBuffer, int sendRank, int sendLength,
-                              const std::vector<std::vector<int> > &sendDisplacements,
-                              double *recvBuffer, int recvCount)
+void ProcessManager::displacedBlocksAllToAll(double* sendBuffer, int sendCount,
+                                             std::vector<std::vector<int>>& sendDisplacements, int sendLength,
+                                             int sendExtent, double* recvBuffer, int recvCount,
+                                             std::vector<std::vector<int>>& recvDisplacements, int recvLength,
+                                             int recvExtent)
 {
 #ifdef BUILDING_WITH_MPI
     int size;
-    int rank;
     MPI_Comm_size(MPI_COMM_WORLD, &size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    // parameters for the sender
-    std::vector<int> sendcnts;
-    if (rank != sendRank) sendcnts.resize(size, 0);     // I am not sender: send nothing to every process
-    else sendcnts.resize(size, 1);                      // I am sender: send 1 to each process
-    std::vector<int> sdispls(size, 0);                  // displacements in buffer will be contained in datatypes
-    std::vector<MPI_Datatype> sendtypes;                // these will be constructed for sending to each process
+    std::vector<int> sendcnts(size,sendCount);
+    std::vector<int> sdispls(size, 0);
+    std::vector<MPI_Datatype> sendtypes;
     sendtypes.reserve(size);
 
-    for (int rank=0; rank<size; rank++)
+    std::vector<int> recvcnts(size, recvCount);
+    std::vector<int> rdispls(size, 0);
+    std::vector<MPI_Datatype> recvtypes;
+    recvtypes.reserve(size);
+
+    for (int r=0; r<size; r++)
     {
         MPI_Datatype newtype;
-        createDisplacedDoubleBlocks(sendLength, sendDisplacements[rank], &newtype);
-        MPI_Type_commit(&newtype);
+        createDisplacedDoubleBlocks(sendLength, sendDisplacements[r], &newtype, sendExtent);
         sendtypes.push_back(newtype);
+
+        createDisplacedDoubleBlocks(recvLength, recvDisplacements[r], &newtype, recvExtent);
+        recvtypes.push_back(newtype);
     }
 
-    // parameters for the receivers
-    std::vector<int> recvcnts(size, 0);                     // each process will receive nothing from all processes
-    recvcnts[sendRank] = recvCount;                         // except from the sender
-    std::vector<int> rdispls(size, 0);                      // starting from recvBuffer + 0
-    std::vector<MPI_Datatype> recvtypes(size, MPI_DOUBLE);  // all doubles
-
     MPI_Alltoallw(sendBuffer, &sendcnts[0], &sdispls[0], &sendtypes[0],
                   recvBuffer, &recvcnts[0], &rdispls[0], &recvtypes[0],
                   MPI_COMM_WORLD);
 
-    for (int rank=0; rank<size; rank++) MPI_Type_free(&sendtypes[rank]);
-#else
-    Q_UNUSED(sendBuffer) Q_UNUSED(sendRank) Q_UNUSED(sendDisplacements) Q_UNUSED(recvBuffer) Q_UNUSED(recvCount)
-#endif
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void ProcessManager::presetGatherw(double *sendBuffer, int sendCount, double *recvBuffer, int recvRank)
-{
-#ifdef BUILDING_WITH_MPI
-    int size;
-    int rank;
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-    // parameters for the senders
-    std::vector<int> sendcnts(size, 0);                     // every process sends...
-    sendcnts[recvRank] = sendCount;                         // ... only to the receiver
-    std::vector<int> sdispls(size, 0);                      // starting from sendBuffer + 0
-    std::vector<MPI_Datatype> sendtypes(size, MPI_DOUBLE);  // using doubles
-
-    // parameters on the receiving end
-    std::vector<int> recvcnts;
-    if (rank != recvRank) recvcnts.resize(size, 0); // I am not receiver: receive nothing from every process
-    else recvcnts.resize(size, 1);                  // I am receiver: receive 1 custom type from every process
-    std::vector<int> rdispls(size, 0);              // displacements will be contained in the datatypes
-                                                    // use the preset datatypes to receive
-
-    MPI_Alltoallw(sendBuffer, &sendcnts[0], &sdispls[0], &sendtypes[0],
-                  recvBuffer, &recvcnts[0], &rdispls[0], &presetDatatypes[0],
-                  MPI_COMM_WORLD);
-#else
-    Q_UNUSED(sendBuffer) Q_UNUSED(sendCount) Q_UNUSED(recvBuffer) Q_UNUSED(recvRank) Q_UNUSED(recvDisplacements)
-#endif
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void ProcessManager::presetScatterw(double *sendBuffer, int sendRank, double *recvBuffer, int recvCount)
-{
-#ifdef BUILDING_WITH_MPI
-    int size;
-    int rank;
-    MPI_Comm_size(MPI_COMM_WORLD, &size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-    // parameters for the sender
-    std::vector<int> sendcnts;
-    if (rank != sendRank) sendcnts.resize(size, 0);     // I am not sender: send nothing to every process
-    else sendcnts.resize(size, 1);                      // I am sender: send 1 to each process
-    std::vector<int> sdispls(size, 0);                  // displacements in buffer will be contained in datatypes
-                                                        // use the preset datatypes
-
-    // parameters for the receivers
-    std::vector<int> recvcnts(size, 0);                     // each process will receive nothing from all processes
-    recvcnts[sendRank] = recvCount;                         // except from the sender
-    std::vector<int> rdispls(size, 0);                      // starting from recvBuffer + 0
-    std::vector<MPI_Datatype> recvtypes(size, MPI_DOUBLE);  // all doubles
-
-    MPI_Alltoallw(sendBuffer, &sendcnts[0], &sdispls[0], &presetDatatypes[0],
-                  recvBuffer, &recvcnts[0], &rdispls[0], &recvtypes[0],
-                  MPI_COMM_WORLD);
-#else
-    Q_UNUSED(sendBuffer) Q_UNUSED(sendRank) Q_UNUSED(sendDisplacements) Q_UNUSED(recvBuffer) Q_UNUSED(recvCount)
-#endif
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void ProcessManager::presetConfigure(int length, const std::vector<std::vector<int>>& displacements)
-{
-    for (size_t rank=0; rank<displacements.size(); rank++)
+    for (int r=0; r<size; r++)
     {
-        MPI_Datatype newtype;
-        createDisplacedDoubleBlocks(length, displacements[rank], &newtype);
-        MPI_Type_commit(&newtype);
-        presetDatatypes.push_back(newtype);
+        MPI_Type_free(&sendtypes[r]);
+        MPI_Type_free(&recvtypes[r]);
     }
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void ProcessManager::presetClear()
-{
-    for (auto& datatype : presetDatatypes) MPI_Type_free(&datatype);
-
-    presetDatatypes.resize(0);
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void ProcessManager::wait_all()
-{
-#ifdef BUILDING_WITH_MPI
-
-    MPI_Barrier(MPI_COMM_WORLD);
-    MPI_Status statuses[pendingrequests.size()];
-    MPI_Waitall(pendingrequests.size(), &pendingrequests[0], &statuses[0]);
-    pendingrequests.clear();
-
+#else
+    Q_UNUSED(sendBuffer) Q_UNUSED(sendCount) Q_UNUSED(sendDisplacements) Q_UNUSED(sendLength)
+    Q_UNUSED(recvBuffer) Q_UNUSED(recvCount) Q_UNUSED(recvDisplacements) Q_UNUSED(recvLength)
 #endif
 }
 
@@ -377,10 +266,10 @@ void ProcessManager::sum_all(double* my_array, int nvalues)
 #endif
 }
 
-void ProcessManager::and_all(bool* boolean)
+void ProcessManager::or_all(bool* boolean)
 {
 #ifdef BUILDING_WITH_MPI
-    MPI_Allreduce(MPI_IN_PLACE, boolean, 1, MPI_C_BOOL, MPI_LAND, MPI_COMM_WORLD);
+    MPI_Allreduce(MPI_IN_PLACE, boolean, 1, MPI_C_BOOL, MPI_LOR, MPI_COMM_WORLD);
 #else
     Q_UNUSED(boolean)
 #endif

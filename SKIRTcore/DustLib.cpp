@@ -15,6 +15,7 @@
 #include "ParallelFactory.hpp"
 #include "PeerToPeerCommunicator.hpp"
 #include "StaggeredAssigner.hpp"
+#include "StopWatch.hpp"
 #include "TimeLogger.hpp"
 #include "WavelengthGrid.hpp"
 
@@ -23,7 +24,7 @@ using namespace std;
 ////////////////////////////////////////////////////////////////////
 
 DustLib::DustLib()
-    : _cellAssigner(0), _lambdaAssigner(0)
+    : _libAssigner(nullptr), _Ncomp(0), _distributedAbsorptionData(false), _cellAssigner(nullptr)
 {
 }
 
@@ -32,9 +33,6 @@ DustLib::DustLib()
 void DustLib::setupSelfBefore()
 {
     SimulationItem::setupSelfBefore();
-
-    WavelengthGrid* lambdagrid = find<WavelengthGrid>();
-    _lambdaAssigner = lambdagrid->assigner();
 
     PanDustSystem* pandustsystem = find<PanDustSystem>();
     _cellAssigner = pandustsystem->assigner();
@@ -57,9 +55,8 @@ namespace
         int _Nlambda;
         int _Ncomp;
         QTime _timer;           // measures the time elapsed since the most recent log message
-
-        // new stuff
-        ProcessAssigner* _cellAssigner;
+        ProcessAssigner* _cellAssigner; // converts the relative dust cell indices in the mapping to absolute indices
+        bool _distributedAbsorptionData;
 
     public:
         // constructor
@@ -74,6 +71,7 @@ namespace
             _Nlambda = _lambdagrid->Nlambda();
             _Ncomp = _ds->Ncomp();
             _cellAssigner = _ds->assigner();
+            _distributedAbsorptionData = _ds->distributedAbsorptionData();
 
             // invert mapping vector into a temporary hash map
             int Ncells = nv.size();
@@ -102,25 +100,28 @@ namespace
             QList<int> mv = _mh.values(n);
             int Nmapped = mv.size();
 
-            // if this library entry is used by at least one cell, calculate the emission for those cells
-            if (Nmapped > 0)
+            // if this library entry is not used, skip the calculation
+            if (Nmapped <= 0) return;
+
+            if (_de->logfrequency())
             {
-                if (_de->logfrequency())
+                // space the messages at least 5 seconds apart; in the interest of speed,
+                // we do this without locking, so once in a while two consecutive messages may slip through
+                if (_timer.elapsed() > 5000)
                 {
-                    // space the messages at least 5 seconds apart; in the interest of speed,
-                    // we do this without locking, so once in a while two consecutive messages may slip through
-                    if (_timer.elapsed() > 5000)
-                    {
-                        _timer.restart();
-                        _log->info("Calculating emission for library entry " + QString::number(n+1) + "...");
-                    }
+                    _timer.restart();
+                    _log->info("Calculating emission for library entry " + QString::number(n+1) + "...");
                 }
+            }
 
-                // calculate the average ISRF for this library entry from the ISRF of all dust cells that map to it
-                Array Jv(_Nlambda);
-                foreach (int mAbs, mv) Jv += _ds->meanintensityv(mAbs);
-                Jv /= Nmapped;
+            // calculate the average ISRF for this library entry from the ISRF of all dust cells that map to it
+            Array Jv(_Nlambda);
+            foreach (int mAbs, mv) Jv += _ds->meanintensityv(mAbs);
+            Jv /= Nmapped;
 
+            // differing libraries, or multiple dust components: calculate emission for each dust cell separately
+            if (_distributedAbsorptionData || _Ncomp > 1)
+            {
                 // get emissivity for each dust component (i.e. for the corresponding dust mix)
                 ArrayTable<2> evv(_Ncomp,0);
                 for (int h=0; h<_Ncomp; h++) evv[h] = _de->emissivity(_ds->mix(h),Jv);
@@ -128,8 +129,7 @@ namespace
                 // combine emissivities into SED for each dust cell, and store the normalized SEDs
                 foreach (int m, mv)
                 {
-                    // get a reference to the output array for this dust cell
-                    Array& Lv = _Lvv[m];
+                    Array Lv(_Nlambda);
 
                     // calculate the emission for this cell
                     for (int h=0; h<_Ncomp; h++) Lv += evv[h] * _ds->density(m,h);
@@ -138,7 +138,26 @@ namespace
                     Lv *= _lambdagrid->dlambdav();
                     double total = Lv.sum();
                     if (total>0) Lv /= total;
+
+                    // copy the output array to the corresponding row of the output table
+                    for (int ell=0; ell<_Nlambda; ell++) _Lvv(m,ell) = Lv[ell];
                 }
+            }
+            // same library on each process, and only one dust component: remember just the library template, which
+            // serves for all mapped cells
+            else
+            {
+                Array Lv(_Nlambda);
+
+                // get the emissivity of the library entry
+                Lv = _de->emissivity(_ds->mix(0),Jv);
+
+                // convert to luminosities and normalize the result
+                Lv *= _lambdagrid->dlambdav();
+                double total = Lv.sum();
+                if (total>0) Lv /= total;
+
+                for (int ell=0; ell<_Nlambda; ell++) _Lvv(n,ell) = Lv[ell];
             }
         }
     };
@@ -149,10 +168,12 @@ namespace
 void DustLib::calculate()
 {
     PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+    PanDustSystem* ds = find<PanDustSystem>();
+    WavelengthGrid* lambdagrid = find<WavelengthGrid>();
 
-    // initialize/clear the ParallelTable that stores and communicates the results
-    if (!_Lvv.initialized()) _Lvv.initialize("Dust Emission Spectra Table",_lambdaAssigner,_cellAssigner,ROW);
-    else _Lvv.clear();
+    _Ncomp = ds->Ncomp();
+    _distributedAbsorptionData = ds->distributedAbsorptionData();
+    const ProcessAssigner* lambdaAssigner = lambdagrid->assigner();
 
     // get mapping from cells to library entries.
     int Nlib = entries();
@@ -162,31 +183,63 @@ void DustLib::calculate()
     EmissionCalculator calc(_Lvv, _nv, Nlib, this);
     Parallel* parallel = find<ParallelFactory>()->parallel();
 
-    // Each process now has its own library over a subset of dustcells.
+    QString tableName = "Dust Emission Spectra Table";
+
+    // Each process now has its own library over a subset of dustcells, and calculates its entries by its own.
     // Use the alternate version of the call() function, which acts as a multi threaded for-loop
-    if (_cellAssigner->parallel())
+    // The ParallelTable for output will be indexed on the dust cells
+    if (_distributedAbsorptionData)
+    {
+        // prepare the ParallelTable for output
+        if (_Lvv.initialized())
+            _Lvv.reset();
+        else
+            _Lvv.initialize(tableName, lambdaAssigner, _cellAssigner, ROW);
+
         parallel->call(&calc, Nlib);
+    }
     // Each process has considered all the dust cells and has an identical library
-    // Divide the work over the processes
+    // Divide the work over the processes per library entry, using an auxiliary assigner.
     else
     {
-        StaggeredAssigner* libAssigner = new StaggeredAssigner(this);
-        libAssigner->assign(Nlib);
-        parallel->call(&calc, libAssigner);
-        delete libAssigner;
+        if (!_libAssigner) _libAssigner = new StaggeredAssigner(this);
+        _libAssigner->assign(Nlib);
+
+        // prepare the ParallelTable for output
+        if (_Lvv.initialized())
+            _Lvv.reset();
+        else
+        {
+            // When there is only one dust component, the normalized output spectrum will be the same for all cells
+            // corresponding to a single library entry. In that case we only need to store the data per library entry,
+            // and hence the ParallelTable is initialized based on the assigner for the library entries.
+            if (_Ncomp > 1)
+                // Remember that _cellAssigner is not parallel, en hence sizes the table to the total number of cells
+                _Lvv.initialize(tableName, lambdaAssigner, _cellAssigner, ROW);
+            else
+                // When both _libAssigner and _lambdaAssigner are parallel, the table will start with distributed rows
+                _Lvv.initialize(tableName, lambdaAssigner, _libAssigner, ROW);
+        }
+        parallel->call(&calc, _libAssigner);
     }
 
     // Wait for the other processes to reach this point
     comm->wait("the emission spectra calculation");
-
-    _Lvv.sync();
+    _Lvv.switchScheme();
 }
 
 ////////////////////////////////////////////////////////////////////
 
 double DustLib::luminosity(int m, int ell) const
 {
-    return _Lvv(m,ell);
+    // In these cases, the output is indexed on m
+    if (_distributedAbsorptionData || _Ncomp > 1)
+        return _Lvv(m,ell);
+    else // we need to convert m to n
+    {
+        int n = _nv[m];
+        return n >= 0 ? _Lvv(n,ell) : 0.;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////

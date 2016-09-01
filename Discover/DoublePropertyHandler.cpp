@@ -76,13 +76,13 @@ double DoublePropertyHandler::maxValue() const
 
 ////////////////////////////////////////////////////////////////////
 
-QString DoublePropertyHandler::quantity() const
+QString DoublePropertyHandler::quantity(bool raw) const
 {
     QString result = _attributes["Quantity"];
 
-    // if the attribute value starts with an at sign, the quantity is determined as the string value
-    // of the indicated enumeration property
-    if (result.startsWith('@'))
+    // if the caller did not request "raw" behavior, and the attribute value starts with an at sign,
+    // the quantity is determined as the string value of the indicated enumeration property
+    if (!raw && result.startsWith('@'))
     {
         // construct a handler for the target property and get its string value
         QByteArray property = result.mid(1).toUtf8();

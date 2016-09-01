@@ -51,6 +51,7 @@ std::shared_ptr<Array> ParallelDataCube::constructCompleteCube()
         for (int i=0; i<_comm->size(); i++) displacements.push_back(_wavelengthAssigner->indicesForRank(i));
 
         _comm->gatherw(&(*_partialCube)[0], _Nlambda*_Nframep, &(*completeCube)[0], 0, _Nframep, displacements);
+
         return completeCube;
     }
 }

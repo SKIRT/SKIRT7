@@ -44,7 +44,7 @@ public:
 
     void sum_all(double& dbl);
 
-    void and_all(bool& b);
+    void or_all(bool& b);
 
     /** This function is used for broadcasting the values in an Array from one particular process to
         all other processes in this communicator. The rank of the sending process is indicated with the
@@ -56,24 +56,14 @@ public:
         second argument. */
     void broadcast(int& value, int sender);
 
-    void sendDouble(double& buffer, int receiver, int tag);
-
-    void receiveDouble(double& buffer, int sender, int tag);
-
-    void finishRequests();
-
     /** This function gathers doubles sent by all processes into displaced positions at the receiving process */
-    void gatherw(double* sendBuffer, int sendCount,
-                 double* recvBuffer, int recvRank, int recvLength, const std::vector<std::vector<int>>& recvDisplacements);
+    void gatherw(double* sendBuffer, int sendCount, double* recvBuffer, int recvRank, int recvLength,
+                 const std::vector<std::vector<int>>& recvDisplacements);
 
-    void scatterw(double* sendBuffer, int sendRank, int sendLength, const std::vector<std::vector<int>>& sendDisplacements,
-                  double* recvBuffer, int recvCount);
-
-    void presetGatherw(double* sendBuffer, int sendCount, double* recvBuffer, int recvRank);
-    void presetScatterw(double* sendBuffer, int sendRank, double* recvBuffer, int recvCount);
-
-    void presetConfigure(int length, const std::vector<std::vector<int>>& displacements);
-    void presetClear();
+    void displacedBlocksAllToAll(double* sendBuffer, int sendCount, std::vector<std::vector<int>>& sendDisplacements,
+                                 int sendLength, int sendExtent,
+                                 double* recvBuffer, int recvCount, std::vector<std::vector<int>>& recvDisplacements,
+                                 int recvLength, int recvExtent);
 
     /** This function returns the rank of the root process. */
     int root();

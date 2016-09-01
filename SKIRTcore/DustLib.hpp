@@ -101,10 +101,12 @@ private:
     // results of calculate(), used by luminosity()
     std::vector<int> _nv;        // library index for each cell or -1, indexed on m
     ParallelTable _Lvv;
+    ProcessAssigner* _libAssigner;
+    int _Ncomp;
+    bool _distributedAbsorptionData;
 
 protected:
     const ProcessAssigner* _cellAssigner;
-    const ProcessAssigner* _lambdaAssigner;
 };
 
 ////////////////////////////////////////////////////////////////////

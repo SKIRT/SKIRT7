@@ -13,6 +13,7 @@
 #include "Position.hpp"
 class DustGridPath;
 class DustParticleInterface;
+class Log;
 class Random;
 class VoronoiMeshFile;
 namespace VoronoiMesh_Private { class VoronoiCell; class Node; }
@@ -58,22 +59,25 @@ public:
         to zero-based column or variable indices. The data file must contain a sufficient number of
         columns or variables to accommodate the highest index in the list; additional columns or
         variables in the file are ignored. The indices may be specified in any order, and the same
-        index may be specified more than once. Negative values are ignored. The last argument \em
-        extent specifies the extent of the domain as a box lined up with the coordinate axes.
-        Any particles located outside of the domain are discarded. */
-    VoronoiMesh(VoronoiMeshFile* meshfile, QList<int> fieldIndices, const Box& extent);
+        index may be specified more than once. Negative values are ignored. The \em extent argument
+        specifies the extent of the domain as a box lined up with the coordinate axes. Any
+        particles located outside of the domain are discarded. If the optional \em log argument is
+        provided, the constructor logs progress messages while the Voronoi mesh is being built. */
+    VoronoiMesh(VoronoiMeshFile* meshfile, QList<int> fieldIndices, const Box& extent, Log* log=nullptr);
 
     /** This constructor obtains the particle coordinates from a DustParticleInterface instance.
-        There are no field values associated with the particles. The last argument \em extent
-        specifies the extent of the domain as a box lined up with the coordinate axes.
-        Any particles located outside of the domain are discarded. */
-    VoronoiMesh(DustParticleInterface* dpi, const Box& extent);
+        There are no field values associated with the particles. The \em extent argument specifies
+        the extent of the domain as a box lined up with the coordinate axes. Any particles located
+        outside of the domain are discarded. If the optional \em log argument is provided, the
+        constructor logs progress messages while the Voronoi mesh is being built. */
+    VoronoiMesh(DustParticleInterface* dpi, const Box& extent, Log* log=nullptr);
 
     /** This constructor uses the particle coordinates specified as a vector. There are no field
-        values associated with the particles. The last argument \em extent specifies the extent of
-        the domain as a box lined up with the coordinate axes. The specified particle locations
-        are assumed to be inside the domain; no check is performed. */
-    VoronoiMesh(const std::vector<Vec>& particles, const Box& extent);
+        values associated with the particles. The \em extent argument specifies the extent of the
+        domain as a box lined up with the coordinate axes. The specified particle locations are
+        assumed to be inside the domain; no check is performed. If the optional \em log argument is
+        provided, the constructor logs progress messages while the Voronoi mesh is being built. */
+    VoronoiMesh(const std::vector<Vec>& particles, const Box& extent, Log* log=nullptr);
 
 private:
     /** This private function is called from each constructor. Given a list of generating
@@ -83,6 +87,7 @@ private:
         discarded.
 
         The function performs the following steps:
+         - if requested, remove particles that are too close to another particle
          - add the particles to a Voro++ container, and compute the Voronoi cells one by one;
          - copy the relevant cell information (such as the list of neighboring cells) from the
            Voro++ data structures into our own;
@@ -103,7 +108,7 @@ private:
         this function builds a binary search tree on the cell particle locations for those blocks
         (see for example <a href="http://en.wikipedia.org/wiki/Kd-tree">en.wikipedia.org/wiki/Kd-tree</a>).
     */
-    void buildMesh(const std::vector<Vec>& particles);
+    void buildMesh(const std::vector<Vec>& particles, bool removeNearby, Log* log);
 
     /** This private function builds the binary search tree. TO DO: complete documentation. */
     VoronoiMesh_Private::Node* buildTree(std::vector<int>::iterator first, std::vector<int>::iterator last, int depth);

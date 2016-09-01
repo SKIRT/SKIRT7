@@ -19,15 +19,14 @@
 ////////////////////////////////////////////////////////////////////
 
 /** \class Array
-An instance of the Array class holds an array of double values, and allows easily
-performing mathematical operations on these values. The number of items held by the array can
-be adjusted, but only at the cost of losing all previously stored values: the resize operation
-sets all values to zero, just as if the array was freshly constructed.
+An instance of the Array class holds an array of double values, and allows easily performing
+mathematical operations on these values. The number of items held by the array can be adjusted,
+but only at the cost of losing all previously stored values: the resize operation sets all
+values to zero, just as if the array was freshly constructed.
 
-Array offers a subset of Array functionality. However, the assignment operator
-adjusts the size of the target to the size of the source if necessary. This small but important
-difference requires a private implementation. Once the new C++11 semantics for std::valarray
-have been widely adopted, Array could be implemented as a typedef for Array.
+Array offers a subset of std::valarray<double> functionality with C++11 semantics. In addition,
+when the code is being built with the BUILDING_MEMORY flag turned on, the class offers support
+for logging memory allocations and deallocations.
 
 The code for this class was copied and adjusted from the standard library implementation
 "libc++" which can be found at http://libcxx.llvm.org and is copyrighted by the contributors to
@@ -41,12 +40,14 @@ class Array
 public:
     // construct/destroy:
     Array();
-    explicit Array(size_t n);   // sets all values to zero
+    explicit Array(size_t n);           // sets all values to zero
     Array(const Array& v);
+    Array(Array&& v);
     ~Array();
 
     // assignment:
     Array& operator=(const Array& v);   // resizes target if needed
+    Array& operator=(Array&& v);
     Array& operator=(const double& x);
 
     // element access:
@@ -81,7 +82,7 @@ public:
     Array apply(double f(const double&)) const;
 };
 
-void swap(Array& x, Array& y) noexcept;
+void swap(Array& x, Array& y);
 
 Array operator* (const Array& x, const Array& y);
 Array operator* (const Array& x, const T& y);
@@ -360,6 +361,7 @@ public:
     Array() : _begin_(0), _end_(0) {}
     explicit Array(size_t _n);
     Array(const Array& _v);
+    Array(Array&& _v);
     ~Array();
 
     #ifdef BUILDING_MEMORY
@@ -370,6 +372,7 @@ public:
     // assignment:
     Array& operator=(const Array& _v);
     Array& operator=(const double& _x);
+    Array& operator=(Array&& v);
     template <class _ValExpr>
     Array& operator=(const _my_val_expr<_ValExpr>& _v);
 
@@ -616,6 +619,14 @@ Array::Array(const Array& _v)
 }
 
 inline
+Array::Array(Array&& _v)
+    : _begin_(_v._begin_),
+      _end_(_v._end_)
+{
+    _v._begin_ = _v._end_ = nullptr;
+}
+
+inline
 Array::~Array()
 {
     resize_noclear(0);
@@ -639,6 +650,18 @@ Array::operator=(const Array& _v)
         resize_noclear(_v.size());
         std::copy(_v._begin_, _v._end_, _begin_);
     }
+    return *this;
+}
+
+inline
+Array&
+Array::operator=(Array&& _v)
+{
+    resize_noclear(0);
+    _begin_ = _v._begin_;
+    _end_ = _v._end_;
+    _v._begin_ = nullptr;
+    _v._end_ = nullptr;
     return *this;
 }
 
