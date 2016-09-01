@@ -34,8 +34,9 @@ using namespace std;
 //////////////////////////////////////////////////////////////////////
 
 PanDustSystem::PanDustSystem()
-    : _dustemissivity(0), _dustlib(0), _emissionBias(0.5), _emissionBoost(1), _selfabsorption(false), _writeEmissivity(false),
-      _writeTemp(true), _writeISRF(false), _cycles(0), _assigner(0), _Nlambda(0), _haveLabsstel(false), _haveLabsdust(false)
+    : _dustemissivity(0), _dustlib(0), _emissionBias(0.5), _emissionBoost(1), _selfabsorption(false),
+      _writeEmissivity(false), _writeTemp(true), _writeISRF(false), _cycles(0), _assigner(0), _Nlambda(0),
+      _haveLabsstel(false), _haveLabsdust(false)
 {
 }
 
@@ -353,7 +354,7 @@ void PanDustSystem::absorb(int m, int ell, double DeltaL, bool ynstellar)
 
 double PanDustSystem::Labs(int m, int ell) const
 {
-    // ParallelTables must be in read mode. Only callable on cells assigned to this process.
+    // Only callable on cells assigned to this process, and after sumResults
     double sum = 0;
     if (_haveLabsstel) sum += _Labsstelvv(m,ell);
     if (_haveLabsdust) sum += _Labsdustvv(m,ell);
@@ -371,7 +372,7 @@ void PanDustSystem::rebootLabsdust()
 
 double PanDustSystem::Labs(int m) const
 {
-    // ParallelTables must be in read mode. Only callable on cells assigned to this process.
+    // Only callable on cells assigned to this process, and after sumResults
     double sum = 0;
 
     if (_haveLabsstel)
@@ -384,7 +385,7 @@ double PanDustSystem::Labs(int m) const
 
 Array PanDustSystem::Labsbolv() const
 {
-    // ParallelTables must be in read mode.
+    // Only callable on cells assigned to this process, and after sumResults
     Array sum(_Ncells);
 
     if (_haveLabsstel)
@@ -729,8 +730,6 @@ void PanDustSystem::write()
 
         ProcessAssigner* rootAssigner = new RootAssigner(0);
         rootAssigner->assign(Np);
-
-        printf("Np %d\n", Np);
 
         // Output temperature map(s) along coordinate axes
         {
