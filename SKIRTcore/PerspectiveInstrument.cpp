@@ -4,6 +4,7 @@
 ///////////////////////////////////////////////////////////////// */
 
 #include <cmath>
+#include "Array.hpp"
 #include "PerspectiveInstrument.hpp"
 #include "FatalError.hpp"
 #include "FilePaths.hpp"

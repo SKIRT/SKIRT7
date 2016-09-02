@@ -306,7 +306,6 @@ HEADERS += \
     BrokenExpDiskGeometry.hpp \
     TrustPolarizedMeanDustMix.hpp \
     ParallelTable.hpp \
-    ParallelTable \
     ThemisDustMix.hpp \
     SimpleOligoDustMix.hpp \
     ParallelDataCube.hpp \

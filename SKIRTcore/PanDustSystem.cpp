@@ -412,22 +412,20 @@ double PanDustSystem::Labsdusttot() const
 
 ////////////////////////////////////////////////////////////////////
 
-void PanDustSystem::calculatedustemission(bool ynstellar)
+void PanDustSystem::calculatedustemission()
 {
     if (_dustemissivity)
     {
-        sumResults(ynstellar);
+        sumResults();
         _dustlib->calculate();
     }
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void PanDustSystem::sumResults(bool ynstellar)
+void PanDustSystem::sumResults()
 {
-    //if (ynstellar)
         _Labsstelvv.switchScheme();
-    //else
         _Labsdustvv.switchScheme();
 }
 
@@ -660,7 +658,7 @@ namespace
 
 ////////////////////////////////////////////////////////////////////
 
-void PanDustSystem::write()
+void PanDustSystem::write() const
 {
     DustSystem::write();
 
@@ -774,14 +772,17 @@ void PanDustSystem::write()
             WriteTempData wt(this);
             rootAssigner->assign(_Ncells);
 
-            // Call the body on the right cells. If everything is available, no unnessecary communication will be done.
-
+            // Call the body on the right cells. If everything is available, no unnecessary communication will be done.
             if (distributedAbsorptionData())
+            {
                 // Calculate the temperature for the cells owned by this process
                 parallel->call(&wt,_assigner);
+            }
             else
+            {
                 // Let root calculate it for everything
                 parallel->call(&wt, rootAssigner);
+            }
             wt.write();
         }
         delete rootAssigner;

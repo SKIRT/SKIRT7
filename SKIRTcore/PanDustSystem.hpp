@@ -247,11 +247,11 @@ public:
     /** This function (re-)calculates the relevant dust emission spectra for the dust system, based
         on the absorption data currently stored in the dust cells, and internally caches the
         results. If dust emission is turned off, this function does nothing. */
-    void calculatedustemission(bool ynstellar);
+    void calculatedustemission();
 
     /** This function synchronizes the results of the absorption by calling the sync() function on the
         absorption tables. **/
-    void sumResults(bool ynstellar);
+    void sumResults();
 
     /** This function returns the luminosity \f$L_\ell\f$ at the wavelength index \f$\ell\f$ in the
         normalized dust emission SED corresponding to the dust cell with dust cell number \f$m\f$.
@@ -290,7 +290,7 @@ public:
         indicative dust temperature is defined as the mean temperature (calculated as described above)
         averaged over all dust populations (weighed by mass in the dust mix) and all dust components
         (weighed by density in the dust cell). */
-    void write();
+    void write() const;
 
 
     //======================== Data Members ========================

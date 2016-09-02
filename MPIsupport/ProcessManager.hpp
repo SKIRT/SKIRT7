@@ -80,7 +80,7 @@ public:
         block length. All processes must call this function for the communication to proceed. */
     static void gatherw(double* sendBuffer, int sendCount,
                         double* recvBuffer, int recvRank, int recvLength,
-                        const std::vector<std::vector<int> >& recvDisplacements);
+                        const std::vector<std::vector<int>>& recvDisplacements);
 
     /** This function lets all processes send and receive an amount of double values. The arguments
         provide the necessary flexibility to handle non-contiguous data. The user can specify any
@@ -98,9 +98,9 @@ public:
         greater than 1, as then they will determine where the next iteration of a pattern will
         start. All processes must call this function for the communication to proceed. */
     static void displacedBlocksAllToAll(double* sendBuffer, int sendCount,
-                                        std::vector<std::vector<int>>& sendDisplacements, int sendLength,
+                                        const std::vector<std::vector<int>>& sendDisplacements, int sendLength,
                                         int sendExtent, double* recvBuffer, int recvCount,
-                                        std::vector<std::vector<int>>& recvDisplacements, int recvLength,
+                                        const std::vector<std::vector<int>>& recvDisplacements, int recvLength,
                                         int recvExtent);
 
     /** The purpose of this function is to sum a particular array of double values element-wise
@@ -117,8 +117,8 @@ public:
     static void sum_all(double* my_array, int nvalues);
 
     /** This function performs a reduction of a given boolean, by applying the logical OR operator
-    across all processes. The result will overwrite the original boolean to which a pointer was
-    passed. All processes must call this function for the communication to proceed. */
+        across all processes. The result will overwrite the original boolean to which a pointer was
+        passed. All processes must call this function for the communication to proceed. */
     static void or_all(bool* boolean);
 
     /** This function is used to broadcast an array of double values from one process to all other

@@ -353,7 +353,7 @@ public:
         overridden in a subclass to write out additional results of the simulation stored in the
         dust system. In that case, the overriding function must also call the implementation in
         this base class. */
-    virtual void write();
+    virtual void write() const;
 
     /** This pure virtual function must be implemented in each subclass to indicate whether dust
         emission is turned on for this dust system. The function returns true if dust emission is
@@ -403,10 +403,9 @@ protected:
     bool _writeCellProperties;
     bool _writeCellsCrossed;
 
-   // data members initialized during setup
-
-    // determines which dust cells are assigned to this process for various calculations in the setup
-    ProcessAssigner* _setupAssigner;
+    // data members initialized during setup
+    ProcessAssigner* _setupAssigner;  // determines which dust cells are assigned to this process
+                                      // for various calculations during setup
     int _Ncomp;
     int _Ncells;
     Array _volumev;     // volume for each cell (indexed on m)

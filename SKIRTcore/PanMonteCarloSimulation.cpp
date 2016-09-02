@@ -128,7 +128,7 @@ void PanMonteCarloSimulation::rundustselfabsorption()
 
             // Construct the dust emission spectra
             _log->info("Calculating dust emission spectra...");
-            _pds->calculatedustemission(!(stage+cycle-1));
+            _pds->calculatedustemission();
             _log->info("Dust emission spectra calculated.");
 
             // Determine the bolometric luminosity that is absorbed in every cell (and that will hence be re-emitted).
@@ -144,7 +144,7 @@ void PanMonteCarloSimulation::rundustselfabsorption()
             parallel->call(this, &PanMonteCarloSimulation::dodustselfabsorptionchunk, assigner());
             // Wait for the other processes to reach this point
             _comm->wait("this self-absorption cycle");
-            _pds->sumResults(false);
+            _pds->sumResults();
 
             // Determine and log the total absorbed luminosity in the vector Labstotv.
             double Labsdusttot = _pds->Labsdusttot();
@@ -242,11 +242,9 @@ void PanMonteCarloSimulation::rundustemission()
 {
     TimeLogger logger(_log, "the dust emission phase");
 
-    bool noDustSelfabsorption = !(_pds && _pds->selfAbsorption());
-
     // Construct the dust emission spectra
     _log->info("Calculating dust emission spectra...");
-    _pds->calculatedustemission(noDustSelfabsorption);
+    _pds->calculatedustemission();
     _log->info("Dust emission spectra calculated.");
 
     // Determine the bolometric luminosity that is absorbed in every cell (and that will hence be re-emitted).

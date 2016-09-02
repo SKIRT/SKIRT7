@@ -200,9 +200,9 @@ void ProcessManager::gatherw(double* sendBuffer, int sendCount,
 //////////////////////////////////////////////////////////////////////
 
 void ProcessManager::displacedBlocksAllToAll(double* sendBuffer, int sendCount,
-                                             std::vector<std::vector<int>>& sendDisplacements, int sendLength,
+                                             const std::vector<std::vector<int>>& sendDisplacements, int sendLength,
                                              int sendExtent, double* recvBuffer, int recvCount,
-                                             std::vector<std::vector<int>>& recvDisplacements, int recvLength,
+                                             const std::vector<std::vector<int>>& recvDisplacements, int recvLength,
                                              int recvExtent)
 {
 #ifdef BUILDING_WITH_MPI
