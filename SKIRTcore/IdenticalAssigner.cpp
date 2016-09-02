@@ -10,14 +10,14 @@
 ////////////////////////////////////////////////////////////////////
 
 IdenticalAssigner::IdenticalAssigner()
-    : _blockassigner(0), _nblocks(1)
+    : _blockassigner(0)
 {
 }
 
 ////////////////////////////////////////////////////////////////////
 
 IdenticalAssigner::IdenticalAssigner(SimulationItem *parent)
-    : _blockassigner(0), _nblocks(1)
+    : _blockassigner(0)
 {
     setParent(parent);
     setup();

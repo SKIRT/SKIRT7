@@ -42,8 +42,14 @@ public:
         on all processes in the communicator. */
     void sum_all(Array& arr);
 
+    /** This function is used for summing one double across the different processes in the
+        communicator. The resulting value is then stored in the double passed to this function, on
+        all processes in the communicator. */
     void sum_all(double& dbl);
 
+    /** This function is used for performing the logical OR operation on a boolean across the different
+    processes in the communicator. The resulting value is then stored in the boolean passed to this
+    function, on all processes in the communicator. */
     void or_all(bool& b);
 
     /** This function is used for broadcasting the values in an Array from one particular process to
@@ -59,6 +65,7 @@ public:
     /** This function gathers doubles sent by all processes into displaced positions at the receiving process */
     void gatherw(double* sendBuffer, int sendCount, double* recvBuffer, int recvRank, int recvLength,
                  const std::vector<std::vector<int>>& recvDisplacements);
+
 
     void displacedBlocksAllToAll(double* sendBuffer, int sendCount, std::vector<std::vector<int>>& sendDisplacements,
                                  int sendLength, int sendExtent,

@@ -128,7 +128,6 @@ public:
 protected:
     size_t _start;                   // the index of the first value assigned to this process (zero if blocks = 1)
     SequentialAssigner* _blockassigner; // the assigner that is used to assign the different blocks (if multiple are used)
-    size_t _nblocks;
 };
 
 ////////////////////////////////////////////////////////////////////

@@ -98,7 +98,10 @@ public:
         Except for the IdenticalAssigner class, each subclass always returns true. */
     virtual bool parallel() const = 0;
 
-    /** Returns true if this process was assigned to the given index. */
+    /** Returns true if this process was assigned to the given index. The default implementation
+        uses rankForIndex to calculate this. If there are certain situations where rankForIndex is
+        meaningless (this currently happens in IdenticalAssigner) , the subclass should provide an
+        alternative implementation. */
     virtual bool validIndex(size_t absoluteIndex) const;
 
     /** Returns a vector containing all the absolute work indices assigned to a given process rank. */
