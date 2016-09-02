@@ -6,7 +6,6 @@
 #ifndef PERSPECTIVEINSTRUMENT_HPP
 #define PERSPECTIVEINSTRUMENT_HPP
 
-#include "Array.hpp"
 #include "HomogeneousTransform.hpp"
 #include "Instrument.hpp"
 #include "ParallelDataCube.hpp"

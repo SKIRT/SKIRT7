@@ -44,7 +44,6 @@ protected:
     //======================== Data Members ========================
 
 private:
-    //Array _ftotv;
     ParallelDataCube _distftotv;
 };
 

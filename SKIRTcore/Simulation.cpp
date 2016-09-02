@@ -8,12 +8,10 @@
 #include "FilePaths.hpp"
 #include "ParallelFactory.hpp"
 #include "PeerToPeerCommunicator.hpp"
-#include "ProcessAssigner.hpp"
 #include "Random.hpp"
 #include "Simulation.hpp"
 #include "SIUnits.hpp"
 #include "TimeLogger.hpp"
-#include "WavelengthGrid.hpp"
 
 ////////////////////////////////////////////////////////////////////
 

@@ -984,7 +984,7 @@ double DustSystem::opticaldepth(PhotonPackage* pp, double distance)
 
 ////////////////////////////////////////////////////////////////////
 
-void DustSystem::write()
+void DustSystem::write() const
 {
     // If requested, output statistics on the number of cells crossed
     if (_writeCellsCrossed)
