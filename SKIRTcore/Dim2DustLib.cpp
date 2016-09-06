@@ -74,7 +74,7 @@ std::vector<int> Dim2DustLib::mapping() const
     WavelengthGrid* lambdagrid = find<WavelengthGrid>();
     PanDustSystem* ds = find<PanDustSystem>();
     int Nlambda = lambdagrid->Nlambda();
-    int Ncells = _cellAssigner->nvalues();
+    int Ncells = _cellAssigner->assigned();
     int Ncomp = ds->Ncomp();
     Log* log = find<Log>();
     Units* units = find<Units>();

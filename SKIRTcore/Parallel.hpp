@@ -100,12 +100,14 @@ public:
         assigner, which is also passed to this function. While the values assigned to a particular
         process are fixed at the moment this function is called, the work will be distributed over the
         parallel threads in an unpredicable manner. */
-    template<class T> void call(T* targetObject, void (T::*targetMember)(size_t index), const ProcessAssigner* assigner);
+    template<class T> void call(T* targetObject, void (T::*targetMember)(size_t index), const ProcessAssigner* assigner,
+                                size_t repetitions = 1);
 
     /** Calls the specified member function for the specified target object a certain number of times,
         with the \em index argument of that function taking values from 0 to \em maxIndex.
         The work will be distributed over the parallel threads in an unpredicable manner. */
-    template<class T> void call(T* targetObject, void (T::*targetMember)(size_t index), size_t maxIndex);
+    template<class T> void call(T* targetObject, void (T::*targetMember)(size_t index), size_t maxIndex,
+                                size_t repetitions = 1);
 
 private:
     /** The function that gets executed inside each of the parallel threads. */
@@ -125,7 +127,7 @@ private:
         locking; callers should lock the shared data members of this class instance. */
     bool threadsActive();
 
-    void prepareAndCall(ParallelTarget* target, const ProcessAssigner* assigner, size_t limit, bool multithread);
+    void prepareAndCall(ParallelTarget* target, const ProcessAssigner* assigner, size_t limit);
 
     //======================== Nested Classes =======================
 
@@ -182,7 +184,8 @@ private:
 ////////////////////////////////////////////////////////////////////
 
 // outermost portion of the call() template function implementation
-template<class T> void Parallel::call(T* targetObject, void (T::*targetMember)(size_t index), const ProcessAssigner* assigner)
+template<class T> void Parallel::call(T* targetObject, void (T::*targetMember)(size_t index),
+                                      const ProcessAssigner* assigner, size_t repetitions)
 {
     Target<T> target(targetObject, targetMember);
     call(&target, assigner);
@@ -190,7 +193,8 @@ template<class T> void Parallel::call(T* targetObject, void (T::*targetMember)(s
 
 ////////////////////////////////////////////////////////////////////
 
-template<class T> void Parallel::call(T* targetObject, void (T::*targetMember)(size_t index), size_t maxIndex)
+template<class T> void Parallel::call(T* targetObject, void (T::*targetMember)(size_t index), size_t maxIndex,
+                                      size_t repetitions)
 {
     Target<T> target(targetObject, targetMember);
     call(&target, maxIndex);

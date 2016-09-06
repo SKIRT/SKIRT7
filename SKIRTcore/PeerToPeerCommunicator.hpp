@@ -10,7 +10,6 @@
 #include "ProcessCommunicator.hpp"
 #include "Table.hpp"
 class Array;
-class ProcessAssigner;
 
 ////////////////////////////////////////////////////////////////////
 
@@ -28,6 +27,10 @@ class ProcessAssigner;
 class PeerToPeerCommunicator : public ProcessCommunicator
 {
     Q_OBJECT
+
+    //============= Construction - Setup - Destruction =============
+public:
+    void setDataParallel(bool dataParallel);
 
     //====================== Other Functions =======================
 
@@ -81,6 +84,13 @@ public:
 
     /** This function does not return before all processes within the communicator have called it. */
     void wait(QString scope);
+
+    bool dataParallel();
+
+
+
+private:
+    bool _dataParallel;
 };
 
 ////////////////////////////////////////////////////////////////////

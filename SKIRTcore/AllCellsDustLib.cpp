@@ -21,7 +21,7 @@ AllCellsDustLib::AllCellsDustLib()
 
 int AllCellsDustLib::entries() const
 {
-    return _cellAssigner->nvalues();
+    return _cellAssigner->assigned();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -29,7 +29,7 @@ int AllCellsDustLib::entries() const
 std::vector<int> AllCellsDustLib::mapping() const
 {
     // create a mapping from each cell index to identical library index
-    int Ncells = _cellAssigner->nvalues();
+    int Ncells = _cellAssigner->assigned();
     vector<int> nv(Ncells);
     for (int m=0; m<Ncells; m++) nv[m] = m;
     return nv;

@@ -33,14 +33,14 @@ void ParallelTable::initialize(QString name, const ProcessAssigner *colAssigner,
     _totalRows = _rowAssigner->total();
     _totalCols = _colAssigner->total();
 
-    if (colAssigner->parallel() && rowAssigner->parallel() && _comm->isMultiProc())
+    if (colAssigner && rowAssigner && _comm->isMultiProc())
     {
         // Use the distributed memory scheme
         _distributed = true;
 
         // Inform the user about the mode used and the dimensions (N,M) of the locally stored data
         _log->info(_name + " is distributed. Sizes of local tables are (" + QString::number(_totalRows) + ","
-                   + QString::number(_colAssigner->nvalues()) + ") and (" + QString::number(_rowAssigner->nvalues())
+                   + QString::number(_colAssigner->assigned()) + ") and (" + QString::number(_rowAssigner->assigned())
                    + "," + QString::number(_totalCols) + ")");
 
         // Set the size of the relevant table
@@ -419,7 +419,7 @@ void ParallelTable::rowsToColums()
 
 void ParallelTable::allocateColumns()
 {
-    _columns.resize(_totalRows, _colAssigner->nvalues());
+    _columns.resize(_totalRows, _colAssigner->assigned());
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -433,7 +433,7 @@ void ParallelTable::destroyColumns()
 
 void ParallelTable::allocateRows()
 {
-    _rows.resize(_rowAssigner->nvalues(),_totalCols);
+    _rows.resize(_rowAssigner->assigned(),_totalCols);
 }
 
 ////////////////////////////////////////////////////////////////////

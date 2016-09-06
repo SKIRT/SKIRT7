@@ -8,15 +8,12 @@
 
 ////////////////////////////////////////////////////////////////////
 
-ProcessAssigner::ProcessAssigner()
-    : _comm(0), _nvalues(0), _blocksize(0), _nblocks(1)
+ProcessAssigner::ProcessAssigner(SimulationItem* parent, size_t size)
+    : _comm(0), _assigned(0), _total(size)
 {
-}
+    setParent(parent);
+    setup();
 
-////////////////////////////////////////////////////////////////////
-
-void ProcessAssigner::setupSelfBefore()
-{
     SimulationItem::setupSelfBefore();
 
     try
@@ -37,25 +34,16 @@ void ProcessAssigner::setupSelfBefore()
 
 ////////////////////////////////////////////////////////////////////
 
-void ProcessAssigner::copyFrom(const ProcessAssigner *from)
+size_t ProcessAssigner::assigned() const
 {
-    _comm = from->_comm;
-    _nvalues = from->_nvalues;
-    _blocksize = from->_blocksize;
-}
-
-////////////////////////////////////////////////////////////////////
-
-size_t ProcessAssigner::nvalues() const
-{
-    return _nvalues;
+    return _assigned;
 }
 
 ////////////////////////////////////////////////////////////////////
 
 size_t ProcessAssigner::total() const
 {
-    return _blocksize*_nblocks;
+    return _total;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -70,7 +58,7 @@ bool ProcessAssigner::validIndex(size_t absoluteIndex) const
 std::vector<int> ProcessAssigner::indicesForRank(int rank) const
 {
     std::vector<int> result;
-    result.reserve(_nvalues);
+    result.reserve(_assigned);
 
     // add all the absolute indices that correspond to the given rank
     for (size_t absoluteIndex=0; absoluteIndex<total(); absoluteIndex++)
@@ -82,7 +70,7 @@ std::vector<int> ProcessAssigner::indicesForRank(int rank) const
 
 ////////////////////////////////////////////////////////////////////
 
-size_t ProcessAssigner::nvaluesForRank(int rank) const
+size_t ProcessAssigner::assignedForRank(int rank) const
 {
     size_t result = 0;
 
@@ -90,3 +78,12 @@ size_t ProcessAssigner::nvaluesForRank(int rank) const
         if (rank == rankForIndex(absoluteIndex)) result++;
     return result;
 }
+
+////////////////////////////////////////////////////////////////////
+
+void ProcessAssigner::setAssigned(size_t assigned)
+{
+    _assigned = assigned;
+}
+
+////////////////////////////////////////////////////////////////////

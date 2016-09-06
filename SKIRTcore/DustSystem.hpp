@@ -149,7 +149,7 @@ private:
         give the value of the dust as read from the finite-resolution dust grid. A comparison of
         both sets of maps can reveal whether the chosen dust grid is suitable (in the ideal case,
         there would be no difference between both sets of maps). */
-    void writedensity(ProcessAssigner* assigner) const;
+    void writedensity() const;
 
     /** This function writes out a FITS file named <tt>prefix_ds_tau.fits</tt> with an all-sky
         V-band optical depth map as seen from the coordinate origin. The map has 1600 x 800 pixels
@@ -161,7 +161,7 @@ private:
         y=(j+\frac{1}{2})/N_\mathrm{pixels,y} \f] \f[ \alpha=\arcsin(2y-1) \f] \f[
         \theta=\arccos(\frac{2\alpha+\sin 2\alpha}{\pi}) \f] \f[ \phi=\frac{\pi(2x-1)}{\cos\alpha}
         \f] */
-    void writedepthmap(ProcessAssigner* assigner) const;
+    void writedepthmap() const;
 
     /** This function writes out a simple text file, named <tt>prefix_ds_quality.dat</tt>,
         providing some basic quality metrics for the dust grid. The first metric consists of the
@@ -171,7 +171,7 @@ private:
         value and the standard deviation for the difference \f$|\tau_g-\tau_t|\f$ between the
         theoretical and grid optical depth, calculated for a large number of line segments with
         random end points uniformly distributed over the dust grid volume. */
-    void writequality(ProcessAssigner* assigner) const;
+    void writequality() const;
 
     /** This function writes out a text data file, named <tt>prefix_ds_cellprops.dat</tt>, which
         contains a line for each cell in the dust grid. Each line contains four columns

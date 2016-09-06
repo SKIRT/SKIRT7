@@ -12,7 +12,6 @@
 #include "FatalError.hpp"
 #include "FITSInOut.hpp"
 #include "FilePaths.hpp"
-#include "IdenticalAssigner.hpp"
 #include "Image.hpp"
 #include "ISRF.hpp"
 #include "LockFree.hpp"
@@ -23,7 +22,6 @@
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
 #include "ParallelTable.hpp"
-#include "RootAssigner.hpp"
 #include "StaggeredAssigner.hpp"
 #include "TextOutFile.hpp"
 #include "Units.hpp"
@@ -70,8 +68,6 @@ void PanDustSystem::setupSelfBefore()
     _Nlambda = lambdagrid->Nlambda();
     // get a pointer to the wavelength assigner
     _lambdaAssigner = lambdagrid->assigner();
-    // and initialize the Q-invokable cell assigner
-    if(!_assigner) _assigner = new StaggeredAssigner(this);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -119,9 +115,11 @@ void PanDustSystem::setupSelfAfter()
 {
     DustSystem::setupSelfAfter();
 
-    // assign this process to work with a subset of dust cells
-    _assigner->assign(_Ncells);
-
+    if (find<PeerToPeerCommunicator>()->dataParallel())
+    {
+        // assign this process to work with a subset of dust cells
+        _assigner = new StaggeredAssigner(this, _Ncells);
+    }
     // resize the tables that hold the absorbed energies for each dust cell and wavelength
     // - absorbed stellar emission is relevant for calculating dust emission
     // - absorbed dust emission is relevant for calculating dust self-absorption
@@ -299,16 +297,7 @@ bool PanDustSystem::writeISRF() const
 
 ////////////////////////////////////////////////////////////////////
 
-void PanDustSystem::setAssigner(ProcessAssigner* value)
-{
-    if (_assigner) delete _assigner;
-    _assigner = value;
-    if (_assigner) _assigner->setParent(this);
-}
-
-////////////////////////////////////////////////////////////////////
-
-ProcessAssigner* PanDustSystem::assigner() const
+const ProcessAssigner* PanDustSystem::assigner() const
 {
     return _assigner;
 }
@@ -724,10 +713,11 @@ void PanDustSystem::write() const
     // If requested, output temperature map(s) along coordinate axes and temperature data for each dust cell
     if (_writeTemp)
     {
+        // Parallelize the calculation over the threads
         Parallel* parallel = find<ParallelFactory>()->parallel();
-
-        ProcessAssigner* rootAssigner = new RootAssigner(0);
-        rootAssigner->assign(Np);
+        // If the necessary data is distributed over the processes, do the calculation on all processes.
+        // Else, let the root do everything.
+        bool isRoot = find<PeerToPeerCommunicator>()->isRoot();
 
         // Output temperature map(s) along coordinate axes
         {
@@ -741,7 +731,7 @@ void PanDustSystem::write() const
             {
                 wt.setup(1,1,0);
                 if (distributedAbsorptionData()) parallel->call(&wt, Np);
-                else parallel->call(&wt, rootAssigner);
+                else if (isRoot) parallel->call(&wt, Np);
                 wt.write();
             }
 
@@ -750,7 +740,7 @@ void PanDustSystem::write() const
             {
                 wt.setup(1,0,1);
                 if (distributedAbsorptionData()) parallel->call(&wt, Np);
-                else parallel->call(&wt, rootAssigner);
+                else if (isRoot) parallel->call(&wt, Np);
                 wt.write();
             }
 
@@ -759,7 +749,7 @@ void PanDustSystem::write() const
             {
                 wt.setup(0,1,1);
                 if (distributedAbsorptionData()) parallel->call(&wt, Np);
-                else parallel->call(&wt, rootAssigner);
+                else if (isRoot) parallel->call(&wt, Np);
                 wt.write();
             }
         }
@@ -770,22 +760,20 @@ void PanDustSystem::write() const
 
             // Construct a private class instance to do the work (parallelized)
             WriteTempData wt(this);
-            rootAssigner->assign(_Ncells);
 
             // Call the body on the right cells. If everything is available, no unnecessary communication will be done.
             if (distributedAbsorptionData())
             {
                 // Calculate the temperature for the cells owned by this process
-                parallel->call(&wt,_assigner);
+                parallel->call(&wt, _assigner);
             }
-            else
+            else if (isRoot)
             {
                 // Let root calculate it for everything
-                parallel->call(&wt, rootAssigner);
+                parallel->call(&wt, _Ncells);
             }
             wt.write();
         }
-        delete rootAssigner;
     }
 }
 

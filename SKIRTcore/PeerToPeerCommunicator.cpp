@@ -119,3 +119,14 @@ void PeerToPeerCommunicator::wait(QString scope)
 }
 
 ////////////////////////////////////////////////////////////////////
+
+bool PeerToPeerCommunicator::dataParallel()
+{
+    return _dataParallel;
+}
+
+void PeerToPeerCommunicator::setDataParallel(bool dataParallel)
+{
+    _dataParallel = dataParallel;
+}
+

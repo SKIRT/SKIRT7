@@ -73,12 +73,6 @@ class TreeDustGrid : public BoxDustGrid, public DustGridDensityInterface
     Q_CLASSINFO("MaxValue", "1")
     Q_CLASSINFO("Default", "0")
 
-    Q_CLASSINFO("Property", "assigner")
-    Q_CLASSINFO("Title", "the parallel process assignment scheme")
-    Q_CLASSINFO("Default", "IdenticalAssigner")
-    Q_CLASSINFO("Optional", "true")
-    Q_CLASSINFO("Silent", "true")
-
     //============= Construction - Setup - Destruction =============
 
 protected:
@@ -192,22 +186,6 @@ public:
     /** Returns the maximum density dispersion in each dust cell, as fraction of the reference
         density. */
     Q_INVOKABLE double maxDensDispFraction() const;
-
-    /** This function sets the process assigner for this tree dust grid. The process assigner is
-        the object that assigns different parts of the calculation to different processes, to
-        parallelize the algorithm. The ProcessAssigner class is the abstract class that represents
-        different types of assigners; different subclasses implement the assignment in different
-        ways. At the moment, the assigner is only used for the part of the setup that is
-        multithreaded: sampling the density of the grid cells. This procedure has not yet been
-        adapted for multiprocessing, so currently only the IdenticalAssigner is supported, which
-        assigns each process to all of the calculations. In later versions of the code, different
-        assigners will be supported that effectively parallelize this procedure among the different
-        processes. The construction of the tree itsself might eventually even be parallelized, so
-        that different processes construct different parts of the tree. */
-    Q_INVOKABLE void setAssigner(ProcessAssigner* value);
-
-    /** Returns the process assigner for this tree dust grid. */
-    Q_INVOKABLE ProcessAssigner* assigner() const;
 
     //======================== Other Functions =======================
 

@@ -7,7 +7,6 @@
 #include "DustMix.hpp"
 #include "DustSystem.hpp"
 #include "FatalError.hpp"
-#include "IdenticalAssigner.hpp"
 #include "Instrument.hpp"
 #include "InstrumentSystem.hpp"
 #include "Log.hpp"
@@ -17,6 +16,7 @@
 #include "ParallelFactory.hpp"
 #include "PeerToPeerCommunicator.hpp"
 #include "PhotonPackage.hpp"
+#include "ProcessAssigner.hpp"
 #include "Random.hpp"
 #include "StellarSystem.hpp"
 #include "TextOutFile.hpp"
@@ -69,8 +69,8 @@ void MonteCarloSimulation::setChunkParams(double packages)
 {
     // Cache the number of wavelengths
     _Nlambda = _lambdagrid->Nlambda();
-    // Copy the assignment scheme of the wavelength assigner, so we can safely change the number of chunks (= blocks).
-    if(!_assigner) _assigner = _lambdagrid->assigner()->clone();
+    // Ask for the wavelength assigner
+    if(!_assigner) _assigner = _lambdagrid->assigner();
 
     // Determine the number of chunks and the corresponding chunk size
     if (packages <= 0)
@@ -92,29 +92,26 @@ void MonteCarloSimulation::setChunkParams(double packages)
 //        else _Nchunks = ceil( std::max({10.*Nprocs, packages/1e7, 10.*Nthreads*Nprocs/_Nlambda}));
 
         // New algorithm
-        // Find the minimum number of wavelengths assigned to any of the processes
-        size_t minNlambda = _Nlambda;
-        for (int r=0; r<Nprocs; r++)
-            minNlambda = std::min(minNlambda, _lambdagrid->assigner()->nvaluesForRank(r));
-
-        // THREAD CRITERION
-        // single thread
-        if (Nthreads == 1) _Nchunks = 1;
-        // multithread: more threads means more chunks, more wavelengths means less chunks. This way the amount of work
-        // units (nchunks * nlambda) == (10*nthreads). Keep the chunk size under 1e7.
-        else _Nchunks = ceil( std::max({(10*double(Nthreads)/minNlambda), packages/1e7}) );
-
-        // MULTIPROCESSING CRITERION
-        // If each process does all the wavelengths, each process will do _Nchunks/Nprocs chunks.
-        // Therefore multiply with Nprocs, so that each process has a suitable number of chunks for its threads
-        if (minNlambda == _Nlambda) _Nchunks *= Nprocs;
-
-        // If each process does only a small collection of wavelengths within a chunk,
-        // the scheme will simple be repeated _Nchunks times, so the current _Nchunks is ok.
+        if (Nthreads == 1) // divide wavelengths and use 1 chunk, or do all wavelengths and divide the chunks
+            _Nchunks = _assigner ? 1 : Nprocs;
+        else
+        {
+            // divided wavelengths : _Nchunks * (_Nlambda/Nprocs) work units > 10 * threads
+            // all wavelengths (divided chunks) : (_Nchunks/Nprocs) * _Nlambda work units > 10 * threads
+            // => same formula
+            _Nchunks = ceil( std::max({(10.*double(Nthreads*Nprocs)/_Nlambda), packages/1e7}) );
+            // Round up to a multiple of Nprocs
+            if (_Nchunks % Nprocs) _Nchunks = _Nchunks + Nprocs - (_Nchunks % Nprocs);
+        }
 
         // Calculate the size of the chunks and the definitive number of photon packages per wavelength
         _chunksize = ceil(packages/_Nchunks);
         _Npp = _Nchunks * _chunksize;
+
+        // The total number of photon packages for this process, used for logging
+        // == number of wavelengths * number of repetitions * number of photons in a chunk
+        _myTotalNpp = _assigner ? _assigner->assigned() * _Nchunks * _chunksize // approx 1/Nprocs lambda's per process
+                                : _Nlambda * _Nchunks / Nprocs * _chunksize;
     }
 
     // Determine the log frequency; continuous scattering is much slower!
@@ -122,7 +119,6 @@ void MonteCarloSimulation::setChunkParams(double packages)
 
     // Assign the _Nlambda x _Nchunks different chunks to the different parallel processes
     _log->info("Using "+QString::number(_Nchunks)+" chunks.");
-    _assigner->setBlocks(_Nchunks);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -213,7 +209,7 @@ bool MonteCarloSimulation::continuousScattering() const
 
 ////////////////////////////////////////////////////////////////////
 
-ProcessAssigner* MonteCarloSimulation::assigner() const
+const ProcessAssigner* MonteCarloSimulation::assigner() const
 {
     return _assigner;
 }
@@ -236,7 +232,7 @@ void MonteCarloSimulation::initprogress(QString phase)
                + (_Nlambda==1 ? QString("a single wavelength") : QString("each of %1 wavelengths").arg(_Nlambda))
                + ")");
 
-    if (_comm->isMultiProc()) _log->info("(" + QString::number(_assigner->nvalues()*_chunksize/_Nlambda)
+    if (_comm->isMultiProc()) _log->info("(" + QString::number(_myTotalNpp/_Nlambda)
                                          + " photon packages per wavelength per process)");
 
     _timer.start();
@@ -254,7 +250,7 @@ void MonteCarloSimulation::logprogress(quint64 extraDone)
     if (_timer.elapsed() > 3000)
     {
         _timer.restart();
-        double completed = _Ndone * 100. / (_assigner->nvalues()*_chunksize);
+        double completed = _Ndone * 100. / (_myTotalNpp);
         _log->info("Launched " + _phase + " photon packages: " + QString::number(completed,'f',1) + "%");
     }
 }
@@ -267,8 +263,13 @@ void MonteCarloSimulation::runstellaremission()
     setChunkParams(_packages);
     initprogress("stellar emission");
     Parallel* parallel = find<ParallelFactory>()->parallel();
-    parallel->call(this, &MonteCarloSimulation::dostellaremissionchunk, _assigner);
 
+    if (_assigner) parallel->call(this, &MonteCarloSimulation::dostellaremissionchunk, _assigner, _Nchunks);
+    else
+    {
+        int Nprocs = find<PeerToPeerCommunicator>()->size();
+        parallel->call(this, &MonteCarloSimulation::dostellaremissionchunk, _Nlambda, _Nchunks/Nprocs);
+    }
     // Wait for the other processes to reach this point
     _comm->wait("the stellar emission phase");
 }

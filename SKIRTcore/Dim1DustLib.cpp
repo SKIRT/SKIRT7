@@ -51,7 +51,7 @@ std::vector<int> Dim1DustLib::mapping() const
     // get basic information about the wavelength grid and the dust system
     WavelengthGrid* lambdagrid = find<WavelengthGrid>();
     PanDustSystem* ds = find<PanDustSystem>();
-    int Ncells = _cellAssigner->nvalues();
+    int Ncells = _cellAssigner->assigned();
 
     // calculate the properties of the ISRF in all cells of the dust system;
     // remember the minimum and maximum values of the strength of the ISRF

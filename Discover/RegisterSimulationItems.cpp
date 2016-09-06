@@ -71,7 +71,6 @@
 #include "GaussianGeometry.hpp"
 #include "GenGeometry.hpp"
 #include "GreyBodyDustEmissivity.hpp"
-#include "IdenticalAssigner.hpp"
 #include "InstrumentFrame.hpp"
 #include "InstrumentSystem.hpp"
 #include "InterstellarDustMix.hpp"
@@ -443,7 +442,6 @@ void RegisterSimulationItems::registerAll()
 
     // process assigners
     add<ProcessAssigner>(false);
-    add<IdenticalAssigner>();
     add<StaggeredAssigner>();
     add<SequentialAssigner>();
     add<RandomAssigner>();

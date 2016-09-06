@@ -98,7 +98,7 @@ protected:
         -# when <b>multiprocessing and multithreading</b> are used in combination, an additional
         criterion must be met, regarding the load balancing between the parallel processes: the number
         of chunks (per wavelength) should at least be 10 times the number of processes, since these
-        chunks will be distributed amongst the processes by the designated ProcessAssigner. This
+        chunks will be distributed amongst the processes. This
         condition can be expressed mathematically as: \f[\boxed{N_\text{chunks} > 10 \times
         N_\text{procs}}\f] The criterion that ensures load balancing between the threads remains, but
         is slightly altered to include the threads from all parallel processes
@@ -173,9 +173,6 @@ public:
     //======================== Other Functions =======================
 
 public:
-    /** Returns the process assigner for this Monte Carlo simulation. */
-    ProcessAssigner* assigner() const;
-
     /** This function returns the dimension of the simulation, which depends on the (lack of)
         symmetry in the stellar and dust geometries. A value of 1 means spherical symmetry, 2 means
         axial symmetry and 3 means none of these symmetries. The stellar or dust component with the
@@ -184,6 +181,9 @@ public:
     int dimension() const;
 
 protected:
+    /** Returns the process assigner for this Monte Carlo simulation. */
+    const ProcessAssigner* assigner() const;
+
     /** This function initializes the progress counter used in logprogress() for the specified
         phase and logs the number of photon packages and wavelengths to be processed. */
     void initprogress(QString phase);
@@ -390,7 +390,7 @@ private:
     int _minfs;                 // the minimum number of scattering events
     double _xi;                 // the scattering bias
     bool _continuousScattering; // true if continuous scattering should be used
-    ProcessAssigner* _assigner; // determines which wavelengths/chunks are assigned to this process
+    const ProcessAssigner* _assigner; // determines which wavelengths are assigned to this process
 
 protected:
     // *** discoverable attributes to be setup by a subclass ***
@@ -404,6 +404,7 @@ protected:
     quint64 _Nchunks;       // the number of chunks to be launched per wavelength
     quint64 _chunksize;     // the number of photon packages in one chunk
     quint64 _Npp;           // the precise number of photon packages to be launched per wavelength
+    quint64 _myTotalNpp;    // the total number of photom packages to be launched by this process
     quint64 _logchunksize;  // the number of photon packages to be processed between logprogress() invocations
 
 private:

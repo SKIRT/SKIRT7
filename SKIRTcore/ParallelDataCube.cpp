@@ -20,7 +20,7 @@ void ParallelDataCube::initialize(const ProcessAssigner *wavelengthAssigner, siz
 {
     _wavelengthAssigner = wavelengthAssigner;
     _Nframep = Nframep;
-    _Nlambda = _wavelengthAssigner->nvalues();
+    _Nlambda = _wavelengthAssigner->assigned();
 
     _partialCube->resize(_Nlambda*_Nframep);
 
@@ -31,7 +31,7 @@ void ParallelDataCube::initialize(const ProcessAssigner *wavelengthAssigner, siz
 
 std::shared_ptr<Array> ParallelDataCube::constructCompleteCube()
 {
-    if (!_wavelengthAssigner->parallel() || !_comm->isMultiProc()) // partial cube of equal size as total cube
+    if (!_wavelengthAssigner || !_comm->isMultiProc()) // partial cube of equal size as total cube
     {
         _comm->sum(*_partialCube); // sum the data to root
         std::shared_ptr<Array> dummy (new Array(0));

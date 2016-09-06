@@ -9,7 +9,6 @@
 #include "DustGridPath.hpp"
 #include "DustGridPlotFile.hpp"
 #include "FatalError.hpp"
-#include "IdenticalAssigner.hpp"
 #include "Log.hpp"
 #include "NR.hpp"
 #include "Parallel.hpp"
@@ -62,13 +61,12 @@ void TreeDustGrid::setupSelfBefore()
     if (_maxMassFraction < 0.0) throw FATALERROR("The maximum mass fraction should be positive");
     if (_maxDensDispFraction < 0.0) throw FATALERROR("The maximum density dispersion fraction should be positive");
 
-    // If no assigner was set, use an IdenticalAssigner as default (each process builds the entire tree)
-    if (!_assigner) setAssigner(new IdenticalAssigner(this));
-
     // Cache some often used values
     // A Parallel instance is created with a limited amount of threads (4) for performance reasons
+    // or with a single thread in case of multiprocessing, to ensure consistency.
+    size_t nthreads = find<PeerToPeerCommunicator>()->isMultiProc() ? 1 : 4;
     _random = find<Random>();
-    _parallel = find<ParallelFactory>()->parallel(4);
+    _parallel = find<ParallelFactory>()->parallel(nthreads);
     _dd = find<DustDistribution>();
     _dmib = _dd->interface<DustMassInBoxInterface>();
     _useDmibForSubdivide = _dmib && !_maxDensDispFraction;
@@ -190,8 +188,7 @@ void TreeDustGrid::subdivide(TreeNode* node)
             // sample the density in the cell
             TreeNodeSampleDensityCalculator* sampleCalc =
                     new TreeNodeSampleDensityCalculator(_random, _Nrandom, _dd, node);
-            _assigner->assign(_Nrandom);
-            _parallel->call(sampleCalc, _assigner);
+            _parallel->call(sampleCalc, _Nrandom);
             calc = sampleCalc;
         }
 
@@ -331,22 +328,6 @@ double TreeDustGrid::maxDensDispFraction() const
 }
 
 ////////////////////////////////////////////////////////////////////
-
-void TreeDustGrid::setAssigner(ProcessAssigner* value)
-{
-    if (_assigner) delete _assigner;
-    _assigner = value;
-    if (_assigner) _assigner->setParent(this);
-}
-
-////////////////////////////////////////////////////////////////////
-
-ProcessAssigner* TreeDustGrid::assigner() const
-{
-    return _assigner;
-}
-
-//////////////////////////////////////////////////////////////////////
 
 double TreeDustGrid::volume(int m) const
 {

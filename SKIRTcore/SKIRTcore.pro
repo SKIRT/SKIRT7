@@ -139,7 +139,6 @@ HEADERS += \
     GreyBodyDustEmissivity.hpp \
     HomogeneousTransform.hpp \
     ISRF.hpp \
-    IdenticalAssigner.hpp \
     Image.hpp \
     Instrument.hpp \
     InstrumentFrame.hpp \
@@ -207,7 +206,6 @@ HEADERS += \
     RangeGrainSizeDistribution.hpp \
     ReadFitsGeometry.hpp \
     RingGeometry.hpp \
-    RootAssigner.hpp \
     RotateGeometryDecorator.hpp \
     SED.hpp \
     SEDFamily.hpp \
@@ -409,7 +407,6 @@ SOURCES += \
     GreyBodyDustEmissivity.cpp \
     HomogeneousTransform.cpp \
     ISRF.cpp \
-    IdenticalAssigner.cpp \
     Image.cpp \
     Instrument.cpp \
     InstrumentFrame.cpp \
@@ -477,7 +474,6 @@ SOURCES += \
     RangeGrainSizeDistribution.cpp \
     ReadFitsGeometry.cpp \
     RingGeometry.cpp \
-    RootAssigner.cpp \
     RotateGeometryDecorator.cpp \
     SED.cpp \
     SEDFamily.cpp \

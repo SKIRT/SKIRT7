@@ -75,14 +75,14 @@ int Parallel::threadCount() const
 
 void Parallel::call(ParallelTarget* target, const ProcessAssigner* assigner)
 {
-    prepareAndCall(target, assigner, assigner->nvalues(), assigner->parallel());
+    prepareAndCall(target, assigner, assigner->assigned());
 }
 
 ////////////////////////////////////////////////////////////////////
 
 void Parallel::call(ParallelTarget* target, size_t maxIndex)
 {
-    prepareAndCall(target, nullptr, maxIndex, true);
+    prepareAndCall(target, nullptr, maxIndex);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -184,7 +184,7 @@ bool Parallel::threadsActive()
 
 ////////////////////////////////////////////////////////////////////
 
-void Parallel::prepareAndCall(ParallelTarget* target, const ProcessAssigner* assigner, size_t limit, bool multithread)
+void Parallel::prepareAndCall(ParallelTarget* target, const ProcessAssigner* assigner, size_t limit)
 {
     // Verify that we're being called from our parent thread
     if (std::this_thread::get_id() != _parentThread)
@@ -200,7 +200,7 @@ void Parallel::prepareAndCall(ParallelTarget* target, const ProcessAssigner* ass
         _limit = limit;
 
         // Initialize the number of active threads (i.e. not waiting for new work)
-        if (multithread) _active.assign(_threadCount, true);
+        _active.assign(_threadCount, true);
 
         // Clear the exception pointer
         _exception = 0;
@@ -209,14 +209,14 @@ void Parallel::prepareAndCall(ParallelTarget* target, const ProcessAssigner* ass
         _next = 0;
 
         // Wake all parallel threads, if multithreading is allowed
-        if (multithread) _conditionExtra.notify_all();
+        _conditionExtra.notify_all();
     }
 
     // Do some work ourselves as well
     doWork();
 
     // Wait until all parallel threads are done
-    if (multithread) waitForThreads();
+    waitForThreads();
 
     // Check for and process the exception, if any
     if (_exception)

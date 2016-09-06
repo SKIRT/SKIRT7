@@ -55,7 +55,7 @@ namespace
         int _Nlambda;
         int _Ncomp;
         QTime _timer;           // measures the time elapsed since the most recent log message
-        ProcessAssigner* _cellAssigner; // converts the relative dust cell indices in the mapping to absolute indices
+        const ProcessAssigner* _cellAssigner; // converts the relative dust cell indices in the mapping to absolute indices
         bool _distributedAbsorptionData;
 
     public:
@@ -202,8 +202,7 @@ void DustLib::calculate()
     // Divide the work over the processes per library entry, using an auxiliary assigner.
     else
     {
-        if (!_libAssigner) _libAssigner = new StaggeredAssigner(this);
-        _libAssigner->assign(Nlib);
+        if (!_libAssigner) _libAssigner = new StaggeredAssigner(this, Nlib);
 
         // prepare the ParallelTable for output
         if (_Lvv.initialized())
