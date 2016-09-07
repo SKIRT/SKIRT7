@@ -95,17 +95,21 @@ public:
         The work will be distributed over the parallel threads in an unpredicable manner. */
     void call(ParallelTarget* target, size_t maxIndex);
 
-    /** Calls the specified member function for the specified target object a certain number of times,
-        with the \em index argument of that function taking values that are determined by the \em
-        assigner, which is also passed to this function. While the values assigned to a particular
-        process are fixed at the moment this function is called, the work will be distributed over the
-        parallel threads in an unpredicable manner. */
+    /** Calls the specified member function for the specified target object a certain number of
+        times, with the \em index argument of that function taking values that are determined by
+        the \em assigner, which is also passed to this function. While the values assigned to a
+        particular process are fixed at the moment this function is called, the work will be
+        distributed over the parallel threads in an unpredicable manner. If the repetitions
+        argument is > 1, this function will loop through the indices specified by the assigner
+        multiple times. */
     template<class T> void call(T* targetObject, void (T::*targetMember)(size_t index), const ProcessAssigner* assigner,
                                 size_t repetitions = 1);
 
-    /** Calls the specified member function for the specified target object a certain number of times,
-        with the \em index argument of that function taking values from 0 to \em maxIndex.
-        The work will be distributed over the parallel threads in an unpredicable manner. */
+    /** Calls the specified member function for the specified target object a certain number of
+        times, with the \em index argument of that function taking values from 0 to \em maxIndex.
+        The work will be distributed over the parallel threads in an unpredicable manner. When
+        repetitions > 1, the loop over the indices will be repeated multiple times. With every
+        repetition, the index starts from 0 and goes up to \em maxIndex. */
     template<class T> void call(T* targetObject, void (T::*targetMember)(size_t index), size_t maxIndex,
                                 size_t repetitions = 1);
 

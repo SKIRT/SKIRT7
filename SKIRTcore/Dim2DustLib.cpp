@@ -9,7 +9,6 @@
 #include "FatalError.hpp"
 #include "Log.hpp"
 #include "PanDustSystem.hpp"
-#include "ProcessAssigner.hpp"
 #include "Units.hpp"
 #include "WavelengthGrid.hpp"
 
@@ -74,7 +73,7 @@ std::vector<int> Dim2DustLib::mapping() const
     WavelengthGrid* lambdagrid = find<WavelengthGrid>();
     PanDustSystem* ds = find<PanDustSystem>();
     int Nlambda = lambdagrid->Nlambda();
-    int Ncells = _cellAssigner->assigned();
+    int Ncells = ds->Ncells();
     int Ncomp = ds->Ncomp();
     Log* log = find<Log>();
     Units* units = find<Units>();
@@ -89,10 +88,9 @@ std::vector<int> Dim2DustLib::mapping() const
     Array lambdameanv(Ncells);
     for (int m=0; m<Ncells; m++)
     {
-        int mAbs = _cellAssigner->absoluteIndex(m);
-        if (ds->Labs(mAbs) > 0.0)
+        if (ds->Labs(m) > 0.0)
         {
-            const Array& Jv = ds->meanintensityv(mAbs);
+            const Array& Jv = ds->meanintensityv(m);
             double sumrho = 0.;
             for (int h=0; h<Ncomp; h++)
             {
@@ -106,7 +104,7 @@ std::vector<int> Dim2DustLib::mapping() const
                     sum0 += sigmaJ * dlambda;
                     sum1 += sigmaJ * lambda * dlambda;
                 }
-                double rho = ds->density(mAbs,h);
+                double rho = ds->density(m,h);
                 Tmeanv[m] += rho * ds->mix(h)->invplanckabs(sum0);
                 lambdameanv[m] += rho * (sum1/sum0);
                 sumrho += rho;

@@ -30,7 +30,7 @@ using namespace std;
 
 MonteCarloSimulation::MonteCarloSimulation()
     : _is(0), _packages(0), _minWeightReduction(1e4),
-      _minfs(0), _xi(0.5), _continuousScattering(false), _assigner(0),
+      _minfs(0), _xi(0.5), _continuousScattering(false), _wavelengthAssigner(0),
       _lambdagrid(0), _ss(0), _ds(0)
 {
 }
@@ -69,8 +69,10 @@ void MonteCarloSimulation::setChunkParams(double packages)
 {
     // Cache the number of wavelengths
     _Nlambda = _lambdagrid->Nlambda();
-    // Ask for the wavelength assigner
-    if(!_assigner) _assigner = _lambdagrid->assigner();
+
+    // Check to see if we are using data parallelization
+    bool dataParallel = _comm->dataParallel();
+    if(dataParallel && !_wavelengthAssigner) _wavelengthAssigner = _lambdagrid->assigner();
 
     // Determine the number of chunks and the corresponding chunk size
     if (packages <= 0)
@@ -92,26 +94,33 @@ void MonteCarloSimulation::setChunkParams(double packages)
 //        else _Nchunks = ceil( std::max({10.*Nprocs, packages/1e7, 10.*Nthreads*Nprocs/_Nlambda}));
 
         // New algorithm
+        int totalChunks = 0;
         if (Nthreads == 1) // divide wavelengths and use 1 chunk, or do all wavelengths and divide the chunks
-            _Nchunks = _assigner ? 1 : Nprocs;
+            totalChunks = _wavelengthAssigner ? 1 : Nprocs;
         else
         {
             // divided wavelengths : _Nchunks * (_Nlambda/Nprocs) work units > 10 * threads
             // all wavelengths (divided chunks) : (_Nchunks/Nprocs) * _Nlambda work units > 10 * threads
             // => same formula
-            _Nchunks = ceil( std::max({(10.*double(Nthreads*Nprocs)/_Nlambda), packages/1e7}) );
+            totalChunks = ceil( std::max({(10.*double(Nthreads*Nprocs)/_Nlambda), packages/1e7}) );
             // Round up to a multiple of Nprocs
-            if (_Nchunks % Nprocs) _Nchunks = _Nchunks + Nprocs - (_Nchunks % Nprocs);
+            if (totalChunks % Nprocs) totalChunks = totalChunks + Nprocs - (totalChunks % Nprocs);
         }
 
         // Calculate the size of the chunks and the definitive number of photon packages per wavelength
-        _chunksize = ceil(packages/_Nchunks);
-        _Npp = _Nchunks * _chunksize;
+        _chunksize = ceil(packages/totalChunks);
+        _Npp = totalChunks * _chunksize;
 
-        // The total number of photon packages for this process, used for logging
-        // == number of wavelengths * number of repetitions * number of photons in a chunk
-        _myTotalNpp = _assigner ? _assigner->assigned() * _Nchunks * _chunksize // approx 1/Nprocs lambda's per process
-                                : _Nlambda * _Nchunks / Nprocs * _chunksize;
+        if (_wavelengthAssigner) // work is divided by letting each process do about 1/Nprocs of the wavelengths
+        {
+            _Nchunks = totalChunks;
+            _myTotalNpp = _wavelengthAssigner->assigned() * _Nchunks * _chunksize;
+        }
+        else // work is divided by letting each process do 1/Nprocs of the chunks
+        {
+            _Nchunks = totalChunks/Nprocs;
+            _myTotalNpp = _Nlambda * _Nchunks * _chunksize;
+        }
     }
 
     // Determine the log frequency; continuous scattering is much slower!
@@ -211,7 +220,7 @@ bool MonteCarloSimulation::continuousScattering() const
 
 const ProcessAssigner* MonteCarloSimulation::assigner() const
 {
-    return _assigner;
+    return _wavelengthAssigner;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -264,12 +273,11 @@ void MonteCarloSimulation::runstellaremission()
     initprogress("stellar emission");
     Parallel* parallel = find<ParallelFactory>()->parallel();
 
-    if (_assigner) parallel->call(this, &MonteCarloSimulation::dostellaremissionchunk, _assigner, _Nchunks);
+    if (_wavelengthAssigner)
+        parallel->call(this, &MonteCarloSimulation::dostellaremissionchunk, _wavelengthAssigner, _Nchunks);
     else
-    {
-        int Nprocs = find<PeerToPeerCommunicator>()->size();
-        parallel->call(this, &MonteCarloSimulation::dostellaremissionchunk, _Nlambda, _Nchunks/Nprocs);
-    }
+        parallel->call(this, &MonteCarloSimulation::dostellaremissionchunk, _Nlambda, _Nchunks);
+
     // Wait for the other processes to reach this point
     _comm->wait("the stellar emission phase");
 }

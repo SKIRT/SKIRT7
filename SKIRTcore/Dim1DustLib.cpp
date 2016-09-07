@@ -9,7 +9,6 @@
 #include "ISRF.hpp"
 #include "Log.hpp"
 #include "PanDustSystem.hpp"
-#include "ProcessAssigner.hpp"
 #include "WavelengthGrid.hpp"
 
 using namespace std;
@@ -51,7 +50,7 @@ std::vector<int> Dim1DustLib::mapping() const
     // get basic information about the wavelength grid and the dust system
     WavelengthGrid* lambdagrid = find<WavelengthGrid>();
     PanDustSystem* ds = find<PanDustSystem>();
-    int Ncells = _cellAssigner->assigned();
+    int Ncells = ds->Ncells();
 
     // calculate the properties of the ISRF in all cells of the dust system;
     // remember the minimum and maximum values of the strength of the ISRF
@@ -61,8 +60,7 @@ std::vector<int> Dim1DustLib::mapping() const
     vector<double> Ucellv(Ncells);
     for (int m=0; m<Ncells; m++)
     {
-        int mAbs = _cellAssigner->absoluteIndex(m);
-        double Jtot = ( ds->meanintensityv(mAbs) * lambdagrid->dlambdav() ).sum();
+        double Jtot = ( ds->meanintensityv(m) * lambdagrid->dlambdav() ).sum();
         double U = Jtot/JtotMW;
         // ignore cells with extremely small radiation fields (compared to the average in the Milky Way)
         // to avoid wasting library grid points on fields that won't change simulation results anyway

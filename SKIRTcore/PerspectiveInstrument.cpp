@@ -104,8 +104,7 @@ void PerspectiveInstrument::setupSelfBefore()
     _transform.translate(_Nx/2., _Ny/2., 0);
 
     // the data cube
-    WavelengthGrid* wavelengthGrid = find<WavelengthGrid>();
-    _ftotv.initialize(wavelengthGrid->assigner(), _Nx*_Ny);
+    _ftotv.initialize(_Nx*_Ny, this);
 }
 
 ////////////////////////////////////////////////////////////////////

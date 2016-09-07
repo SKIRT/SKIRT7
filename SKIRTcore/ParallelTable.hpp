@@ -27,8 +27,10 @@ class ParallelTable
 public:
     ParallelTable();
 
-    void initialize(QString name, const ProcessAssigner* colAssigner, const ProcessAssigner* rowAssigner,
-                    writeState writeOn);
+    void initialize(QString name, writeState writeOn, const ProcessAssigner* colAssigner,
+                    const ProcessAssigner* rowAssigner, PeerToPeerCommunicator* comm);
+
+    void initialize(QString name, writeState writeOn, int columns, int rows, PeerToPeerCommunicator* comm);
 
     //======================== Other Functions =======================
 

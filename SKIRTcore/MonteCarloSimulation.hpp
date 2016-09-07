@@ -390,7 +390,7 @@ private:
     int _minfs;                 // the minimum number of scattering events
     double _xi;                 // the scattering bias
     bool _continuousScattering; // true if continuous scattering should be used
-    const ProcessAssigner* _assigner; // determines which wavelengths are assigned to this process
+    const ProcessAssigner* _wavelengthAssigner; // determines which wavelengths are assigned to this process
 
 protected:
     // *** discoverable attributes to be setup by a subclass ***

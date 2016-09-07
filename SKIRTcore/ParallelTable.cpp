@@ -18,60 +18,71 @@ ParallelTable::ParallelTable()
 
 ////////////////////////////////////////////////////////////////////
 
-void ParallelTable::initialize(QString name, const ProcessAssigner *colAssigner, const ProcessAssigner *rowAssigner,
-                               writeState writeOn)
+void ParallelTable::initialize(QString name, writeState writeOn, const ProcessAssigner* colAssigner,
+                               const ProcessAssigner* rowAssigner, PeerToPeerCommunicator* comm)
 {
-    // Fill in some basic data members
     _name = name;
     _colAssigner = colAssigner;
     _rowAssigner = rowAssigner;
     _writeOn = writeOn;
-
-    _comm = colAssigner->find<PeerToPeerCommunicator>();
-    _log = colAssigner->find<Log>();
-
+    _comm = comm;
+    _log = _comm->find<Log>();
     _totalRows = _rowAssigner->total();
     _totalCols = _colAssigner->total();
 
-    if (colAssigner && rowAssigner && _comm->isMultiProc())
-    {
-        // Use the distributed memory scheme
-        _distributed = true;
+    if (!_comm->dataParallel()) throw FATALERROR(_name + " says: The initialize function using assigners should not be"
+                                                       + " called when the code runs non-dataparallel.");
 
-        // Inform the user about the mode used and the dimensions (N,M) of the locally stored data
-        _log->info(_name + " is distributed. Sizes of local tables are (" + QString::number(_totalRows) + ","
-                   + QString::number(_colAssigner->assigned()) + ") and (" + QString::number(_rowAssigner->assigned())
-                   + "," + QString::number(_totalCols) + ")");
+    // Use the distributed memory scheme
+    _distributed = true;
 
-        // Set the size of the relevant table
-        if (_writeOn == COLUMN) allocateColumns();
-        else if (_writeOn == ROW) allocateRows();
-        else throw FATALERROR("Invalid writeState for ParallelTable");
+    // Inform the user about the mode used and the dimensions (N,M) of the locally stored data
+    _log->info(_name + " is distributed. Size of local table will switch between (" + QString::number(_totalRows) + ","
+               + QString::number(_colAssigner->assigned()) + ") and (" + QString::number(_rowAssigner->assigned())
+               + "," + QString::number(_totalCols) + ")");
 
-        // Cache the outcomes of the following function calls
-        _isValidRowv.resize(_totalRows, false);
-        for (size_t i=0; i<_totalRows; i++) _isValidRowv[i] = _rowAssigner->validIndex(i);
-        _isValidColv.resize(_totalCols, false);
-        for (size_t j=0; j<_totalCols; j++) _isValidColv[j] = _colAssigner->validIndex(j);
-        _relativeRowIndexv.resize(_totalRows, 0);
-        for (size_t i=0; i<_totalRows; i++) _relativeRowIndexv[i] = _rowAssigner->relativeIndex(i);
-        _relativeColIndexv.resize(_totalCols, 0);
-        for (size_t j=0; j<_totalCols; j++) _relativeColIndexv[j] = _rowAssigner->relativeIndex(j);
-    }
+    // Set the size of the relevant table
+    if (_writeOn == COLUMN) allocateColumns();
+    else if (_writeOn == ROW) allocateRows();
+    else throw FATALERROR("Invalid writeState for ParallelTable");
 
-    else
-    {
-        // Not distributed
-        _distributed = false;
+    // Cache the outcomes of the following function calls
+    _isValidRowv.resize(_totalRows, false);
+    for (size_t i=0; i<_totalRows; i++) _isValidRowv[i] = _rowAssigner->validIndex(i);
+    _isValidColv.resize(_totalCols, false);
+    for (size_t j=0; j<_totalCols; j++) _isValidColv[j] = _colAssigner->validIndex(j);
+    _relativeRowIndexv.resize(_totalRows, 0);
+    for (size_t i=0; i<_totalRows; i++) _relativeRowIndexv[i] = _rowAssigner->relativeIndex(i);
+    _relativeColIndexv.resize(_totalCols, 0);
+    for (size_t j=0; j<_totalCols; j++) _relativeColIndexv[j] = _rowAssigner->relativeIndex(j);
 
-        _log->info(_name + " is not distributed. Size is (" + QString::number(_totalRows) + ","
-                   + QString::number(_totalCols) + ")");
+    _initialized = true;
+}
 
-        // Set the size of one of the tables. The other one will not be used.
-        if (writeOn == COLUMN) _columns.resize(_totalRows,_totalCols);
-        else if (writeOn == ROW) _rows.resize(_totalRows,_totalCols);
-        else throw FATALERROR("Invalid writeState for ParallelTable");
-    }
+void ParallelTable::initialize(QString name, writeState writeOn, int columns, int rows, PeerToPeerCommunicator* comm)
+{
+    _colAssigner = nullptr;
+    _rowAssigner = nullptr;
+
+    // Fill in some basic data members
+    _name = name;
+    _writeOn = writeOn;
+    _comm = comm;
+    _log = _comm->find<Log>();
+    _totalCols = columns;
+    _totalRows = rows;
+
+    // Not distributed
+    _distributed = false;
+
+    _log->info(_name + " is not distributed. Size is (" + QString::number(_totalRows) + ","
+               + QString::number(_totalCols) + ")");
+
+    // Set the size of one of the tables. The other one will not be used.
+    if (writeOn == COLUMN) _columns.resize(_totalRows,_totalCols);
+    else if (writeOn == ROW) _rows.resize(_totalRows,_totalCols);
+    else throw FATALERROR("Invalid writeState for ParallelTable");
+
     _initialized = true;
 }
 

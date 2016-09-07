@@ -30,6 +30,8 @@ class PeerToPeerCommunicator : public ProcessCommunicator
 
     //============= Construction - Setup - Destruction =============
 public:
+    /** This function should be used just after this object has been set up, to set the
+        _dataParallel member to true if '-d' was specified on the commandline. */
     void setDataParallel(bool dataParallel);
 
     //====================== Other Functions =======================
@@ -85,9 +87,8 @@ public:
     /** This function does not return before all processes within the communicator have called it. */
     void wait(QString scope);
 
+    /** This function indicates whether data parallelization is enabled or not */
     bool dataParallel();
-
-
 
 private:
     bool _dataParallel;

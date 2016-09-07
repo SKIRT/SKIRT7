@@ -27,7 +27,7 @@ void SimpleInstrument::setupSelfBefore()
     int Nlambda = wavelengthGrid->Nlambda();
 
     _Ftotv.resize(Nlambda);
-    _ftotv.initialize(wavelengthGrid->assigner(), _Nframep);
+    _ftotv.initialize(_Nframep, this);
 }
 
 ////////////////////////////////////////////////////////////////////

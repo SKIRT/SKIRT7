@@ -188,9 +188,6 @@ public:
         calculated if dust emission is turned on. */
     bool storeabsorptionrates() const;
 
-    /** This function returns true if data parallelization is activated for one of the absorption tables **/
-    bool distributedAbsorptionData() const;
-
     /** The function simulates the absorption of a monochromatic luminosity package in the dust
         cell with cell number \f$m\f$, i.e. it adds a fraction \f$\Delta L\f$ to the already
         absorbed luminosity at wavelength index \f$\ell\f$. The function adds the absorbed

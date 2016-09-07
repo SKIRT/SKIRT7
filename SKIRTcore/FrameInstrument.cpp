@@ -25,8 +25,11 @@ void FrameInstrument::setupSelfBefore()
 {
     SingleFrameInstrument::setupSelfBefore();
 
-    WavelengthGrid* wavelengthGrid = find<WavelengthGrid>();
-    _distftotv.initialize(wavelengthGrid->assigner(), _Nframep);
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+    if (comm->dataParallel())
+        _distftotv.initialize(_Nframep, comm);
+    else
+        _distftotv.initialize(_Nframep, comm);
 }
 
 ////////////////////////////////////////////////////////////////////
