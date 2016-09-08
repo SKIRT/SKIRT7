@@ -50,7 +50,7 @@ public:
     this is so, the \c _assigned member is incremented. The condition that is checked for each index
     \f$t\f$ can be written mathematically as: \f[ t \bmod{N_P} = i \f] where \f$N_P\f$ is the
     number of processes and \f$i\f$ is the rank of the process. */
-    explicit StaggeredAssigner(SimulationItem* parent, size_t size);
+    explicit StaggeredAssigner(size_t size, SimulationItem* parent);
 
     //======================== Other Functions =======================
 

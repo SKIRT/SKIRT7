@@ -35,7 +35,7 @@ protected:
     because this is an abstract class. The algorithm for dividing the work is implemented
     differently in each of the subclasses, and typically involves some calculations to determine
     which process is assigned to which parts of the work. */
-    ProcessAssigner(SimulationItem* parent, size_t size);
+    ProcessAssigner(size_t size, SimulationItem* parent);
 
     /** Subclasses must use this protected setter to set _assigned to the correct value, after
     performing their assignment algorithm in the constructor */

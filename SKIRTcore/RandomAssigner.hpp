@@ -42,7 +42,7 @@ public:
         any part of the work (stored in the _assignment vector). Each process then determines which
         values it is assigned to itself, and stores these values in a seperate list (the _values
         attribute). */
-    explicit RandomAssigner(SimulationItem* parent, size_t size);
+    explicit RandomAssigner(size_t size, SimulationItem* parent);
 
     //======================== Other Functions =======================
 

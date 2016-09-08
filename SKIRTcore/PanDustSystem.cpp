@@ -116,13 +116,10 @@ void PanDustSystem::setupSelfAfter()
     PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
     bool dataParallel = comm->dataParallel();
 
-    if (dataParallel)
-    {
-        // get a pointer to the wavelength assigner
-        _lambdaAssigner = find<WavelengthGrid>()->assigner();
-        // assign this process to work with a subset of dust cells
-        _assigner = new StaggeredAssigner(this, _Ncells);
-    }
+    if (dataParallel) // assign this process to work with a subset of dust cells
+        _assigner = new StaggeredAssigner(_Ncells, this);
+
+    WavelengthGrid* wg = find<WavelengthGrid>();
 
     // resize the tables that hold the absorbed energies for each dust cell and wavelength
     // - absorbed stellar emission is relevant for calculating dust emission
@@ -132,7 +129,7 @@ void PanDustSystem::setupSelfAfter()
     if (dustemission())
     {
         if (dataParallel)
-            _Labsstelvv.initialize("Absorbed Stellar Luminosity Table", COLUMN, _lambdaAssigner, _assigner, comm);
+            _Labsstelvv.initialize("Absorbed Stellar Luminosity Table", COLUMN, wg->assigner(), _assigner, comm);
         else
             _Labsstelvv.initialize("Absorbed Stellar Luminosity Table", COLUMN, _Nlambda, _Ncells, comm);
         _haveLabsstel = true;
@@ -140,7 +137,7 @@ void PanDustSystem::setupSelfAfter()
         if (selfAbsorption())
         {
             if (dataParallel)
-                _Labsdustvv.initialize("Absorbed Dust Luminosity Table", COLUMN, _lambdaAssigner, _assigner, comm);
+                _Labsdustvv.initialize("Absorbed Dust Luminosity Table", COLUMN, wg->assigner(), _assigner, comm);
             else
                 _Labsdustvv.initialize("Absorbed Dust Luminosity Table", COLUMN, _Nlambda, _Ncells, comm);
             _haveLabsdust = true;

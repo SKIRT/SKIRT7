@@ -35,7 +35,6 @@ void ParallelDataCube::initialize(size_t Nframep, SimulationItem* item)
         _wavelengthAssigner = nullptr;
         _Nlambda = wg->Nlambda();
     }
-
     _partialCube->resize(_Nlambda*_Nframep);
 }
 
@@ -72,10 +71,13 @@ std::shared_ptr<Array> ParallelDataCube::constructCompleteCube()
 
 double& ParallelDataCube::operator()(int ell, int pixel)
 {
-    if(!_wavelengthAssigner) return (*_partialCube)[ell*_Nframep + pixel];
+    if(!_wavelengthAssigner)
+        return (*_partialCube)[ell*_Nframep + pixel];
     else
     {
-        if (!_wavelengthAssigner->validIndex(ell)) throw FATALERROR("Wrong wavelength for this process!");
+        if (!_wavelengthAssigner->validIndex(ell))
+            throw FATALERROR("Wrong wavelength for this process!");
+
         return (*_partialCube)[_wavelengthAssigner->relativeIndex(ell)*_Nframep + pixel];
     }
 }

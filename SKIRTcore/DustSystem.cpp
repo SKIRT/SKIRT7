@@ -83,7 +83,7 @@ void DustSystem::setupSelfAfter()
     pfactory->parallel(nthreads)->call(this, &DustSystem::setVolumeBody, _Ncells);
 
     // use a StaggeredAssigner to calculate the densities
-    _setupAssigner = new StaggeredAssigner(this, _Ncells);
+    _setupAssigner = new StaggeredAssigner(_Ncells, this);
 
     // Calculate and set the density of the cells that are assigned to this process
     _gdi = _grid->interface<DustGridDensityInterface>();

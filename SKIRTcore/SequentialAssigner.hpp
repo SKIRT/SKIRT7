@@ -62,7 +62,7 @@ public:
         1 ) \f] In the latter case, this index is given by: \f[ t_0 = r \cdot ( q + 1) + (i - r)
         \cdot q \f] The resulting value is stored in the private \c _start member of this class,
         for use in the absoluteIndex() function. */
-    explicit SequentialAssigner(SimulationItem* parent, size_t size);
+    explicit SequentialAssigner(size_t size, SimulationItem* parent);
 
     //======================== Other Functions =======================
 

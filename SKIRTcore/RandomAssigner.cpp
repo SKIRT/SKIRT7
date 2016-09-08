@@ -11,8 +11,8 @@
 
 ////////////////////////////////////////////////////////////////////
 
-RandomAssigner::RandomAssigner(SimulationItem *parent, size_t size)
-    : ProcessAssigner(parent, size)
+RandomAssigner::RandomAssigner(size_t size, SimulationItem* parent)
+    : ProcessAssigner(size, parent)
 {
     if (!_comm) throw FATALERROR("Could not find an object of type PeerToPeerCommunicator in the simulation hierarchy");
     _random = find<Random>();
@@ -23,7 +23,7 @@ RandomAssigner::RandomAssigner(SimulationItem *parent, size_t size)
     _values.reserve(1.2*size/_comm->size());
 
     // For each value in a certain subset of 'size', let this process determine a random process rank
-    SequentialAssigner* helpassigner = new SequentialAssigner(this, size);
+    SequentialAssigner* helpassigner = new SequentialAssigner(size, this);
     for (size_t i = 0; i < helpassigner->assigned(); i++)
     {
         int rank = floor(_random->uniform() * _comm->size());

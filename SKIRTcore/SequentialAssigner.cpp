@@ -9,8 +9,8 @@
 
 ////////////////////////////////////////////////////////////////////
 
-SequentialAssigner::SequentialAssigner(SimulationItem *parent, size_t size)
-    : ProcessAssigner(parent, size), _start(0), _quotient(0), _remainder(0)
+SequentialAssigner::SequentialAssigner(size_t size, SimulationItem* parent)
+    : ProcessAssigner(size, parent), _start(0), _quotient(0), _remainder(0)
 {
     if (!_comm) throw FATALERROR("Could not find an object of type PeerToPeerCommunicator in the simulation hierarchy");
 

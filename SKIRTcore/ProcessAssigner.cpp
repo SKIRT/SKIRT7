@@ -8,7 +8,7 @@
 
 ////////////////////////////////////////////////////////////////////
 
-ProcessAssigner::ProcessAssigner(SimulationItem* parent, size_t size)
+ProcessAssigner::ProcessAssigner(size_t size, SimulationItem* parent)
     : _comm(0), _assigned(0), _total(size)
 {
     setParent(parent);

@@ -43,7 +43,7 @@ void WavelengthGrid::setupSelfAfter()
     }
 
     if (find<PeerToPeerCommunicator>()->dataParallel())
-        _assigner = new StaggeredAssigner(this, _Nlambda);
+        _assigner = new StaggeredAssigner(_Nlambda, this);
 }
 
 ////////////////////////////////////////////////////////////////////

@@ -25,11 +25,7 @@ void FrameInstrument::setupSelfBefore()
 {
     SingleFrameInstrument::setupSelfBefore();
 
-    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
-    if (comm->dataParallel())
-        _distftotv.initialize(_Nframep, comm);
-    else
-        _distftotv.initialize(_Nframep, comm);
+    _distftotv.initialize(_Nframep, this);
 }
 
 ////////////////////////////////////////////////////////////////////

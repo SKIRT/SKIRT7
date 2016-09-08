@@ -200,7 +200,7 @@ void DustLib::calculate()
     {
         // The processes have access to all the cells, and can hence use library subclasses other than AllCellsDustLib.
         // Divide the work over the processes per library entry, using an auxiliary assigner.
-        if (!_libAssigner) _libAssigner = new StaggeredAssigner(this, Nlib);
+        if (!_libAssigner) _libAssigner = new StaggeredAssigner(Nlib, this);
         parallel->call(&calc, _libAssigner);
     }
 

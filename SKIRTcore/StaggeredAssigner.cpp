@@ -9,8 +9,8 @@
 
 ////////////////////////////////////////////////////////////////////
 
-StaggeredAssigner::StaggeredAssigner(SimulationItem *parent, size_t size)
-    : ProcessAssigner(parent, size)
+StaggeredAssigner::StaggeredAssigner(size_t size, SimulationItem* parent)
+    : ProcessAssigner(size, parent)
 {
     if (!_comm) throw FATALERROR("Could not find an object of type PeerToPeerCommunicator in the simulation hierarchy");
 

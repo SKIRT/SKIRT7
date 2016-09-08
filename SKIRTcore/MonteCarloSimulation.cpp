@@ -72,6 +72,7 @@ void MonteCarloSimulation::setChunkParams(double packages)
 
     // Check to see if we are using data parallelization
     bool dataParallel = _comm->dataParallel();
+    // Get the assigner for the wavelengths if necessary
     if(dataParallel && !_wavelengthAssigner) _wavelengthAssigner = _lambdagrid->assigner();
 
     // Determine the number of chunks and the corresponding chunk size
@@ -111,7 +112,7 @@ void MonteCarloSimulation::setChunkParams(double packages)
         _chunksize = ceil(packages/totalChunks);
         _Npp = totalChunks * _chunksize;
 
-        if (_wavelengthAssigner) // work is divided by letting each process do about 1/Nprocs of the wavelengths
+        if (dataParallel) // work is divided by letting each process do about 1/Nprocs of the wavelengths
         {
             _Nchunks = totalChunks;
             _myTotalNpp = _wavelengthAssigner->assigned() * _Nchunks * _chunksize;
