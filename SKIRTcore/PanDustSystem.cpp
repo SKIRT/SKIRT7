@@ -66,8 +66,6 @@ void PanDustSystem::setupSelfBefore()
 
     // cache size of wavelength grid
     _Nlambda = lambdagrid->Nlambda();
-    // get a pointer to the wavelength assigner
-    _lambdaAssigner = lambdagrid->assigner();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -120,6 +118,8 @@ void PanDustSystem::setupSelfAfter()
 
     if (dataParallel)
     {
+        // get a pointer to the wavelength assigner
+        _lambdaAssigner = find<WavelengthGrid>()->assigner();
         // assign this process to work with a subset of dust cells
         _assigner = new StaggeredAssigner(this, _Ncells);
     }
