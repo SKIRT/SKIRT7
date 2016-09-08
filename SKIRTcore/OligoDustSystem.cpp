@@ -18,7 +18,6 @@
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
 #include "PeerToPeerCommunicator.hpp"
-#include "RootAssigner.hpp"
 
 //////////////////////////////////////////////////////////////////////
 
@@ -195,10 +194,9 @@ void OligoDustSystem::write() const
 
     if (_writeMeanIntensity)
     {
-        // Get the parallel engine and construct an assigner that assigns all the work to the root process
+        // Get the parallel engine and perform the calculations at the root
         Parallel* parallel = find<ParallelFactory>()->parallel();
-        RootAssigner assigner(0);
-        assigner.assign(Np);
+        bool isRoot = find<PeerToPeerCommunicator>()->isRoot();
 
         // Output map(s) along coordinate axes
         {
@@ -211,7 +209,7 @@ void OligoDustSystem::write() const
             // For the xy plane (always)
             {
                 wt.setup(1,1,0);
-                parallel->call(&wt, &assigner);
+                if (isRoot) parallel->call(&wt, Np);
                 wt.write();
             }
 
@@ -219,7 +217,7 @@ void OligoDustSystem::write() const
             if (dimDust >= 2)
             {
                 wt.setup(1,0,1);
-                parallel->call(&wt, &assigner);
+                if (isRoot) parallel->call(&wt, Np);
                 wt.write();
             }
 
@@ -227,7 +225,7 @@ void OligoDustSystem::write() const
             if (dimDust == 3)
             {
                 wt.setup(0,1,1);
-                parallel->call(&wt, &assigner);
+                if (isRoot) parallel->call(&wt, Np);
                 wt.write();
             }
         }

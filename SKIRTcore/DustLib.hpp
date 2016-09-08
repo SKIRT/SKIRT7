@@ -98,15 +98,10 @@ protected:
     //======================== Data Members ========================
 
 private:
-    // results of calculate(), used by luminosity()
-    std::vector<int> _nv;        // library index for each cell or -1, indexed on m
-    ParallelTable _Lvv;
-    ProcessAssigner* _libAssigner;
-    int _Ncomp;
-    bool _distributedAbsorptionData;
-
-protected:
-    const ProcessAssigner* _cellAssigner;
+    std::vector<int> _nv;           // library index for each cell or -1, indexed on m
+    ParallelTable _Lvv;             // results of calculate(), used by luminosity()
+    ProcessAssigner* _libAssigner;  // an assigner to parallelize the calculation of the library entries
+    bool _nIndexed;                 // indicates whether the output is stored per library index n or per cell index m
 };
 
 ////////////////////////////////////////////////////////////////////

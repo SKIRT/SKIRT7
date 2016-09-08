@@ -25,8 +25,7 @@ void FrameInstrument::setupSelfBefore()
 {
     SingleFrameInstrument::setupSelfBefore();
 
-    WavelengthGrid* wavelengthGrid = find<WavelengthGrid>();
-    _distftotv.initialize(wavelengthGrid->assigner(), _Nframep);
+    _distftotv.initialize(_Nframep, this);
 }
 
 ////////////////////////////////////////////////////////////////////

@@ -7,8 +7,7 @@
 #include "FatalError.hpp"
 #include "NR.hpp"
 #include "WavelengthGrid.hpp"
-#include "ProcessAssigner.hpp"
-#include "IdenticalAssigner.hpp"
+#include "StaggeredAssigner.hpp"
 
 using namespace std;
 
@@ -24,7 +23,6 @@ WavelengthGrid::WavelengthGrid()
 void WavelengthGrid::setupSelfBefore()
 {
     SimulationItem::setupSelfBefore();
-    if (!_assigner) setAssigner(new IdenticalAssigner(this));
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -43,21 +41,14 @@ void WavelengthGrid::setupSelfAfter()
     {
         if (_lambdav[ell] <= _lambdav[ell-1]) throw FATALERROR("Wavelengths should be sorted in ascending order");
     }
-    _assigner->assign(_Nlambda);
+
+    if (find<PeerToPeerCommunicator>()->dataParallel())
+        _assigner = new StaggeredAssigner(_Nlambda, this);
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void WavelengthGrid::setAssigner(ProcessAssigner *value)
-{
-    if (_assigner) delete _assigner;
-    _assigner = value;
-    if (_assigner) _assigner->setParent(this);
-}
-
-////////////////////////////////////////////////////////////////////
-
-ProcessAssigner* WavelengthGrid::assigner() const
+const ProcessAssigner* WavelengthGrid::assigner() const
 {
     return _assigner;
 }

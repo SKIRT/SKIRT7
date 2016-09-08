@@ -18,14 +18,12 @@
 #include "FITSInOut.hpp"
 #include "Log.hpp"
 #include "NR.hpp"
-#include "IdenticalAssigner.hpp"
 #include "Image.hpp"
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
 #include "PeerToPeerCommunicator.hpp"
 #include "PhotonPackage.hpp"
 #include "Random.hpp"
-#include "RootAssigner.hpp"
 #include "StaggeredAssigner.hpp"
 #include "TextOutFile.hpp"
 #include "TimeLogger.hpp"
@@ -54,8 +52,6 @@ void DustSystem::setupSelfBefore()
     if (!_dd) throw FATALERROR("Dust distribution was not set");
     if (!_grid) throw FATALERROR("Dust grid was not set");
 
-    // use a StaggeredAssigner in the setup
-    _setupAssigner = new StaggeredAssigner(this);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -82,11 +78,12 @@ void DustSystem::setupSelfAfter()
     // Set the volume of the cells (parallelized over different threads, except when multiprocessing is enabled)
     find<Log>()->info("Calculating the volume of the cells...");
     PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
-    IdenticalAssigner* assigner = new IdenticalAssigner(this);
-    assigner->assign(_Ncells);
-    find<ParallelFactory>()->parallel()->call(this, &DustSystem::setVolumeBody, assigner);
+    ParallelFactory* pfactory = find<ParallelFactory>();
+    size_t nthreads = comm->isMultiProc() ? 1 : pfactory->maxThreadCount();
+    pfactory->parallel(nthreads)->call(this, &DustSystem::setVolumeBody, _Ncells);
 
-    _setupAssigner->assign(_Ncells);
+    // use a StaggeredAssigner to calculate the densities
+    _setupAssigner = new StaggeredAssigner(_Ncells, this);
 
     // Calculate and set the density of the cells that are assigned to this process
     _gdi = _grid->interface<DustGridDensityInterface>();
@@ -106,23 +103,20 @@ void DustSystem::setupSelfAfter()
     // Wait for the other processes to reach this point
     comm->wait("the calculation of the dust cell densities");
 
-    // Create an assigner that can be used for the write functions
-    RootAssigner* writeassigner = new RootAssigner(this);
-
     // Obtain the densities in all dust cells, if the calculation has been performed by parallel processes
-    if (_setupAssigner->parallel()) assemble();
+    if (_setupAssigner) assemble();
 
     // Perform a convergence check on the grid.
     if (_writeConvergence) writeconvergence();
 
     // Write the density in the xy plane, xz plane and yz plane to a file.
-    if (_writeDensity) writedensity(writeassigner);
+    if (_writeDensity) writedensity();
 
     // Output optical depth map as seen from the center
-    if (_writeDepthMap) writedepthmap(writeassigner);
+    if (_writeDepthMap) writedepthmap();
 
     // Calculate and output some quality metrics for the dust grid
-    if (_writeQuality) writequality(writeassigner);
+    if (_writeQuality) writequality();
 
     // Output properties for all cells in the dust grid
     if (_writeCellProperties) writecellproperties();
@@ -153,7 +147,9 @@ void DustSystem::setSampleDensityBody(size_t m)
     if (m%100000==0)
     {
         find<Log>()->info("  Computing density for cell " + QString::number(m)
-                          + " (" + QString::number(floor(100.*_setupAssigner->relativeIndex(m)/_setupAssigner->nvalues())) + "%)");
+                          + " ("
+                          + QString::number(floor(100.*_setupAssigner->relativeIndex(m)/_setupAssigner->assigned()))
+                          + "%)");
     }
     double weight = _grid->weight(m);
     if (weight > 0)
@@ -420,7 +416,7 @@ namespace
 
 ////////////////////////////////////////////////////////////////////
 
-void DustSystem::writedensity(ProcessAssigner* assigner) const
+void DustSystem::writedensity() const
 {
     // construct a private class instance to do the work (parallelized)
     WriteDensity wd(this);
@@ -429,13 +425,12 @@ void DustSystem::writedensity(ProcessAssigner* assigner) const
     // get the dimension of the dust system
     int dimDust = dimension();
 
-    // Assign the work
-    assigner->assign(Np);
-
+    // Only perform the calculation at the root processs
+    bool isRoot = find<PeerToPeerCommunicator>()->isRoot();
     // For the xy plane (always)
     {
         wd.setup(1,1,0);
-        parallel->call(&wd, assigner);
+        if (isRoot) parallel->call(&wd, Np);
         wd.write();
     }
 
@@ -443,7 +438,7 @@ void DustSystem::writedensity(ProcessAssigner* assigner) const
     if (dimDust >= 2)
     {
         wd.setup(1,0,1);
-        parallel->call(&wd, assigner);
+        if (isRoot) parallel->call(&wd, Np);
         wd.write();
     }
 
@@ -451,7 +446,7 @@ void DustSystem::writedensity(ProcessAssigner* assigner) const
     if (dimDust == 3)
     {
         wd.setup(0,1,1);
-        parallel->call(&wd, assigner);
+        if (isRoot) parallel->call(&wd, Np);
         wd.write();
     }
 }
@@ -571,34 +566,32 @@ namespace
 
 ////////////////////////////////////////////////////////////////////
 
-void DustSystem::writedepthmap(ProcessAssigner* assigner) const
+void DustSystem::writedepthmap() const
 {
-    // Assign the work
-    assigner->assign(Npy);
-
     // construct a private class instance to do the work (parallelized)
     WriteDepthMap wdm(this);
+
+    // perform the calculation at the root process
     Parallel* parallel = find<ParallelFactory>()->parallel();
-    parallel->call(&wdm, assigner);
+    bool isRoot = find<PeerToPeerCommunicator>()->isRoot();
+    if (isRoot) parallel->call(&wdm, Npy);
     wdm.write();
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void DustSystem::writequality(ProcessAssigner* assigner) const
+void DustSystem::writequality() const
 {
     Log* log = find<Log>();
     Units* units = find<Units>();
     Parallel* parallel = find<ParallelFactory>()->parallel();
-
-    // Assign the work
-    assigner->assign(_Nrandom);
+    bool isRoot = find<PeerToPeerCommunicator>()->isRoot();
 
     // Density metric
 
     log->info("Calculating quality metric for the grid density...");
     DustSystemDensityCalculator calc1(this, _Nrandom, _Ncells/5);
-    parallel->call(&calc1, assigner);
+    if (isRoot) parallel->call(&calc1, _Nrandom);
 
     log->info("  Mean value of density delta: "
               + QString::number(units->omassvolumedensity(calc1.meanDelta()*1e9))
@@ -611,7 +604,7 @@ void DustSystem::writequality(ProcessAssigner* assigner) const
 
     log->info("Calculating quality metric for the optical depth in the grid...");
     DustSystemDepthCalculator calc2(this, _Nrandom, _Ncells/50, _Nrandom*10);
-    parallel->call(&calc2, assigner);
+    if (isRoot) parallel->call(&calc2, _Nrandom);
 
     log->info("  Mean value of optical depth delta: " + QString::number(calc2.meanDelta()));
     log->info("  Standard deviation of optical depth delta: " + QString::number(calc2.stddevDelta()));

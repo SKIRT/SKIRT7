@@ -73,16 +73,17 @@ int Parallel::threadCount() const
 
 ////////////////////////////////////////////////////////////////////
 
-void Parallel::call(ParallelTarget* target, const ProcessAssigner* assigner)
+void Parallel::call(ParallelTarget* target, const ProcessAssigner* assigner, size_t repetitions)
 {
-    prepareAndCall(target, assigner, assigner->nvalues(), assigner->parallel());
+    size_t assigned = assigner->assigned();
+    prepareAndCall(target, assigner, assigned*repetitions, assigned);
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void Parallel::call(ParallelTarget* target, size_t maxIndex)
+void Parallel::call(ParallelTarget* target, size_t maxIndex, size_t repetitions)
 {
-    prepareAndCall(target, nullptr, maxIndex, true);
+    prepareAndCall(target, nullptr, maxIndex*repetitions, maxIndex);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -130,6 +131,9 @@ void Parallel::doWork()
         {
             size_t index = _next++;                  // get the next index atomically
             if (index >= _limit) break;              // break if no more are available
+
+            // Repeat the same index range if necessary
+            index = index % _loopRange;
 
             // Convert the index if using an assigner
             if (_assigner) index = _assigner->absoluteIndex(index);
@@ -184,7 +188,7 @@ bool Parallel::threadsActive()
 
 ////////////////////////////////////////////////////////////////////
 
-void Parallel::prepareAndCall(ParallelTarget* target, const ProcessAssigner* assigner, size_t limit, bool multithread)
+void Parallel::prepareAndCall(ParallelTarget* target, const ProcessAssigner* assigner, size_t limit, size_t loopRange)
 {
     // Verify that we're being called from our parent thread
     if (std::this_thread::get_id() != _parentThread)
@@ -198,9 +202,10 @@ void Parallel::prepareAndCall(ParallelTarget* target, const ProcessAssigner* ass
         _target = target;
         _assigner = assigner;
         _limit = limit;
+        _loopRange = loopRange;
 
         // Initialize the number of active threads (i.e. not waiting for new work)
-        if (multithread) _active.assign(_threadCount, true);
+        _active.assign(_threadCount, true);
 
         // Clear the exception pointer
         _exception = 0;
@@ -209,14 +214,14 @@ void Parallel::prepareAndCall(ParallelTarget* target, const ProcessAssigner* ass
         _next = 0;
 
         // Wake all parallel threads, if multithreading is allowed
-        if (multithread) _conditionExtra.notify_all();
+        _conditionExtra.notify_all();
     }
 
     // Do some work ourselves as well
     doWork();
 
     // Wait until all parallel threads are done
-    if (multithread) waitForThreads();
+    waitForThreads();
 
     // Check for and process the exception, if any
     if (_exception)

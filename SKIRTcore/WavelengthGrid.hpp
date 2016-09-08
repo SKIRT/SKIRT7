@@ -22,12 +22,6 @@ class WavelengthGrid : public SimulationItem
     Q_OBJECT
     Q_CLASSINFO("Title", "a wavelength grid")
 
-    Q_CLASSINFO("Property", "assigner")
-    Q_CLASSINFO("Title", "the assignment scheme that assigns the wavelengths to the different parallel processes")
-    Q_CLASSINFO("Default", "IdenticalAssigner")
-    Q_CLASSINFO("Optional", "true")
-    Q_CLASSINFO("Silent", "true")
-
     //============= Construction - Setup - Destruction =============
 
 protected:
@@ -45,23 +39,13 @@ protected:
         is at least one wavelength, and caches the number of wavelengths in a data member. */
     void setupSelfAfter();
 
-    //======== Setters & Getters for Discoverable Attributes =======
-
-    /** This function sets the wavelength assigner for the Monte Carlo simulation. The process assigner is
-        the object that assigns different wavelengths to different processes, to parallelize the photon
-        shooting algorithm, and the data storage. The ProcessAssigner class is the abstract class that
-        represents different types of assigners; different subclass implement the assignment in different ways.
-        The default assigner that is used for the Monte Carlo simulation is an IdenticalAssigner, which assigns
-        each process to all of the wavelengths to obtain the best load balancing. Another option would
-        be to use a StaggeredAssigner, which would hand out the wavelengths to the different processes
-        in a staggered way, enabling data parallelization for reduced memory usage.
-        Using a SequentialAssigner for this purpose would
-        not be recommended due to very poor load balancing. */
-    Q_INVOKABLE void setAssigner(ProcessAssigner* value);
-
 public:
-    /** Returns the wavelength assigner for this Monte Carlo simulation. */
-    Q_INVOKABLE ProcessAssigner* assigner() const;
+    /** This function returns the wavelength assigner for the simulation. The process
+        assigner is the object that assigns different wavelengths to different processes, to
+        parallelize the photon shooting algorithm, and the data storage. The ProcessAssigner class
+        is the abstract class that represents different types of assigners; different subclass
+        implement the assignment in different ways. */
+    const ProcessAssigner* assigner() const;
 
     //======================== Other Functions =======================
 

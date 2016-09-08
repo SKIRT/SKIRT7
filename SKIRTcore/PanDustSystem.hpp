@@ -81,12 +81,6 @@ class PanDustSystem : public DustSystem
     Q_CLASSINFO("Default", "no")
     Q_CLASSINFO("RelevantIf", "dustEmissivity")
 
-    Q_CLASSINFO("Property", "assigner")
-    Q_CLASSINFO("Title", "the parallel process assignment scheme")
-    Q_CLASSINFO("Default", "StaggeredAssigner")
-    Q_CLASSINFO("Optional", "true")
-    Q_CLASSINFO("Silent", "true")
-
     //============= Construction - Setup - Destruction =============
 
 public:
@@ -182,20 +176,6 @@ public:
         radiation field. If dust emission is turned off, this function returns false. */
     Q_INVOKABLE bool writeISRF() const;
 
-    /** This function sets the process assigner for this dust system. The process assigner is the
-        object that assigns different dust cells to different processes, to parallelize the
-        calculation and storage of the dust emission. The ProcessAssigner class is the abstract
-        class that represents different types of assigners; different subclass implement the
-        assignment in different ways. While the most straightforward types of process assigners are
-        used to assign each dust cell to a different process to speed up the calculation and reduce
-        memory usage, one ProcessAssigner subclass lets all processes store the emission for all
-        dust cells. This can reduce communication times at the cost of using more memory.
-        */
-    Q_INVOKABLE void setAssigner(ProcessAssigner* value);
-
-    /** Returns the process assigner for this dust system. */
-    Q_INVOKABLE ProcessAssigner* assigner() const;
-
     //======================== Other Functions =======================
 
 public:
@@ -207,9 +187,6 @@ public:
         to be stored for this dust system. For a panchromatic simulation, absorption rates are only
         calculated if dust emission is turned on. */
     bool storeabsorptionrates() const;
-
-    /** This function returns true if data parallelization is activated for one of the absorption tables **/
-    bool distributedAbsorptionData() const;
 
     /** The function simulates the absorption of a monochromatic luminosity package in the dust
         cell with cell number \f$m\f$, i.e. it adds a fraction \f$\Delta L\f$ to the already
@@ -292,6 +269,13 @@ public:
         (weighed by density in the dust cell). */
     void write() const;
 
+    /** This function returns the process assigner for this dust system. The process assigner is
+        the object that assigns different dust cells to different processes, to parallelize the
+        storage of the dust absorption and emission. The assigner is only available value when the
+        '-d' option was given at the command line, which enables parallelization. In that case, the
+        _assigner data member is set to a StaggeredAssigner during the setup of the PanDustSystem. ((
+        otherwise return a nullptr? )) */
+    const ProcessAssigner* assigner() const;
 
     //======================== Data Members ========================
 
@@ -306,7 +290,7 @@ private:
     bool _writeTemp;
     bool _writeISRF;
     int _cycles;
-    ProcessAssigner* _assigner; // determines which cells will be given to the DustLib
+    const ProcessAssigner* _assigner; // determines which cells will be given to the DustLib
 
     // data members initialized during setup
     int _Nlambda;

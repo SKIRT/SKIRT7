@@ -12,7 +12,6 @@
 #include "FatalError.hpp"
 #include "FITSInOut.hpp"
 #include "FilePaths.hpp"
-#include "IdenticalAssigner.hpp"
 #include "Image.hpp"
 #include "ISRF.hpp"
 #include "LockFree.hpp"
@@ -23,7 +22,6 @@
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
 #include "ParallelTable.hpp"
-#include "RootAssigner.hpp"
 #include "StaggeredAssigner.hpp"
 #include "TextOutFile.hpp"
 #include "Units.hpp"
@@ -68,10 +66,6 @@ void PanDustSystem::setupSelfBefore()
 
     // cache size of wavelength grid
     _Nlambda = lambdagrid->Nlambda();
-    // get a pointer to the wavelength assigner
-    _lambdaAssigner = lambdagrid->assigner();
-    // and initialize the Q-invokable cell assigner
-    if(!_assigner) _assigner = new StaggeredAssigner(this);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -119,8 +113,13 @@ void PanDustSystem::setupSelfAfter()
 {
     DustSystem::setupSelfAfter();
 
-    // assign this process to work with a subset of dust cells
-    _assigner->assign(_Ncells);
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+    bool dataParallel = comm->dataParallel();
+
+    if (dataParallel) // assign this process to work with a subset of dust cells
+        _assigner = new StaggeredAssigner(_Ncells, this);
+
+    WavelengthGrid* wg = find<WavelengthGrid>();
 
     // resize the tables that hold the absorbed energies for each dust cell and wavelength
     // - absorbed stellar emission is relevant for calculating dust emission
@@ -129,13 +128,18 @@ void PanDustSystem::setupSelfAfter()
     _haveLabsdust = false;
     if (dustemission())
     {
-        //_Labsstelvv.resize(_Ncells,_Nlambda);
-        _Labsstelvv.initialize("Absorbed Stellar Luminosity Table",_lambdaAssigner,_assigner,COLUMN);
+        if (dataParallel)
+            _Labsstelvv.initialize("Absorbed Stellar Luminosity Table", COLUMN, wg->assigner(), _assigner, comm);
+        else
+            _Labsstelvv.initialize("Absorbed Stellar Luminosity Table", COLUMN, _Nlambda, _Ncells, comm);
         _haveLabsstel = true;
+
         if (selfAbsorption())
         {
-            //_Labsdustvv.resize(_Ncells,_Nlambda);
-            _Labsdustvv.initialize("Absorbed Dust Luminosity Table",_lambdaAssigner,_assigner,COLUMN);
+            if (dataParallel)
+                _Labsdustvv.initialize("Absorbed Dust Luminosity Table", COLUMN, wg->assigner(), _assigner, comm);
+            else
+                _Labsdustvv.initialize("Absorbed Dust Luminosity Table", COLUMN, _Nlambda, _Ncells, comm);
             _haveLabsdust = true;
         }
     }
@@ -299,16 +303,7 @@ bool PanDustSystem::writeISRF() const
 
 ////////////////////////////////////////////////////////////////////
 
-void PanDustSystem::setAssigner(ProcessAssigner* value)
-{
-    if (_assigner) delete _assigner;
-    _assigner = value;
-    if (_assigner) _assigner->setParent(this);
-}
-
-////////////////////////////////////////////////////////////////////
-
-ProcessAssigner* PanDustSystem::assigner() const
+const ProcessAssigner* PanDustSystem::assigner() const
 {
     return _assigner;
 }
@@ -325,13 +320,6 @@ bool PanDustSystem::dustemission() const
 bool PanDustSystem::storeabsorptionrates() const
 {
     return dustemission();
-}
-
-//////////////////////////////////////////////////////////////////////
-
-bool PanDustSystem::distributedAbsorptionData() const
-{
-    return _Labsstelvv.distributed() || _Labsdustvv.distributed();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -425,8 +413,8 @@ void PanDustSystem::calculatedustemission()
 
 void PanDustSystem::sumResults()
 {
-        _Labsstelvv.switchScheme();
-        _Labsdustvv.switchScheme();
+    _Labsstelvv.switchScheme();
+    _Labsdustvv.switchScheme();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -451,7 +439,7 @@ namespace
     private:
         // cached values initialized in constructor
         const PanDustSystem* _ds;
-        bool _distributed;
+        bool _dataParallel;
         const ProcessAssigner* _cellAssigner;
         DustGrid* _grid;
         Units* _units;
@@ -472,12 +460,12 @@ namespace
         WriteTempCut(const PanDustSystem* ds)
         {
             _ds = ds;
-            _distributed = ds->distributedAbsorptionData();
             _cellAssigner = ds->assigner();
             _grid = ds->dustGrid();
             _units = ds->find<Units>();
             _log = ds->find<Log>();
             _comm = ds->find<PeerToPeerCommunicator>();
+            _dataParallel = _comm->dataParallel();
 
             double xmin, ymin, zmin, xmax, ymax, zmax;
             _grid->boundingbox().extent(xmin,ymin,zmin,xmax,ymax,zmax);
@@ -523,7 +511,7 @@ namespace
                 Position bfr(x,y,z);
                 int m = _grid->whichcell(bfr);
 
-                bool m_is_available = !_distributed || _cellAssigner->validIndex(m);
+                bool m_is_available = !_dataParallel || _cellAssigner->validIndex(m);
                 if (m_is_available && m!=-1 && _ds->Labs(m)>0.0)
                 {
                     const Array& Jv = _ds->meanintensityv(m);
@@ -551,7 +539,7 @@ namespace
         void write()
         {
             // If we didn't have all the cells, sum the results first
-            if (_distributed) _comm->sum(tempv);
+            if (_dataParallel) _comm->sum(tempv);
 
             QString filename = "ds_temp" + plane;
             Image image(_ds, Np, Np, Nmaps, xd?xpsize:ypsize, zd?zpsize:ypsize,
@@ -632,10 +620,10 @@ namespace
         // Write the results to a text file with an appropriate name
         void write()
         {
+            PeerToPeerCommunicator* comm = _ds->find<PeerToPeerCommunicator>();
             // Sum the calculated results if necessary
-            if (_ds->distributedAbsorptionData())
+            if (comm->dataParallel())
             {
-                PeerToPeerCommunicator* comm = _ds->find<PeerToPeerCommunicator>();
                 comm->sum(_Tv);
                 comm->sum(_Mv);
             }
@@ -662,6 +650,9 @@ void PanDustSystem::write() const
 {
     DustSystem::write();
 
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+    bool dataParallel = comm->dataParallel();
+
     // If requested, output the interstellar radiation field in every dust cell to a data file
     if (_writeISRF)
     {
@@ -685,7 +676,7 @@ void PanDustSystem::write() const
         // Write one line for each dust cell with nonzero absorption
         for (int m=0; m<_Ncells; m++)
         {
-            if (!distributedAbsorptionData())
+            if (!dataParallel)
             {
                 double Ltotm = Labs(m);
                 if (Ltotm>0.0)
@@ -710,7 +701,7 @@ void PanDustSystem::write() const
 
                 // and broadcasts it
                 int sender = _assigner->rankForIndex(m);
-                find<PeerToPeerCommunicator>()->broadcast(Jv,sender);
+                comm->broadcast(Jv,sender);
 
                 if (Jv.sum()>0)
                 {
@@ -724,10 +715,11 @@ void PanDustSystem::write() const
     // If requested, output temperature map(s) along coordinate axes and temperature data for each dust cell
     if (_writeTemp)
     {
+        // Parallelize the calculation over the threads
         Parallel* parallel = find<ParallelFactory>()->parallel();
-
-        ProcessAssigner* rootAssigner = new RootAssigner(0);
-        rootAssigner->assign(Np);
+        // If the necessary data is distributed over the processes, do the calculation on all processes.
+        // Else, let the root do everything.
+        bool isRoot = comm->isRoot();
 
         // Output temperature map(s) along coordinate axes
         {
@@ -740,8 +732,8 @@ void PanDustSystem::write() const
             // For the xy plane (always)
             {
                 wt.setup(1,1,0);
-                if (distributedAbsorptionData()) parallel->call(&wt, Np);
-                else parallel->call(&wt, rootAssigner);
+                if (dataParallel) parallel->call(&wt, Np);
+                else if (isRoot) parallel->call(&wt, Np);
                 wt.write();
             }
 
@@ -749,8 +741,8 @@ void PanDustSystem::write() const
             if (dimDust >= 2)
             {
                 wt.setup(1,0,1);
-                if (distributedAbsorptionData()) parallel->call(&wt, Np);
-                else parallel->call(&wt, rootAssigner);
+                if (dataParallel) parallel->call(&wt, Np);
+                else if (isRoot) parallel->call(&wt, Np);
                 wt.write();
             }
 
@@ -758,8 +750,8 @@ void PanDustSystem::write() const
             if (dimDust == 3)
             {
                 wt.setup(0,1,1);
-                if (distributedAbsorptionData()) parallel->call(&wt, Np);
-                else parallel->call(&wt, rootAssigner);
+                if (dataParallel) parallel->call(&wt, Np);
+                else if (isRoot) parallel->call(&wt, Np);
                 wt.write();
             }
         }
@@ -770,22 +762,20 @@ void PanDustSystem::write() const
 
             // Construct a private class instance to do the work (parallelized)
             WriteTempData wt(this);
-            rootAssigner->assign(_Ncells);
 
             // Call the body on the right cells. If everything is available, no unnecessary communication will be done.
-            if (distributedAbsorptionData())
+            if (dataParallel)
             {
                 // Calculate the temperature for the cells owned by this process
-                parallel->call(&wt,_assigner);
+                parallel->call(&wt, _assigner);
             }
-            else
+            else if (isRoot)
             {
                 // Let root calculate it for everything
-                parallel->call(&wt, rootAssigner);
+                parallel->call(&wt, _Ncells);
             }
             wt.write();
         }
-        delete rootAssigner;
     }
 }
 

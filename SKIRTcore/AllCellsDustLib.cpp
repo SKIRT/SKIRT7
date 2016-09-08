@@ -7,7 +7,6 @@
 #include "DustSystem.hpp"
 #include "PeerToPeerCommunicator.hpp"
 #include "WavelengthGrid.hpp"
-#include "ProcessAssigner.hpp"
 
 using namespace std;
 
@@ -21,7 +20,7 @@ AllCellsDustLib::AllCellsDustLib()
 
 int AllCellsDustLib::entries() const
 {
-    return _cellAssigner->nvalues();
+    return find<DustSystem>()->Ncells();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -29,7 +28,7 @@ int AllCellsDustLib::entries() const
 std::vector<int> AllCellsDustLib::mapping() const
 {
     // create a mapping from each cell index to identical library index
-    int Ncells = _cellAssigner->nvalues();
+    int Ncells = entries();
     vector<int> nv(Ncells);
     for (int m=0; m<Ncells; m++) nv[m] = m;
     return nv;

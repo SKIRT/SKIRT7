@@ -30,90 +30,68 @@ class ProcessAssigner : public SimulationItem
     //============= Construction - Setup - Destruction =============
 
 protected:
-    /** The default constructor; it is protected since this is an abstract class. */
-    ProcessAssigner();
+    /** The constructor takes a number of work units as an argument. The constructed object will then
+    decide how the work will be divided across the processes. This constructor is proctected
+    because this is an abstract class. The algorithm for dividing the work is implemented
+    differently in each of the subclasses, and typically involves some calculations to determine
+    which process is assigned to which parts of the work. */
+    ProcessAssigner(size_t size, SimulationItem* parent);
 
-    /** The purpose of this function is setting the _comm attribute, which points to the
-        PeerToPeerCommunicator object of the simulation hierarchy. */
-    void setupSelfBefore();
-
-public:
-    virtual ProcessAssigner* clone() = 0;
-protected:
-    void copyFrom(const ProcessAssigner* from);
+    /** Subclasses must use this protected setter to set _assigned to the correct value, after
+    performing their assignment algorithm in the constructor */
+    void setAssigned(size_t assigned);
 
     //======================== Other Functions =======================
 
 public:
-    /** This function returns the number of values (or the number of parts of the total work) that are
-        assigned to the calling process. This number is stored in the _nvalues data member. */
-    size_t nvalues() const;
-
+    /** Returns the total number of work units assigned to the processes, i.e. the argument given at
+    construction. */
     size_t total() const;
 
-    /** This function invokes the assignment procedure. As a first argument, it takes the number of
-        parts of work that need to be performed. As a second optional argument, it takes the number of
-        blocks; which represents the number of times a set of \c size parts is encountered in the
-        entire collection that holds each and every distinguishable piece of work. This function is
-        declared purely virtual so it must be defined in either of the subclasses. The algorithm of
-        this function is therefore implemented differently in each of the subclasses, and typically
-        involves some calculations to determine which process is assigned to which parts of work. Each
-        subclass must ensure that the assign function determines the number of values that are assigned
-        to the process, and stores it in the _nvalues member. The typical behaviour of a subclass would
-        be to repeat its assignment scheme used for the first \c size values, for as many times as
-        there are blocks, if \c blocks > 1 (although the IdenticalAssigner subclass deviates from this
-        behaviour). */
-    virtual void assign(size_t size, size_t blocks = 1) = 0;
+    /** This function returns the number of values (or the number of parts of the total work) that are
+        assigned to the calling process. */
+    size_t assigned() const;
 
-    virtual void setBlocks(size_t blocks) = 0;
-
-    /** This purely virtual function must be implemented in each of the ProcessAssigner subclasses. As
-        an argument, it can take any value between zero and the number of values assigned to the
-        process, defined by the _nvalues variable. This value is the relative index some part of the
-        work assigned to the process. This function translates that relative index to the absolute
-        index corresponding with that part of work, a value between zero and the size argument passed
-        to the assign function. According to their assignment procedure, each ProcessAssigner subclass
-        defines this function in a different way. */
-    virtual size_t absoluteIndex(size_t relativeIndex) const = 0;
-
-    /** This purely virtual function must be implemented in each of the ProcessAssigner subclasses. As
-        an argument, it takes a value from zero to the number of parts of work that is used for the
-        assignment, minus one. This value is the absolute index of this part of work. This function
-        translates that absolute index to the relative index corresponding with that part of work for
-        this process, a value between zero and the number of values assigned to this process, _nvalues.
-        According to their assignment procedure, each ProcessAssigner subclass defines this function in
-        a different way. */
-    virtual size_t relativeIndex(size_t absoluteIndex) const = 0;
-
-    /** This purely virtual function can be called to determine which process is assigned to a certain
-        part of work. The index argument passed to this function is the absolute index of that part,
-        ranging from zero to the size argument passed to the assign function. The return value is the
-        rank of the process corresponding with that part of work. */
-    virtual int rankForIndex(size_t index) const = 0;
-
-    /** This function returns \c true if the different parts of work are distributed amongst the
-        different processes and returns \c false if each process is assigned to the same work. Thus, it
-        indicates whether multithreading can be safely used to parallelize the work even further or
-        not. Since this is a purely virtual function, subclasses must implement it appropriately.
-        Except for the IdenticalAssigner class, each subclass always returns true. */
-    virtual bool parallel() const = 0;
+    /** Calculates the number of work units assigned to any given rank. */
+    size_t assignedForRank(int rank) const;
 
     /** Returns true if this process was assigned to the given index. */
-    virtual bool validIndex(size_t absoluteIndex) const;
+    bool validIndex(size_t absoluteIndex) const;
 
     /** Returns a vector containing all the absolute work indices assigned to a given process rank. */
     std::vector<int> indicesForRank(int rank) const;
 
-    virtual size_t nvaluesForRank(int rank) const;
+    /** This purely virtual function must be implemented in each of the ProcessAssigner subclasses. As
+        an argument, it can take any value between zero and the number of values assigned to the
+        process, defined by the _assigned variable. This value is the relative index some part of the
+        work assigned to the process. This function translates that relative index to the absolute
+        index corresponding with that part of work, a value between zero and the size argument passed
+        during construction. According to their assignment procedure, each ProcessAssigner subclass
+        defines this function in a different way. */
+    virtual size_t absoluteIndex(size_t relativeIndex) const = 0;
 
+    /** This purely virtual function must be implemented in each of the ProcessAssigner subclasses. As
+        an argument, it takes a value from zero to _total minus one. This value is the absolute index
+        of this part of work. This function translates that absolute index to the relative index
+        corresponding with that part of work for this process, a value between zero and the number of
+        work units assigned to this process, _assigned. According to their assignment procedure, each
+        ProcessAssigner subclass defines this function in a different way. */
+    virtual size_t relativeIndex(size_t absoluteIndex) const = 0;
+
+    /** This purely virtual function can be called to determine which process is assigned to a certain
+        part of work. The index argument passed to this function is the absolute index of that part,
+        ranging from zero to the size argument passed during construction. The return value is the
+        rank of the process corresponding with that part of work. */
+    virtual int rankForIndex(size_t index) const = 0;
 
     //======================== Data Members ========================
 
 protected:
     PeerToPeerCommunicator* _comm;  // cached pointer to the peer-to-peer communicator of the simulation
-    size_t _nvalues;                // the number of values assigned to this process
-    size_t _blocksize;
-    size_t _nblocks;
+
+private:
+    size_t _assigned;                // the number of values assigned to this process
+    size_t _total;
 };
 
 #endif // PROCESSASSIGNER_HPP

@@ -10,7 +10,6 @@
 #include <QVector>
 #include "ParallelFactory.hpp"
 #include "ProcessCommunicator.hpp"
-#include "RootAssigner.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
@@ -268,7 +267,6 @@ private:
     ParallelFactory _factory;   // the factory used to spawn objects for local parallellization
     QList<Task*> _tasks;        // registered tasks, in index order
     int _bufsize;               // the maximum message size, in bytes (for multiprocessing mode)
-    RootAssigner* _assigner;    // the assigner, necessary to use the Parallel::call() function
 };
 
 ////////////////////////////////////////////////////////////////////

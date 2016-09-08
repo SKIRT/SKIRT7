@@ -21,7 +21,7 @@ namespace
 ////////////////////////////////////////////////////////////////////
 
 MasterSlaveCommunicator::MasterSlaveCommunicator()
-    : _acquired(false), _performing(false), _bufsize(4000), _assigner(0)
+    : _acquired(false), _performing(false), _bufsize(4000)
 {
     if (_mainThread == std::thread::id())
     {
@@ -32,10 +32,6 @@ MasterSlaveCommunicator::MasterSlaveCommunicator()
         if (std::this_thread::get_id() != _mainThread)
             throw FATALERROR("Must be invoked from the thread that initialized MasterSlaveCommunicator");
     }
-
-    // Create an assigner that utilizes no specific assignment scheme (assignment of tasks is performed
-    // by this class), necessary when the multithreading features of this class are utilized.
-    _assigner = new RootAssigner(this);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -190,8 +186,7 @@ QVector<QVariant> MasterSlaveCommunicator::performTask(int taskIndex, QVector<QV
     else
     {
         LocalTarget target(_tasks[taskIndex], inputVector);
-        _assigner->assign(inputVector.size());
-        _factory.parallel()->call(&target, _assigner);
+        _factory.parallel()->call(&target, inputVector.size());
         return target.outputVector();
     }
 }

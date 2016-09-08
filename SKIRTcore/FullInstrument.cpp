@@ -55,38 +55,36 @@ void FullInstrument::setupSelfBefore()
     }
 
     // resize the detector arrays only when meaningful
-    WavelengthGrid* wavelengthGrid = find<WavelengthGrid>();
-    const ProcessAssigner* wavelengthAssigner = wavelengthGrid->assigner();
-    int Nlambda = wavelengthGrid->Nlambda();
+    int Nlambda = find<WavelengthGrid>()->Nlambda();
 
-    _ftrav.initialize(wavelengthAssigner, _Nframep);
+    _ftrav.initialize(_Nframep, this);
     _Ftrav.resize(Nlambda);
     if (_dustsystem)
     {
-        _fstrdirv.initialize(wavelengthAssigner, _Nframep);
+        _fstrdirv.initialize(_Nframep, this);
         _Fstrdirv.resize(Nlambda);
-        _fstrscav.initialize(wavelengthAssigner, _Nframep);
+        _fstrscav.initialize(_Nframep, this);
         _Fstrscav.resize(Nlambda);
         if (_dustemission)
         {
-            _fdusdirv.initialize(wavelengthAssigner, _Nframep);
+            _fdusdirv.initialize(_Nframep, this);
             _Fdusdirv.resize(Nlambda);
-            _fdusscav.initialize(wavelengthAssigner, _Nframep);
+            _fdusscav.initialize(_Nframep, this);
             _Fdusscav.resize(Nlambda);
         }
         if (_Nscatt > 0)
         {
             _fstrscavv.resize(_Nscatt);
-            for (auto& cube : _fstrscavv) cube.initialize(wavelengthAssigner, _Nframep);
+            for (auto& cube : _fstrscavv) cube.initialize(_Nframep, this);
             _Fstrscavv.resize(_Nscatt, Nlambda);
         }
         if (_polarization)
         {
-            _ftotQv.initialize(wavelengthAssigner, _Nframep);
+            _ftotQv.initialize(_Nframep, this);
             _FtotQv.resize(Nlambda);
-            _ftotUv.initialize(wavelengthAssigner, _Nframep);
+            _ftotUv.initialize(_Nframep, this);
             _FtotUv.resize(Nlambda);
-            _ftotVv.initialize(wavelengthAssigner, _Nframep);
+            _ftotVv.initialize(_Nframep, this);
             _FtotVv.resize(Nlambda);
         }
     }

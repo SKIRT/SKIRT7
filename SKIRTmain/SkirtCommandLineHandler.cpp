@@ -24,7 +24,6 @@
 #include "ParallelFactory.hpp"
 #include "PeerToPeerCommunicator.hpp"
 #include "ProcessManager.hpp"
-#include "RootAssigner.hpp"
 #include "Simulation.hpp"
 #include "SmileSchemaWriter.hpp"
 #include "SkirtCommandLineHandler.hpp"
@@ -38,7 +37,7 @@
 namespace
 {
     // the allowed options list, in the format consumed by the CommandLineArguments constructor
-    static const char* allowedOptions = "-t* -s* -b -v -m -l* -e -i* -o* -k -r -x";
+    static const char* allowedOptions = "-t* -s* -b -v -m -l* -e -i* -o* -k -r -x -d";
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -163,9 +162,7 @@ int SkirtCommandLineHandler::doBatch()
                           + (_parallelSims > 1 ? ", " + QString::number(_parallelSims) + " in parallel" : ""));
         ParallelFactory factory;
         factory.setMaxThreadCount(_parallelSims);
-        RootAssigner* assigner = new RootAssigner(0);
-        assigner->assign(_skifiles.size());
-        factory.parallel()->call(this, &SkirtCommandLineHandler::doSimulation, assigner);
+        factory.parallel()->call(this, &SkirtCommandLineHandler::doSimulation, _skifiles.size());
     }
 
     // report memory statistics for the complete run
@@ -310,6 +307,7 @@ void SkirtCommandLineHandler::doSimulation(size_t index)
     //  - the multiprocessing environment
     PeerToPeerCommunicator* comm = simulation->communicator();
     comm->setup();
+    comm->setDataParallel(_args.isPresent("-d") && comm->isMultiProc());
 
     //  - the console and the file log (and memory (de)allocation logging)
     FileLog* log = new FileLog();

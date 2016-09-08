@@ -21,7 +21,7 @@ class ParallelDataCube
 public:
     ParallelDataCube();
 
-    void initialize(const ProcessAssigner* wavelengthAssigner, size_t Nframep);
+    void initialize(size_t Nframep, SimulationItem* item);
 
     //======================== Other Methods =======================
 
