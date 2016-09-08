@@ -104,7 +104,7 @@ void DustSystem::setupSelfAfter()
     comm->wait("the calculation of the dust cell densities");
 
     // Obtain the densities in all dust cells, if the calculation has been performed by parallel processes
-    if (_setupAssigner) assemble();
+    if (comm->isMultiProc()) assemble();
 
     // Perform a convergence check on the grid.
     if (_writeConvergence) writeconvergence();

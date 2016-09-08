@@ -181,9 +181,6 @@ public:
     int dimension() const;
 
 protected:
-    /** Returns the process assigner for this Monte Carlo simulation. */
-    const ProcessAssigner* assigner() const;
-
     /** This function initializes the progress counter used in logprogress() for the specified
         phase and logs the number of photon packages and wavelengths to be processed. */
     void initprogress(QString phase);
@@ -390,7 +387,6 @@ private:
     int _minfs;                 // the minimum number of scattering events
     double _xi;                 // the scattering bias
     bool _continuousScattering; // true if continuous scattering should be used
-    const ProcessAssigner* _wavelengthAssigner; // determines which wavelengths are assigned to this process
 
 protected:
     // *** discoverable attributes to be setup by a subclass ***
@@ -404,7 +400,7 @@ protected:
     quint64 _Nchunks;       // the number of chunks to be launched per wavelength
     quint64 _chunksize;     // the number of photon packages in one chunk
     quint64 _Npp;           // the precise number of photon packages to be launched per wavelength
-    quint64 _myTotalNpp;    // the total number of photom packages to be launched by this process
+    quint64 _myTotalNpp;    // the total number of photon packages to be launched by this process
     quint64 _logchunksize;  // the number of photon packages to be processed between logprogress() invocations
 
 private:

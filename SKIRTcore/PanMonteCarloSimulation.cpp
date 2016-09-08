@@ -141,8 +141,9 @@ void PanMonteCarloSimulation::rundustselfabsorption()
             initprogress(QString(stage_name[stage]) + " dust self-absorption cycle " + QString::number(cycle));
 
             Parallel* parallel = find<ParallelFactory>()->parallel();
-            if (assigner())
-                parallel->call(this, &PanMonteCarloSimulation::dodustselfabsorptionchunk, assigner(), _Nchunks);
+            if (_lambdagrid->assigner())
+                parallel->call(this, &PanMonteCarloSimulation::dodustselfabsorptionchunk,
+                               _lambdagrid->assigner(), _Nchunks);
             else
                 parallel->call(this, &PanMonteCarloSimulation::dodustselfabsorptionchunk, _Nlambda, _Nchunks);
 
@@ -258,8 +259,8 @@ void PanMonteCarloSimulation::rundustemission()
     setChunkParams(packages()*_pds->emissionBoost());
     initprogress("dust emission");
     Parallel* parallel = find<ParallelFactory>()->parallel();
-    if (assigner())
-        parallel->call(this, &PanMonteCarloSimulation::dodustemissionchunk, assigner(), _Nchunks);
+    if (_lambdagrid->assigner())
+        parallel->call(this, &PanMonteCarloSimulation::dodustemissionchunk, _lambdagrid->assigner(), _Nchunks);
     else
         parallel->call(this, &PanMonteCarloSimulation::dodustemissionchunk, _Nlambda, _Nchunks);
 

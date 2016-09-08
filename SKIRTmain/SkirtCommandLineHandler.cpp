@@ -37,7 +37,7 @@
 namespace
 {
     // the allowed options list, in the format consumed by the CommandLineArguments constructor
-    static const char* allowedOptions = "-t* -s* -b -v -m -l* -e -i* -o* -k -r -x -d";
+    static const char* allowedOptions = "-t* -s* -d -b -v -m -l* -e -k -i* -o* -r -x";
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -369,21 +369,23 @@ void SkirtCommandLineHandler::printHelp()
     _console.warning("To create a new ski file interactively:    skirt");
     _console.warning("To run a simulation with default options:  skirt <ski-filename>");
     _console.warning("");
-    _console.warning("  skirt [-b] [-v] [-m] [-s <simulations>] [-t <threads>]");
+    _console.warning("  skirt [-t <threads>] [-s <simulations>] [-d]");
+    _console.warning("        [-b] [-v] [-m] [-l <limit>] [-e]");
     _console.warning("        [-k] [-i <dirpath>] [-o <dirpath>]");
     _console.warning("        [-r] {<filepath>}*");
     _console.warning("");
-    _console.warning("  -b : forces brief console logging");
-    _console.warning("  -v : forces verbose logging");
+    _console.warning("  -t <threads> : the number of parallel threads for each simulation");
+    _console.warning("  -s <simulations> : the number of parallel simulations per process");
+    _console.warning("  -d : enable data parallelization mode for multiple processes");
+    _console.warning("  -b : force brief console logging");
+    _console.warning("  -v : force verbose logging for multiple processes");
     _console.warning("  -m : state the amount of used memory at the start of each log message");
     _console.warning("  -l <limit> : enable memory (de)allocation logging (lower limit in GB)");
-    _console.warning("  -e : runs the simulation in 'emulation' mode to get an estimate of the memory consumption");
-    _console.warning("  -s <simulations> : the number of parallel simulations per process");
-    _console.warning("  -t <threads> : the number of parallel threads for each simulation");
-    _console.warning("  -k : makes the input/output paths relative to the ski file being processed");
+    _console.warning("  -e : run the simulation in 'emulation' mode to get an estimate of the memory consumption");
+    _console.warning("  -k : make the input/output paths relative to the ski file being processed");
     _console.warning("  -i <dirpath> : the relative or absolute path for simulation input files");
     _console.warning("  -o <dirpath> : the relative or absolute path for simulation output files");
-    _console.warning("  -r : causes recursive directory descent for all specified ski file paths");
+    _console.warning("  -r : cause recursive directory descent for all specified ski file paths");
     _console.warning("  <filepath> : the relative or absolute file path for a ski file");
     _console.warning("               (the filename may contain ? and * wildcards)");
     _console.warning("");

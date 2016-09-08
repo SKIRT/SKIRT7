@@ -30,7 +30,7 @@ using namespace std;
 
 MonteCarloSimulation::MonteCarloSimulation()
     : _is(0), _packages(0), _minWeightReduction(1e4),
-      _minfs(0), _xi(0.5), _continuousScattering(false), _wavelengthAssigner(0),
+      _minfs(0), _xi(0.5), _continuousScattering(false),
       _lambdagrid(0), _ss(0), _ds(0)
 {
 }
@@ -72,8 +72,6 @@ void MonteCarloSimulation::setChunkParams(double packages)
 
     // Check to see if we are using data parallelization
     bool dataParallel = _comm->dataParallel();
-    // Get the assigner for the wavelengths if necessary
-    if(dataParallel && !_wavelengthAssigner) _wavelengthAssigner = _lambdagrid->assigner();
 
     // Determine the number of chunks and the corresponding chunk size
     if (packages <= 0)
@@ -97,7 +95,7 @@ void MonteCarloSimulation::setChunkParams(double packages)
         // New algorithm
         int totalChunks = 0;
         if (Nthreads == 1) // divide wavelengths and use 1 chunk, or do all wavelengths and divide the chunks
-            totalChunks = _wavelengthAssigner ? 1 : Nprocs;
+            totalChunks = _lambdagrid->assigner() ? 1 : Nprocs;
         else
         {
             // divided wavelengths : _Nchunks * (_Nlambda/Nprocs) work units > 10 * threads
@@ -115,7 +113,7 @@ void MonteCarloSimulation::setChunkParams(double packages)
         if (dataParallel) // work is divided by letting each process do about 1/Nprocs of the wavelengths
         {
             _Nchunks = totalChunks;
-            _myTotalNpp = _wavelengthAssigner->assigned() * _Nchunks * _chunksize;
+            _myTotalNpp = _lambdagrid->assigner()->assigned() * _Nchunks * _chunksize;
         }
         else // work is divided by letting each process do 1/Nprocs of the chunks
         {
@@ -219,13 +217,6 @@ bool MonteCarloSimulation::continuousScattering() const
 
 ////////////////////////////////////////////////////////////////////
 
-const ProcessAssigner* MonteCarloSimulation::assigner() const
-{
-    return _wavelengthAssigner;
-}
-
-////////////////////////////////////////////////////////////////////
-
 int MonteCarloSimulation::dimension() const
 {
     return qMax(_ss->dimension(), _ds ? _ds->dimension() : 1);
@@ -274,8 +265,8 @@ void MonteCarloSimulation::runstellaremission()
     initprogress("stellar emission");
     Parallel* parallel = find<ParallelFactory>()->parallel();
 
-    if (_wavelengthAssigner)
-        parallel->call(this, &MonteCarloSimulation::dostellaremissionchunk, _wavelengthAssigner, _Nchunks);
+    if (_lambdagrid->assigner())
+        parallel->call(this, &MonteCarloSimulation::dostellaremissionchunk, _lambdagrid->assigner(), _Nchunks);
     else
         parallel->call(this, &MonteCarloSimulation::dostellaremissionchunk, _Nlambda, _Nchunks);
 

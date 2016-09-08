@@ -6,9 +6,7 @@
 #ifndef PEERTOPEERCOMMUNICATOR_HPP
 #define PEERTOPEERCOMMUNICATOR_HPP
 
-#include "ArrayTable.hpp"
 #include "ProcessCommunicator.hpp"
-#include "Table.hpp"
 class Array;
 
 ////////////////////////////////////////////////////////////////////

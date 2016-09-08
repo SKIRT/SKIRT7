@@ -192,11 +192,11 @@ void OligoDustSystem::write() const
 {
     DustSystem::write();
 
-    if (_writeMeanIntensity)
+    // Perform the calculations only at the root
+    if (_writeMeanIntensity && find<PeerToPeerCommunicator>()->isRoot())
     {
-        // Get the parallel engine and perform the calculations at the root
+        // Get the parallel engine
         Parallel* parallel = find<ParallelFactory>()->parallel();
-        bool isRoot = find<PeerToPeerCommunicator>()->isRoot();
 
         // Output map(s) along coordinate axes
         {
@@ -209,7 +209,7 @@ void OligoDustSystem::write() const
             // For the xy plane (always)
             {
                 wt.setup(1,1,0);
-                if (isRoot) parallel->call(&wt, Np);
+                parallel->call(&wt, Np);
                 wt.write();
             }
 
@@ -217,7 +217,7 @@ void OligoDustSystem::write() const
             if (dimDust >= 2)
             {
                 wt.setup(1,0,1);
-                if (isRoot) parallel->call(&wt, Np);
+                parallel->call(&wt, Np);
                 wt.write();
             }
 
@@ -225,7 +225,7 @@ void OligoDustSystem::write() const
             if (dimDust == 3)
             {
                 wt.setup(0,1,1);
-                if (isRoot) parallel->call(&wt, Np);
+                parallel->call(&wt, Np);
                 wt.write();
             }
         }

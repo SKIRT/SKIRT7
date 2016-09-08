@@ -7,11 +7,13 @@
 #include "Log.hpp"
 #include "PeerToPeerCommunicator.hpp"
 #include "ProcessManager.hpp"
-#include "ProcessAssigner.hpp"
 
 ////////////////////////////////////////////////////////////////////
 
-#define ROOT 0
+namespace
+{
+    const int ROOT = 0;
+}
 
 ////////////////////////////////////////////////////////////////////
 
@@ -74,7 +76,7 @@ void PeerToPeerCommunicator::gatherw(double* sendBuffer, int sendCount,
                                      double* recvBuffer, int recvRank, int recvLength,
                                      const std::vector<std::vector<int>>& recvDisplacements)
 {
-    if(!isMultiProc()) return;
+    if (!isMultiProc()) return;
 
     ProcessManager::gatherw(sendBuffer, sendCount, recvBuffer, recvRank, recvLength, recvDisplacements);
 }
@@ -87,7 +89,7 @@ void PeerToPeerCommunicator::displacedBlocksAllToAll(double* sendBuffer, int sen
                                                      std::vector<std::vector<int>>& recvDisplacements, int recvLength,
                                                      int recvExtent)
 {
-    if(!isMultiProc()) return;
+    if (!isMultiProc()) return;
 
     ProcessManager::displacedBlocksAllToAll(sendBuffer, sendCount, sendDisplacements, sendLength, sendExtent,
                                             recvBuffer, recvCount, recvDisplacements, recvLength, recvExtent);
@@ -125,8 +127,11 @@ bool PeerToPeerCommunicator::dataParallel()
     return _dataParallel;
 }
 
+////////////////////////////////////////////////////////////////////
+
 void PeerToPeerCommunicator::setDataParallel(bool dataParallel)
 {
     _dataParallel = dataParallel;
 }
 
+////////////////////////////////////////////////////////////////////

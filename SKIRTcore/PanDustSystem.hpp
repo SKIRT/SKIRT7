@@ -294,8 +294,6 @@ private:
 
     // data members initialized during setup
     int _Nlambda;
-    const ProcessAssigner* _lambdaAssigner; // determines which wavelengths absorption will be recorded for
-
     ParallelTable _Labsstelvv;
     ParallelTable _Labsdustvv;
     bool _haveLabsstel;     // true if absorbed stellar emission is relevant for this simulation
