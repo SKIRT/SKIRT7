@@ -76,14 +76,58 @@ int Parallel::threadCount() const
 void Parallel::call(ParallelTarget* target, const ProcessAssigner* assigner, size_t repetitions)
 {
     size_t assigned = assigner->assigned();
-    prepareAndCall(target, assigner, assigned*repetitions, assigned);
+    call(target, assigner, assigned*repetitions, assigned);
 }
 
 ////////////////////////////////////////////////////////////////////
 
 void Parallel::call(ParallelTarget* target, size_t maxIndex, size_t repetitions)
 {
-    prepareAndCall(target, nullptr, maxIndex*repetitions, maxIndex);
+    call(target, nullptr, maxIndex*repetitions, maxIndex);
+}
+
+////////////////////////////////////////////////////////////////////
+
+void Parallel::call(ParallelTarget* target, const ProcessAssigner* assigner, size_t limit, size_t loopRange)
+{
+    // Verify that we're being called from our parent thread
+    if (std::this_thread::get_id() != _parentThread)
+        throw FATALERROR("Parallel call not invoked from thread that constructed this object");
+
+    // Initialize shared data members and activate threads in a critical section
+    {
+        std::unique_lock<std::mutex> lock(_mutex);
+
+        // Copy the arguments so they can be used from any of the threads
+        _target = target;
+        _assigner = assigner;
+        _limit = limit;
+        _loopRange = loopRange;
+
+        // Initialize the number of active threads (i.e. not waiting for new work)
+        _active.assign(_threadCount, true);
+
+        // Clear the exception pointer
+        _exception = 0;
+
+        // Initialize the loop variable
+        _next = 0;
+
+        // Wake all parallel threads, if multithreading is allowed
+        _conditionExtra.notify_all();
+    }
+
+    // Do some work ourselves as well
+    doWork();
+
+    // Wait until all parallel threads are done
+    waitForThreads();
+
+    // Check for and process the exception, if any
+    if (_exception)
+    {
+        throw *_exception;  // throw by value (the memory for the heap-allocated exception is leaked)
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -187,45 +231,3 @@ bool Parallel::threadsActive()
 }
 
 ////////////////////////////////////////////////////////////////////
-
-void Parallel::prepareAndCall(ParallelTarget* target, const ProcessAssigner* assigner, size_t limit, size_t loopRange)
-{
-    // Verify that we're being called from our parent thread
-    if (std::this_thread::get_id() != _parentThread)
-        throw FATALERROR("Parallel call not invoked from thread that constructed this object");
-
-    // Initialize shared data members and activate threads in a critical section
-    {
-        std::unique_lock<std::mutex> lock(_mutex);
-
-        // Copy the arguments so they can be used from any of the threads
-        _target = target;
-        _assigner = assigner;
-        _limit = limit;
-        _loopRange = loopRange;
-
-        // Initialize the number of active threads (i.e. not waiting for new work)
-        _active.assign(_threadCount, true);
-
-        // Clear the exception pointer
-        _exception = 0;
-
-        // Initialize the loop variable
-        _next = 0;
-
-        // Wake all parallel threads, if multithreading is allowed
-        _conditionExtra.notify_all();
-    }
-
-    // Do some work ourselves as well
-    doWork();
-
-    // Wait until all parallel threads are done
-    waitForThreads();
-
-    // Check for and process the exception, if any
-    if (_exception)
-    {
-        throw *_exception;  // throw by value (the memory for the heap-allocated exception is leaked)
-    }
-}

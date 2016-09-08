@@ -14,8 +14,6 @@ ProcessAssigner::ProcessAssigner(size_t size, SimulationItem* parent)
     setParent(parent);
     setup();
 
-    SimulationItem::setupSelfBefore();
-
     try
     {
         // get a pointer to the PeerToPeerCommunicator without performing setup
@@ -34,9 +32,9 @@ ProcessAssigner::ProcessAssigner(size_t size, SimulationItem* parent)
 
 ////////////////////////////////////////////////////////////////////
 
-size_t ProcessAssigner::assigned() const
+void ProcessAssigner::setAssigned(size_t assigned)
 {
-    return _assigned;
+    _assigned = assigned;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -44,6 +42,24 @@ size_t ProcessAssigner::assigned() const
 size_t ProcessAssigner::total() const
 {
     return _total;
+}
+
+////////////////////////////////////////////////////////////////////
+
+size_t ProcessAssigner::assigned() const
+{
+    return _assigned;
+}
+
+////////////////////////////////////////////////////////////////////
+
+size_t ProcessAssigner::assignedForRank(int rank) const
+{
+    size_t result = 0;
+
+    for (size_t absoluteIndex=0; absoluteIndex<total(); absoluteIndex++)
+        if (rank == rankForIndex(absoluteIndex)) result++;
+    return result;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -66,24 +82,6 @@ std::vector<int> ProcessAssigner::indicesForRank(int rank) const
             result.push_back(absoluteIndex);
 
     return result;
-}
-
-////////////////////////////////////////////////////////////////////
-
-size_t ProcessAssigner::assignedForRank(int rank) const
-{
-    size_t result = 0;
-
-    for (size_t absoluteIndex=0; absoluteIndex<total(); absoluteIndex++)
-        if (rank == rankForIndex(absoluteIndex)) result++;
-    return result;
-}
-
-////////////////////////////////////////////////////////////////////
-
-void ProcessAssigner::setAssigned(size_t assigned)
-{
-    _assigned = assigned;
 }
 
 ////////////////////////////////////////////////////////////////////

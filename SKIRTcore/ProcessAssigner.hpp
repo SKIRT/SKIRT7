@@ -13,32 +13,35 @@
 
 /** ProcessAssigner is an abstract class representing objects that assign different parts of work
     to the different processes in the simulation. Different subclasses of ProcessAssigner do this
-    in different ways. A ProcessAssigner can be a part of any item in the simulation hierarchy. The
-    DustLib object for example, can incorporate a ProcessAssigner object to define the way in which
-    the process work together to calculate the dust emission for the different library items. The
-    ProcessAssigner can also be associated with for example the WavelengthGrid, to assign the
-    simulation of different wavelengths to different processes. The ProcessAssigner is always used
-    in combination with the PeerToPeerCommunicator of the simulation. The latter defines the
-    communications needed between the processes, while the former defines the work assignment. The
-    MasterSlaveCommunicator implements the work assignment itself; letting one process hand out
-    the parts of work to the others by sending messages. */
+    in different ways. A ProcessAssigner is always used in combination with the
+    PeerToPeerCommunicator of the simulation. The latter defines the communications needed between
+    the processes, while the former defines the work assignment. The MasterSlaveCommunicator
+    implements the work assignment itself; letting one process hand out the parts of work to the
+    others by sending messages. The construction of ProcessAssigner subclass instances is hardcoded
+    in the SimulationItem class setting up the assignment scheme, usually during setup. In other
+    words, process assigners are not configured externally by the user. Still, the ProcessAssigner
+    class inherits from SimulationItem so that it can be linked into the simulation item hierarchy
+    at run time. This provides the process assigner with a way to access the PeerToPeerCommunicator
+    of the simulation, and ensures proper destruction with the simulation hierarchy itself. */
 class ProcessAssigner : public SimulationItem
 {
     Q_OBJECT
-    Q_CLASSINFO("Title", "a process assigner")
 
     //============= Construction - Setup - Destruction =============
 
 protected:
-    /** The constructor takes a number of work units as an argument. The constructed object will then
-    decide how the work will be divided across the processes. This constructor is proctected
-    because this is an abstract class. The algorithm for dividing the work is implemented
-    differently in each of the subclasses, and typically involves some calculations to determine
-    which process is assigned to which parts of the work. */
-    ProcessAssigner(size_t size, SimulationItem* parent);
+    /** The constructor takes a number of work units as its first argument. The constructed object
+        will then decide how the work will be divided across the processes. This constructor is
+        proctected because this is an abstract class. The algorithm for dividing the work is
+        implemented differently in each of the subclasses, and typically involves some calculations
+        to determine which process is assigned to which parts of the work. The second argument
+        specifies the immediate parent of the new process assigner instance in the simulation item
+        hierarchy. The constructor links the new instance into the hierarchy by setting its parent
+        to the specified item. */
+    explicit ProcessAssigner(size_t size, SimulationItem* parent);
 
-    /** Subclasses must use this protected setter to set _assigned to the correct value, after
-    performing their assignment algorithm in the constructor */
+    /** Subclasses must use this protected setter to set the number of values assigned to the
+        calling process, after performing their assignment algorithm in the constructor. */
     void setAssigned(size_t assigned);
 
     //======================== Other Functions =======================

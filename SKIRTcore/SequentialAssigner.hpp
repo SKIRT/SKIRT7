@@ -27,7 +27,6 @@
 class SequentialAssigner : public ProcessAssigner
 {
     Q_OBJECT
-    Q_CLASSINFO("Title", "an assigner that assigns each process sequentially to a subset of the work")
 
     //============= Construction - Setup - Destruction =============
 

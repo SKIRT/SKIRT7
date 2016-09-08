@@ -87,37 +87,41 @@ public:
         times, with the \em index argument of that function taking values that are determined by
         the \em assigner, which is also passed to this function. While the values assigned to a
         particular process are fixed at the moment this function is called, the work will be
-        distributed over the parallel threads in an unpredicable manner. If the repetitions
+        distributed over the parallel threads in an unpredicable manner. If the \em repetitions
         argument is > 1, this function will loop through the indices specified by the assigner
         multiple times. */
     void call(ParallelTarget* target, const ProcessAssigner* assigner, size_t repetitions = 1);
 
     /** Calls the body() function of the specified specified target object a certain number of
-        times, with the \em index argument of that function taking values from 0 to \em maxIndex.
-        The work will be distributed over the parallel threads in an unpredicable manner. When
-        repetitions > 1, the loop over the indices will be repeated multiple times. With every
-        repetition, the index starts from 0 and goes up to \em maxIndex. */
+        times, with the \em index argument of that function taking values from 0 to \em maxIndex-1.
+        The work will be distributed over the parallel threads in an unpredicable manner. If the
+        \em repetitions argument is > 1, the loop over the indices will be repeated multiple times.
+        With every repetition, the index starts from 0 and goes up to \em maxIndex-1. */
     void call(ParallelTarget* target, size_t maxIndex, size_t repetitions = 1);
 
     /** Calls the specified member function for the specified target object a certain number of
         times, with the \em index argument of that function taking values that are determined by
         the \em assigner, which is also passed to this function. While the values assigned to a
         particular process are fixed at the moment this function is called, the work will be
-        distributed over the parallel threads in an unpredicable manner. If the repetitions
+        distributed over the parallel threads in an unpredicable manner. If the \em repetitions
         argument is > 1, this function will loop through the indices specified by the assigner
         multiple times. */
-    template<class T> void call(T* targetObject, void (T::*targetMember)(size_t index), const ProcessAssigner* assigner,
-                                size_t repetitions = 1);
+    template<class T> void call(T* targetObject, void (T::*targetMember)(size_t index),
+                                const ProcessAssigner* assigner, size_t repetitions = 1);
 
     /** Calls the specified member function for the specified target object a certain number of
-        times, with the \em index argument of that function taking values from 0 to \em maxIndex.
-        The work will be distributed over the parallel threads in an unpredicable manner. When
-        repetitions > 1, the loop over the indices will be repeated multiple times. With every
-        repetition, the index starts from 0 and goes up to \em maxIndex. */
-    template<class T> void call(T* targetObject, void (T::*targetMember)(size_t index), size_t maxIndex,
-                                size_t repetitions = 1);
+        times, with the \em index argument of that function taking values from 0 to \em maxIndex-1.
+        The work will be distributed over the parallel threads in an unpredicable manner. If the
+        \em repetitions argument is > 1, the loop over the indices will be repeated multiple times.
+        With every repetition, the index starts from 0 and goes up to \em maxIndex-1. */
+    template<class T> void call(T* targetObject, void (T::*targetMember)(size_t index),
+                                size_t maxIndex, size_t repetitions = 1);
 
 private:
+    /** This function gets called by all other versions of the call() function. It sets the data
+        members shared by the threads and starts the parallel execution. */
+    void call(ParallelTarget* target, const ProcessAssigner* assigner, size_t limit, size_t loopRange);
+
     /** The function that gets executed inside each of the parallel threads. */
     void run(int threadIndex);
 
@@ -134,9 +138,6 @@ private:
         the parent thread) is still active, and false if not. This function does not perform any
         locking; callers should lock the shared data members of this class instance. */
     bool threadsActive();
-
-    /** This function sets the data members shared by the threads and starts the parallel execution. */
-    void prepareAndCall(ParallelTarget* target, const ProcessAssigner* assigner, size_t limit, size_t loopRange);
 
     //======================== Nested Classes =======================
 
@@ -203,8 +204,8 @@ template<class T> void Parallel::call(T* targetObject, void (T::*targetMember)(s
 
 ////////////////////////////////////////////////////////////////////
 
-template<class T> void Parallel::call(T* targetObject, void (T::*targetMember)(size_t index), size_t maxIndex,
-                                      size_t repetitions)
+template<class T> void Parallel::call(T* targetObject, void (T::*targetMember)(size_t index),
+                                      size_t maxIndex, size_t repetitions)
 {
     Target<T> target(targetObject, targetMember);
     call(&target, maxIndex, repetitions);

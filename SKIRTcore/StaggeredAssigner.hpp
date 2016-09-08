@@ -30,7 +30,6 @@
 class StaggeredAssigner : public ProcessAssigner
 {
     Q_OBJECT
-    Q_CLASSINFO("Title", "an assigner that assigns the work to the processes in a staggered way")
 
     //============= Construction - Setup - Destruction =============
 
@@ -75,8 +74,6 @@ public:
         argument. The rank \f$j\f$ is calculated as follows: \f[ j = t \bmod{N_P} \f] where \f$t\f$
         is the absolute index of the task and \f$N_P\f$ the number of processes. */
     int rankForIndex(size_t index) const;
-
-    //======================== Data Members ========================
 };
 
 //////////////////////////////////////////////////////////////////////

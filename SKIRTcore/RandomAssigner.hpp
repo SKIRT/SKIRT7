@@ -22,7 +22,6 @@ class Random;
 class RandomAssigner : public ProcessAssigner
 {
     Q_OBJECT
-    Q_CLASSINFO("Title", "an assigner that assigns the work to the processes in a random way")
 
     //============= Construction - Setup - Destruction =============
 

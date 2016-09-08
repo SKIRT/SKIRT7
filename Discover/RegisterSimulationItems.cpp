@@ -119,12 +119,10 @@
 #include "QuasarSED.hpp"
 #include "RadialDustCompNormalization.hpp"
 #include "Random.hpp"
-#include "RandomAssigner.hpp"
 #include "ReadFitsGeometry.hpp"
 #include "RingGeometry.hpp"
 #include "RotateGeometryDecorator.hpp"
 #include "SEDInstrument.hpp"
-#include "SequentialAssigner.hpp"
 #include "SIUnits.hpp"
 #include "SolarPatchGeometry.hpp"
 #include "SPHDustDistribution.hpp"
@@ -146,7 +144,6 @@
 #include "SphericalClipGeometryDecorator.hpp"
 #include "SpheroidalGeometryDecorator.hpp"
 #include "SpiralStructureGeometryDecorator.hpp"
-#include "StaggeredAssigner.hpp"
 #include "StarburstSED.hpp"
 #include "StellarSurfaceGeometry.hpp"
 #include "StellarSystem.hpp"
@@ -439,12 +436,6 @@ void RegisterSimulationItems::registerAll()
     add<SEDFamily>(false);
     add<BruzualCharlotSEDFamily>();
     add<MappingsSEDFamily>();
-
-    // process assigners
-    add<ProcessAssigner>(false);
-    add<StaggeredAssigner>();
-    add<SequentialAssigner>();
-    add<RandomAssigner>();
 }
 
 ////////////////////////////////////////////////////////////////////
