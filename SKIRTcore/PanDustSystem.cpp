@@ -33,7 +33,7 @@ using namespace std;
 PanDustSystem::PanDustSystem()
     : _dustemissivity(0), _dustlib(0), _emissionBias(0.5), _emissionBoost(1), _selfabsorption(false),
       _writeEmissivity(false), _writeTemp(true), _writeISRF(false), _cycles(0), _assigner(0), _Nlambda(0),
-      _haveLabsstel(false), _haveLabsdust(false)
+      _haveLabsStel(false), _haveLabsDust(false)
 {
 }
 
@@ -123,23 +123,23 @@ void PanDustSystem::setupSelfAfter()
     // resize the tables that hold the absorbed energies for each dust cell and wavelength
     // - absorbed stellar emission is relevant for calculating dust emission
     // - absorbed dust emission is relevant for calculating dust self-absorption
-    _haveLabsstel = false;
-    _haveLabsdust = false;
+    _haveLabsStel = false;
+    _haveLabsDust = false;
     if (dustemission())
     {
         if (dataParallel)
-            _Labsstelvv.initialize("Absorbed Stellar Luminosity Table", COLUMN, wg->assigner(), _assigner, comm);
+            _LabsStelvv.initialize("Absorbed Stellar Luminosity Table", COLUMN, wg->assigner(), _assigner, comm);
         else
-            _Labsstelvv.initialize("Absorbed Stellar Luminosity Table", COLUMN, _Nlambda, _Ncells, comm);
-        _haveLabsstel = true;
+            _LabsStelvv.initialize("Absorbed Stellar Luminosity Table", COLUMN, _Nlambda, _Ncells, comm);
+        _haveLabsStel = true;
 
         if (selfAbsorption())
         {
             if (dataParallel)
-                _Labsdustvv.initialize("Absorbed Dust Luminosity Table", COLUMN, wg->assigner(), _assigner, comm);
+                _LabsDustvv.initialize("Absorbed Dust Luminosity Table", COLUMN, wg->assigner(), _assigner, comm);
             else
-                _Labsdustvv.initialize("Absorbed Dust Luminosity Table", COLUMN, _Nlambda, _Ncells, comm);
-            _haveLabsdust = true;
+                _LabsDustvv.initialize("Absorbed Dust Luminosity Table", COLUMN, _Nlambda, _Ncells, comm);
+            _haveLabsDust = true;
         }
     }
 
@@ -327,13 +327,13 @@ void PanDustSystem::absorb(int m, int ell, double DeltaL, bool ynstellar)
 {
     if (ynstellar)
     {
-        if (!_haveLabsstel) throw FATALERROR("This dust system does not support absorption of stellar emission");
-        LockFree::add(_Labsstelvv(m,ell), DeltaL);
+        if (!_haveLabsStel) throw FATALERROR("This dust system does not support absorption of stellar emission");
+        LockFree::add(_LabsStelvv(m,ell), DeltaL);
     }
     else
     {
-        if (!_haveLabsdust) throw FATALERROR("This dust system does not support absorption of dust emission");
-        LockFree::add(_Labsdustvv(m,ell), DeltaL);
+        if (!_haveLabsDust) throw FATALERROR("This dust system does not support absorption of dust emission");
+        LockFree::add(_LabsDustvv(m,ell), DeltaL);
     }
 }
 
@@ -343,8 +343,8 @@ double PanDustSystem::Labs(int m, int ell) const
 {
     // Only callable on cells assigned to this process, and after sumResults
     double sum = 0;
-    if (_haveLabsstel) sum += _Labsstelvv(m,ell);
-    if (_haveLabsdust) sum += _Labsdustvv(m,ell);
+    if (_haveLabsStel) sum += _LabsStelvv(m,ell);
+    if (_haveLabsDust) sum += _LabsDustvv(m,ell);
     return sum;
 }
 
@@ -352,7 +352,7 @@ double PanDustSystem::Labs(int m, int ell) const
 
 void PanDustSystem::rebootLabsdust()
 {
-    _Labsdustvv.reset();
+    _LabsDustvv.reset();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -362,10 +362,10 @@ double PanDustSystem::Labs(int m) const
     // Only callable on cells assigned to this process, and after sumResults
     double sum = 0;
 
-    if (_haveLabsstel)
-        sum += _Labsstelvv.sumRow(m);
-    if (_haveLabsdust)
-        sum += _Labsdustvv.sumRow(m);
+    if (_haveLabsStel)
+        sum += _LabsStelvv.sumRow(m);
+    if (_haveLabsDust)
+        sum += _LabsDustvv.sumRow(m);
 
     return sum;
 }
@@ -375,10 +375,10 @@ Array PanDustSystem::Labsbolv() const
     // Only callable on cells assigned to this process, and after sumResults
     Array sum(_Ncells);
 
-    if (_haveLabsstel)
-        sum += _Labsstelvv.stackColumns();
-    if (_haveLabsdust)
-        sum += _Labsdustvv.stackColumns();
+    if (_haveLabsStel)
+        sum += _LabsStelvv.stackColumns();
+    if (_haveLabsDust)
+        sum += _LabsDustvv.stackColumns();
 
     return sum;
 }
@@ -387,14 +387,14 @@ Array PanDustSystem::Labsbolv() const
 
 double PanDustSystem::Labsstellartot() const
 {
-    return _Labsstelvv.sumEverything();
+    return _LabsStelvv.sumEverything();
 }
 
 //////////////////////////////////////////////////////////////////////
 
 double PanDustSystem::Labsdusttot() const
 {
-    return _Labsdustvv.sumEverything();
+    return _LabsDustvv.sumEverything();
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -412,8 +412,8 @@ void PanDustSystem::calculatedustemission()
 
 void PanDustSystem::sumResults()
 {
-    _Labsstelvv.switchScheme();
-    _Labsdustvv.switchScheme();
+    if (_haveLabsStel) _LabsStelvv.switchScheme();
+    if (_haveLabsDust) _LabsDustvv.switchScheme();
 }
 
 ////////////////////////////////////////////////////////////////////

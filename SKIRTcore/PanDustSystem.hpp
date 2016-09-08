@@ -294,10 +294,10 @@ private:
 
     // data members initialized during setup
     int _Nlambda;
-    ParallelTable _Labsstelvv;
-    ParallelTable _Labsdustvv;
-    bool _haveLabsstel;     // true if absorbed stellar emission is relevant for this simulation
-    bool _haveLabsdust;     // true if absorbed dust emission is relevant for this simulation
+    ParallelTable _LabsStelvv;
+    ParallelTable _LabsDustvv;
+    bool _haveLabsStel;     // true if absorbed stellar emission is relevant for this simulation
+    bool _haveLabsDust;     // true if absorbed dust emission is relevant for this simulation
 };
 
 //////////////////////////////////////////////////////////////////////
