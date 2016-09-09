@@ -232,6 +232,7 @@ void FullInstrument::write()
     }
     else
     {
+        printf("operations");
         // don't output transparent frame separately because it is identical to the total frame
         ftotv = *ftravComp;
         ftravComp->resize(0);
@@ -248,32 +249,46 @@ void FullInstrument::write()
     Farrays << &Ftotv << &_Fstrdirv << &_Fstrscav << &Ftotdusv << &_Fdusscav << &_Ftrav;
     Fnames << "total flux" << "direct stellar flux" << "scattered stellar flux"
            << "total dust emission flux" << "dust emission scattered flux" << "transparent flux";
+    if (_dustsystem)
+    {
+        for (int nscatt=0; nscatt<_Nscatt; nscatt++)
+        {
+            printf("%d nscatt\n", nscatt);
+            Farrays << &(_Fstrscavv[nscatt]);
+            Fnames << (QString::number(nscatt+1) + "-times scattered flux");
+        }
+    }
     if (_polarization)
     {
         Farrays << &_FtotQv << &_FtotUv << &_FtotVv;
         Fnames << "total Stokes Q" << "total Stokes U" << "total Stokes V";
-    }
-    for (int nscatt=0; nscatt<_Nscatt; nscatt++)
-    {
-        Farrays << &(_Fstrscavv[nscatt]);
-        Fnames << (QString::number(nscatt+1) + "-times scattered flux");
     }
 
     // Sum the SED arrays element-wise across the different processes
     sumResults(Farrays);
 
     // Frames
-    farrays << &ftotv << fstrdirvComp.get() << fstrscavComp.get() << &ftotdusv << fdusscavComp.get() << ftravComp.get();
-    fnames << "total" << "direct" << "scattered" << "dust" << "dustscattered" << "transparent";
+    farrays << &ftotv << ftravComp.get();
+    fnames << "total" << "transparent";
+    if (_dustsystem)
+    {
+        farrays << fstrdirvComp.get() << fstrscavComp.get();
+        fnames << "direct" << "scattered";
+        if (_dustemission)
+        {
+            farrays << &ftotdusv << fdusscavComp.get();
+            fnames << "dust" << "dustscattered";
+        }
+        for (int nscatt=0; nscatt<_Nscatt; nscatt++)
+        {
+            farrays << fstrscavvComp[nscatt].get();
+            fnames << ("scatteringlevel" + QString::number(nscatt+1));
+        }
+    }
     if (_polarization)
     {
         farrays << ftotQvComp.get() << ftotUvComp.get() << ftotVvComp.get();
         fnames << "stokesQ" << "stokesU" << "stokesV";
-    }
-    for (int nscatt=0; nscatt<_Nscatt; nscatt++)
-    {
-        farrays << fstrscavvComp[nscatt].get();
-        fnames << ("scatteringlevel" + QString::number(nscatt+1));
     }
 
     // calibrate and output the arrays

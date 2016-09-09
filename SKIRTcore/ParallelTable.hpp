@@ -34,6 +34,9 @@ public:
 
     //======================== Other Functions =======================
 
+    bool initialized() const;
+    bool distributed() const;
+
     // Reading and writing operators
     const double& operator()(size_t i, size_t j) const; // read operator
     double& operator()(size_t i, size_t j); // write operator
@@ -51,8 +54,7 @@ public:
     Array stackRows() const; // sum of al the rows: each elements is a column sum
     double sumEverything() const;
 
-    bool distributed() const;
-    bool initialized() const;
+
 
 private:
     // Private methods
@@ -73,9 +75,9 @@ private:
     writeState _writeOn;    // determines the format for writing to the table before switching
                             // and the format for reading after switching
 
+    bool _initialized;
     bool _distributed;  // false if memory is not distributed
     bool _modified; // true if the table has been written to since initialization or resetting
-    bool _initialized;
     bool _switched; // true after switchSchemes has been called. Disallows the writing operator.
 
     // the dimensions of the table represented by this data structure
