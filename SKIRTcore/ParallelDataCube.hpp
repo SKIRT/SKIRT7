@@ -9,8 +9,9 @@
 #include <memory>
 
 #include "Array.hpp"
-#include "PeerToPeerCommunicator.hpp"
+class PeerToPeerCommunicator;
 class ProcessAssigner;
+class SimulationItem;
 
 ////////////////////////////////////////////////////////////////////
 

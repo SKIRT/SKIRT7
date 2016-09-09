@@ -128,17 +128,21 @@ void PanDustSystem::setupSelfAfter()
     if (dustemission())
     {
         if (dataParallel)
-            _LabsStelvv.initialize("Absorbed Stellar Luminosity Table", COLUMN, wg->assigner(), _assigner, comm);
+            _LabsStelvv.initialize("Absorbed Stellar Luminosity Table", ParallelTable::WriteState::COLUMN,
+                                   wg->assigner(), _assigner, comm);
         else
-            _LabsStelvv.initialize("Absorbed Stellar Luminosity Table", COLUMN, _Nlambda, _Ncells, comm);
+            _LabsStelvv.initialize("Absorbed Stellar Luminosity Table", ParallelTable::WriteState::COLUMN,
+                                   _Nlambda, _Ncells, comm);
         _haveLabsStel = true;
 
         if (selfAbsorption())
         {
             if (dataParallel)
-                _LabsDustvv.initialize("Absorbed Dust Luminosity Table", COLUMN, wg->assigner(), _assigner, comm);
+                _LabsDustvv.initialize("Absorbed Dust Luminosity Table", ParallelTable::WriteState::COLUMN,
+                                       wg->assigner(), _assigner, comm);
             else
-                _LabsDustvv.initialize("Absorbed Dust Luminosity Table", COLUMN, _Nlambda, _Ncells, comm);
+                _LabsDustvv.initialize("Absorbed Dust Luminosity Table", ParallelTable::WriteState::COLUMN,
+                                       _Nlambda, _Ncells, comm);
             _haveLabsDust = true;
         }
     }
