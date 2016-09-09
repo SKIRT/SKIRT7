@@ -11,14 +11,14 @@ namespace {
 ////////////////////////////////////////////////////////////////////
 
 ParallelTable::ParallelTable()
-    : _name(""), _colAssigner(nullptr), _rowAssigner(nullptr), _distributed(false), _modified(false),
-      _initialized(false), _switched(false), _comm(nullptr), _log(nullptr)
+    : _name(""), _totalCols(0), _totalRows(0), _colAssigner(nullptr), _rowAssigner(nullptr), _comm(nullptr),
+      _log(nullptr), _initialized(false), _distributed(false), _switched(false), _modified(false)
 {
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void ParallelTable::initialize(QString name, writeState writeOn, const ProcessAssigner* colAssigner,
+void ParallelTable::initialize(QString name, WriteState writeOn, const ProcessAssigner* colAssigner,
                                const ProcessAssigner* rowAssigner, PeerToPeerCommunicator* comm)
 {
     _name = name;
@@ -33,17 +33,14 @@ void ParallelTable::initialize(QString name, writeState writeOn, const ProcessAs
     if (!_comm->dataParallel()) throw FATALERROR(_name + " says: The initialize function using assigners should not be"
                                                        + " called when the code runs non-dataparallel.");
 
-    // Use the distributed memory scheme
-    _distributed = true;
-
     // Inform the user about the mode used and the dimensions (N,M) of the locally stored data
     _log->info(_name + " is distributed. Size of local table will switch between (" + QString::number(_totalRows) + ","
                + QString::number(_colAssigner->assigned()) + ") and (" + QString::number(_rowAssigner->assigned())
                + "," + QString::number(_totalCols) + ")");
 
     // Set the size of the relevant table
-    if (_writeOn == COLUMN) allocateColumns();
-    else if (_writeOn == ROW) allocateRows();
+    if (_writeOn == WriteState::COLUMN) allocateColumns();
+    else if (_writeOn == WriteState::ROW) allocateRows();
     else throw FATALERROR("Invalid writeState for ParallelTable");
 
     // Cache the outcomes of the following function calls
@@ -57,98 +54,52 @@ void ParallelTable::initialize(QString name, writeState writeOn, const ProcessAs
     for (size_t j=0; j<_totalCols; j++) _relativeColIndexv[j] = _rowAssigner->relativeIndex(j);
 
     _initialized = true;
+    _distributed = true;
 }
 
-void ParallelTable::initialize(QString name, writeState writeOn, int columns, int rows, PeerToPeerCommunicator* comm)
+////////////////////////////////////////////////////////////////////
+
+void ParallelTable::initialize(QString name, WriteState writeOn, int columns, int rows, PeerToPeerCommunicator* comm)
 {
-    _colAssigner = nullptr;
-    _rowAssigner = nullptr;
 
     // Fill in some basic data members
     _name = name;
+    _totalCols = columns;
+    _totalRows = rows;
+    _colAssigner = nullptr;
+    _rowAssigner = nullptr;
     _writeOn = writeOn;
     _comm = comm;
     _log = _comm->find<Log>();
-    _totalCols = columns;
-    _totalRows = rows;
 
-    // Not distributed
-    _distributed = false;
-
+    // Report the allocated size
     _log->info(_name + " is not distributed. Size is (" + QString::number(_totalRows) + ","
                + QString::number(_totalCols) + ")");
 
     // Set the size of one of the tables. The other one will not be used.
-    if (writeOn == COLUMN) _columns.resize(_totalRows,_totalCols);
-    else if (writeOn == ROW) _rows.resize(_totalRows,_totalCols);
+    if (writeOn == WriteState::COLUMN) _columns.resize(_totalRows,_totalCols);
+    else if (writeOn == WriteState::ROW) _rows.resize(_totalRows,_totalCols);
     else throw FATALERROR("Invalid writeState for ParallelTable");
 
     _initialized = true;
+    _distributed = false;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-const double& ParallelTable::operator()(size_t i, size_t j) const
+bool ParallelTable::initialized() const
 {
-    if (!_switched) throw FATALERROR(_name + " says: switchScheme() must be called before using the read operator");
-
-    // WORKING DISTRIBUTED: Read from the table opposite to the table we _writeOn.
-    if (_distributed)
-    {
-        if (_writeOn == COLUMN) // read from _rows
-        {
-            if (!_isValidRowv[i])
-                throw FATALERROR(_name + " says: Row of ParallelTable not available on this process");
-            return _rows(_relativeRowIndexv[i],j);
-        }
-        else                    // read from _columns
-        {
-            if (!_isValidColv[j])
-                throw FATALERROR(_name + " says: Column of ParallelTable not available on this process");
-            return _columns(i,_relativeColIndexv[j]);
-        }
-    }
-    // WORKING NON-DISTRIBUTED: Reading and writing happens in the same table.
-    else
-    {
-        if (_writeOn == COLUMN)
-            return _columns(i,j);
-        else
-            return _rows(i,j);
-    }
+    return _initialized;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double& ParallelTable::operator()(size_t i, size_t j)
+bool ParallelTable::distributed() const
 {
-    if (!_modified) _modified = true;
-
-    // WORKING DISTRIBUTED: Writable reference to the table we _writeOn.
-    if (_distributed)
-    {
-        if (_writeOn == COLUMN) // Write on _columns
-        {
-            if (!_isValidColv[j])
-                throw FATALERROR(_name + " says: Column of ParallelTable not available on this process");
-            return _columns(i,_relativeColIndexv[j]);
-        }
-        else                    // Write on _rows
-        {
-            if (!_isValidRowv[i])
-                throw FATALERROR(_name + " says: Row of ParallelTable not available on this process");
-            return _rows(_relativeRowIndexv[i],j);
-        }
-    }
-    // WORKING NON-DISTRIBUTED: Reading and writing happens in the same table.
-    else
-    {
-        if (_writeOn == COLUMN)
-            return _columns(i,j);
-        else
-            return _rows(i,j);
-    }
+    return _distributed;
 }
+
+////////////////////////////////////////////////////////////////////
 
 void ParallelTable::switchScheme()
 {
@@ -164,21 +115,21 @@ void ParallelTable::switchScheme()
         {
             if (_modified) sum_all();
         }
-        else if (_writeOn == COLUMN)
+        else if (_writeOn == WriteState::COLUMN)
         {
             allocateRows();
             if (_modified) columsToRows();
             destroyColumns();
         }
-        else if (_writeOn == ROW)
+        else if (_writeOn == WriteState::ROW)
         {
             allocateColumns();
             if (_modified) rowsToColums();
             destroyRows();
         }
     }
-    _modified = false;
     _switched = true;
+    _modified = false;
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -187,7 +138,7 @@ void ParallelTable::reset()
 {
     if (_distributed)
     {
-        if (_writeOn == COLUMN)
+        if (_writeOn == WriteState::COLUMN)
         {
             destroyRows();
             allocateColumns();
@@ -203,34 +154,72 @@ void ParallelTable::reset()
         _columns.clear();
         _rows.clear();
     }
-    _modified = false;
     _switched = false;
+    _modified = false;
 }
 
 ////////////////////////////////////////////////////////////////////
 
-double ParallelTable::sumRow(size_t i) const
+double& ParallelTable::operator()(size_t i, size_t j)
 {
-    if (!_switched) throw FATALERROR(_name + " says: switchScheme() must be called before using summation functions");
-    if (_writeOn == ROW) throw FATALERROR("Not available in ROW mode.");
+    if (!_modified) _modified = true;
 
-    double sum = 0;
+    // WORKING DISTRIBUTED: Writable reference to the table we _writeOn.
     if (_distributed)
     {
-        if (_writeOn == COLUMN) // read from _rows
+        if (_writeOn == WriteState::COLUMN) // Write on _columns
         {
-            if (_isValidRowv[i]) // we have the whole row
-                for (size_t j=0; j<_totalCols; j++)
-                    sum += _rows(_relativeRowIndexv[i],j);
-            else throw FATALERROR("Row not available.");
+            if (!_isValidColv[j])
+                throw FATALERROR(_name + " says: Column of ParallelTable not available on this process");
+            return _columns(i,_relativeColIndexv[j]);
+        }
+        else                    // Write on _rows
+        {
+            if (!_isValidRowv[i])
+                throw FATALERROR(_name + " says: Row of ParallelTable not available on this process");
+            return _rows(_relativeRowIndexv[i],j);
         }
     }
-    else // not distributed -> everything available, so straightforward
+    // WORKING NON-DISTRIBUTED: Reading and writing happens in the same table.
+    else
     {
-        for (size_t j=0; j<_totalCols; j++)
-            sum += (*this)(i,j);
+        if (_writeOn == WriteState::COLUMN)
+            return _columns(i,j);
+        else
+            return _rows(i,j);
     }
-    return sum;
+}
+
+////////////////////////////////////////////////////////////////////
+
+const double& ParallelTable::operator()(size_t i, size_t j) const
+{
+    if (!_switched) throw FATALERROR(_name + " says: switchScheme() must be called before using the read operator");
+
+    // WORKING DISTRIBUTED: Read from the table opposite to the table we _writeOn.
+    if (_distributed)
+    {
+        if (_writeOn == WriteState::COLUMN) // read from _rows
+        {
+            if (!_isValidRowv[i])
+                throw FATALERROR(_name + " says: Row of ParallelTable not available on this process");
+            return _rows(_relativeRowIndexv[i],j);
+        }
+        else                    // read from _columns
+        {
+            if (!_isValidColv[j])
+                throw FATALERROR(_name + " says: Column of ParallelTable not available on this process");
+            return _columns(i,_relativeColIndexv[j]);
+        }
+    }
+    // WORKING NON-DISTRIBUTED: Reading and writing happens in the same table.
+    else
+    {
+        if (_writeOn == WriteState::COLUMN)
+            return _columns(i,j);
+        else
+            return _rows(i,j);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -238,12 +227,12 @@ double ParallelTable::sumRow(size_t i) const
 double ParallelTable::sumColumn(size_t j) const
 {
     if (!_switched) throw FATALERROR(_name + " says: switchScheme() must be called before using summation functions");
-    if (_writeOn == COLUMN) throw FATALERROR("Not available in COLUMN mode.");
+    if (_writeOn == WriteState::COLUMN) throw FATALERROR("Not available in COLUMN mode.");
 
     double sum = 0;
     if (_distributed)
     {
-        if (_writeOn == ROW) // read from columns
+        if (_writeOn == WriteState::ROW) // read from columns
         {
             if(_isValidColv[j]) // we have the whole column
                 for (size_t i=0; i<_totalRows; i++)
@@ -261,6 +250,32 @@ double ParallelTable::sumColumn(size_t j) const
 
 ////////////////////////////////////////////////////////////////////
 
+double ParallelTable::sumRow(size_t i) const
+{
+    if (!_switched) throw FATALERROR(_name + " says: switchScheme() must be called before using summation functions");
+    if (_writeOn == WriteState::ROW) throw FATALERROR("Not available in ROW mode.");
+
+    double sum = 0;
+    if (_distributed)
+    {
+        if (_writeOn == WriteState::COLUMN) // read from _rows
+        {
+            if (_isValidRowv[i]) // we have the whole row
+                for (size_t j=0; j<_totalCols; j++)
+                    sum += _rows(_relativeRowIndexv[i],j);
+            else throw FATALERROR("Row not available.");
+        }
+    }
+    else // not distributed -> everything available, so straightforward
+    {
+        for (size_t j=0; j<_totalCols; j++)
+            sum += (*this)(i,j);
+    }
+    return sum;
+}
+
+////////////////////////////////////////////////////////////////////
+
 Array ParallelTable::stackColumns() const
 {
     if (!_switched) throw FATALERROR(_name + " says: switchScheme() must be called before using summation functions");
@@ -269,7 +284,7 @@ Array ParallelTable::stackColumns() const
 
     if(_distributed)
     {
-        if (_writeOn == COLUMN) // use rows to get a part of the stacked column
+        if (_writeOn == WriteState::COLUMN) // use rows to get a part of the stacked column
         {
             for (size_t iRel=0; iRel<_rows.size(0); iRel++)
             {
@@ -304,7 +319,7 @@ Array ParallelTable::stackRows() const
 
     if(_distributed)
     {
-        if (_writeOn == COLUMN) // sum the local rows
+        if (_writeOn == WriteState::COLUMN) // sum the local rows
         {
             for (size_t j=0; j<_totalCols; j++)
                 for (size_t iRel=0; iRel<_rows.size(0); iRel++)
@@ -340,25 +355,11 @@ double ParallelTable::sumEverything() const
 
 ////////////////////////////////////////////////////////////////////
 
-bool ParallelTable::distributed() const
-{
-    return _distributed;
-}
-
-////////////////////////////////////////////////////////////////////
-
-bool ParallelTable::initialized() const
-{
-    return _initialized;
-}
-
-////////////////////////////////////////////////////////////////////
-
 void ParallelTable::sum_all()
 {
     if (_modified)
     {
-        if (_writeOn == COLUMN)
+        if (_writeOn == WriteState::COLUMN)
         {
             Array& arr = _columns.getArray();
             _comm->sum_all(arr);
@@ -435,16 +436,16 @@ void ParallelTable::allocateColumns()
 
 ////////////////////////////////////////////////////////////////////
 
-void ParallelTable::destroyColumns()
+void ParallelTable::allocateRows()
 {
-    _columns.resize(0,0);
+    _rows.resize(_rowAssigner->assigned(),_totalCols);
 }
 
 ////////////////////////////////////////////////////////////////////
 
-void ParallelTable::allocateRows()
+void ParallelTable::destroyColumns()
 {
-    _rows.resize(_rowAssigner->assigned(),_totalCols);
+    _columns.resize(0,0);
 }
 
 ////////////////////////////////////////////////////////////////////

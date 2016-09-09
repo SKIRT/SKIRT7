@@ -369,20 +369,13 @@ void PerspectiveInstrument::write()
 
     // Multiply each sample by lambda/dlamdba and by the constant factor 1/(4 pi s^2)
     // to obtain the surface brightness and convert to output units (such as W/m2/arcsec2)
-
     double front = 1. / (4.*M_PI*_s*_s);
-    for (int ell=0; ell<Nlambda; ell++)
+    for (size_t m = 0; m < completeCube->size(); m++)
     {
+        size_t ell = m / (_Nx*_Ny);
         double lambda = lambdagrid->lambda(ell);
         double dlambda = lambdagrid->dlambda(ell);
-        for (int i=0; i<_Nx; i++)
-        {
-            for (int j=0; j<_Ny; j++)
-            {
-                int m = i + _Nx*j + _Nx*_Ny*ell;
-                (*completeCube)[m] = units->osurfacebrightness(lambda, (*completeCube)[m]*front/dlambda);
-            }
-        }
+        (*completeCube)[m] = units->osurfacebrightness(lambda, (*completeCube)[m]*front/dlambda);
     }
 
     // Write a FITS file containing the data cube

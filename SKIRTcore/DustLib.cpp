@@ -5,14 +5,15 @@
 
 #include <QMultiHash>
 #include <QTime>
-#include "ParallelTable.hpp"
-#include "DustLib.hpp"
+#include "ArrayTable.hpp"
 #include "DustEmissivity.hpp"
+#include "DustLib.hpp"
 #include "Log.hpp"
 #include "NR.hpp"
 #include "PanDustSystem.hpp"
 #include "Parallel.hpp"
 #include "ParallelFactory.hpp"
+#include "ParallelTable.hpp"
 #include "PeerToPeerCommunicator.hpp"
 #include "StaggeredAssigner.hpp"
 #include "StopWatch.hpp"
@@ -173,13 +174,13 @@ void DustLib::calculate()
     if (_Lvv.initialized())
         _Lvv.reset();
     else if (dataParallel)
-        _Lvv.initialize(tableName, ROW, lambdagrid->assigner(), ds->assigner(), comm);
+        _Lvv.initialize(tableName, ParallelTable::WriteState::ROW, lambdagrid->assigner(), ds->assigner(), comm);
     else
     {
         if (Ncomp > 1)
-            _Lvv.initialize(tableName, ROW, lambdagrid->Nlambda(), ds->Ncells(), comm);
+            _Lvv.initialize(tableName, ParallelTable::WriteState::ROW, lambdagrid->Nlambda(), ds->Ncells(), comm);
         else
-            _Lvv.initialize(tableName, ROW, lambdagrid->Nlambda(), Nlib, comm);
+            _Lvv.initialize(tableName, ParallelTable::WriteState::ROW, lambdagrid->Nlambda(), Nlib, comm);
             // (When there is only one dust component, the normalized output spectrum will be the same for all cells
             // corresponding to a single library entry. In that case we only need to store the data per library entry.)
     }
