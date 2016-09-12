@@ -21,7 +21,7 @@ class PeerToPeerCommunicator;
     two positive integers, the first one indicating the row index, and the second one the column
     index. However, under data-parallelization, only a small part of all the data will actually be
     stored at the calling process, and only the available index combinations can be called (see \c
-    operator()). */
+    operator()). \n\n */
 
 /** One of the most important features of this class, is that it can switch between two ways of
     parallelized data storage. A 2D block of data can be cut either vertically or horizontally,
@@ -32,7 +32,7 @@ class PeerToPeerCommunicator;
     two ways. The parallel program either fills in the data in a column format, and then transposes
     it to a row format, or it performs this operation the other way round. At initialization, one
     of these two operating modes has to be chosen using an enum argument (see \c enum \c class \c
-    WriteState). */
+    WriteState). \n\n */
 
 /** Exactly which columns or rows will be stored by each process, can be almost freely decided.
     Deciding which columns (or rows) need to be stored on a certain process, happens through the \c
@@ -41,17 +41,17 @@ class PeerToPeerCommunicator;
     will ensure that the two are consistent. Any index conversions that need to happen to access
     the data, can be performed by calling one of the indexing function on a \c ProcessAssigner
     object. Thus the freedom for dividing the data is essentially limited by the number of \c
-    ProcessAssigner implementations. */
+    ProcessAssigner implementations.*/
 
 /** The switching from a column-based to a row-based parallel storage scheme or vice versa is
     implemented with a call to the alltoallw function of MPI. This is a very general communication
     function, where every process can be made to send a certain set of data to every other process
-    (see \c switchScheme()). */
+    (see \c switchScheme()). \n\n */
 
 /** This class can also store data in a regular way, when data-parallelization is not desired. This
     way, the code can run with or without data parallelization using the same data structure. This
     mode is called the \em non-distributed mode, as opposed to the \em distributed mode used for
-    data- parallelization. */
+    data- parallelization. \n\n */
 
 /** The workflow for using a ParallelTable usually comes down to the following steps:
     - Create a ParallelTable object through the default constructor.
@@ -60,7 +60,12 @@ class PeerToPeerCommunicator;
     - Perform some calculation in parallel, where each process writes some data to the ParallelTable.
     - Call \c switchScheme()
     - Perform another calculation, where each process reads the data from the ParallelTable.
-    - Call \c reset() if the table is to be re-used with the same parameters. */
+    - Call \c reset() if the table is to be re-used with the same parameters.
+    .
+
+    When the two assigners divide the columns and the rows evenly between the processes, the memory
+    usage per process is expected to scale as 1/N, with N the number of processes. During the
+    switch, the memory usage temporarily becomes 2/N. */
 class ParallelTable
 {
 public:
@@ -161,7 +166,13 @@ public:
         When called on an available absolute row index \c i, the row index is converted to a
         relative index to find the right element of the data stored at this process. This operator
         functions analogously for the \c ROW mode, where only certain columns will be available,
-        after performing \c switchScheme(). */
+        after performing \c switchScheme().
+
+        \image html /home/dries/SKIRT/html/paralleltable_elementacces.png "Indexing of ParallelTable"
+
+        The block at the top left shows the availability of elements. The arrows show how the absolute
+        index can be converted to a relative one to find the correct element of the stored data. The
+        red elements are available for writing before switching, the yellow ones are available after. */
     double& operator()(size_t i, size_t j);
     const double& operator()(size_t i, size_t j) const;
 
