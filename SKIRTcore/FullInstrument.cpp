@@ -232,7 +232,6 @@ void FullInstrument::write()
     }
     else
     {
-        printf("operations");
         // don't output transparent frame separately because it is identical to the total frame
         ftotv = *ftravComp;
         ftravComp->resize(0);
@@ -253,7 +252,6 @@ void FullInstrument::write()
     {
         for (int nscatt=0; nscatt<_Nscatt; nscatt++)
         {
-            printf("%d nscatt\n", nscatt);
             Farrays << &(_Fstrscavv[nscatt]);
             Fnames << (QString::number(nscatt+1) + "-times scattered flux");
         }

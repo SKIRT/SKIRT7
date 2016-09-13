@@ -89,30 +89,28 @@ void MonteCarloSimulation::setChunkParams(double packages)
         else totalChunks = ceil( std::max({(10.*double(Nthreads*Nprocs)/_Nlambda), packages/1e7}) );
 
         // Step 2: consider the work division and determine the number of chunks per process (_Nchunks)
-        if (_comm->dataParallel())
+        if (_comm->dataParallel())  // Do some wavelengths for all chunks
         {
-            // Do some wavelengths for all chunks
+            _chunksize = ceil(packages/totalChunks);
             _Nchunks = totalChunks;
             _myTotalNpp = _lambdagrid->assigner()->assigned() * _Nchunks * _chunksize;
         }
-        else
+        else                        // Do all wavelengths for some chunks
         {
-            // Do all wavelengths for some chunks
             if ((totalChunks % Nprocs)) totalChunks = totalChunks + Nprocs - (totalChunks % Nprocs);
+            _chunksize = ceil(packages/totalChunks);
             _Nchunks = totalChunks/Nprocs;
             _myTotalNpp = _Nlambda * _Nchunks * _chunksize;
         }
 
-        // Calculate the size of the chunks and the definitive number of photon packages per wavelength
-        _chunksize = ceil(packages/totalChunks);
+        // Calculate the the definitive number of photon packages per wavelength
         _Npp = totalChunks * _chunksize;
+
+        _log->info("Using "+QString::number(totalChunks)+" chunks per wavelength.");
     }
 
     // Determine the log frequency; continuous scattering is much slower!
     _logchunksize = _continuousScattering ? 5000 : 50000;
-
-    // Assign the _Nlambda x _Nchunks different chunks to the different parallel processes
-    _log->info("Using "+QString::number(_Nchunks)+" chunks.");
 }
 
 ////////////////////////////////////////////////////////////////////
