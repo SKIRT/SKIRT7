@@ -30,6 +30,7 @@
 #include "SkirtCommandLineHandler.hpp"
 #include "StopWatch.hpp"
 #include "TimeLogger.hpp"
+#include "WavelengthGrid.hpp"
 #include "XmlHierarchyCreator.hpp"
 #include "XmlHierarchyWriter.hpp"
 
@@ -312,6 +313,9 @@ void SkirtCommandLineHandler::doSimulation(size_t index)
     //  - the activation of data parallelization
     if (_args.isPresent("-d") && comm->isMultiProc())
     {
+        if (simulation->find<WavelengthGrid>(false)->Nlambda() < comm->size())
+            throw FATALERROR("When using -d, the number of wavelengths must be larger than the number of processes.");
+
         PanDustSystem* pds = nullptr;
         try {pds = simulation->find<PanDustSystem>(false);}
         catch (FatalError&) {}
