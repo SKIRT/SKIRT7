@@ -248,6 +248,11 @@ void FullInstrument::write()
     Farrays << &Ftotv << &_Fstrdirv << &_Fstrscav << &Ftotdusv << &_Fdusscav << &_Ftrav;
     Fnames << "total flux" << "direct stellar flux" << "scattered stellar flux"
            << "total dust emission flux" << "dust emission scattered flux" << "transparent flux";
+    if (_polarization)
+    {
+        Farrays << &_FtotQv << &_FtotUv << &_FtotVv;
+        Fnames << "total Stokes Q" << "total Stokes U" << "total Stokes V";
+    }
     if (_dustsystem)
     {
         for (int nscatt=0; nscatt<_Nscatt; nscatt++)
@@ -255,11 +260,6 @@ void FullInstrument::write()
             Farrays << &(_Fstrscavv[nscatt]);
             Fnames << (QString::number(nscatt+1) + "-times scattered flux");
         }
-    }
-    if (_polarization)
-    {
-        Farrays << &_FtotQv << &_FtotUv << &_FtotVv;
-        Fnames << "total Stokes Q" << "total Stokes U" << "total Stokes V";
     }
 
     // Sum the SED arrays element-wise across the different processes
@@ -277,17 +277,21 @@ void FullInstrument::write()
             farrays << &ftotdusv << fdusscavComp.get();
             fnames << "dust" << "dustscattered";
         }
-        for (int nscatt=0; nscatt<_Nscatt; nscatt++)
-        {
-            farrays << fstrscavvComp[nscatt].get();
-            fnames << ("scatteringlevel" + QString::number(nscatt+1));
-        }
     }
     if (_polarization)
     {
         farrays << ftotQvComp.get() << ftotUvComp.get() << ftotVvComp.get();
         fnames << "stokesQ" << "stokesU" << "stokesV";
     }
+    if (_dustsystem)
+    {
+        for (int nscatt=0; nscatt<_Nscatt; nscatt++)
+        {
+            farrays << fstrscavvComp[nscatt].get();
+            fnames << ("scatteringlevel" + QString::number(nscatt+1));
+        }
+    }
+
 
     // calibrate and output the arrays
     calibrateAndWriteDataCubes(farrays, fnames);
