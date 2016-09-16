@@ -90,37 +90,34 @@ protected:
         active. \n\n
 
         -# Number of threads:
-
             -# When there is only one thread per process, each process will just run through
             the wavelengths serially, and hence no load balancing improvements can be gained by
-            increasing the number of chunks. The number of chunks per process is set to 1.\n\n
+            increasing the number of chunks. The number of chunks per wavelength is set to 1 .\n\n
 
             -# When multithreading is used, we want the total number of work units per process to
             be larger than 10 times the amount of threads. This condition can be written as:
             \f[\boxed{ \frac{N_\text{chunks} \times N_\lambda}{N_{procs}} > 10\times
-            N_\text{threads} }\f] To further enhance the load balancing, we additionally enforce
-            the chunks to not consist of more than \f$S_\text{max}=10^7\f$ photon packages:
-            \f[\boxed{N_\text{chunks} > \frac{N_\text{pp}}{S_\text{max}}}\f] Combining these, the total number
-            of chunks per wavelength becomes
-            \f[ \boxed{ N_\text{chunks} = \text{max} \left( \frac{10 \times
-            N_\text{threads} \times N_\text{procs}}{N_\lambda}, \frac{N_\text{pp}}{S_\text{max}}
-            \right)} \f]
+            N_\text{threads} }\f] where \f$N_\text{chunks}\f$ is the number of chunks per
+            wavelength. To further enhance the load balancing, we additionally enforce the chunks
+            to not consist of more than \f$S_\text{max}=10^7\f$ photon packages:
+            \f[\boxed{N_\text{chunks} > \frac{N_\text{pp}}{S_\text{max}}}\f] Combining these, the
+            total number of chunks per wavelength becomes \f[ \boxed{ N_\text{chunks} = \text{max}
+            \left( \frac{10 \times N_\text{threads} \times N_\text{procs}}{N_\lambda},
+            \frac{N_\text{pp}}{S_\text{max}} \right)} \f]
 
         -# Work division:
+            -# When data parallelization is not active, each process has to shoot photons of all of
+            the wavelengths. Therefore we distribute the work units by letting each process do
+            \f$1/N_\text{procs}\f$ of the chunks for each wavelength. The total amount of chunks
+            per wavelength is first rounded up to a multiple of \f$N_\text{procs}\f$, and the
+            number of chunks per wavelength per process then becomes \f[\boxed{N_\text{chunks, per
+            proc} = \frac{N_\text{chunks, rounded up}}{N_\text{procs}}}\f]
 
-            -# When data parallelization is not active, each process will do all the
-            wavelengths for every chunk it gets. Therefore we distribute the work units by
-            letting each process do a subset of the chunks. The total amount of chunks per
-            wavelength is first rounded up to a multiple of \f$N_\text{procs}\f$, and the
-            number of chunks per wavelength per process then becomes
-            \f[\boxed{N_\text{chunks, per proc} = \frac{N_\text{chunks}}{N_\text{procs}}}\f]
-
-            -# When data parallelization is used, each process will only handle a particular
-            subset of about \f$\frac{1}{N_\text{procs}}\f$ of the wavelengths. Each process
-            will also be the only one to shoot the photons for those specific wavelengths.
-            Therefore, the processes need to do all the chunks for their own wavelengths, and
-            the number of chunks per wavelength per process is set equal to the total number of
-            chunks per wavelength.
+            -# When data parallelization is used, each process will only handle a particular subset
+            of about \f$1/N_\text{procs}\f$ of the wavelengths. Each process will also be the only
+            one to shoot the photons for those specific wavelengths. Therefore, the processes need
+            to do all the chunks for their own wavelengths, and the number of chunks per wavelength
+            per process is set equal to the total number of chunks per wavelength.
             \f[\boxed{N_\text{chunks, per proc} = N_\text{chunks}}\f] */
     void setChunkParams(double packages);
 

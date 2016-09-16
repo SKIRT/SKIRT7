@@ -18,13 +18,12 @@ class SimulationItem;
 /** An object of this class represents a data cube of which the slices per wavelength are
     distributed across the different processes. It acts as a table indexed on wavelengths and
     pixels, with respectively the first and second index of its ()-operator. It makes use of the \c
-    ProcessAssigner for the wavlengths to check and convert the given wavelength index. When data
-    parallelization is not active, there will be no wavelength assigner, and this object will find
-    itself in its non-distributed mode. At the end of a simulation, the data stored across the
-    different processes can be gathered at the root process using an MPI communication.\n\n */
-
-/** When the wavelengths are evenly divided across the processes, the memory usage per process is
-    expected to scale as 1/N, with N the number of processes. */
+    ProcessAssigner contained in the \c WavelengthGrid to check and convert the given wavelength
+    index. At the end of a simulation, the data stored across the different processes can be
+    gathered at the root process using an MPI communication. When the wavelengths are evenly
+    divided across the processes, the memory usage per process is expected to scale as 1/N, with N
+    the number of processes. When data parallelization is not active, there will be no wavelength
+    assigner, and this object will store data for all wavelengths. */
 class ParallelDataCube
 {
     //============= Construction - Setup - Destruction =============

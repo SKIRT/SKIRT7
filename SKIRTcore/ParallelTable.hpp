@@ -24,24 +24,25 @@ class PeerToPeerCommunicator;
     operator()). \n\n */
 
 /** One of the most important features of this class, is that it can switch between two ways of
-    parallelized data storage. A 2D block of data can be cut either vertically or horizontally,
-    letting each process store a set of column or rows respectively. When a certain operation works
-    on the data column wise, one can opt to only store the relevant columns. It is often the case
-    however, that another calculation needs this same data in a row format. For such situations,
-    performing a \em global \em transposition is key. A \c ParallelTable can therefore be used in
-    two ways. The parallel program either fills in the data in a column format, and then transposes
-    it to a row format, or it performs this operation the other way round. At initialization, one
-    of these two operating modes has to be chosen using an enum argument (see \c enum \c class \c
-    WriteState). \n\n */
+    parallelized data storage. The idea is that a 2D block of data can be cut either vertically or
+    horizontally, letting each process store a set of column or rows respectively. When a certain
+    operation works on the data in a column-wise manner for example, one could opt to only store
+    the relevant columns. It is often the case however, that after a certain column-wise
+    calculation, another calculation needs this same data in a row format. For such situations, an
+    operation needs to be perfomed where all processes exchange data to achieve this switch of
+    storage formats. This kind of operation is often called a \em global \em transposition. \c
+    ParallelTable implements the storing and exchanging of data in two ways: The parallel program
+    either fills in the data in a column format, and then transposes it to a row format, or it
+    performs this operation the other way round. At initialization, one of these two operating
+    modes has to be chosen using an enum argument (see \c enum \c class \c WriteState). \n\n */
 
-/** Exactly which columns or rows will be stored by each process, can be almost freely decided.
-    Deciding which columns (or rows) need to be stored on a certain process, happens through the \c
+/** Deciding which columns (or rows) need to be stored on a certain process, happens through the \c
     ProcessAssigner class. Because a \c ProcessAssigner can also be used to decide the work
     distribution between processes, using a common asigner for both work and data parallelization
     will ensure that the two are consistent. Any index conversions that need to happen to access
     the data, can be performed by calling one of the indexing function on a \c ProcessAssigner
     object. Thus the freedom for dividing the data is essentially limited by the number of \c
-    ProcessAssigner implementations.*/
+    ProcessAssigner implementations. */
 
 /** The switching from a column-based to a row-based parallel storage scheme or vice versa is
     implemented with a call to the alltoallw function of MPI. This is a very general communication
@@ -64,8 +65,8 @@ class PeerToPeerCommunicator;
     .
 
     When the two assigners divide the columns and the rows evenly between the processes, the memory
-    usage per process is expected to scale as 1/N, with N the number of processes. During the
-    switch, the memory usage temporarily becomes 2/N. */
+    usage per process of a \c ParallelTable is expected to scale as 1/N, with N the number of
+    processes. During the switch, the memory usage temporarily becomes 2/N. */
 class ParallelTable
 {
 public:
@@ -84,26 +85,29 @@ public:
     //============= Construction - Setup - Destruction =============
 
     /** The default constructor creates an uninitialized ParallelTable object. Before it can be used,
-     one of the initialization functions below needs to be called. */
-     ParallelTable();
+    one of the \c initialize() functions needs to be called. */
+    ParallelTable();
 
     /** This function prepares the ParallelTable for use. This version of \c initialize should be
-        used if one wants to activate data paralellization. As arguments it takes:
-    - A name, which will be used in log messages.
-    - A \c WriteState argument, determining the mode of operation, see the description of \c WriteState.
-    - Two \c ProcessAssigner pointers. The first one indicates which columns should be stored by each
-    process, and the second one does the same for the rows. When the execution of the work and the
-    storage of the corresponding data are based on the same assigner, consistency between work division
-    and data distribution can be easily achieved.
-    - All MPI operations will be performed through the given communicator.
-    .
+        used if one wants to activate the distributed storage of data (a.k.a data parallelization).
+        As arguments it takes:
+            - A name, which will be used in log messages.
+            - A \c WriteState argument, determining the mode of operation, see the description
+            of \c WriteState.
+            - Two \c ProcessAssigner pointers. The first one indicates which columns should be
+            stored by each process, and the second one does the same for the rows. When the
+            execution of the work and the storage of the corresponding data are based on the same
+            assigner, consistency between work division and data distribution can be easily
+            achieved.
+            - All MPI operations will be performed through the given communicator.
+        .
     The table derives its dimensions from the properties of the given assigners, and allocates the
     necessary memory. After this, the table is ready for writing to it.
     */
     void initialize(QString name, WriteState writeOn, const ProcessAssigner* colAssigner,
                     const ProcessAssigner* rowAssigner, PeerToPeerCommunicator* comm);
 
-    /** This version of initialize sets up the ParallelTable to operate without data parallelization.
+    /** This version of \c initialize sets up the ParallelTable to operate without data parallelization.
         The dimensions are simply given as arguments. A WriteState argument is still required is still
         required for consistency reasons. The communicator is used to sum the contents of the table
         across all processes when performing the scheme switch.*/
@@ -124,7 +128,7 @@ public:
         Then, a call to one of three private communication functions is made, depending on the mode
         of operation. After the communication, the table that originally contained the data is
         deleted, as it will be no longer used. This also means that during the communication, this
-        ParallelTable consumes roughly twiced the memory. Before calling \c switchScheme(), only
+        ParallelTable consumes roughly twice the memory. Before calling \c switchScheme(), only
         the writing operator can be used. After the call, only reading is allowed. ParallelTable
         also keeps a flag (\c _modified) that indicates whether the write operator has already been
         callled. If it has not been called yet, this means that the data contained consists of
@@ -137,42 +141,42 @@ public:
     void switchScheme();
 
     /** This function resets the ParallelTable, reverting it to the same state as if it was just
-        initialized, and setting all data to zero. After resetting, all data again only the writing
-        operator can be called. */
+        initialized, and setting all data to zero. After resetting, only the writing operator can
+        be called. */
     void reset();
 
-    /** The non-const ()-operator returns a writable reference to an element of the
-        ParallelTable, and will hence be called the writing operator. This operator should only be
-        called \em before the invocation of \c switchScheme(). In \c COLUMN mode, this operator
-        assumes that all elements of the columns indicated by the column assigner are available.
-        Because only a subset of the columns is stored in this case, it is first checked if the
-        specified column \c j is actually available. If this is not the case, an error is thrown.
-        Therefore, the client should make sure that this operator is only for \c j that are
-        available, as indicated by the same column assigner that was given to the ParallelTable at
+    /** The non-const ()-operator returns a writable reference to an element of the ParallelTable,
+        and will hence be called the writing operator. This operator should only be called \em
+        before the invocation of \c switchScheme(). In \c COLUMN mode, this operator assumes that
+        all elements of the columns indicated by the column assigner are available. Because only a
+        subset of the columns is stored in this case, it is first checked if the specified column
+        \c j is actually available. If this is not the case, an error is thrown. Therefore, the
+        client should make sure that this operator is only called for \c j that are available, as
+        indicated by the same column assigner that was given to the ParallelTable at
         initialization. If the \c j 'th column is available, the column assigner can be used to
         convert this absolute index to a relative one, allowing the implementation easily find the
         correct element of data that is actually stored by this process. This operator functions
         analogously for the \c ROW mode, where only certain rows will be available. In
-        non-distributed mode, this operator simply returns the requested element.
+        non-distributed mode, this operator simply returns the requested element. \n\n */
 
-        The const version of the ()-operator returns a read-only reference to an element of the
+    /** The const version of the ()-operator returns a read-only reference to an element of the
         ParallelTable and is therefore called the read operator. This operator can only be called
         \em after the invocation of \c switchScheme(). In \c COLUMN mode, this operator asserts
         that all elements of the rows indicated by the row assigner are available. This means that
         an error will be thrown if the \c switched flag is false. For every call, it is checked if
         the specified row \c i is stored by the calling process. If this is not the case, another
         potential error is thrown. The client can make sure that only the available \c i are used
-        by making use of the same assigner that was given the the ParallelTable as its row assigner.
-        When called on an available absolute row index \c i, the row index is converted to a
-        relative index to find the right element of the data stored at this process. This operator
-        functions analogously for the \c ROW mode, where only certain columns will be available,
-        after performing \c switchScheme().
+        by making use of the same assigner that was given the the ParallelTable as its row
+        assigner. When called on an available absolute row index \c i, the row index is converted
+        to a relative index to find the right element of the data stored at this process. This
+        operator functions analogously for the \c ROW mode, where only certain columns will be
+        available, after performing \c switchScheme(). */
 
-        \image html /home/dries/SKIRT/html/paralleltable_elementacces.png "Indexing of ParallelTable"
-
-        The block at the top left shows the availability of elements. The arrows show how the absolute
-        index can be converted to a relative one to find the correct element of the stored data. The
-        red elements are available for writing before switching, the yellow ones are available after. */
+    /** \image html paralleltable_elementacces.png "Indexing of ParallelTable" */
+    /** The block at the top left shows the availability of elements. The arrows show how the
+        absolute index can be converted to a relative one to find the correct element of the stored
+        data. The red elements are available for writing before switching, the yellow ones are
+        available after. */
     double& operator()(size_t i, size_t j);
     const double& operator()(size_t i, size_t j) const;
 
@@ -180,12 +184,12 @@ public:
         this column needs to be available at the calling process. The column index is checked and
         converted by the column assigner, and an error can be thrown when a column is not
         available. This function can only be called when the contained data is consistent between
-        all processes. Therefore, \c switchScheme should be called before invoking this function.
+        all processes. Therefore, \c switchScheme() should be called before invoking this function.
         Because this function needs all data from a certain column after switching schemes, it is
         only available in \c ROW mode. */
     double sumColumn(size_t j) const;
 
-    /** This function does the same as \c sumColumn, but for a certain row. Because it needs all data from
+    /** This function does the same as \c sumColumn(), but for a certain row. Because it needs all data from
         from a certain row after performing a scheme switch, it is only available in \c COLUMN mode. */
     double sumRow(size_t i) const;
 
@@ -193,11 +197,11 @@ public:
         important to know that this is a \em collective function, meaning that all processes need
         to call it together. This is necessary because a collective MPI communication needs to
         happen if all the columns are to be stacked. This function can be used in any mode, but
-        only after \c switchScheme has been called to ensure consistency of the result. */
+        only after \c switchScheme() has been called to ensure consistency of the result. */
     Array stackColumns() const;
 
     /** This function calculatese the sum of all the rows contained by all the processes. Functions
-        analogously to \c stackColumn(). Needs to be called collectively. */
+        analogously to \c stackColumns(). Needs to be called collectively. */
     Array stackRows() const;
 
     /** This function calculates the sum of all the elements in the ParallelTable. Needs to be
@@ -205,11 +209,12 @@ public:
     double sumEverything() const;
 
 private:
-    /** Sums the contained data over all processes. */
+    /** Private function to sum the contained data over all processes, used during the communication
+    step in non-distributed mode. */
     void sum_all();
 
     /** Performs a communication between all processes to switch from a column based to a row based
-        data distribution scheme. Both data members that serve for storage(\c _columns and \c
+        data distribution scheme. Both data members that serve for storage (\c _columns and \c
         _rows) need to have their correct size when this function is called. */
     void columsToRows();
 
