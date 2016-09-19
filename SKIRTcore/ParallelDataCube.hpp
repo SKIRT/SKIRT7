@@ -30,7 +30,7 @@ class ParallelDataCube
 
 public:
     /** The default constructor. Before a ParallelDataCube object can be used, it first needs to be
-    initialized (see \c initialize()). */
+        initialized (see \c initialize()). */
     ParallelDataCube();
 
     /** This function readies the ParallelDataCube for use. The number of pixels is given as a
@@ -53,11 +53,16 @@ public:
         return value is a pointer to an empty array for all non-root processes. */
     std::shared_ptr<Array> constructCompleteCube();
 
-    /** This operator provides access to the contents of the ParallelDataCube. First it is checked if
-        the specified wavelength is available at the calling process. If this is not the case, a \c
-        FATALERROR is thrown. Then, the index is converted using the wavelength assigner, and the
-        correct element is retrieved. */
+    /** This operator provides writable access to the contents of the ParallelDataCube. First it is
+        checked if the specified wavelength is available at the calling process. If this is not the
+        case, a \c FATALERROR is thrown. Then, the index is converted using the wavelength
+        assigner, and the correct element is retrieved. */
     double& operator()(int ell, int pixel);
+
+    /** This operator provides read-only access to the contents of the ParallelDataCube. First it
+        is checked if the specified wavelength is available at the calling process. If this is not
+        the case, a \c FATALERROR is thrown. Then, the index is converted using the wavelength
+        assigner, and the correct element is retrieved. */
     const double& operator()(int ell, int pixel) const;
 
     //======================== Data Members ========================

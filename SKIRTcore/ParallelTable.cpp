@@ -11,8 +11,9 @@ namespace {
 ////////////////////////////////////////////////////////////////////
 
 ParallelTable::ParallelTable()
-    : _name(""), _totalCols(0), _totalRows(0), _colAssigner(nullptr), _rowAssigner(nullptr), _comm(nullptr),
-      _log(nullptr), _initialized(false), _distributed(false), _switched(false), _modified(false)
+    : _totalCols(0), _totalRows(0), _colAssigner(nullptr), _rowAssigner(nullptr),
+      _writeOn(WriteState::COLUMN), _comm(nullptr), _log(nullptr),
+      _initialized(false), _distributed(false), _switched(false), _modified(false)
 {
 }
 
@@ -281,7 +282,7 @@ Array ParallelTable::stackColumns() const
 
     Array result(_totalRows);
 
-    if(_distributed)
+    if (_distributed)
     {
         if (_writeOn == WriteState::COLUMN) // use rows to get a part of the stacked column
         {
@@ -316,7 +317,7 @@ Array ParallelTable::stackRows() const
 
     Array result(_totalCols);
 
-    if(_distributed)
+    if (_distributed)
     {
         if (_writeOn == WriteState::COLUMN) // sum the local rows
         {

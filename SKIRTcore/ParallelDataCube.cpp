@@ -12,7 +12,7 @@
 ////////////////////////////////////////////////////////////////////
 
 ParallelDataCube::ParallelDataCube() : _wavelengthAssigner(nullptr), _comm(nullptr), _Nframep(0),
-    _partialCube(new Array)
+    _partialCube(std::make_shared<Array>())
 {
 }
 
@@ -42,27 +42,29 @@ void ParallelDataCube::initialize(size_t Nframep, SimulationItem* item)
 
 std::shared_ptr<Array> ParallelDataCube::constructCompleteCube()
 {
-    if (!_wavelengthAssigner || !_comm->isMultiProc()) // partial cube of equal size as total cube
+    // partial cube of equal size as total cube
+    if (!_wavelengthAssigner || !_comm->isMultiProc())
     {
-        _comm->sum(*_partialCube); // sum the data to root
-        std::shared_ptr<Array> dummy (new Array(0));
-        return _comm->isRoot() ? _partialCube : dummy;
-        // give a handle to the summed cube at the root, and a dummy for the other processes
-    }
-    else // total cube is bigger than partial cube
-    {
-        std::shared_ptr<Array> completeCube(new Array(0));
+        // sum the data to root
+        _comm->sum(*_partialCube);
 
-        if (_comm->isRoot())
-            completeCube->resize(_wavelengthAssigner->total()*_Nframep);
+        // give a handle to the summed cube at the root, and a dummy for the other processes
+        return _comm->isRoot() ? _partialCube : std::make_shared<Array>();
+    }
+    // total cube is bigger than partial cube
+    else
+    {
+        // allocate space for complete cube at root process
+        auto completeCube = std::make_shared<Array>();
+        if (_comm->isRoot()) completeCube->resize(_wavelengthAssigner->total()*_Nframep);
 
         // displacements parameters for gatherw
         std::vector<std::vector<int>> displacements;
         displacements.reserve(_comm->size());
         for (int i=0; i<_comm->size(); i++) displacements.push_back(_wavelengthAssigner->indicesForRank(i));
 
+        // gather complete cube
         _comm->gatherw(&(*_partialCube)[0], _Nlambda*_Nframep, &(*completeCube)[0], 0, _Nframep, displacements);
-
         return completeCube;
     }
 }
@@ -71,7 +73,7 @@ std::shared_ptr<Array> ParallelDataCube::constructCompleteCube()
 
 double& ParallelDataCube::operator()(int ell, int pixel)
 {
-    if(!_wavelengthAssigner)
+    if (!_wavelengthAssigner)
         return (*_partialCube)[ell*_Nframep + pixel];
     else
     {

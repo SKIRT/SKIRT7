@@ -20,10 +20,9 @@ class PeerToPeerCommunicator;
     concerning element access. Elements can be retrieved or written using a ()-operator that takes
     two positive integers, the first one indicating the row index, and the second one the column
     index. However, under data-parallelization, only a small part of all the data will actually be
-    stored at the calling process, and only the available index combinations can be called (see \c
-    operator()). \n\n */
+    stored at the calling process, and only the available index combinations can be called.
 
-/** One of the most important features of this class, is that it can switch between two ways of
+    One of the most important features of this class, is that it can switch between two ways of
     parallelized data storage. The idea is that a 2D block of data can be cut either vertically or
     horizontally, letting each process store a set of column or rows respectively. When a certain
     operation works on the data in a column-wise manner for example, one could opt to only store
@@ -34,27 +33,36 @@ class PeerToPeerCommunicator;
     ParallelTable implements the storing and exchanging of data in two ways: The parallel program
     either fills in the data in a column format, and then transposes it to a row format, or it
     performs this operation the other way round. At initialization, one of these two operating
-    modes has to be chosen using an enum argument (see \c enum \c class \c WriteState). \n\n */
+    modes has to be chosen using an enum argument (see \c enum \c class \c WriteState).
 
-/** Deciding which columns (or rows) need to be stored on a certain process, happens through the \c
+    Deciding which columns (or rows) need to be stored on a certain process, happens through the \c
     ProcessAssigner class. Because a \c ProcessAssigner can also be used to decide the work
-    distribution between processes, using a common asigner for both work and data parallelization
+    distribution between processes, using a common assigner for both work and data parallelization
     will ensure that the two are consistent. Any index conversions that need to happen to access
     the data, can be performed by calling one of the indexing function on a \c ProcessAssigner
     object. Thus the freedom for dividing the data is essentially limited by the number of \c
-    ProcessAssigner implementations. */
+    ProcessAssigner implementations.
 
-/** The switching from a column-based to a row-based parallel storage scheme or vice versa is
+    The switching from a column-based to a row-based parallel storage scheme or vice versa is
     implemented with a call to the alltoallw function of MPI. This is a very general communication
     function, where every process can be made to send a certain set of data to every other process
-    (see \c switchScheme()). \n\n */
+    (see \c switchScheme()).
 
-/** This class can also store data in a regular way, when data-parallelization is not desired. This
+    This class can also store data in a regular way, when data-parallelization is not desired. This
     way, the code can run with or without data parallelization using the same data structure. This
     mode is called the \em non-distributed mode, as opposed to the \em distributed mode used for
-    data- parallelization. \n\n */
+    data-parallelization.
 
-/** The workflow for using a ParallelTable usually comes down to the following steps:
+    The figure below illustrates the operation of a ParallelTable instance.
+
+    \image html paralleltable_elementacces.png "Indexing of ParallelTable"
+
+    The block at the top left shows the availability of elements. The arrows show how the
+    absolute index can be converted to a relative one to find the correct element of the stored
+    data. The red elements are available for writing before switching, the yellow ones are
+    available after switching.
+
+    The workflow for using a ParallelTable usually comes down to the following steps:
     - Create a ParallelTable object through the default constructor.
     - Initialize the ParallelTable in the desired mode, choosing to start with either the column
       based or the row based scheme.
@@ -62,7 +70,6 @@ class PeerToPeerCommunicator;
     - Call \c switchScheme()
     - Perform another calculation, where each process reads the data from the ParallelTable.
     - Call \c reset() if the table is to be re-used with the same parameters.
-    .
 
     When the two assigners divide the columns and the rows evenly between the processes, the memory
     usage per process of a \c ParallelTable is expected to scale as 1/N, with N the number of
@@ -73,19 +80,20 @@ public:
     /** This enum is used to indicate the mode that should be used. An argument of this type should
         be given at initialization and is stored by the paralleltable for the rest of its lifetime.
         The meaning of the two available values can be summarized as follows:
-        + \em COLUMNS: Write in a column format -> communicate -> read in a row format
-        + \em ROW: Write in a row format -> communicate -> read in a column format
-        .
-    The chosen mode hence determines how the data is stored before and after performing the global
-    transposition, defining a fixed direction for the flow of data. If one wants to switch back to the
-    initial format, the \c reset() function can be used. This clears all data however, and hence it
-    is made sure that data/information can only flow in the chosen direction. */
+        - \em COLUMNS: Write in a column format -> communicate -> read in a row format
+        - \em ROW: Write in a row format -> communicate -> read in a column format
+
+        The chosen mode hence determines how the data is stored before and after performing the
+        global transposition, defining a fixed direction for the flow of data. If one wants to
+        switch back to the initial format, the \c reset() function can be used. This clears all
+        data however, and hence it is made sure that data/information can only flow in the chosen
+        direction. */
     enum class WriteState { COLUMN, ROW };
 
     //============= Construction - Setup - Destruction =============
 
-    /** The default constructor creates an uninitialized ParallelTable object. Before it can be used,
-    one of the \c initialize() functions needs to be called. */
+    /** The default constructor creates an uninitialized ParallelTable object. Before it can be
+        used, one of the \c initialize() functions needs to be called. */
     ParallelTable();
 
     /** This function prepares the ParallelTable for use. This version of \c initialize should be
@@ -100,10 +108,9 @@ public:
             assigner, consistency between work division and data distribution can be easily
             achieved.
             - All MPI operations will be performed through the given communicator.
-        .
-    The table derives its dimensions from the properties of the given assigners, and allocates the
-    necessary memory. After this, the table is ready for writing to it.
-    */
+
+        The table derives its dimensions from the properties of the given assigners, and allocates
+        the necessary memory. After this, the table is ready for writing to it. */
     void initialize(QString name, WriteState writeOn, const ProcessAssigner* colAssigner,
                     const ProcessAssigner* rowAssigner, PeerToPeerCommunicator* comm);
 
@@ -157,7 +164,8 @@ public:
         convert this absolute index to a relative one, allowing the implementation easily find the
         correct element of data that is actually stored by this process. This operator functions
         analogously for the \c ROW mode, where only certain rows will be available. In
-        non-distributed mode, this operator simply returns the requested element. \n\n */
+        non-distributed mode, this operator simply returns the requested element. */
+    double& operator()(size_t i, size_t j);
 
     /** The const version of the ()-operator returns a read-only reference to an element of the
         ParallelTable and is therefore called the read operator. This operator can only be called
@@ -171,13 +179,6 @@ public:
         to a relative index to find the right element of the data stored at this process. This
         operator functions analogously for the \c ROW mode, where only certain columns will be
         available, after performing \c switchScheme(). */
-
-    /** \image html paralleltable_elementacces.png "Indexing of ParallelTable" */
-    /** The block at the top left shows the availability of elements. The arrows show how the
-        absolute index can be converted to a relative one to find the correct element of the stored
-        data. The red elements are available for writing before switching, the yellow ones are
-        available after. */
-    double& operator()(size_t i, size_t j);
     const double& operator()(size_t i, size_t j) const;
 
     /** This function returns the sum of all elements of a certain column. In distributed mode,
@@ -189,8 +190,9 @@ public:
         only available in \c ROW mode. */
     double sumColumn(size_t j) const;
 
-    /** This function does the same as \c sumColumn(), but for a certain row. Because it needs all data from
-        from a certain row after performing a scheme switch, it is only available in \c COLUMN mode. */
+    /** This function does the same as \c sumColumn(), but for a certain row. Because it needs all
+        data from from a certain row after performing a scheme switch, it is only available in \c
+        COLUMN mode. */
     double sumRow(size_t i) const;
 
     /** This function calculates the sum of all the columns contained by all the processes. It is
@@ -209,8 +211,8 @@ public:
     double sumEverything() const;
 
 private:
-    /** Private function to sum the contained data over all processes, used during the communication
-    step in non-distributed mode. */
+    /** Private function to sum the contained data over all processes, used during the
+        communication step in non-distributed mode. */
     void sum_all();
 
     /** Performs a communication between all processes to switch from a column based to a row based
@@ -222,7 +224,7 @@ private:
     void rowsToColums();
 
     /** Sets _columns to its correct size. Its height is set to encompass an entire column of the
-        ParallelTable, while its width is set to the nunber of columns stored at this process. */
+        ParallelTable, while its width is set to the number of columns stored at this process. */
     void allocateColumns();
 
     /** Sets _rows to its correct size. Its height is set to the number of rows stored at this
