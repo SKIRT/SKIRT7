@@ -110,14 +110,18 @@ public:
             - All MPI operations will be performed through the given communicator.
 
         The table derives its dimensions from the properties of the given assigners, and allocates
-        the necessary memory. After this, the table is ready for writing to it. */
+        the necessary memory. After this, the table is ready for writing to it. A ParallelTable can
+        only be initialized once. If this function is called a second time, an error will be
+        thrown. */
     void initialize(QString name, WriteState writeOn, const ProcessAssigner* colAssigner,
                     const ProcessAssigner* rowAssigner, PeerToPeerCommunicator* comm);
 
-    /** This version of \c initialize sets up the ParallelTable to operate without data parallelization.
-        The dimensions are simply given as arguments. A WriteState argument is still required is still
-        required for consistency reasons. The communicator is used to sum the contents of the table
-        across all processes when performing the scheme switch.*/
+    /** This version of \c initialize sets up the ParallelTable to operate without data
+        parallelization. The dimensions are simply given as arguments. A WriteState argument is
+        still required is still required for consistency reasons. The communicator is used to sum
+        the contents of the table across all processes when performing the scheme switch. A
+        ParallelTable can only be initialized once. If this function is called a second time, an
+        error will be thrown. */
     void initialize(QString name, WriteState writeOn, int columns, int rows, PeerToPeerCommunicator* comm);
 
     //======================== Other Functions =======================
