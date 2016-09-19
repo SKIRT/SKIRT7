@@ -61,7 +61,6 @@ void ParallelTable::initialize(QString name, WriteState writeOn, const ProcessAs
 
 void ParallelTable::initialize(QString name, WriteState writeOn, int columns, int rows, PeerToPeerCommunicator* comm)
 {
-
     // Fill in some basic data members
     _name = name;
     _totalCols = columns;
@@ -357,18 +356,15 @@ double ParallelTable::sumEverything() const
 
 void ParallelTable::sum_all()
 {
-    if (_modified)
+    if (_writeOn == WriteState::COLUMN)
     {
-        if (_writeOn == WriteState::COLUMN)
-        {
-            Array& arr = _columns.getArray();
-            _comm->sum_all(arr);
-        }
-        else
-        {
-            Array& arr = _rows.getArray();
-            _comm->sum_all(arr);
-        }
+        Array& arr = _columns.getArray();
+        _comm->sum_all(arr);
+    }
+    else
+    {
+        Array& arr = _rows.getArray();
+        _comm->sum_all(arr);
     }
 }
 

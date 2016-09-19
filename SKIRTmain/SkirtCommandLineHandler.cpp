@@ -9,6 +9,7 @@
 #include <QFileInfo>
 #include <QSharedPointer>
 #include <QHostInfo>
+#include "AllCellsDustLib.hpp"
 #include "Array.hpp"
 #include "CommandLineArguments.hpp"
 #include "Console.hpp"
@@ -29,6 +30,7 @@
 #include "SkirtCommandLineHandler.hpp"
 #include "StopWatch.hpp"
 #include "TimeLogger.hpp"
+#include "WavelengthGrid.hpp"
 #include "XmlHierarchyCreator.hpp"
 #include "XmlHierarchyWriter.hpp"
 
@@ -307,7 +309,30 @@ void SkirtCommandLineHandler::doSimulation(size_t index)
     //  - the multiprocessing environment
     PeerToPeerCommunicator* comm = simulation->communicator();
     comm->setup();
-    comm->setDataParallel(_args.isPresent("-d") && comm->isMultiProc());
+
+    //  - the activation of data parallelization
+    if (_args.isPresent("-d") && comm->isMultiProc())
+    {
+        if (simulation->find<WavelengthGrid>(false)->Nlambda() < comm->size())
+            throw FATALERROR("When using -d, the number of wavelengths must be larger than the number of processes.");
+
+        PanDustSystem* pds = nullptr;
+        try {pds = simulation->find<PanDustSystem>(false);}
+        catch (FatalError&) {}
+
+        if (pds && pds->dustemission())
+        {
+            try {pds->find<AllCellsDustLib>();}
+            catch(FatalError&)
+            {
+                throw FATALERROR("When using -d, the dust emission can only be calculated using an AllCellsDustLib");
+            }
+        }
+        // no PanDustSystem -> true,
+        // pds but no dust emission -> true,
+        // pds with dust emission -> error when no AllCellsDustLib
+        comm->setDataParallel(true);
+    }
 
     //  - the console and the file log (and memory (de)allocation logging)
     FileLog* log = new FileLog();

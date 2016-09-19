@@ -77,39 +77,48 @@ protected:
 
     /** This function determines how the specified number of photon packages should be split over
         chunks, and stores the resulting parameters in protected data members. It should be called
-        at the start of each photon shooting phase.
+        at the start of each photon shooting phase. A chunk is the unit of parallelization in the
+        simulation, i.e. multiple chunks may be performed simultaneously in different execution
+        threads. The number of photons launched in a chunk, called the chunk size, is the same for
+        all chunks in the simulation. All photon packages in a chunk have the same wavelength.
+        Increasing the number of chunks per wavelength artificially increases the number of work
+        units, giving a better load balancing between threads. If no photon packages must be
+        launched for the simulation, the number of chunks is trivially zero. If the number of
+        photon packages is nonzero, we will determine the number of chunks in two steps. The first
+        one is based on whether multithreading is active, and the second one looks at the way the
+        work is divided between the processes, which is different when data parallelization is
+        active. \n\n
 
-        A chunk is the unit of parallelization in the simulation, i.e. multiple chunks may be performed
-        simultaneously in different execution threads. The number of photons launched in a chunk,
-        called the chunk size, is the same for all chunks in the simulation. All photon packages in a
-        chunk have the same wavelength. If no photon packages must be launched for the simulation, the
-        number of chunks is trivially zero. If the number of photon packages is nonzero, we
-        differentiate between 3 cases to calculate the number of chunks:
-        -# if the current simulation is <b>not parallelized</b> at all, i.e. the number of processes as
-        well as the number of threads per process is one, there is no reason to split the photon
-        packages into chunks, so the number of chunks per wavelength is set to one;
-        -# if <b>only multithreading</b> is used (the number of processes is one), the number of chunks
-        is determined by the condition that a decent load balancing is obtained among the execution
-        threads. Therefore, we dictate that at least 10 chunks (across all wavelengths) are executed by
-        each thread. This condition can be written as: \f[\boxed{N_\text{chunks} > 10\times
-        \frac{N_\text{threads}}{N_\lambda}}\f] To further enhance the load balancing, we additionally
-        enforce the chunks to not consist of more than \f$S_\text{max}=10^7\f$ photon packages:
-        \f[\boxed{N_\text{chunks} > \frac{N_\text{pp}}{S_\text{max}}}\f]
-        -# when <b>multiprocessing and multithreading</b> are used in combination, an additional
-        criterion must be met, regarding the load balancing between the parallel processes: the number
-        of chunks (per wavelength) should at least be 10 times the number of processes, since these
-        chunks will be distributed amongst the processes. This
-        condition can be expressed mathematically as: \f[\boxed{N_\text{chunks} > 10 \times
-        N_\text{procs}}\f] The criterion that ensures load balancing between the threads remains, but
-        is slightly altered to include the threads from all parallel processes
-        (\f$N_\text{threads}\times N_\text{procs}\f$). This condition can then be formulated as "the
-        total number of chunks (across all wavelengths) per process must at least be 10 times the
-        number of threads". This translates into the following mathematical expression: \f[
-        \frac{N_\text{chunks} \times N_\lambda}{N_\text{procs}} > 10 \times N_\text{threads} \f] Which
-        in turn can be rewritten into the following form: \f[ \boxed{N_\text{chunks} > 10 \times
-        \frac{N_\text{threads} \times N_\text{procs}}{N_\lambda}} \f] The final condition prevents the
-        chunks from being overly large (\f$S_\text{max}=10^7\f$): \f[\boxed{N_\text{chunks} >
-        \frac{N_\text{pp}}{S_\text{max}}}\f] */
+        -# Number of threads:
+            -# When there is only one thread per process, each process will just run through
+            the wavelengths serially, and hence no load balancing improvements can be gained by
+            increasing the number of chunks. The number of chunks per wavelength is set to 1 .\n\n
+
+            -# When multithreading is used, we want the total number of work units per process to
+            be larger than 10 times the amount of threads. This condition can be written as:
+            \f[\boxed{ \frac{N_\text{chunks} \times N_\lambda}{N_{procs}} > 10\times
+            N_\text{threads} }\f] where \f$N_\text{chunks}\f$ is the number of chunks per
+            wavelength. To further enhance the load balancing, we additionally enforce the chunks
+            to not consist of more than \f$S_\text{max}=10^7\f$ photon packages:
+            \f[\boxed{N_\text{chunks} > \frac{N_\text{pp}}{S_\text{max}}}\f] Combining these, the
+            total number of chunks per wavelength becomes \f[ \boxed{ N_\text{chunks} = \text{max}
+            \left( \frac{10 \times N_\text{threads} \times N_\text{procs}}{N_\lambda},
+            \frac{N_\text{pp}}{S_\text{max}} \right)} \f]
+
+        -# Work division:
+            -# When data parallelization is not active, each process has to shoot photons of all of
+            the wavelengths. Therefore we distribute the work units by letting each process do
+            \f$1/N_\text{procs}\f$ of the chunks for each wavelength. The total amount of chunks
+            per wavelength is first rounded up to a multiple of \f$N_\text{procs}\f$, and the
+            number of chunks per wavelength per process then becomes \f[\boxed{N_\text{chunks, per
+            proc} = \frac{N_\text{chunks, rounded up}}{N_\text{procs}}}\f]
+
+            -# When data parallelization is used, each process will only handle a particular subset
+            of about \f$1/N_\text{procs}\f$ of the wavelengths. Each process will also be the only
+            one to shoot the photons for those specific wavelengths. Therefore, the processes need
+            to do all the chunks for their own wavelengths, and the number of chunks per wavelength
+            per process is set equal to the total number of chunks per wavelength.
+            \f[\boxed{N_\text{chunks, per proc} = N_\text{chunks}}\f] */
     void setChunkParams(double packages);
 
     //======== Setters & Getters for Discoverable Attributes =======
