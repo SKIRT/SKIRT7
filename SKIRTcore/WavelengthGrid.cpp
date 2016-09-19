@@ -42,8 +42,13 @@ void WavelengthGrid::setupSelfAfter()
         if (_lambdav[ell] <= _lambdav[ell-1]) throw FATALERROR("Wavelengths should be sorted in ascending order");
     }
 
-    if (find<PeerToPeerCommunicator>()->dataParallel())
+    PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+    if (comm->dataParallel())
+    {
+        if (comm->size() > _Nlambda) throw FATALERROR("When using -d, the number of wavelengths must be larger than"
+                                                      "the number of processes.");
         _assigner = new StaggeredAssigner(_Nlambda, this);
+    }
 }
 
 ////////////////////////////////////////////////////////////////////
