@@ -89,7 +89,9 @@ const double& ParallelDataCube::operator()(int ell, int pixel) const
     if(!_wavelengthAssigner) return (*_partialCube)[ell*_Nframep + pixel];
     else
     {
-        if (!_wavelengthAssigner->validIndex(ell)) throw FATALERROR("Wrong wavelength for this process!");
+        if (!_wavelengthAssigner->validIndex(ell))
+            throw FATALERROR("Wrong wavelength for this process!");
+
         return (*_partialCube)[_wavelengthAssigner->relativeIndex(ell)*_Nframep + pixel];
     }
 }
