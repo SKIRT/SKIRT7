@@ -106,7 +106,7 @@ void MonteCarloSimulation::setChunkParams(double packages)
         // Calculate the the definitive number of photon packages per wavelength
         _Npp = totalChunks * _chunksize;
 
-        _log->info("Using "+QString::number(totalChunks)+" chunks per wavelength.");
+        _log->info("Using " + QString::number(totalChunks) + " chunks per wavelength");
     }
 
     // Determine the log frequency; continuous scattering is much slower!
@@ -213,12 +213,8 @@ void MonteCarloSimulation::initprogress(QString phase)
     _phase = phase;
     _Ndone = 0;
 
-    _log->info("(" + QString::number(_Npp) + " photon packages for "
-               + (_Nlambda==1 ? QString("a single wavelength") : QString("each of %1 wavelengths").arg(_Nlambda))
-               + ")");
-
-    if (_comm->isMultiProc()) _log->info("(" + QString::number(_myTotalNpp/_Nlambda)
-                                         + " photon packages per wavelength per process)");
+    _log->info(QString::number(_Npp) + " photon packages for "
+               + (_Nlambda==1 ? QString("a single wavelength") : QString("each of %1 wavelengths").arg(_Nlambda)));
 
     _timer.start();
 }

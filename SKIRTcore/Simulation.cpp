@@ -66,7 +66,13 @@ void Simulation::setupAndRun()
 {
     _log->setup(); // ensure the log is properly setup before first use
 
-    QString processInfo = _comm->isMultiProc() ? " with " + QString::number(_comm->size()) + " processes" : "";
+    QString processInfo;
+    if (_comm->isMultiProc())
+    {
+        processInfo = " with " + QString::number(_comm->size()) + " processes";
+        if (_comm->dataParallel()) processInfo += " in data parallelization mode";
+        else processInfo += " in task parallelization mode";
+    }
     TimeLogger logger(_log, "simulation " + _paths->outputPrefix() + processInfo);
 
     setup();
