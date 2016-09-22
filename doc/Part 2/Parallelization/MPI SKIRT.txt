@@ -373,54 +373,68 @@ before the dust selfabsorption and dust emission phases.
 
 \subsection MPIimplementation_emissioncalculation The dust emission calculation
 
-For a \em panchromatic simulation, extra phases are involved before the writing phase. These phases involve a repeated simulation
-of (stellar or thermal) photon packages during which the absorbed luminosities in the dust cells should be stored.
-This absorption information is used when the \c calculatedustemission function of the PanDustSystem class is called.
-Similar as with the instruments where the fluxes are summed <em>wavelength/pixel-wise</em>, the luminosities should be summed <em>dustcell-wise</em>
-across the processes. The difference is that now each process should store the results afterwards, as each process still has to
-continue with the simulation.
-
-The summing of the absorbed luminosities is implemented in the \c calculatedustemission function of the PanDustSystem,
-before the actual calculation starts. It is implemented at this level since it is the PanDustSystem class that stores the
-absorption information, in the form of two container variables: \c _Labsstelvv and \c _Labsdustvv.
-These containers are of the type Table<2>, i.e. a two-dimensional instance of the template class Table.
-It can be constructed by specifying its dimensions \f$n_0\f$ and \f$n_1\f$  and its elements can be accessed by specifying two indices (i,j).
+For a \em panchromatic simulation, extra phases are involved before the writing phase. These phases involve a repeated
+simulation of (stellar or thermal) photon packages during which the absorbed luminosities in the dust cells should be
+stored. Before the implementation of the data parallelization, the PanDustSystem class stored the absorption
+information in the form of two container variables: \c _Labsstelvv and \c _Labsdustvv. These containers used to be of
+the type Table<2>, i.e. a two-dimensional instance of the template class Table. An instance of Table can be constructed
+by specifying its dimensions \f$n_0\f$ and \f$n_1\f$ and its elements can be accessed by specifying two indices (i,j).
 Internally, it consists of an Array of size \f$n_0 \times n_1\f$.
 
-There are two different circumstances in which we want to calculate the dust emission.
-The first is when we have just launched stellar photon packages, and we want to calculate the emission based on the absorption
-of these photon packages (in \c _Labsstelvv) to initiate the first dust selfabsorption cycle.
-The other situation happens after each dust selfabsorption cycle, where the absorption luminosities of thermal photon packages get updated.
-In this case, we want to recalculate the dust emission because on these updated thermal absorptions (stored in \c _Labsdustvv),
-whereas the absorption luminosities of stellar photon packages (stored in \c _Labsstelvv) have not been altered.
-Thus, in the first situation we want to sum the values of the \c _Labsstelvv across the processes,
-whereas in the second situation we need to sum the values of \c _Labsdustvv across the processes.
-Therefore, the calculatedustemission function takes a boolean argument \c ynstellar to determine whether it is called after a
-stellar emission phase or after a dust selfabsorption phase.
+This absorption information is used when the \c calculatedustemission function of the PanDustSystem class is called. To
+perform this calculation, every process will need a certain set of data, depending on the parallelization mode: For
+task-based mode, every process needs all absorption data, and this data can be obtained by summing the absorption table
+over all the processes. For the data-parallel mode, every process needs absorption data for the subset of the dust
+cells it will work on, and a transposition from a wavelength-based data parallelization scheme to a dustcell-based
+scheme has to happen.
 
-The dust selfabsorption phase consists of 3 \em stages. During each such stage, a simulation of thermal photon packages is performed
-repeatedly (in so-called \em cycles), until a certain convergence is reached on the total absorbed luminosity of thermal photon packages.
-The first stage, second stage and third stage respectively launch 1/10, 1/3 and 1 times the number of photon packages used for
-the stellar emission phase. A stage is finished when the total absorbed thermal luminosity convergence or the maximum number of
-cycles (which is 100) is reached. Only in the <em>first cycle of the first stage</em>, the absorbed \em stellar luminosities have to be
-communicated between the different processes. Once the summed stellar luminosities are stored in each processor’s memory,
-these values are not changed anymore during the simulation. The argument \c ynstellar passed to \c calculatedustemission
-should thus only be \c true when the \c stage variable is zero (because the stage index starts from zero) and the
-\c cycle variable is one (because this index starts with one). Therefore, the following statement is implemented in the body
-of the rundustselfabsorption loop:
+To encapsulate the differences between these two cases, the Tables containing the absorption data have been replaced by
+instances of \c ParallelTable. An instance of this class can be initialized to behave either as a regular table or as a
+parallelized data container, where only certain rows or columns are stored (see \c ParallelTable::initialize()). The
+class also provides the \c switchScheme() function. When the object has been initialized as a regular table, this
+function will sum the contributions over all processes. When the data-parallel mode is used, it will perform the
+transposition we need by using \c alltoallw of the \c PeerToPeerCommunicator, a wrapper around \c MPI_Alltotallw. Using
+the latter function, the whole transposition routine can be performed in a single MPI call. For detailed information
+about what a \c ParallelTable can and cannot do, check out the class documentation.
+
+There are two different circumstances in which we want to calculate the dust emission. The first is when we have just
+launched stellar photon packages, and we want to calculate the emission based on the absorption of these photon
+packages (in \c _Labsstelvv) to initiate the first dust selfabsorption cycle. The other situation happens after each
+dust selfabsorption cycle, where the absorption luminosities of thermal photon packages get updated. In this case, we
+want to recalculate the dust emission because of these updated thermal absorptions (stored in \c _Labsdustvv), whereas
+the absorption luminosities of stellar photon packages (stored in \c _Labsstelvv) have not been altered. Thus, in the
+first situation we want to communicate the values in \c _Labsstelvv between the processes, whereas in the second
+situation we need to communicate the values of \c _Labsdustvv between the processes. This behaviour is built-in into \c
+ParallelTable: \c switchScheme can only be performed once, and will only perform an MPI operation when the contents of
+the ParallelTable have been altered. If the ParallelTable has not been written to since its initialization, the
+dimensions of the storage will be changed, but no communication will be nessecary, as the content will consist entirely
+of zeros.
+
+The dust selfabsorption phase consists of 3 \em stages. During each such stage, a simulation of thermal photon packages
+is performed repeatedly (in so-called \em cycles), until a certain convergence is reached on the total absorbed
+luminosity of thermal photon packages. The first stage, second stage and third stage respectively launch 1/10, 1/3 and
+1 times the number of photon packages used for the stellar emission phase. A stage is finished when the total absorbed
+thermal luminosity convergence or the maximum number of cycles (which is 100) is reached. Only in the <em>first cycle
+of the first stage</em>, the absorbed \em stellar luminosities have to be communicated between the different processes.
+Once the summed stellar luminosities are stored in each processor’s memory, these values are not changed anymore during
+the simulation. The following statement is implemented in the body of the \c
+PanMonteCarloSimulation::rundustselfabsorption loop:
 
 \code
-_pds->calculatedustemission(!(stage+cycle-1));
+_pds->calculatedustemission();
 \endcode
 
-The variable \c _pds is a pointer to the dust system used for panchromatic simulations. The calculatedustemission function does the following:
+The variable \c _pds is a pointer to the dust system used for panchromatic simulations. The calculatedustemission
+function does the following:
 
-- First, it checks whether dust emission is turned on or off. If it is turned off (one can choose to do so in the \em ski file),
-  then the function immediately returns (it does nothing).
-- If dust emission is enabled, the \c sumResults function of the same class is called, which performs the communication.
-  The argument \c ynstellar is passed on to this function.
-- After \c sumResults, the actual calculation is executed. This is done by calling the calculate function of the _dustlib object,
-  an instance of one of the DustLib subclasses.
+- First, it checks whether dust emission is turned on or off. If it is turned off (one can choose to do so in the \em
+ski file), then the function immediately returns (it does nothing).
+
+- If dust emission is enabled, the \c sumResults function of the same class is called, which performs the
+communication and potential switch of parallelization scheme by calling \c switchScheme on both ParallelTables
+
+- After \c sumResults, the actual calculation is executed. This is done by calling the calculate function of the
+_dustlib object, an instance of one of the DustLib subclasses.
 
 \note A panchromatic simulation does not necessarily include a dust selfabsorption phase. While enabled by default, the execution of this
       phase can be disabled in the \em ski file for the simulation. In this case, the stellar emission phase is immediately followed by
