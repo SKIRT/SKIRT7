@@ -158,6 +158,4 @@ emission</em> phase (for oligochromatic and panchromatic simulations) and then t
 <em>dust emission</em> phases (only for panchromatic simulations). In general, the parallelization of these phases
 follows the mechanism explained in the previous section, \ref ParallelizationThreads_intro.
 
-\subsection ParallelizationThreads_random Randomness
-
 */

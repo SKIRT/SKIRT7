@@ -27,7 +27,7 @@ class ProcessAssigner;
         \code
         void Test::body(size_t index) { ... }
         ...
-        IdenticalAssigner assigner;
+        SequentialAssigner assigner;
         ParallelFactory factory;
         ...
         assigner.assign(1000);
