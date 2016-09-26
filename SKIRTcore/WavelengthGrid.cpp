@@ -45,8 +45,9 @@ void WavelengthGrid::setupSelfAfter()
     PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
     if (comm->dataParallel())
     {
-        if (comm->size() > _Nlambda) throw FATALERROR("When using -d, the number of wavelengths must be larger than"
-                                                      "the number of processes.");
+        if (comm->size() > _Nlambda)
+            throw FATALERROR("In data parallelization mode, the number of wavelengths must be at least "
+                             "the number of processes.");
         _assigner = new StaggeredAssigner(_Nlambda, this);
     }
 }
