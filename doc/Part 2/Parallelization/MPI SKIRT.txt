@@ -14,10 +14,11 @@ of the work it needs to de beforehand.
 master-slave model.)
 
 The MPI parallelization of SKIRT can be used in two modes, both having their own strongpoints and work distribution
-schemes. The first mode is called the 'task-based parallelization' mode and parallelizes only the execution of the
-work, while making the load balancing as good as possible. The 'data parallelization' mode on the other hand, also
-parallelizes the storage of the data that is relevant to the work, to greatly reduce the memory usage per process. To
-make the parallel storage of data possible, this mode distributes the work in a different way.
+schemes. The first mode is called the 'task-based' mode and parallelizes only the execution of the work, while making
+the load balancing as good as possible. The 'data parallelization' mode on the other hand, also parallelizes the
+storage of certain large sets of data, to greatly reduce the memory usage per process. To make the parallel storage of
+data possible, this mode distributes the work in a different way, making sure that each process only needs the data
+that is stored in its own memory pool.
 
 Before we dive into the implementation, we will first explain the main differences between these modes. These can be
 understood best by looking at the way they parallelize the photon shooting algorithm.
@@ -35,10 +36,10 @@ photon packages amongst their parallel threads.
 Because each process basically performs an independent <tt>SKIRT</tt> simulation, the same rules must apply for the
 number of chunks \em within each process to obtain a good load balancing between its threads. Note that the work is
 already well balanced between the processes, since they execute the same algorithm, for the same wavelengths, and with
-the same number of photon packages. The amount of chunks and their size are determined in the same way as in
-the non-MPI case, except for the fact that each process determines these quantities based on only a fraction of the
-total number of photon packages. To recapitulate, the equations that determine the number and size of the chunks are
-given by:
+the same number of photon packages. The amount of chunks and their size are determined in the same way as in the
+non-MPI case, except for the fact that each process determines these quantities based on only a fraction of the total
+number of photon packages. To recapitulate from \ref ParallelizationThreads_skirt, the equations that determine the
+number and size of the chunks are given by:
 
 \f[N_C > \frac{N^{\prime}}{10^7} \f]
 \f[N_C > 10 \times \frac{T}{N_{\lambda}} \f]
@@ -81,13 +82,13 @@ wavelengths. When multithreading is used in combination with multiprocessing, ea
 packages for these wavelengths amongst its threads.
 
 An important aspect to dividing the work this way, is choosing the wavelengths that each process will handle. SKIRT has
-a dedicated framework built in to handle this (\c ProcessAssigner). The standard way to distribute the wavelengths is
-by handing then out one by one, while cycling through the processes (\c StaggeredAssigner). Neighbouring wavelengths
-will often provide similar computational loads, resulting in 'slow' and 'fast' wavelength ranges, and a process working
-only on 'slow' wavelengths would always lag behind. By using the division scheme described in \c StaggeredAssigner, it
-is made sure that every range of wavelengths is split up as much as possible. Note that the load will be balanced
-better when there are more wavelengths to be distributed. As a rule of thumb, no severe load balancing problems should
-occur when
+a dedicated framework built in to handle the the distribution of a number of work (or data) units, called \c
+ProcessAssigner. The standard way to distribute the wavelengths is by handing then out one by one, while cycling
+through the processes, as dictated by the subclass called \c StaggeredAssigner. Neighbouring wavelengths will often
+provide similar computational loads, resulting in 'slow' and 'fast' wavelength ranges, and a process working only on
+'slow' wavelengths would always lag behind. By using the division scheme described in \c StaggeredAssigner, it is made
+sure that every range of wavelengths is split up as much as possible. Note that the load will be balanced better when
+there are more wavelengths to be distributed. As a rule of thumb, no severe load balancing problems should occur when
 
 \f[N_\lambda > 10P\f]
 
@@ -111,13 +112,13 @@ gained during the photon shooting phase useless. The solution is to change the p
 the thermal emission calculation phase. Instead of storing the absorption for certain wavelengths and for all
 dustcells, we make the transition to a scheme where each process has access to the absorption for all wavelengths, but
 for only a subset of the dustcells. In practice, this comes down to a complex MPI communication, which changes the
-storage of a table from 'parallelized by columns' to 'parallelized by rows'.
+storage format of a table from 'parallelized by columns' to 'parallelized by rows'.
 
 After this transposition, each process will be able to calculate a thermal emission spectrum for each of its dust
 cells. When the thermal emission has been calculated, every process will thus contain emission spectra for a subset of
-dust cells. Before these spectra can be used for the next photon shooting phase, another transposition needs to happen.
-A process will no longer need the spectra at all wavelengths, as it will only shoot photons for its own subset of
-wavelengths. We do however need the data over all dust cells, to calculate the spatial distribution of the emission.
+the dust cells. Before these spectra can be used for the next photon shooting phase, another transposition needs to
+happen. A process will no longer need the spectra at all wavelengths, as it will only shoot photons for its own subset
+of wavelengths. We do however need the data over all dust cells, to calculate the spatial distribution of the emission.
 Thats why, before shooting the photons, the parallelization scheme is switched back from a dust cell format to a
 wavelength format.
 
@@ -130,11 +131,11 @@ in the \c ParallelTable class.
 Aside from possible load balancing issues, there is one other drawback to using data parallelization. Normally, the
 calculation of the thermal emission can be simplified and sped up by using a dust library (see \ref
 emissioncalculation_library). With the current implementation, the aborption data in all dust cells is needed to
-construct a proper library, and therefore \c Dim1DustLib and \c Dim2DustLib can not be used.
+properly construct a library, and therefore \c Dim1DustLib and \c Dim2DustLib can not be used.
 
-\note When using data parallelization, the absorption data is only available for a subset of dust cells, and therefore
-the calculation has to happen per cell individually. In practice, this means that only the \c AllCellsDustLib is
-allowed.
+\note When using data parallelization, the absorption data is only available for a subset of the dust cells, and
+therefore the calculation has to happen per cell individually. In practice, this means that only the \c AllCellsDustLib
+is allowed.
 
 \section MPIsupport MPI support classes
 
@@ -168,7 +169,7 @@ trivially consists of one process. Consequently, the entire simulation is run by
 been performed, a next request to the ProcessManager will always result in a ‘non-MPI’ answer: \f$n=1\f$ and a rank of
 zero. Any request thereafter results in the very same answer. The number of performed request can be conveniently
 stored in a static variable of the ProcessManager class. This variable is increased with one after every request, and
-decreased with one whenever such a request is release again. With every request, the value of the counter is checked.
+decreased with one whenever such a request is released again. With every request, the value of the counter is checked.
 Only if it is zero, the correct number of n processes is returned to the caller.
 
 As we already mentioned, the MPI environment must always be initialized (once) and subsequently finalized (once) again.
@@ -228,25 +229,26 @@ two assignment schemes is illustrated by the figures below.
 \image html sequentialassigner.png "Illustration of how the SequentialAssigner class distributes work amongst the different processes."
 \image html staggeredassigner.png "Illustration of how the StaggeredAssigner class distributes work amongst the different processes."
 
-The third assignment scheme, implemented in the RandomAssigner, assigns each part of work to a randomly chosen process.
+A third assignment scheme, implemented in the RandomAssigner, assigns each part of work to a randomly chosen process.
 While this type of assigner is currently not used in the code, it provides a good test for the robustness and
 generality of the parallelization.
 
-The ProcessAssigner framework can work together with two other classes called \c Parallel and ParallelTable, to
-parallelize the execution of work and the storage of data over the different MPI processes, respectively.
+Once constructed, a ProcessAssigner object can work together with two other classes called \c Parallel and
+ParallelTable, to parallelize the execution of work and the storage of data over the different MPI processes,
+respectively.
 
 \subsection MPIsupport_parallel The Parallel class
 
 As explained in \ref ParallelizationThreads_classes and in its documentation, the Parallel class was originally
 designed as a relatively safe way of using multithreading. A ParallelTarget could be given to the \c call() function,
-which would execute the \c body() function of this target in a multithreaded way. To combine MPI multiprocessing with
-multithreading, this class has been extended with a version of its \c call() function that takes a pointer to a \c
-ProcessAssigner as an argument. Using the given ProcessAssigner, the number of work units to be executed by the calling
-process can be determined through its \c nvalues() function. The \c call() function of Parallel will then perform a
-multithreaded for loop with an index \c i that runs from 0 to \c nvalues(), and call the body function on the indices
-that have been assigned to the calling process by the \c ProcessAssigner. These indices are retrieved using \c
-ProcessAssigner::absoluteIndex(i). To parallelize 1000 executions of a \c body function over both processes and
-threads, the code will look like the example below.
+and the latter would execute the \c body() function of this target in a multithreaded way. To combine MPI
+multiprocessing with multithreading, this class has been extended with a version of its \c call() function that takes a
+pointer to a \c ProcessAssigner as an argument. Using the given ProcessAssigner, the number of work units to be
+executed by the calling process can be determined through its \c nvalues() function. The \c call() function of Parallel
+will then perform a multithreaded for loop with an index \c i that runs from 0 to \c nvalues(), and call the body
+function on the indices that have been assigned to the calling process by the \c ProcessAssigner. These indices are
+retrieved using \c ProcessAssigner::absoluteIndex(i). To parallelize 1000 executions of a \c body function over both
+processes and threads, the code will look like the example below.
 
 \code
 void Test::body(size_t index) { ... }
@@ -259,7 +261,8 @@ factory.parallel()->call(this, &Test::body, &assigner);
 
 The \c this argument in the contructor of the SequentialAssigner is added because a ProcessAssigner needs to link
 itself into the simulation hierarchy. It will use \c this as a parent, and once it is linked in it will be able to find
-the \c PeerToPeerCommunicator of the simulation and use it to perform its assignment operation.
+the \c PeerToPeerCommunicator of the simulation and use it to perform its assignment operation. In the \c call()
+function, \c this is used as the ParallelTarget, resulting in a parallel execution of \c this->body().
 
 \subsection MPIsupport_paralleltable The ParallelTable class
 
@@ -271,7 +274,7 @@ columns, or by letting each process store a subset of the rows. It is possible t
 storage formats by calling the \c switchScheme function.
 
 -# It can be used both in a non-parallelized and parallelized way. This severely reduces the number of times we
-explicitly have to check wether the data parallelization option is turned on, by unifying both ways of storing data
+explicitly have to check whether the data parallelization option is turned on, by unifying both ways of storing data
 into one class. The way the ParallelTable is used depends on which overload of its \c initialize function is used. The
 non-parallel version takes two integers among its arguments, which simply specify the required dimensions. The version
 that activates the parallel storage of the data, takes two \c ProcessAssigners as arguments: one for the columns, and
@@ -279,18 +282,49 @@ one for the rows. Just like they determine the way work is distributed when give
 framework can be used to indicate which subset of the columns or rows should be stored. The dimensions of the table
 will be equal to the integers given to the assigner objects at construction.
 
--# When getting an element, no explicit index conversion have to be done by the client, as the ParallelTable will
+-# When getting an element, no explicit index conversions have to be done by the client, as the ParallelTable will
 perform these internally. The client can treat the paralleltable as a regular 2D Table, using the \c ()-operator. When
 one tries to retrieve an element that is not stored on a certain process, an error will be thrown.
 
-Shown below is a piece of example code, showing how a ParallelTable can be initialized to store a 2D data structure with
-dimensions \f$ 1000 \times 200 \f$.
+Shown below is a piece of example code, showing the general flow of operations for a ParallelTable and the surrounding
+framework, when coupled with operations executed via \c Parallel::call(). By passing the correct assigners to both
+Parallel::call() and ParallelTable::initialize(), it can be ensured that only the available elements are accessed.
+
+\code
+// A 2D container that will be worked with in parallel
+ParallelTable _pTable;
+
+// Functions that use _pTable
+void Test::writeColumns(size_t c) { /* body that writes data on column 'c' of height 1000 */ }
+void Test::readRows(size_t r) { /* body that reads data from row 'r' of length 200 */ }
+
+// Parallellize the writing of 200 columns
+ProcessAssigner* columnAssigner = new SequentialAssigner(200, this);
+
+// Parallelize the reading of 1000 rows
+ProcessAssigner* rowAssigner = new StaggeredAssigner(1000, this);
+
+// Parallelize the storage in exactly the same way
+_pTable.initialize("Name", ParallelTable::WriteState::COLUMN, columnAssigner, rowAssigner,
+                                        find<PeerToPeerCommunicator>());
+
+// Do the writing in parallel
+ParallelFactory factory;
+Parallel* parallel = factory.parallel()
+parallel->call(this, &Test::writeColumns, columnAssigner);
+
+// Transpose the parallelization scheme
+_pTable.switchScheme()
+
+// Do the reading in parallel
+parallel->call(this, &Test::readRows, rowAssigner);
+\endcode
 
 Now that we know these basic concepts about the ParallelTable, we can move on to some implementation details concerning
 the MPI parallelization of different phases of the simulation.
 
 \note This explanation of ParallelTable only mentions the basics. There are a lot more functions that are not mentioned
-in this article, with quite some subtleties causes by the fact that only a subset of the stored data is actually
+in this article, with certain subtleties caused by the fact that only a subset of the stored data is actually
 present at a process. Functions often behave differently depending on the state of the ParallelTable object. For
 detailed information about how, when and in what order the functions of this class can be used, please refer to the
 ParallelTable documentation.
@@ -408,25 +442,6 @@ function a different number of times. The choice of implementing the summing pro
 class over implementing that procedure in each derived class separately provides clarity, improves modularity (adding
 new instrument classes) and prevents needless duplication of code.
 
-Most of the instruments also contain one or multiple data cubes, blocks of data that store an image of the flux for
-every wavelength. Because the necessary behaviour is different for the two parallelization modes, a class called \c
-ParallelDataCube has been created. Depending on the mode used, an object of this class will store a data cube
-containing all the wavelengths of a simulation, or one that only stores the wavelengths relevant for each process. This
-class also contains a function called \c constructCompleteCube, which either sums the data cube over all processes in
-task-based mode, or gathers and assembles the partial data cubes stored on the processes in data parallel mode. The
-result of this operation can then be given to a writing function by the root process.
-
-The Instrument subclasses (SimpleInstrument, SEDInstrument, FullInstrument, FrameInstrument) contain a function \c
-write, which is called from the InstrumentSystem class for each instrument in the simulation. In this function, each
-instrument places pointers to the flux arrays it needs to write out (type Array) into a list of type \c QList. This is
-typically a list called \c farrays for their (potential) data cube arrays and a list called \c Farrays for their
-(potential) SED data arrays. These two lists (if present) are then respectively passed to the functions \c
-calibrateAndWriteDataCubes and \c calibrateAndWriteSEDs. These functions are implemented in the SingleFrameInstrument
-and DistantInstrument classes, from which the concrete instrument classes inherit. Before these functions are called,
-first the communication between the processes must be performed. This is done by calling the \c sumResults function for
-each list of flux arrays. In other words, \c sumResults is either called once with an \c farrays list as an argument,
-once with an \c Farrays list as an argument, or twice for both lists.
-
 The implementation of the \c sumResults function in Instrument is as follows:
 
 \code
@@ -445,15 +460,30 @@ zero</em>. Another function of PeerToPeerCommunicator, \c sum_all can be used to
 process obtains the results afterwards. The sum and sum_all function of the ProcessManager class are just simple
 wrappers around the \c MPI_Reduce and \c MPI_Allreduce functions respectively.
 
+Most of the instruments also contain one or multiple data cubes, blocks of data that store an image of the flux for
+every wavelength. Because the necessary behaviour is different for the two parallelization modes, a class called \c
+ParallelDataCube has been created. Depending on the mode used, an object of this class will either store a data cube
+containing all the wavelengths of a simulation, or one that only stores the wavelengths relevant for each process. This
+class also contains a function called \c constructCompleteCube, which either sums the data cube over all processes in
+task-based mode, or gathers and assembles the partial data cubes stored on the processes in data parallel mode. The
+result of this operation is stored in an Array at the root process, which can then perform some operations and write
+out the image.
+
 The implementation of \c constructCompleteCube uses the the function \c gatherw of the PeerToPeerCommunicator. The
 backbone of this function is \c MPI_Alltoallw, a very general collective communication function of MPI. With \c
 gatherw, blocks of data can be gathered from different processes into arbitrary locations within the receive buffer. By
 giving the correct arguments, all the wavelength slices of a data cube can be gathered at a single process and put into
 the right locations in memory with a single MPI call.
 
-After the calls to the \c sumResults and \c ParallelDataCube::constructCompleteCube functions have returned, the
-functions \c calibrateAndWriteDataCubes and \c calibrateAndWriteSEDs are called. These functions convert the flux data
-into appropriate units and subsequently write this data to file.
+The Instrument subclasses (SimpleInstrument, SEDInstrument, FullInstrument, FrameInstrument) contain a function \c
+write, which is called from the InstrumentSystem class for each instrument in the simulation. In this function, each
+instrument places pointers to the flux arrays it needs to write out (type Array) into a list of type \c QList. This is
+typically a list called \c farrays for their (potential) data cube arrays, and a list called \c Farrays for their
+(potential) SED data arrays. These two lists (if present) are then respectively passed to the functions \c
+calibrateAndWriteDataCubes and \c calibrateAndWriteSEDs. These functions are implemented in the SingleFrameInstrument
+and DistantInstrument classes, from which the concrete instrument classes inherit. After the calls to the \c sumResults
+and \c ParallelDataCube::constructCompleteCube functions have returned, these functions convert the flux data into
+appropriate units and subsequently write this data to file.
 
 For the panchromatic simulations, the algorithm for the instruments is identical, but the writing phase is not entered
 before the dust selfabsorption and dust emission phases.
@@ -484,7 +514,63 @@ class also provides the \c switchScheme() function. When the object has been ini
 function will sum the contributions over all processes. When the data-parallel mode is used, it will perform the
 transposition we need by using \c alltoallw of the \c PeerToPeerCommunicator, a wrapper around \c MPI_Alltotallw. Using
 the latter function, the whole transposition routine can be performed in a single MPI call. For detailed information
-about what a \c ParallelTable can and cannot do, check out the class documentation.
+about what a \c ParallelTable can and cannot do, refer to the class documentation.
+
+The code below shows how \c _Labsstelvv and \c _Labsdustvv are initialized during the setup of PanDustSystem. The
+assigners used to initialize them in data-parallel mode are members of the WavelengthGrid and the PanDustSystem, to
+determine the column-wise and row-wise distribution schemes respectively. By making these assigners members of
+important simulation objects, the distribution schemes for the wavelengths and dust cells gain a more global character.
+In any part of the code, the WavelengthGrid or PanDustSystem can be found using the \c find<T>() function, and
+subsequently their \c assigner() getter can be used to obtain a pointer to the ProcessAssigner for the wavelenghts or
+the dust cells respectively. By using these assigners, it can be made sure that operations that write to (or read from)
+a ParallelTable, performed through a \c Parallel::call(), only need access to the elements that are actually available.
+
+\code
+PeerToPeerCommunicator* comm = find<PeerToPeerCommunicator>();
+bool dataParallel = comm->dataParallel();
+
+if (dataParallel) // assign this process to work with a subset of dust cells
+    _assigner = new StaggeredAssigner(_Ncells, this);
+
+WavelengthGrid* wg = find<WavelengthGrid>();
+
+// resize the tables that hold the absorbed energies for each dust cell and wavelength
+// - absorbed stellar emission is relevant for calculating dust emission
+// - absorbed dust emission is relevant for calculating dust self-absorption
+_haveLabsStel = false;
+_haveLabsDust = false;
+if (dustemission())
+{
+    if (dataParallel)
+        _LabsStelvv.initialize("Absorbed Stellar Luminosity Table", ParallelTable::WriteState::COLUMN,
+                               wg->assigner(), _assigner, comm);
+    else
+        _LabsStelvv.initialize("Absorbed Stellar Luminosity Table", ParallelTable::WriteState::COLUMN,
+                               _Nlambda, _Ncells, comm);
+    _haveLabsStel = true;
+
+    if (selfAbsorption())
+    {
+        if (dataParallel)
+            _LabsDustvv.initialize("Absorbed Dust Luminosity Table", ParallelTable::WriteState::COLUMN,
+                                   wg->assigner(), _assigner, comm);
+        else
+            _LabsDustvv.initialize("Absorbed Dust Luminosity Table", ParallelTable::WriteState::COLUMN,
+                                   _Nlambda, _Ncells, comm);
+        _haveLabsDust = true;
+    }
+}
+\endcode
+
+In this part of the setup, it is first determined if the data-parallel mode is active, by obtaining a boolean from the
+PeerToPeerCommunicator. If this is the case, the assigner for the dust cells is created, by giving the number of dust
+cells as a constructor argument. Then, the absorption tables are initialized, providing a name, and an initial
+parallelization scheme (column-based). The next two arguments are two assigners; the distribution scheme for the
+columns is set equal to that of the wavelengths by passing the assigner member of the WavelengthGrid. The same happens
+for our alternate, row-based scheme, by passing the assigner for the dust cells we just created. Without data
+parallelization, these arguments are simply integers, causing the ParallelTable to behave like a regular Table. The
+ParallelTable will use the last argument, a pointer to the communicator, to perform \c switchScheme() and several other
+functions involving MPI communications.
 
 There are two different circumstances in which we want to calculate the dust emission. The first is when we have just
 launched stellar photon packages, and we want to calculate the emission based on the absorption of these photon
@@ -496,8 +582,8 @@ first situation we want to communicate the values in \c _Labsstelvv between the 
 situation we need to communicate the values of \c _Labsdustvv between the processes. This behaviour is built-in into \c
 ParallelTable: \c switchScheme can only be performed once, and will only perform an MPI operation when the contents of
 the ParallelTable have been altered. If the ParallelTable has not been written to since its initialization, the
-dimensions of the storage will be changed, but no communication will be nessecary, as the content will consist entirely
-of zeros.
+dimensions of the storage will be changed, but no communication will be nessecary, as the contents will consist
+entirely of zeros.
 
 The dust selfabsorption phase consists of 3 \em stages. During each such stage, a simulation of thermal photon packages
 is performed repeatedly (in so-called \em cycles), until a certain convergence is reached on the total absorbed
@@ -523,7 +609,7 @@ ski file), then the function immediately returns (it does nothing).
 communication and potential switch of parallelization scheme by calling \c switchScheme on both ParallelTables
 
 - After \c sumResults, the actual calculation is executed. This is done by calling the calculate function of the
-_dustlib object, an instance of one of the DustLib subclasses.
+\c _dustlib object, an instance of one of the DustLib subclasses.
 
 \note A panchromatic simulation does not necessarily include a dust selfabsorption phase. While enabled by default, the
 execution of this phase can be disabled in the \em ski file for the simulation. In this case, the stellar emission
@@ -534,11 +620,11 @@ communications are performed only once, and no absorption is recorded while shoo
 
 After communicating the luminosities, each process invokes a procedure to actually calculate the dust emission spectra.
 This procedure is the \c calculate function of the dust library object, an instance of the DustLib class (or rather a
-DusLib subclass). The DustLib object is the object that delegates the calculation of the dust emission spectra in all
+DustLib subclass). The DustLib object is the object that delegates the calculation of the dust emission spectra in all
 dust cells, using the absorption information contained in the PanDustSystem, and for that purpose taking advantage of a
 library mechanism. Without going into detail here (refer to the DustLib class reference), this mechanism allows
 <tt>SKIRT</tt> to determine an approximate dust emission spectrum appropriate for different cells at once, instead of
-doing the calculation seperately (and more exact) for each individual dust cell. A set of dust cells for which the
+doing the calculation separately (and more exact) for each individual dust cell. A set of dust cells for which the
 emission spectrum is calculated at once, is represented by a so-called <em>library entry</em>.
 
 Such a library entry is thus the <em>unit of parallelization</em> for the dust emission calculation. The
@@ -553,9 +639,9 @@ The dust emission calculation, performed by the \c calculate function of DustLib
 library entries and calculating the mapping from dust cells to library entries. Here, an important distinction between
 the two parallelization modes arises. To construct this mapping, the dustlib needs the absorbed luminosity for all dust
 cells. The exception to this rule is the trivial implementation of a DustLib called the \c AllCellsDustLib, which
-creates an individual library entry for every cell, and hence does not need any absorption data at all to generate its
-mapping. When data parallelization is used, the absorption data is only available for a subset of the dustcells on
-each process. As a consequence, only the \c AllCellsDustLib can be used with data parallelization.
+simply creates a one-to-one mapping from dust cells to library entries, and hence does not need any absorption data at
+all to generate its mapping. When data parallelization is used, the absorption data is only available for a subset of
+the dustcells on each process. As a consequence, only the \c AllCellsDustLib can be used with data parallelization.
 
 Closely related to this distinction is the part where we decide which ProcessAssigner object we need to use. In the
 task-based parallelization mode, we simply create a new StaggeredAssigner that distributes whatever number of library
@@ -564,8 +650,8 @@ emission template for the library entries it was assigned to. Under data paralle
 AllCellsDustLib can be used, and hence the library entries map directly to individual cells. This is important because
 only the spectra of the cells for which the absorption data is available should be calculated. To ensure that this is
 the case, the ProcessAssigner we choose has to be the same one that was used to initialize the ParallelTable containing
-the necessary data. This assigner is stored as a member of the PanDustSystem, which was constructed during the setup
-phase given that the \c '-d' command line argument was present.
+the necessary data. This assigner is stored as a member of the PanDustSystem, and is constructed during the setup phase
+given that the \c '-d' command line argument was present.
 
 Listed below is the implementation (with some omissions for readability) of the \c calculate function in the DustLib
 base class. A boolean indicating whether or not data parallelization is active, is obtained from the \c
