@@ -12,6 +12,7 @@
 
 ////////////////////////////////////////////////////////////////////
 
+#ifdef BUILDING_WITH_MPI
 namespace
 {
     void createDisplacedDoubleBlocks(int blocklength, const std::vector<int>& displacements, MPI_Datatype* newtypeP,
@@ -48,6 +49,7 @@ namespace
         }
     }
 }
+#endif
 
 std::atomic<int> ProcessManager::requests(0);
 
@@ -193,7 +195,7 @@ void ProcessManager::gatherw(double* sendBuffer, int sendCount,
 
     for (int rank=0; rank<size; rank++) MPI_Type_free(&recvtypes[rank]);
 #else
-    Q_UNUSED(sendBuffer) Q_UNUSED(sendCount) Q_UNUSED(recvBuffer) Q_UNUSED(recvRank) Q_UNUSED(recvDisplacements)
+    Q_UNUSED(sendBuffer) Q_UNUSED(sendCount) Q_UNUSED(recvBuffer) Q_UNUSED(recvRank) Q_UNUSED(recvLength) Q_UNUSED(recvDisplacements)
 #endif
 }
 
@@ -239,8 +241,8 @@ void ProcessManager::displacedBlocksAllToAll(double* sendBuffer, int sendCount,
         MPI_Type_free(&recvtypes[r]);
     }
 #else
-    Q_UNUSED(sendBuffer) Q_UNUSED(sendCount) Q_UNUSED(sendDisplacements) Q_UNUSED(sendLength)
-    Q_UNUSED(recvBuffer) Q_UNUSED(recvCount) Q_UNUSED(recvDisplacements) Q_UNUSED(recvLength)
+    Q_UNUSED(sendBuffer) Q_UNUSED(sendCount) Q_UNUSED(sendDisplacements) Q_UNUSED(sendLength) Q_UNUSED(sendExtent)
+    Q_UNUSED(recvBuffer) Q_UNUSED(recvCount) Q_UNUSED(recvDisplacements) Q_UNUSED(recvLength) Q_UNUSED(recvExtent)
 #endif
 }
 

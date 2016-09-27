@@ -4,56 +4,67 @@
 
 \section MessagePassing_intro Introduction
 
-To benefit from the advancements in supercomputer architecture, specialized software had to be developed. 
-Not only specific operating systems were developed for the su- percomputers, but methods were invented to organize the communication between processors 
-so that large computational problems could be solved by many processors simultaneously. In the beginning of multiprocessor computing, 
-several of these meth- ods were developed, but none of them was standardized. Around 1991, a small group of researchers realized that a 
-standardized method would benefit the future of com- puting and the next year Jack Dongarra, Rolf Hempel, Tony Hey, and David W. Walker 
-proposed a first draft of a possible message-passing standard. In the next two years, the working group further refined the details of the standard. 
-They were helped by an expanding base of people involved with high performance computing, which gathered in the MPI forum. 
-In 1994, a standard was presented and was called version 1.0 of the Message Passing Interface. It was designed to be highly efficient and portable, 
-meaning it could be used on every multiprocessor system: not only distributed memory systems but also shared-memory systems and even on networks of computers. 
-Once the standard was set, implementations were being developed and soon libraries for C and Fortran became available.
+To benefit from the advancements in supercomputer architecture, specialized software had to be developed. Not only
+specific operating systems were developed for the supercomputers, but methods were invented to organize the
+communication between processors so that large computational problems could be solved by many processors
+simultaneously. In the beginning of multiprocessor computing, several of these methods were developed, but none of
+them was standardized. Around 1991, a small group of researchers realized that a standardized method would benefit the
+future of computing and the next year Jack Dongarra, Rolf Hempel, Tony Hey, and David W. Walker proposed a first
+draft of a possible message-passing standard. In the next two years, the working group further refined the details of
+the standard. They were helped by an expanding base of people involved with high performance computing, which gathered
+in the MPI forum. In 1994, a standard was presented and was called version 1.0 of the Message Passing Interface. It was
+designed to be highly efficient and portable, meaning it could be used on every multiprocessor system: not only
+distributed memory systems but also shared-memory systems and even on networks of computers. Once the standard was set,
+implementations were being developed and soon libraries for C and Fortran became available.
 
 \section MessagePassing_standard The MPI standard
 
-It is important to note that the MPI standard set in MPI 1.0 was only a \em specification for the developers and users of message passing libraries. 
-By itself, it is not a library or implementation, but it is the specification of how such an implementation should look like. 
-In other words, it defined the rules implementers of MPI libraries had to follow. 
-Concretely, it specified the names and syntaxes of the functions in the library as well as the results of these functions. 
-In the MPI 1.0 standard, these specifications were only made for the C and Fortran programming language. 
-Specifications for other languages followed in later versions of the standard. Thanks to the MPI standard, one could be sure that all 
-MPI implementations were highly portable between different computer systems and different parallel programs using MPI. 
-The individual implementers how- ever, retained the responsibility to determine the details of their MPI implementation 
-themselves so that they were optimally adjusted to a specific computer system but again, not exclusive to them. 
-The MPI standard acquired a great deal of success and is now the absolute <em>industry standard</em> for writing parallel programs on distributed memory systems.
+It is important to note that the MPI standard set in MPI 1.0 was only a \em specification for the developers and users
+of message passing libraries. By itself, it is not a library or implementation, but it is the specification of what such
+an implementation should look like. In other words, it defined the rules implementers of MPI libraries had to follow.
+Concretely, it specified the names and syntaxes of the functions in the library as well as the results of these
+functions. In the MPI 1.0 standard, these specifications were only made for the C and Fortran programming language.
+Specifications for other languages followed in later versions of the standard. Thanks to the MPI standard, one could be
+sure that all MPI implementations were highly portable between different computer systems and different parallel
+programs using MPI. The individual implementers however, retained the responsibility to determine the details of
+their MPI implementation themselves so that they were optimally adjusted to a specific computer system but again, not
+exclusive to them. The MPI standard acquired a great deal of success and is now the absolute <em>industry standard</em>
+for writing parallel programs on distributed memory systems.
 
-In 1996, the MPI standard 2.0 was presented, as an extension to MPI 1.0. It provided the specification for additional features such as parallel I/O, 
-C++ and Fortran 90 libraries and one-sided communications. Another revision to the MPI standard, MPI 3.0, was finished in 2012. 
-New features included for example non-blocking collective operations and Fortran 2008 bindings. 
-The C++ bindings were removed because it was felt they provided not much more than the C bindings and were actually not much used. 
-Version 3.1 of the MPI standard is currently under development.
+In 1996, the MPI standard 2.0 was presented, as an extension to MPI 1.0. It provided the specification for additional
+features such as parallel I/O, C++ and Fortran 90 libraries and one-sided communications. Another revision to the MPI
+standard, MPI 3.0, was finished in 2012. New features included for example non-blocking collective operations and
+Fortran 2008 bindings. The C++ bindings were removed because it was felt they provided not much more than the C
+bindings and were actually not much used. The most recent version of the MPI standard is 3.1, since June 2015. MPI 4.0
+is currently under development.
 
-As of today, different versions of MPI are preferred by different users and implementers. The most popular versions are version 1.3 (called MPI-1 for short) 
-and version 2.2 (or MPI-2). Since MPI-2 is an extension of MPI-1, MPI-2 implementations are backwards compatible with programs written around older MPI implementations.
+As of today, different versions of MPI are preferred by different users and implementers. The most popular versions are
+version 1.3 (called MPI-1 for short) and version 2.2 (or MPI-2). Since MPI-2 is an extension of MPI-1, MPI-2
+implementations are backwards compatible with programs written around older MPI implementations.
 
 \section MessagePassing_openmpi OpenMPI
 
-OpenMPI is an open source implementation of the MPI-2 standard. It originated in 2003 as an initiative to combine the best ideas of different existing MPI implementations. 
-OpenMPI is the result of the union of 4 implementations: LAM/MPI, LA/MPI, FT-MPI and PACX-MPI. New and better version of OpenMPI are continuously under development by a 
-large base of people. OpenMPI is used by many supercomputers in the TOP500 list. A version of OpenMPI conform with the MPI-3 standard is expected soon. 
-Because of its success, OpenMPI was the implementation that is used for the parallelization of the <tt>SKIRT</tt> code.
+OpenMPI is an open source implementation of the MPI standard. It originated in 2003 as an initiative to combine the
+best ideas of different existing MPI implementations. OpenMPI is the result of the union of 4 implementations: LAM/MPI,
+LA/MPI, FT-MPI and PACX-MPI. New and better version of OpenMPI are continuously under development by a large base of
+people. OpenMPI is used by many supercomputers in the TOP500 list. Since version 2.0.0, OpenMPI is fully compliant with
+the MPI-3.1 standard. Because of its success, OpenMPI is the implementation that is used for development and testing of
+the parallelization of the <tt>SKIRT</tt> code.
 
 \section MessagePassing_basics MPI basics
 
-An MPI program consists of multiple processes that each execute their own instructions. In this sense, these processes can be thought of as individual programs. 
-The difference with actual, autonomous programs is however that these processes work together on the same problem and that they have the ability to communicate with each other. 
-Launching an MPI program is done by invoking the mpirun script (or any equivalent). This script effectively launches \f$N\f$ processes, which are all instances of the same executable. 
-The number \f$N\f$ is chosen by the user. The executable can be any kind of program, it does not necessarily have to involve any MPI calls. 
-Using mpirun with an ordinary program would result in \f$N\f$ processes executing exactly the same instructions, which is in most cases not very useful. 
-The difference with an MPI program is that such a program can differentiate amongst these processes so that each of them solves one part of a larger problem. 
-This differentiation is done by calling functions of the MPI library. The first MPI function that must be called in an MPI program is an initializaion 
-routine. It may be called only once by every process. The most used initialization routine is called MPI_Init. The syntax of this function is shown in the box below.
+An MPI program consists of multiple processes that each execute their own instructions. In this sense, these processes
+can be thought of as individual programs. The difference with actual, autonomous programs is however that these
+processes work together on the same problem and that they have the ability to communicate with each other. Launching an
+MPI program is done by invoking the mpirun script (or any equivalent). This script effectively launches \f$N\f$
+processes, which are all instances of the same executable. The number \f$N\f$ is chosen by the user. The executable can
+be any kind of program, it does not necessarily have to involve any MPI calls. Using mpirun with an ordinary program
+would result in \f$N\f$ processes executing exactly the same instructions, which is in most cases not very useful. The
+difference with an MPI program is that such a program can differentiate amongst these processes so that each of them
+solves one part of a larger problem. This differentiation is done by calling functions of the MPI library. The first
+MPI function that must be called in an MPI program is an initialization routine. It may be called only once by every
+process. The most used initialization routine is called MPI_Init. The syntax of this function is shown in the box
+below.
 
 | MPI_Init                 |
 | -------------------------|
@@ -61,9 +72,10 @@ routine. It may be called only once by every process. The most used initializati
 | <b>Arguments:</b> <tt>int *argc, char ***argv</tt> |
 | <b>Description:</b> This function initializes the MPI execution environment. It requires a pointer to the number of arguments and a pointer to the argument vector. |
 
-As soon as a process calls the <tt>MPI_Init</tt> function, it enters the so-called MPI environment. From that moment on, this process can call any other function in the 
-MPI library and in- teract with other processes. When no further calls to MPI routines are necessary, the MPI environment should be terminated before the program finishes. 
-To achieve this, every process calls the <tt>MPI_Finalize</tt> function, of which the syntax is shown below.
+As soon as a process calls the <tt>MPI_Init</tt> function, it enters the so-called MPI environment. From that moment
+on, this process can call any other function in the MPI library and interact with other processes. When no further
+calls to MPI routines are necessary, the MPI environment should be terminated before the program finishes. To achieve
+this, every process calls the <tt>MPI_Finalize</tt> function, of which the syntax is shown below.
 
 | MPI_Finalize                 |
 | -------------------------|
@@ -71,25 +83,28 @@ To achieve this, every process calls the <tt>MPI_Finalize</tt> function, of whic
 | <b>Arguments:</b> \em none |
 | <b>Description:</b> This function terminates the MPI execution environment. |
 
-All other calls to the MPI library must of course happen between the initiation and termination. The basic principles listed here, are illustrated in the figure below.
+All other calls to the MPI library must of course happen between the initiation and termination. The basic principles
+listed here, are illustrated in the figure below.
 
 \image html initfinal.png "The outline of the execution of an MPI program. The program is started as N identical processes. Upon calling the initiation function, they get assigned a rank within the MPI environment. They can then call other MPI functions, e.g. for communication with other processes. All calls must be done before the call to the finalization function."
 
-As soon as a process calls the <tt>MPI_Init</tt> function, it is assigned a rank. This rank is just a number that is used to identify the process within the 
-environment. With \f$N\f$ processes, the rank of each process is an integer value between zero and \f$N-1\f$.
+As soon as a process calls the <tt>MPI_Init</tt> function, it is assigned a rank. This rank is just a number that is
+used to identify the process within the environment. With \f$N\f$ processes, the rank of each process is an integer
+value between zero and \f$N-1\f$.
 
-Regarding communications between processes, it can be useful to define smaller groups of processes that are able to communicate with each other. 
-Such groups are called \em communicators. MPI automatically provides a communicator called <tt>MPI_COMM_WORLD</tt>, which includes all processes in the environment. 
-Additional communicators can be created by the programmer by calling specific functions of the MPI library. 
-This involves setting a name for the communicator and choosing the processes that should be included in it. 
-Within a communicator, each process is given a unique rank. Note that the rank of a process in one communicator is generally not the same as its rank in 
-an other communicator. This is illustrated in the next figure.
+Regarding communications between processes, it can be useful to define smaller groups of processes that are able to
+communicate with each other. Such groups are called \em communicators. MPI automatically provides a communicator called
+<tt>MPI_COMM_WORLD</tt>, which includes all processes in the environment. Additional communicators can be created by
+the programmer by calling specific functions of the MPI library. This involves setting a name for the communicator and
+choosing the processes that should be included in it. Within a communicator, each process is given a unique rank. Note
+that the rank of a process in one communicator is generally not the same as its rank in an other communicator. This is
+illustrated in the next figure.
 
 \image html communicators.png "Processes can have different ranks within different communicators."
 
-A process can determine its rank within a certain communicator with a call to the MPI_Comm_rank function of the MPI library. 
-The process specifies the name of the communicator and the memory address where the rank should be stored. 
-The syntax of the <tt>MPI_Comm_rank</tt> function is shown in the box below.
+A process can determine its rank within a certain communicator with a call to the MPI_Comm_rank function of the MPI
+library. The process specifies the name of the communicator and the memory address where the rank should be stored. The
+syntax of the <tt>MPI_Comm_rank</tt> function is shown in the box below.
 
 | MPI_Comm_rank                 |
 | -------------------------|
@@ -97,8 +112,9 @@ The syntax of the <tt>MPI_Comm_rank</tt> function is shown in the box below.
 | <b>Arguments:</b> <tt>MPI_Comm comm, int *rank</tt> |
 | <b>Description:</b> This function determines the rank of the calling process in the specified communicator. |
 
-A process can also determine the size, or the number of processes, of a communicator it belongs to. 
-This done by calling the <tt>MPI_Comm_size</tt> function, of which the syntax is shown below. The second argument is the address where the integer size should be stored.
+A process can also determine the size, or the number of processes, of a communicator it belongs to. This done by
+calling the <tt>MPI_Comm_size</tt> function, of which the syntax is shown below. The second argument is the address
+where the integer size should be stored.
 
 | MPI_Comm_size                 |
 | -------------------------|
@@ -110,32 +126,41 @@ If the communicator is <tt>MPI_COMM_WORLD</tt>, the size that is returned from t
 
 \section MessagePassing_communications Communications
 
-The most fundamental role of the Message Passing Interface is of course providing a mechanism for communication between processes. 
-There are two major groups of communications that are defined in the MPI standards: <em>point-to-point communications</em> and <em>collective communications</em>. 
-The difference between these two is straightforward: point-to-point communications are defined between two processes and collective communications involve a group of processes. 
-The messages that are communicated be- tween processes can vary in length and type. It is important to note that messages must consist of a continuous block of information 
-in the process’s memory. In other words, a single communication can send an indefinite amount of information, but only if this data can be accessed by 
-reading the memory of the process from a certain starting location up to an other location determined by the length of the message.
+The most fundamental role of the Message Passing Interface is of course providing a mechanism for communication between
+processes. There are two major groups of communications that are defined in the MPI standards: <em>point-to-point
+communications</em> and <em>collective communications</em>. The difference between these two is straightforward:
+point-to-point communications are defined between two processes and collective communications involve a group of
+processes. The messages that are communicated between processes can vary in length and type. It is important to note
+that messages must consist of a continuous block of information in the process’s memory. In other words, a single
+communication can send an indefinite amount of information, but only if this data can be accessed by reading the memory
+of the process from a certain starting location up to an other location determined by the length of the message.
 
 \subsection Communications_ptp Point-to-point communications
 
-Point-to-point communications allow one process to send a certain message to an other process. They require the calling of two types of MPI functions: 
-a send function and a receive function. The send function is to be called from the process that has the information, called the source, 
-and the receive function should be called from the pro- cess that needs this information, called the destination. 
-The message in a point-to-point communication consists of two parts. The first part, called the envelope, defines the rank of the source, 
-the rank of the destination, the communicator and a tag. The com- municator must be a group of processors to which both the source and the destination belong. 
-The tag is just an integer used to identify the message. The second part of the message, called the message body, describes the data itself. 
-It includes the data buffer, the datatype and the count. The buffer is the region of the physical memory where the data that is to be sent, is stored. 
-The buffer can be thought of as an continuous array of elements of a the same type. This datatype (e.g. an integer, a double) is thus also
-specified in the message body. The count variable is thus the number of elements of this datatype in the buffer.
+Point-to-point communications allow one process to send a certain message to an other process. They require the calling
+of two types of MPI functions: a send function and a receive function. The send function is to be called from the
+process that has the information, called the source, and the receive function should be called from the process that
+needs this information, called the destination. The message in a point-to-point communication consists of two parts.
+The first part, called the envelope, defines the rank of the source, the rank of the destination, the communicator and
+a tag. The communicator must be a group of processors to which both the source and the destination belong. The tag is
+just an integer used to identify the message. The second part of the message, called the message body, describes the
+data itself. It includes the data buffer, the datatype and the count. The buffer is the region of the physical memory
+where the data that is to be sent, is stored. The buffer can be thought of as an continuous array of elements of a the
+same type. This datatype (e.g. an integer, a double) is thus also specified in the message body. The count variable is
+thus the number of elements of this datatype in the buffer.
 
-The following figure shows how a point-to-point communication between two processes, process A and process B, happens. If for example process A calls the MPI_Send function and process B calls the MPI_Recv function and the envelopes passed on to both functions match, the communication is initiated. It is then up to the programmer to ensure that the buffer specified by process A indeed contains data of the specified datatype and that this data is readable.
+The following figure shows how a point-to-point communication between two processes, process A and process B, happens.
+If for example process A calls the MPI_Send function and process B calls the MPI_Recv function and the envelopes passed
+on to both functions match, the communication is initiated. It is then up to the programmer to ensure that the buffer
+specified by process A indeed contains data of the specified datatype and that this data is readable.
 
 \image html sendreceive.png "In a point-to-point communication, a piece of data (a message) is copied from the memory of one process to the memory of another process."
 
-It is important to note that there are blocking and non-blocking send and receive functions. A blocking send or receive function only returns when the communication 
-operation is completed. The MPI_Send and MPI_Recv are both blocking functions. The syntax of both functions is shown in the boxes below. 
-Note that both functions return an integer. This represents an error code: it is zero if the operation finished successfully and is greater than zero if any error occurred.
+It is important to note that there are blocking and non-blocking send and receive functions. A blocking send or receive
+function only returns when the communication operation is completed. The MPI_Send and MPI_Recv are both blocking
+functions. The syntax of both functions is shown in the boxes below. Note that both functions return an integer. This
+represents an error code: it is zero if the operation finished successfully and is greater than zero if any error
+occurred.
 
 | MPI_Send                 |
 | -------------------------|
@@ -143,24 +168,28 @@ Note that both functions return an integer. This represents an error code: it is
 | <b>Arguments:</b> <tt>const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm</tt> |
 | <b>Description:</b> This function performs a blocking send. |
 
-If process A calls the <tt>MPI_Send</tt> function, this process executes no further instructions until process B calls a receive function (not necessarily MPI_Recv) 
-with a matching envelope. Analogously, if process B calls the <tt>MPI_Recv</tt> function before process A calls a send function, process B will wait for process A before 
-doing any other business. This principle is illustrated in the following figure, in the case process A reaches the communication point first.
+If process A calls the <tt>MPI_Send</tt> function, this process executes no further instructions until process B calls
+a receive function (not necessarily MPI_Recv) with a matching envelope. Analogously, if process B calls the
+<tt>MPI_Recv</tt> function before process A calls a send function, process B will wait for process A before doing any
+other business. This principle is illustrated in the following figure, in the case process A reaches the communication
+point first.
 
 \image html sendtimeblocking.png "With a blocking send, no other operations can be executed until the communication has completed."
 
-This figure clearly shows that process A does no work (remains idle) as long as pro- cess B has not called the receive function. 
-When B reaches the communication point, the communication is initiated and B receives the data stored in the buffer of process A. 
-After this communication has completed, both functions can continue doing other work. If the MPI_Send function returns, 
-process A can be sure that the buffer can be overwritten. Analogously, when a process calls a blocking receive function such as MPI_Recv, 
-the process is sure that it can begin using the received data as soon as this function returns.
+This figure clearly shows that process A does no work (remains idle) as long as process B has not called the receive
+function. When B reaches the communication point, the communication is initiated and B receives the data stored in the
+buffer of process A. After this communication has completed, both functions can continue doing other work. If the
+MPI_Send function returns, process A can be sure that the buffer can be overwritten. Analogously, when a process calls
+a blocking receive function such as MPI_Recv, the process is sure that it can begin using the received data as soon as
+this function returns.
 
-Non-blocking send and receive functions behave differently. If a process calls a non- blocking send function (or receive function), 
-this function returns immediately. This process is then said to have ‘posted a send’ (or ‘posted a receive’). 
-After posting a send or receive, the process is able to perform any further instructions. The actual communication will be initiated from the 
-moment a matching call is performed on another process. Essentially, calling a non-blocking send or receive function and the actual transfer 
-of the data is separated. To initiate a non-blocking send or receive operation, a process can call the <tt>MPI_Isend</tt> or the <tt>MPI_Irecv</tt> function respectively. 
-The syntax of these MPI functions is shown in the boxes below.
+Non-blocking send and receive functions behave differently. If a process calls a non-blocking send function (or receive
+function), this function returns immediately. This process is then said to have ‘posted a send’ (or ‘posted a
+receive’). After posting a send or receive, the process is able to perform any further instructions. The actual
+communication will be initiated from the moment a matching call is performed on another process. Essentially, calling a
+non-blocking send or receive function and the actual transfer of the data is separated. To initiate a non-blocking send
+or receive operation, a process can call the <tt>MPI_Isend</tt> or the <tt>MPI_Irecv</tt> function respectively. The
+syntax of these MPI functions is shown in the boxes below.
 
 | MPI_Isend                 |
 | -------------------------|
@@ -175,110 +204,125 @@ The syntax of these MPI functions is shown in the boxes below.
 | <b>Arguments:</b> <tt>void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Request *request</tt> |
 | <b>Description:</b> This function begins a nonblocking receive. |
 
-Note that the syntax of the <tt>MPI_Isend</tt> and <tt>MPI_Irecv</tt> functions is very alike the syntax of the <tt>MPI_Send</tt> and <tt>MPI_Recv</tt> functions. 
-The difference is that the nonblocking operations use so-called <em>request handles</em>. When a send or receive has been posted by a certain process, 
-the request handle can be used by this process to refer to the posted operation at a later point in time. 
-Since the <tt>MPI_Isend</tt> and <tt>MPI_Irecv</tt> functions return immediately after being called, a process has no direct information on when 
-the actual communication is performed. At some point however, it is very likely that the process that posted the send or receive wants to know whether 
-the communication has already finished or not. If this process is the destination, this is crucial if the received data is supposed to be used. 
-If the process is the source, the send buffer can only be overwrit- ten if the message has successfully been sent. For these purposes, the <tt>MPI_Wait</tt> and 
-<tt>MPI_Test</tt> can be used. When the first function is called, it waits for the communication to finish before returning. 
-The second function provides the process with the current status of the communication. The <tt>MPI_Wait</tt> and <tt>MPI_Test</tt> functions use the request handle 
-to identify the preceding <tt>MPI_Isend</tt> or <tt>MPI_Irecv</tt> call.
+Note that the syntax of the <tt>MPI_Isend</tt> and <tt>MPI_Irecv</tt> functions is very alike the syntax of the
+<tt>MPI_Send</tt> and <tt>MPI_Recv</tt> functions. The difference is that the nonblocking operations use so-called
+<em>request handles</em>. When a send or receive has been posted by a certain process, the request handle can be used
+by this process to refer to the posted operation at a later point in time. Since the <tt>MPI_Isend</tt> and
+<tt>MPI_Irecv</tt> functions return immediately after being called, a process has no direct information on when the
+actual communication is performed. At some point however, it is very likely that the process that posted the send or
+receive wants to know whether the communication has already finished or not. If this process is the destination, this
+is crucial if the received data is supposed to be used. If the process is the source, the send buffer can only be
+overwritten if the message has successfully been sent. For these purposes, the <tt>MPI_Wait</tt> and <tt>MPI_Test</tt>
+can be used. When the first function is called, it waits for the communication to finish before returning. The second
+function provides the process with the current status of the communication. The <tt>MPI_Wait</tt> and <tt>MPI_Test</tt>
+functions use the request handle to identify the preceding <tt>MPI_Isend</tt> or <tt>MPI_Irecv</tt> call.
 
-There are advantages and disadvantages to both blocking and non-blocking functions. When a blocking send or receive function returns, 
-the programmer is sure that the information is properly copied to the destination’s memory so that process can be- gin using this information. 
-Additionally, the sending process can safely overwrite the memory locations where the sent information was stored. 
-With non-blocking send and receive functions, there are less certainties.
+There are advantages and disadvantages to both blocking and non-blocking functions. When a blocking send or receive
+function returns, the programmer is sure that the information is properly copied to the destination’s memory so that
+process can begin using this information. Additionally, the sending process can safely overwrite the memory locations
+where the sent information was stored. With non-blocking send and receive functions, there are less certainties.
 
-If a process calls a non-blocking send function, the programmer has to make sure that the information it is about to send is not overwritten 
-(and not even read) while the process executes further instructions. Posting receives is analogous to posting sends, here the programmer must 
-make sure that the memory where the information will be delivered is not already used (read or written) before the communication is completed. 
-The advantage of non-blocking operations is that one process can proceed doing other useful work while the communication is put on hold until the 
-other process reaches the communication point. This can save valuable CPU time. Two processes can for example execute a similar set of routines, 
-but they will never do this perfectly synchronous. Imagine we have 2 processes A and B working on some set of tasks. At a certain point, 
-the programmer can choose to send some information from process A to process B because B needs some result of process A. 
-Assume that process A reaches the communication point before process B does. Process A posts a send with the results as a message, 
-and subsequently moves to working on some other data. The moment process B is ready with its work, its time to bring the results of A and B together. 
-Thus, process B posts a receive, after which the communication is immediately initiated and the information of A is written to the memory of B. 
-Process B can than proceed its work, using the newly received data. This principle is illustrated in the next figure.
+If a process calls a non-blocking send function, the programmer has to make sure that the information it is about to
+send is not overwritten (and not even read) while the process executes further instructions. Posting receives is
+analogous to posting sends, here the programmer must make sure that the memory where the information will be delivered
+is not already used (read or written) before the communication is completed. The advantage of non-blocking operations
+is that one process can proceed doing other useful work while the communication is put on hold until the other process
+reaches the communication point. This can save valuable CPU time. Two processes can for example execute a similar set
+of routines, but they will never do this perfectly synchronous. Imagine we have 2 processes A and B working on some set
+of tasks. At a certain point, the programmer can choose to send some information from process A to process B because B
+needs some result of process A. Assume that process A reaches the communication point before process B does. Process A
+posts a send with the results as a message, and subsequently moves to working on some other data. The moment process B
+is ready with its work, its time to bring the results of A and B together. Thus, process B posts a receive, after which
+the communication is immediately initiated and the information of A is written to the memory of B. Process B can than
+proceed its work, using the newly received data. This principle is illustrated in the next figure.
 
 \image html sendtime.png "With a nonblocking send, other operations can be executed until the other process responds with a call to a receive function."
 
-In this example we see that it is very useful for process A to use a non-blocking oper- ation, since it will have already performed useful work when 
-B reaches the commu- nication point. In the other case, where B reaches this point first, it is useful if B uses a non-blocking receive, 
-at least if it doesn’t require the data from A immediately and if there are other tasks it can perform in the meantime. 
-At some point further in the execution of the program, process B will require the data acquired from A for other operations. 
-Before these operations are started, process B should call a function which checks whether the communication has succeeded and blocks 
-the process as long as this is not the case (the MPI_wait function). Process A should use the same block- ing function before it intends 
-to overwrite the memory where the message for B was stored.
+In this example we see that it is very useful for process A to use a non-blocking oper- ation, since it will have
+already performed useful work when B reaches the communication point. In the other case, where B reaches this point
+first, it is useful if B uses a non-blocking receive, at least if it doesn’t require the data from A immediately and if
+there are other tasks it can perform in the meantime. At some point further in the execution of the program, process B
+will require the data acquired from A for other operations. Before these operations are started, process B should call
+a function which checks whether the communication has succeeded and blocks the process as long as this is not the case
+(the MPI_wait function). Process A should use the same blocking function before it intends to overwrite the memory
+where the message for B was stored.
 
 \subsection Communications_collective Collective communications
 
-Collective communications are communications that involve a group of processors, rather than just two. 
-In principle, all possible movements of data across multiple processors can be accomplished using a sequence of point-to-point communications. 
-There are however a lot of common forms of collective communications for which MPI provides a a set of pre-defined functions.
+Collective communications are communications that involve a group of processors, rather than just two. In principle,
+all possible movements of data across multiple processors can be accomplished using a sequence of point-to-point
+communications. There are however a lot of common forms of collective communications for which MPI provides a a set of
+pre-defined functions.
 
-An important distinction with point-to-point communications is that collective communications do not use the tag mechanism for identifying matching 
-calls from different processes. Instead, all processes involved in the collective communication call the same MPI function and the communication 
-is initiated as soon as each process in the group has done so. The association of the calls of each process is thus made based simply on the order 
-of execution of the program. The figure below this paragraph illustrates this principle. If process A reaches the communication point first, it will wait for other processes 
-and not execute other instructions. It is only when the last process involved in the communication calls the same function, that the actual communication starts. 
-When the communication has completed, each process can proceed executing their instructions.
+An important distinction with point-to-point communications is that collective communications do not use the tag
+mechanism for identifying matching calls from different processes. Instead, all processes involved in the collective
+communication call the same MPI function and the communication is initiated as soon as each process in the group has
+done so. The association of the calls of each process is thus made based simply on the order of execution of the
+program. The figure below this paragraph illustrates this principle. If process A reaches the communication point
+first, it will wait for other processes and not execute other instructions. It is only when the last process involved
+in the communication calls the same function, that the actual communication starts. When the communication has
+completed, each process can proceed executing their instructions.
 
 \image html collectivetime.png "In a collective operation, processes must reach the same point in the program code in order for the communication to begin. The call to the collective function is blocking."
 
-Many different collective communications are defined in the MPI standard. They all provide certain benefits over using point-to-point communications, such as simplicity
-and speed. Below, we will discuss the most important collective operations.
+Many different collective communications are defined in the MPI standard. They all provide certain benefits over using
+point-to-point communications, such as simplicity and speed. Below, we will discuss the most important collective
+operations.
 
 \subsubsection Communications_collective_broadcasts Broadcasts
 
-A first example of a collective communication is a broadcast. In a broadcast operation, a single process sends a copy of the exact same data to all 
-the other processes in a group. In terms of its result, this operation is equivalent with one process calling a separate send function for every 
-other participating process and each of these processes calling a receive function. For the broadcast to take place, each process in the group 
-(the sender and the receivers) should call the MPI_Bcast function in the MPI library. The syntax of this function is shown below.
+A first example of a collective communication is a broadcast. In a broadcast operation, a single process sends a copy
+of the exact same data to all the other processes in a group. In terms of its result, this operation is equivalent with
+one process calling a separate send function for every other participating process and each of these processes calling
+a receive function. For the broadcast to take place, each process in the group (the sender and the receivers) should
+call the MPI_Bcast function in the MPI library. The syntax of this function is shown below.
 
 | MPI_Bcast                 |
 | -------------------------|
 | <b>Type:</b> <tt>int</tt> |
 | <b>Arguments:</b> <tt>void *buffer, int count, MPI_Datatype datatype, int root, MPI_Comm comm</tt> |
-| <b>Description:</b> This function broadcasts a message from the process with rank ‘root’ to all other pro- cesses of the specified communicator. |
+| <b>Description:</b> This function broadcasts a message from the process with rank ‘root’ to all other processes of the specified communicator. |
 
-As soon as each process in the specified communicator calls this function, the broadcast operation is initiated. 
-All processes must agree on the rank of the root process, i.e. the process which sends the information. 
+As soon as each process in the specified communicator calls this function, the broadcast operation is initiated.
+All processes must agree on the rank of the root process, i.e. the process which sends the information.
 The figure below illustrates the result of a broadcast operation.
 
 \image html broadcast.png "The result of a broadcast operation is that some data is copied from the memory of one process to the same memory location of all other processes in the communicator."
 
-It is important to note that all participating processes pass the same buffer (or memory location) to the broadcast function. 
-Before calling the MPI_Bcast function, the root process must ensure that this buffer is filled with the appropriate data. Equivalently,
-the other process must ensure that their buffer is empty or may at least be overwritten. When the broadcast operation is finished, 
-the data in the memory of the root process is copied to the same memory locations of the other processes in the communicator. This principle is illustrated in the next figure.
+It is important to note that all participating processes pass the same buffer (or memory location) to the broadcast
+function. Before calling the MPI_Bcast function, the root process must ensure that this buffer is filled with the
+appropriate data. Equivalently, the other process must ensure that their buffer is empty or may at least be
+overwritten. When the broadcast operation is finished, the data in the memory of the root process is copied to the same
+memory locations of the other processes in the communicator. This principle is illustrated in the next figure.
 
 \image html broadcast2.png "Every process calling the MPI_Bcast function passes the address of a buffer. The information in this buffer of the root process is copied to the buffers of the other processes."
 
-It is obvious that calling the broadcast function from each process is much easier than using multiple sends and receives. 
-Still, the broadcast function is built around these simple point-to-point operations. While the specific algorithm depends on the imple- mentation, 
-most implementations are designed to make very efficient use of the hard- ware on which the MPI program is run. More specifically, 
-the topology of the network that connects the processors determines how the broadcast operation is performed. 
-In a bus topology, for example, where all processors are connected to a single cable, the data sent by the root process can be read simultaneously 
-by the receiving processes. If the network is fully connected (each processor is connected to any other processor), 
-a tree-based mechanism will be the most efficient communication algorithm. Instead of letting the root process send its data successively to every other process, 
-this algorithm will use the connection between different pairs of processes at the same time. In the first stage, the root process sends the data to some other 
-process X in the communica- tor. In the next stage, the root process and process X each send a copy of the data to an other process. 
-This mechanism repeats itself until the message has arrived on each participating process. This tree mechanism is illustrated below.
+It is obvious that calling the broadcast function from each process is much easier than using multiple sends and
+receives. Still, the broadcast function is built around these simple point-to-point operations. While the specific
+algorithm depends on the implementation, most implementations are designed to make very efficient use of the hardware
+on which the MPI program is run. More specifically, the topology of the network that connects the processors determines
+how the broadcast operation is performed. In a bus topology, for example, where all processors are connected to a
+single cable, the data sent by the root process can be read simultaneously by the receiving processes. If the network
+is fully connected (each processor is connected to any other processor), a tree-based mechanism will be the most
+efficient communication algorithm. Instead of letting the root process send its data successively to every other
+process, this algorithm will use the connection between different pairs of processes at the same time. In the first
+stage, the root process sends the data to some other process X in the communicator. In the next stage, the root process
+and process X each send a copy of the data to an other process. This mechanism repeats itself until the message has
+arrived on each participating process. This tree mechanism is illustrated below.
 
 \image html treemechanism.png "Instead of sending the data from the root process to every other process successively, in the tree mechanism the data is distributed with the help of other processes."
 
-Due to these efficient implementations, using the broadcast function is generally much faster than using successive point-to-point communications. 
-The specification of the root process as the mechanism of differentiating amongst the participating processes will be used in many other collective operations.
+Due to these efficient implementations, using the broadcast function is generally much faster than using successive
+point-to-point communications. The specification of the root process as the mechanism of differentiating amongst the
+participating processes will be used in many other collective operations.
 
 \subsubsection Communications_collective_reductions Reductions
 
-A second kind of collective communication is the reduction operation. It is applied to collect data from each processor in a 
-given group and reduce these different sets of data back to one set of data by applying some operation on them. 
-This resulting set of data is then either stored at one particular process or sent back to each individual process. 
-In the case the result should only be used by one process, we use the <tt>MPI_Reduce</tt> function. The syntax of this function is shown below.
+A second kind of collective communication is the reduction operation. It is applied to collect data from each processor
+in a given group and reduce these different sets of data back to one set of data by applying some operation on them.
+This resulting set of data is then either stored at one particular process or sent back to each individual process. In
+the case the result should only be used by one process, we use the <tt>MPI_Reduce</tt> function. The syntax of this
+function is shown below.
 
 | MPI_Reduce                 |
 | -------------------------|
@@ -286,22 +330,27 @@ In the case the result should only be used by one process, we use the <tt>MPI_Re
 | <b>Arguments:</b> <tt>const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op operation, int root, MPI_Comm comm</tt> |
 | <b>Description:</b> This function combines values from all processes and distributes the result back to the process with rank <tt>root</tt>. |
 
-An notable difference with the MPI_Bcast function is that the MPI_Reduce function requires two buffers: a send buffer and a receive buffer. 
-In the send buffer, each process in the communicator stores an array of length count with values of datatype datatype. 
-The receive buffer is used to store the results of the operation that is applied on the values of the different processes. 
-The desired operation is passed as an argument to the MPI_Reduce function by each participating process. There are many different MPI operations available. 
-The MPI_MAX and MPI_MIN operations are used to calculate the maximum and minimum value across all processes for each element of the data buffer. 
-The MPI_SUM and MPI_PROD can be used to determine the sum and product of these values across the processes. Logical operations are denoted by MPI_LAND and MPI_LOR. 
-Note that these operations are always performed count times, the amount of values in the data buffers. The result is of course a buffer with again count values.
-When the operations are complete, the resulting array of values is copied to the memory of the root process. Note that because each process calls the same function, 
-each process should provide a receive buffer. When the reduction operation is finished, the reduced values are copied to the receive buffer of the root 
-process while the receive buffer of the other processes is left untouched. The root process can then begin using the received information and the other processes can 
-overwrite the reserved memory. The send buffer of each process can also be overwritten. The above principles are illustrated in the figure below.
+An notable difference with the MPI_Bcast function is that the MPI_Reduce function requires two buffers: a send buffer
+and a receive buffer. In the send buffer, each process in the communicator stores an array of length count with values
+of datatype datatype. The receive buffer is used to store the results of the operation that is applied on the values of
+the different processes. The desired operation is passed as an argument to the MPI_Reduce function by each
+participating process. There are many different MPI operations available. The MPI_MAX and MPI_MIN operations are used
+to calculate the maximum and minimum value across all processes for each element of the data buffer. The MPI_SUM and
+MPI_PROD can be used to determine the sum and product of these values across the processes. Logical operations are
+denoted by MPI_LAND and MPI_LOR. Note that these operations are always performed count times, the amount of values in
+the data buffers. The result is of course a buffer with again count values. When the operations are complete, the
+resulting array of values is copied to the memory of the root process. Note that because each process calls the same
+function, each process should provide a receive buffer. When the reduction operation is finished, the reduced values
+are copied to the receive buffer of the root process while the receive buffer of the other processes is left untouched.
+The root process can then begin using the received information and the other processes can overwrite the reserved
+memory. The send buffer of each process can also be overwritten. The above principles are illustrated in the figure
+below.
 
 \image html reduce.png "The MPI_Reduce operation."
 
-A variant of the MPI_Reduce function is the MPI_Allreduce function. The syntax of this function is shown below. 
-If this function is used, the result of the operation is not only copied to the memory of one process, but to the memory of each process in the communicator.
+A variant of the MPI_Reduce function is the MPI_Allreduce function. The syntax of this function is shown below. If this
+function is used, the result of the operation is not only copied to the memory of one process, but to the memory of
+each process in the communicator.
 
 | MPI_Allreduce                 |
 | -------------------------|
@@ -309,15 +358,17 @@ If this function is used, the result of the operation is not only copied to the 
 | <b>Arguments:</b> <tt>const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op operation, MPI_Comm comm</tt> |
 | <b>Description:</b> This function combines values from all processes and distributes the result back to all processes. |
 
-An <tt>MPI_Allreduce</tt> operation is similar to a reduce operation followed by a broadcast. The actual implementations may however not use these steps but provide a faster algorithm. 
-The effect of the <tt>MPI_Allreduce</tt> function is shown in the next figure.
+An <tt>MPI_Allreduce</tt> operation is similar to a reduce operation followed by a broadcast. The actual
+implementations may however not use these steps but provide a faster algorithm. The effect of the
+<tt>MPI_Allreduce</tt> function is shown in the next figure.
 
 \image html allreduce.png "The MPI_Allreduce operation."
 
 \subsubsection Communications_collective_gather The gather operation
 
-Another example of a collective operation is provided by the <tt>MPI_Gather</tt> function. It is called an all-to-one operation because it is used to 
-send information from all processes in the group to a single process, the root process. The syntax of the <tt>MPI_Gather</tt> function is shown below.
+Another example of a collective operation is provided by the <tt>MPI_Gather</tt> function. It is called an all-to-one
+operation because it is used to send information from all processes in the group to a single process, the root process.
+The syntax of the <tt>MPI_Gather</tt> function is shown below.
 
 | MPI_Gather                 |
 | -------------------------|
@@ -325,16 +376,18 @@ send information from all processes in the group to a single process, the root p
 | <b>Arguments:</b> <tt>const void *sendbuf, int sendcount, MPI_datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm</tt> |
 | <b>Description:</b> This function gathers data from different processes and sends it to the memory of the process with rank <tt>root</tt>. |
 
-Each process in the communicator must call the <tt>MPI_Gather</tt> function and specify the memory location where its information can be found. 
-Each process also specifies a receive buffer, but this is only meaningful to the process with rank root. 
-The number of elements in the send buffer (given by the sendcount variable) must be the same on all processes. 
-The size of the receive buffer is given by the product of the size of the send buffer and the number of processors in the communicator. 
-The result of the <tt>MPI_Gather</tt> operation is then that the send buffers are copied to the receive buffer at the root process, one after the other, 
-in order of increasing rank. This is illustrated below.
+Each process in the communicator must call the <tt>MPI_Gather</tt> function and specify the memory location where its
+information can be found. Each process also specifies a receive buffer, but this is only meaningful to the process with
+rank root. The number of elements in the send buffer (given by the sendcount variable) must be the same on all
+processes. The size of the receive buffer is given by the product of the size of the send buffer and the number of
+processors in the communicator. The result of the <tt>MPI_Gather</tt> operation is then that the send buffers are
+copied to the receive buffer at the root process, one after the other, in order of increasing rank. This is illustrated
+below.
 
 \image html gather.png "The MPI_Gather operation."
 
-If each process should send a different number of elements to the root process, the <tt>MPI_Gatherv</tt> function must be used.
+If each process should send a different number of elements to the root process, the <tt>MPI_Gatherv</tt> function must
+be used.
 
 | MPI_Gatherv                 |
 | -------------------------|
@@ -342,15 +395,17 @@ If each process should send a different number of elements to the root process, 
 | <b>Arguments:</b> <tt>const void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, const int *recvcounts, const int *displs, MPI_Datatype recvtype, int root, MPI_Comm comm</tt> |
 | <b>Description:</b> This function gathers data of different sizes from all processes in a group into specified locations on the process with rank <tt>root</tt>. |
 
-Each process now has a send buffer with size sendcount, which can differ from process to process. The size of the receive buffer does not need to be specified. 
-Instead, each process passes the address of two arrays: the displacements array (displs) and an array defining the number of elements that is to be 
-received from either process (recv- counts). According to this information, the information in the send buffers is copied to the receive buffer of the root process. 
+Each process now has a send buffer with size sendcount, which can differ from process to process. The size of the
+receive buffer does not need to be specified. Instead, each process passes the address of two arrays: the displacements
+array (displs) and an array defining the number of elements that is to be received from either process (recvcounts).
+According to this information, the information in the send buffers is copied to the receive buffer of the root process.
 This principle is illustrated in the following figure.
 
 \image html gatherv.png "The MPI_Gatherv operation."
 
-Another variation on the <tt>MPI_Gather</tt> function is the <tt>MPI_Allgather</tt> function, of which the syntax is shown below. Similar to the <tt>MPI_Allreduce</tt> 
-operation, this function copies the information to each process in the communicator instead of to one root process.
+Another variation on the <tt>MPI_Gather</tt> function is the <tt>MPI_Allgather</tt> function, of which the syntax is
+shown below. Similar to the <tt>MPI_Allreduce</tt> operation, this function copies the information to each process in
+the communicator instead of to one root process.
 
 | MPI_Allgather                 |
 | -------------------------|
@@ -358,18 +413,20 @@ operation, this function copies the information to each process in the communica
 | <b>Arguments:</b> <tt>const void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, MPI_Comm comm</tt> |
 | <b>Description:</b> This function gathers data from all processes and distribute the combined data to all processes in the communicator. |
 
-By calling this function, the receive buffer of each process in the communicator is filled with the combined information of the send buffers of all processes. 
-This is illustrated in the next figure.
+By calling this function, the receive buffer of each process in the communicator is filled with the combined
+information of the send buffers of all processes. This is illustrated in the next figure.
 
 \image html allgather.png "The MPI_Allgather operation."
 
-There also exists a <tt>MPI_Allgatherv</tt> function, which combines the characteristics of the <tt>MPI_Gatherv</tt> and <tt>MPI_Allgather</tt> functions.
+There also exists a <tt>MPI_Allgatherv</tt> function, which combines the characteristics of the <tt>MPI_Gatherv</tt>
+and <tt>MPI_Allgather</tt> functions.
 
 \subsubsection Communications_collective_scatter The scatter operation
 
-The opposite of the <tt>MPI_Gather</tt> operation is the <tt>MPI_Scatter</tt> operation. In this operation, a block of information on one process, 
-the root process, is divided into pieces which are sent to different processes. This kind of communication is called a one-to- all communication. 
-The syntax of the <tt>MPI_Scatter</tt> function is shown in the box below.
+The opposite of the <tt>MPI_Gather</tt> operation is the <tt>MPI_Scatter</tt> operation. In this operation, a block of
+information on one process, the root process, is divided into pieces which are sent to different processes. This kind
+of communication is called a one-to-all communication. The syntax of the <tt>MPI_Scatter</tt> function is shown in the
+box below.
 
 | MPI_Scatter                 |
 | -------------------------|
@@ -377,18 +434,19 @@ The syntax of the <tt>MPI_Scatter</tt> function is shown in the box below.
 | <b>Arguments:</b> <tt>const void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm</tt> |
 | <b>Description:</b> This function sends data from one process to all processes in a communicator. |
 
-Each process calls the MPI_Scatter function, specifying the address of the send buffer and the receive buffer. 
-Only the process with rank root should fill in the send buffer. The length of the send buffer must be a multiple of the number of processes in the communicator. 
-This send buffer is then broken up in pieces of equal length, which are copied to the receive buffers of all processes. 
-The order in which processes receive successive pieces is determined by their rank. The send buffer is only meaningful for the root process, 
-as illustrated in the figure below.
+Each process calls the MPI_Scatter function, specifying the address of the send buffer and the receive buffer. Only the
+process with rank root should fill in the send buffer. The length of the send buffer must be a multiple of the number
+of processes in the communicator. This send buffer is then broken up in pieces of equal length, which are copied to the
+receive buffers of all processes. The order in which processes receive successive pieces is determined by their rank.
+The send buffer is only meaningful for the root process, as illustrated in the figure below.
 
 \image html scatter.png "The MPI_Scatter operation."
 
-After the scatter operation, all processes can use the information contained in their
-receive buffer. The send buffers can be overwritten.
+After the scatter operation, all processes can use the information contained in their receive buffer. The send buffers
+can be overwritten.
 
-If the information that has to be sent to different processes differs in length, the <tt>MPI_Scatterv</tt> function can be used. The syntax of this function is shown below.
+If the information that has to be sent to different processes differs in length, the <tt>MPI_Scatterv</tt> function can
+be used. The syntax of this function is shown below.
 
 | MPI_Scatterv                 |
 | -------------------------|
@@ -396,14 +454,15 @@ If the information that has to be sent to different processes differs in length,
 | <b>Arguments:</b> <tt>const void *sendbuf, const int *sendcounts, const int *displs, MPI_Datatype sendtype, void *recvbuf, int recvcount, MPI_Datatype recvtype, int root, MPI_Comm comm</tt> |
 | <b>Description:</b> This function scatters the information in a buffer of the process with rank root in parts to all processes in a communicator. |
 
-Each process passes a send and receive buffer to this function. The size of the send buffer is not specified. 
-The root process fills this send buffer with information, which does not have to be contigious: gaps are allowed between different pieces. 
-Each piece is sent to the receive buffer of a different process. The arrays sendcounts and displs specify the position and length of the pieces, 
-in the order of the rank of the receiving processes. This is illustrated in the following figure.
+Each process passes a send and receive buffer to this function. The size of the send buffer is not specified. The root
+process fills this send buffer with information, which does not have to be contigious: gaps are allowed between
+different pieces. Each piece is sent to the receive buffer of a different process. The arrays sendcounts and displs
+specify the position and length of the pieces, in the order of the rank of the receiving processes. This is illustrated
+in the following figure.
 
 \image html scatterv.png "The MPI_Scatterv operation."
 
-Note that although the figure may suggest so, the pieces in the send buffer do not have
-to be positioned in the same order as the processes are ranked.
+Note that although the figure may suggest so, the pieces in the send buffer do not have to be positioned in the same
+order as the processes are ranked.
 
 */
