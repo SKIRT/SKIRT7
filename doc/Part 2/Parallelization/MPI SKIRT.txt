@@ -1,6 +1,6 @@
 /**
 
-\page ParallelizationMPI_skirt MPI parallelization in SKIRT
+\page ParallelizationMPI_skirt Multi-processing in SKIRT
 
 \section Parallelizationmodes MPI Parallelization modes
 

@@ -1,6 +1,6 @@
 /**
 
-\page ParallelizationThreads_skirt Thread parallelization in SKIRT
+\page ParallelizationThreads_skirt Multi-threading in SKIRT
 
 \section ParallelizationThreads_intro Parallelization scheme
 
