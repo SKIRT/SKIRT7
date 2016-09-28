@@ -1,17 +1,17 @@
 /**
 
-\page UserMPI Use SKIRT with MPI
+\page UserMPI Using SKIRT with multiple processes
 
 \section UserMPI_Introduction Introduction
 
-The basic unit of parallelization in <tt>SKIRT</tt> is a chunk. A chunk is a certain number of photon packages of the same wavelength. 
-Such a chunk is always simulated by a single thread. The total number of chunks is determined by the number of wavelengths in the 
-simulation and the number of photon packages desired per wavelength. The parallelization of the oligochromatic and panchromatic simulations is 
-designed in the same way: the \f$N_C \times N_{\lambda}\f$ chunks are distributed over the different threads, for different wavelengths at a time. 
-The first chunks of each wavelength are handed out first. Whenever a thread has finished its work, it picks out a chunk of the wavelength that 
-is next in line. 
- 
-We have implemented an MPI parallelization in <tt>SKIRT</tt> that follows the same design as the thread parallelization. 
+The basic unit of parallelization in <tt>SKIRT</tt> is a chunk. A chunk is a certain number of photon packages of the same wavelength.
+Such a chunk is always simulated by a single thread. The total number of chunks is determined by the number of wavelengths in the
+simulation and the number of photon packages desired per wavelength. The parallelization of the oligochromatic and panchromatic simulations is
+designed in the same way: the \f$N_C \times N_{\lambda}\f$ chunks are distributed over the different threads, for different wavelengths at a time.
+The first chunks of each wavelength are handed out first. Whenever a thread has finished its work, it picks out a chunk of the wavelength that
+is next in line.
+
+We have implemented an MPI parallelization in <tt>SKIRT</tt> that follows the same design as the thread parallelization.
 That means: each process simulates <em>all wavelengths</em>, but each process simulates only a portion of the chunks. For more details about the implementation,
 see \ref ParallelizationMPI_skirt.
 
@@ -19,47 +19,47 @@ see \ref ParallelizationMPI_skirt.
 
 \subsection UserMPI_comparison Comparison of multithreading and MPI
 
-The essence of a multithreaded parallelization is that the code executed by the different processors uses the same memory locations. 
-The threads share the entire process state, with all variables and functions. This inevitably leads to so-called <em>race conditions</em>, 
-where different threads want to read or write the same memory location at the same time. When one process acts on the value of a certain variable, 
-during which another thread changes that same variable, inconsistencies occur. There are mechanisms that prevent this incorrect behaviour, 
-such as locking. Locking basically means that all other threads are prevented from reading a certain variable 
-until a certain thread has finished writing it. If used extensively however, with a large number of threads, 
+The essence of a multithreaded parallelization is that the code executed by the different processors uses the same memory locations.
+The threads share the entire process state, with all variables and functions. This inevitably leads to so-called <em>race conditions</em>,
+where different threads want to read or write the same memory location at the same time. When one process acts on the value of a certain variable,
+during which another thread changes that same variable, inconsistencies occur. There are mechanisms that prevent this incorrect behaviour,
+such as locking. Locking basically means that all other threads are prevented from reading a certain variable
+until a certain thread has finished writing it. If used extensively however, with a large number of threads,
 this can ultimately lead to decreased performance.
 
-With an MPI parallelization, the execution of parallel code is performed by multiple, independent processes, 
-each with their own memory addresses and process state. This avoids the performance issues from which the multithreading suffers. 
-On the other hand, this kind of parallelization requires the implementation of explicit calls to the MPI library at any point 
-where communication is needed between processes: a process cannot just read the memory of an other process. 
-If implemented efficiently with the minimal amount of communication, an MPI parallelized code scales much better (in speedup) for a 
-high number of processors then an equivalent multithreaded one. Therefore, the MPI parallelized codes are perfectly suited for running on (distributed memory) 
-multi-processor systems (or supercomputers). 
+With an MPI parallelization, the execution of parallel code is performed by multiple, independent processes,
+each with their own memory addresses and process state. This avoids the performance issues from which the multithreading suffers.
+On the other hand, this kind of parallelization requires the implementation of explicit calls to the MPI library at any point
+where communication is needed between processes: a process cannot just read the memory of an other process.
+If implemented efficiently with the minimal amount of communication, an MPI parallelized code scales much better (in speedup) for a
+high number of processors then an equivalent multithreaded one. Therefore, the MPI parallelized codes are perfectly suited for running on (distributed memory)
+multi-processor systems (or supercomputers).
 
 \subsection UserMPI_memory Memory considerations
 
 \note For a more detailed discussion of the concepts regarding parallel computing used in this subsection, see \ref ParallelComputing.
 
-As each MPI process is basically a copy of the entire program, a program parallelized with \f$n\f$ parallel processes 
-takes in \f$n\f$ times as much memory as the same program parallelized with \f$n\f$ parallel threads. 
-That could be a reason for choosing a multithreaded approach for <tt>SKIRT</tt> when the model size is too large (many wavelengths and/or a fine dust grid). 
-When we talk about running a program with MPI, we of course assume that the model fits on the system. 
+As each MPI process is basically a copy of the entire program, a program parallelized with \f$n\f$ parallel processes
+takes in \f$n\f$ times as much memory as the same program parallelized with \f$n\f$ parallel threads.
+That could be a reason for choosing a multithreaded approach for <tt>SKIRT</tt> when the model size is too large (many wavelengths and/or a fine dust grid).
+When we talk about running a program with MPI, we of course assume that the model fits on the system.
 
-A process always resides on a single node, but a node can host multiple processes. So does a processor. 
+A process always resides on a single node, but a node can host multiple processes. So does a processor.
 Processes can (and have to) communicate through MPI whether they reside on the same processor, the same node or on a different node in the cluster.
-Assuming that running more than one thread on a single processor at a particular moment is pointless, 
-a node with \f$N\f$ processors can host at most \f$P\f$ processes with \f$N⁄P\f$ threads each. 
+Assuming that running more than one thread on a single processor at a particular moment is pointless,
+a node with \f$N\f$ processors can host at most \f$P\f$ processes with \f$N⁄P\f$ threads each.
 On the other hand, a node with physical memory size \f$M\f$ can host no more than \f$P\f$ processes with a memory requirement of \f$M/P\f$ each.
 
-Assume each process needs a logical memory of size \f$D\f$ to fit the model. The node has a memory capacity of \f$M\f$. 
-If \f$M/D<2\f$, only one model can fit on the node. Thus, irrespective of the number of processors, only one process can be run at a time. 
+Assume each process needs a logical memory of size \f$D\f$ to fit the model. The node has a memory capacity of \f$M\f$.
+If \f$M/D<2\f$, only one model can fit on the node. Thus, irrespective of the number of processors, only one process can be run at a time.
 To make use of the multiple processors of the node, we must apply multithreading.
-If \f$M/D \geq 2\f$, more than one process can be run on the node. The number of processes \f$P\f$ can actually be any number between 1 and \f$M/D\f$, 
+If \f$M/D \geq 2\f$, more than one process can be run on the node. The number of processes \f$P\f$ can actually be any number between 1 and \f$M/D\f$,
 with multiprocessing used to make sure that each processor executes threads.
-It is however more efficient to always use the maximal number of processes \f$P=M/D\f$ (rounded down) in this case. 
+It is however more efficient to always use the maximal number of processes \f$P=M/D\f$ (rounded down) in this case.
 This is because multi-<em>processing</em> scales better than multi-<em>threading</em>. Using multiprocessing (MPI) will thus probably lead to the shortest execution time.
-From the other perspective, where we want to maximize the size of our model, we can benefit from using multithreading. 
-If there are \f$P\f$ processes, each with \f$T=N/P\f$ threads, the model size is limited to \f$D=M/P=T \times M/N \f$. 
-Therefore, the maximum model size is reached for \f$T=N\f$ or \f$P=1\f$. In other words, using only one process on the node and a number of threads equal 
+From the other perspective, where we want to maximize the size of our model, we can benefit from using multithreading.
+If there are \f$P\f$ processes, each with \f$T=N/P\f$ threads, the model size is limited to \f$D=M/P=T \times M/N \f$.
+Therefore, the maximum model size is reached for \f$T=N\f$ or \f$P=1\f$. In other words, using only one process on the node and a number of threads equal
 to the number of processors on that node permits the largest model size.
 
 <b>Things to remember from the discussion above:</b>
@@ -69,14 +69,14 @@ to the number of processors on that node permits the largest model size.
 
 \subsection UserMPI_hybrid Hybrid parallelization of SKIRT
 
-Regarding the advantages and disadvantages of both kinds of parallelization explained in the previous subsection, in practice 
-a combination of both kinds (a <em>hybrid</em> parallelization) is often useful on computing clusters. On these systems, each 
+Regarding the advantages and disadvantages of both kinds of parallelization explained in the previous subsection, in practice
+a combination of both kinds (a <em>hybrid</em> parallelization) is often useful on computing clusters. On these systems, each
 computing node consists of multiple processors sharing the same memory. This hybrid model of parallelization in the case of <tt>SKIRT</tt> is illustrated in
 the following figure:
 
-\image html hybridskirt.png 
+\image html hybridskirt.png
 
-The message passing parallelization of <tt>SKIRT</tt> uses the MPI library. 
+The message passing parallelization of <tt>SKIRT</tt> uses the MPI library.
 Within each MPI process, the QThread library is used to create a multithreading environment.
 
 \section UserMPI_Compiling Compiling SKIRT with MPI
@@ -88,15 +88,15 @@ use the MPI parallelization (or hybrid parallelization) on the VSC infrastructur
 instructions in \ref UserHPC.
 
 If you have an MPI implementation installed, you have to make sure you compile the <tt>SKIRT</tt> with MPI before you can use the MPI parallelization. By default,
-<tt>SKIRT</tt> will be automatically compiled with MPI if MPI is installed on the system. Therefore, recompiling <tt>SKIRT</tt> once after installing the MPI 
+<tt>SKIRT</tt> will be automatically compiled with MPI if MPI is installed on the system. Therefore, recompiling <tt>SKIRT</tt> once after installing the MPI
 distribution should provide you with an MPI enabled <tt>SKIRT</tt> on your system. You can check whether the MPI compiler is indeed found during compilation
 (either by running makeSKIRT.sh or using the hammer icon in Qt Creator) by looking at the compilation output. On a system where an MPI compiler is present, the following
 output will appear when compiling <tt>SKIRT</tt> from within Qt Creator:
 
 \image html compilempicxx.jpeg
 
-The lines stating "Project MESSAGE: using MPI compiler ... " inform you that the MPI compiler is found and will be used for the compilation of <tt>SKIRT</tt>. 
-You will get a seperate message for each subproject of <tt>SKIRT</tt> that depends on MPI (\c FitSKIRTmain, \c MPIsupport, \c SKIRTmain and \c SkirtMakeUp), 
+The lines stating "Project MESSAGE: using MPI compiler ... " inform you that the MPI compiler is found and will be used for the compilation of <tt>SKIRT</tt>.
+You will get a seperate message for each subproject of <tt>SKIRT</tt> that depends on MPI (\c FitSKIRTmain, \c MPIsupport, \c SKIRTmain and \c SkirtMakeUp),
 revealing the location of your MPI installation. When compiling <tt>SKIRT</tt> with the makeSKIRT.sh script, you can find the same messages, but they are harder
 to find between the other terminal output. If you want to check the MPI compilation in this case, copy your terminal output to a text editor and search for
 the corresponding sentence.
@@ -104,7 +104,7 @@ the corresponding sentence.
 \section UserMPI_launching Launching SKIRT with MPI
 
 Using the MPI parallelization for a <tt>SKIRT</tt> simulation is straightforward. You will make use of the \c mpirun command, which is a script that
-starts the required number of processes for the program that you want to use. The \c mpirun command is universal on all systems, and the script will 
+starts the required number of processes for the program that you want to use. The \c mpirun command is universal on all systems, and the script will
 automatically detect the kind of system you are on. It basically launches \f$n\f$ identical copies of a program, regardless of whether that program is
 parallelized with MPI or not. In our case, the <tt>SKIRT</tt> code is parallelized and "is aware" of the multiprocess environment, so processes can distinguish
 between each other.
@@ -117,32 +117,32 @@ The usual \c skirt command with its parameters is thus placed after the <tt>mpir
 with 10 processes, and 1 thread per process for the "galaxy.ski" parameter file is started by typing the following command:
 
     mpirun -n 10 skirt -t 1 galaxy.ski [ENTER]
-    
+
 Note that the number of threads does not have to be 1, in fact you can use any combination of the number of processes and the number of threads,
-as explained in \ref UserMPI_hybrid. The output of the above command is the same as for the regular \c skirt command. The only difference is that you 
+as explained in \ref UserMPI_hybrid. The output of the above command is the same as for the regular \c skirt command. The only difference is that you
 will be informed of the number of parallel processes with which the simulation is run, as indicated in the figure below.
 
 \image html skirtwithmpi.jpeg
 
 \note If you launched a <tt>SKIRT</tt> simulation with the <tt>mpirun -n N</tt> command, but the terminal output doesn't state "with N processes", this
 means that <tt>SKIRT</tt> was not properly compiled with MPI. In that case, using \c mpirun is useless, as you will have \f$N\f$ identical instances of
-<tt>SKIRT</tt>, each of them performing the same simulation. 
+<tt>SKIRT</tt>, each of them performing the same simulation.
 
-At the moment, the setup of the simulation is not parallelized with MPI. This means which that during the setup, all processes execute the same algorithm and 
+At the moment, the setup of the simulation is not parallelized with MPI. This means which that during the setup, all processes execute the same algorithm and
 do not work together to speed up the calculation. Therefore, you will not notice a speedup in this phase compared to a singlethreaded non-MPI run of <tt>SKIRT</tt>,
-regardless of the number of processes. Although in some cases, part of the setup is parallelized with multithreading, this feature has to be disabled when 
+regardless of the number of processes. Although in some cases, part of the setup is parallelized with multithreading, this feature has to be disabled when
 running with multiple processes (this has to do with constructing a dust grid that is consistent across all processes). Therefore, if you launched a simulation
-with \f$n\f$ processes and \f$t\f$ threads, during the setup <tt>SKIRT</tt> will behave as was launched with 1 process and 1 thread. You can observe this behaviour 
+with \f$n\f$ processes and \f$t\f$ threads, during the setup <tt>SKIRT</tt> will behave as was launched with 1 process and 1 thread. You can observe this behaviour
 in the terminal output as follows: before the setup you will find the following line:
 
-    Initializing random number generator for thread number 0 with seed 4357... 
-    
+    Initializing random number generator for thread number 0 with seed 4357...
+
 Right after the setup, you will be shown the following lines (depending on the number of threads \f$t\f$ you chose):
 
-    Initializing random number generator for thread number 0 with seed 4357... 
+    Initializing random number generator for thread number 0 with seed 4357...
     Initializing random number generator for thread number 1 with seed 4358...
     ...
-    Initializing random number generator for thread number t-1 with seed 4357+t-1...  
+    Initializing random number generator for thread number t-1 with seed 4357+t-1...
 
 When the stellar emission phase is entered, you will be informed of the number of photon packages per wavelength as usual, and additionally the number of
 photon packages per wavelength <em>per process</em> (see the figure below).
@@ -150,7 +150,7 @@ photon packages per wavelength <em>per process</em> (see the figure below).
 \image html skirtwithmpi_pp.png
 
 The same information will appear before each selfabsorption cycle and the dust emission phase. In the next section, you can learn about how to asses whether
-the multithreaded, MPI or hybrid parallelization works best for your simulations. As the MPI implementation is a new feature in <tt>SKIRT</tt>, you are very 
+the multithreaded, MPI or hybrid parallelization works best for your simulations. As the MPI implementation is a new feature in <tt>SKIRT</tt>, you are very
 welcome to share your results (concerning performance improvements or exciting new simulations) with the <tt>SKIRT</tt> development team. Feel free to explore
 its capabilities on any supercomputer system.
 
@@ -158,36 +158,36 @@ its capabilities on any supercomputer system.
 
 \subsection UserMPI_Interpreting_intro Introduction
 
-No matter how big the effort, a computer program can never be made entirely parallel. If a program could be perfectly parallelized, 
-the runtime of the program would keep decreasing with the same rate at which the number of parallel processes increases. There are however a few 
-factors that prevent this perfect behaviour. First of all, not all operations in a serial program can be broken down into smaller operations 
-that can then be executed by different processors. As an example, input and output can be included in these kinds of operations. 
+No matter how big the effort, a computer program can never be made entirely parallel. If a program could be perfectly parallelized,
+the runtime of the program would keep decreasing with the same rate at which the number of parallel processes increases. There are however a few
+factors that prevent this perfect behaviour. First of all, not all operations in a serial program can be broken down into smaller operations
+that can then be executed by different processors. As an example, input and output can be included in these kinds of operations.
 As a result, some portion of the program is always serial, and will thus require a certain runtime \f$T_s\f$ irrespective of the number of
 processes. This principle is illustrated in the figure below.
 
 \image html serialparallel.png
 
-Secondly, an important aspect of parallel computing is communication. Although some applications require a very limited amount of communication between processors, 
-some form of communication in a parallel program is inevitable. The bottleneck for the speed of the communication is the throughput or bandwidth of the communication network. 
-In contrast to the time \f$T_s\f$ spent on the execution of the serial portion of the program, the time required for communication generally increases with the number of processes used. 
-There are also other overheads of parallelization, such as <em>idle time</em>. This is the time processes or threads do no work while they wait for further instructions. 
+Secondly, an important aspect of parallel computing is communication. Although some applications require a very limited amount of communication between processors,
+some form of communication in a parallel program is inevitable. The bottleneck for the speed of the communication is the throughput or bandwidth of the communication network.
+In contrast to the time \f$T_s\f$ spent on the execution of the serial portion of the program, the time required for communication generally increases with the number of processes used.
+There are also other overheads of parallelization, such as <em>idle time</em>. This is the time processes or threads do no work while they wait for further instructions.
 The effects of overheads on the runtime of a parallel program is illustrated below.
 
 \image html serialparallel2.png
 
 \subsection UserMPI_Interpreting_scaling Scaling
 
-The behaviour of the total runtime of a program corresponding to an increase in the amount of parallel processors this program is run on, 
-is called \em scaling. The quantity that is mostly used to study scaling is called the \em speedup. The speedup \f$S\f$ refers to how much faster a program runs 
-when it is run in parallel, compared to when it is run as a serial or sequential algorithm. If \f$T_1\f$ is the time needed for a serial run (on one processor) 
+The behaviour of the total runtime of a program corresponding to an increase in the amount of parallel processors this program is run on,
+is called \em scaling. The quantity that is mostly used to study scaling is called the \em speedup. The speedup \f$S\f$ refers to how much faster a program runs
+when it is run in parallel, compared to when it is run as a serial or sequential algorithm. If \f$T_1\f$ is the time needed for a serial run (on one processor)
 and \f$T_n\f$ is the runtime of the parallel algorithm with \f$n\f$ processors, the speedup for \f$n\f$ processors can be defined as:
 
 \f[ S_n = \frac{T_1}{T_n} \f]
 
-Theoretically, if a program would be perfectly parallelized, the runtime would decrease as \f$T_n = \tfrac{T_1}{n}\f$ with \f$n\f$ the number of parallel processors. 
-In this case, the scaling is said to be linear. The <em>linear speedup</em> or <em>ideal speedup</em> is thus given by \f$S_n = n\f$. 
-In practice, a program can never show linear scaling, due to the reasons described above. In a simplified case where the communication bottleneck is ignored, 
-we can derive a simple equation describing the speedup as a function of the number of parallel processes. If \f$T_s\f$ is the time spent on serial parts of the program, 
+Theoretically, if a program would be perfectly parallelized, the runtime would decrease as \f$T_n = \tfrac{T_1}{n}\f$ with \f$n\f$ the number of parallel processors.
+In this case, the scaling is said to be linear. The <em>linear speedup</em> or <em>ideal speedup</em> is thus given by \f$S_n = n\f$.
+In practice, a program can never show linear scaling, due to the reasons described above. In a simplified case where the communication bottleneck is ignored,
+we can derive a simple equation describing the speedup as a function of the number of parallel processes. If \f$T_s\f$ is the time spent on serial parts of the program,
 and \f$T_p\f$ is the amount of time spent (by a serial processor) on parts of the program that can be done in parallel, \f$T_1\f$ and \f$T_n\f$ can be written as:
 
 \f[ T_1 = T_s + T_p \f]
@@ -202,12 +202,12 @@ We can now introduce the following quantities:
 \f[ s \equiv \frac{T_s}{T_1} \f]
 \f[ p \equiv \frac{T_p}{T_1} \f]
 
-These quantities represent respectively the portion of the time spent on serial parts and the portion of the time spent on parallelized parts. 
+These quantities represent respectively the portion of the time spent on serial parts and the portion of the time spent on parallelized parts.
 The equation for the speedup can now be rewritten as:
 
 \f[ S_n = \frac{1}{1-p+\tfrac{p}{n}} \f]
 
-Here, we have made use of the fact that \f$s = 1 - p\f$. The above equation is known as <em>Amdahl’s law</em>, named after computer architect Gene Amdahl. 
+Here, we have made use of the fact that \f$s = 1 - p\f$. The above equation is known as <em>Amdahl’s law</em>, named after computer architect Gene Amdahl.
 A plot of this relation for different values of the parameter \f$p\f$ is shown in the following figure.
 
 \image html amdahl.png
@@ -217,28 +217,28 @@ reaches a maximum value given by:
 
 \f[ S_{\infty}= \frac{1}{1-p} \f]
 
-This value, corresponding to a certain value of \f$p\f$, is called the <em>theoretical maximum speedup</em>. Thus, the total runtime of the 
-program will in the best case be equal to \f$T_s\f$, the runtime of the serial portion of the program. In this case, 
-the parallel portion of the program is executed infinitely fast. As seen in the figure, the speedup gradually flattens out to its asymptotic value. 
-This means that at some point, adding more processors into the computation gives no true benefit. In a practical application, it is therefore 
-important to empirically determine the speedup curve. If this curve shows that adding more then a certain amount of processors does not 
-increase the speedup appreciably, adding those processors can and should be avoided. After all, most of the time on each individual processor 
-will be used by executing the serial part (with a multiprocess algorithm) or this time will be wasted by remaining idle (with a multithreading algorithm). 
-In any realistic case, adding processors will eventually also provide a significant negative contribution to the speedup for large \f$n\f$, due to the 
-communication overhead. Despite its simplicity, Amdahl’s law provides a useful tool of quantifying the maximum number of processors that can 
-be allowed to participate in the parallel execution of a program. Let’s say a same program is run repeatedly with a different number of 
-parallel processes, and the speedup is measured for each run. If we assume that the number of processors used for these runs is not too large, 
-and consequently the communication time is still one or more magnitudes smaller then the total execution time of the program, we can 
-expect the speedups to follow Amdahl’s law. Fitting the observed speedups to this equation results in a certain value of the parameter \f$p\f$, 
-the parallel portion of the program. With this value of \f$p\f$, Amdahl’s law allows us to extrapolate the observed speedups to higher numbers of processors. 
-The part of the curve where the speedups flatten out, allows us to determine an absolute upper limit to the number of processors that 
+This value, corresponding to a certain value of \f$p\f$, is called the <em>theoretical maximum speedup</em>. Thus, the total runtime of the
+program will in the best case be equal to \f$T_s\f$, the runtime of the serial portion of the program. In this case,
+the parallel portion of the program is executed infinitely fast. As seen in the figure, the speedup gradually flattens out to its asymptotic value.
+This means that at some point, adding more processors into the computation gives no true benefit. In a practical application, it is therefore
+important to empirically determine the speedup curve. If this curve shows that adding more then a certain amount of processors does not
+increase the speedup appreciably, adding those processors can and should be avoided. After all, most of the time on each individual processor
+will be used by executing the serial part (with a multiprocess algorithm) or this time will be wasted by remaining idle (with a multithreading algorithm).
+In any realistic case, adding processors will eventually also provide a significant negative contribution to the speedup for large \f$n\f$, due to the
+communication overhead. Despite its simplicity, Amdahl’s law provides a useful tool of quantifying the maximum number of processors that can
+be allowed to participate in the parallel execution of a program. Let’s say a same program is run repeatedly with a different number of
+parallel processes, and the speedup is measured for each run. If we assume that the number of processors used for these runs is not too large,
+and consequently the communication time is still one or more magnitudes smaller then the total execution time of the program, we can
+expect the speedups to follow Amdahl’s law. Fitting the observed speedups to this equation results in a certain value of the parameter \f$p\f$,
+the parallel portion of the program. With this value of \f$p\f$, Amdahl’s law allows us to extrapolate the observed speedups to higher numbers of processors.
+The part of the curve where the speedups flatten out, allows us to determine an absolute upper limit to the number of processors that
 should be used with the particular program.
 
-Another use of Amdahl’s law can be illustrated in the following way. Let’s say we have a program that is currently serial and we want to 
-look into the advantage of parallelizing it. Assume that we know what parts of the program are impossible or extremely 
-difficult to parallelize and what parts could be parallelized. By analyzing the time spent in either parts of the program, 
-we could find for example that the strictly serial part takes 25% of the computation time while the other part takes 75% of the time. 
-Without the necessity of parallelizing anything, the equation above tells us that under the best conditions the maximum speedup will be 4 
+Another use of Amdahl’s law can be illustrated in the following way. Let’s say we have a program that is currently serial and we want to
+look into the advantage of parallelizing it. Assume that we know what parts of the program are impossible or extremely
+difficult to parallelize and what parts could be parallelized. By analyzing the time spent in either parts of the program,
+we could find for example that the strictly serial part takes 25% of the computation time while the other part takes 75% of the time.
+Without the necessity of parallelizing anything, the equation above tells us that under the best conditions the maximum speedup will be 4
 regardless of the number of processors. Thus, Amdahl’s law also eliminates many applications from consideration for parallelization.
 
 \subsection UserMPI_Interpreting_comparing Comparing multithreading and MPI
@@ -246,4 +246,3 @@ regardless of the number of processors. Thus, Amdahl’s law also eliminates man
 
 
 */
- 
