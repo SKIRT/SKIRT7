@@ -296,7 +296,7 @@ void MonteCarloSimulation::dostellaremissionchunk(size_t index)
 
 ////////////////////////////////////////////////////////////////////
 
-void MonteCarloSimulation::peeloffemission(PhotonPackage* pp, PhotonPackage* ppp)
+void MonteCarloSimulation::peeloffemission(const PhotonPackage* pp, PhotonPackage* ppp)
 {
     Position bfr = pp->position();
 
@@ -310,7 +310,7 @@ void MonteCarloSimulation::peeloffemission(PhotonPackage* pp, PhotonPackage* ppp
 
 ////////////////////////////////////////////////////////////////////
 
-void MonteCarloSimulation::peeloffscattering(PhotonPackage* pp, PhotonPackage* ppp)
+void MonteCarloSimulation::peeloffscattering(const PhotonPackage* pp, PhotonPackage* ppp)
 {
     int Ncomp = _ds->Ncomp();
     int ell = pp->ell();
@@ -358,7 +358,7 @@ void MonteCarloSimulation::peeloffscattering(PhotonPackage* pp, PhotonPackage* p
 
 ////////////////////////////////////////////////////////////////////
 
-void MonteCarloSimulation::continuouspeeloffscattering(PhotonPackage *pp, PhotonPackage *ppp)
+void MonteCarloSimulation::continuouspeeloffscattering(const PhotonPackage *pp, PhotonPackage *ppp)
 {
     int ell = pp->ell();
     Position bfr = pp->position();

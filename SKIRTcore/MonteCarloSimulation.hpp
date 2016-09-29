@@ -233,7 +233,7 @@ protected:
         the function creates such a peel-off photon package and feeds it to the instrument. The
         first argument specifies the photon package that was just emitted; the second argument
         provides a placeholder peel off photon package for use by the function. */
-    void peeloffemission(PhotonPackage* pp, PhotonPackage* ppp);
+    void peeloffemission(const PhotonPackage* pp, PhotonPackage* ppp);
 
     /** This function simulates the peel-off of a photon package before a scattering event. This
         means that, just before a scattering event, we create peel-off or shadow photon packages,
@@ -267,7 +267,7 @@ protected:
         peel-off photon package and feeds it to the instrument. The first argument specifies the
         photon package that was just emitted; the second argument provides a placeholder peel off
         photon package for use by the function. */
-    void peeloffscattering(PhotonPackage* pp, PhotonPackage* ppp);
+    void peeloffscattering(const PhotonPackage* pp, PhotonPackage* ppp);
 
     /** This function simulates the continuous peel-off of a series of photon packages along the
         path of the original photon package. It should be called before the
@@ -286,7 +286,7 @@ protected:
         the path until the exit point of the \f$n\f$'th dust cell along the path. The second weight
         factor \f$w_{\text{obs}}\f$ compensates for the change in propagation direction, and is
         determined as explained for the function peeloffscattering(). */
-    void continuouspeeloffscattering(PhotonPackage* pp, PhotonPackage* ppp);
+    void continuouspeeloffscattering(const PhotonPackage* pp, PhotonPackage* ppp);
 
     /** This function simulates the escape from the system and the absorption by dust of a fraction
         of the luminosity of a photon package. It actually splits the luminosity \f$L_\ell\f$ of
