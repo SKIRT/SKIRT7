@@ -12,13 +12,11 @@ settings untouched), and at the end press the OK button to confirm the changes.
 - Select the "Build&Run->Compilers" tab and verify that Qt automatically detected the Clang compiler installed on your
     computer. If not, manually add a suitable compiler and press the "Apply" button.
 
-- Select the "Build&Run->Qt Versions" tab and verify that Qt automatically detected the Qt version you just installed
-    (Qt 5.4 if you followed this manual). If not, manually add an appropriate Qt version.
+- Select the "Build&Run->Qt Versions" tab and verify that Qt automatically detected the Qt version you just installed. If not, manually add an appropriate Qt version.
 
 - Select the "Build&Run->Kits" tab. Remove any lines listed other than "Desktop (Default)" (select each of the
     lines in turn and press the "Remove" button). Select the line "Desktop (Default)" and verify and/or configure
-    its properties: "Compiler" should be "Clang x86 64-bit", and "Qt version" should be the version you installed
-    (i.e. Qt 5.4 if you followed this manual).
+    its properties: "Compiler" should be "Clang x86 64-bit", and "Qt version" should be the version you installed.
 
 - "Text Editor -> Behavior" tab
     - Tab size: 4

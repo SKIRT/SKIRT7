@@ -4,7 +4,7 @@
 
 \section InstallReq System requirements
 
-<tt>SKIRT</tt> has been developed and tested on Mac OS X 10.9 (Mavericks), Mac OS X 10.10 (Yosemite) and on the Linux distributions Ubuntu 12.04 (64-bit) and Ubuntu 14.04 (64-bit).
+<tt>SKIRT</tt> has been developed and tested on Mac OS X 10.9 (Mavericks), Mac OS X 10.10 (Yosemite), Mac OS X 10.11 (El Capitan) and on the Linux distributions Ubuntu 12.04 (64-bit) and Ubuntu 14.04 (64-bit).
 However <tt>SKIRT</tt> should be able to run on any Unix system. To perform all but the smallest simulations,
 it must be compiled as a 64-bit application and run on a 64-bit system.
 At this time <tt>SKIRT</tt> does not properly compile or run on Microsoft Windows systems, however should the need arise this

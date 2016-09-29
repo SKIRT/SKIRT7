@@ -7,15 +7,15 @@
 <b> Download the source code </b>
 
 - Navigate to the  <a href="http://www.open-mpi.org/software/">OpenMPI webpage</a>.
-- Download the file 'openmpi-1.8.3.tar.gz'.
-- When the download has finished, click on the resulting 'openmpi-1.8.3.tar' file and it should automatically be unpacked.
+- Download the 'tar.gz' file for the latest stable version.
+- When the download has finished, click on the resulting 'tar' file and it should automatically be unpacked.
 
 <b> Compile and install the source code </b>
 
-- Open Terminal and navigate to the newly created folder called 'openmpi-1.8.3' with the commands:
+- Open Terminal and navigate to the newly created folder (replace x.x.x with the appropriate version number) with the commands:
 
       cd
-      cd Downloads/openmpi-1.8.3 [ENTER]
+      cd Downloads/openmpi-x.x.x [ENTER]
 
 - Then, type:
 

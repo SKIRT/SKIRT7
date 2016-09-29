@@ -27,7 +27,8 @@ regular "Edit" mode. However you still need to adjust the project configuration.
 - For the "Debug" configuration, change the "Build directory" to the \c SKIRT/debug directory you created earlier
   (simply replace the capitcal 'D' by a lower-case 'd').
 - For the "Release" configuration, change the "Build directory" to the \c SKIRT/release directory you created earlier 
-  (simply replace the capital 'R' by a lower-case 'r'). 
+  (simply replace the capital 'R' by a lower-case 'r').
+- There is also a "Profile" configuration, but you can ignore this (unless you know what profiling is and you plan on using it during SKIRT development. In that case, make a directory next to the 'release' and 'debug' directories and set the corresponding build directory in the Profile configuration pane).
 - Still in "Projects" mode, now select the "Run" subtab. 
 - Search for the option list called "Run configuration" and select the "SKIRTmain" item. 
 - Now change the "Working directory" to the \c SKIRT/run directory you created earlier. 
