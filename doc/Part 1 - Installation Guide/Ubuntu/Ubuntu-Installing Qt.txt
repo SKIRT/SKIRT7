@@ -2,7 +2,7 @@
 
 \page InstallUbuntuQt Installing the Qt development environment
 
-<tt>SKIRT</tt> is based on the Qt 5.4 development environment (but also works with Qt 5.3 and 5.2). In addition to run-time libraries and build tools, Qt offers
+<tt>SKIRT</tt> is based on the Qt development environment. In addition to run-time libraries and build tools, Qt offers
 a convenient integrated code editor called Qt Creator. All of these components can be installed on Ubuntu with
 a single installer.
 
@@ -10,22 +10,18 @@ a single installer.
 
 <b>Download the Qt installer</b>
 
- - Go to the <a href="http://www.qt.io/download-open-source/">Qt download page</a> and click on "Qt Offline Installers" on the middle of the page. 
- - Under "Linux Host", click on "Qt 5.4.0 for Linux 64-bit (542 MB)" and press "Save File" to download the installer for linux. 
+ - Go to the <a href="http://www.qt.io/download-open-source/">Qt download page</a> and click 'Download Now'. 
 
 <b>Run the installer</b>
 
- - Before you can run the file, you should make it executable by opening a Terminal window and typing the following commands:
+ - Before you can run the file, you should make it executable by opening a Terminal window and typing the following commands (replace x.x.x by the appriopriate version number):
 
        cd [ENTER]
        cd Downloads [ENTER]
-       chmod +rx qt-opensource-linux-x64-5.4.0.run [ENTER]
-       ./qt-opensource-linux-x64-5.4.0.run [ENTER]
+       chmod +rx qt-unified-linux-x64-x.x.x-online.run [ENTER]
+       ./qt-unified-linux-x64-x.x.x-online.run [ENTER]
 
- - Follow the instructions in the installer wizard. If you enter the "Select Components" screen, uncheck the "Qt WebEngine" and "Qt Extras" components (see screenshot).
-  
-    \image html qtinstaller_components_ubuntu.png
-    \image latex qtinstaller_components_ubuntu.png
+ - Follow the instructions to initiate the installation. You can skip creating a Qt Account unless you want to. You will also be asked to choose the installation folder for Qt, but it is best to keep this at the default value. When you enter the "Select Components" screen, unfold the item that is marked as the Qt version that is to be installed. In the list that appears, uncheck all items except "gcc 64-bit".
  
  - When the installation is finished, don't launch Qt Creator just yet (uncheck the box at the end).
  
