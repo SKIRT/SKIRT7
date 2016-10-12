@@ -28,7 +28,7 @@ int main(int argc, char** argv)
     // but don't run the event loop because we don't need it
     QCoreApplication app(argc, argv);
     app.setApplicationName("FitSKIRT");
-    app.setApplicationVersion("v7.3 (git " + QString(git_version).simplified() +
+    app.setApplicationVersion("v7.4 (git " + QString(git_version).simplified() +
                               " built on " + QString(__DATE__).simplified() + " at "  __TIME__ ")");
 
     // install C signal handlers (which throw an exception if all goes well)
