@@ -66,11 +66,11 @@ public:
     void broadcast(int& value, int sender);
 
     /** This function gathers doubles sent by all processes into displaced positions at the receiving process */
-    void gatherw(double* sendBuffer, size_t sendCount, double* recvBuffer, int recvRank, size_t recvLength,
+    void gatherw(const double* sendBuffer, size_t sendCount, double* recvBuffer, int recvRank, size_t recvLength,
                  const std::vector<std::vector<int>>& recvDisplacements);
 
 
-    void displacedBlocksAllToAll(double* sendBuffer, size_t sendCount, std::vector<std::vector<int>>& sendDisplacements,
+    void displacedBlocksAllToAll(const double* sendBuffer, size_t sendCount, std::vector<std::vector<int>>& sendDisplacements,
                                  size_t sendLength, size_t sendExtent,
                                  double* recvBuffer, size_t recvCount, std::vector<std::vector<int>>& recvDisplacements,
                                  size_t recvLength, size_t recvExtent);

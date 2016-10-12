@@ -8,6 +8,8 @@
 #endif
 
 #include "ProcessManager.hpp"
+
+#include <exception>
 #include <QDataStream>
 
 ////////////////////////////////////////////////////////////////////
@@ -28,14 +30,14 @@ namespace
         MPI_Datatype indexedBlock;
         MPI_Type_create_indexed_block(count, 1, displacements.data(), singleBlock, &indexedBlock);
 
-        // Pad this datatype to modify the extent to the requested value
-        MPI_Aint lb;
-        MPI_Aint ex;
-        MPI_Type_get_extent(indexedBlock, &lb, &ex);
-
         if (extent != 0)
         {
+            // Pad this datatype to modify the extent to the requested value
+            MPI_Aint lb;
+            MPI_Aint ex;
+            MPI_Type_get_extent(indexedBlock, &lb, &ex);
             MPI_Type_create_resized(indexedBlock, lb, extent*sizeof(double), newtypeP);
+
             // Commit the final type and free the intermediary one
             MPI_Type_commit(newtypeP);
             MPI_Type_free(&indexedBlock);
@@ -46,6 +48,9 @@ namespace
             *newtypeP = indexedBlock;
             MPI_Type_commit(newtypeP);
         }
+
+        // Free the intermediary type
+        MPI_Type_free(&singleBlock);
     }
 }
 #endif
@@ -157,7 +162,7 @@ void ProcessManager::receiveByteBuffer(QByteArray &buffer, int sender, int& tag)
 
 //////////////////////////////////////////////////////////////////////
 
-void ProcessManager::gatherw(double* sendBuffer, size_t sendCount,
+void ProcessManager::gatherw(const double* sendBuffer, size_t sendCount,
                              double* recvBuffer, int recvRank, size_t recvLength,
                              const std::vector<std::vector<int>>& recvDisplacements)
 {
@@ -178,7 +183,7 @@ void ProcessManager::gatherw(double* sendBuffer, size_t sendCount,
     if (rank != recvRank) recvcnts.resize(size, 0); // I am not receiver: receive nothing from every process
     else recvcnts.resize(size, 1);                  // I am receiver: receive 1 from every process
     std::vector<int> rdispls(size, 0);              // displacements will be contained in the datatypes
-    std::vector<MPI_Datatype> recvtypes;            // we will construct derived datatypes for receiving from each process
+    std::vector<MPI_Datatype> recvtypes;            // we will construct a derived datatype per process for receiving
     recvtypes.reserve(size);
 
     for (int r=0; r<size; r++)
@@ -194,16 +199,17 @@ void ProcessManager::gatherw(double* sendBuffer, size_t sendCount,
 
     for (int rank=0; rank<size; rank++) MPI_Type_free(&recvtypes[rank]);
 #else
-    Q_UNUSED(sendBuffer) Q_UNUSED(sendCount) Q_UNUSED(recvBuffer) Q_UNUSED(recvRank) Q_UNUSED(recvLength) Q_UNUSED(recvDisplacements)
+    Q_UNUSED(sendBuffer) Q_UNUSED(sendCount) Q_UNUSED(recvBuffer) Q_UNUSED(recvRank) Q_UNUSED(recvLength)
+    Q_UNUSED(recvDisplacements)
 #endif
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void ProcessManager::displacedBlocksAllToAll(double* sendBuffer, size_t sendCount,
+void ProcessManager::displacedBlocksAllToAll(const double* sendBuffer, size_t sendCount,
                                              const std::vector<std::vector<int>>& sendDisplacements, size_t sendLength,
                                              size_t sendExtent, double* recvBuffer, size_t recvCount,
-                                             const std::vector<std::vector<int> >& recvDisplacements, size_t recvLength,
+                                             const std::vector<std::vector<int>>& recvDisplacements, size_t recvLength,
                                              size_t recvExtent)
 {
 #ifdef BUILDING_WITH_MPI
@@ -247,10 +253,28 @@ void ProcessManager::displacedBlocksAllToAll(double* sendBuffer, size_t sendCoun
 
 //////////////////////////////////////////////////////////////////////
 
-void ProcessManager::sum(double* my_array, double* result_array, int nvalues, int root)
+void ProcessManager::sum(double* my_array, size_t nvalues, int root)
 {
 #ifdef BUILDING_WITH_MPI
-    MPI_Reduce(my_array, result_array, nvalues, MPI_DOUBLE, MPI_SUM, root, MPI_COMM_WORLD);
+    int rank;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    size_t remaining = nvalues;
+    double* my_array_position;
+    while (remaining > INT_MAX)
+    {
+        if (rank == root)
+            MPI_Reduce(MPI_IN_PLACE, my_array_position, INT_MAX, MPI_DOUBLE, MPI_SUM, root, MPI_COMM_WORLD);
+        else
+            MPI_Reduce(my_array_position, my_array_position, INT_MAX, MPI_DOUBLE, MPI_SUM, root, MPI_COMM_WORLD);
+
+        remaining -= INT_MAX;
+        my_array_position = my_array + (nvalues-remaining);
+    }
+    if (rank == root)
+        MPI_Reduce(MPI_IN_PLACE, my_array_position, INT_MAX, MPI_DOUBLE, MPI_SUM, root, MPI_COMM_WORLD);
+    else
+        MPI_Reduce(my_array_position, my_array_position, remaining, MPI_DOUBLE, MPI_SUM, root, MPI_COMM_WORLD);
 #else
     Q_UNUSED(my_array) Q_UNUSED(result_array) Q_UNUSED(nvalues) Q_UNUSED(root)
 #endif
@@ -258,14 +282,22 @@ void ProcessManager::sum(double* my_array, double* result_array, int nvalues, in
 
 //////////////////////////////////////////////////////////////////////
 
-void ProcessManager::sum_all(double* my_array, int nvalues)
+void ProcessManager::sum_all(double* my_array, size_t nvalues)
 {
 #ifdef BUILDING_WITH_MPI
-    MPI_Allreduce(MPI_IN_PLACE, my_array, nvalues, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+    size_t remaining = nvalues;
+    while (remaining >= INT_MAX)
+    {
+        MPI_Allreduce(MPI_IN_PLACE, my_array + (nvalues-remaining), INT_MAX, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+        remaining -= INT_MAX;
+    }
+    MPI_Allreduce(MPI_IN_PLACE, my_array + (nvalues-remaining), remaining, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 #else
     Q_UNUSED(my_array) Q_UNUSED(nvalues)
 #endif
 }
+
+//////////////////////////////////////////////////////////////////////
 
 void ProcessManager::or_all(bool* boolean)
 {
@@ -274,15 +306,20 @@ void ProcessManager::or_all(bool* boolean)
 #else
     Q_UNUSED(boolean)
 #endif
-
 }
 
 //////////////////////////////////////////////////////////////////////
 
-void ProcessManager::broadcast(double* my_array, int nvalues, int root)
+void ProcessManager::broadcast(double* my_array, size_t nvalues, int root)
 {
 #ifdef BUILDING_WITH_MPI
-    MPI_Bcast(my_array, nvalues, MPI_DOUBLE, root, MPI_COMM_WORLD);
+    size_t remaining = nvalues;
+    while (remaining >= INT_MAX)
+    {
+        MPI_Bcast(my_array + (nvalues-remaining), INT_MAX, MPI_DOUBLE, root, MPI_COMM_WORLD);
+        remaining -= INT_MAX;
+    }
+    MPI_Bcast(my_array + (nvalues-remaining), remaining, MPI_DOUBLE, root, MPI_COMM_WORLD);
 #else
     Q_UNUSED(my_array) Q_UNUSED(nvalues) Q_UNUSED(root)
 #endif
@@ -326,3 +363,8 @@ bool ProcessManager::isMultiProc()
 }
 
 //////////////////////////////////////////////////////////////////////
+
+void ProcessManager::overMaxIntError(const QString& variableName)
+{
+    throw "The value of "+variableName+" cannot be larger than MAX_INT";
+}

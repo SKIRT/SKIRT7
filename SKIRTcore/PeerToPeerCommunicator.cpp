@@ -21,10 +21,7 @@ void PeerToPeerCommunicator::sum(Array& arr)
 {
     if (!isMultiProc()) return;
 
-    Array results(arr.size());
-
-    ProcessManager::sum(&(arr[0]),&results[0],arr.size(),0);
-    if (isRoot()) arr = results;
+    ProcessManager::sum(&(arr[0]),arr.size(),0);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -72,7 +69,7 @@ void PeerToPeerCommunicator::broadcast(int& value, int sender)
 
 ////////////////////////////////////////////////////////////////////
 
-void PeerToPeerCommunicator::gatherw(double* sendBuffer, size_t sendCount,
+void PeerToPeerCommunicator::gatherw(const double* sendBuffer, size_t sendCount,
                                      double* recvBuffer, int recvRank, size_t recvLength,
                                      const std::vector<std::vector<int>>& recvDisplacements)
 {
@@ -83,7 +80,7 @@ void PeerToPeerCommunicator::gatherw(double* sendBuffer, size_t sendCount,
 
 ////////////////////////////////////////////////////////////////////
 
-void PeerToPeerCommunicator::displacedBlocksAllToAll(double* sendBuffer, size_t sendCount,
+void PeerToPeerCommunicator::displacedBlocksAllToAll(const double* sendBuffer, size_t sendCount,
                                                      std::vector<std::vector<int>>& sendDisplacements, size_t sendLength,
                                                      size_t sendExtent, double* recvBuffer, size_t recvCount,
                                                      std::vector<std::vector<int>>& recvDisplacements, size_t recvLength,
