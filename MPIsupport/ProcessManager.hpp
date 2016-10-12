@@ -78,8 +78,8 @@ public:
         should contain as many lists as there are processes involved in this communication, and
         each list should consist of the locations where the blocks should start, in units of the
         block length. All processes must call this function for the communication to proceed. */
-    static void gatherw(double* sendBuffer, int sendCount,
-                        double* recvBuffer, int recvRank, int recvLength,
+    static void gatherw(double* sendBuffer, size_t sendCount,
+                        double* recvBuffer, int recvRank, size_t recvLength,
                         const std::vector<std::vector<int>>& recvDisplacements);
 
     /** This function lets all processes send and receive an amount of double values. The arguments
@@ -97,11 +97,11 @@ public:
         should have. These are especially important when the corresponding count argument is
         greater than 1, as then they will determine where the next iteration of a pattern will
         start. All processes must call this function for the communication to proceed. */
-    static void displacedBlocksAllToAll(double* sendBuffer, int sendCount,
-                                        const std::vector<std::vector<int>>& sendDisplacements, int sendLength,
-                                        int sendExtent, double* recvBuffer, int recvCount,
-                                        const std::vector<std::vector<int>>& recvDisplacements, int recvLength,
-                                        int recvExtent);
+    static void displacedBlocksAllToAll(double* sendBuffer, size_t sendCount,
+                                        const std::vector<std::vector<int> >& sendDisplacements, size_t sendLength,
+                                        size_t sendExtent, double* recvBuffer, size_t recvCount,
+                                        const std::vector<std::vector<int> >& recvDisplacements, size_t recvLength,
+                                        size_t recvExtent);
 
     /** The purpose of this function is to sum a particular array of double values element-wise
         across the different processes. The resulting values are stored in the array passed as the

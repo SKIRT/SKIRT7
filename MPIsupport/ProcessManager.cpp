@@ -15,26 +15,25 @@
 #ifdef BUILDING_WITH_MPI
 namespace
 {
-    void createDisplacedDoubleBlocks(int blocklength, const std::vector<int>& displacements, MPI_Datatype* newtypeP,
-                                     int extent = -1)
+    void createDisplacedDoubleBlocks(size_t blocklength, const std::vector<int>& displacements,
+                                     MPI_Datatype* newtypeP, size_t extent = 0)
     {
-        int count = displacements.size();
+        size_t count = displacements.size();
 
-        // Multiply the displacements by the block length
-        std::vector<int> multiplied_disp;
-        multiplied_disp.reserve(count);
-        for(auto i: displacements) multiplied_disp.push_back(blocklength*i);
+        // Intermediary datatype (counting by double instead of by block can cause problems when displacement*blocklength > MAX_INT)
+        MPI_Datatype singleBlock;
+        MPI_Type_contiguous(blocklength, MPI_DOUBLE, &singleBlock);
 
         // Create a datatype representing a structure of displaced blocks of the same size;
         MPI_Datatype indexedBlock;
-        MPI_Type_create_indexed_block(count, blocklength, &multiplied_disp[0], MPI_DOUBLE, &indexedBlock);
+        MPI_Type_create_indexed_block(count, 1, displacements.data(), singleBlock, &indexedBlock);
 
         // Pad this datatype to modify the extent to the requested value
         MPI_Aint lb;
         MPI_Aint ex;
         MPI_Type_get_extent(indexedBlock, &lb, &ex);
 
-        if (extent != -1)
+        if (extent != 0)
         {
             MPI_Type_create_resized(indexedBlock, lb, extent*sizeof(double), newtypeP);
             // Commit the final type and free the intermediary one
@@ -158,8 +157,8 @@ void ProcessManager::receiveByteBuffer(QByteArray &buffer, int sender, int& tag)
 
 //////////////////////////////////////////////////////////////////////
 
-void ProcessManager::gatherw(double* sendBuffer, int sendCount,
-                             double* recvBuffer, int recvRank, int recvLength,
+void ProcessManager::gatherw(double* sendBuffer, size_t sendCount,
+                             double* recvBuffer, int recvRank, size_t recvLength,
                              const std::vector<std::vector<int>>& recvDisplacements)
 {
 #ifdef BUILDING_WITH_MPI
@@ -201,11 +200,11 @@ void ProcessManager::gatherw(double* sendBuffer, int sendCount,
 
 //////////////////////////////////////////////////////////////////////
 
-void ProcessManager::displacedBlocksAllToAll(double* sendBuffer, int sendCount,
-                                             const std::vector<std::vector<int>>& sendDisplacements, int sendLength,
-                                             int sendExtent, double* recvBuffer, int recvCount,
-                                             const std::vector<std::vector<int>>& recvDisplacements, int recvLength,
-                                             int recvExtent)
+void ProcessManager::displacedBlocksAllToAll(double* sendBuffer, size_t sendCount,
+                                             const std::vector<std::vector<int>>& sendDisplacements, size_t sendLength,
+                                             size_t sendExtent, double* recvBuffer, size_t recvCount,
+                                             const std::vector<std::vector<int> >& recvDisplacements, size_t recvLength,
+                                             size_t recvExtent)
 {
 #ifdef BUILDING_WITH_MPI
     int size;

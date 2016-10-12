@@ -72,8 +72,8 @@ void PeerToPeerCommunicator::broadcast(int& value, int sender)
 
 ////////////////////////////////////////////////////////////////////
 
-void PeerToPeerCommunicator::gatherw(double* sendBuffer, int sendCount,
-                                     double* recvBuffer, int recvRank, int recvLength,
+void PeerToPeerCommunicator::gatherw(double* sendBuffer, size_t sendCount,
+                                     double* recvBuffer, int recvRank, size_t recvLength,
                                      const std::vector<std::vector<int>>& recvDisplacements)
 {
     if (!isMultiProc()) return;
@@ -83,11 +83,11 @@ void PeerToPeerCommunicator::gatherw(double* sendBuffer, int sendCount,
 
 ////////////////////////////////////////////////////////////////////
 
-void PeerToPeerCommunicator::displacedBlocksAllToAll(double* sendBuffer, int sendCount,
-                                                     std::vector<std::vector<int>>& sendDisplacements, int sendLength,
-                                                     int sendExtent, double* recvBuffer, int recvCount,
-                                                     std::vector<std::vector<int>>& recvDisplacements, int recvLength,
-                                                     int recvExtent)
+void PeerToPeerCommunicator::displacedBlocksAllToAll(double* sendBuffer, size_t sendCount,
+                                                     std::vector<std::vector<int>>& sendDisplacements, size_t sendLength,
+                                                     size_t sendExtent, double* recvBuffer, size_t recvCount,
+                                                     std::vector<std::vector<int>>& recvDisplacements, size_t recvLength,
+                                                     size_t recvExtent)
 {
     if (!isMultiProc()) return;
 
