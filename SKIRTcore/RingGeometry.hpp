@@ -104,7 +104,7 @@ public:
 
     /** This function returns the surface density along a line in the equatorial plane
         starting at the centre of the coordinate system, i.e. \f[ \Sigma_R =
-        \int_0\infty \rho(R,0)\,{\text{d}}R. \f] For the
+        \int_0\^infty \rho(R,0)\,{\text{d}}R. \f] For the
         ring geometry we obtain \f[ \Sigma_R = \sqrt{\frac{\pi}{2}}\,A\,w \left[ 1 +
         {\text{erf}} \left( \frac{R_0}{\sqrt{2} w} \right) \right]. \f] */
     double SigmaR() const;
