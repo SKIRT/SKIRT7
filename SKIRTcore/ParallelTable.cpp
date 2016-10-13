@@ -401,8 +401,8 @@ void ParallelTable::columsToRows()
     size_t recvCount = _rows.size(0);
     size_t recvExtent = _totalCols;
 
-    _comm->displacedBlocksAllToAll(sendBuffer, 1, sendDispvv, sendBlockLength, sendExtent,
-                                   recvBuffer, recvCount, recvDispvv, 1, recvExtent);
+    _comm->displacedBlocksAllToAll(sendBuffer, 1, sendBlockLength, sendDispvv, sendExtent,
+                                   recvBuffer, recvCount, 1, recvDispvv, recvExtent);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -425,8 +425,8 @@ void ParallelTable::rowsToColums()
     int recvBlockLength = _columns.size(1);
     int recvExtent = _totalRows*recvBlockLength;
 
-    _comm->displacedBlocksAllToAll(sendBuffer, sendCount, sendDispvv, 1, sendExtent,
-                                   recvBuffer, 1, recvDispvv, recvBlockLength, recvExtent);
+    _comm->displacedBlocksAllToAll(sendBuffer, sendCount, 1, sendDispvv, sendExtent,
+                                   recvBuffer, 1, recvBlockLength, recvDispvv, recvExtent);
 }
 
 ////////////////////////////////////////////////////////////////////

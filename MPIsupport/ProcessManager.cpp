@@ -22,6 +22,12 @@ namespace
     {
         size_t count = displacements.size();
 
+        // These are passed to int arguments of MPI functions, so we need to check for a possible integer overflow
+        if (blocklength > INT_MAX)
+            throw std::overflow_error("blocklength larger than INT_MAX");
+        if (count > INT_MAX)
+            throw std::overflow_error("number of elements larger than INT_MAX");
+
         // Intermediary datatype (counting by double instead of by block can cause problems when displacement*blocklength > MAX_INT)
         MPI_Datatype singleBlock;
         MPI_Type_contiguous(blocklength, MPI_DOUBLE, &singleBlock);
@@ -206,10 +212,10 @@ void ProcessManager::gatherw(const double* sendBuffer, size_t sendCount,
 
 //////////////////////////////////////////////////////////////////////
 
-void ProcessManager::displacedBlocksAllToAll(const double* sendBuffer, size_t sendCount,
-                                             const std::vector<std::vector<int>>& sendDisplacements, size_t sendLength,
-                                             size_t sendExtent, double* recvBuffer, size_t recvCount,
-                                             const std::vector<std::vector<int>>& recvDisplacements, size_t recvLength,
+void ProcessManager::displacedBlocksAllToAll(const double* sendBuffer, size_t sendCount,  size_t sendLength,
+                                             const std::vector<std::vector<int>>& sendDisplacements,
+                                             size_t sendExtent, double* recvBuffer, size_t recvCount, size_t recvLength,
+                                             const std::vector<std::vector<int>>& recvDisplacements,
                                              size_t recvExtent)
 {
 #ifdef BUILDING_WITH_MPI
@@ -260,7 +266,7 @@ void ProcessManager::sum(double* my_array, size_t nvalues, int root)
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     size_t remaining = nvalues;
-    double* my_array_position;
+    double* my_array_position = my_array;
     while (remaining > INT_MAX)
     {
         if (rank == root)
@@ -272,7 +278,7 @@ void ProcessManager::sum(double* my_array, size_t nvalues, int root)
         my_array_position = my_array + (nvalues-remaining);
     }
     if (rank == root)
-        MPI_Reduce(MPI_IN_PLACE, my_array_position, INT_MAX, MPI_DOUBLE, MPI_SUM, root, MPI_COMM_WORLD);
+        MPI_Reduce(MPI_IN_PLACE, my_array_position, remaining, MPI_DOUBLE, MPI_SUM, root, MPI_COMM_WORLD);
     else
         MPI_Reduce(my_array_position, my_array_position, remaining, MPI_DOUBLE, MPI_SUM, root, MPI_COMM_WORLD);
 #else
@@ -360,11 +366,4 @@ bool ProcessManager::isMultiProc()
 #else
     return false;
 #endif
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void ProcessManager::overMaxIntError(const QString& variableName)
-{
-    throw "The value of "+variableName+" cannot be larger than MAX_INT";
 }

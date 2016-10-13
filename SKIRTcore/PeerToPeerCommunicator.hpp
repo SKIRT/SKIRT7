@@ -70,10 +70,12 @@ public:
                  const std::vector<std::vector<int>>& recvDisplacements);
 
 
-    void displacedBlocksAllToAll(const double* sendBuffer, size_t sendCount, std::vector<std::vector<int>>& sendDisplacements,
-                                 size_t sendLength, size_t sendExtent,
-                                 double* recvBuffer, size_t recvCount, std::vector<std::vector<int>>& recvDisplacements,
-                                 size_t recvLength, size_t recvExtent);
+    void displacedBlocksAllToAll(const double* sendBuffer, size_t sendCount,
+                                 size_t sendLength, std::vector<std::vector<int>>& sendDisplacements,
+                                 size_t sendExtent,
+                                 double* recvBuffer, size_t recvCount,
+                                 size_t recvLength, std::vector<std::vector<int>>& recvDisplacements,
+                                 size_t recvExtent);
 
     /** This function returns the rank of the root process. */
     int root();

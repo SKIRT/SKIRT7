@@ -97,11 +97,10 @@ public:
         should have. These are especially important when the corresponding count argument is
         greater than 1, as then they will determine where the next iteration of a pattern will
         start. All processes must call this function for the communication to proceed. */
-    static void displacedBlocksAllToAll(const double* sendBuffer, size_t sendCount,
-                                        const std::vector<std::vector<int>>& sendDisplacements, size_t sendLength,
-                                        size_t sendExtent, double* recvBuffer, size_t recvCount,
-                                        const std::vector<std::vector<int>>& recvDisplacements, size_t recvLength,
-                                        size_t recvExtent);
+    static void displacedBlocksAllToAll(const double* sendBuffer, size_t sendCount, size_t sendLength,
+                                        const std::vector<std::vector<int>>& sendDisplacements, size_t sendExtent,
+                                        double* recvBuffer, size_t recvCount, size_t recvLength,
+                                        const std::vector<std::vector<int>>& recvDisplacements, size_t recvExtent);
 
     /** The purpose of this function is to sum a particular array of double values element-wise
         across the different processes. The resulting values are stored in the array passed as the
@@ -147,9 +146,6 @@ public:
         this function is unaffected by whether the object that calls it has acquired the MPI
         resource or not. */
     static bool isMultiProc();
-
-private:
-    static void overMaxIntError(const QString& variableName);
 
 private:
     static std::atomic<int> requests;   // This atomic integer is used to store the number of active requests for MPI

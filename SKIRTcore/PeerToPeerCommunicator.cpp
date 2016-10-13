@@ -80,16 +80,17 @@ void PeerToPeerCommunicator::gatherw(const double* sendBuffer, size_t sendCount,
 
 ////////////////////////////////////////////////////////////////////
 
-void PeerToPeerCommunicator::displacedBlocksAllToAll(const double* sendBuffer, size_t sendCount,
-                                                     std::vector<std::vector<int>>& sendDisplacements, size_t sendLength,
-                                                     size_t sendExtent, double* recvBuffer, size_t recvCount,
-                                                     std::vector<std::vector<int>>& recvDisplacements, size_t recvLength,
+void PeerToPeerCommunicator::displacedBlocksAllToAll(const double* sendBuffer, size_t sendCount, size_t sendLength,
+                                                     std::vector<std::vector<int>>& sendDisplacements,
+                                                     size_t sendExtent,
+                                                     double* recvBuffer, size_t recvCount, size_t recvLength,
+                                                     std::vector<std::vector<int>>& recvDisplacements,
                                                      size_t recvExtent)
 {
     if (!isMultiProc()) return;
 
-    ProcessManager::displacedBlocksAllToAll(sendBuffer, sendCount, sendDisplacements, sendLength, sendExtent,
-                                            recvBuffer, recvCount, recvDisplacements, recvLength, recvExtent);
+    ProcessManager::displacedBlocksAllToAll(sendBuffer, sendCount, sendLength, sendDisplacements, sendExtent,
+                                            recvBuffer, recvCount, recvLength, recvDisplacements, recvExtent);
 }
 
 ////////////////////////////////////////////////////////////////////
