@@ -17,16 +17,18 @@
 #ifdef BUILDING_WITH_MPI
 namespace
 {
+    // When an Array with more than INT_MAX elements is to be communicated,
+    // the message will be broken up into pieces of the following size
+    const int maxMessageSize = 2000000000;
+
     void createDisplacedDoubleBlocks(size_t blocklength, const std::vector<int>& displacements,
                                      MPI_Datatype* newtypeP, size_t extent = 0)
     {
         size_t count = displacements.size();
 
         // These are passed to int arguments of MPI functions, so we need to check for a possible integer overflow
-        if (blocklength > INT_MAX)
-            throw std::overflow_error("blocklength larger than INT_MAX");
-        if (count > INT_MAX)
-            throw std::overflow_error("number of elements larger than INT_MAX");
+        if (blocklength > INT_MAX) throw std::overflow_error("blocklength larger than INT_MAX");
+        if (count > INT_MAX) throw std::overflow_error("number of elements larger than INT_MAX");
 
         // Intermediary datatype (counting by double instead of by block can cause problems when displacement*blocklength > MAX_INT)
         MPI_Datatype singleBlock;
@@ -265,22 +267,28 @@ void ProcessManager::sum(double* my_array, size_t nvalues, int root)
     int rank;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
+    const int maxMessageSize = 2000000000;
     size_t remaining = nvalues;
     double* my_array_position = my_array;
-    while (remaining > INT_MAX)
-    {
-        if (rank == root)
-            MPI_Reduce(MPI_IN_PLACE, my_array_position, INT_MAX, MPI_DOUBLE, MPI_SUM, root, MPI_COMM_WORLD);
-        else
-            MPI_Reduce(my_array_position, my_array_position, INT_MAX, MPI_DOUBLE, MPI_SUM, root, MPI_COMM_WORLD);
 
-        remaining -= INT_MAX;
-        my_array_position = my_array + (nvalues-remaining);
+    while (remaining >= INT_MAX)
+    {
+        printf("proc %d: while\n", rank);
+        if (rank == root)
+            MPI_Reduce(MPI_IN_PLACE, my_array_position, maxMessageSize, MPI_DOUBLE, MPI_SUM, root, MPI_COMM_WORLD);
+        else
+            MPI_Reduce(my_array_position, my_array_position, maxMessageSize, MPI_DOUBLE, MPI_SUM, root, MPI_COMM_WORLD);
+        printf("proc %d: past reduce\n", rank);
+
+        remaining -= maxMessageSize;
+        my_array_position += maxMessageSize;
     }
+    printf("proc %d: out while\n", rank);
     if (rank == root)
         MPI_Reduce(MPI_IN_PLACE, my_array_position, remaining, MPI_DOUBLE, MPI_SUM, root, MPI_COMM_WORLD);
     else
         MPI_Reduce(my_array_position, my_array_position, remaining, MPI_DOUBLE, MPI_SUM, root, MPI_COMM_WORLD);
+    printf("proc %d: end\n", rank);
 #else
     Q_UNUSED(my_array) Q_UNUSED(result_array) Q_UNUSED(nvalues) Q_UNUSED(root)
 #endif
@@ -294,8 +302,8 @@ void ProcessManager::sum_all(double* my_array, size_t nvalues)
     size_t remaining = nvalues;
     while (remaining >= INT_MAX)
     {
-        MPI_Allreduce(MPI_IN_PLACE, my_array + (nvalues-remaining), INT_MAX, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
-        remaining -= INT_MAX;
+        MPI_Allreduce(MPI_IN_PLACE, my_array + (nvalues-remaining), maxMessageSize, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
+        remaining -= maxMessageSize;
     }
     MPI_Allreduce(MPI_IN_PLACE, my_array + (nvalues-remaining), remaining, MPI_DOUBLE, MPI_SUM, MPI_COMM_WORLD);
 #else
@@ -322,8 +330,8 @@ void ProcessManager::broadcast(double* my_array, size_t nvalues, int root)
     size_t remaining = nvalues;
     while (remaining >= INT_MAX)
     {
-        MPI_Bcast(my_array + (nvalues-remaining), INT_MAX, MPI_DOUBLE, root, MPI_COMM_WORLD);
-        remaining -= INT_MAX;
+        MPI_Bcast(my_array + (nvalues-remaining), maxMessageSize, MPI_DOUBLE, root, MPI_COMM_WORLD);
+        remaining -= maxMessageSize;
     }
     MPI_Bcast(my_array + (nvalues-remaining), remaining, MPI_DOUBLE, root, MPI_COMM_WORLD);
 #else
