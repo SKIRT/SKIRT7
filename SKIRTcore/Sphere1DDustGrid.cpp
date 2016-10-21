@@ -176,7 +176,7 @@ void Sphere1DDustGrid::path(DustGridPath* path) const
         double ds = qN-q;
         path->addSegment(m, ds);
         i++;
-        if (i>=_Nr-1) return;
+        if (i>=_Nr) return;
         else
         {
             q = qN;

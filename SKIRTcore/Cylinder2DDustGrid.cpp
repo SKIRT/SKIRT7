@@ -335,7 +335,7 @@ void Cylinder2DDustGrid::path(DustGridPath* path) const
                 ds = dsq;
                 path->addSegment(m, ds);
                 i++;
-                if (i>=_NR-1) return;
+                if (i>=_NR) return;
                 else
                 {
                     q = qN;
