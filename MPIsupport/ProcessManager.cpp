@@ -21,6 +21,8 @@ namespace
     // the message will be broken up into pieces of the following size
     const int maxMessageSize = 2000000000;
 
+    // Creates (and commits!) a datatype consisting of blocks of a certain length, displaced according to a list of
+    // displacements in units of the block length. The created datatype should be freed when it is no longer needed.
     void createDisplacedDoubleBlocks(size_t blocklength, const std::vector<int>& displacements,
                                      MPI_Datatype* newtypeP, size_t extent = 0)
     {
@@ -30,7 +32,7 @@ namespace
         if (blocklength > INT_MAX) throw std::overflow_error("blocklength larger than INT_MAX");
         if (count > INT_MAX) throw std::overflow_error("number of elements larger than INT_MAX");
 
-        // Intermediary datatype (counting by double instead of by block can cause problems when displacement*blocklength > MAX_INT)
+        // Intermediary datatype (counting by double causes overflow when displacements[i]*blocklength > INT_MAX)
         MPI_Datatype singleBlock;
         MPI_Type_contiguous(blocklength, MPI_DOUBLE, &singleBlock);
 
@@ -273,24 +275,20 @@ void ProcessManager::sum(double* my_array, size_t nvalues, int root)
 
     while (remaining >= INT_MAX)
     {
-        printf("proc %d: while\n", rank);
         if (rank == root)
             MPI_Reduce(MPI_IN_PLACE, my_array_position, maxMessageSize, MPI_DOUBLE, MPI_SUM, root, MPI_COMM_WORLD);
         else
             MPI_Reduce(my_array_position, my_array_position, maxMessageSize, MPI_DOUBLE, MPI_SUM, root, MPI_COMM_WORLD);
-        printf("proc %d: past reduce\n", rank);
 
         remaining -= maxMessageSize;
         my_array_position += maxMessageSize;
     }
-    printf("proc %d: out while\n", rank);
     if (rank == root)
         MPI_Reduce(MPI_IN_PLACE, my_array_position, remaining, MPI_DOUBLE, MPI_SUM, root, MPI_COMM_WORLD);
     else
         MPI_Reduce(my_array_position, my_array_position, remaining, MPI_DOUBLE, MPI_SUM, root, MPI_COMM_WORLD);
-    printf("proc %d: end\n", rank);
 #else
-    Q_UNUSED(my_array) Q_UNUSED(result_array) Q_UNUSED(nvalues) Q_UNUSED(root)
+    Q_UNUSED(my_array) Q_UNUSED(nvalues) Q_UNUSED(root)
 #endif
 }
 
