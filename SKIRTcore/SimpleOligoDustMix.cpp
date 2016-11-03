@@ -41,15 +41,13 @@ void SimpleOligoDustMix::setupSelfBefore()
     Array asymmparv(Nlambda);
     for (int ell=0; ell<Nlambda; ell++)
     {
-        kappaabsv[ell] = _kappaextv[ell]*(_albedov[ell]+1.0);
+        kappaabsv[ell] = _kappaextv[ell]*(1.-_albedov[ell]);
         kappascav[ell] = _kappaextv[ell]*_albedov[ell];
         asymmparv[ell] = _asymmparv[ell];
     }
 
-    // Add a dust population with these properties, provide a dummy for the dust mass with (at least)
-    // the correct dimension.
-    double Mdust = 1.0/_kappaextv[0];
-    addpopulation(Mdust, kappaabsv, kappascav, asymmparv);
+    // Add a dust population with these properties, providing 1 kg for the dust mass to fix the units to m2/kg
+    addpopulation(1., kappaabsv, kappascav, asymmparv);
 }
 
 //////////////////////////////////////////////////////////////////////
