@@ -387,8 +387,8 @@ void ParallelTable::columsToRows()
     IntTable sendDispvv;
     sendDispvv.reserve(Nprocs);
     for (int r=0; r<Nprocs; r++) sendDispvv.push_back(_rowAssigner->indicesForRank(r));
-    int sendBlockLength = _columns.size(1);
-    int sendExtent = _totalRows*sendBlockLength;
+    size_t sendBlockLength = _columns.size(1);
+    size_t sendExtent = _totalRows*sendBlockLength;
 
     // All the complete rows stored at a process will be filled up by repeating the pattern used to fill a single one.
     // The pattern consists of doubles displaced over a distance of their absolute column index. To ensure that the
@@ -398,11 +398,11 @@ void ParallelTable::columsToRows()
     IntTable recvDispvv;
     recvDispvv.reserve(Nprocs);
     for (int r=0; r<Nprocs; r++) recvDispvv.push_back(_colAssigner->indicesForRank(r));
-    int recvCount = _rows.size(0);
-    int recvExtent = _totalCols;
+    size_t recvCount = _rows.size(0);
+    size_t recvExtent = _totalCols;
 
-    _comm->displacedBlocksAllToAll(sendBuffer, 1, sendDispvv, sendBlockLength, sendExtent,
-                                   recvBuffer, recvCount, recvDispvv, 1, recvExtent);
+    _comm->displacedBlocksAllToAll(sendBuffer, 1, sendBlockLength, sendDispvv, sendExtent,
+                                   recvBuffer, recvCount, 1, recvDispvv, recvExtent);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -425,8 +425,8 @@ void ParallelTable::rowsToColums()
     int recvBlockLength = _columns.size(1);
     int recvExtent = _totalRows*recvBlockLength;
 
-    _comm->displacedBlocksAllToAll(sendBuffer, sendCount, sendDispvv, 1, sendExtent,
-                                   recvBuffer, 1, recvDispvv, recvBlockLength, recvExtent);
+    _comm->displacedBlocksAllToAll(sendBuffer, sendCount, 1, sendDispvv, sendExtent,
+                                   recvBuffer, 1, recvBlockLength, recvDispvv, recvExtent);
 }
 
 ////////////////////////////////////////////////////////////////////

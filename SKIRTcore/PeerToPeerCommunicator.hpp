@@ -66,14 +66,16 @@ public:
     void broadcast(int& value, int sender);
 
     /** This function gathers doubles sent by all processes into displaced positions at the receiving process */
-    void gatherw(double* sendBuffer, int sendCount, double* recvBuffer, int recvRank, int recvLength,
+    void gatherw(const double* sendBuffer, size_t sendCount, double* recvBuffer, int recvRank, size_t recvLength,
                  const std::vector<std::vector<int>>& recvDisplacements);
 
 
-    void displacedBlocksAllToAll(double* sendBuffer, int sendCount, std::vector<std::vector<int>>& sendDisplacements,
-                                 int sendLength, int sendExtent,
-                                 double* recvBuffer, int recvCount, std::vector<std::vector<int>>& recvDisplacements,
-                                 int recvLength, int recvExtent);
+    void displacedBlocksAllToAll(const double* sendBuffer, size_t sendCount,
+                                 size_t sendLength, std::vector<std::vector<int>>& sendDisplacements,
+                                 size_t sendExtent,
+                                 double* recvBuffer, size_t recvCount,
+                                 size_t recvLength, std::vector<std::vector<int>>& recvDisplacements,
+                                 size_t recvExtent);
 
     /** This function returns the rank of the root process. */
     int root();

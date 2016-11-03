@@ -32,8 +32,7 @@ void SimpleInstrument::setupSelfBefore()
 
 ////////////////////////////////////////////////////////////////////
 
-void
-SimpleInstrument::detect(PhotonPackage* pp)
+void SimpleInstrument::detect(PhotonPackage* pp)
 {
     int l = pixelondetector(pp);
     int ell = pp->ell();
@@ -51,8 +50,7 @@ SimpleInstrument::detect(PhotonPackage* pp)
 
 ////////////////////////////////////////////////////////////////////
 
-void
-SimpleInstrument::write()
+void SimpleInstrument::write()
 {
     // lists of f-array and F-array pointers, and the corresponding file and column names
     QList< Array* > farrays, Farrays;

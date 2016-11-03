@@ -4,6 +4,7 @@
 ///////////////////////////////////////////////////////////////// */
 
 #include "FatalError.hpp"
+#include "Log.hpp"
 #include "ParallelDataCube.hpp"
 #include "PeerToPeerCommunicator.hpp"
 #include "ProcessAssigner.hpp"
@@ -20,6 +21,7 @@ ParallelDataCube::ParallelDataCube() : _wavelengthAssigner(nullptr), _comm(nullp
 
 void ParallelDataCube::initialize(size_t Nframep, SimulationItem* item)
 {
+    Log* log = item->find<Log>();
     _Nframep = Nframep;
     _comm = item->find<PeerToPeerCommunicator>();
 
@@ -29,11 +31,15 @@ void ParallelDataCube::initialize(size_t Nframep, SimulationItem* item)
     {
         _wavelengthAssigner = wg->assigner();
         _Nlambda = _wavelengthAssigner->assigned();
+        log->info("Data cube is distributed, size on this process is "
+                  +QString::number(_Nframep)+"x"+QString::number(_Nlambda));
     }
     else
     {
         _wavelengthAssigner = nullptr;
         _Nlambda = wg->Nlambda();
+        log->info("Data cube is not distributed, size is "
+                  +QString::number(_Nframep)+"x"+QString::number(_Nlambda));
     }
     _partialCube->resize(_Nlambda*_Nframep);
 }

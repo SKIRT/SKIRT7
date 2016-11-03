@@ -78,8 +78,8 @@ public:
         should contain as many lists as there are processes involved in this communication, and
         each list should consist of the locations where the blocks should start, in units of the
         block length. All processes must call this function for the communication to proceed. */
-    static void gatherw(double* sendBuffer, int sendCount,
-                        double* recvBuffer, int recvRank, int recvLength,
+    static void gatherw(const double* sendBuffer, size_t sendCount,
+                        double* recvBuffer, int recvRank, size_t recvLength,
                         const std::vector<std::vector<int>>& recvDisplacements);
 
     /** This function lets all processes send and receive an amount of double values. The arguments
@@ -97,24 +97,23 @@ public:
         should have. These are especially important when the corresponding count argument is
         greater than 1, as then they will determine where the next iteration of a pattern will
         start. All processes must call this function for the communication to proceed. */
-    static void displacedBlocksAllToAll(double* sendBuffer, int sendCount,
-                                        const std::vector<std::vector<int>>& sendDisplacements, int sendLength,
-                                        int sendExtent, double* recvBuffer, int recvCount,
-                                        const std::vector<std::vector<int>>& recvDisplacements, int recvLength,
-                                        int recvExtent);
+    static void displacedBlocksAllToAll(const double* sendBuffer, size_t sendCount, size_t sendLength,
+                                        const std::vector<std::vector<int>>& sendDisplacements, size_t sendExtent,
+                                        double* recvBuffer, size_t recvCount, size_t recvLength,
+                                        const std::vector<std::vector<int>>& recvDisplacements, size_t recvExtent);
 
     /** The purpose of this function is to sum a particular array of double values element-wise
         across the different processes. The resulting values are stored in the array passed as the
         second argument 'result_array', only on the process that is assigned as root. The rank of
         this particular process is specified in the third argument. All processes must call this
         function for the communication to proceed. */
-    static void sum(double* my_array, double* result_array, int nvalues, int root);
+    static void sum(double* my_array, size_t nvalues, int root);
 
     /** The purpose of this function is to sum a particular array of double values element-wise across
         the different processes. The resulting values are stored in the original array passed to this
         function, on each individual process. All processes must call this function for the
         communication to proceed. */
-    static void sum_all(double* my_array, int nvalues);
+    static void sum_all(double* my_array, size_t size_t);
 
     /** This function performs a reduction of a given boolean, by applying the logical OR operator
         across all processes. The result will overwrite the original boolean to which a pointer was
@@ -127,7 +126,7 @@ public:
         processes must call this function for the communication to proceed. The array passed to
         this function by the receiving processes gets overwritten during the communication with the
         values stored in the array passed by the root. */
-    static void broadcast(double* my_array, int nvalues, int root);
+    static void broadcast(double* my_array, size_t nvalues, int root);
 
     /** This function is used to broadcast a single integer value from one process to all other
         processes. A pointer to the value is passed as the first argument and the rank of the sending

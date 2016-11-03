@@ -21,10 +21,7 @@ void PeerToPeerCommunicator::sum(Array& arr)
 {
     if (!isMultiProc()) return;
 
-    Array results(arr.size());
-
-    ProcessManager::sum(&(arr[0]),&results[0],arr.size(),0);
-    if (isRoot()) arr = results;
+    ProcessManager::sum(&(arr[0]),arr.size(),0);
 }
 
 ////////////////////////////////////////////////////////////////////
@@ -72,8 +69,8 @@ void PeerToPeerCommunicator::broadcast(int& value, int sender)
 
 ////////////////////////////////////////////////////////////////////
 
-void PeerToPeerCommunicator::gatherw(double* sendBuffer, int sendCount,
-                                     double* recvBuffer, int recvRank, int recvLength,
+void PeerToPeerCommunicator::gatherw(const double* sendBuffer, size_t sendCount,
+                                     double* recvBuffer, int recvRank, size_t recvLength,
                                      const std::vector<std::vector<int>>& recvDisplacements)
 {
     if (!isMultiProc()) return;
@@ -83,16 +80,17 @@ void PeerToPeerCommunicator::gatherw(double* sendBuffer, int sendCount,
 
 ////////////////////////////////////////////////////////////////////
 
-void PeerToPeerCommunicator::displacedBlocksAllToAll(double* sendBuffer, int sendCount,
-                                                     std::vector<std::vector<int>>& sendDisplacements, int sendLength,
-                                                     int sendExtent, double* recvBuffer, int recvCount,
-                                                     std::vector<std::vector<int>>& recvDisplacements, int recvLength,
-                                                     int recvExtent)
+void PeerToPeerCommunicator::displacedBlocksAllToAll(const double* sendBuffer, size_t sendCount, size_t sendLength,
+                                                     std::vector<std::vector<int>>& sendDisplacements,
+                                                     size_t sendExtent,
+                                                     double* recvBuffer, size_t recvCount, size_t recvLength,
+                                                     std::vector<std::vector<int>>& recvDisplacements,
+                                                     size_t recvExtent)
 {
     if (!isMultiProc()) return;
 
-    ProcessManager::displacedBlocksAllToAll(sendBuffer, sendCount, sendDisplacements, sendLength, sendExtent,
-                                            recvBuffer, recvCount, recvDisplacements, recvLength, recvExtent);
+    ProcessManager::displacedBlocksAllToAll(sendBuffer, sendCount, sendLength, sendDisplacements, sendExtent,
+                                            recvBuffer, recvCount, recvLength, recvDisplacements, recvExtent);
 }
 
 ////////////////////////////////////////////////////////////////////
