@@ -38,7 +38,7 @@ namespace
 
         // Create a datatype representing a structure of displaced blocks of the same size;
         MPI_Datatype indexedBlock;
-        MPI_Type_create_indexed_block(count, 1, displacements.data(), singleBlock, &indexedBlock);
+        MPI_Type_create_indexed_block(count, 1, const_cast<int*>(displacements.data()), singleBlock, &indexedBlock);
 
         if (extent != 0)
         {
