@@ -203,8 +203,8 @@ void ProcessManager::gatherw(const double* sendBuffer, size_t sendCount,
         recvtypes.push_back(newtype);
     }
 
-    MPI_Alltoallw(sendBuffer, &sendcnts[0], &sdispls[0], &sendtypes[0],
-                  recvBuffer, &recvcnts[0], &rdispls[0], &recvtypes[0],
+    MPI_Alltoallw(const_cast<double*>(sendBuffer), sendcnts.data(), sdispls.data(), sendtypes.data(),
+                  recvBuffer, recvcnts.data(), rdispls.data(), recvtypes.data(),
                   MPI_COMM_WORLD);
 
     for (int rank=0; rank<size; rank++) MPI_Type_free(&recvtypes[rank]);
@@ -216,7 +216,7 @@ void ProcessManager::gatherw(const double* sendBuffer, size_t sendCount,
 
 //////////////////////////////////////////////////////////////////////
 
-void ProcessManager::displacedBlocksAllToAll(const double* sendBuffer, size_t sendCount,  size_t sendLength,
+void ProcessManager::displacedBlocksAllToAll(const double* sendBuffer, size_t sendCount, size_t sendLength,
                                              const std::vector<std::vector<int>>& sendDisplacements,
                                              size_t sendExtent, double* recvBuffer, size_t recvCount, size_t recvLength,
                                              const std::vector<std::vector<int>>& recvDisplacements,
@@ -246,8 +246,8 @@ void ProcessManager::displacedBlocksAllToAll(const double* sendBuffer, size_t se
         recvtypes.push_back(newtype);
     }
 
-    MPI_Alltoallw(sendBuffer, &sendcnts[0], &sdispls[0], &sendtypes[0],
-                  recvBuffer, &recvcnts[0], &rdispls[0], &recvtypes[0],
+    MPI_Alltoallw(const_cast<double*>(sendBuffer), sendcnts.data(), sdispls.data(), sendtypes.data(),
+                  recvBuffer, recvcnts.data(), rdispls.data(), recvtypes.data(),
                   MPI_COMM_WORLD);
 
     for (int r=0; r<size; r++)
