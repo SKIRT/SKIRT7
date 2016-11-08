@@ -23,7 +23,7 @@
     This class only supports cartesian grids. It converts 1D and 2D grids to 3D grids by assuming
     a thickness of 1 cell in the missing directions.
 
-    For some reason the MPI-AMRVAC data file does not contain the size of the mesh at the coursest
+    For some reason the MPI-AMRVAC data file does not contain the size of the mesh at the coarsest
     level. This information must be provided separately as part of the ski file.
 */
 class AdaptiveMeshAmrvacFile : public AdaptiveMeshFile
@@ -38,39 +38,39 @@ public:
     Q_INVOKABLE AdaptiveMeshAmrvacFile();
 
     Q_CLASSINFO("Property", "levelOneX")
-    Q_CLASSINFO("Title", "the number of mesh cells at the coursest level, in the X direction")
+    Q_CLASSINFO("Title", "the number of mesh cells at the coarsest level, in the X direction")
     Q_CLASSINFO("MinValue", "1")
     Q_CLASSINFO("MaxValue", "10000")
 
     Q_CLASSINFO("Property", "levelOneY")
-    Q_CLASSINFO("Title", "the number of mesh cells at the coursest level, in the Y direction")
+    Q_CLASSINFO("Title", "the number of mesh cells at the coarsest level, in the Y direction")
     Q_CLASSINFO("MinValue", "1")
     Q_CLASSINFO("MaxValue", "10000")
 
     Q_CLASSINFO("Property", "levelOneZ")
-    Q_CLASSINFO("Title", "the number of mesh cells at the coursest level, in the Z direction")
+    Q_CLASSINFO("Title", "the number of mesh cells at the coarsest level, in the Z direction")
     Q_CLASSINFO("MinValue", "1")
     Q_CLASSINFO("MaxValue", "10000")
 
     //======== Setters & Getters for Discoverable Attributes =======
 
 public:
-    /** Sets the number of mesh cells at the coursest level, in the X direction. */
+    /** Sets the number of mesh cells at the coarsest level, in the X direction. */
     Q_INVOKABLE void setLevelOneX(int value);
 
-    /** Returns the number of mesh cells at the coursest level, in the X direction. */
+    /** Returns the number of mesh cells at the coarsest level, in the X direction. */
     Q_INVOKABLE int levelOneX() const;
 
-    /** Sets the number of mesh cells at the coursest level, in the Y direction. */
+    /** Sets the number of mesh cells at the coarsest level, in the Y direction. */
     Q_INVOKABLE void setLevelOneY(int value);
 
-    /** Returns the number of mesh cells at the coursest level, in the Y direction. */
+    /** Returns the number of mesh cells at the coarsest level, in the Y direction. */
     Q_INVOKABLE int levelOneY() const;
 
-    /** Sets the number of mesh cells at the coursest level, in the Z direction. */
+    /** Sets the number of mesh cells at the coarsest level, in the Z direction. */
     Q_INVOKABLE void setLevelOneZ(int value);
 
-    /** Returns the number of mesh cells at the coursest level, in the Z direction. */
+    /** Returns the number of mesh cells at the coarsest level, in the Z direction. */
     Q_INVOKABLE int levelOneZ() const;
 
     //======================== Other Functions =======================
@@ -110,14 +110,14 @@ public:
 
 private:
     // information about the mesh provided by the user
-    int _nxlone[3];    // number of mesh cells at the coursest level, in each direction
+    int _nxlone[3];    // number of mesh cells at the coarsest level, in each direction
 
     // information about the mesh read from the input file
     int _nblocks;      // total number of blocks in the mesh
     int _ndims;        // dimension of the mesh (1D, 2D or 3D)
     int _nvars;        // number of variables in each cell
     int _nx[3];        // number of mesh cells in each block, in each direction
-    int _ng[3];        // number of blocks at the coursest level, in each direction
+    int _ng[3];        // number of blocks at the coarsest level, in each direction
     int _nr[3];        // refinement factor for nested level, in each direction
     int _ncells;       // number of cells in a block
     int _blocksize;    // the size of a block in bytes
