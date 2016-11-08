@@ -111,11 +111,11 @@ void AdaptiveMeshAmrvacFile::open()
     for (int i=0; i<_ndims; i++) _nx[i] = readInt(_infile);
 
     // calculate some handy grid characteristics:
-    //    number of blocks at the coursest level
+    //    number of blocks at the coarsest level
     for (int i=0; i<3; i++)
     {
         if (_nxlone[i]%_nx[i])
-            throw FATALERROR("Number of cells at the coursest level is not a multiple of block size");
+            throw FATALERROR("Number of cells at the coarsest level is not a multiple of block size");
         _ng[i] = _nxlone[i]/_nx[i];
     }
     //    refinement factor: always 2 except for missing dimensions
