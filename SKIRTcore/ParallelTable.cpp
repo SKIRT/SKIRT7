@@ -63,7 +63,8 @@ void ParallelTable::initialize(QString name, WriteState writeOn, const ProcessAs
 
 ////////////////////////////////////////////////////////////////////
 
-void ParallelTable::initialize(QString name, WriteState writeOn, int columns, int rows, PeerToPeerCommunicator* comm)
+void ParallelTable::initialize(QString name, WriteState writeOn, size_t columns, size_t rows,
+                               PeerToPeerCommunicator* comm)
 {
     if (_initialized) throw FATALERROR(_name + ": A ParallelTable can only be initialized once.");
 
@@ -82,8 +83,8 @@ void ParallelTable::initialize(QString name, WriteState writeOn, int columns, in
                + QString::number(_totalCols) + ")");
 
     // Set the size of one of the tables. The other one will not be used.
-    if (writeOn == WriteState::COLUMN) _columns.resize(_totalRows,_totalCols);
-    else if (writeOn == WriteState::ROW) _rows.resize(_totalRows,_totalCols);
+    if (writeOn == WriteState::COLUMN) _columns.resize(_totalRows, _totalCols);
+    else if (writeOn == WriteState::ROW) _rows.resize(_totalRows, _totalCols);
     else throw FATALERROR("Invalid writeState for ParallelTable");
 
     _initialized = true;

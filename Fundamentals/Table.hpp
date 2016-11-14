@@ -68,7 +68,7 @@ protected:
     // Resizes the internal data representation so that it can hold the currently
     // specified number of items in each dimension. All values are set to zero.
     void resize_base()
-    { _v.resize(std::accumulate(_n, _n+NDIM, 1, std::multiplies<size_t>())); }
+        { _v.resize(std::accumulate(_n, _n+NDIM, static_cast<size_t>(1), std::multiplies<size_t>())); }
 
 public:
     // Returns the number of items in the indicated dimension.

@@ -122,7 +122,7 @@ public:
         the contents of the table across all processes when performing the scheme switch. A
         ParallelTable can only be initialized once. If this function is called a second time, an
         error will be thrown. */
-    void initialize(QString name, WriteState writeOn, int columns, int rows, PeerToPeerCommunicator* comm);
+    void initialize(QString name, WriteState writeOn, size_t columns, size_t rows, PeerToPeerCommunicator* comm);
 
     //======================== Other Functions =======================
 
