@@ -310,7 +310,8 @@ HEADERS += \
     BoxClipGeometryDecorator.hpp \
     ClipGeometryDecorator.hpp \
     SphericalClipGeometryDecorator.hpp \
-    CylindricalClipGeometryDecorator.hpp
+    CylindricalClipGeometryDecorator.hpp \
+    FileMesh.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -576,4 +577,5 @@ SOURCES += \
     BoxClipGeometryDecorator.cpp \
     ClipGeometryDecorator.cpp \
     SphericalClipGeometryDecorator.cpp \
-    CylindricalClipGeometryDecorator.cpp
+    CylindricalClipGeometryDecorator.cpp \
+    FileMesh.cpp

@@ -60,6 +60,7 @@
 #include "ExtragalacticUnits.hpp"
 #include "FaceOnDustCompNormalization.hpp"
 #include "FileGrainComposition.hpp"
+#include "FileMesh.hpp"
 #include "FilePaths.hpp"
 #include "FileSED.hpp"
 #include "FileWavelengthGrid.hpp"
@@ -335,11 +336,12 @@ void RegisterSimulationItems::registerAll()
     // meshes for the dust grids
     add<Mesh>(false);
     add<MoveableMesh>(false);
+    add<AnchoredMesh>(false);
     add<LinMesh>();
     add<PowMesh>();
     add<SymPowMesh>();
-    add<AnchoredMesh>(false);
     add<LogMesh>();
+    add<FileMesh>();
 
     // dust grids
     add<DustGrid>(false);
