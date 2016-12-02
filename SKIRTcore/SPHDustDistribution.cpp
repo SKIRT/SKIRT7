@@ -69,6 +69,17 @@ void SPHDustDistribution::setupSelfBefore()
             if (M<0) _negativeMasses = true;
         }
     }
+
+    // if the total cold and/or metallic gas mass is negative, suppress the complete dust distribution
+    if (Mtot<0 || Mmetal<0)
+    {
+        find<Log>()->warning("  Total cold and/or metallic gas mass is negative; suppressing all dust");
+        _pv.clear();
+        Mtot = 0;
+        Mmetal = 0;
+    }
+
+    // show some statistics
     find<Log>()->info("  Number of high-temperature particles ignored: " + QString::number(Nignored));
     find<Log>()->info("  Number of SPH gas particles containing dust: " + QString::number(_pv.size()));
     find<Log>()->info("  Total gas mass: " + QString::number(Mtot) + " Msun");
