@@ -56,7 +56,7 @@ public:
 protected:
     /** This function reads the raw optical and calorimetric data from resource files, and sets the
         bulk mass density to the value of 3330 kg m\f$^{-3}\f$ specified by Min for crystalline Forsterite
-        and 1600 kg m\f$^{-3}\f$ specified by Köhler for amorphous Forsterite. */
+        and 2190 kg m\f$^{-3}\f$ specified by Köhler for amorphous Forsterite. */
     void setupSelfBefore();
 
     //======== Setters & Getters for Discoverable Attributes =======

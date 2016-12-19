@@ -55,7 +55,7 @@ public:
 protected:
     /** This function reads the raw optical and calorimetric data from resource files, and sets the
         bulk mass density to the value of 2800 kg m\f$^{-3}\f$ specified by Min for crystalline enstatite
-        and 1600 kg m\f$^{-3}\f$ specified by Köhler for amorphous enstatite. */
+        and 2190 kg m\f$^{-3}\f$ specified by Köhler for amorphous enstatite. */
     void setupSelfBefore();
 
     //======== Setters & Getters for Discoverable Attributes =======

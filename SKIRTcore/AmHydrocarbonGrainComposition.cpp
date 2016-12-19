@@ -25,7 +25,7 @@ void AmHydrocarbonGrainComposition::setupSelfBefore()
 {
     GrainComposition::setupSelfBefore();
 
-    setBulkDensity(3330.);
+    setBulkDensity(1600.);
     loadLogHeatCapacityGrid("GrainComposition/Themis/C_aCH_coreman_d20.DAT");
     loadOpticalGrid(true, "GrainComposition/Themis/aCH_coreman_d20_Jones2013_SKIRT.dat", false, false, false, false);
 }

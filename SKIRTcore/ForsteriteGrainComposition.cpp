@@ -40,7 +40,7 @@ void ForsteriteGrainComposition::setupSelfBefore()
         opticalfile = "GrainComposition/Min/Forsterite_Suto2006.dat";
         break;
     case Amorphous:
-        density = 1600.;
+        density = 2190.;
         heatfile = "GrainComposition/Themis/C_CM_amFo10Fe30FeS.DAT";
         opticalfile = "GrainComposition/Themis/CM_amFo10Fe30FeS_Jones2013_SKIRT.dat";
         break;

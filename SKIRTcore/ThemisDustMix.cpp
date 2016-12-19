@@ -26,19 +26,19 @@ namespace
     // parameters for the size distribution of the silicates
     const double amins = 0.001e-6;
     const double a0s = 0.008e-6;
-    const double Cs = 3.80303826e-10;
+    const double Cs = 3.74461585691147e-10;
 
     // parameters for the lognormal part of the size distribution for the hydrocarbons
     const double aminh1 = 0.0005e-6;
     const double a0h = 0.007e-6;
-    const double Ch1 = 1.84089829e-10;
+    const double Ch1 = 1.88994983508769e-10;
 
     // parameters for the power-law part of the size distribution for the hydrocarbons
     const double aminh2 = 0.0004e-6;
     const double alpha = -5.0;
     const double at = 0.01e-6;
     const double ac = 0.05e-6;
-    const double Ch2 = 1.53786339e-41;
+    const double Ch2 = 1.59726058957057e-41;
     const double aminh = min(aminh1,aminh2);
 
     // amorphous hydrocarbons

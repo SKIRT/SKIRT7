@@ -33,7 +33,7 @@ public:
 
 protected:
     /** This function reads the raw optical and calorimetric data from resource files, and sets the
-        bulk mass density to the value of 1.5 g/cm\f$^3\f$ specified by Jones. */
+        bulk mass density to the value of 1.6 g/cm\f$^3\f$ specified by Jones. */
     void setupSelfBefore();
 
     //====================== Identifying =====================

@@ -40,7 +40,7 @@ void EnstatiteGrainComposition::setupSelfBefore()
         opticalfile = "GrainComposition/Min/Enstatite_Jaeger1998.dat";
         break;
     case Amorphous:
-        density = 1600.;
+        density = 2190.;
         heatfile = "GrainComposition/Themis/C_CM_amEnst10Fe30FeS.DAT";
         opticalfile = "GrainComposition/Themis/CM_amEnst10Fe30FeS_Jones2013_SKIRT.dat";
         break;
