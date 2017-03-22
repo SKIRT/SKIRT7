@@ -311,7 +311,8 @@ HEADERS += \
     ClipGeometryDecorator.hpp \
     SphericalClipGeometryDecorator.hpp \
     CylindricalClipGeometryDecorator.hpp \
-    FileMesh.hpp
+    FileMesh.hpp \
+    Starburst99SEDFamily.hpp
 
 SOURCES += \
     AdaptiveMesh.cpp \
@@ -578,4 +579,5 @@ SOURCES += \
     ClipGeometryDecorator.cpp \
     SphericalClipGeometryDecorator.cpp \
     CylindricalClipGeometryDecorator.cpp \
-    FileMesh.cpp
+    FileMesh.cpp \
+    Starburst99SEDFamily.cpp

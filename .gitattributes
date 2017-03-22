@@ -31,3 +31,5 @@
 *.icns binary
 *.nb binary
 *.save binary
+*.fits binary
+*.gz binary

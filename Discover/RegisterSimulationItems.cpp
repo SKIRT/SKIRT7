@@ -146,6 +146,7 @@
 #include "SpheroidalGeometryDecorator.hpp"
 #include "SpiralStructureGeometryDecorator.hpp"
 #include "StarburstSED.hpp"
+#include "Starburst99SEDFamily.hpp"
 #include "StellarSurfaceGeometry.hpp"
 #include "StellarSystem.hpp"
 #include "StellarUnits.hpp"
@@ -437,6 +438,7 @@ void RegisterSimulationItems::registerAll()
     // SED families
     add<SEDFamily>(false);
     add<BruzualCharlotSEDFamily>();
+    add<Starburst99SEDFamily>();
     add<MappingsSEDFamily>();
 }
 
