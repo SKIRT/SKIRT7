@@ -5,6 +5,7 @@
 
 #include <cmath>
 #include <fstream>
+#include <mutex>
 #include "Starburst99SEDFamily.hpp"
 #include "FatalError.hpp"
 #include "FilePaths.hpp"
