@@ -22,8 +22,8 @@
 
     - \em Amorphous silicates with enstatite-normative composition from Köhler et al. 2014 (A&A,
       565, L9). Together with the amorphous silicates with forsterite-normative composition, they
-      replace the silicate grains of Jones et al. 2013 (A&A, 558, A62). The calorimetric properties
-      are calculated in DustEM. */
+      represent the silicate grains of Jones et al. 2017 (A&A, 602, A46). The optical and calorimetric
+      properties are loaded from data files calculated for DustEM. */
 class EnstatiteGrainComposition : public GrainComposition
 {
     Q_OBJECT
@@ -31,8 +31,8 @@ class EnstatiteGrainComposition : public GrainComposition
 
     Q_CLASSINFO("Property", "type")
     Q_CLASSINFO("Title", "the type of Enstatite grains")
-    Q_CLASSINFO("Crystalline", "crystalline")
-    Q_CLASSINFO("Amorphous", "amorphous")
+    Q_CLASSINFO("Crystalline", "crystalline (Min et al.)")
+    Q_CLASSINFO("Amorphous", "amorphous (Jones et al. 2017)")
     Q_CLASSINFO("Default", "Crystalline")
 
     //============= Construction - Setup - Destruction =============

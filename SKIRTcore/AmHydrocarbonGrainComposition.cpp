@@ -13,10 +13,11 @@ AmHydrocarbonGrainComposition::AmHydrocarbonGrainComposition()
 
 //////////////////////////////////////////////////////////////////////
 
-AmHydrocarbonGrainComposition::AmHydrocarbonGrainComposition(SimulationItem *parent)
+AmHydrocarbonGrainComposition::AmHydrocarbonGrainComposition(SimulationItem *parent, double bulkDensity)
 {
     setParent(parent);
     setup();
+    setBulkDensity(bulkDensity);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -26,8 +27,10 @@ void AmHydrocarbonGrainComposition::setupSelfBefore()
     GrainComposition::setupSelfBefore();
 
     setBulkDensity(1600.);
-    loadLogHeatCapacityGrid("GrainComposition/Themis/C_aCH_coreman_d20.DAT");
-    loadOpticalGrid(true, "GrainComposition/Themis/aCH_coreman_d20_Jones2013_SKIRT.dat", false, false, false, false);
+    loadLogHeatCapacityGrid("GrainComposition/ThemisJ17/C_CM20.DAT");
+    loadOpticalGrid("GrainComposition/ThemisJ17/LAMBDA.DAT",
+                    "GrainComposition/ThemisJ17/Q_CM20.DAT",
+                    "GrainComposition/ThemisJ17/G_CM20.DAT");
 }
 
 //////////////////////////////////////////////////////////////////////

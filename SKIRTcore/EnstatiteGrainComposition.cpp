@@ -28,27 +28,22 @@ void EnstatiteGrainComposition::setupSelfBefore()
 {
     GrainComposition::setupSelfBefore();
 
-    // determine the bulk density and resource filenames based on the grain type
-    double density;
-    QString heatfile;
-    QString opticalfile;
+    // set the bulk density and load the appropriate resources based on the grain type
     switch (_type)
     {
     case Crystalline:
-        density = 2800.;
-        heatfile = "GrainComposition/Min/C_aSil.DAT";
-        opticalfile = "GrainComposition/Min/Enstatite_Jaeger1998.dat";
+        setBulkDensity(2800.);
+        loadLogHeatCapacityGrid("GrainComposition/Min/C_aSil.DAT");
+        loadOpticalGrid(true, "GrainComposition/Min/Enstatite_Jaeger1998.dat", false, false, false, false);
         break;
     case Amorphous:
-        density = 2190.;
-        heatfile = "GrainComposition/Themis/C_CM_amEnst10Fe30FeS.DAT";
-        opticalfile = "GrainComposition/Themis/CM_amEnst10Fe30FeS_Jones2013_SKIRT.dat";
+        setBulkDensity(2190.);
+        loadLogHeatCapacityGrid("GrainComposition/ThemisJ17/C_aPyM5.DAT");
+        loadOpticalGrid("GrainComposition/ThemisJ17/LAMBDA.DAT",
+                        "GrainComposition/ThemisJ17/Q_aPyM5.DAT",
+                        "GrainComposition/ThemisJ17/G_aPyM5.DAT");
         break;
     }
-
-    setBulkDensity(density);
-    loadLogHeatCapacityGrid(heatfile);
-    loadOpticalGrid(true, opticalfile, false, false, false, false);
 }
 
 //////////////////////////////////////////////////////////////////////
