@@ -33,3 +33,12 @@
 *.save binary
 *.fits binary
 *.gz binary
+
+# Ignore third-party code and shell scripts for determining the main project language
+GAlib/* linguist-vendored
+Cfitsio/* linguist-vendored
+Voro/* linguist-vendored
+*.sh linguist-vendored
+*.py linguist-vendored
+*.h linguist-vendored
+*.nb linguist-vendored
